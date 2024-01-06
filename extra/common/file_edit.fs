@@ -285,6 +285,12 @@ begin-module file-edit
     
     \ Move the cursor to the next line
     method output-down ( buffer -- )
+
+    \ Go to the start of a Unicode character
+    method go-to-unicode-start ( buffer -- )
+
+    \ Go to the end of a Unicode character
+    method go-to-unicode-end ( buffer -- )
     
     \ Go to the first position in a buffer
     method do-first ( buffer -- )
@@ -721,19 +727,23 @@ begin-module file-edit
     :noname ( buffer -- )
       dup buffer-dyn-buffer <cursor> [:
         default-segment-size [: { buffer cursor data }
-          buffer buffer-edit-cursor buffer cursor-raw-start-dist { start-dist }
-          buffer buffer-edit-cursor buffer cursor-raw-end-dist { end-dist }
-          start-dist end-dist + { len }
+          buffer buffer-edit-cursor cursor copy-cursor
+          [: $0A = ;] cursor find-prev
+          cursor buffer cursor-raw-end-dist { end-dist }
           hide-cursor
           buffer buffer-edit-row @ 0 go-to-buffer-coord
-          buffer buffer-edit-cursor cursor copy-cursor
-          start-dist negate cursor adjust-offset
+          end-dist { len }
           0 { chars }
+          false { cols-set? }
           begin len 0> while
             len default-segment-size min { part-size }
             cursor offset@ { prev-offset }
             data part-size cursor read-data { real-size }
             real-size 0 ?do
+              prev-offset i + buffer buffer-edit-cursor offset@ = if
+                chars buffer buffer-edit-col !
+                true to cols-set?
+              then
               data i + c@ { byte }
               byte tab = if
                 tab-char-size @ chars tab-char-size @ umod - { tab-spaces }
@@ -746,13 +756,10 @@ begin-module file-edit
                   1 +to chars
                 then
               then
-              prev-offset i + buffer buffer-edit-cursor offset@ = if
-                chars buffer buffer-edit-col !
-              then
             loop
             part-size negate +to len
           repeat
-          end-dist 0= if chars buffer buffer-edit-col ! then
+          cols-set? not if chars buffer buffer-edit-col ! then
           chars display-width @ < if erase-end-of-line then
           buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
           show-cursor
@@ -1048,6 +1055,38 @@ begin-module file-edit
       cols buffer buffer-edit-col !
       buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
     ; define output-down
+
+    \ Go to the start of a Unicode character
+    :noname { buffer -- }
+      buffer edit-cursor-at { byte }
+      byte unicode? byte unicode-start? not and if
+        begin
+          -1 buffer buffer-edit-cursor adjust-offset
+          buffer buffer-edit-cursor offset@ 0> if
+            buffer edit-cursor-at to byte
+            byte unicode? not byte unicode-start? or
+          else
+            true
+          then
+        until
+      then
+    ; define go-to-unicode-start
+
+    \ Go to the end of a Unicode character
+    :noname { buffer -- }
+      buffer edit-cursor-at { byte }
+      byte unicode? byte unicode-start? not and if
+        begin
+          1 buffer buffer-edit-cursor adjust-offset
+          buffer buffer-edit-cursor offset@ buffer buffer-len@ < if
+            buffer edit-cursor-at to byte
+            byte unicode? not byte unicode-start? or
+          else
+            true
+          then
+        until
+      then
+    ; define go-to-unicode-end
     
     \ Go to the first position in a buffer
     :noname ( buffer -- )
@@ -1062,11 +1101,13 @@ begin-module file-edit
     \ Move the edit cursor left by one character
     :noname { buffer -- }
       -1 buffer buffer-edit-cursor adjust-offset
+      buffer go-to-unicode-start
     ; define do-backward
 
     \ Move the edit cursor right by one character
     :noname { buffer -- }
       1 buffer buffer-edit-cursor adjust-offset
+      buffer go-to-unicode-end
     ; define do-forward
 
     \ Move the edit cursor up by one character
@@ -1121,8 +1162,7 @@ begin-module file-edit
           buffer edit-cursor-before { byte }
           1 buffer buffer-edit-cursor delete-data
           select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
-          byte $0A = byte tab = or byte $20 >= byte $7F < and or
-          byte unicode-start? or
+          byte unicode? not byte unicode-start? or
         else
           true
         then
@@ -1131,11 +1171,20 @@ begin-module file-edit
 
     \ Delete in the buffer
     :noname { buffer -- }
+      buffer go-to-unicode-start
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
-      1 buffer buffer-edit-cursor adjust-offset
-      1 buffer buffer-edit-cursor delete-data
-      select-diff 0> if -1 buffer buffer-select-cursor adjust-offset then
+      begin
+        buffer buffer-edit-cursor offset@ buffer buffer-len@ < if
+          1 buffer buffer-edit-cursor adjust-offset
+          1 buffer buffer-edit-cursor delete-data
+          select-diff 0> if -1 buffer buffer-select-cursor adjust-offset then
+          buffer edit-cursor-at { byte }
+          byte unicode? not byte unicode-start? or
+        else
+          true
+        then
+      until
     ; define do-delete-forward
 
     \ Kill a range in the buffer
@@ -1307,13 +1356,17 @@ begin-module file-edit
           current refresh-display
         else
           cols 0> if
-            spaces current output-left
-          else
-            rows 0> if
-              current output-prev-row
+            current edit-cursor-at tab <> if
+              spaces current output-left
             else
-              current output-prev-line
+              current edit-cursor-single-row? if
+                current refresh-line
+              else
+                current refresh-display
+              then
             then
+          else
+            current refresh-display
           then
         then
       then
@@ -1326,6 +1379,7 @@ begin-module file-edit
         current edit-cursor-left-space { cols rows }
         current edit-cursor-at-spaces { spaces }
         current edit-cursor-at-end? { at-end? }
+        current edit-cursor-before tab = { before-tab? }
         current do-forward
         current update-display if
           current refresh-display
@@ -1334,9 +1388,17 @@ begin-module file-edit
             current output-next-line
           else
             cols display-width @ 1- < if
-              spaces current output-right
+              before-tab? not if
+                spaces current output-right
+              else
+                current edit-cursor-single-row? if
+                  current refresh-line
+                else
+                  current refresh-display
+                then
+              then
             else
-              current output-next-row
+              current refresh-display
             then
           then
         then
@@ -1389,7 +1451,7 @@ begin-module file-edit
       current edit-cursor-at-end? if
         current edit-cursor-single-row?
         current edit-cursor-at-row-end? not and if
-          c tab <> if
+          c tab <> c unicode? not and if
             at-end
           else
             in-single-row

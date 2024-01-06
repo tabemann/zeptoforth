@@ -741,16 +741,16 @@ begin-module dyn-buffer
     \ Find previous
     :noname { xt cursor -- } ( xt: c -- match? )
       0 { W^ buffer }
-      -1 cursor adjust-offset
       begin cursor offset@ 0> while
+        -1 cursor adjust-offset
         buffer 1 cursor read-data 0> if
           buffer c@ xt execute if
             exit
           else
-            -2 cursor adjust-offset
+            -1 cursor adjust-offset
           then
         else
-          exit
+          -1 cursor adjust-offset exit
         then
       repeat
     ; define find-prev
