@@ -76,7 +76,7 @@ begin-module file-edit
   1024 constant max-undo-byte-count
 
   \ Delete undo accumulation
-  -40 constant delete-undo-accumulation
+  -20 constant delete-undo-accumulation
   
   \ My block size
   default-segment-size dyn-buffer-internal::segment-header-size +
@@ -525,7 +525,7 @@ begin-module file-edit
     \ Get the oldest undo
     :noname { buffer -- undo }
       buffer buffer-undo-count @ 0> if
-        buffer buffer-undo-array buffer buffer-undo-count @ 1- cells +
+        buffer buffer-undo-array buffer buffer-undo-count @ 1- cells + @
       else
         0
       then
@@ -534,7 +534,7 @@ begin-module file-edit
     \ Get the newest undo
     :noname { buffer -- undo }
       buffer buffer-undo-count @ 0> if
-        buffer buffer-undo-array
+        buffer buffer-undo-array @
       else
         0
       then
@@ -548,7 +548,7 @@ begin-module file-edit
       buffer buffer-undo-count @ cells move
       full-bytes buffer buffer-undo-bytes +!
       1 buffer buffer-undo-count +!
-      full-bytes buffer buffer-heap @ allocate { undo }
+      bytes undo-header-size + buffer buffer-heap @ allocate { undo }
       undo buffer buffer-undo-array !
       undo
     ; define push-undo
@@ -564,7 +564,7 @@ begin-module file-edit
     
     \ Free an undo
     :noname { undo buffer -- }
-      undo undo-size @ [ undo-header-size cell+ ] literal + negate
+      undo undo-size @ 0 max [ undo-header-size cell+ ] literal + negate
       buffer buffer-undo-bytes +!
       -1 buffer buffer-undo-count +!
       undo buffer buffer-heap @ free
@@ -573,7 +573,7 @@ begin-module file-edit
     \ Make room for undos
     :noname { bytes buffer -- }
       begin
-        max-undo-byte-count buffer buffer-undo-bytes @ bytes + >
+        max-undo-byte-count buffer buffer-undo-bytes @ bytes + <
         buffer buffer-undo-count @ 0> and
       while
         buffer oldest-undo@ buffer free-undo
@@ -1416,12 +1416,14 @@ begin-module file-edit
       select offset@ { select-offset }
       edit offset@ { edit-offset }
       select-offset edit-offset < if
-        select edit select buffer add-insert-undo
+        select-offset edit-offset select-offset
+        buffer add-insert-undo
         select edit buffer buffer-dyn-buffer clip copy-to-clip
         edit-offset select-offset - edit delete-data
       else
         edit-offset select-offset < if
-          edit select edit buffer add-insert-undo
+          edit-offset select-offset edit-offset
+          buffer add-insert-undo
           edit select buffer buffer-dyn-buffer clip copy-to-clip
           select-offset edit-offset - select delete-data
         then
