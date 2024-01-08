@@ -821,6 +821,7 @@ begin-module file-edit
       begin
         max-undo-byte-count buffer buffer-undo-bytes @ bytes + <
         buffer buffer-undo-count @ 0> and
+        buffer buffer-undo-count @ max-undo-count = or
       while
         buffer oldest-undo@ buffer free-undo
       repeat
