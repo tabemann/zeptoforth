@@ -376,7 +376,8 @@ begin-module dyn-buffer
     \ Move to the end
     :noname { cursor -- }
       cursor cursor-dyn-buffer @ dyn-buffer-last @ cursor cursor-segment !
-      cursor cursor-segment @ segment-size @ cursor cursor-offset !
+      cursor cursor-segment @ ?dup if segment-size @ else 0 then
+      cursor cursor-offset !
       cursor cursor-dyn-buffer @ dyn-buffer-len@ cursor cursor-global-offset !
     ; define go-to-end
 
