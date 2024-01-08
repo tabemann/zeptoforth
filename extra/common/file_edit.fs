@@ -201,6 +201,9 @@ begin-module file-edit
     \ Select enabled
     cell member buffer-select-enabled
 
+    \ Is the buffer dirty
+    cell member buffer-dirty
+
     \ Buffer dynamic buffer
     <dyn-buffer> class-size member buffer-dyn-buffer
     
@@ -224,6 +227,12 @@ begin-module file-edit
 
     \ Left bound index
     cell member buffer-left-bound
+
+    \ Dirty buffer
+    method dirty-buffer ( buffer -- )
+
+    \ Clean buffer
+    method clean-buffer ( buffer -- )
 
     \ Buffer width in characters
     method buffer-width@ ( buffer -- width )
@@ -592,6 +601,9 @@ begin-module file-edit
 
     \ Are we in the minibuffer?
     cell member editor-in-minibuffer
+
+    \ Are we going to exit
+    cell member editor-exit
     
     \ Clipboard
     <clip> class-size member editor-clip
@@ -671,6 +683,12 @@ begin-module file-edit
     \ Revert from file
     method handle-editor-revert ( editor -- )
     
+    \ Handle exit
+    method handle-editor-exit ( editor -- )
+
+    \ Handle a prompted exit
+    method do-editor-exit ( editor -- )
+
   end-class
 
   \ Implement buffers
@@ -695,6 +713,7 @@ begin-module file-edit
       0 buffer buffer-undo-bytes !
       0 buffer buffer-left-bound !
       false buffer buffer-select-enabled !
+      false buffer buffer-dirty !
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-edit-cursor init-object
@@ -713,6 +732,16 @@ begin-module file-edit
       buffer <object>->destroy
     ; define destroy
 
+    \ Dirty buffer
+    :noname ( buffer -- )
+      true swap buffer-dirty !
+    ; define dirty-buffer
+
+    \ Clean buffer
+    :noname ( buffer -- )
+      false swap buffer-dirty !
+    ; define clean-buffer
+    
     \ Buffer width in characters
     :noname ( buffer -- width )
       drop display-width @
@@ -1098,14 +1127,16 @@ begin-module file-edit
     \ Output buffer title
     :noname { buffer -- }
       0 0 go-to-coord
-      buffer buffer-name 2@ dup buffer buffer-width@ < if
-        type erase-end-of-line
+      buffer buffer-dirty @ if -2 else 0 then { dirty-offset }
+      buffer buffer-name 2@ dup buffer buffer-width@ dirty-offset + < if
+        type buffer buffer-dirty @ if ."  *" then erase-end-of-line
       else
-        dup buffer buffer-width@ = if
-          type
+        dup buffer buffer-width@ dirty-offset + = if
+          type buffer buffer-dirty @ if ."  *" then
         else
-          buffer buffer-width@ - { offset }
-          offset - swap offset + swap type
+          + buffer buffer-width@ dirty-offset + -
+          buffer buffer-width@ dirty-offset +
+          buffer buffer-dirty @ if ."  *" then
         then
       then
     ; define output-title
@@ -1547,6 +1578,7 @@ begin-module file-edit
       c 1 buffer buffer-edit-cursor insert-data
       select-diff 0> if 1 buffer buffer-select-cursor adjust-offset then
       1 buffer buffer-edit-cursor offset@ buffer add-delete-undo
+      buffer dirty-buffer
     ; define do-insert
 
     \ Find the begin and end offsets for a delete
@@ -1611,6 +1643,7 @@ begin-module file-edit
         buffer buffer-edit-cursor offset@ 0> if
           buffer edit-cursor-before { byte }
           1 buffer buffer-edit-cursor delete-data
+          buffer dirty-buffer
           select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
           byte unicode? not byte unicode-start? or
         else
@@ -1629,6 +1662,7 @@ begin-module file-edit
         buffer buffer-edit-cursor offset@ buffer buffer-len@ < if
           1 buffer buffer-edit-cursor adjust-offset
           1 buffer buffer-edit-cursor delete-data
+          buffer dirty-buffer
           select-diff 0> if -1 buffer buffer-select-cursor adjust-offset then
           buffer edit-cursor-at { byte }
           byte unicode? not byte unicode-start? or
@@ -1649,12 +1683,14 @@ begin-module file-edit
         buffer add-insert-undo
         select edit buffer buffer-dyn-buffer clip copy-to-clip
         edit-offset select-offset - edit delete-data
+        buffer dirty-buffer
       else
         edit-offset select-offset < if
           edit-offset select-offset edit-offset
           buffer add-insert-undo
           edit select buffer buffer-dyn-buffer clip copy-to-clip
           select-offset edit-offset - select delete-data
+          buffer dirty-buffer
         then
       then
     ; define do-kill
@@ -1686,6 +1722,7 @@ begin-module file-edit
       then
       edit offset@ { new-edit-offset }
       new-edit-offset edit-offset - new-edit-offset buffer add-delete-undo
+      clip clip-size@ 0> if buffer dirty-buffer then
     ; define do-paste
 
     \ Is there a selection in the buffer
@@ -1734,6 +1771,7 @@ begin-module file-edit
           then
         then
         buffer drop-undo
+        buffer dirty-buffer
       then
     ; define do-undo
     
@@ -1989,6 +2027,26 @@ begin-module file-edit
       buffer <buffer>->destroy
     ; define destroy
 
+    \ Dirty buffer
+    :noname { buffer -- }
+      buffer buffer-dirty @ { old-dirty }
+      buffer <buffer>->dirty-buffer
+      old-dirty not if
+        buffer output-title
+        buffer buffer-editor @ update-coord
+      then
+    ; define dirty-buffer
+
+    \ Clean buffer
+    :noname { buffer -- }
+      buffer buffer-dirty @ { old-dirty }
+      buffer <buffer>->clean-buffer
+      old-dirty if
+        buffer output-title
+        buffer buffer-editor @ update-coord
+      then
+    ; define clean-buffer
+
     \ Access a file, creating or opening it
     :noname { path-addr path-bytes buffer -- }
       path-addr path-bytes fat32-tools::current-fs@ root-path-exists? if
@@ -2022,6 +2080,7 @@ begin-module file-edit
           part-size +to bytes-read
         repeat
         buffer buffer-edit-cursor go-to-start
+        buffer clean-buffer
       ;] with-allot
     ; define load-buffer-from-file
     
@@ -2040,6 +2099,7 @@ begin-module file-edit
           repeat
           buffer buffer-file truncate-file
           fat32-tools::current-fs@ flush
+          buffer clean-buffer
         ;] with-object
       ;] with-allot
     ; define write-buffer-to-file
@@ -2077,6 +2137,7 @@ begin-module file-edit
       minibuffer edit-cursor-left-space drop minibuffer buffer-edit-col !
       0 minibuffer minibuffer-callback !
       0 minibuffer minibuffer-callback-object !
+      minibuffer clean-buffer
       minibuffer update-display drop
       minibuffer refresh-display
     ; define set-message
@@ -2324,6 +2385,7 @@ begin-module file-edit
       buffer editor editor-current !
       minibuffer editor editor-minibuffer !
       false editor editor-in-minibuffer !
+      false editor editor-exit !
     ; define new
 
     \ Destructor
@@ -2524,7 +2586,7 @@ begin-module file-edit
 
     \ Actually create a new buffer
     :noname { editor -- }
-      editor editor-minibuffer @ if
+      editor editor-in-minibuffer @ if
         editor 256 [: { editor data }
           data 256 0 editor editor-minibuffer @ read-minibuffer { len }
           <file-buffer> class-size editor editor-heap @ allocate { buffer }
@@ -2555,6 +2617,7 @@ begin-module file-edit
       editor editor-in-minibuffer @ not if
         editor editor-current @ if
           editor editor-current @ write-buffer-to-file
+          editor editor-current @ refresh-display
           s" Wrote file" editor editor-minibuffer @ set-message
         then
       then
@@ -2570,6 +2633,54 @@ begin-module file-edit
         then
       then
     ; define handle-editor-revert
+
+    \ Handle exit
+    :noname { editor -- }
+      false editor editor-first @ begin ?dup while
+        dup buffer-dirty @ rot or swap buffer-next @
+      repeat
+      if
+        editor activate-minibuffer
+        s" A buffer is modified, exit? (yes/no): " editor ['] do-editor-exit
+        editor editor-minibuffer @ set-prompt
+      else
+        true editor editor-exit !
+      then
+    ; define handle-editor-exit
+
+    \ Handle a prompted exit
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor 256 [: { editor data }
+          data 256 0 editor editor-minibuffer @ read-minibuffer { len }
+          begin
+            len 0> if
+              data c@ { byte }
+              byte $20 <= byte $7F = or if
+                1 +to data
+                -1 +to len
+                false
+              else
+                true
+              then
+            else
+              true
+            then
+          until
+          data c@ { byte }
+          byte [char] Y = byte [char] y = or if
+            true editor editor-exit ! true
+          else
+            byte [char] N = byte [char] n = or
+          then
+          if
+            editor editor-minibuffer @ clear-minibuffer
+            editor deactivate-minibuffer
+            editor editor-current @ refresh-display
+          then
+        ;] with-allot
+      then
+    ; define do-editor-exit
     
   end-implement
 
@@ -2633,30 +2744,29 @@ begin-module file-edit
         cr type 2drop 2drop drop cr exit
       then
       editor refresh-editor
-      begin
+      begin editor editor-exit @ not while
 	get-key
 	dup $20 u< over tab <> and if
 	  case
-	    return of editor handle-editor-newline false endof
-	    newline of editor handle-editor-newline false endof
-            \	    tab of handle-editor-tab false endof
-            ctrl-space of editor handle-editor-select false endof
-\	    ctrl-a of editor handle-editor-start false endof
-\	    ctrl-e of editor handle-editor-end false endof
-	    ctrl-f of editor handle-editor-forward false endof
-	    ctrl-b of editor handle-editor-backward false endof
-	    ctrl-n of editor handle-editor-next false endof
-            ctrl-p of editor handle-editor-prev false endof
-            ctrl-o of editor handle-editor-new false endof
-	    ctrl-v of true endof
-	    ctrl-w of editor handle-editor-write false endof
-	    ctrl-x of editor handle-editor-revert false endof
-\	    ctrl-u of handle-editor-insert-row false endof
-            ctrl-k of editor handle-editor-kill false endof
-            ctrl-y of editor handle-editor-paste false endof
-            ctrl-z of editor handle-editor-undo false endof
-	    escape of editor handle-escape false endof
-	    swap false swap
+	    return of editor handle-editor-newline endof
+	    newline of editor handle-editor-newline endof
+            \	    tab of handle-editor-tab endof
+            ctrl-space of editor handle-editor-select endof
+\	    ctrl-a of editor handle-editor-start endof
+\	    ctrl-e of editor handle-editor-end endof
+	    ctrl-f of editor handle-editor-forward endof
+	    ctrl-b of editor handle-editor-backward endof
+	    ctrl-n of editor handle-editor-next endof
+            ctrl-p of editor handle-editor-prev endof
+            ctrl-o of editor handle-editor-new endof
+            ctrl-v of editor handle-editor-exit endof
+	    ctrl-w of editor handle-editor-write endof
+	    ctrl-x of editor handle-editor-revert endof
+\	    ctrl-u of handle-editor-insert-row endof
+            ctrl-k of editor handle-editor-kill endof
+            ctrl-y of editor handle-editor-paste endof
+            ctrl-z of editor handle-editor-undo endof
+	    escape of editor handle-escape endof
           endcase
           depth 1 < if ." *** " then \ DEBUG
 	else
@@ -2665,9 +2775,9 @@ begin-module file-edit
 	  else
 	    editor handle-editor-insert
 	  then
-	  false
 	then
-      until
+      repeat
+      display-height 0 go-to-coord cr
     ;] with-aligned-allot
   ;
 
