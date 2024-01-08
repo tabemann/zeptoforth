@@ -43,6 +43,55 @@ begin-module file-edit
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
 
+  \ Generate file error message if one occurs
+  : with-file-error ( xt -- c-addr u error? )
+    try case
+      ['] x-sector-size-not-supported of
+        s" Sector sizes other than 512 are not supported" true
+      endof
+      ['] x-fs-version-not-supported of
+        s" FAT32 version not supported" true
+      endof
+      ['] x-bad-info-sector of
+        s" Bad info sector" true
+      endof
+      ['] x-no-clusters-free of
+        s" No clusters free" true
+      endof
+      ['] x-file-name-format of
+        s" Unsupported filename" true
+      endof
+      ['] x-out-of-range-entry of
+        s" Out of range directory entry" true
+      endof
+      ['] x-out-of-range-partition of
+        s" Out of range partition" true
+      endof
+      ['] x-entry-not-found of
+        s" Directory entry not found" true
+      endof
+      ['] x-entry-already-exists of
+        s" Directory entry already exists" true
+      endof
+      ['] x-entry-not-file of
+        s" Directory entry not file" true
+      endof
+      ['] x-entry-not-dir of
+        s" Directory entry not directory" true
+      endof
+      ['] x-forbidden-dir of
+        s" Forbidden directory name" true
+      endof
+      ['] x-empty-path of
+        s" Empty path" true
+      endof
+      ['] x-invalid-path of
+        s" Invalid path" true
+      endof
+      ?raise 0 0 false 0
+    endcase
+  ;
+
   \ Character constants
   $09 constant tab
   $7F constant delete
@@ -457,6 +506,23 @@ begin-module file-edit
 
   end-class
 
+  \ File buffer class
+  <buffer> begin-class <file-buffer>
+
+    \ The file being edited
+    <fat32-file> class-size member buffer-file
+
+    \ Access a file, creating or opening it
+    method access-file ( path-addr path-bytes buffer -- )
+
+    \ Load from file
+    method load-buffer-from-file ( buffer -- )
+    
+    \ Write out a file
+    method write-buffer-to-file ( buffer -- )
+
+  end-class
+
   \ Minibuffer class
   <buffer> begin-class <minibuffer>
 
@@ -598,6 +664,12 @@ begin-module file-edit
 
     \ Actually create a new buffer
     method do-editor-new ( editor -- )
+
+    \ Write to file
+    method handle-editor-write ( editor -- )
+
+    \ Revert from file
+    method handle-editor-revert ( editor -- )
     
   end-class
 
@@ -1901,6 +1973,79 @@ begin-module file-edit
 
   end-implement
 
+  \ Implement the file buffer
+  <file-buffer> begin-implement
+
+    \ Constructor
+    :noname { path-addr path-bytes heap editor buffer -- }
+      path-addr path-bytes buffer access-file
+      path-addr path-bytes heap editor buffer <buffer>->new
+      buffer load-buffer-from-file
+    ; define new
+
+    \ Destructor
+    :noname { buffer }
+      buffer buffer-file destroy
+      buffer <buffer>->destroy
+    ; define destroy
+
+    \ Access a file, creating or opening it
+    :noname { path-addr path-bytes buffer -- }
+      path-addr path-bytes fat32-tools::current-fs@ root-path-exists? if
+        buffer buffer-file path-addr path-bytes [:
+          { file file-addr file-bytes dir }
+          file-addr file-bytes file dir open-file
+        ;] fat32-tools::current-fs@ with-root-path
+      else
+        buffer buffer-file path-addr path-bytes [:
+          { file file-addr file-bytes dir }
+          file-addr file-bytes file dir create-file
+        ;] fat32-tools::current-fs@ with-root-path
+      then
+    ; define access-file
+
+    \ Load buffer from file
+    :noname ( buffer -- )
+      512 [: { buffer data }
+        buffer buffer-edit-cursor go-to-end
+        buffer buffer-edit-cursor offset@
+        buffer buffer-edit-cursor delete-data
+        buffer buffer-select-cursor go-to-start
+        buffer buffer-display-cursor go-to-start
+        0 seek-set buffer buffer-file seek-file
+        buffer buffer-file file-size@ { bytes }
+        0 { bytes-read }
+        begin bytes-read bytes < while
+          bytes bytes-read - 512 min { part-size }
+          data part-size buffer buffer-file read-file to part-size
+          data part-size buffer buffer-edit-cursor insert-data
+          part-size +to bytes-read
+        repeat
+        buffer buffer-edit-cursor go-to-start
+      ;] with-allot
+    ; define load-buffer-from-file
+    
+    \ Write out a file
+    :noname ( buffer -- )
+      512 [:
+        over buffer-dyn-buffer <cursor> [: { buffer data cursor }
+          buffer buffer-len@ { bytes }
+          0 { bytes-written }
+          0 seek-set buffer buffer-file seek-file
+          begin bytes-written bytes < while
+            bytes bytes-written - 512 min { part-size }
+            data part-size cursor read-data to part-size
+            data part-size buffer buffer-file write-file to part-size
+            part-size +to bytes-written
+          repeat
+          buffer buffer-file truncate-file
+          fat32-tools::current-fs@ flush
+        ;] with-object
+      ;] with-allot
+    ; define write-buffer-to-file
+    
+  end-implement
+  
   \ Implement the minibuffer
   <minibuffer> begin-implement
 
@@ -2166,12 +2311,12 @@ begin-module file-edit
   <editor> begin-implement
 
     \ Constructor
-    :noname { heap editor -- }
+    :noname { path-addr path-bytes heap editor -- }
       editor <object>->new
       heap editor editor-heap !
       heap <clip> editor editor-clip init-object
-      <buffer> class-size heap allocate { buffer }
-      s" F00bar" heap editor <buffer> buffer init-object
+      <file-buffer> class-size heap allocate { buffer }
+      path-addr path-bytes heap editor <file-buffer> buffer init-object
       <minibuffer> class-size heap allocate { minibuffer }
       heap editor <minibuffer> minibuffer init-object
       buffer editor editor-first !
@@ -2382,24 +2527,50 @@ begin-module file-edit
       editor editor-minibuffer @ if
         editor 256 [: { editor data }
           data 256 0 editor editor-minibuffer @ read-minibuffer { len }
-          <buffer> class-size editor editor-heap @ allocate { buffer }
-          data len editor editor-heap @ editor <buffer> buffer init-object
-          editor editor-current @ buffer buffer-prev !
-          editor editor-current @ buffer-next @ buffer buffer-next !
-          buffer buffer-next @ if
-            buffer buffer-next @ buffer-prev !
+          <file-buffer> class-size editor editor-heap @ allocate { buffer }
+          data len editor editor-heap @ editor <file-buffer> buffer
+          ['] init-object with-file-error if
+            buffer editor editor-heap @ free
+            editor editor-minibuffer @ set-message
           else
-            buffer editor editor-last !
+            editor editor-current @ buffer buffer-prev !
+            editor editor-current @ buffer-next @ buffer buffer-next !
+            buffer buffer-next @ if
+              buffer buffer-next @ buffer-prev !
+            else
+              buffer editor editor-last !
+            then
+            buffer editor editor-current @ buffer-next !
+            buffer editor editor-current !
+            editor editor-minibuffer @ clear-minibuffer
           then
-          buffer editor editor-current @ buffer-next !
-          buffer editor editor-current !
         ;] with-allot
-        editor editor-minibuffer @ clear-minibuffer
         editor deactivate-minibuffer
         editor editor-current @ refresh-display
       then
     ; define do-editor-new
 
+    \ Handle write
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ if
+          editor editor-current @ write-buffer-to-file
+          s" Wrote file" editor editor-minibuffer @ set-message
+        then
+      then
+    ; define handle-editor-write
+
+    \ Handle revert
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ if
+          editor editor-current @ load-buffer-from-file
+          editor editor-current @ refresh-display
+          s" Reverted file" editor editor-minibuffer @ set-message
+        then
+      then
+    ; define handle-editor-revert
+    
   end-implement
 
   \ The line editor
@@ -2451,12 +2622,16 @@ begin-module file-edit
   ;
   
   \ Edit a block
-  : edit ( -- )
-    my-heap-size [: { my-heap }
+  : edit ( path-addr path-bytes -- )
+    fat32-tools::current-fs@ averts fat32-tools::x-fs-not-set
+    my-heap-size [: { path-addr path-bytes my-heap }
       my-block-size my-block-count my-heap init-heap
       config-edit
       <editor> class-size my-heap allocate { editor }
-      my-heap <editor> editor init-object
+      path-addr path-bytes my-heap <editor> editor
+      ['] init-object with-file-error if
+        cr type 2drop 2drop drop cr exit
+      then
       editor refresh-editor
       begin
 	get-key
@@ -2474,8 +2649,8 @@ begin-module file-edit
             ctrl-p of editor handle-editor-prev false endof
             ctrl-o of editor handle-editor-new false endof
 	    ctrl-v of true endof
-\	    ctrl-w of handle-editor-write false endof
-\	    ctrl-x of handle-editor-revert false endof
+	    ctrl-w of editor handle-editor-write false endof
+	    ctrl-x of editor handle-editor-revert false endof
 \	    ctrl-u of handle-editor-insert-row false endof
             ctrl-k of editor handle-editor-kill false endof
             ctrl-y of editor handle-editor-paste false endof
