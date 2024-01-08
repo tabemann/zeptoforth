@@ -52,4 +52,4 @@ init-fs
 my-fs fat32-tools::current-fs!
   
 #include extra/common/dyn_buffer.fs
-#include extra/common/file_edit.fs
+#include extra/common/zeptoed.fs

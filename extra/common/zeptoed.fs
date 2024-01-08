@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module file-edit
+begin-module zeptoed-internal
 
   oo import
   dyn-buffer import
@@ -2732,9 +2732,9 @@ begin-module file-edit
       clear-keys
     endcase
   ;
-  
-  \ Edit a block
-  : edit ( path-addr path-bytes -- )
+
+  \ Edit one or more files in a FAT32 filesystem
+  : zeptoed ( path-addr path-bytes -- )
     fat32-tools::current-fs@ averts fat32-tools::x-fs-not-set
     my-heap-size [: { path-addr path-bytes my-heap }
       my-block-size my-block-count my-heap init-heap
@@ -2746,40 +2746,45 @@ begin-module file-edit
       then
       editor refresh-editor
       begin editor editor-exit @ not while
-	get-key
-	dup $20 u< over tab <> and if
-	  case
-	    return of editor handle-editor-newline endof
-	    newline of editor handle-editor-newline endof
+        get-key
+        dup $20 u< over tab <> and if
+          case
+            return of editor handle-editor-newline endof
+            newline of editor handle-editor-newline endof
             \	    tab of handle-editor-tab endof
             ctrl-space of editor handle-editor-select endof
-\	    ctrl-a of editor handle-editor-start endof
-\	    ctrl-e of editor handle-editor-end endof
-	    ctrl-f of editor handle-editor-forward endof
-	    ctrl-b of editor handle-editor-backward endof
-	    ctrl-n of editor handle-editor-next endof
+            \	    ctrl-a of editor handle-editor-start endof
+            \	    ctrl-e of editor handle-editor-end endof
+            ctrl-f of editor handle-editor-forward endof
+            ctrl-b of editor handle-editor-backward endof
+            ctrl-n of editor handle-editor-next endof
             ctrl-p of editor handle-editor-prev endof
             ctrl-o of editor handle-editor-new endof
             ctrl-v of editor handle-editor-exit endof
-	    ctrl-w of editor handle-editor-write endof
-	    ctrl-x of editor handle-editor-revert endof
-\	    ctrl-u of handle-editor-insert-row endof
+            ctrl-w of editor handle-editor-write endof
+            ctrl-x of editor handle-editor-revert endof
+            \	    ctrl-u of handle-editor-insert-row endof
             ctrl-k of editor handle-editor-kill endof
             ctrl-y of editor handle-editor-paste endof
             ctrl-z of editor handle-editor-undo endof
-	    escape of editor handle-escape endof
+            escape of editor handle-escape endof
           endcase
           depth 1 < if ." *** " then \ DEBUG
-	else
-	  dup delete = if
-	    drop editor handle-editor-delete
-	  else
-	    editor handle-editor-insert
-	  then
-	then
+        else
+          dup delete = if
+            drop editor handle-editor-delete
+          else
+            editor handle-editor-insert
+          then
+        then
       repeat
       display-height 0 go-to-coord cr
     ;] with-aligned-allot
   ;
-
+  
 end-module
+ 
+\ Invoke zeptoed to edit a specified file in a FAT32 filesystem
+: zeptoed ( path-addr path-bytes -- )
+  zeptoed-internal::zeptoed
+;
