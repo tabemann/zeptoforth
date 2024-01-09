@@ -1949,9 +1949,17 @@ begin-module zeptoed-internal
           select-offset edit-offset < if
             offset1 buffer buffer-edit-cursor go-to-offset
           else
-            edit-offset select-offset <  if
+            edit-offset select-offset < if
               offset1 buffer buffer-select-cursor go-to-offset
             then
+          then
+          offset0 select-offset = if
+            offset0 zeptoed-indent-size +
+            buffer buffer-select-cursor go-to-offset
+          then
+          offset0 edit-offset = if
+            offset0 zeptoed-indent-size +
+            buffer buffer-edit-cursor go-to-offset
           then
         ;] with-object
       else
