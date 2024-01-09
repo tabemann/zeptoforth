@@ -1936,9 +1936,8 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
-          0 { total-indent }
           begin cursor offset@ offset1 < while
-            zeptoed-indent-size +to total-indent
+            zeptoed-indent-size +to offset1
             zeptoed-indent-size 0 ?do
               $20 { W^ data }
               data 1 cursor insert-data
@@ -1946,21 +1945,13 @@ begin-module zeptoed-internal
             zeptoed-indent-size cursor offset@ buffer add-delete-undo
             [: $0A = ;] cursor find-next
             1 cursor adjust-offset
-            cursor offset@ offset1 >= if
-              select-offset edit-offset < if
-                total-indent buffer buffer-edit-cursor adjust-offset
-              else
-                edit-offset select-offset < if
-                  total-indent buffer buffer-select-cursor adjust-offset
-                then
-              then
-            then
           repeat
-          offset0 select-offset = if
-            zeptoed-indent-size buffer buffer-select-cursor adjust-offset
-          then
-          offset0 edit-offset = if
-            zeptoed-indent-size buffer buffer-edit-cursor adjust-offset
+          select-offset edit-offset < if
+            offset1 buffer buffer-edit-cursor go-to-offset
+          else
+            edit-offset select-offset <  if
+              offset1 buffer buffer-select-cursor go-to-offset
+            then
           then
         ;] with-object
       else
@@ -1994,7 +1985,7 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
-          false 0 0 { first total-insert-count total-delete-count }
+          false { first }
           begin cursor offset@ offset1 < while
             cursor buffer cursor-unindent-chars { insert-count delete-count }
             cursor offset@ dup delete-count + over buffer add-insert-undo
@@ -2017,20 +2008,15 @@ begin-module zeptoed-internal
                 buffer buffer-edit-cursor adjust-offset
               then
             then
-            insert-count +to total-insert-count
-            delete-count +to total-delete-count
-            cursor offset@ offset1 >= if
-              select-offset edit-offset < if
-                total-insert-count total-delete-count -
-                buffer buffer-edit-cursor adjust-offset
-              else
-                edit-offset select-offset < if
-                  total-insert-count total-delete-count -
-                  buffer buffer-select-cursor adjust-offset
-                then
-              then
-            then
+            insert-count delete-count - +to offset1
           repeat
+          select-offset edit-offset < if
+            offset1 buffer buffer-edit-cursor go-to-offset
+          else
+            edit-offset select-offset <  if
+              offset1 buffer buffer-select-cursor go-to-offset
+            then
+          then
         ;] with-object
       else
         buffer dup buffer-dyn-buffer <cursor> [: { buffer cursor }
