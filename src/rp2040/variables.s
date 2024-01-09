@@ -30,3 +30,4 @@
 
 	allot hold_core, 4 * cpu_count
 
+	allot sysclk, 4

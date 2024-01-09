@@ -568,5 +568,13 @@ _systick_divisor:
 	bx lr
 	end_inlined
 
+	@@ Crystal oscillator frequency
+	define_word "xosc-frequency", visible_flag
+_xosc_freq:
+	push_tos
+	ldr tos, =XOSC_MHZ * 1000000
+	bx lr
+	end_inlined
+
 	.ltorg
 	
