@@ -336,14 +336,15 @@ begin-module spi
 
     \ Find a prescale for a baud rate
     : find-spi-prescale ( baud -- prescale )
-      2 begin dup 254 <= while
-	dup 2 + 256 * 2 pick * 125000000 > if
-	  nip exit
+      s>d { D: baud }
+      2. begin 2dup 254. d<= while
+	2dup 2. d+ 256. d* baud d* 125000000. d> if
+	  d>s exit
 	else
-	  2 +
+	  2. d+
 	then
       repeat
-      nip
+      d>s
     ;
 
     \ Find a postdiv for a baud rate and prescale
