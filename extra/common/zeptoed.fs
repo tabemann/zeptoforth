@@ -473,7 +473,19 @@ begin-module zeptoed-internal
 
     \ Undo in the buffer
     method do-undo ( buffer -- )
+
+    \ Go to the start of the line in the buffer
+    method do-line-start ( buffer -- )
+
+    \ Go to the end of the line in the buffer
+    method do-line-end ( buffer -- )
     
+    \ Page up in buffer
+    method do-page-up ( buffer -- )
+
+    \ Page down in buffer
+    method do-page-down ( buffer -- )
+
     \ Go left one character
     method handle-backward ( buffer -- )
 
@@ -513,6 +525,18 @@ begin-module zeptoed-internal
     \ Undo in the buffer
     method handle-undo ( buffer -- )
 
+    \ Go to line start in the buffer
+    method handle-start ( buffer -- )
+
+    \ Go to line end in the buffer
+    method handle-end ( buffer -- )
+
+    \ Page up in buffer
+    method handle-page-up ( buffer -- )
+
+    \ Page down in buffer
+    method handle-page-down ( buffer -- )
+    
   end-class
 
   \ File buffer class
@@ -688,6 +712,18 @@ begin-module zeptoed-internal
 
     \ Handle a prompted exit
     method do-editor-exit ( editor -- )
+
+    \ Handle editor start
+    method handle-editor-start ( editor -- )
+
+    \ Handle editor end
+    method handle-editor-end ( editor -- )
+    
+    \ Handle editor page up
+    method handle-editor-page-up ( editor -- )
+
+    \ Handle editor page down
+    method handle-editor-page-down ( editor -- )
 
   end-class
 
@@ -1775,6 +1811,41 @@ begin-module zeptoed-internal
         buffer dirty-buffer
       then
     ; define do-undo
+
+    \ Go to the start of the line in the buffer
+    :noname { buffer -- }
+      [: $0A = ;] buffer buffer-edit-cursor find-prev
+      buffer buffer-edit-cursor offset@ buffer buffer-left-bound @ < if
+        buffer buffer-left-bound @ buffer buffer-edit-cursor go-to-offset
+      then
+    ; define do-line-start
+
+    \ Go to the end of the line in the buffer
+    :noname { buffer -- }
+      [: $0A = ;] buffer buffer-edit-cursor find-next
+    ; define do-line-end
+
+    \ Page up in buffer
+    :noname { buffer -- }
+      buffer buffer-height@ 0 ?do
+        buffer buffer-edit-cursor offset@ buffer buffer-left-bound @ > if
+          buffer do-up
+        else
+          unloop exit
+        then
+      loop
+    ; define do-page-up
+
+    \ Page down in buffer
+    :noname { buffer -- }
+      buffer buffer-height@ 0 ?do
+        buffer buffer-edit-cursor offset@ buffer buffer-len@ < if
+          buffer do-down
+        else
+          unloop exit
+        then
+      loop
+    ; define do-page-down
     
     \ Editor constants
     0 constant in-middle
@@ -2009,6 +2080,56 @@ begin-module zeptoed-internal
       buffer update-display drop
       buffer refresh-display
     ; define handle-undo
+
+    \ Go to line start in the buffer
+    :noname { buffer -- }
+      buffer edit-cursor-single-row? if
+        in-single-row
+      else
+        in-middle
+      then { position }
+      buffer do-line-start
+      buffer update-display if
+        buffer refresh-display
+      else
+        position case
+          in-single-row of buffer refresh-line endof
+          in-middle of buffer refresh-display endof
+        endcase
+      then
+    ; define handle-start
+
+    \ Go to line end in the buffer
+    :noname { buffer -- }
+      buffer edit-cursor-single-row? if
+        in-single-row
+      else
+        in-middle
+      then { position }
+      buffer do-line-end
+      buffer update-display if
+        buffer refresh-display
+      else
+        position case
+          in-single-row of buffer refresh-line endof
+          in-middle of buffer refresh-display endof
+        endcase
+      then
+    ; define handle-end
+
+    \ Page up in buffer
+    :noname { buffer -- }
+      buffer do-page-up
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-page-up
+
+    \ Page down in buffer
+    :noname { buffer -- }
+      buffer do-page-down
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-page-down
 
   end-implement
 
@@ -2682,7 +2803,43 @@ begin-module zeptoed-internal
         ;] with-allot
       then
     ; define do-editor-exit
-    
+
+    \ Handle editor start
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-start
+      else
+        editor editor-current @ handle-start
+      then
+    ; define handle-editor-start
+
+    \ Handle editor end
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-end
+      else
+        editor editor-current @ handle-end
+      then
+    ; define handle-editor-end
+
+    \ Handle editor page up
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-page-up
+      else
+        editor editor-current @ handle-page-up
+      then
+    ; define handle-editor-page-up
+
+    \ Handle editor page down
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-page-down
+      else
+        editor editor-current @ handle-page-down
+      then
+    ; define handle-editor-page-down
+
   end-implement
 
   \ The line editor
@@ -2708,18 +2865,18 @@ begin-module zeptoed-internal
 	  clear-keys
 	endcase
       endof
-      \ [char] 5 of
-      \   get-key case
-      \     [char] ~ of editor handle-editor-prev endof
-      \     clear-keys
-      \   endcase
-      \ endof
-      \ [char] 6 of
-      \   get-key case
-      \     [char] ~ of editor handle-editor-next endof
-      \     clear-keys
-      \   endcase
-      \ endof
+      [char] 5 of
+        get-key case
+          [char] ~ of editor handle-editor-page-up endof
+          clear-keys
+        endcase
+      endof
+      [char] 6 of
+        get-key case
+          [char] ~ of editor handle-editor-page-down endof
+          clear-keys
+        endcase
+      endof
       clear-keys
     endcase
   ;
@@ -2753,8 +2910,8 @@ begin-module zeptoed-internal
             newline of editor handle-editor-newline endof
             \	    tab of handle-editor-tab endof
             ctrl-space of editor handle-editor-select endof
-            \	    ctrl-a of editor handle-editor-start endof
-            \	    ctrl-e of editor handle-editor-end endof
+            ctrl-a of editor handle-editor-start endof
+            ctrl-e of editor handle-editor-end endof
             ctrl-f of editor handle-editor-forward endof
             ctrl-b of editor handle-editor-backward endof
             ctrl-n of editor handle-editor-next endof
