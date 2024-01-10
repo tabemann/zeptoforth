@@ -598,6 +598,9 @@ begin-module zeptoed-internal
     \ Exception
     cell member file-buffer-exception
 
+    \ File has been accessed
+    cell member file-buffer-accessed
+
     \ Buffer file is valid
     method file-buffer-valid? ( buffer -- valid? )
 
@@ -607,12 +610,28 @@ begin-module zeptoed-internal
     \ Access a file, creating or opening it
     method access-file ( path-addr path-bytes buffer -- )
 
+    \ Try to change the file path
+    method try-change-file-path
+    ( path-addr path-bytes buffer -- exception success? )
+    
     \ Load from file
     method load-buffer-from-file ( buffer -- )
     
     \ Write out a file
     method write-buffer-to-file ( buffer -- )
 
+    \ Handle change file path
+    method handle-change-file-path ( buffer -- )
+
+    \ Actal do change file path
+    method do-change-file-path ( buffer -- )
+
+    \ Handle write
+    method handle-write ( buffer -- )
+
+    \ Handle revert
+    method handle-revert ( buffer -- )
+    
   end-class
 
   \ Minibuffer class
@@ -769,6 +788,9 @@ begin-module zeptoed-internal
     \ Actually create a new buffer
     method do-editor-new ( editor -- )
 
+    \ Handle change file path
+    method handle-editor-change-file-path ( buffer -- )
+
     \ Write to file
     method handle-editor-write ( editor -- )
 
@@ -798,6 +820,15 @@ begin-module zeptoed-internal
 
     \ Handle editor unindent
     method handle-editor-unindent ( editor -- )
+
+    \ Handle a special key
+    method handle-special ( editor -- )
+
+    \ Handle escape
+    method handle-escape ( editor -- )
+    
+    \ Editor main loop
+    method editor-loop ( editor -- )
     
   end-class
 
@@ -2406,6 +2437,7 @@ begin-module zeptoed-internal
     :noname { path-addr path-bytes heap editor buffer -- }
       path-addr path-bytes heap editor buffer <buffer>->new
       0 buffer file-buffer-exception !
+      false buffer file-buffer-accessed !
       path-addr path-bytes buffer ['] access-file try ?dup if
         buffer file-buffer-exception ! 2drop drop exit
       then
@@ -2467,6 +2499,29 @@ begin-module zeptoed-internal
       then
     ; define access-file
 
+    \ Try to change the file path
+    :noname { path-addr path-bytes buffer -- exception success? }
+      path-addr path-bytes buffer ['] access-file try ?dup if
+        buffer buffer-path 2@ buffer ['] access-file try ?dup if { exception }
+          2drop 2drop 2drop drop
+          exception buffer file-buffer-exception ! exception false
+        else { exception }
+          2drop drop exception false
+        then
+      else
+        buffer buffer-name 2@ drop buffer buffer-heap @ free
+        buffer buffer-path 2@ drop buffer buffer-heap @ free
+        path-bytes buffer buffer-heap @ allocate { new-name-addr }
+        path-addr new-name-addr path-bytes move
+        path-bytes buffer buffer-heap @ allocate { new-path-addr }
+        path-addr new-path-addr path-bytes move
+        new-name-addr path-bytes buffer buffer-name 2!
+        new-path-addr path-bytes buffer buffer-path 2!
+        buffer output-title
+        0 true
+      then
+    ; define try-change-file-path
+    
     \ Load buffer from file
     :noname ( buffer -- )
       512 [: { buffer data }
@@ -2518,6 +2573,55 @@ begin-module zeptoed-internal
         ;] with-object
       ;] with-allot
     ; define write-buffer-to-file
+
+    \ Handle change file path
+    :noname { buffer -- }
+      buffer buffer-editor @ activate-minibuffer
+      s" Write to path: " buffer ['] do-change-file-path
+      buffer buffer-editor @ editor-minibuffer @ set-prompt
+    ; define handle-change-file-path
+
+    \ Actually do change file path
+    :noname { buffer -- }
+      buffer buffer-editor @ editor-in-minibuffer @ if
+        buffer 256 [: { buffer data }
+          data 256 0 buffer buffer-editor @ editor-minibuffer @
+          read-minibuffer { len }
+          buffer buffer-editor @ editor-minibuffer @ clear-minibuffer
+          buffer buffer-editor @ deactivate-minibuffer
+          data len buffer try-change-file-path if
+            drop buffer handle-write
+          else
+            file-error-string buffer buffer-editor @ editor-minibuffer @
+            set-message
+          then
+        ;] with-allot
+      then
+    ; define do-change-file-path
+
+    \ Handle write
+    :noname { buffer -- }
+      buffer write-buffer-to-file
+      buffer file-buffer-valid? not if
+        buffer file-buffer-exception@ file-error-string
+        buffer buffer-editor @ editor-minibuffer @ set-message
+      else
+        buffer refresh-display
+        s" Wrote file" buffer buffer-editor @ editor-minibuffer @ set-message
+      then
+    ; define handle-write
+
+    \ Handle revert
+    :noname { buffer -- }
+      buffer load-buffer-from-file
+      buffer file-buffer-valid? not if
+        buffer file-buffer-exception@ file-error-string
+        buffer buffer-editor @ editor-minibuffer @ set-message
+      else
+        buffer refresh-display
+        s" Reverted file" buffer buffer-editor @ editor-minibuffer @ set-message
+      then
+    ; define handle-revert
     
   end-implement
   
@@ -3043,13 +3147,20 @@ begin-module zeptoed-internal
       then
     ; define do-editor-new
 
+    \ Handle change file path
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ if
+          editor editor-current @ handle-change-file-path
+        then
+      then
+    ; define handle-editor-change-file-path
+
     \ Handle write
     :noname { editor -- }
       editor editor-in-minibuffer @ not if
         editor editor-current @ if
-          editor editor-current @ write-buffer-to-file
-          editor editor-current @ refresh-display
-          s" Wrote file" editor editor-minibuffer @ set-message
+          editor editor-current @ handle-write
         then
       then
     ; define handle-editor-write
@@ -3058,9 +3169,7 @@ begin-module zeptoed-internal
     :noname { editor -- }
       editor editor-in-minibuffer @ not if
         editor editor-current @ if
-          editor editor-current @ load-buffer-from-file
-          editor editor-current @ refresh-display
-          s" Reverted file" editor editor-minibuffer @ set-message
+          editor editor-current @ handle-revert
         then
       then
     ; define handle-editor-revert
@@ -3166,78 +3275,57 @@ begin-module zeptoed-internal
         editor editor-current @ handle-unindent
       then
     ; define handle-editor-unindent
-    
-  end-implement
 
-  \ The line editor
-  variable edit-state
-  
-  \ Configure the editor
-  : config-edit ( -- )
-    reset-ansi-term
-    get-terminal-size display-width ! display-height !
-  ;
-
-  \ Handle a special key
-  : handle-special { editor -- }
-    get-key case
-      [char] A of editor handle-editor-up endof
-      [char] B of editor handle-editor-down endof
-      [char] C of editor handle-editor-forward endof
-      [char] D of editor handle-editor-backward endof
-      [char] Z of editor handle-editor-unindent endof
-      [char] 3 of
-	get-key case
-	  [char] ~ of editor handle-editor-delete-forward endof
-	  clear-keys
-	endcase
-      endof
-      [char] 5 of
-        get-key case
-          [char] ~ of editor handle-editor-page-up endof
-          clear-keys
-        endcase
-      endof
-      [char] 6 of
-        get-key case
-          [char] ~ of editor handle-editor-page-down endof
-          clear-keys
-        endcase
-      endof
-      clear-keys
-    endcase
-  ;
-
-  \ Handle the escape key
-  : handle-escape { editor -- }
-    get-key case
-      tab of tab editor handle-editor-insert endof
-      ctrl-k of editor handle-editor-copy endof
-      [char] [ of editor handle-special endof
-      clear-keys
-    endcase
-  ;
-
-  \ Calculate heap size
-  : get-heap-size ( -- heap-size )
-    zeptoed-heap-size my-block-size / my-block-size swap heap-size
-  ;
-
-  \ Edit one or more files in a FAT32 filesystem
-  : zeptoed ( path-addr path-bytes -- )
-    fat32-tools::current-fs@ averts fat32-tools::x-fs-not-set
-    get-heap-size [: { path-addr path-bytes my-heap }
-      my-block-size zeptoed-heap-size my-block-size / my-heap init-heap
-      config-edit
-      <editor> class-size my-heap allocate { editor }
-      path-addr path-bytes my-heap <editor> editor init-object
-      editor editor-valid? not if
-        editor editor-exception@ file-error-string cr type
-        editor destroy
-        editor my-heap free
-        exit
+    \ Handle editor change file path
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ handle-change-file-path
       then
-      editor refresh-editor
+    ; define handle-editor-change-file-path
+    
+    \ Handle a special key
+    :noname { editor -- }
+      get-key case
+        [char] A of editor handle-editor-up endof
+        [char] B of editor handle-editor-down endof
+        [char] C of editor handle-editor-forward endof
+        [char] D of editor handle-editor-backward endof
+        [char] Z of editor handle-editor-unindent endof
+        [char] 3 of
+          get-key case
+            [char] ~ of editor handle-editor-delete-forward endof
+            clear-keys
+          endcase
+        endof
+        [char] 5 of
+          get-key case
+            [char] ~ of editor handle-editor-page-up endof
+            clear-keys
+          endcase
+        endof
+        [char] 6 of
+          get-key case
+            [char] ~ of editor handle-editor-page-down endof
+            clear-keys
+          endcase
+        endof
+        clear-keys
+      endcase
+    ; define handle-special
+
+    \ Handle the escape key
+    :noname { editor -- }
+      get-key case
+        tab of tab editor handle-editor-insert endof
+        ctrl-k of editor handle-editor-copy endof
+        ctrl-w of editor handle-editor-change-file-path endof
+        [char] [ of editor handle-special endof
+        clear-keys
+      endcase
+    ; define handle-escape
+
+    \ Editor main loop
+    :noname { editor -- }
       begin editor editor-exit @ not while
         get-key
         dup $20 u< if
@@ -3271,6 +3359,41 @@ begin-module zeptoed-internal
           then
         then
       repeat
+    ; define editor-loop
+  
+end-implement
+
+  \ The line editor
+  variable edit-state
+  
+  \ Configure the editor
+  : config-edit ( -- )
+    reset-ansi-term
+    get-terminal-size display-width ! display-height !
+  ;
+
+
+  \ Calculate heap size
+  : get-heap-size ( -- heap-size )
+    zeptoed-heap-size my-block-size / my-block-size swap heap-size
+  ;
+
+  \ Edit one or more files in a FAT32 filesystem
+  : zeptoed ( path-addr path-bytes -- )
+    fat32-tools::current-fs@ averts fat32-tools::x-fs-not-set
+    get-heap-size [: { path-addr path-bytes my-heap }
+      my-block-size zeptoed-heap-size my-block-size / my-heap init-heap
+      config-edit
+      <editor> class-size my-heap allocate { editor }
+      path-addr path-bytes my-heap <editor> editor init-object
+      editor editor-valid? not if
+        editor editor-exception@ file-error-string cr type
+        editor destroy
+        editor my-heap free
+        exit
+      then
+      editor refresh-editor
+      editor editor-loop
       display-height 0 go-to-coord cr
     ;] with-aligned-allot
   ;
