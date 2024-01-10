@@ -2974,6 +2974,7 @@ begin-module zeptoed-internal
           ['] init-object with-file-error if
             buffer editor editor-heap @ free
             editor editor-minibuffer @ set-message
+            2drop 2drop 2drop
           else
             editor editor-current @ buffer buffer-prev !
             editor editor-current @ buffer-next @ buffer buffer-next !
