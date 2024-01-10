@@ -27,6 +27,9 @@
 \ Tab character
 8 value zeptoed-tab-size
 
+\ Save files with CRLF newlines
+false value zeptoed-save-crlf-enabled
+
 begin-module zeptoed-internal
 
   oo import
@@ -99,6 +102,37 @@ begin-module zeptoed-internal
       endof
       ?raise 0 0 false 0
     endcase
+  ;
+
+  \ Strip carriage returns
+  : strip-crs { addr bytes -- bytes' }
+    0 { offset }
+    begin offset bytes < while
+      addr offset + c@ $0D = if
+        addr offset + 1+ addr offset + bytes offset - 1- move
+        -1 +to bytes
+      else
+        1 +to offset
+      then
+    repeat
+    bytes
+  ;
+
+  \ Expand newlines to CRLF's - note that the available amount of space must be
+  \ 2x bytes
+  : expand-newlines-to-crlfs { addr bytes -- bytes }
+    0 { offset }
+    begin offset bytes < while
+      addr offset + c@ $0A = if
+        addr offset + addr offset + 1+ bytes offset - move
+        $0D addr offset + c!
+        1 +to bytes
+        2 +to offset
+      else
+        1 +to offset
+      then
+    repeat
+    bytes
   ;
 
   \ Character constants
@@ -2412,7 +2446,8 @@ begin-module zeptoed-internal
         begin bytes-read bytes < while
           bytes bytes-read - 512 min { part-size }
           data part-size buffer buffer-file read-file to part-size
-          data part-size buffer buffer-edit-cursor insert-data
+          data part-size strip-crs { stripped-size }
+          data stripped-size buffer buffer-edit-cursor insert-data
           part-size +to bytes-read
         repeat
         buffer buffer-edit-cursor go-to-start
@@ -2422,7 +2457,8 @@ begin-module zeptoed-internal
     
     \ Write out a file
     :noname ( buffer -- )
-      512 [:
+      zeptoed-save-crlf-enabled if 1024 else 512 then
+      [:
         over buffer-dyn-buffer <cursor> [: { buffer data cursor }
           buffer buffer-len@ { bytes }
           0 { bytes-written }
@@ -2430,7 +2466,15 @@ begin-module zeptoed-internal
           begin bytes-written bytes < while
             bytes bytes-written - 512 min { part-size }
             data part-size cursor read-data to part-size
-            data part-size buffer buffer-file write-file to part-size
+            zeptoed-save-crlf-enabled if
+              data part-size expand-newlines-to-crlfs
+            else
+              part-size
+            then { expanded-size }
+            \ This line relies on the fact that WRITE-FILE always writes the
+            \ full length that is given. However, we shouldn't really trust
+            \ this. TODO: Fix this.
+            data expanded-size buffer buffer-file write-file drop
             part-size +to bytes-written
           repeat
           buffer buffer-file truncate-file
