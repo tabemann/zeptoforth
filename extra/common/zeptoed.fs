@@ -3227,3 +3227,9 @@ end-module
 : zeptoed ( path-addr path-bytes -- )
   zeptoed-internal::zeptoed
 ;
+
+
+\ A shorter version of ZEPTOED just because
+: zed ( path-addr path-bytes -- )
+  zeptoed-internal::zeptoed
+;
