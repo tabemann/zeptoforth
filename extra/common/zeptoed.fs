@@ -55,52 +55,52 @@ begin-module zeptoed-internal
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
 
-  \ Generate file error message if one occurs
-  : with-file-error ( xt -- c-addr u error? )
-    try case
+  \ Get file error string
+  : file-error-string ( exception -- c-addr u )
+    case
       ['] x-sector-size-not-supported of
-        s" Sector sizes other than 512 are not supported" true
+        s" Sector sizes other than 512 are not supported"
       endof
       ['] x-fs-version-not-supported of
-        s" FAT32 version not supported" true
+        s" FAT32 version not supported"
       endof
       ['] x-bad-info-sector of
-        s" Bad info sector" true
+        s" Bad info sector"
       endof
       ['] x-no-clusters-free of
-        s" No clusters free" true
+        s" No clusters free"
       endof
       ['] x-file-name-format of
-        s" Unsupported filename" true
+        s" Unsupported filename"
       endof
       ['] x-out-of-range-entry of
-        s" Out of range directory entry" true
+        s" Out of range directory entry"
       endof
       ['] x-out-of-range-partition of
-        s" Out of range partition" true
+        s" Out of range partition"
       endof
       ['] x-entry-not-found of
-        s" Directory entry not found" true
+        s" Directory entry not found"
       endof
       ['] x-entry-already-exists of
-        s" Directory entry already exists" true
+        s" Directory entry already exists"
       endof
       ['] x-entry-not-file of
-        s" Directory entry not file" true
+        s" Directory entry not file"
       endof
       ['] x-entry-not-dir of
-        s" Directory entry not directory" true
+        s" Directory entry not directory"
       endof
       ['] x-forbidden-dir of
-        s" Forbidden directory name" true
+        s" Forbidden directory name"
       endof
       ['] x-empty-path of
-        s" Empty path" true
+        s" Empty path"
       endof
       ['] x-invalid-path of
-        s" Invalid path" true
+        s" Invalid path"
       endof
-      ?raise 0 0 false 0
+      s" "
     endcase
   ;
 
@@ -595,6 +595,15 @@ begin-module zeptoed-internal
     \ The file being edited
     <fat32-file> class-size member buffer-file
 
+    \ Exception
+    cell member file-buffer-exception
+
+    \ Buffer file is valid
+    method file-buffer-valid? ( buffer -- valid? )
+
+    \ Buffer file exception
+    method file-buffer-exception@ ( buffer -- exception )
+    
     \ Access a file, creating or opening it
     method access-file ( path-addr path-bytes buffer -- )
 
@@ -679,8 +688,17 @@ begin-module zeptoed-internal
     \ Are we going to exit
     cell member editor-exit
     
+    \ Exception
+    cell member editor-exception
+
     \ Clipboard
     <clip> class-size member editor-clip
+
+    \ Editor is valid
+    method editor-valid? ( editor -- valid? )
+
+    \ Editor exception
+    method editor-exception@ ( editor -- exception )
 
     \ Refresh the editor
     method refresh-editor ( editor -- )
@@ -2386,16 +2404,33 @@ begin-module zeptoed-internal
 
     \ Constructor
     :noname { path-addr path-bytes heap editor buffer -- }
-      path-addr path-bytes buffer access-file
       path-addr path-bytes heap editor buffer <buffer>->new
-      buffer load-buffer-from-file
+      0 buffer file-buffer-exception !
+      path-addr path-bytes buffer ['] access-file try ?dup if
+        buffer file-buffer-exception ! 2drop drop exit
+      then
+      buffer ['] load-buffer-from-file try ?dup if
+        buffer file-buffer-exception ! drop
+      then
     ; define new
 
     \ Destructor
     :noname { buffer }
-      buffer buffer-file destroy
+      buffer file-buffer-exception @ 0= if
+        buffer buffer-file destroy
+      then
       buffer <buffer>->destroy
     ; define destroy
+
+    \ Buffer file is valid
+    :noname ( buffer -- valid? )
+      file-buffer-exception @ 0=
+    ; define file-buffer-valid?
+
+    \ Buffer file exception
+    :noname ( buffer -- exception )
+      file-buffer-exception @
+    ; define file-buffer-exception@
 
     \ Dirty buffer
     :noname { buffer -- }
@@ -2754,10 +2789,14 @@ begin-module zeptoed-internal
     \ Constructor
     :noname { path-addr path-bytes heap editor -- }
       editor <object>->new
+      0 editor editor-exception !
       heap editor editor-heap !
       heap <clip> editor editor-clip init-object
       <file-buffer> class-size heap allocate { buffer }
       path-addr path-bytes heap editor <file-buffer> buffer init-object
+      buffer file-buffer-valid? not if
+        buffer file-buffer-exception@ editor editor-exception !
+      then
       <minibuffer> class-size heap allocate { minibuffer }
       heap editor <minibuffer> minibuffer init-object
       buffer editor editor-first !
@@ -2776,6 +2815,16 @@ begin-module zeptoed-internal
       editor editor-current @ editor editor-heap @ free
       editor <object>->destroy
     ; define destroy
+
+    \ Editor is valid
+    :noname ( editor -- valid? )
+      editor-exception @ 0=
+    ; define editor-valid?
+
+    \ Editor exception
+    :noname ( editor -- exception )
+      editor-exception @
+    ; define editor-exception@
 
     \ Refresh the editor
     :noname { editor -- }
@@ -2970,11 +3019,12 @@ begin-module zeptoed-internal
         editor 256 [: { editor data }
           data 256 0 editor editor-minibuffer @ read-minibuffer { len }
           <file-buffer> class-size editor editor-heap @ allocate { buffer }
-          data len editor editor-heap @ editor <file-buffer> buffer
-          ['] init-object with-file-error if
-            buffer editor editor-heap @ free
+          data len editor editor-heap @ editor <file-buffer> buffer init-object
+          buffer file-buffer-valid? not if
+            buffer file-buffer-exception@ file-error-string
             editor editor-minibuffer @ set-message
-            2drop 2drop 2drop
+            buffer destroy
+            buffer editor editor-heap @ free
           else
             editor editor-current @ buffer buffer-prev !
             editor editor-current @ buffer-next @ buffer buffer-next !
@@ -3180,9 +3230,12 @@ begin-module zeptoed-internal
       my-block-size zeptoed-heap-size my-block-size / my-heap init-heap
       config-edit
       <editor> class-size my-heap allocate { editor }
-      path-addr path-bytes my-heap <editor> editor
-      ['] init-object with-file-error if
-        cr type 2drop 2drop drop cr exit
+      path-addr path-bytes my-heap <editor> editor init-object
+      editor editor-valid? not if
+        editor editor-exception@ file-error-string cr type
+        editor destroy
+        editor my-heap free
+        exit
       then
       editor refresh-editor
       begin editor editor-exit @ not while
@@ -3209,7 +3262,7 @@ begin-module zeptoed-internal
             ctrl-z of editor handle-editor-undo endof
             escape of editor handle-escape endof
           endcase
-          depth 1 < if ." *** " then \ DEBUG
+          depth 0< if ." *** " then \ DEBUG
         else
           dup delete = if
             drop editor handle-editor-delete
