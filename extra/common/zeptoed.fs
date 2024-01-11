@@ -43,6 +43,27 @@ begin-module zeptoed-internal
   : *echo* [immediate] char lit, postpone internal::serial-emit ;
   \ DEBUG
 
+  \ Character constants
+  $09 constant tab
+  $7F constant delete
+  $0A constant newline
+  $0D constant return
+  $00 constant ctrl-space
+  $01 constant ctrl-a
+  $02 constant ctrl-b
+  $05 constant ctrl-e
+  $06 constant ctrl-f
+  $0B constant ctrl-k
+  $0E constant ctrl-n
+  $0F constant ctrl-o
+  $10 constant ctrl-p
+  $15 constant ctrl-u
+  $16 constant ctrl-v
+  $17 constant ctrl-w
+  $18 constant ctrl-x
+  $19 constant ctrl-y
+  $1A constant ctrl-z
+
   \ Normal video
   : normal-video ( -- ) csi ." 0m" ;
 
@@ -123,7 +144,7 @@ begin-module zeptoed-internal
   : expand-newlines-to-crlfs { addr bytes -- bytes }
     0 { offset }
     begin offset bytes < while
-      addr offset + c@ $0A = if
+      addr offset + c@ newline = if
         addr offset + addr offset + 1+ bytes offset - move
         $0D addr offset + c!
         1 +to bytes
@@ -134,27 +155,6 @@ begin-module zeptoed-internal
     repeat
     bytes
   ;
-
-  \ Character constants
-  $09 constant tab
-  $7F constant delete
-  $0A constant newline
-  $0D constant return
-  $00 constant ctrl-space
-  $01 constant ctrl-a
-  $02 constant ctrl-b
-  $05 constant ctrl-e
-  $06 constant ctrl-f
-  $0B constant ctrl-k
-  $0E constant ctrl-n
-  $0F constant ctrl-o
-  $10 constant ctrl-p
-  $15 constant ctrl-u
-  $16 constant ctrl-v
-  $17 constant ctrl-w
-  $18 constant ctrl-x
-  $19 constant ctrl-y
-  $1A constant ctrl-z
 
   \ My base heap size
   65536 constant my-base-heap-size
@@ -185,7 +185,7 @@ begin-module zeptoed-internal
       byte tab = if
         zeptoed-tab-size chars zeptoed-tab-size umod - +to chars
       else
-        byte $20 >= byte $7F < and byte unicode-start? or if 1 +to chars then
+        byte bl >= byte delete < and byte unicode-start? or if 1 +to chars then
       then
     loop
     chars
@@ -303,6 +303,12 @@ begin-module zeptoed-internal
 
     \ Add a delete undo
     method add-delete-undo ( bytes offset buffer -- )
+
+    \ Get a line's indentation
+    method cursor-line-indent ( cursor buffer -- indent )
+
+    \ Get the edit cursor's line's indentation
+    method edit-cursor-line-indent ( cursor buffer -- indent )
 
     \ Get the number of continguous space characters at a cursor
     method cursor-space-chars ( cursor buffer -- chars )
@@ -479,6 +485,9 @@ begin-module zeptoed-internal
     \ Enter a character into the buffer
     method do-insert ( c buffer -- )
 
+    \ Enter a newline with indentation into the buffer
+    method do-newline ( buffer -- )
+    
     \ Find the begin and end offsets for a delete
     method find-delete-range ( buffer -- start-offset end-offset )
 
@@ -491,6 +500,9 @@ begin-module zeptoed-internal
     \ Delete in the buffer
     method do-delete-forward ( buffer -- )
 
+    \ Delete a range in the buffer
+    method do-delete-range ( buffer -- )
+    
     \ Kill a range in the buffer
     method do-kill ( clip buffer -- )
 
@@ -1006,7 +1018,36 @@ begin-module zeptoed-internal
       then
       offset undo undo-offset !
     ; define add-delete-undo
-    
+
+    \ Get a line's indentation
+    :noname ( cursor buffer -- indent )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor cursor copy-cursor
+        [: newline = ;] cursor find-prev
+        0 { chars }
+        begin cursor offset@ buffer buffer-len@ < while
+          cursor buffer cursor-at { byte }
+          byte bl = if
+            1 +to chars
+            1 cursor adjust-offset
+          else
+            byte tab = if
+              zeptoed-tab-size chars zeptoed-tab-size umod - +to chars
+              1 cursor adjust-offset
+            else
+              chars exit
+            then
+          then
+        repeat
+        chars
+      ;] with-object
+    ; define cursor-line-indent
+
+    \ Get the edit cursor's line's indentation
+    :noname ( cursor buffer -- indent )
+      dup buffer-edit-cursor swap cursor-line-indent
+    ; define edit-cursor-line-indent
+
     \ Get the number of continguous space characters at a cursor
     :noname ( cursor buffer -- chars )
       buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
@@ -1015,7 +1056,7 @@ begin-module zeptoed-internal
         0 { count }
         begin
           data 1 cursor read-data if
-            data c@ $20 = if
+            data c@ bl = if
               1 +to count false
             else
               true
@@ -1065,10 +1106,10 @@ begin-module zeptoed-internal
     :noname ( cursor0 cursor1 buffer -- same? )
       buffer-dyn-buffer <cursor> [: { cursor0 cursor1 cursor }
         cursor0 cursor copy-cursor
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         cursor offset@ { offset0 }
         cursor1 cursor copy-cursor
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         cursor offset@ { offset1 }
         offset0 offset1 =
       ;] with-object
@@ -1182,7 +1223,7 @@ begin-module zeptoed-internal
       buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         orig-offset cursor offset@ -
       ;] with-object
     ; define cursor-raw-start-dist
@@ -1192,7 +1233,7 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         0 cursor offset@ orig-offset buffer char-dist
       ;] with-object
     ; define cursor-start-dist
@@ -1202,7 +1243,7 @@ begin-module zeptoed-internal
       buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
-        [: $0A = ;] cursor find-next
+        [: newline = ;] cursor find-next
         cursor offset@ orig-offset -
       ;] with-object
     ; define cursor-raw-end-dist
@@ -1213,7 +1254,7 @@ begin-module zeptoed-internal
         orig-cursor buffer cursor-start-dist { init-chars }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
-        [: $0A = ;] cursor find-next
+        [: newline = ;] cursor find-next
         init-chars orig-offset cursor offset@ buffer char-dist
       ;] with-object
     ; define cursor-end-dist
@@ -1342,7 +1383,7 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [:
         default-segment-size [: { buffer cursor data }
           buffer buffer-edit-cursor cursor copy-cursor
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor buffer cursor-raw-end-dist { end-dist }
           hide-cursor
           buffer buffer-edit-row @ 0 buffer go-to-buffer-coord
@@ -1365,7 +1406,7 @@ begin-module zeptoed-internal
                 tab-spaces +to chars
               else
                 byte emit
-                byte $20 >= byte $7F < and
+                byte bl >= byte delete < and
                 byte unicode-start? or if
                   1 +to chars
                 then
@@ -1428,7 +1469,7 @@ begin-module zeptoed-internal
                       buffer buffer-width@ cols-remaining - to edit-col
                     then
                     current-data c@ { byte }
-                    byte $0A = if
+                    byte newline = if
                       erase-end-of-line cr
                       -1 +to rows-remaining
                       buffer buffer-width@ to cols-remaining
@@ -1447,7 +1488,7 @@ begin-module zeptoed-internal
                         repeat
                       else
                         byte emit
-                        byte $20 >= byte $7F < and
+                        byte bl >= byte delete < and
                         byte unicode-start? or if
                           cols-remaining 1 > if
                             -1 +to cols-remaining
@@ -1496,14 +1537,14 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [:
         { center-cursor dest-cursor buffer cursor }
         center-cursor cursor copy-cursor
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         0 { rows }
         begin
           rows buffer buffer-height@ 2 / < cursor offset@ 0> and
         while
           -1 cursor adjust-offset
           cursor offset@ { old-offset }
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ { new-offset }
           0 new-offset old-offset buffer char-dist { diff }
           diff 0> if
@@ -1546,14 +1587,14 @@ begin-module zeptoed-internal
     :noname ( cursor0 cursor1 buffer -- rows )
       dup buffer-dyn-buffer <cursor> [: { cursor0 cursor1 buffer cursor }
         cursor1 cursor copy-cursor
-        [: $0A = ;] cursor find-prev
+        [: newline = ;] cursor find-prev
         0 { rows }
         begin
           cursor offset@ cursor0 offset@ >
         while
           -1 cursor adjust-offset
           cursor offset@ { old-offset }
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ { new-offset }
           0 new-offset old-offset buffer char-dist { diff }
           new-offset cursor0 offset@ >= if
@@ -1733,7 +1774,7 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer buffer-edit-cursor buffer cursor-start-dist { dist }
       dist buffer buffer-width@ <= if
-        [: $0A = ;] buffer buffer-edit-cursor find-prev
+        [: newline = ;] buffer buffer-edit-cursor find-prev
         -1 buffer buffer-edit-cursor adjust-offset
         buffer buffer-edit-cursor buffer cursor-start-dist { len }
         len buffer buffer-width@ umod dup { last-len } dist >= if
@@ -1753,7 +1794,7 @@ begin-module zeptoed-internal
       buffer buffer-edit-cursor buffer cursor-left-space { col row }
       buffer edit-cursor-line-last? if
         dist buffer buffer-width@ umod { last-len }
-        [: $0A = ;] buffer buffer-edit-cursor find-next
+        [: newline = ;] buffer buffer-edit-cursor find-next
         1 buffer buffer-edit-cursor adjust-offset
         buffer buffer-edit-cursor buffer cursor-line-len { next-len }
         last-len next-len min buffer buffer-edit-cursor adjust-offset
@@ -1777,6 +1818,20 @@ begin-module zeptoed-internal
       buffer dirty-buffer
     ; define do-insert
 
+    \ Enter a newline with indentation into the buffer
+    :noname { buffer -- }
+      buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
+      { select-diff }
+      buffer edit-cursor-line-indent { indent }
+      newline { W^ data }
+      data 1 buffer buffer-edit-cursor insert-data
+      bl data c!
+      indent 0 ?do data 1 buffer buffer-edit-cursor insert-data loop
+      select-diff 0> if indent 1+ buffer buffer-select-cursor adjust-offset then
+      indent 1+ buffer buffer-edit-cursor offset@ buffer add-delete-undo
+      buffer dirty-buffer
+    ; define do-newline
+    
     \ Find the begin and end offsets for a delete
     :noname ( buffer -- start-offset end-offset )
       dup buffer-dyn-buffer <cursor> [: { buffer cursor }
@@ -1867,6 +1922,27 @@ begin-module zeptoed-internal
         then
       until
     ; define do-delete-forward
+
+    \ Delete a range in the buffer
+    :noname { buffer -- }
+      buffer buffer-select-cursor { select }
+      buffer buffer-edit-cursor { edit }
+      select offset@ { select-offset }
+      edit offset@ { edit-offset }
+      select-offset edit-offset < if
+        select-offset edit-offset select-offset
+        buffer add-insert-undo
+        edit-offset select-offset - edit delete-data
+        buffer dirty-buffer
+      else
+        edit-offset select-offset < if
+          edit-offset select-offset edit-offset
+          buffer add-insert-undo
+          select-offset edit-offset - select delete-data
+          buffer dirty-buffer
+        then
+      then
+    ; define do-delete-range
 
     \ Kill a range in the buffer
     :noname { clip buffer -- }
@@ -1973,7 +2049,7 @@ begin-module zeptoed-internal
 
     \ Go to the start of the line in the buffer
     :noname { buffer -- }
-      [: $0A = ;] buffer buffer-edit-cursor find-prev
+      [: newline = ;] buffer buffer-edit-cursor find-prev
       buffer buffer-edit-cursor offset@ buffer buffer-left-bound @ < if
         buffer buffer-left-bound @ buffer buffer-edit-cursor go-to-offset
       then
@@ -1981,7 +2057,7 @@ begin-module zeptoed-internal
 
     \ Go to the end of the line in the buffer
     :noname { buffer -- }
-      [: $0A = ;] buffer buffer-edit-cursor find-next
+      [: newline = ;] buffer buffer-edit-cursor find-next
     ; define do-line-end
 
     \ Page up in buffer
@@ -2015,18 +2091,18 @@ begin-module zeptoed-internal
           select-offset edit-offset min { offset0 }
           select-offset edit-offset max { offset1 }
           offset0 cursor go-to-offset
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
           begin cursor offset@ offset1 < while
             zeptoed-indent-size +to offset1
             zeptoed-indent-size 0 ?do
-              $20 { W^ data }
+              bl { W^ data }
               data 1 cursor insert-data
             loop
             zeptoed-indent-size cursor offset@ buffer add-delete-undo
-            [: $0A = ;] cursor find-next
+            [: newline = ;] cursor find-next
             1 cursor adjust-offset
           repeat
           select-offset edit-offset < if
@@ -2048,12 +2124,12 @@ begin-module zeptoed-internal
       else
         buffer dup buffer-dyn-buffer <cursor> [: { buffer cursor }
           buffer buffer-edit-cursor cursor copy-cursor
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
           zeptoed-indent-size 0 ?do
-            $20 { W^ data }
+            bl { W^ data }
             data 1 cursor insert-data
           loop
           zeptoed-indent-size cursor offset@ buffer add-delete-undo
@@ -2072,7 +2148,7 @@ begin-module zeptoed-internal
           select-offset edit-offset min { offset0 }
           select-offset edit-offset max { offset1 }
           offset0 cursor go-to-offset
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
@@ -2083,10 +2159,10 @@ begin-module zeptoed-internal
             delete-count cursor adjust-offset
             delete-count cursor delete-data
             insert-count 0 ?do
-              $20 { W^ data } data 1 cursor insert-data
+              bl { W^ data } data 1 cursor insert-data
             loop
             insert-count cursor offset@ buffer add-delete-undo
-            [: $0A = ;] cursor find-next
+            [: newline = ;] cursor find-next
             1 cursor adjust-offset
             first not if
               true to first
@@ -2112,7 +2188,7 @@ begin-module zeptoed-internal
       else
         buffer dup buffer-dyn-buffer <cursor> [: { buffer cursor }
           buffer buffer-edit-cursor cursor copy-cursor
-          [: $0A = ;] cursor find-prev
+          [: newline = ;] cursor find-prev
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
@@ -2121,7 +2197,7 @@ begin-module zeptoed-internal
           delete-count cursor adjust-offset
           delete-count cursor delete-data
           insert-count 0 ?do
-            $20 { W^ data } data 1 cursor insert-data
+            bl { W^ data } data 1 cursor insert-data
           loop
           insert-count cursor offset@ buffer add-delete-undo
           insert-count delete-count - buffer buffer-edit-cursor adjust-offset
@@ -2264,60 +2340,74 @@ begin-module zeptoed-internal
 
     \ Enter a newline into the buffer
     :noname { buffer -- }
-      $0A buffer do-insert
+      buffer do-newline
       buffer update-display drop
       buffer refresh-display
     ; define handle-newline
 
     \ Backspace in the buffer
     :noname { buffer -- }
-      buffer buffer-left-bound @ buffer buffer-edit-cursor offset@ = if
-        exit
-      then
-      buffer edit-cursor-at-row-start? if
-        at-start
-      else
-        buffer edit-cursor-at-end?
-        buffer edit-cursor-at-row-end? and
-        buffer edit-cursor-before tab <> and if
-          at-end
-        else
-          buffer edit-cursor-single-row? if
-            in-single-row
-          else
-            in-middle
-          then
-        then
-      then { position }
-      buffer do-delete
-      buffer update-display if
+      buffer selected? if
+        buffer do-delete-range
+        buffer do-deselect
+        buffer update-display drop
         buffer refresh-display
       else
-        position case
-          in-middle of buffer refresh-display endof
-          at-start of buffer refresh-display endof
-          in-single-row of buffer refresh-line endof
-          at-end of buffer output-backspace endof
-        endcase
+        buffer buffer-left-bound @ buffer buffer-edit-cursor offset@ = if
+          exit
+        then
+        buffer edit-cursor-at-row-start? if
+          at-start
+        else
+          buffer edit-cursor-at-end?
+          buffer edit-cursor-at-row-end? and
+          buffer edit-cursor-before tab <> and if
+            at-end
+          else
+            buffer edit-cursor-single-row? if
+              in-single-row
+            else
+              in-middle
+            then
+          then
+        then { position }
+        buffer do-delete
+        buffer update-display if
+          buffer refresh-display
+        else
+          position case
+            in-middle of buffer refresh-display endof
+            at-start of buffer refresh-display endof
+            in-single-row of buffer refresh-line endof
+            at-end of buffer output-backspace endof
+          endcase
+        then
       then
     ; define handle-delete
 
     \ Delete in the buffer
     :noname { buffer -- }
-      buffer edit-cursor-offset@ buffer buffer-len@ = if exit then
-      buffer edit-cursor-single-row? if
-        in-single-row
-      else
-        in-middle
-      then { position }
-      buffer do-delete-forward
-      buffer update-display if
+      buffer selected? if
+        buffer do-delete-range
+        buffer do-deselect
+        buffer update-display drop
         buffer refresh-display
       else
-        position case
-          in-middle of buffer refresh-display endof
-          in-single-row of buffer refresh-line endof
-        endcase
+        buffer edit-cursor-offset@ buffer buffer-len@ = if exit then
+        buffer edit-cursor-single-row? if
+          in-single-row
+        else
+          in-middle
+        then { position }
+        buffer do-delete-forward
+        buffer update-display if
+          buffer refresh-display
+        else
+          position case
+            in-middle of buffer refresh-display endof
+            in-single-row of buffer refresh-line endof
+          endcase
+        then
       then
     ; define handle-delete-forward
 
@@ -3196,7 +3286,7 @@ begin-module zeptoed-internal
           begin
             len 0> if
               data c@ { byte }
-              byte $20 <= byte $7F = or if
+              byte bl <= byte delete = or if
                 1 +to data
                 -1 +to len
                 false
@@ -3276,13 +3366,6 @@ begin-module zeptoed-internal
       then
     ; define handle-editor-unindent
 
-    \ Handle editor change file path
-    :noname { editor -- }
-      editor editor-in-minibuffer @ not if
-        editor editor-current @ handle-change-file-path
-      then
-    ; define handle-editor-change-file-path
-    
     \ Handle a special key
     :noname { editor -- }
       get-key case
@@ -3328,7 +3411,7 @@ begin-module zeptoed-internal
     :noname { editor -- }
       begin editor editor-exit @ not while
         get-key
-        dup $20 u< if
+        dup bl u< if
           case
             return of editor handle-editor-newline endof
             newline of editor handle-editor-newline endof
