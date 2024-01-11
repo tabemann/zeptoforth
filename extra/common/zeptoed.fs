@@ -304,6 +304,9 @@ begin-module zeptoed-internal
     \ Add a delete undo
     method add-delete-undo ( bytes offset buffer -- )
 
+    \ Check whether any lines in a range are not indented
+    method not-indented? ( cursor offset1 buffer -- not-indented? )
+
     \ Get a line's indentation
     method cursor-line-indent ( cursor buffer -- indent )
 
@@ -1018,6 +1021,19 @@ begin-module zeptoed-internal
       then
       offset undo undo-offset !
     ; define add-delete-undo
+
+    \ Check whether any lines in a range are not indented
+    :noname ( cursor offset1 buffer -- not-indented? )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor offset1 buffer cursor }
+        orig-cursor cursor copy-cursor
+        begin cursor offset@ offset1 < while
+          cursor buffer cursor-at dup bl <> swap tab <> and if true exit then
+          [: newline = ;] cursor find-next
+          1 cursor adjust-offset
+        repeat
+        false
+      ;] with-object
+    ; define not-indented?
 
     \ Get a line's indentation
     :noname ( cursor buffer -- indent )
@@ -2156,6 +2172,7 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
+          cursor offset1 buffer not-indented? if exit then
           false { first }
           begin cursor offset@ offset1 < while
             cursor buffer cursor-unindent-chars { insert-count delete-count }
@@ -2188,6 +2205,7 @@ begin-module zeptoed-internal
               offset1 buffer buffer-select-cursor go-to-offset
             then
           then
+          buffer dirty-buffer
         ;] with-object
       else
         buffer dup buffer-dyn-buffer <cursor> [: { buffer cursor }
@@ -2205,9 +2223,9 @@ begin-module zeptoed-internal
           loop
           insert-count cursor offset@ buffer add-delete-undo
           insert-count delete-count - buffer buffer-edit-cursor adjust-offset
+          buffer dirty-buffer
         ;] with-object
       then
-      buffer dirty-buffer
     ; define do-unindent
 
     \ Editor constants
