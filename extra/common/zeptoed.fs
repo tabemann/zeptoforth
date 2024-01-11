@@ -1075,14 +1075,17 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         zeptoed-indent-size { chars-left }
+        0 { chars-traversed }
         0 0 { insert-count delete-count }
         begin chars-left 0> while
           cursor buffer cursor-at { bytes }
           insert-count 0> if
             chars-left insert-count min
+            dup +to chars-traversed
             negate dup +to insert-count +to chars-left
           else
             cursor buffer cursor-space-chars chars-left min { chars }
+            chars +to chars-traversed
             chars +to delete-count
             chars negate +to chars-left
             chars cursor adjust-offset
@@ -1090,15 +1093,16 @@ begin-module zeptoed-internal
               cursor buffer cursor-at { byte }
               byte tab = if
                 1 +to delete-count
-                zeptoed-tab-size +to insert-count
+                zeptoed-tab-size chars-traversed zeptoed-tab-size umod -
+                +to insert-count
                 1 cursor adjust-offset
               else
                 0 to chars-left
               then
             then
           then
-          insert-count delete-count
         repeat
+        insert-count delete-count
       ;] with-object
     ; define cursor-unindent-chars
 
