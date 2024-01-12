@@ -67,6 +67,7 @@ Zeptoforth Documentation
    words/internal
    words/asm
    words/expose
+   extra/zeptoed
    extra/display
    extra/font
    extra/bitmap_utils

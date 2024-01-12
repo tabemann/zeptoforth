@@ -41,6 +41,13 @@
 <p>( – fs )</p>
 <p>Get the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 </section>
+<section id="init-simple-fat32">
+<h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code></h3>
+<p>( write-through sck-pin tx-pin rx-pin cs-pin spi-device – )</p>
+<p>Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card interface and FAT32 filesystem and, if successful, sets it as the current filesystem.</p>
+<p><em>sck-pin</em>, <em>tx-pin</em>, <em>rx-pin</em>, and <em>cs-pin</em> are the clock, transmit, receive, and chip select pins to use. <em>spi-device</em> is the SPI peripheral to use; it must match <em>sck-pin</em>, <em>tx-pin</em>, and <em>rx-pin</em>. <em>write-through</em> is whether to enable write-through; enabling write-through will result in greater data integrity in the case of failures, but slower performance. If write-through is not enabled, manually flushing at opportune moments is highly recommended.</p>
+<p>Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task’s RAM dictionary.</p>
+</section>
 <section id="load-file">
 <h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code></h3>
 <p>( file – )</p>

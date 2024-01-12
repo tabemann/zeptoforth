@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>RP2040 clock control words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="rp2040-clock-control-words">
+<h1>RP2040 clock control words</h1>
+<p>These words allow the RP2040 system clock (normally 125 MHz) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 data sheet.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following words are built into the kernel:</p>
+<section id="xosc-frequency">
+<h3><code class="docutils literal notranslate"><span class="pre">xosc-frequency</span></code></h3>
+<p>( – u )</p>
+<p>Returns the crystal oscillator frequency in Hz.  This is set at built time; currently only 12 MHz is supported.</p>
+</section>
+<section id="sysclk">
+<h3><code class="docutils literal notranslate"><span class="pre">sysclk</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz, and will be changed to the new value by <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code>.</p>
+</section>
+</section>
+<section id="clocks">
+<h2><code class="docutils literal notranslate"><span class="pre">clocks</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">clocks</span></code>:</p>
+<section id="set-sysclk">
+<h3><code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code></h3>
+<p>( refdiv fbdiv pdiv1 pdiv2 – )</p>
+<p>This changes the RP2040 system clock (“SYSCLK”) using the PLL parameters given.  The resulting system clock frequency is <code class="docutils literal notranslate"><span class="pre">xosc-frequency</span> <span class="pre">refdiv</span> <span class="pre">/</span> <span class="pre">fbdiv</span> <span class="pre">*</span> <span class="pre">pdiv1</span> <span class="pre">/</span> <span class="pre">pdiv2</span> <span class="pre">/</span></code>.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result.</p>
+<p>Since SYSCLK is the clock source for the UART, I2C, and SPI subsystems, if this word is used to change the SYSCLK frequency, those interfaces will run at a different rate than before.  The appropriate rate setting words (<code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code>, <code class="docutils literal notranslate"><span class="pre">i2c-clock!</span></code>, or <code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code>) should be called after any call to <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code> to reload the devices with the divider values needed for the updated system clock frequency.</p>
+</section>
+<section id="x-bad-refdiv">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-refdiv</span></code></h3>
+<p>( – )</p>
+<p>Exception for reference divider value out of range.</p>
+</section>
+<section id="x-bad-fbdiv">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-fbdiv</span></code></h3>
+<p>( – )</p>
+<p>Exception for VCO feedback divider value out of range.</p>
+</section>
+<section id="x-bad-postdiv1">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-postdiv1</span></code></h3>
+<p>( – )</p>
+<p>Exception for post divider 1 value out of range.</p>
+</section>
+<section id="x-bad-postdiv2">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-postdiv2</span></code></h3>
+<p>( – )</p>
+<p>Exception for post divider 2 value out of range.</p>
+</section>
+<section id="x-bad-refclk">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-refclk</span></code></h3>
+<p>( – )</p>
+<p>Exception for VCO refclock frequency out of range.</p>
+</section>
+<section id="x-bad-vcofreq">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-vcofreq</span></code></h3>
+<p>( – )</p>
+<p>Exception for VCO frequency out of range.</p>
+</section>
+<section id="x-bad-sysclk">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-sysclk</span></code></h3>
+<p>( – )</p>
+<p>Exception for sysclk frequency out of range.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
