@@ -6,6 +6,8 @@ Each buffer takes up the middle portion of the screen, i.e. excluding the top an
 
 Note that zeptoed requires a FAT32 filesystem to be registered via `fat32-tools::current-fs!` or `fat32-tools::init-simple-fat32`. In most cases the latter will be the easiest approach (e.g. one is using SDHC/SDXC cards containing only one partition and one is using only one FAT32 filesystem).
 
+zeptoed lives in `extra/common/zeptoed.fs` and is dependent upon `extra/common/dyn_buffer.fs`. Both can be loaded at once by loading `extra/common/zeptoed_all.fs` with `utils/codeload3.sh`, zeptocom.js, or e4thcom.
+
 ## Words
 
 ##### `zeptoed`
