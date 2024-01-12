@@ -70,6 +70,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 There is also support for loadable extras not included in any builds:
 
 * An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
+* A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.
 * An SNTP (Simple Network Time Protocol) implementation for use with zeptoIP
 * Bitmaps (in `extra/common/bitmap.fs`)
 * 16-bit pixmaps (in `extra/common/pixmap16.fs`)
