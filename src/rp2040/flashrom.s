@@ -1186,6 +1186,7 @@ _get_flash_buffer_value_4:
 
         @ Get the Pico unique ID
 	define_word "unique-id", visible_flag
+_unique_id:     
 	push_tos
 	ldr r0, =pico_uuid
 	ldr tos, [r0, #4]
