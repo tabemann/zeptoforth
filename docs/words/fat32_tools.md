@@ -28,6 +28,15 @@ Set the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-
 
 Get the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-fs>` in the `fat32` module.
 
+##### `init-simple-fat32`
+( write-through sck-pin tx-pin rx-pin cs-pin spi-device -- )
+
+Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card interface and FAT32 filesystem and, if successful, sets it as the current filesystem.
+
+*sck-pin*, *tx-pin*, *rx-pin*, and *cs-pin* are the clock, transmit, receive, and chip select pins to use. *spi-device* is the SPI peripheral to use; it must match *sck-pin*, *tx-pin*, and *rx-pin*. *write-through* is whether to enable write-through; enabling write-through will result in greater data integrity in the case of failures, but slower performance. If write-through is not enabled, manually flushing at opportune moments is highly recommended.
+
+Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task's RAM dictionary.
+
 ##### `load-file`
 ( file -- )
 
