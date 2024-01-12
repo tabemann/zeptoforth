@@ -60,6 +60,7 @@
 	.equ CMD_PAGE_PROGRAM, 0x02
         .equ CMD_ENABLE_RESET, 0x66
         .equ CMD_RESET, 0x99
+	.equ CMD_READ_UUID, 0x4B
 
 	@ QSPI Enable state
 	.equ QSPI_ENABLE_STATE, 0x02
@@ -182,6 +183,28 @@ _reset_flash:
 1:      ldr r2, [r0]
         cmp r3, r2
         bgt 1b
+	@ Read the unique ID
+        bl _force_flash_cs_low
+        ldr r0, =XIP_SSI_BASE
+        movs r1, #CMD_READ_UUID
+        str r1, [r0, #SSI_DR0_OFFSET]
+        bl _wait_ssi_busy
+	ldr r0, =XIP_SSI_BASE
+        ldr r1, [r0, #SSI_DR0_OFFSET]
+	movs r3, #12
+	rsbs r3, #0
+2:	ldr r0, =XIP_SSI_BASE
+	str r1, [r0, #SSI_DR0_OFFSET]
+	push {r3}
+        bl _wait_ssi_busy
+	pop {r3}
+	ldr r0, =XIP_SSI_BASE
+        ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r2, =pico_uuid+12
+	strb r1, [r2, r3]
+	adds r3, #1
+	bmi 2b
+        bl _force_flash_cs_high
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
@@ -1160,6 +1183,15 @@ _get_flash_buffer_value_4:
         ldr tos, [tos]
         bx lr
         end_inlined
-        
+
+        @ Get the Pico unique ID
+	define_word "unique-id", visible_flag
+	push_tos
+	ldr r0, =pico_uuid
+	ldr tos, [r0, #4]
+	push_tos
+	ldr tos, [r0, #8]
+	bx lr
+	end_inlined
+
 	.ltorg
-	
