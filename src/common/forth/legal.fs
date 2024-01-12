@@ -20,7 +20,7 @@
 
 \ Display the license message
 : license ( -- )
-  cr ." Copyright (c) 2019-2023 Travis Bemann"
+  cr ." Copyright (c) 2019-2024 Travis Bemann"
   cr ." Copyright (c) 2013, 2021 Matthias Koch"
   cr ." Copyright (c) 2021 Jan Bramkamp"
   cr ." Copyright (c) 2023 Rob Probin"
