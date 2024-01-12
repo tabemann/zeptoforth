@@ -307,6 +307,12 @@ begin-module zeptoed-internal
     \ Check whether any lines in a range are not indented
     method not-indented? ( cursor offset1 buffer -- not-indented? )
 
+    \ Is there a tab in the indentation?
+    method cursor-tab-in-indent? ( cursor buffer -- tab-in-indent? )
+
+    \ Get the number of indentation bytes
+    method cursor-line-indent-bytes ( cursor buffer -- indent-bytes )
+    
     \ Get a line's indentation
     method cursor-line-indent ( cursor buffer -- indent )
 
@@ -316,10 +322,6 @@ begin-module zeptoed-internal
     \ Get the number of continguous space characters at a cursor
     method cursor-space-chars ( cursor buffer -- chars )
     
-    \ Get the number of space or tab characters to delete and the number of
-    \ space characters to insert when unindenting
-    method cursor-unindent-chars ( cursor buffer -- insert-count delete-count )
-
     \ Get whether two cursors share the same preceding newline
     method cursors-before-same-newline? ( cursor0 cursor1 buffer -- same? )
 
@@ -1035,6 +1037,35 @@ begin-module zeptoed-internal
       ;] with-object
     ; define not-indented?
 
+    \ Is there a tab in the indentation?
+    :noname ( cursor buffer -- tab-in-indent? )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor cursor copy-cursor
+        begin cursor offset@ buffer buffer-len@ < while
+          cursor buffer cursor-at { byte }
+          byte tab = if
+            true exit
+          else
+            byte bl <> if
+              false exit
+            then
+          then
+          1 cursor adjust-offset
+        repeat
+        false
+      ;] with-object
+    ; define cursor-tab-in-indent?
+
+    \ Get the number of indentation bytes
+    :noname ( cursor buffer -- indent-bytes )
+      buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
+        orig-cursor cursor copy-cursor
+        cursor offset@ { offset0 }
+        [: dup tab <> swap bl <> and ;] cursor find-next
+        cursor offset@ offset0 -
+      ;] with-object
+    ; define cursor-line-indent-bytes
+
     \ Get a line's indentation
     :noname ( cursor buffer -- indent )
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
@@ -1084,43 +1115,6 @@ begin-module zeptoed-internal
         count
       ;] with-object
     ; define cursor-space-chars
-
-    \ Get the number of space or tab characters to delete and the number of
-    \ space characters to insert when unindenting
-    :noname ( cursor buffer -- insert-count delete-count )
-      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
-        orig-cursor cursor copy-cursor
-        zeptoed-indent-size { chars-left }
-        0 { chars-traversed }
-        0 0 { insert-count delete-count }
-        begin chars-left 0> while
-          cursor buffer cursor-at { bytes }
-          insert-count 0> if
-            chars-left insert-count min
-            dup +to chars-traversed
-            negate dup +to insert-count +to chars-left
-          else
-            cursor buffer cursor-space-chars chars-left min { chars }
-            chars +to chars-traversed
-            chars +to delete-count
-            chars negate +to chars-left
-            chars cursor adjust-offset
-            chars-left 0> if
-              cursor buffer cursor-at { byte }
-              byte tab = if
-                1 +to delete-count
-                zeptoed-tab-size chars-traversed zeptoed-tab-size umod -
-                +to insert-count
-                1 cursor adjust-offset
-              else
-                0 to chars-left
-              then
-            then
-          then
-        repeat
-        insert-count delete-count
-      ;] with-object
-    ; define cursor-unindent-chars
 
     \ Get whether two cursors share the same preceding newline
     :noname ( cursor0 cursor1 buffer -- same? )
@@ -2117,6 +2111,7 @@ begin-module zeptoed-internal
           then
           begin cursor offset@ offset1 < while
             zeptoed-indent-size +to offset1
+            [: dup tab <> swap bl <> and ;] cursor find-next
             zeptoed-indent-size 0 ?do
               bl { W^ data }
               data 1 cursor insert-data
@@ -2148,6 +2143,7 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
+          [: dup tab <> swap bl <> and ;] cursor find-next
           zeptoed-indent-size 0 ?do
             bl { W^ data }
             data 1 cursor insert-data
@@ -2175,14 +2171,22 @@ begin-module zeptoed-internal
           cursor offset1 buffer not-indented? if exit then
           false { first }
           begin cursor offset@ offset1 < while
-            cursor buffer cursor-unindent-chars { insert-count delete-count }
-            cursor offset@ dup delete-count + over buffer add-insert-undo
-            delete-count cursor adjust-offset
+            cursor buffer cursor-tab-in-indent? if
+              cursor buffer cursor-line-indent-bytes
+              cursor buffer cursor-line-indent zeptoed-indent-size - 0 max
+            else
+              cursor buffer cursor-line-indent-bytes zeptoed-indent-size min 0
+            then
+            { delete-count insert-count }
+            [: dup tab <> swap bl <> and ;] cursor find-next
+            cursor offset@ dup delete-count - tuck buffer add-insert-undo
             delete-count cursor delete-data
             insert-count 0 ?do
               bl { W^ data } data 1 cursor insert-data
             loop
-            insert-count cursor offset@ buffer add-delete-undo
+            insert-count 0> if
+              insert-count cursor offset@ buffer add-delete-undo
+            then
             [: newline = ;] cursor find-next
             1 cursor adjust-offset
             first not if
@@ -2214,14 +2218,22 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
-          cursor buffer cursor-unindent-chars { insert-count delete-count }
-          cursor offset@ dup delete-count + over buffer add-insert-undo
-          delete-count cursor adjust-offset
+          cursor buffer cursor-tab-in-indent? if
+            cursor buffer cursor-line-indent-bytes
+            cursor buffer cursor-line-indent zeptoed-indent-size - 0 max
+          else
+            cursor buffer cursor-line-indent-bytes zeptoed-indent-size min 0
+          then
+          { delete-count insert-count }
+          [: dup tab <> swap bl <> and ;] cursor find-next
+          cursor offset@ dup delete-count - tuck buffer add-insert-undo
           delete-count cursor delete-data
           insert-count 0 ?do
             bl { W^ data } data 1 cursor insert-data
           loop
-          insert-count cursor offset@ buffer add-delete-undo
+          insert-count 0> if
+            insert-count cursor offset@ buffer add-delete-undo
+          then
           insert-count delete-count - buffer buffer-edit-cursor adjust-offset
           buffer dirty-buffer
         ;] with-object
