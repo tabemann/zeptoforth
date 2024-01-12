@@ -48,11 +48,15 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-Meta-Tab: Insert a single tab character (rather than indent).
 * Backspace: If there is no selection, delete backward (left) one character; if there is a selection, delete the current selection.
 * Delete: If there is no selection, delete forward (right) one character; if there is a selection, delete the current selection.
+* Left, Control-B: Move the cursor backward (left) one character.
+* Right, Control-F: Move the cursor forward (right) one character.
+* Up: Move the cursor up by one row.
+* Down: Move the cursor down by one row.
+* Page Up: Move the cursor up by roughly one screen.
+* Page Down: Move the cursor down by roughly one screen.
 * Control-Space: Toggle selection; if there previously was no selection, the selection point is set to the current position of the cursor.
 * Control-A: Move the cursor to the start of the line; note that under many terminal programs (GNU Screen, picocom) Control-A is captured, and generating a Control-A requires more keys to be entered (e.g. entering Control-A again under picocom).
 * Control-E: Move the cursor to the end of the line.
-* Control-F: Move the cursor forward (right) one character.
-* Control-B: Move the cursor backward (left) one character.
 * Control-N: Go to the next buffer.
 * Control-P: Go to the previous buffer.
 * Control-O: Open a buffer with the specified file path; if a file with that path exists it is loaded, otherwise it is created.
