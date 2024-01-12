@@ -503,7 +503,7 @@ Get whether compilation is to flash
 ##### `begin-critical`
 ( -- )
 
-Begin a critical section, within which context switches will not take place; note that critical sections do nest.
+Begin a critical section, within which context switches will not take place on the current core; note that critical sections do nest.
 
 ##### `end-critical`
 ( -- )
@@ -513,7 +513,7 @@ End a critical section; if a context switch would have occurred within the criti
 ##### `critical`
 ( xt -- )
 
-Execute code within a critical section, properly handling exceptions.
+Execute code within a critical section; if an exception was raised within *xt* it is re-raised afterwards.
 
 ##### `with-allot`
 ( bytes xt -- ) ( xt: addr -- )

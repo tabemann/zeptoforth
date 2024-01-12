@@ -200,6 +200,11 @@ Do a blocking push onto a FIFO for inter-core communication; if *core* is outsid
 
 Launch an auxiliary core, i.e. a core *core* other than core 0 and execute *entry-xt* on it with the return stack pointer *rstack-ptr*, the data stack pointer *stack-ptr*, and the vector table base *vector-table*. Note that it is not recommended that this be used by the user, rather the user should use `spawn-aux-main` in `src/common/forth/task.fs`.
 
+##### `with-hold-core`
+( xt -- )
+
+Hold the other core, execute the provided *xt*, release the other core even if an exception had been raised, and if an exception had been raised re-raise it.
+
 In `src/common/forth/multicore.fs`, in `multicore` for all platforms other than rp2040, exists:
 
 ##### `spinlock-count`
@@ -296,4 +301,9 @@ Placeholder for attempting to send data on a FIFO and confirming that the same d
 ( xt stack-ptr rstack-ptr core -- )
 
 Placeholder for attempting to launch an auxiliary core; this will always raise `x-core-out-of-range`.
+
+##### `with-hold-core`
+( xt -- )
+
+This simply executes the provided *xt*.
 

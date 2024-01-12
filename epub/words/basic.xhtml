@@ -517,7 +517,7 @@ available, so as to enable any source file to call a preceding init</p>
 <section id="begin-critical">
 <h3><code class="docutils literal notranslate"><span class="pre">begin-critical</span></code></h3>
 <p>( – )</p>
-<p>Begin a critical section, within which context switches will not take place; note that critical sections do nest.</p>
+<p>Begin a critical section, within which context switches will not take place on the current core; note that critical sections do nest.</p>
 </section>
 <section id="end-critical">
 <h3><code class="docutils literal notranslate"><span class="pre">end-critical</span></code></h3>
@@ -527,7 +527,7 @@ available, so as to enable any source file to call a preceding init</p>
 <section id="critical">
 <h3><code class="docutils literal notranslate"><span class="pre">critical</span></code></h3>
 <p>( xt – )</p>
-<p>Execute code within a critical section, properly handling exceptions.</p>
+<p>Execute code within a critical section; if an exception was raised within <em>xt</em> it is re-raised afterwards.</p>
 </section>
 <section id="with-allot">
 <h3><code class="docutils literal notranslate"><span class="pre">with-allot</span></code></h3>

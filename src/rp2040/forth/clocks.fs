@@ -28,6 +28,8 @@ compile-to-flash
 
 begin-module clocks
 
+  multicore import
+  
   \ Exceptions
   : x-bad-refdiv ( -- ) ." reference divider value out of range" cr ;
   : x-bad-fbdiv ( -- ) ." VCO feedback divider value out of range" cr ;
@@ -127,16 +129,16 @@ begin-module clocks
 : set-sysclk ( refdiv fbdiv pdiv1 pdiv2 -- )
   2over 2over check-pll
   \ Now do the clock/pll dance.  This is a critical section.
-  [: { refdiv fbdiv pdiv1 pdiv2 freq }
-    internal::hold-core
-    disable-int
-    freq sysclk !                   \ save resulting new sysclk frequency
-    SYS_CLK_REF sysclk-mainsrc \ Switch sysclk to refclk (12 MHz)
-    $e0 [ CLK_SYS_CTRL MOD_CLR + ] literal !  \ Set aux src to sys_pll (zero)
-    refdiv fbdiv pdiv1 pdiv2 sysclk-pll                 \ Set the PLL
-    SYS_CLKSRC_CLK_SYS_AUX sysclk-mainsrc \ Switch sysclk to PLL
-    enable-int
-    internal::release-core
+  [:
+    [: { refdiv fbdiv pdiv1 pdiv2 freq }
+      disable-int
+      freq sysclk !                   \ save resulting new sysclk frequency
+      SYS_CLK_REF sysclk-mainsrc \ Switch sysclk to refclk (12 MHz)
+      $e0 [ CLK_SYS_CTRL MOD_CLR + ] literal !  \ Set aux src to sys_pll (zero)
+      refdiv fbdiv pdiv1 pdiv2 sysclk-pll                 \ Set the PLL
+      SYS_CLKSRC_CLK_SYS_AUX sysclk-mainsrc \ Switch sysclk to PLL
+      enable-int
+    ;] with-hold-core
   ;] critical
 ;
 

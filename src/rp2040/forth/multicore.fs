@@ -537,6 +537,11 @@ begin-module multicore
     1 = averts x-core-out-of-range
   ;
 
+  \ Execute code with a core held
+  : with-hold-core ( xt -- )
+    hold-core try release-core ?raise
+  ;
+  
 end-module> import
 
 \ Initialize

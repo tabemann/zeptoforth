@@ -538,7 +538,7 @@ available, so as to enable any source file to call a preceding init</p>
 <section id="begin-critical">
 <h3><code class="docutils literal notranslate"><span class="pre">begin-critical</span></code><a class="headerlink" href="#begin-critical" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
-<p>Begin a critical section, within which context switches will not take place; note that critical sections do nest.</p>
+<p>Begin a critical section, within which context switches will not take place on the current core; note that critical sections do nest.</p>
 </section>
 <section id="end-critical">
 <h3><code class="docutils literal notranslate"><span class="pre">end-critical</span></code><a class="headerlink" href="#end-critical" title="Permalink to this heading">¶</a></h3>
@@ -548,7 +548,7 @@ available, so as to enable any source file to call a preceding init</p>
 <section id="critical">
 <h3><code class="docutils literal notranslate"><span class="pre">critical</span></code><a class="headerlink" href="#critical" title="Permalink to this heading">¶</a></h3>
 <p>( xt – )</p>
-<p>Execute code within a critical section, properly handling exceptions.</p>
+<p>Execute code within a critical section; if an exception was raised within <em>xt</em> it is re-raised afterwards.</p>
 </section>
 <section id="with-allot">
 <h3><code class="docutils literal notranslate"><span class="pre">with-allot</span></code><a class="headerlink" href="#with-allot" title="Permalink to this heading">¶</a></h3>
@@ -2129,6 +2129,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -2138,6 +2139,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>

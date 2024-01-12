@@ -229,6 +229,11 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#launch-aux-core" title="Permalink to this heading">¶</a></h3>
 <p>( vector-table stack-ptr rstack-ptr entry-xt core – )</p>
 <p>Launch an auxiliary core, i.e. a core <em>core</em> other than core 0 and execute <em>entry-xt</em> on it with the return stack pointer <em>rstack-ptr</em>, the data stack pointer <em>stack-ptr</em>, and the vector table base <em>vector-table</em>. Note that it is not recommended that this be used by the user, rather the user should use <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>.</p>
+</section>
+<section id="with-hold-core">
+<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#with-hold-core" title="Permalink to this heading">¶</a></h3>
+<p>( xt – )</p>
+<p>Hold the other core, execute the provided <em>xt</em>, release the other core even if an exception had been raised, and if an exception had been raised re-raise it.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> for all platforms other than rp2040, exists:</p>
 </section>
 <section id="id1">
@@ -326,6 +331,11 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <p>( xt stack-ptr rstack-ptr core – )</p>
 <p>Placeholder for attempting to launch an auxiliary core; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
+<section id="id18">
+<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
+<p>( xt – )</p>
+<p>This simply executes the provided <em>xt</em>.</p>
+</section>
 </section>
 </section>
 
@@ -399,6 +409,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -408,9 +419,11 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

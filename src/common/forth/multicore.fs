@@ -164,6 +164,9 @@ begin-module multicore
   \ Reset an auxiliary core
   : reset-aux-core ( core -- ) ['] x-core-out-of-range ?raise ;
 
+  \ Placeholder for executing code with cores held
+  : with-hold-core ( xt -- ) execute ;
+  
 end-module
 
 \ Reboot
