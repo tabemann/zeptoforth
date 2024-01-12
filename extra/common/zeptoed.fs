@@ -2168,6 +2168,7 @@ begin-module zeptoed-internal
           cursor offset@ buffer buffer-left-bound @ < if
             buffer buffer-left-bound @ cursor go-to-offset
           then
+          cursor offset@ { line-offset }
           cursor offset1 buffer not-indented? if exit then
           false { first }
           begin cursor offset@ offset1 < while
@@ -2192,12 +2193,20 @@ begin-module zeptoed-internal
             first not if
               true to first
               offset0 select-offset = if
-                insert-count delete-count -
-                buffer buffer-select-cursor adjust-offset
+                offset0 insert-count + delete-count - line-offset > if
+                  insert-count delete-count -
+                  buffer buffer-select-cursor adjust-offset
+                else
+                  line-offset buffer buffer-select-cursor go-to-offset
+                then
               then
               offset0 edit-offset = if
-                insert-count delete-count -
-                buffer buffer-edit-cursor adjust-offset
+                offset0 insert-count + delete-count - line-offset > if
+                  insert-count delete-count -
+                  buffer buffer-edit-cursor adjust-offset
+                else
+                  line-offset buffer buffer-edit-cursor go-to-offset
+                then
               then
             then
             insert-count delete-count - +to offset1
