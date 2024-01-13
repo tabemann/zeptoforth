@@ -152,6 +152,9 @@ begin-module sd
 
     \ Sector size
     512 constant sector-size
+
+    \ Dummy iterations
+    12 constant dummy-iters
     
   end-module> import
     
@@ -468,10 +471,9 @@ begin-module sd
     ; define dummy-byte
     
     :noname { sd-card -- }
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      dummy-iters 0 ?do
+        dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      loop
     ; define dummy-bytes
     
     :noname { argument command sd-card -- response }
