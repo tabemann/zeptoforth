@@ -1341,14 +1341,14 @@ commit-flash
 \ Safely emit a character
 : safe-emit ( b -- )
   begin-critical
-  swap serial-emit
+  serial-emit
   end-critical
 ;
 
 \ Safely type a string
 : safe-type ( b-addr bytes -- )
   begin-critical
-  -rot serial-type
+  serial-type
   end-critical
 ;
 
