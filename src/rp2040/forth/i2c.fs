@@ -574,71 +574,71 @@ begin-module i2c
     
     \ Handle TX_EMPTY
     : handle-tx-empty { buf -- }
-      buf i2c-mode c@ mode-send = if [char] k internal::serial-emit depth.
+      buf i2c-mode c@ mode-send = if \ [char] k internal::serial-emit depth.
         begin
           buf i2c-data-offset @
-          buf i2c-data-size @ < if [char] l internal::serial-emit depth.
-            buf i2c-addr @ IC_INTR_STAT @ RX_DONE and if [char] m internal::serial-emit depth.
+          buf i2c-data-size @ < if \ [char] l internal::serial-emit depth.
+            buf i2c-addr @ IC_INTR_STAT @ RX_DONE and if \ [char] m internal::serial-emit depth.
               mode-done-send buf i2c-mode c!
               buf i2c-addr @ IC_CLR_RX_DONE @ drop
               true
             else
-              buf i2c-addr @ IC_INTR_STAT @ TX_ABRT and if [char] n internal::serial-emit depth.
+              buf i2c-addr @ IC_INTR_STAT @ TX_ABRT and if \ [char] n internal::serial-emit depth.
                 buf handle-tx-abrt
                 true
-              else [char] o internal::serial-emit depth.
+              else \ [char] o internal::serial-emit depth.
                 buf i2c-addr @ IC_STATUS @ TFE and
-                if [char] p internal::serial-emit depth.
+                if \ [char] p internal::serial-emit depth.
                   buf i2c-data-offset @ buf i2c-data-addr @ + c@ { command }
-                  buf i2c-slave c@ 0= if [char] q internal::serial-emit depth.
-                    buf i2c-data-offset @ 0= if [char] r internal::serial-emit depth.
+                  buf i2c-slave c@ 0= if \ [char] q internal::serial-emit depth.
+                    buf i2c-data-offset @ 0= if \ [char] r internal::serial-emit depth.
                       buf i2c-restart c@ if RESTART command or to command then
                     then
                     buf i2c-data-offset @
                     buf i2c-data-size @ 2 - =
-                    buf i2c-stop c@ 0<> and if [char] s internal::serial-emit depth.
+                    buf i2c-stop c@ 0<> and if \ [char] s internal::serial-emit depth.
                       $FF buf i2c-prev-stop c!
                       STOP_BIT command or to command
                     then
                   then
                   command buf i2c-addr @ IC_DATA_CMD !
-                  1 buf i2c-data-offset +! [char] t internal::serial-emit depth.
+                  1 buf i2c-data-offset +! \ [char] t internal::serial-emit depth.
                   false
                 else
                   true
                 then
               then
             then
-          else [char] u internal::serial-emit depth.
+          else \ [char] u internal::serial-emit depth.
             mode-done-send buf i2c-mode c!
             true
           then
         until
       else
-        [char] v internal::serial-emit  depth.
+        \ [char] v internal::serial-emit  depth.
         buf restore-int-mask
       then
     ;
 
     \ Handle RX_FULL
     : handle-rx-full { buf -- }
-      buf i2c-mode c@ mode-recv = if \ [char] a internal::serial-emit depth.
+      buf i2c-mode c@ mode-recv = if [char] a internal::serial-emit depth.
         buf i2c-addr @ IC_INTR_STAT @ STOP_DET and if
-          buf i2c-prev-stop c@ 0= if \ [char] b internal::serial-emit depth.
+          buf i2c-prev-stop c@ 0= if [char] b internal::serial-emit depth.
             $FF buf i2c-stop-det c!
-          else \ [char] c internal::serial-emit depth.
+          else [char] c internal::serial-emit depth.
             $00 buf i2c-prev-stop c!
           then
           buf i2c-addr @ IC_CLR_STOP_DET @ drop
         then
         buf i2c-data-size @ buf i2c-data-offset @ -
         buf i2c-addr @ IC_RXFLR @ $1F and min { bytes }
-        buf i2c-data-offset @ bytes + buf i2c-data-offset @ ?do \ [char] d internal::serial-emit depth.
+        buf i2c-data-offset @ bytes + buf i2c-data-offset @ ?do [char] d internal::serial-emit depth.
           buf i2c-addr @ IC_DATA_CMD @ $FF and buf i2c-data-addr @ i + c!
           buf i2c-slave c@ 0=
-          i buf i2c-data-size @ 1- < and if \ [char] e internal::serial-emit depth.
+          i buf i2c-data-size @ 1- < and if [char] e internal::serial-emit depth.
             CMD { command }
-            buf i2c-stop c@ 0<> buf i2c-data-size @ 2 - i = and if \ [char] g internal::serial-emit depth.
+            buf i2c-stop c@ 0<> buf i2c-data-size @ 2 - i = and if [char] g internal::serial-emit depth.
               $FF buf i2c-prev-stop c!
               STOP_BIT command or to command
             then
@@ -647,19 +647,19 @@ begin-module i2c
         loop
         bytes buf i2c-data-offset +!
         buf i2c-stop-det c@ 0<>
-        buf i2c-addr @ IC_RXFLR @ $1F and 0= and if \ [char] h internal::serial-emit depth.
+        buf i2c-addr @ IC_RXFLR @ $1F and 0= and if [char] h internal::serial-emit depth.
           mode-not-active buf i2c-mode c!
           buf restore-int-mask
           buf signal-final
         else
-          buf i2c-data-offset @ buf i2c-data-size @ = if \ [char] i internal::serial-emit depth.
+          buf i2c-data-offset @ buf i2c-data-size @ = if [char] i internal::serial-emit depth.
             mode-not-active buf i2c-mode c!
             buf restore-int-mask
             buf signal-done
           then
         then
       else
-        buf i2c-mode c@ mode-not-active = buf i2c-slave c@ 0<> and if \ [char] j internal::serial-emit depth.
+        buf i2c-mode c@ mode-not-active = buf i2c-slave c@ 0<> and if [char] j internal::serial-emit depth.
           master-send buf i2c-master-mode c!
           send-pending buf i2c-pending c!
           buf restore-int-mask
@@ -707,8 +707,6 @@ begin-module i2c
           buf signal-final
         then
       then
-
-      drop
     ;
     
     \ Handle ACTIVITY
