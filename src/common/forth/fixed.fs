@@ -101,11 +101,11 @@ continue-module internal
   
   \ Calculate whether a square root is close enough
   : sqrt-close-enough ( f1 f2 -- flag )
-    4dup d- 2rot dabs 2rot dabs dmax f/ dabs 2 0 d<
+    4dup d- 2rot dabs 2rot dabs dmax f/ dabs 4 0 d<
   ;
   
   \ Calculate a better square root guess
-  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
+  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 0 2 f/ ;
 
   commit-flash
   
@@ -113,7 +113,7 @@ end-module
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 )
-  2dup 2 0 d/
+  2dup 0 2 f/
   begin
     4dup f/ 2over sqrt-close-enough if
       2nip true
