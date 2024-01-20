@@ -105,7 +105,7 @@ continue-module internal
   ;
   
   \ Calculate a better square root guess
-  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
+  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 0 2 f/ ;
 
   commit-flash
   
@@ -113,12 +113,17 @@ end-module
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 )
-  2dup 2 0 d/
+  64 >r
+  2dup 0 2 f/
   begin
-    4dup f/ 2over sqrt-close-enough if
-      2nip true
+    r@ 0> if
+      4dup f/ 2over sqrt-close-enough if
+        rdrop 2nip true
+      else
+        r> 1- >r 4dup sqrt-better-guess 2nip false
+      then
     else
-      4dup sqrt-better-guess 2nip false
+      rdrop 2nip true
     then
   until
 ;
