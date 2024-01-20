@@ -126,7 +126,7 @@ begin-module raytracing-fun
   
 
   \ Fire a ray
-  : ray ( D: x D: y D: z D: u D: v D: w D: q -- D: color )
+  : ray ( D: x D: y D: z D: u D: v D: w D: q -- color )
     ray-data-size [: { data }
       data ray-q 2! data ray-w 2! data ray-v 2! data ray-u 2!
       data ray-z 2! data ray-y 2! data ray-x 2!
