@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -1172,78 +1172,71 @@ _unknown_word:
 	@@ Store a byte
 	define_word "c!", visible_flag | fold_flag
 _store_1:
-	ldr r0, [dp]
-	strb r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        strb r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a halfword
 	define_word "h!", visible_flag | fold_flag
 _store_2:
-	ldr r0, [dp]
-	strh r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        strh r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a word
 	define_word "!", visible_flag | fold_flag
 _store_4:
-	ldr r0, [dp]
-	str r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        str r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a doubleword
 	define_word "2!", visible_flag
 _store_8:
-	movs r0, tos
-	pull_tos
-	str tos, [r0]
-	pull_tos
-	str tos, [r0, #4]
-	pull_tos
+        ldmia dp!, {r0}
+        str r0, [tos]
+        ldmia dp!, {r0}
+        str r0, [tos, #4]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a byte from an address, add a value, and write it back
 	define_word "c+!", visible_flag
 _add_store_1:
-	ldrb r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	strb r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        adds r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a halfword from an address, add a value, and write it back
 	define_word "h+!", visible_flag
 _add_store_2:	
-	ldrh r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	strh r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        adds r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a word from an address, add a value, and write it back
 	define_word "+!", visible_flag
 _add_store_4:	
-	ldr r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	str r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        adds r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
