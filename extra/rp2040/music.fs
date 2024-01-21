@@ -336,6 +336,7 @@ begin-module music
   : .2   ~mpm 2000 / ntr note ;
   : .4   ~mpm 4000 / ntr note ;
   : .8   ~mpm 8000 / ntr note ;
+  : .12   ~mpm 12000 / ntr NOTE ;
   : .16   ~mpm 16000 / ntr note ;
   : .32   ~mpm 32000 / ntr note ;
   : .64   ~mpm 64000 / ntr note ;
@@ -352,6 +353,7 @@ begin-module music
   : ,2   ~mpm 2000 / rest drop ;
   : ,4   ~mpm 4000 / rest drop ;
   : ,8   ~mpm 8000 / rest drop ;
+  : ,12   ~mpm 12000 / rest drop ;
   : ,16   ~mpm 16000 / rest drop ;
   : ,32   ~mpm 32000 / rest drop ;
   : ,64   ~mpm 64000 / rest drop ;
