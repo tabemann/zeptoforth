@@ -598,15 +598,14 @@ begin-module i2c
                   buf handle-tx-abrt
                   true
                 else \ [char] o internal::serial-emit depth.
-                  buf i2c-addr @ IC_STATUS @ TFE and
-                  if \ [char] p internal::serial-emit depth.
+                  buf i2c-addr @ IC_STATUS @ TFE and if \ [char] p internal::serial-emit depth.
                     buf i2c-data-offset @ buf i2c-data-addr @ + c@ { command }
                     buf i2c-slave c@ 0= if \ [char] q internal::serial-emit depth.
                       buf i2c-data-offset @ 0= if \ [char] r internal::serial-emit depth.
                         buf i2c-restart c@ if RESTART command or to command then
                       then
                       buf i2c-data-offset @
-                      buf i2c-data-size @ 2 - =
+                      buf i2c-data-size @ 1- =
                       buf i2c-stop c@ 0<> and if \ [char] s internal::serial-emit depth.
                         $FF buf i2c-prev-stop c!
                         STOP_BIT command or to command
