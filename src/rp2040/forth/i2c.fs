@@ -578,8 +578,9 @@ begin-module i2c
         begin
           buf i2c-data-offset @
           buf i2c-data-size @ < if \ [char] l internal::serial-emit depth.
-            buf i2c-addr @ IC_INTR_STAT @ RESTART_DET and if
+            buf i2c-addr @ IC_RAW_INTR_STAT @ RESTART_DET and if
               buf i2c-addr @ IC_CLR_RESTART_DET @ drop
+              buf i2c-addr @ IC_CLR_STOP_DET @ drop
               buf i2c-addr @ IC_CLR_RX_DONE @ drop
               buf i2c-data-offset @ 0= if
                 false
@@ -642,6 +643,13 @@ begin-module i2c
     \ Handle RX_FULL
     : handle-rx-full { buf -- }
       buf i2c-mode c@ mode-recv = if \ [char] a internal::serial-emit depth.
+        buf i2c-addr @ IC_RAW_INTR_STAT @ RESTART_DET and if
+          buf i2c-addr @ IC_CLR_RESTART_DET @ drop
+          buf i2c-addr @ IC_CLR_STOP_DET @ drop
+          buf i2c-data-offset @ 0<> if
+            $FF buf i2c-stop-det c!
+          then
+        then
         buf i2c-addr @ IC_INTR_STAT @ STOP_DET and if
           buf i2c-prev-stop c@ 0= if \ [char] b internal::serial-emit depth.
             $FF buf i2c-stop-det c!
