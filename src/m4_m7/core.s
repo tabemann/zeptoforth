@@ -1257,6 +1257,28 @@ _bit:	movs r0, tos
 	bx lr
 	end_inlined
 
+	@@ Bit set a byte
+	define_word "cbis!", visible_flag | inlined_flag
+_bit_set_1:
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        orrs r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
+	bx lr
+	end_inlined
+
+	@@ Bit set a halfword
+	define_word "hbis!", visible_flag | inlined_flag
+_bit_set_2:
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        orrs r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
+	bx lr
+	end_inlined
+
 	@@ Bit set a word
 	define_word "bis!", visible_flag | inlined_flag
 _bit_set_4:
