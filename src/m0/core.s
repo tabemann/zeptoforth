@@ -1264,112 +1264,103 @@ _bit:	movs r0, tos
 	end_inlined
 
 	@@ Bit set a byte
-	define_word "cbis!", visible_flag
+	define_word "cbis!", visible_flag | inlined_flag
 _bit_set_1:
-	movs r0, tos
-	pull_tos
-	ldrb r1, [r0]
-	orrs r1, tos
-	strb r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        orrs r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit set a halfword
-	define_word "hbis!", visible_flag
+	define_word "hbis!", visible_flag | inlined_flag
 _bit_set_2:
-	movs r0, tos
-	pull_tos
-	ldrh r1, [r0]
-	orrs r1, tos
-	strh r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        orrs r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 	
 	@@ Bit set a word
-	define_word "bis!", visible_flag
+	define_word "bis!", visible_flag | inlined_flag
 _bit_set_4:
-	movs r0, tos
-	pull_tos
-	ldr r1, [r0]
-	orrs r1, tos
-	str r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        orrs r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit clear a byte
-	define_word "cbic!", visible_flag | fold_flag
+	define_word "cbic!", visible_flag | inlined_flag
 _bit_clear_1:
-	movs r0, tos
-	pull_tos
-	ldrb r1, [r0]
-	bics r1, tos
-	strb r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        bics r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit clear a halfword
-	define_word "hbic!", visible_flag | fold_flag
+	define_word "hbic!", visible_flag | inlined_flag
 _bit_clear_2:
-	movs r0, tos
-	pull_tos
-	ldrh r1, [r0]
-	bics r1, tos
-	strh r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        bics r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	.ltorg
 	
 	@@ Bit clear a word
-	define_word "bic!", visible_flag | fold_flag
+	define_word "bic!", visible_flag | inlined_flag
 _bit_clear_4:
-	movs r0, tos
-	pull_tos
-	ldr r1, [r0]
-	bics r1, tos
-	str r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        bics r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
         @ Load, exclusive-or, and store a byte
-        define_word "cxor!", visible_flag
+        define_word "cxor!", visible_flag | inlined_flag
 _xor_set_1:
-        movs r0, tos
-        pull_tos
-        ldrb r1, [r0]
-        eors r1, tos
-        strb r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        eors r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
 
         @ Load, exclusive-or, and store a halfword
-        define_word "hxor!", visible_flag
+        define_word "hxor!", visible_flag | inlined_flag
 _xor_set_2:
-        movs r0, tos
-        pull_tos
-        ldrh r1, [r0]
-        eors r1, tos
-        strh r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        eors r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
         
         @ Load, exclusive-or, and store a word
-        define_word "xor!", visible_flag
+        define_word "xor!", visible_flag | inlined_flag
 _xor_set_4:
-        movs r0, tos
-        pull_tos
-        ldr r1, [r0]
-        eors r1, tos
-        str r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        eors r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
 
