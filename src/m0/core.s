@@ -1450,8 +1450,6 @@ _comma_1:
 	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
-	movs r2, #0xFF
-	ands tos, r2
 	strb tos, [r1]
 	adds r1, #1
 	str r1, [r0]
@@ -1470,8 +1468,6 @@ _comma_2:
 	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
-	ldr r2, =0xFFFF
-	ands tos, r2
 	strh tos, [r1]
 	adds r1, #2
 	str r1, [r0]
