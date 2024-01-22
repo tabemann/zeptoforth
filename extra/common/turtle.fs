@@ -117,7 +117,7 @@ begin-module turtle
     turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
     turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
     turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
-    turtle-angle 0,5 f* { D: right-angle }
+    turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
     right-angle cos { D: right-angle-cos }
     right-angle sin { D: right-angle-sin }
     right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
@@ -212,5 +212,15 @@ begin-module turtle
 
   \ Set pen size
   : setpensize { pixels -- } ;
+
+  \ Clear the display
+  : clear ( -- )
+    inited? not if true to inited? init-turtle then
+    erase-turtle
+    my-display clear-pixmap
+    my-save clear-pixmap
+    draw-turtle
+    my-display update-display
+  ;
 
 end-module
