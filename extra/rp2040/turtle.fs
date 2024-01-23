@@ -25,111 +25,115 @@ begin-module turtle
   pixmap16-utils import
   st7735s import
 
-  \ Screen dimensions
-  160 constant screen-width
-  80 constant screen-height
+  begin-module turtle-internal
 
-  \ Turtle dimensions
-  8 constant turtle-width
-  8 constant turtle-height
+    \ Screen dimensions
+    160 constant screen-width
+    80 constant screen-height
 
-  \ Save dimensions
-  16 constant save-width
-  16 constant save-height
+    \ Turtle dimensions
+    8 constant turtle-width
+    8 constant turtle-height
 
-  \ SPI device
-  1 constant my-device
+    \ Save dimensions
+    16 constant save-width
+    16 constant save-height
 
-  \ Pins
-  11 constant lcd-din 
-  10 constant lcd-clk
-  8 constant lcd-dc
-  12 constant lcd-rst
-  9 constant lcd-cs
-  25 constant lcd-bl
+    \ SPI device
+    1 constant my-device
 
-  \ Buffer
-  screen-width screen-height pixmap16-buf-size aligned-buffer: my-buffer
+    \ Pins
+    11 constant lcd-din 
+    10 constant lcd-clk
+    8 constant lcd-dc
+    12 constant lcd-rst
+    9 constant lcd-cs
+    25 constant lcd-bl
 
-  \ Save buffer
-  save-width save-height pixmap16-buf-size aligned-buffer: my-save-buffer
-  
-  \ Display
-  <st7735s> class-size buffer: my-display
+    \ Buffer
+    screen-width screen-height pixmap16-buf-size aligned-buffer: my-buffer
 
-  \ Save pixmap
-  <pixmap16> class-size buffer: my-save
+    \ Save buffer
+    save-width save-height pixmap16-buf-size aligned-buffer: my-save-buffer
+    
+    \ Display
+    <st7735s> class-size buffer: my-display
 
-  \ Is the pen down
-  true value pen-down?
+    \ Save pixmap
+    <pixmap16> class-size buffer: my-save
 
-  \ Is the turtle visible
-  true value show-turtle?
+    \ Is the pen down
+    true value pen-down?
 
-  \ The turtle position
-  screen-width s>f 2,0 f/ 2value turtle-x
-  screen-height s>f 2,0 f/ 2value turtle-y
+    \ Is the turtle visible
+    true value show-turtle?
 
-  \ The turtle angle
-  pi 2,0 f/ 2value turtle-angle
-  
-  \ The pen color
-  255 255 255 rgb16 value pen-color
+    \ The turtle position
+    screen-width s>f 2,0 f/ 2value turtle-x
+    screen-height s>f 2,0 f/ 2value turtle-y
 
-  \ The turtle color
-  0 255 0 rgb16 value turtle-color
+    \ The turtle angle
+    pi 2,0 f/ 2value turtle-angle
+    
+    \ The pen color
+    255 255 255 rgb16 value pen-color
 
-  \ Inited?
-  false value inited?
+    \ The turtle color
+    0 255 0 rgb16 value turtle-color
 
-  \ Initialize the turtle
-  : init-turtle ( -- )
-    lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
-    my-buffer screen-width screen-height my-device <st7735s> my-display
-    init-object
-    my-save-buffer save-width save-height <pixmap16> my-save init-object
-    my-display clear-pixmap
-    my-display update-display
-    my-save clear-pixmap
-  ;
+    \ Inited?
+    false value inited?
 
-  \ Erase the turtle
-  : erase-turtle ( -- )
-    0 0 turtle-x f>s save-width 2 / -
-    screen-height turtle-y f>s - save-height 2 / -
-    save-width save-height my-save my-display draw-rect
-  ;
+    \ Initialize the turtle
+    : init-turtle ( -- )
+      lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
+      my-buffer screen-width screen-height my-device <st7735s> my-display
+      init-object
+      my-save-buffer save-width save-height <pixmap16> my-save init-object
+      my-display clear-pixmap
+      my-display update-display
+      my-save clear-pixmap
+    ;
 
-  \ Draw a line
-  : draw-line { color x0 y0 x1 y1 -- }
-    color x0 screen-height 1- y0 - x1 screen-height 1- y1 - my-display
-    draw-pixel-line
-  ;
+    \ Erase the turtle
+    : erase-turtle ( -- )
+      0 0 turtle-x f>s save-width 2 / -
+      screen-height turtle-y f>s - save-height 2 / -
+      save-width save-height my-save my-display draw-rect
+    ;
 
-  \ Draw the turtle
-  : draw-turtle ( -- )
-    turtle-x f>s save-width 2 / -
-    screen-height turtle-y f>s - save-height 2 / -
-    0 0 save-width save-height my-display my-save draw-rect
-    turtle-angle cos { D: turtle-angle-cos }
-    turtle-angle sin { D: turtle-angle-sin }
-    turtle-angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
-    turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
-    turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
-    turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
-    turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
-    right-angle cos { D: right-angle-cos }
-    right-angle sin { D: right-angle-sin }
-    right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
-    right-angle-sin turtle-height 2 / s>f f* base-y d+ f>s { right-y }
-    right-angle-cos turtle-width -2 / s>f f* base-x d+ f>s { left-x }
-    right-angle-sin turtle-height -2 / s>f f* base-y d+ f>s { left-y }
-    show-turtle? if
-      turtle-color left-x left-y right-x right-y draw-line
-      turtle-color left-x left-y tip-x tip-y draw-line
-      turtle-color right-x right-y tip-x tip-y draw-line
-    then
-  ;
+    \ Draw a line
+    : draw-line { color x0 y0 x1 y1 -- }
+      color x0 screen-height 1- y0 - x1 screen-height 1- y1 - my-display
+      draw-pixel-line
+    ;
+
+    \ Draw the turtle
+    : draw-turtle ( -- )
+      turtle-x f>s save-width 2 / -
+      screen-height turtle-y f>s - save-height 2 / -
+      0 0 save-width save-height my-display my-save draw-rect
+      turtle-angle cos { D: turtle-angle-cos }
+      turtle-angle sin { D: turtle-angle-sin }
+      turtle-angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
+      turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
+      turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
+      turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
+      turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
+      right-angle cos { D: right-angle-cos }
+      right-angle sin { D: right-angle-sin }
+      right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
+      right-angle-sin turtle-height 2 / s>f f* base-y d+ f>s { right-y }
+      right-angle-cos turtle-width -2 / s>f f* base-x d+ f>s { left-x }
+      right-angle-sin turtle-height -2 / s>f f* base-y d+ f>s { left-y }
+      show-turtle? if
+        turtle-color left-x left-y right-x right-y draw-line
+        turtle-color left-x left-y tip-x tip-y draw-line
+        turtle-color right-x right-y tip-x tip-y draw-line
+      then
+    ;
+
+  end-module> import
 
   \ Set the pen color
   : setpencolor ( r g b -- ) rgb16 to pen-color ;
