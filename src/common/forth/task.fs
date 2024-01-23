@@ -1491,7 +1491,7 @@ begin-module task
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- waiting? )
-      code[ \ ( task tos: task-state-mask )
+      code[ ( tos: task )
       .task-state tos r0 ldrh_,[_,#_]
       ( tos: task r0: *task-state )
       readied r0 cmp_,#_ ( tos: task r0: *task-state )
@@ -1509,8 +1509,9 @@ begin-module task
       r0 1 dp ldm ( r1: *wake-counter r0: task tos: 0 )
       .task-wake-after r0 r0 ldr_,[_,#_]
       ( r1: *wake-counter r0: *task-wake-after tos: 0 )
-      r0 r1 cmp_,_
-      ne bc>
+      r0 r1 r1 subs_,_,_
+      tos r1 cmp_,_
+      gt bc>
       tos tos mvns_,_
       >mark
       pc 1 pop
@@ -1590,7 +1591,7 @@ begin-module task
 
     \ Body of extra task
     : do-extra-task ( -- )
-      begin wake-counter 1+ current-task @ block-wait again
+      begin wake-counter @ 1+ current-task @ block-wait again
     ;
 
     \ Initialize the extra task

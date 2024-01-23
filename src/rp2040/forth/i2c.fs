@@ -71,6 +71,9 @@ begin-module i2c
   
   begin-module i2c-internal
 
+    \ Print depth DEBUG
+    : depth. depth [char] 0 + internal::serial-emit ;
+    
     \ I2C peripheral structure
     begin-structure i2c-size
 
@@ -187,6 +190,15 @@ begin-module i2c
     \ I2C peripheral count
     2 constant i2c-count
 
+    \ I2C is not done
+    0 constant not-done
+
+    \ I2C is done with the immediate operation
+    1 constant done-now
+
+    \ I2C is finally done
+    2 constant finally-done
+    
     \ I2C buffers
     i2c-size i2c-count * buffer: i2c-buffers
 
@@ -328,7 +340,7 @@ begin-module i2c
 
     \ IC_TX_ABRT_SOURCE bits
     23 constant TX_FLUSH_CNT_SHIFT
-    $FF100000 constant TX_FLUSH_CNT_MASK
+    $FF800000 constant TX_FLUSH_CNT_MASK
     16 bit constant ABRT_USER_ABRT
     15 bit constant ABRT_SLVRD_INTX
     14 bit constant ABRT_SLV_ARBLOST
@@ -450,7 +462,13 @@ begin-module i2c
     
     \ Signal done state
     : signal-done ( i2c-buffer -- )
-      $FF swap i2c-done c!
+      done-now swap i2c-done c!
+      wake
+    ;
+
+    \ Signal final state
+    : signal-final ( i2c-buffer -- )
+      finally-done swap i2c-done c!
       wake
     ;
     
@@ -498,14 +516,29 @@ begin-module i2c
       drop
     ;
 
+    \ Clear ABRT_SBYTE_NORSTRT
+    : clear-abrt-sbyte-norstrt ( i2c-buffer -- )
+      dup i2c-addr @ IC_TX_ABRT_SOURCE @ ABRT_SBYTE_NORSTRT and if
+        IC_RESTART_EN over i2c-addr @ IC_CON bis!
+        [ SPECIAL GC_OR_START or ] literal over i2c-addr @ IC_TAR bic!
+      then
+      drop
+    ;
+    
     \ Handle TX_ABRT
     : handle-tx-abrt ( i2c-buffer -- )
+      \ dup clear-abrt-sbyte-norstrt
       dup i2c-mode c@ dup mode-send = swap mode-done-send = or if
         dup i2c-addr @ IC_TX_ABRT_SOURCE @
         TX_FLUSH_CNT_MASK and TX_FLUSH_CNT_SHIFT rshift
         negate over i2c-data-offset @ + 0 max
         over i2c-data-offset !
       then
+      \ emit-hook @ emit?-hook @ { orig-emit-hook orig-emit?-hook }
+      \ ['] internal::serial-emit emit-hook !
+      \ ['] internal::serial-emit? emit?-hook !
+      \ space dup i2c-addr @ IC_TX_ABRT_SOURCE @ h.8 space
+      \ orig-emit-hook emit-hook ! orig-emit?-hook emit?-hook !
       dup i2c-addr @ IC_TX_ABRT_SOURCE @
       [ ABRT_SLVRD_INTX
       ABRT_SLV_ARBLOST or
@@ -540,115 +573,134 @@ begin-module i2c
     ;
     
     \ Handle TX_EMPTY
-    : handle-tx-empty ( i2c-buffer -- )
-      dup i2c-mode c@ mode-send = if
+    : handle-tx-empty { buf -- }
+      buf i2c-mode c@ mode-send = if \ [char] k internal::serial-emit depth.
         begin
-          dup i2c-data-offset @
-          over i2c-data-size @ < if
-            dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if
-              dup handle-tx-abrt
-              true
-            else
-              dup i2c-addr @ IC_STATUS @ TFE and
-              if
-                dup i2c-data-offset @
-                over i2c-data-addr @ + c@
-                over i2c-slave c@ 0= if
-                  over i2c-data-offset @ 0= if
-                    over i2c-restart c@ if RESTART or then
-                  then
-                  over i2c-data-offset @
-                  2 pick i2c-data-size @ 1- =
-                  2 pick i2c-stop c@ 0<> and if
-                    $FF 2 pick i2c-prev-stop c!
-                    STOP_BIT or
-                  then
-                then
-                over i2c-addr @ IC_DATA_CMD !
-                1 over i2c-data-offset +!
+          buf i2c-data-offset @
+          buf i2c-data-size @ < if \ [char] l internal::serial-emit depth.
+            buf i2c-addr @ IC_RAW_INTR_STAT @ RESTART_DET and if
+              buf i2c-addr @ IC_CLR_RESTART_DET @ drop
+              buf i2c-addr @ IC_CLR_STOP_DET @ drop
+              buf i2c-addr @ IC_CLR_RX_DONE @ drop
+              buf i2c-data-offset @ 0= if
                 false
               else
+                mode-done-send buf i2c-mode c!
                 true
               then
-            then
-          else
-            mode-done-send over i2c-mode c!
-            true
-          then
-        until
-      then
-      drop
-    ;
-
-    \ Handle RX_FULL
-    : handle-rx-full ( i2c-buffer -- )
-      dup i2c-mode c@ mode-recv = if
-        begin
-          dup i2c-data-offset @
-          over i2c-data-size @ < if
-            dup i2c-addr @ IC_DATA_CMD @ $FF and
-            over i2c-data-offset @
-            2 pick i2c-data-addr @ + c!
-            1 over i2c-data-offset +!
-            dup i2c-data-offset @
-            over i2c-data-size @ = if
-              $00 over i2c-stop-det c!
-              mode-not-active over i2c-mode c!
-              dup restore-int-mask
-              dup signal-done
-              true
             else
-              dup i2c-slave c@ 0= over i2c-stop-det c@ 0= and if
-                dup i2c-data-offset @ over i2c-data-size @ 1- = if
-                  dup i2c-stop c@ if
-                    $FF over i2c-prev-stop c!
-                    [ CMD STOP_BIT or ] literal
+              buf i2c-addr @ IC_INTR_STAT @ RX_DONE and if \ [char] m internal::serial-emit depth.
+                mode-done-send buf i2c-mode c!
+                buf i2c-addr @ IC_CLR_RX_DONE @ drop
+                true
+              else
+                buf i2c-addr @ IC_INTR_STAT @ TX_ABRT and if \ [char] n internal::serial-emit depth.
+                  buf handle-tx-abrt
+                  true
+                else \ [char] o internal::serial-emit depth.
+                  buf i2c-addr @ IC_STATUS @ TFE and if \ [char] p internal::serial-emit depth.
+                    buf i2c-data-offset @ buf i2c-data-addr @ + c@ { command }
+                    buf i2c-slave c@ 0= if \ [char] q internal::serial-emit depth.
+                      buf i2c-data-offset @ 0= if \ [char] r internal::serial-emit depth.
+                        buf i2c-restart c@ if RESTART command or to command then
+                      then
+                      buf i2c-data-offset @
+                      buf i2c-data-size @ 1- =
+                      buf i2c-stop c@ 0<> and if \ [char] s internal::serial-emit depth.
+                        $FF buf i2c-prev-stop c!
+                        STOP_BIT command or to command
+                      then
+                    then
+                    \ emit-hook @ emit?-hook @ { orig-emit-hook orig-emit?-hook }
+                    \ ['] internal::serial-emit emit-hook !
+                    \ ['] internal::serial-emit? emit?-hook !
+                    \ ."  *" command h.8 ." * "
+                    \ orig-emit-hook emit-hook ! orig-emit?-hook emit?-hook !
+                    command buf i2c-addr @ IC_DATA_CMD !
+                    buf i2c-slave c@ if
+                      buf i2c-addr @ IC_CLR_RD_REQ @ drop
+                    then
+                    1 buf i2c-data-offset +! \ [char] t internal::serial-emit depth.
+                    false
                   else
-                    CMD
+                    true
                   then
-                else
-                  CMD
                 then
-                over i2c-addr @ IC_DATA_CMD !
-              then
-              dup i2c-addr @ IC_STATUS @ RFNE and 0=
-              over i2c-stop-det c@ 0<> over and if
-                $00 2 pick i2c-stop-det c!
-                over restore-int-mask
-                mode-not-active 2 pick i2c-mode c!
-                over i2c-slave c@ <> if
-                  master-not-active 2 pick i2c-master-mode c!
-                then
-                over signal-done
               then
             then
-          else
-            mode-not-active over i2c-mode c!
-            dup i2c-slave c@ if
-              master-send over i2c-master-mode c!
-              send-pending over i2c-pending c!
-            then
-            dup restore-int-mask
-            dup signal-done
+          else \ [char] u internal::serial-emit depth.
+            mode-done-send buf i2c-mode c!
             true
           then
         until
       else
-        dup i2c-mode c@ mode-not-active = over i2c-slave c@ 0<> and if
-          master-send over i2c-master-mode c!
-          send-pending over i2c-pending c!
-          dup restore-int-mask
+        \ [char] v internal::serial-emit  depth.
+        buf restore-int-mask
+      then
+    ;
+
+    \ Handle RX_FULL
+    : handle-rx-full { buf -- }
+      buf i2c-mode c@ mode-recv = if \ [char] a internal::serial-emit depth.
+        buf i2c-addr @ IC_RAW_INTR_STAT @ RESTART_DET and if
+          buf i2c-addr @ IC_CLR_RESTART_DET @ drop
+          buf i2c-addr @ IC_CLR_STOP_DET @ drop
+          buf i2c-data-offset @ 0<> if
+            $FF buf i2c-stop-det c!
+          then
+        then
+        buf i2c-addr @ IC_INTR_STAT @ STOP_DET and if
+          buf i2c-prev-stop c@ 0= if \ [char] b internal::serial-emit depth.
+            $FF buf i2c-stop-det c!
+          else \ [char] c internal::serial-emit depth.
+            $00 buf i2c-prev-stop c!
+          then
+          buf i2c-addr @ IC_CLR_STOP_DET @ drop
+        then
+        buf i2c-data-size @ buf i2c-data-offset @ -
+        buf i2c-addr @ IC_RXFLR @ $1F and min { bytes }
+        buf i2c-data-offset @ bytes + buf i2c-data-offset @ ?do \ [char] d internal::serial-emit depth.
+          buf i2c-addr @ IC_DATA_CMD @ $FF and buf i2c-data-addr @ i + c!
+          buf i2c-slave c@ 0=
+          i buf i2c-data-size @ 1- < and if \ [char] e internal::serial-emit depth.
+            CMD { command }
+            buf i2c-stop c@ 0<> buf i2c-data-size @ 2 - i = and if \ [char] g internal::serial-emit depth.
+              $FF buf i2c-prev-stop c!
+              STOP_BIT command or to command
+            then
+            command buf i2c-addr @ IC_DATA_CMD !
+          then
+        loop
+        bytes buf i2c-data-offset +!
+        buf i2c-stop-det c@ 0<>
+        buf i2c-addr @ IC_RXFLR @ $1F and 0= and if \ [char] h internal::serial-emit depth.
+          mode-not-active buf i2c-mode c!
+          buf restore-int-mask
+          buf signal-final
+        else
+          buf i2c-data-offset @ buf i2c-data-size @ = if \ [char] i internal::serial-emit depth.
+            mode-not-active buf i2c-mode c!
+            buf restore-int-mask
+            buf signal-done
+          then
+        then
+      else
+        buf i2c-mode c@ mode-not-active = buf i2c-slave c@ 0<> and if \ [char] j internal::serial-emit depth.
+          master-send buf i2c-master-mode c!
+          send-pending buf i2c-pending c!
+          buf restore-int-mask
           wake
         then
       then
-      drop          
     ;
 
     \ Handle RD_REQ
     : handle-rd-req ( i2c-buffer -- )
+      \ [char] $ internal::serial-emit
       dup i2c-mode c@ mode-not-active = over i2c-slave c@ 0<> and if
         master-recv over i2c-master-mode c!
         recv-pending over i2c-pending c!
+        \ [char] * internal::serial-emit
         wake
       then
       i2c-addr @ IC_CLR_RD_REQ @ drop
@@ -656,7 +708,7 @@ begin-module i2c
 
     \ Handle RX_DONE
     : handle-rx-done ( i2c-buffer -- )
-      dup i2c-mode c@ mode-recv = over i2c-slave c@ 0<> and if
+      dup i2c-mode c@ mode-send = over i2c-slave c@ 0<> and if
         dup restore-int-mask
         0 over i2c-addr @ IC_RX_TL !
         0 over i2c-addr @ IC_TX_TL !
@@ -668,26 +720,21 @@ begin-module i2c
     ;
 
     \ Handle STOP_DET
-    : handle-stop-det ( i2c-buffer -- )
-      dup i2c-prev-stop c@ 0= if
-        $FF over i2c-stop-det c!
+    : handle-stop-det { buf -- }
+      buf i2c-prev-stop c@ 0= if
+        $FF buf i2c-stop-det c!
       else
-        $00 over i2c-prev-stop c!
+        $00 buf i2c-prev-stop c!
       then
-      dup i2c-addr @ IC_CLR_STOP_DET @ drop
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
       
-      dup i2c-mode c@ mode-recv =
-      over i2c-addr @ IC_STATUS @ RFNE and 0= and if
-        dup i2c-stop-det c@ if
-          $00 over i2c-stop-det c!
-          dup restore-int-mask
-          mode-not-active over i2c-mode c!
-          dup i2c-slave c@ if master-not-active over i2c-master-mode c! then
-          dup signal-done
+      buf i2c-mode c@ mode-recv =
+      buf i2c-addr @ IC_STATUS @ RFNE and 0= and if
+        buf i2c-stop-det c@ if
+          buf restore-int-mask
+          buf signal-final
         then
       then
-
-      drop
     ;
     
     \ Handle ACTIVITY
@@ -708,28 +755,73 @@ begin-module i2c
       then
       i2c-addr @ IC_CLR_RX_OVER @ drop
     ;
-      
+
     \ Handle an I2C interrupt
-    : handle-i2c-interrupt ( i2c -- )
-      dup i2c-irq NVIC_ICPR_CLRPEND!
-      i2c-select
-      dup i2c-addr @ IC_INTR_STAT @ STOP_DET and if dup handle-stop-det then
-      dup i2c-addr @ IC_INTR_STAT @ ACTIVITY and if dup handle-activity then
-      dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if dup handle-tx-abrt then
-      dup i2c-addr @ IC_INTR_STAT @ TX_EMPTY and if dup handle-tx-empty then
-      dup i2c-addr @ IC_INTR_STAT @ RX_FULL and if dup handle-rx-full then
-      dup i2c-addr @ IC_INTR_STAT @ RX_OVER and if dup handle-rx-over then
-      dup i2c-addr @ IC_INTR_STAT @ RX_DONE and if dup handle-rx-done then
-      dup i2c-addr @ IC_INTR_STAT @ RD_REQ and if dup handle-rd-req then
-      dup i2c-mode c@ mode-done-send = if
-        begin dup i2c-addr @ IC_STATUS @ SLV_ACTIVITY and 0= until
-        begin dup i2c-addr @ IC_STATUS @ MST_ACTIVITY and 0= until
-        dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if dup handle-tx-abrt then
-        dup restore-int-mask
-        dup signal-done
-        mode-not-active over i2c-mode c!
-      then
-      drop
+    : handle-i2c-interrupt { index -- } \ [char] A internal::serial-emit \ depth.
+      index i2c-irq NVIC_ICPR_CLRPEND! \ [char] A internal::serial-emit \ depth.
+      index i2c-select { buf } \ [char] B internal::serial-emit \ depth.
+      \ emit-hook @ emit?-hook @ { orig-emit-hook orig-emit?-hook }
+      \ ['] internal::serial-emit emit-hook !
+      \ ['] internal::serial-emit? emit?-hook !
+      \ ."  =" index . buf i2c-addr @ IC_INTR_STAT @ h.8 space depth (.) ." = "
+      \ orig-emit-hook emit-hook ! orig-emit?-hook emit?-hook !
+      buf i2c-addr @ IC_INTR_STAT @ STOP_DET and if
+        \ [char] Q internal::serial-emit \ depth.
+        buf handle-stop-det
+        \ [char] R internal::serial-emit \ depth.
+      then \ [char] C internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ ACTIVITY and if
+        \ [char] ! internal::serial-emit \ depth.
+        buf handle-activity
+      then \ [char] D internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ TX_EMPTY and if
+        \ [char] # internal::serial-emit \ depth.
+        buf handle-tx-empty
+      then \ [char] E internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ RX_FULL and if
+        \ [char] Y internal::serial-emit \ depth.
+        buf handle-rx-full
+        \ [char] Z internal::serial-emit \ depth.
+      then \ [char] F internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ RX_OVER and if
+        \ [char] $ internal::serial-emit \ depth.
+        buf handle-rx-over
+      then \ [char] G internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ RX_DONE and if
+        \ [char] % internal::serial-emit \ depth.
+        buf handle-rx-done
+      then \ [char] H internal::serial-emit \ depth.
+      \ emit-hook @ emit?-hook @ { orig-emit-hook orig-emit?-hook }
+      \ buf clear-abrt-sbyte-norstrt
+      \ ['] internal::serial-emit emit-hook !
+      \ ['] internal::serial-emit? emit?-hook !
+      \ ."  +" index . buf i2c-addr @ IC_INTR_STAT @ h.8 space depth (.) ." + "
+      \ orig-emit-hook emit-hook ! orig-emit?-hook emit?-hook !
+      buf i2c-addr @ IC_INTR_STAT @ TX_ABRT and if
+        \ [char] @ internal::serial-emit \ depth.
+        buf handle-tx-abrt
+      then \ [char] I internal::serial-emit \ depth.
+      buf i2c-addr @ IC_INTR_STAT @ RD_REQ and { rd-req-active } \ [char] J internal::serial-emit \ depth.
+      buf i2c-mode c@ mode-done-send = if
+        \ [char] @ internal::serial-emit \ depth.
+        buf restore-int-mask
+        \ [char] ~ internal::serial-emit \ depth.
+        buf i2c-addr @ IC_CLR_STOP_DET @ drop
+        \ [char] $ internal::serial-emit \ depth.
+        buf signal-done
+        \ [char] % internal::serial-emit \ depth.
+        mode-not-active buf i2c-mode c!
+        \ [char] ^ internal::serial-emit \ depth.
+      then \ [char] K internal::serial-emit \ depth.
+      rd-req-active if
+        \ [char] < internal::serial-emit \ depth.
+        buf handle-rd-req
+      then \ [char] B internal::serial-emit depth.
+      \ emit-hook @ emit?-hook @ { orig-emit-hook orig-emit?-hook }
+      \ ['] internal::serial-emit emit-hook !
+      \ ['] internal::serial-emit? emit?-hook !
+      \ ."  *" index . buf i2c-addr @ IC_INTR_STAT @ h.8 space depth (.) ." * "
+      \ orig-emit-hook emit-hook ! orig-emit?-hook emit?-hook !
     ;
     
   end-module
@@ -756,7 +848,7 @@ begin-module i2c
       $00 over i2c-nack-set c!
       master-not-active over i2c-master-mode c!
       not-pending over i2c-pending c!
-      $00 over i2c-done c!
+      not-done over i2c-done c!
       $00 over i2c-tx-abort c!
       $00 over i2c-tx-error c!
       $00 over i2c-tx-target-noack c!
@@ -807,138 +899,164 @@ begin-module i2c
     ;
     
     \ Wait for I2C completion or timeout
-    : wait-i2c-complete-or-timeout ( i2c-buffer -- )
-      timeout @ no-timeout = if
-        [: dup i2c-done c@ 0<> ;] wait
+    : wait-i2c-complete-or-timeout { buf -- } \ [char] C internal::serial-emit depth.
+      timeout @ no-timeout = if \ [char] D internal::serial-emit depth.
+        \ [char] A internal::serial-emit depth.
+        buf [: dup i2c-done c@ 0<> ;] wait drop \ [char] F internal::serial-emit depth.
+        \ [char] B internal::serial-emit depth.
       else
-        systick-counter
-        begin
-          over i2c-done c@ 0<> if
-            drop true
-          else
+        systick-counter { start-systick }
+        begin \ [char] G internal::serial-emit depth.
+          buf i2c-done c@ if \ [char] H internal::serial-emit depth.
+            true
+          else \ [char] I internal::serial-emit depth.
             disable-int
-            systick-counter over - timeout @ >= if
-              drop
-              dup i2c-slave c@ 0= if
-                IC_ENABLE_ABORT over i2c-addr @ IC_ENABLE bis!
-                begin dup i2c-addr @ IC_ENABLE @ IC_ENABLE_ABORT and 0= until
-              then
-              dup i2c-addr @ IC_CLR_STOP_DET @ drop
-              dup i2c-addr @ IC_CLR_RX_DONE @ drop
-              dup i2c-addr @ IC_CLR_TX_ABRT @ drop
-              mode-not-active over i2c-mode c!
-              0 over i2c-data-offset !
-              0 over i2c-data-size !
-              $00 over i2c-stop c!
-              $00 over i2c-restart c!
-              $00 over i2c-stop-det c!
-              $00 over i2c-prev-stop c!
-              $00 over i2c-tx-abort c!
-              $00 over i2c-tx-error c!
-              $00 over i2c-tx-target-noack c!
-              $00 over i2c-arb-lost c!
-              $00 over i2c-rx-over c!
-              $00 over i2c-stop-det c!
-              dup restore-int-mask \ This enables interrupts
-              dup i2c-lock release-lock
+            systick-counter start-systick - timeout @ >= if \ [char] J internal::serial-emit depth.
+              buf i2c-slave c@ 0= buf i2c-mode c@ mode-send = and if
+                IC_ENABLE_ABORT buf i2c-addr @ IC_ENABLE bis! \ [char] K internal::serial-emit depth.
+                begin
+                  buf i2c-addr @ IC_RAW_INTR_STAT @ TX_ABRT and ?dup if
+                    buf i2c-addr @ IC_CLR_TX_ABRT @ drop
+                  then
+                until \ [char] L internal::serial-emit depth.
+              then \ [char] M internal::serial-emit depth.
+              buf i2c-addr @ IC_CLR_STOP_DET @ drop
+              buf i2c-addr @ IC_CLR_RX_DONE @ drop
+              \ dup clear-abrt-sbyte-norstrt
+              buf i2c-addr @ IC_CLR_TX_ABRT @ drop
+              mode-not-active buf i2c-mode c!
+              0 buf i2c-data-offset !
+              0 buf i2c-data-size !
+              $00 buf i2c-stop c!
+              $00 buf i2c-restart c!
+              \ $00 buf i2c-stop-det c!
+              $00 buf i2c-prev-stop c!
+              $00 buf i2c-tx-abort c!
+              $00 buf i2c-tx-error c!
+              $00 buf i2c-tx-target-noack c!
+              $00 buf i2c-arb-lost c!
+              $00 buf i2c-rx-over c!
+              buf restore-int-mask \ This enables interrupts
+              enable-int
+              buf i2c-lock release-lock \ [char] N internal::serial-emit depth.
               ['] x-timed-out ?raise
-            then
-            enable-int wake-counter @ current-task block-wait false
-          then
-        until
-      then
-      drop
+            then \ [char] O internal::serial-emit depth.
+            enable-int wake-counter @ current-task block-wait false \ [char] P internal::serial-emit depth.
+          then \ [char] Q internal::serial-emit depth.
+        until \ [char] R internal::serial-emit depth.
+      then \ [char] S internal::serial-emit depth.
     ;
     
     \ Do I2C send
-    : do-i2c-send ( c-addr u i2c -- bytes-sent )
-      i2c-select
-      over if
+    : do-i2c-send { addr bytes index -- bytes-sent }
+      index i2c-select { buf }
+      bytes if \ [char] A internal::serial-emit depth.
         disable-int
-        dup i2c-slave c@ 0<> over i2c-master-mode c@ master-recv <> and if
+        buf i2c-slave c@ 0<> buf i2c-master-mode c@ master-recv <> and if \ [char] B internal::serial-emit depth.
           enable-int ['] x-master-not-ready ?raise
-        then
-        tuck i2c-data-size !
-        tuck i2c-data-addr !
-        0 over i2c-data-offset !
-        mode-send over i2c-mode c!
-        $00 over i2c-tx-abort c!
-        $00 over i2c-tx-error c!
-        $00 over i2c-tx-target-noack c!
-        $00 over i2c-arb-lost c!
-        $00 over i2c-rx-over c!
-        $00 over i2c-stop-det c!
-        not-pending over i2c-pending c!
-        $00 over i2c-done c!
-        0 over i2c-addr @ IC_RX_TL !
-        dup i2c-slave c@ if 7 else 0 then over i2c-addr @ IC_TX_TL !
-        [ TX_EMPTY TX_OVER or TX_ABRT or ] literal
-        over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
-        over i2c-addr @ IC_INTR_MASK !
-        enable-int
-        dup wait-i2c-complete-or-timeout
-        $00 over i2c-stop-det c!
-        mode-not-active over i2c-mode c!
-        dup i2c-data-offset @
-        over i2c-tx-target-noack c@
-        2 pick i2c-arb-lost c@
-        3 pick i2c-tx-error c@
-        4 roll i2c-lock release-lock
-        triggers x-i2c-tx-error
-        triggers x-arb-lost
-        triggers x-i2c-target-noack
-      else
-        i2c-lock release-lock nip
-      then
+        then \ [char] C internal::serial-emit depth.
+        bytes buf i2c-data-size !
+        addr buf i2c-data-addr !
+        0 buf i2c-data-offset !
+        mode-send buf i2c-mode c!
+        $00 buf i2c-tx-abort c!
+        $00 buf i2c-tx-error c!
+        $00 buf i2c-tx-target-noack c!
+        $00 buf i2c-arb-lost c!
+        $00 buf i2c-rx-over c!
+        $00 buf i2c-stop-det c!
+        not-pending buf i2c-pending c!
+        not-done buf i2c-done c!
+        0 buf i2c-addr @ IC_TX_TL !
+        0 buf i2c-addr @ IC_RX_TL ! \ [char] D internal::serial-emit depth.
+        buf i2c-restart c@ if \ [char] E internal::serial-emit depth.
+          $00 buf i2c-stop-det c!
+        then \ [char] F internal::serial-emit depth.
+        [ TX_EMPTY TX_OVER or TX_ABRT or ] literal { mask }
+        buf i2c-slave c@ if mask [ RD_REQ RX_DONE or ] literal or to mask then
+        mask buf i2c-addr @ IC_INTR_MASK ! \ [char] G internal::serial-emit depth.
+        enable-int \ [char] H internal::serial-emit depth.
+        buf wait-i2c-complete-or-timeout \ [char] I internal::serial-emit depth.
+        $00 buf i2c-stop-det c!
+        mode-not-active buf i2c-mode c!
+        buf i2c-data-offset @ { offset }
+        buf i2c-tx-target-noack c@ { noack }
+        buf i2c-arb-lost c@ { arb-lost }
+        buf i2c-tx-error c@ { rx-over }
+        buf i2c-lock release-lock
+        rx-over triggers x-i2c-tx-error
+        arb-lost triggers x-arb-lost
+        noack triggers x-i2c-target-noack \ [char] J internal::serial-emit depth.
+        offset
+      else \ [char] K internal::serial-emit depth.
+        buf i2c-lock release-lock
+        0
+      then \ [char] L internal::serial-emit depth.
     ;
     
     \ Do I2C receive
-    : do-i2c-recv ( c-addr u i2c -- bytes-recv )
-      i2c-select
-      over if
+    : do-i2c-recv { addr bytes index -- bytes-recv }
+      index i2c-select { buf } \ [char] a internal::serial-emit depth.
+      bytes if
         disable-int
-        dup i2c-slave c@ 0<> over i2c-master-mode c@ master-send <> and if
+        buf i2c-slave c@ 0<> buf i2c-master-mode c@ master-send <> and if \ [char] b internal::serial-emit depth.
           enable-int ['] x-master-not-ready ?raise
-        then
-        tuck i2c-data-size !
-        tuck i2c-data-addr !
-        0 over i2c-data-offset !
-        mode-recv over i2c-mode c!
-        $00 over i2c-tx-abort c!
-        $00 over i2c-tx-error c!
-        $00 over i2c-tx-target-noack c!
-        $00 over i2c-arb-lost c!
-        $00 over i2c-rx-over c!
-        not-pending over i2c-pending c!
-        $00 over i2c-done c!
-        0 over i2c-addr @ IC_RX_TL !
-        0 over i2c-addr @ IC_TX_TL !
-        [ RX_FULL RX_OVER or STOP_DET or TX_ABRT or ] literal
-        over i2c-slave c@ if RD_REQ or then
-        over i2c-addr @ IC_INTR_MASK !
-        dup i2c-slave c@ 0= if
-          CMD over i2c-restart c@ if RESTART or then
-          over i2c-data-size @ 1 = 2 pick i2c-stop c@ 0<> and if
-            $FF 2 pick i2c-prev-stop c!
-            STOP_BIT or
-          then
-          over i2c-addr @ IC_DATA_CMD !
-        then
+        then \ [char] c internal::serial-emit depth.
+        bytes buf i2c-data-size !
+        addr buf i2c-data-addr !
+        0 buf i2c-data-offset !
+        mode-recv buf i2c-mode c!
+        $00 buf i2c-tx-abort c!
+        $00 buf i2c-tx-error c!
+        $00 buf i2c-tx-target-noack c!
+        $00 buf i2c-arb-lost c!
+        $00 buf i2c-rx-over c!
+        not-pending buf i2c-pending c!
+        buf i2c-done c@ done-now = if not-done buf i2c-done c! then \ [char] d internal::serial-emit depth.
+        0 buf i2c-addr @ IC_RX_TL ! \ [char] e internal::serial-emit depth.
+        0 buf i2c-addr @ IC_TX_TL ! \ [char] f internal::serial-emit depth.
+        [ RX_FULL RX_OVER or STOP_DET or TX_ABRT or ] literal { mask } \ [char] g internal::serial-emit depth.
+        buf i2c-slave c@ if mask RD_REQ or to mask then \ [char] h internal::serial-emit depth.
+        mask buf i2c-addr @ IC_INTR_MASK ! \ [char] i internal::serial-emit depth.
+        buf i2c-done c@ finally-done <> if \ [char] j internal::serial-emit depth.
+          buf i2c-slave c@ 0= if \ [char] k internal::serial-emit depth.
+            CMD { command } \ [char] l internal::serial-emit depth.
+            buf i2c-restart c@ if \ [char] m internal::serial-emit depth.
+              $00 buf i2c-stop-det c!
+              command RESTART or to command
+            then \ [char] n internal::serial-emit depth.
+            buf i2c-data-size @ 1 = buf i2c-stop c@ 0<> and if \ [char] o internal::serial-emit depth.
+              $FF buf i2c-prev-stop c!
+              command STOP_BIT or to command
+            then \ [char] p internal::serial-emit depth.
+            command buf i2c-addr @ IC_DATA_CMD ! \ [char] q internal::serial-emit depth.
+          then \ [char] r internal::serial-emit depth.
+        then \ [char] s internal::serial-emit depth.
         enable-int
-        dup wait-i2c-complete-or-timeout
-        $00 over i2c-stop-det c!
-        mode-not-active over i2c-mode c!
-        dup i2c-data-offset @
-        over i2c-tx-target-noack c@
-        2 pick i2c-arb-lost c@
-        3 pick i2c-rx-over c@
-        4 roll i2c-lock release-lock
-        triggers x-i2c-rx-over
-        triggers x-arb-lost
-        triggers x-i2c-target-noack
-      else
-        i2c-lock release-lock nip
-      then
+        buf i2c-done c@ finally-done <> if \ [char] t internal::serial-emit depth.
+          buf wait-i2c-complete-or-timeout \ [char] u internal::serial-emit depth.
+        then \ [char] v internal::serial-emit depth.
+        \ $00 buf i2c-stop-det c!
+        mode-not-active buf i2c-mode c!
+        buf i2c-data-offset @ { offset }
+        offset 0= if
+          buf i2c-done c@ finally-done = if
+            $00 buf i2c-stop-det c!
+            master-not-active buf i2c-master-mode c!
+          then \ [char] w internal::serial-emit depth.
+        then \ [char] x internal::serial-emit depth.
+        buf i2c-tx-target-noack c@ { noack }
+        buf i2c-arb-lost c@ { arb-lost }
+        buf i2c-rx-over c@ { rx-over }
+        buf i2c-lock release-lock
+        rx-over triggers x-i2c-rx-over
+        arb-lost triggers x-arb-lost
+        noack triggers x-i2c-target-noack
+        offset
+      else \ [char] y internal::serial-emit depth.
+        buf i2c-lock release-lock
+        0
+      then \ [char] z internal::serial-emit depth.
     ;
 
   end-module> import
@@ -1086,167 +1204,187 @@ begin-module i2c
   continue-module i2c-internal
     
     \ Wait for master send or receive on I2C peripheral with a timeout
-    : wait-i2c-master-timeout ( ticks i2c -- accepted )
-      dup validate-i2c
-      systick-counter swap
-      dup i2c-select
+    : wait-i2c-master-timeout { ticks index -- accepted }
+      index validate-i2c
+      systick-counter { start-systick }
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      [ RX_FULL RD_REQ or ] literal buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_RX_DONE @ drop
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
+      buf i2c-addr @ IC_CLR_TX_ABRT @ drop
       enable-int
       
       begin
-        systick-counter 3 pick - 4 pick < averts x-timed-out
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ send-pending = if
-          not-pending over i2c-pending c! accept-send true
+        systick-counter start-systick - ticks < averts x-timed-out
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ send-pending = if
+          not-pending buf i2c-pending c! accept-send true
         else
-          dup i2c-pending c@ recv-pending = if
-            not-pending over i2c-pending c! accept-recv true
+          buf i2c-pending c@ recv-pending = if
+            not-pending buf i2c-pending c! accept-recv true
           else
-            0 false
+            false
           then
         then
-        3 pick release-i2c dup not if
-          nip pause wake-counter @ current-task block-wait
+        index release-i2c
+        dup not if
+          pause wake-counter @ current-task block-wait
         then
       until
-      nip nip nip nip
     ;
     
     \ Wait for master send on I2C peripheral with a timeout
-    : wait-i2c-master-send-timeout ( ticks i2c -- )
-      dup validate-i2c
-      systick-counter swap
-      dup i2c-select
+    : wait-i2c-master-send-timeout { ticks index -- }
+      index validate-i2c
+      systick-counter { start-systick }
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      RX_FULL over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      RX_FULL buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
+      buf i2c-addr @ IC_CLR_TX_ABRT @ drop
       enable-int
       
       begin
-        systick-counter 3 pick - 4 pick < averts x-timed-out
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ send-pending = if
-          not-pending over i2c-pending c! true
+        systick-counter start-systick - ticks < averts x-timed-out
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ send-pending = if
+          not-pending buf i2c-pending c! true
         else
           false
         then
-        2 pick release-i2c dup not if
+        index release-i2c
+        dup not if
           pause wake-counter @ current-task block-wait
         then
       until
-      2drop 2drop
     ;
   
     \ Wait for master receive on I2C peripheral with a timeout
-    : wait-i2c-master-recv-timeout ( ticks i2c -- )
-      dup validate-i2c
-      systick-counter swap
-      dup i2c-select
+    : wait-i2c-master-recv-timeout { ticks index -- }
+      index validate-i2c
+      systick-counter { start-systick }
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      RD_REQ over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      RD_REQ buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_RX_DONE @ drop
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
       enable-int
       
       begin
-        systick-counter 3 pick - 4 pick < averts x-timed-out
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ recv-pending = if
-          not-pending over i2c-pending c! true
+        systick-counter start-systick - ticks < averts x-timed-out
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ recv-pending = if
+          not-pending buf i2c-pending c! true
         else
           false
         then
-        2 pick release-i2c dup not if
+        index release-i2c
+        dup not if
           pause wake-counter @ current-task block-wait
         then
       until
-      2drop 2drop
     ;
     
     \ Wait for master send or receive on I2C peripheral without a timeout
-    : wait-i2c-master-indefinite ( i2c -- accepted )
-      dup validate-i2c
-      dup i2c-select
+    : wait-i2c-master-indefinite { index -- accepted }
+      index validate-i2c
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      [ RX_FULL RD_REQ or ] literal buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_RX_DONE @ drop
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
+      buf i2c-addr @ IC_CLR_TX_ABRT @ drop
       enable-int
       
       begin
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ send-pending = if
-          not-pending over i2c-pending c! accept-send true
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ send-pending = if
+          not-pending buf i2c-pending c! accept-send true
         else
-          dup i2c-pending c@ recv-pending = if
-            not-pending over i2c-pending c! accept-recv true
+          buf i2c-pending c@ recv-pending = if
+            not-pending buf i2c-pending c! accept-recv true
           else
-            0 false
+            false
           then
         then
-        3 pick release-i2c dup not if
-          nip pause wake-counter @ current-task block-wait
+        index release-i2c
+        dup not if
+          pause wake-counter @ current-task block-wait
         then
       until
-      nip nip
     ;
     
     \ Wait for master send on I2C peripheral without a timeout
-    : wait-i2c-master-send-indefinite ( i2c -- )
-      dup validate-i2c
-      dup i2c-select
+    : wait-i2c-master-send-indefinite { index -- }
+      index validate-i2c
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      RX_FULL over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      RX_FULL buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
+      buf i2c-addr @ IC_CLR_TX_ABRT @ drop
       enable-int
       
       begin
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ send-pending = if
-          not-pending over i2c-pending c! true
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ send-pending = if
+          not-pending buf i2c-pending c! true
         else
           false
         then
-        2 pick release-i2c dup not if
+        index release-i2c
+        dup not if
           pause wake-counter @ current-task block-wait
         then
       until
-      2drop
     ;
   
     \ Wait for master receive on I2C peripheral without a timeout
-    : wait-i2c-master-recv-indefinite ( i2c -- )
-      dup validate-i2c
-      dup i2c-select
+    : wait-i2c-master-recv-indefinite { index -- }
+      index validate-i2c
+      index i2c-select { buf }
       
       disable-int
-      mode-not-active over i2c-mode c!
-      RD_REQ over i2c-addr @ IC_INTR_MASK !
+      $00 buf i2c-stop-det c!
+      mode-not-active buf i2c-mode c!
+      RD_REQ buf i2c-addr @ IC_INTR_MASK !
+      buf i2c-addr @ IC_CLR_RX_DONE @ drop
+      buf i2c-addr @ IC_CLR_STOP_DET @ drop
       enable-int
       
       begin
-        over claim-i2c
-        over validate-slave
-        dup i2c-pending c@ recv-pending = if
-          not-pending over i2c-pending c! true
+        index claim-i2c
+        index validate-slave
+        buf i2c-pending c@ recv-pending = if
+          not-pending buf i2c-pending c! true
         else
           false
         then
-        2 pick release-i2c dup not if
+        index release-i2c
+        dup not if
           pause wake-counter @ current-task block-wait
         then
       until
-      2drop
     ;
   
   end-module
@@ -1368,9 +1506,13 @@ begin-module i2c
       enable-int
     then
 
-    dup i2c-slave c@ 0= if
-      IC_ENABLE_ABORT over i2c-addr @ IC_ENABLE bis!
-      begin dup i2c-addr @ IC_ENABLE @ IC_ENABLE_ABORT and 0= until
+    dup i2c-slave c@ 0= over i2c-mode c@ mode-send = and if
+      IC_ENABLE_ABORT over i2c-addr @ IC_ENABLE bis! \ [char] K internal::serial-emit depth.
+      begin
+        dup i2c-addr @ IC_RAW_INTR_STAT @ TX_ABRT and ?dup if
+          dup i2c-addr @ IC_CLR_TX_ABRT @ drop
+        then
+      until
     then
 
     IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bic!
@@ -1382,6 +1524,7 @@ begin-module i2c
     disable-int
     dup i2c-addr @ IC_CLR_STOP_DET @ drop
     dup i2c-addr @ IC_CLR_RX_DONE @ drop
+    \ dup clear-abrt-sbyte-norstrt
     dup i2c-addr @ IC_CLR_TX_ABRT @ drop
     0 over i2c-data-offset !
     0 over i2c-data-size !
