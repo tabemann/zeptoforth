@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>DMA support</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="dma-support">
+<h1>DMA support</h1>
+<p>There exists support for the DMA controller on the RP2040. There exist 12 DMA channels, 64 DREQ’s/TREQ’s, and 4 DMA timers. Register to register, buffer to register, register to buffer, and buffer to buffer transfers are supported; the main difference between registers and buffers is that buffers’ addresses are updated with each transfer while registers’ addresses are not. Transfer units of size 1 byte, 2 bytes, and 4 bytes are supported. DREQ’s and TREQ’s are used for synchronizing transfers with other peripherals.</p>
+<p>There also exists a global DMA pool to simplify dynamically allocating and freeing DMA channels. It is recommended that one use this rather than manually selecting DMA channels.</p>
+<section id="dma">
+<h2><code class="docutils literal notranslate"><span class="pre">dma</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dma</span></code> module contains the following words:</p>
+<section id="x-out-of-range-dma-channel">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-dma-channel</span></code></h3>
+<p>( – )</p>
+<p>Out of range DMA index exception.</p>
+</section>
+<section id="x-out-of-range-treq">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-treq</span></code></h3>
+<p>( – )</p>
+<p>Out of range transfer request exception.</p>
+</section>
+<section id="x-out-of-range-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer</span></code></h3>
+<p>( – )</p>
+<p>Out of range timer exception.</p>
+</section>
+<section id="x-invalid-transfer-size">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-transfer-size</span></code></h3>
+<p>( – )</p>
+<p>Invalid transfer size exception.</p>
+</section>
+<section id="x-out-of-range-timer-value">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer-value</span></code></h3>
+<p>( – )</p>
+<p>Out of range timer dividend or divisor</p>
+</section>
+<section id="dreq-pio-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_TX</span></code></h3>
+<p>( sm pio – dreq )</p>
+<p>PIO TX DREQ for <em>pio</em> block state machine <em>sm</em> transmit.</p>
+</section>
+<section id="dreq-pio-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_RX</span></code></h3>
+<p>( sm pio – dreq )</p>
+<p>PIO RX DREQ for <em>pio</em> block state machine <em>sm</em> receive.</p>
+</section>
+<section id="dreq-spi-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_TX</span></code></h3>
+<p>( spi – dreq )</p>
+<p>SPI TX DREQ for <em>spi</em> peripheral transmit.</p>
+</section>
+<section id="dreq-spi-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_RX</span></code></h3>
+<p>( spi – dreq )</p>
+<p>SPI RX DREQ for <em>spi</em> peripheral receive.</p>
+</section>
+<section id="dreq-uart-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_TX</span></code></h3>
+<p>( uart – dreq )</p>
+<p>UART TX DREQ for <em>uart</em> peripheral transmit.</p>
+</section>
+<section id="dreq-uart-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_RX</span></code></h3>
+<p>( uart – dreq )</p>
+<p>UART RX DREQ for <em>uart</em> peripheral receive.</p>
+</section>
+<section id="dreq-pwm-wrap">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PWM_WRAP</span></code></h3>
+<p>( pwm – dreq )</p>
+<p>PWM DREQ for <em>pwm</em> slice.</p>
+</section>
+<section id="dreq-i2c-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_TX</span></code></h3>
+<p>( i2c – dreq )</p>
+<p>I2C TX DREQ for <em>i2c</em> peripheral transmit.</p>
+</section>
+<section id="dreq-i2c-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_RX</span></code></h3>
+<p>( i2c – dreq )</p>
+<p>I2C RX DREQ for <em>i2c</em> peripheral receive.</p>
+</section>
+<section id="dreq-adc">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_ADC</span></code></h3>
+<p>( – dreq )</p>
+<p>ADC DREQ.</p>
+</section>
+<section id="dreq-xip-stream">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_STREAM</span></code></h3>
+<p>( – dreq )</p>
+<p>XIP STREAM DREQ.</p>
+</section>
+<section id="dreq-xip-ssitx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSITX</span></code></h3>
+<p>( – dreq )</p>
+<p>XIP SSITX DREQ.</p>
+</section>
+<section id="dreq-xip-ssirx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSIRX</span></code></h3>
+<p>( – dreq )</p>
+<p>XIP SSIRX DREQ.</p>
+</section>
+<section id="treq-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_TIMER</span></code></h3>
+<p>( timer – treq )</p>
+<p>DMA timer <em>timer</em>, from 0 to 3, as TREQ.</p>
+</section>
+<section id="treq-unpaced">
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_UNPACED</span></code></h3>
+<p>( – treq )</p>
+<p>Unpaced transfer TREQ.</p>
+</section>
+<section id="start-register-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma</span></code></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-register-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma</span></code></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-buffer-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma</span></code></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-buffer-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma</span></code></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="dma-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-timer!</span></code></h3>
+<p>( dividend divisor timer – )</p>
+<p>Set DMA <em>timer</em> clock <em>dividend</em> and <em>divisor</em>.</p>
+</section>
+<section id="spin-wait-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">spin-wait-dma</span></code></h3>
+<p>( channel – )</p>
+<p>Spin wait for DMA <em>channel</em> completion</p>
+</section>
+<section id="wait-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-dma</span></code></h3>
+<p>( channel – )</p>
+<p>Non-busy wait for DMA <em>channel</em> completion</p>
+</section>
+<section id="halt-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">halt-dma</span></code></h3>
+<p>( channel – )</p>
+<p>Halt DMA <em>channel</em></p>
+</section>
+<section id="abort-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">abort-dma</span></code></h3>
+<p>( channel – )</p>
+<p>Abort DMA <em>channel</em></p>
+</section>
+<section id="dma-src-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-src-addr&#64;</span></code></h3>
+<p>( channel – addr )</p>
+<p>Get DMA <em>channel</em> source address</p>
+</section>
+<section id="dma-dest-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-dest-addr&#64;</span></code></h3>
+<p>( channel – addr )</p>
+<p>Get DMA <em>channel</em> destination address</p>
+</section>
+<section id="dma-remaining">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-remaining&#64;</span></code></h3>
+<p>( channel – remaining )</p>
+<p>Get outstanding bytes transferred</p>
+</section>
+</section>
+<section id="dma-pool">
+<h2><code class="docutils literal notranslate"><span class="pre">dma-pool</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dma-pool</span></code> module contains the following words:</p>
+<section id="x-no-dma-channels-available">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-channels-available</span></code></h3>
+<p>( – )</p>
+<p>No DMA channels available exception.</p>
+</section>
+<section id="x-dma-channel-already-free">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dma-channel-already-free</span></code></h3>
+<p>( – )</p>
+<p>DMA channel is already free.</p>
+</section>
+<section id="allocate-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-dma</span></code></h3>
+<p>( – channel )</p>
+<p>Allocate a DMA channel.</p>
+</section>
+<section id="free-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">free-dma</span></code></h3>
+<p>( channel – )</p>
+<p>Free a DMA channel</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

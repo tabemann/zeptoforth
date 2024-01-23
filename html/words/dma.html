@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>DMA support &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
+    <link rel="prev" title="Hardware Timers" href="timer.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="dma-support">
+<h1>DMA support<a class="headerlink" href="#dma-support" title="Permalink to this heading">¶</a></h1>
+<p>There exists support for the DMA controller on the RP2040. There exist 12 DMA channels, 64 DREQ’s/TREQ’s, and 4 DMA timers. Register to register, buffer to register, register to buffer, and buffer to buffer transfers are supported; the main difference between registers and buffers is that buffers’ addresses are updated with each transfer while registers’ addresses are not. Transfer units of size 1 byte, 2 bytes, and 4 bytes are supported. DREQ’s and TREQ’s are used for synchronizing transfers with other peripherals.</p>
+<p>There also exists a global DMA pool to simplify dynamically allocating and freeing DMA channels. It is recommended that one use this rather than manually selecting DMA channels.</p>
+<section id="dma">
+<h2><code class="docutils literal notranslate"><span class="pre">dma</span></code><a class="headerlink" href="#dma" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dma</span></code> module contains the following words:</p>
+<section id="x-out-of-range-dma-channel">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-dma-channel</span></code><a class="headerlink" href="#x-out-of-range-dma-channel" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Out of range DMA index exception.</p>
+</section>
+<section id="x-out-of-range-treq">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-treq</span></code><a class="headerlink" href="#x-out-of-range-treq" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Out of range transfer request exception.</p>
+</section>
+<section id="x-out-of-range-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer</span></code><a class="headerlink" href="#x-out-of-range-timer" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Out of range timer exception.</p>
+</section>
+<section id="x-invalid-transfer-size">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-transfer-size</span></code><a class="headerlink" href="#x-invalid-transfer-size" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Invalid transfer size exception.</p>
+</section>
+<section id="x-out-of-range-timer-value">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer-value</span></code><a class="headerlink" href="#x-out-of-range-timer-value" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Out of range timer dividend or divisor</p>
+</section>
+<section id="dreq-pio-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_TX</span></code><a class="headerlink" href="#dreq-pio-tx" title="Permalink to this heading">¶</a></h3>
+<p>( sm pio – dreq )</p>
+<p>PIO TX DREQ for <em>pio</em> block state machine <em>sm</em> transmit.</p>
+</section>
+<section id="dreq-pio-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_RX</span></code><a class="headerlink" href="#dreq-pio-rx" title="Permalink to this heading">¶</a></h3>
+<p>( sm pio – dreq )</p>
+<p>PIO RX DREQ for <em>pio</em> block state machine <em>sm</em> receive.</p>
+</section>
+<section id="dreq-spi-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_TX</span></code><a class="headerlink" href="#dreq-spi-tx" title="Permalink to this heading">¶</a></h3>
+<p>( spi – dreq )</p>
+<p>SPI TX DREQ for <em>spi</em> peripheral transmit.</p>
+</section>
+<section id="dreq-spi-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_RX</span></code><a class="headerlink" href="#dreq-spi-rx" title="Permalink to this heading">¶</a></h3>
+<p>( spi – dreq )</p>
+<p>SPI RX DREQ for <em>spi</em> peripheral receive.</p>
+</section>
+<section id="dreq-uart-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_TX</span></code><a class="headerlink" href="#dreq-uart-tx" title="Permalink to this heading">¶</a></h3>
+<p>( uart – dreq )</p>
+<p>UART TX DREQ for <em>uart</em> peripheral transmit.</p>
+</section>
+<section id="dreq-uart-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_RX</span></code><a class="headerlink" href="#dreq-uart-rx" title="Permalink to this heading">¶</a></h3>
+<p>( uart – dreq )</p>
+<p>UART RX DREQ for <em>uart</em> peripheral receive.</p>
+</section>
+<section id="dreq-pwm-wrap">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PWM_WRAP</span></code><a class="headerlink" href="#dreq-pwm-wrap" title="Permalink to this heading">¶</a></h3>
+<p>( pwm – dreq )</p>
+<p>PWM DREQ for <em>pwm</em> slice.</p>
+</section>
+<section id="dreq-i2c-tx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_TX</span></code><a class="headerlink" href="#dreq-i2c-tx" title="Permalink to this heading">¶</a></h3>
+<p>( i2c – dreq )</p>
+<p>I2C TX DREQ for <em>i2c</em> peripheral transmit.</p>
+</section>
+<section id="dreq-i2c-rx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_RX</span></code><a class="headerlink" href="#dreq-i2c-rx" title="Permalink to this heading">¶</a></h3>
+<p>( i2c – dreq )</p>
+<p>I2C RX DREQ for <em>i2c</em> peripheral receive.</p>
+</section>
+<section id="dreq-adc">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_ADC</span></code><a class="headerlink" href="#dreq-adc" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>ADC DREQ.</p>
+</section>
+<section id="dreq-xip-stream">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_STREAM</span></code><a class="headerlink" href="#dreq-xip-stream" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>XIP STREAM DREQ.</p>
+</section>
+<section id="dreq-xip-ssitx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSITX</span></code><a class="headerlink" href="#dreq-xip-ssitx" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>XIP SSITX DREQ.</p>
+</section>
+<section id="dreq-xip-ssirx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSIRX</span></code><a class="headerlink" href="#dreq-xip-ssirx" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>XIP SSIRX DREQ.</p>
+</section>
+<section id="treq-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_TIMER</span></code><a class="headerlink" href="#treq-timer" title="Permalink to this heading">¶</a></h3>
+<p>( timer – treq )</p>
+<p>DMA timer <em>timer</em>, from 0 to 3, as TREQ.</p>
+</section>
+<section id="treq-unpaced">
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_UNPACED</span></code><a class="headerlink" href="#treq-unpaced" title="Permalink to this heading">¶</a></h3>
+<p>( – treq )</p>
+<p>Unpaced transfer TREQ.</p>
+</section>
+<section id="start-register-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma</span></code><a class="headerlink" href="#start-register-register-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-register-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma</span></code><a class="headerlink" href="#start-register-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-buffer-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma</span></code><a class="headerlink" href="#start-buffer-register-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-buffer-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#start-buffer-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="dma-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-timer!</span></code><a class="headerlink" href="#dma-timer" title="Permalink to this heading">¶</a></h3>
+<p>( dividend divisor timer – )</p>
+<p>Set DMA <em>timer</em> clock <em>dividend</em> and <em>divisor</em>.</p>
+</section>
+<section id="spin-wait-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">spin-wait-dma</span></code><a class="headerlink" href="#spin-wait-dma" title="Permalink to this heading">¶</a></h3>
+<p>( channel – )</p>
+<p>Spin wait for DMA <em>channel</em> completion</p>
+</section>
+<section id="wait-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-dma</span></code><a class="headerlink" href="#wait-dma" title="Permalink to this heading">¶</a></h3>
+<p>( channel – )</p>
+<p>Non-busy wait for DMA <em>channel</em> completion</p>
+</section>
+<section id="halt-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">halt-dma</span></code><a class="headerlink" href="#halt-dma" title="Permalink to this heading">¶</a></h3>
+<p>( channel – )</p>
+<p>Halt DMA <em>channel</em></p>
+</section>
+<section id="abort-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">abort-dma</span></code><a class="headerlink" href="#abort-dma" title="Permalink to this heading">¶</a></h3>
+<p>( channel – )</p>
+<p>Abort DMA <em>channel</em></p>
+</section>
+<section id="dma-src-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-src-addr&#64;</span></code><a class="headerlink" href="#dma-src-addr" title="Permalink to this heading">¶</a></h3>
+<p>( channel – addr )</p>
+<p>Get DMA <em>channel</em> source address</p>
+</section>
+<section id="dma-dest-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-dest-addr&#64;</span></code><a class="headerlink" href="#dma-dest-addr" title="Permalink to this heading">¶</a></h3>
+<p>( channel – addr )</p>
+<p>Get DMA <em>channel</em> destination address</p>
+</section>
+<section id="dma-remaining">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-remaining&#64;</span></code><a class="headerlink" href="#dma-remaining" title="Permalink to this heading">¶</a></h3>
+<p>( channel – remaining )</p>
+<p>Get outstanding bytes transferred</p>
+</section>
+</section>
+<section id="dma-pool">
+<h2><code class="docutils literal notranslate"><span class="pre">dma-pool</span></code><a class="headerlink" href="#dma-pool" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dma-pool</span></code> module contains the following words:</p>
+<section id="x-no-dma-channels-available">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-channels-available</span></code><a class="headerlink" href="#x-no-dma-channels-available" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>No DMA channels available exception.</p>
+</section>
+<section id="x-dma-channel-already-free">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dma-channel-already-free</span></code><a class="headerlink" href="#x-dma-channel-already-free" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>DMA channel is already free.</p>
+</section>
+<section id="allocate-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-dma</span></code><a class="headerlink" href="#allocate-dma" title="Permalink to this heading">¶</a></h3>
+<p>( – channel )</p>
+<p>Allocate a DMA channel.</p>
+</section>
+<section id="free-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">free-dma</span></code><a class="headerlink" href="#free-dma" title="Permalink to this heading">¶</a></h3>
+<p>( channel – )</p>
+<p>Free a DMA channel</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="timer.html" title="previous chapter">Hardware Timers</a></li>
+      <li>Next: <a href="sdcard.html" title="next chapter">SDHC/SDXC Card Support</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/dma.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

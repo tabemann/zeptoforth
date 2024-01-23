@@ -26,6 +26,7 @@ Zeptoforth Documentation
    words/pwm
    words/rtc
    words/timer
+   words/dma
    words/sdcard
    words/fat32
    words/simple_fat32
@@ -72,6 +73,7 @@ Zeptoforth Documentation
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils
+   extra/turtle
    extra/neopixel
    extra/net
    extra/net_ntp
