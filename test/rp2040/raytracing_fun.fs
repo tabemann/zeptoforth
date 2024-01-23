@@ -93,38 +93,6 @@ begin-module raytracing-fun
     2field: ray-t
   end-structure
 
-  \
-  \ NOTE: This SQRT implementation is included because there is a bug
-  \ in the existing SQRT implementation; it has been fixed in 'main'
-  \ and 'devel' but is not in a release yet.
-  \
-
-  \ Calculate whether a square root is close enough
-  : sqrt-close-enough ( f1 f2 -- flag )
-    4dup d- 2rot dabs 2rot dabs dmax f/ dabs 2 0 d<
-  ;
-  
-  \ Calculate a better square root guess
-  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 0 2 f/ ;
-  
-  \ Calculate a square root
-  : sqrt ( f1 -- f2 )
-    64 >r
-    2dup 0 2 f/
-    begin
-      r@ 0> if
-        4dup f/ 2over sqrt-close-enough if
-          rdrop 2nip true
-        else
-          r> 1- >r 4dup sqrt-better-guess 2nip false
-        then
-      else
-        rdrop 2nip true
-      then
-    until
-  ;
-  
-
   \ Fire a ray
   : ray ( D: x D: y D: z D: u D: v D: w D: q -- color )
     ray-data-size [: { data }
