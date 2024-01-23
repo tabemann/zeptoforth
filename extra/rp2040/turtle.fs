@@ -105,7 +105,7 @@ begin-module turtle
     color x0 screen-height 1- y0 - x1 screen-height 1- y1 - my-display
     draw-pixel-line
   ;
-  
+
   \ Draw the turtle
   : draw-turtle ( -- )
     turtle-x f>s save-width 2 / -
@@ -138,30 +138,30 @@ begin-module turtle
   : setturtlecolor ( r g b -- ) rgb16 to turtle-color ;
 
   \ Go forward
-  : forward { pixels -- } [char] a internal::serial-emit
-    inited? not if true to inited? init-turtle then [char] b internal::serial-emit
-    erase-turtle [char] c internal::serial-emit
-    turtle-angle cos pixels s>f f* turtle-x d+ { D: dest-x } [char] d internal::serial-emit
-    turtle-angle sin pixels s>f f* turtle-y d+ { D: dest-y } [char] e internal::serial-emit
-    pen-down? if [char] f internal::serial-emit
-      pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s draw-line [char] g internal::serial-emit
-    then [char] h internal::serial-emit
-    dest-x to turtle-x [char] i internal::serial-emit
-    dest-y to turtle-y [char] j internal::serial-emit
-    draw-turtle [char] k internal::serial-emit
-    my-display update-display [char] l internal::serial-emit
+  : forward { pixels -- } \ [char] a emit .s
+    inited? not if true to inited? init-turtle then \ [char] b emit .s
+    erase-turtle \ [char] c emit .s
+    turtle-angle cos pixels s>f f* turtle-x d+ { D: dest-x } \ [char] d emit .s
+    turtle-angle sin pixels s>f f* turtle-y d+ { D: dest-y } \ [char] e emit .s
+    pen-down? if \ [char] f emit .s
+      pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s draw-line \ [char] g emit .s
+    then \ [char] h emit .s
+    dest-x to turtle-x \ [char] i emit .s
+    dest-y to turtle-y \ [char] j emit .s
+    draw-turtle \ [char] k emit .s
+    my-display update-display \ [char] l emit .s
   ;
 
   \ Go backward
   : backward ( pixels -- ) -1 * forward ;
 
   \ Go left; angle is in degrees
-  : left { angle -- }
-    inited? not if true to inited? init-turtle then
-    erase-turtle
-    angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* +to turtle-angle
-    draw-turtle
-    my-display update-display
+  : left { angle -- } \ [char] m emit .s
+    inited? not if true to inited? init-turtle then \ [char] n emit .s
+    erase-turtle \ [char] o emit .s
+    angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* +to turtle-angle \ [char] p emit .s
+    draw-turtle \ [char] q emit .s
+    my-display update-display \ [char] r emit .s
   ;
 
   \ Go right: angle is in degrees

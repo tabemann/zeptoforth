@@ -167,6 +167,7 @@ commit-flash
 
 \ Calculate sin(x)
 : sin ( f1 -- f2 )
+  [ pi 0 2 f* swap ] literal literal fmod
   2dup 2dup >r >r 1 0 begin
     2swap 2r@ f* 2r@ f*
     2over 2 0 d* d/
@@ -185,7 +186,7 @@ commit-flash
 ;
 
 \ Calculate cos(x)
-: cos ( f1 -- f2 ) pi 2 0 d/ 2swap d- sin ;
+: cos ( f1 -- f2 ) pi 0 2 f/ 2swap d- sin ;
 
 commit-flash
 
