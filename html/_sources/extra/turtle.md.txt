@@ -78,4 +78,4 @@ Clear the display but leave the turtle in the same position and heading (and it 
 ##### `setpensize`
 ( pixels -- )
 
-This is currently a no-op but that will likely change in the near future.
+Set the pen size in pixels.

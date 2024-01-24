@@ -81,6 +81,9 @@ begin-module turtle
     \ The turtle color
     0 255 0 rgb16 value turtle-color
 
+    \ Pen size
+    1 value pen-size
+    
     \ Inited?
     false value inited?
 
@@ -103,9 +106,25 @@ begin-module turtle
     ;
 
     \ Draw a line
-    : draw-line { color x0 y0 x1 y1 -- }
-      color x0 screen-height 1- y0 - x1 screen-height 1- y1 - my-display
-      draw-pixel-line
+    : draw-line { weight color x0 y0 x1 y1 -- }
+      screen-height 1- y0 - to y0
+      screen-height 1- y1 - to y1
+      weight 1 = if
+        color x0 y0 x1 y1 my-display draw-pixel-line
+      else
+        weight 1 > if
+          1 +to weight
+          weight color x0 y0 x1 y1 weight dup dup bitmap::bitmap-buf-size [:
+            swap dup bitmap::<bitmap> [: { weight color x0 y0 x1 y1 brush }
+              brush bitmap::clear-bitmap
+              $FF weight 2 / dup dup bitmap::op-set brush
+              bitmap-utils::draw-filled-circle
+              color 0 dup weight dup x0 y0 x1 y1 brush my-display
+              draw-bitmap-line
+            ;] with-object
+          ;] with-aligned-allot
+        then
+      then
     ;
 
     \ Draw the turtle
@@ -113,23 +132,23 @@ begin-module turtle
       turtle-x f>s save-width 2 / -
       screen-height turtle-y f>s - save-height 2 / -
       0 0 save-width save-height my-display my-save draw-rect
-      turtle-angle cos { D: turtle-angle-cos }
-      turtle-angle sin { D: turtle-angle-sin }
-      turtle-angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
-      turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
-      turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
-      turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
-      turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
-      right-angle cos { D: right-angle-cos }
-      right-angle sin { D: right-angle-sin }
-      right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
-      right-angle-sin turtle-height 2 / s>f f* base-y d+ f>s { right-y }
-      right-angle-cos turtle-width -2 / s>f f* base-x d+ f>s { left-x }
-      right-angle-sin turtle-height -2 / s>f f* base-y d+ f>s { left-y }
       show-turtle? if
-        turtle-color left-x left-y right-x right-y draw-line
-        turtle-color left-x left-y tip-x tip-y draw-line
-        turtle-color right-x right-y tip-x tip-y draw-line
+        turtle-angle cos { D: turtle-angle-cos }
+        turtle-angle sin { D: turtle-angle-sin }
+        turtle-angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
+        turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
+        turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
+        turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
+        turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
+        right-angle cos { D: right-angle-cos }
+        right-angle sin { D: right-angle-sin }
+        right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
+        right-angle-sin turtle-height 2 / s>f f* base-y d+ f>s { right-y }
+        right-angle-cos turtle-width -2 / s>f f* base-x d+ f>s { left-x }
+        right-angle-sin turtle-height -2 / s>f f* base-y d+ f>s { left-y }
+        1 turtle-color left-x left-y right-x right-y draw-line
+        1 turtle-color left-x left-y tip-x tip-y draw-line
+        1 turtle-color right-x right-y tip-x tip-y draw-line
       then
     ;
 
@@ -148,7 +167,8 @@ begin-module turtle
     turtle-angle cos pixels s>f f* turtle-x d+ { D: dest-x }
     turtle-angle sin pixels s>f f* turtle-y d+ { D: dest-y }
     pen-down? if
-      pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s draw-line
+      pen-size pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s
+      draw-line
     then
     dest-x to turtle-x
     dest-y to turtle-y
@@ -215,7 +235,7 @@ begin-module turtle
   ;
 
   \ Set pen size
-  : setpensize { pixels -- } ;
+  : setpensize ( pixels -- ) to pen-size ;
 
   \ Clear the display
   : clear ( -- )
