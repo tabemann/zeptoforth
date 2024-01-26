@@ -70,6 +70,16 @@ Hide the turtle.
 
 Show the turtle.
 
+##### `updateoff`
+( -- )
+
+Disable updating the display.
+
+##### `updateon`
+( -- )
+
+Enable updating the display, and update it.
+
 ##### `clear`
 ( -- )
 

@@ -87,6 +87,9 @@ begin-module turtle
     \ Inited?
     false value inited?
 
+    \ Update display?
+    true value update-display?
+
     \ Initialize the turtle
     : init-turtle ( -- )
       lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
@@ -173,7 +176,7 @@ begin-module turtle
     dest-x to turtle-x
     dest-y to turtle-y
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
   \ Go backward
@@ -185,7 +188,7 @@ begin-module turtle
     erase-turtle
     angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* +to turtle-angle
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
   \ Go right: angle is in degrees
@@ -204,7 +207,7 @@ begin-module turtle
     x s>f to turtle-x
     y s>f to turtle-y
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
   \ Set the angle, from the y axis, of the turtle
@@ -213,7 +216,7 @@ begin-module turtle
     erase-turtle
     angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* to turtle-angle
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
   \ Hide the turtle
@@ -222,7 +225,7 @@ begin-module turtle
     erase-turtle
     false to show-turtle?
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
   \ Show the turtle
@@ -231,6 +234,15 @@ begin-module turtle
     erase-turtle
     true to show-turtle?
     draw-turtle
+    update-display? if my-display update-display then
+  ;
+
+  \ Turn off updating the display
+  : updateoff ( -- ) false to update-display? ;
+
+  \ Turn on updating the display
+  : updateon ( -- )
+    true to update-display?
     my-display update-display
   ;
 
@@ -244,7 +256,7 @@ begin-module turtle
     my-display clear-pixmap
     my-save clear-pixmap
     draw-turtle
-    my-display update-display
+    update-display? if my-display update-display then
   ;
 
 end-module
