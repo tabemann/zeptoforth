@@ -70,3 +70,4 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-Meta-K: Copy the current selection and transfer it to the clipboard.
 * Control-Y: Paste the contents of the clipboard at the cursor.
 * Control-Z: Carry out one undo; note that some operations have their undos combined, while others may be split into multiple undos (i.e. are non-atomic).
+* Control-L: Refresh the display, e.g. if the terminal has changed size.
