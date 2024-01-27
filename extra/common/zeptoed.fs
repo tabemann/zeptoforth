@@ -54,6 +54,7 @@ begin-module zeptoed-internal
   $05 constant ctrl-e
   $06 constant ctrl-f
   $0B constant ctrl-k
+  $0C constant ctrl-l
   $0E constant ctrl-n
   $0F constant ctrl-o
   $10 constant ctrl-p
@@ -837,6 +838,9 @@ begin-module zeptoed-internal
 
     \ Handle editor unindent
     method handle-editor-unindent ( editor -- )
+
+    \ Handle editor refresh
+    method handle-editor-refresh ( editor -- )
 
     \ Handle a special key
     method handle-special ( editor -- )
@@ -3409,6 +3413,14 @@ begin-module zeptoed-internal
       then
     ; define handle-editor-unindent
 
+    \ Handle editor refresh
+    :noname { editor -- }
+      page
+      reset-ansi-term
+      get-terminal-size display-width ! display-height !
+      editor refresh-editor
+    ; define handle-editor-refresh
+
     \ Handle a special key
     :noname { editor -- }
       get-key case
@@ -3474,6 +3486,7 @@ begin-module zeptoed-internal
             ctrl-k of editor handle-editor-kill endof
             ctrl-y of editor handle-editor-paste endof
             ctrl-z of editor handle-editor-undo endof
+            ctrl-l of editor handle-editor-refresh endof
             escape of editor handle-escape endof
           endcase
           depth 0< if ." *** " then \ DEBUG
@@ -3497,7 +3510,6 @@ end-implement
     reset-ansi-term
     get-terminal-size display-width ! display-height !
   ;
-
 
   \ Calculate heap size
   : get-heap-size ( -- heap-size )
