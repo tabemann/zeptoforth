@@ -2757,6 +2757,7 @@ begin-module zeptoed-internal
       else
         buffer refresh-display
         s" Reverted file" buffer buffer-editor @ editor-minibuffer @ set-message
+        buffer clear-undos
       then
     ; define handle-revert
     
