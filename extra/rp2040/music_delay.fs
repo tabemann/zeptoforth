@@ -25,7 +25,7 @@ begin-module music
   oo import
   pin import
   pwm import
-  timer import
+  systick import
   
   begin-module music-internal
 
@@ -139,9 +139,12 @@ begin-module music
 
       \ Play a note at a given time in micrseconds
       method play-note ( us voice -- )
-    
+      
     end-module
 
+    \ Get the current note's end
+    method note-end@ ( voice -- us )
+    
     \ Play a voice
     method play-voice ( us voice -- )
     
@@ -161,7 +164,7 @@ begin-module music
       part @ voice voice-end !
       part cell+ voice voice-start !
       voice voice-start @ voice current-note !
-      us-counter-lsb voice note-start !
+      systick-counter 100 * voice note-start !
       false voice playing-voice !
     ; define new
     
@@ -213,7 +216,8 @@ begin-module music
           else
             voice tone-off true
           then
-        else
+        else 
+          false voice playing-voice !
           voice tone-off true
         then
       until
@@ -224,7 +228,7 @@ begin-module music
       voice playing-voice @ if
         voice current-note @ voice voice-end @ < if
           us voice note-start @ -
-          voice current-note @ note-length h@ 1000 * > if
+          voice current-note @ note-length h@ 1000 * >= if
             note-size voice current-note +!
             us voice play-note
           then
@@ -247,24 +251,52 @@ begin-module music
     \ Is a voice playing?
     :noname ( voice -- playing? ) playing-voice @ ; define voice-playing?
     
+    \ Get the current note's end
+    :noname { voice -- us }
+      voice playing-voice @ if
+        voice current-note @ note-pitch h@ lyric-pitch <> if
+          voice note-start @ voice current-note @ note-length h@ 1000 * +
+        else
+          0
+        then
+      else
+        -1
+      then
+    ; define note-end@
+
   end-implement
 
   \ Play a set of voices
   : play-voices ( voicen ... voice0 count -- )
     dup cells [: { count array }
       count 0 ?do array i cells + ! loop
-      us-counter-lsb { us }
-      count 0 ?do us array i cells + @ play-voice loop
+      systick-counter { start-systick }
+      count 0 ?do start-systick 100 * array i cells + @ play-voice loop
       begin
         false { playing? }
-        us-counter-lsb to us
         count 0 ?do
           array i cells + @ { voice }
           voice voice-playing? if
             true to playing?
-            us voice play-voice
+            start-systick 100 * voice play-voice
           then
         loop
+        playing? if
+          -1 1 rshift { min-length }
+          count 0 ?do
+            array i cells + @ { voice }
+            voice voice-playing? if
+              voice voice-playing? if
+                voice note-end@ 100 / min-length min to min-length
+              then
+            then
+          loop
+          -1 1 rshift min-length <> if
+            min-length start-systick - { delay-ticks }
+            delay-ticks start-systick task::current-task task::delay
+            delay-ticks +to start-systick
+          then
+        then
         playing? not
       until
     ;] with-aligned-allot
