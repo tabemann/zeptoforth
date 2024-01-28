@@ -2442,7 +2442,11 @@ begin-module zeptoed-internal
       else
         buffer edit-cursor-offset@ buffer buffer-len@ = if exit then
         buffer edit-cursor-single-row? if
-          in-single-row
+          buffer edit-cursor-at-end? if
+            in-middle
+          else
+            in-single-row
+          then
         else
           in-middle
         then { position }
