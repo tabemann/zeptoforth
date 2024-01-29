@@ -259,6 +259,56 @@ Exponentiation of a fixed point number by an unsigned integer
 
 Compute the symmetric modulus of two S31.32 fixed point numbers.
 
+##### `ceil`
+( f -- n )
+
+Get the ceiling of a fixed-point number as a single-cell number.
+
+##### `floor`
+( f -- n )
+
+Get the floor of a fixed-point number as a single-cell number.
+
+##### `round-half-up`
+( f -- n )
+
+Round a fixed-point number up to the nearest integer with half rounding up.
+
+##### `round-half-down`
+( f -- n )
+
+Round a fixed-point number down to the nearest integer with half rounding down.
+
+##### `round-half-zero`
+( f -- n )
+
+Round a fixed-point number to the nearest integer with half rounding towards zero.
+
+##### `round-half-away-zero`
+( f -- n )
+
+Round a fixed-point number to the nearest integer with half rounding away from zero.
+
+##### `round-half-even`
+( f -- n )
+
+Round a fixed-point number to the nearest integer with half rounding towards even.
+
+##### `round-half-odd`
+( f -- n )
+
+Round a fixed-point number to the nearest integer with half rounding towards even.
+
+##### `round-zero`
+( f -- n )
+
+Round a fixed-point number towards zero.
+
+##### `round-away-zero`
+( f -- n )
+
+Round a fixed-point number away from zero.
+
 ##### `sqrt`
 ( f1 -- f2 )
 

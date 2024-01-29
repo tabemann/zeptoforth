@@ -295,6 +295,56 @@
 <p>( f1 f2 – f3 )</p>
 <p>Compute the symmetric modulus of two S31.32 fixed point numbers.</p>
 </section>
+<section id="ceil">
+<h3><code class="docutils literal notranslate"><span class="pre">ceil</span></code><a class="headerlink" href="#ceil" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Get the ceiling of a fixed-point number as a single-cell number.</p>
+</section>
+<section id="floor">
+<h3><code class="docutils literal notranslate"><span class="pre">floor</span></code><a class="headerlink" href="#floor" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Get the floor of a fixed-point number as a single-cell number.</p>
+</section>
+<section id="round-half-up">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-up</span></code><a class="headerlink" href="#round-half-up" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number up to the nearest integer with half rounding up.</p>
+</section>
+<section id="round-half-down">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-down</span></code><a class="headerlink" href="#round-half-down" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number down to the nearest integer with half rounding down.</p>
+</section>
+<section id="round-half-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-zero</span></code><a class="headerlink" href="#round-half-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards zero.</p>
+</section>
+<section id="round-half-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-away-zero</span></code><a class="headerlink" href="#round-half-away-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding away from zero.</p>
+</section>
+<section id="round-half-even">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-even</span></code><a class="headerlink" href="#round-half-even" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="round-half-odd">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-odd</span></code><a class="headerlink" href="#round-half-odd" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="round-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-zero</span></code><a class="headerlink" href="#round-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number towards zero.</p>
+</section>
+<section id="round-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-away-zero</span></code><a class="headerlink" href="#round-away-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number away from zero.</p>
+</section>
 <section id="sqrt">
 <h3><code class="docutils literal notranslate"><span class="pre">sqrt</span></code><a class="headerlink" href="#sqrt" title="Permalink to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
@@ -433,6 +483,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -463,6 +514,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -472,9 +524,12 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
