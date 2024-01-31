@@ -22,6 +22,7 @@
 \ executed to load a "big" configuration
 
 #include src/common/forth/compat.fs
+#include src/common/forth/implicit.fs
 #include src/common/forth/closure.fs
 #include src/common/forth/temp.fs
 #include src/common/forth/temp_str.fs
