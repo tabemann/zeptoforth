@@ -111,9 +111,6 @@ end-module> import
   ;] word-reset-hook !
 ;
 
-\ Begin a [: with implicit word creation
-: [: ( -- ) [immediate] try-start-implicit postpone [: ;
-
 \ Begin an IF with implicit word creation
 : if ( -- if-block ) [immediate] try-start-implicit postpone if ;
 
@@ -129,32 +126,50 @@ end-module> import
 \ Begin a CASE with implicit word creation
 : case ( -- case-block ) [immediate] try-start-implicit postpone case ;
 
-\ End a ;] with implicit word ending
-: ;] ( -- ) [immediate] postpone ;] try-end-implicit ;
+\ End an IF/ELSE with THEN with implicit word ending
+: then ( if-block -- )
+  [immediate] [compile-only] postpone then try-end-implicit
+;
 
-\ End a THEN with implicit word ending
-: then ( if-block -- ) [immediate] postpone then try-end-implicit ;
+\ End a BEGIN with END with implicit word ending
+: end ( begin-block -- )
+  [immediate] [compile-only] postpone end try-end-implicit
+;
 
-\ End an UNTIL with implicit word ending
-: until ( begin-block -- ) [immediate] postpone until try-end-implicit ;
+\ End a BEGIN with UNTIL with implicit word ending
+: until ( begin-block -- )
+  [immediate] [compile-only] postpone until try-end-implicit
+;
 
-\ End a REPEAT with implicit word ending
-: repeat ( while-block -- ) [immediate] postpone repeat try-end-implicit ;
+\ End a WHILE with REPEAT with implicit word ending
+: repeat ( while-block -- )
+  [immediate] [compile-only] postpone repeat try-end-implicit
+;
 
-\ End an AGAIN with implicit word ending
-: again ( begin-block -- ) [immediate] postpone again try-end-implicit ;
+\ End a BEGIN with AGAIN with implicit word ending
+: again ( begin-block -- )
+  [immediate] [compile-only] postpone again try-end-implicit
+;
 
-\ End a LOOP with implicit word ending
-: loop ( do-block -- ) [immediate] postpone loop try-end-implicit ;
+\ End a DO/?DO with LOOP with implicit word ending
+: loop ( do-block -- )
+  [immediate] [compile-only] postpone loop try-end-implicit
+;
 
-\ End a +LOOP with implicit word ending
-: +loop ( do-block -- ) [immediate] postpone +loop try-end-implicit ;
+\ End a DO/?DO with LOOP with implicit word ending
+: +loop ( do-block -- )
+  [immediate] [compile-only] postpone +loop try-end-implicit
+;
 
-\ End an ENDCASE with implicit word ending
-: endcase ( case-block -- ) [immediate] postpone endcase try-end-implicit ;
+\ End a CASE with ENDCASE with implicit word ending
+: endcase ( case-block -- )
+  [immediate] [compile-only] postpone endcase try-end-implicit
+;
 
-\ End an ENDCASESTR with implicit word ending
-: endcasestr ( case-block -- ) [immediate] postpone endcasestr try-end-implicit ;
+\ End a CASE with ENDCASESTR with implicit word ending
+: endcasestr ( case-block -- )
+  [immediate] [compile-only] postpone endcasestr try-end-implicit
+;
 
 implicit-internal unimport
 

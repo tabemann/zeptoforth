@@ -783,6 +783,16 @@ commit-flash
   then
 ;
 
+\ Start an END statement
+: end ( -- )
+  [immediate]
+  [compile-only]
+  syntax-begin verify-syntax drop-syntax
+  drop
+  undefer-lit
+  end-block
+;
+
 \ Start a CASE statement
 : case ( -- )
   [immediate]
