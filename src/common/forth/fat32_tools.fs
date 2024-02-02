@@ -177,7 +177,9 @@ begin-module fat32-tools
                 date-time date-time. space
                 date-time 2 pick modify-date-time@
                 date-time date-time. space
-                over entry-file-size @ 10 compat::u.r
+                over entry-file? if
+                  over entry-file-size @ 10 compat::u.r
+                then
                 false
               ;] with-aligned-allot
             ;] with-allot
