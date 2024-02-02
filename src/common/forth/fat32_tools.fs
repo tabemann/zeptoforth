@@ -159,10 +159,10 @@ begin-module fat32-tools
 
     \ List a directory with file sizes
     : list-dir ( dir -- )
-      cr ." filename      creation date              modification date        "
-      ."   file size"
-      cr ." ------------  -------------------------  -------------------------"
-      ."   ----------"
+      cr ." filename     creation date             modification date        "
+      ."  file size"
+      cr ." ------------ ------------------------- -------------------------"
+      ."  ----------"
       <fat32-entry> class-size [:
         swap
         begin
@@ -172,11 +172,11 @@ begin-module fat32-tools
                 file-name-buf 12 3 pick file-name@ { file-name-len } drop
                 cr file-name-buf file-name-len type
                 over entry-dir? if ." /" 1 +to file-name-len then
-                14 file-name-len - spaces
+                13 file-name-len - spaces
                 date-time 2 pick create-date-time@
-                date-time date-time. 2 spaces
+                date-time date-time. space
                 date-time 2 pick modify-date-time@
-                date-time date-time. 2 spaces
+                date-time date-time. space
                 over entry-file-size @ 10 compat::u.r
                 false
               ;] with-aligned-allot
