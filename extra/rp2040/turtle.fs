@@ -69,11 +69,11 @@ begin-module turtle
     true value show-turtle?
 
     \ The turtle position
-    screen-width s>f 2,0 f/ 2value turtle-x
-    screen-height s>f 2,0 f/ 2value turtle-y
+    0,0 2value turtle-x
+    0,0 2value turtle-y
 
     \ The turtle angle
-    pi 2,0 f/ 2value turtle-angle
+    0 value turtle-angle
     
     \ The pen color
     255 255 255 rgb16 value pen-color
@@ -101,17 +101,28 @@ begin-module turtle
       my-save clear-pixmap
     ;
 
+    \ Convert an angle
+    : convert-angle ( angle -- D: real-angle )
+      s>f [ pi 180,0 f/ swap ] literal literal f*
+      [ pi 2,0 f/ swap ] literal literal d+
+    ;
+
+    \ Convert a coordinate
+    : convert-coord ( x y -- x' y' )
+      screen-height 2 / swap - swap screen-width 2 / + swap
+    ;
+
     \ Erase the turtle
     : erase-turtle ( -- )
-      0 0 turtle-x f>s save-width 2 / -
-      screen-height turtle-y f>s - save-height 2 / -
+      turtle-x f>s turtle-y f>s convert-coord { x y }
+      0 0 x save-width 2 / - y save-height 2 / -
       save-width save-height my-save my-display draw-rect
     ;
 
     \ Draw a line
     : draw-line { weight color x0 y0 x1 y1 -- }
-      screen-height 1- y0 - to y0
-      screen-height 1- y1 - to y1
+      x0 y0 convert-coord to y0 to x0
+      x1 y1 convert-coord to y1 to x1
       weight 1 = if
         color x0 y0 x1 y1 my-display draw-pixel-line
       else
@@ -132,17 +143,18 @@ begin-module turtle
 
     \ Draw the turtle
     : draw-turtle ( -- )
-      turtle-x f>s save-width 2 / -
-      screen-height turtle-y f>s - save-height 2 / -
+      turtle-x f>s turtle-y f>s convert-coord { x y }
+      x save-width 2 / - y save-height 2 / -
       0 0 save-width save-height my-display my-save draw-rect
       show-turtle? if
-        turtle-angle cos { D: turtle-angle-cos }
-        turtle-angle sin { D: turtle-angle-sin }
-        turtle-angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
-        turtle-angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
-        turtle-angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
-        turtle-angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
-        turtle-angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
+        turtle-angle convert-angle { D: angle }
+        angle cos { D: angle-cos }
+        angle sin { D: angle-sin }
+        angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
+        angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
+        angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
+        angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
+        angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
         right-angle cos { D: right-angle-cos }
         right-angle sin { D: right-angle-sin }
         right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
@@ -167,8 +179,8 @@ begin-module turtle
   : forward { pixels -- }
     inited? not if true to inited? init-turtle then
     erase-turtle
-    turtle-angle cos pixels s>f f* turtle-x d+ { D: dest-x }
-    turtle-angle sin pixels s>f f* turtle-y d+ { D: dest-y }
+    turtle-angle convert-angle cos pixels s>f f* turtle-x d+ { D: dest-x }
+    turtle-angle convert-angle sin pixels s>f f* turtle-y d+ { D: dest-y }
     pen-down? if
       pen-size pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s
       draw-line
@@ -186,7 +198,7 @@ begin-module turtle
   : left { angle -- }
     inited? not if true to inited? init-turtle then
     erase-turtle
-    angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* +to turtle-angle
+    angle +to turtle-angle
     draw-turtle
     update-display? if my-display update-display then
   ;
@@ -200,23 +212,41 @@ begin-module turtle
   \ Set the pen down
   : pendown ( -- ) true to pen-down? ;
 
+  \ Get whether the pen is down
+  : getpendown ( -- pendown? ) pen-down? ;
+  
   \ Set the x/y coordinate of the turtle
   : setxy { x y -- }
     inited? not if true to inited? init-turtle then
     erase-turtle
+    pen-down? if
+      pen-size pen-color turtle-x f>s turtle-y f>s x y draw-line
+    then
     x s>f to turtle-x
     y s>f to turtle-y
     draw-turtle
     update-display? if my-display update-display then
   ;
 
-  \ Set the angle, from the y axis, of the turtle
+  \ Get the x/y coordinate of the turtle - note that this is only accurate to
+  \ the pixel, so calling GETXY and then using the same values for SETXY may
+  \ lose precision.
+  : getxy ( -- x y )
+    turtle-x f>s turtle-y f>s
+  ;
+  
+  \ Set the angle, from pointing up, of the turtle
   : setheading { angle -- }
     inited? not if true to inited? init-turtle then
     erase-turtle
-    angle s>f [ 2,0 pi f* 360,0 f/ swap ] literal literal f* to turtle-angle
+    angle to turtle-angle
     draw-turtle
     update-display? if my-display update-display then
+  ;
+
+  \ Get the heading of the turtle, from pointing up
+  : getheading ( -- angle )
+    turtle-angle
   ;
 
   \ Hide the turtle
@@ -237,6 +267,9 @@ begin-module turtle
     update-display? if my-display update-display then
   ;
 
+  \ Get whether the turtle is shown
+  : getshowturtle ( --  showturtle? ) show-turtle? ;
+
   \ Turn off updating the display
   : updateoff ( -- ) false to update-display? ;
 
@@ -246,8 +279,14 @@ begin-module turtle
     my-display update-display
   ;
 
+  \ Get whether updates are on
+  : getupdateon ( -- updateon? )  update-display? ;
+
   \ Set pen size
   : setpensize ( pixels -- ) to pen-size ;
+
+  \ Get whether updates are on
+  : getpensize ( -- pixels ) pen-size ;
 
   \ Clear the display
   : clear ( -- )
@@ -259,4 +298,17 @@ begin-module turtle
     update-display? if my-display update-display then
   ;
 
+  \ Move the turtle to home position
+  : home ( -- )
+    inited? not if true to inited? init-turtle then
+    getupdateon { saved-updateon }
+    getpendown { saved-pendown }
+    updateoff
+    penup
+    0 0 setxy
+    0 setheading
+    saved-pendown if pendown then
+    saved-updateon if updateon then
+  ;
+  
 end-module
