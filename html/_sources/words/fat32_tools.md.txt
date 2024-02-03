@@ -55,7 +55,7 @@ Load code from a file with the specified path as a token in the current include 
 ##### `list-dir`
 ( path-addr path-u -- )
 
-List a directory at the specified path.
+List a directory at the specified path. Display the file creation date, modification date, and size.
 
 ##### `create-file`
 ( data-addr data-u path-addr path-u -- )
