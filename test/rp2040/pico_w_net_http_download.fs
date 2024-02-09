@@ -126,6 +126,7 @@ begin-module pico-w-net-http
   
   \ Initialize the test
   : init-test { D: ssid D: pass -- }
+    1024 256 1024 0 init-default-alarm-task
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
