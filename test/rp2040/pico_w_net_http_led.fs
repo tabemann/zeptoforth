@@ -646,13 +646,12 @@ begin-module pico-w-net-http-server
     :noname { endpoint self -- }
       endpoint find-http-server not if drop exit then { http-server }
       endpoint endpoint-tcp-state@ { state }
-      state TCP_SYN_RECEIVED = if
+      state TCP_SYN_RECEIVED = state TCP_ESTABLISHED = or state TCP_CLOSE_WAIT = or if
         http-server start-connection
-      else
-        state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
-          http-server schedule-close
-          endpoint endpoint-rx-data@ http-server handle-http-input
-        then
+      then
+      state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
+        http-server schedule-close
+        endpoint endpoint-rx-data@ http-server handle-http-input
       then
       endpoint my-interface @ endpoint-done
     ; define handle-endpoint
