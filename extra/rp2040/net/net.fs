@@ -3077,7 +3077,6 @@ begin-module net
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv4-rst
 
     \ Send a basic IPv4 TCP packet
@@ -3328,6 +3327,7 @@ begin-module net
       addr tcp-ack-no unaligned@ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
+        endpoint self put-ready-endpoint
       then
     ; define process-ipv4-ack-last-ack
 
@@ -3337,7 +3337,6 @@ begin-module net
       self send-ipv4-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv4-rst-for-ack
     
     \ \ Process an IPv4 FIN packet
@@ -3392,7 +3391,7 @@ begin-module net
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
       addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
-      endpoint wake-endpoint
+      endpoint self put-ready-endpoint
     ; define process-ipv4-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
@@ -4146,6 +4145,9 @@ begin-module net
             endof
             TCP_LAST_ACK of
               timeout start endpoint self wait-endpoint-closed
+            endof
+            TCP_CLOSED of
+              endpoint free-endpoint
             endof
           endcase
         ;] 2 pick with-ctrl-endpoint

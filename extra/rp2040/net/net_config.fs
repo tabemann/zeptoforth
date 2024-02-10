@@ -144,7 +144,7 @@ begin-module net-config
   3 value last-ack-max-refreshes
   
   \ Close timeout
-  50000 value close-timeout
+  100000 value close-timeout
 
   \ TIME_WAIT count
   8 constant time-wait-count

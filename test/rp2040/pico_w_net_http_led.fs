@@ -671,7 +671,7 @@ begin-module pico-w-net-http-server
       state TCP_SYN_RECEIVED = state TCP_ESTABLISHED = or state TCP_CLOSE_WAIT = or if
         http-server start-connection
       then
-      state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
+      state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or state TCP_CLOSED = or if
         http-server schedule-close
         endpoint endpoint-rx-data@ http-server handle-http-input
       then
