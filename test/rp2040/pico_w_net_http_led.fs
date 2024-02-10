@@ -108,6 +108,12 @@ begin-module pico-w-net-http-server
   \ Close delay in ticks
   10000 constant close-delay
   
+  \ Listen delay in ticks
+  1000 constant listen-delay
+    
+  \ Our listen alarm
+  alarm-size aligned-buffer: my-listen-alarm
+    
   \ HTTP server class
   <object> begin-class <http-server>
     
@@ -618,6 +624,21 @@ begin-module pico-w-net-http-server
   \ Our HTTP servers
   net-config::max-endpoints <http-server> class-size * buffer: http-servers
 
+  \ Our listen alarm initializer
+  defer init-listen-alarm
+  :noname ( -- )
+    listen-delay 0 0 [: ( alarm -- )
+      drop
+      net-config::max-endpoints 0 ?do
+        http-servers <http-server> class-size i * + { http-server }
+        http-server http-endpoint @ 0= if
+          http-server init-http-state
+        then
+      loop
+      init-listen-alarm
+    ;] my-listen-alarm set-alarm-delay-default
+  ; is init-listen-alarm
+
   \ Initialize our HTTP servers
   : init-http-servers ( -- )
     net-config::max-endpoints 0 ?do
@@ -626,6 +647,7 @@ begin-module pico-w-net-http-server
     net-config::max-endpoints 0 ?do
       http-servers <http-server> class-size i * + init-http-state
     loop
+    init-listen-alarm
   ;
 
   \ Find our HTTP server
