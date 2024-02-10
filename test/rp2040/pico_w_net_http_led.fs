@@ -593,8 +593,12 @@ begin-module pico-w-net-http-server
     \ Do a connection close
     :noname { self -- }
       self actually-closed? @ not if
-        self http-endpoint @ my-interface @ close-tcp-endpoint
-        self init-http-state
+        self http-endpoint @ if
+          self http-endpoint @ endpoint-tcp-state@ TCP_LISTEN <> if
+            self http-endpoint @ my-interface @ close-tcp-endpoint
+            self init-http-state
+          then
+        then
       then
     ; define actually-close
 
@@ -647,7 +651,7 @@ begin-module pico-w-net-http-server
     net-config::max-endpoints 0 ?do
       http-servers <http-server> class-size i * + init-http-state
     loop
-    init-listen-alarm
+    \ init-listen-alarm
   ;
 
   \ Find our HTTP server

@@ -4128,7 +4128,15 @@ begin-module net
       systick::systick-counter { start }
       task::timeout @ start 2swap [:
         [: { timeout start endpoint self }
-          endpoint endpoint-tcp-state@ case
+          endpoint [: { endpoint }
+            endpoint endpoint-tcp-state@ dup case
+              TCP_LISTEN of
+                TCP_CLOSED endpoint endpoint-tcp-state!
+                endpoint free-endpoint
+              endof
+            endcase
+          ;] endpoint with-endpoint
+          case
             TCP_SYN_SENT of endpoint self send-ipv4-rst endof
             TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
             TCP_ESTABLISHED of
