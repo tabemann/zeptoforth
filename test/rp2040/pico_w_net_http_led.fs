@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,7 @@ begin-module pico-w-net-http-server
   net import
   endpoint-process import
   alarm import
+  lock import
   simple-cyw43-net import
   pico-w-cyw43-net import
 
@@ -116,6 +117,9 @@ begin-module pico-w-net-http-server
     
   \ HTTP server class
   <object> begin-class <http-server>
+    
+    \ HTTP server lock
+    lock-size member http-lock
     
     \ HTTP server endpoint
     cell member http-endpoint
@@ -266,6 +270,7 @@ begin-module pico-w-net-http-server
       0 self out-buffer-offset !
       0 self http-endpoint !
       true self actually-closed? !
+      self http-lock init-lock
     ; define new
 
     \ Match HTTP server
@@ -433,8 +438,10 @@ begin-module pico-w-net-http-server
 
     \ Send output
     :noname { self -- }
-      self out-buffer self out-buffer-offset @
-      self http-endpoint @ my-interface @ send-tcp-endpoint
+      self http-endpoint @ ?dup if { endpoint }
+        self out-buffer self out-buffer-offset @
+        endpoint my-interface @ send-tcp-endpoint
+      then
       0 self out-buffer-offset !
     ; define send-output
 
@@ -592,14 +599,16 @@ begin-module pico-w-net-http-server
     
     \ Do a connection close
     :noname { self -- }
-      self actually-closed? @ not if
-        self http-endpoint @ if
-          self http-endpoint @ endpoint-tcp-state@ TCP_LISTEN <> if
-            self http-endpoint @ my-interface @ close-tcp-endpoint
-            self init-http-state
+      self [: { self }
+        self actually-closed? @ not if
+          self http-endpoint @ ?dup if { endpoint }
+            endpoint endpoint-tcp-state@ TCP_LISTEN <> if
+              endpoint my-interface @ close-tcp-endpoint
+              self init-http-state
+            then
           then
         then
-      then
+      ;] self http-lock with-lock
     ; define actually-close
 
     \ Schedule a connection close
@@ -670,16 +679,20 @@ begin-module pico-w-net-http-server
     
     \ Handle an HTTP request
     :noname { endpoint self -- }
-      endpoint find-http-server not if drop exit then { http-server }
-      endpoint endpoint-tcp-state@ { state }
-      state TCP_SYN_RECEIVED = state TCP_ESTABLISHED = or state TCP_CLOSE_WAIT = or if
-        http-server start-connection
-      then
-      state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or state TCP_CLOSED = or if
-        http-server schedule-close
-        endpoint endpoint-rx-data@ http-server handle-http-input
-      then
-      endpoint my-interface @ endpoint-done
+      endpoint find-http-server not if
+        endpoint my-interface @ endpoint-done drop exit
+      then { http-server }
+      endpoint self http-server [: { endpoint self http-server }
+        endpoint endpoint-tcp-state@ { state }
+        state TCP_SYN_RECEIVED = state TCP_ESTABLISHED = or state TCP_CLOSE_WAIT = or if
+          http-server start-connection
+        then
+        state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or state TCP_CLOSED = or if
+          http-server schedule-close
+          endpoint endpoint-rx-data@ http-server handle-http-input
+        then
+        endpoint my-interface @ endpoint-done
+      ;] http-server http-lock with-lock
     ; define handle-endpoint
   
   end-implement
