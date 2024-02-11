@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module mandelbrot
+begin-module julia
 
   \ Displayed X size
   80 constant width
@@ -33,24 +33,24 @@ begin-module mandelbrot
 
   \ The maximum number of iterations
   color c@ 1- constant max-iteration
-  
-  \ Mandelbrot test
-  : draw { D: xa D: xb D: ya D: yb -- }
-    xb xa d- { D: x-mult }
-    yb ya d- { D: y-mult }
+
+  \ Initialize the test
+  \ Julia test
+  : draw { D: cx D: cy D: r -- }
+    r 2,0 f* { D: 2r }
+    r r f* { D: r2** }
     height 0 ?do
       cr
       width 0 ?do
-        i s>f width s>f f/ x-mult f* xa d+ { D: x0 }
-        height j - s>f height s>f f/ y-mult f* ya d+ { D: y0 }
-        0,0 0,0 { D: x D: y }
+        i s>f width s>f f/ 0,5 d- 2r f* { D: zx }
+        height j - s>f height s>f f/ 0,5 d- 2r f* { D: zy }
         0 { iteration }
         begin
-          x 2dup f* y 2dup f* d+ 4,0 d<= iteration max-iteration < and
+          zx 2dup f* zy 2dup f* d+ r2** d< iteration max-iteration < and
         while
-          x 2dup f* y 2dup f* d- x0 d+ { D: xtemp }
-          x y f* 2,0 f* y0 d+ to y
-          xtemp to x
+          zx 2dup f* zy 2dup f* d- { D: xtemp }
+          zx zy f* 2,0 f* cy d+ to zy
+          xtemp cx d+ to zx
           1 +to iteration
         repeat
         color 1+ iteration + c@ emit
@@ -58,7 +58,7 @@ begin-module mandelbrot
     loop
   ;
 
-  \ Draw a mandelbrot set
-  : test ( -- ) -2,00 0,47 -1,12 1,12 draw ;
+  \ Draw a julia set
+  : test ( -- ) -0,4 0,6 1,0 julia::draw ;
   
 end-module
