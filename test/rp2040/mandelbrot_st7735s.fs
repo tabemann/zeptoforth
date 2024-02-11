@@ -69,7 +69,7 @@ begin-module mandelbrot
   \ Initialize the colors
   : init-colors ( -- )
     max-iteration 1+ 0 ?do
-      i s>f max-iteration s>f f/ 1,0 d+ ln 2,0 ln f/
+      i s>f max-iteration 1- s>f f/ 1,0 d+ ln 2,0 ln f/
       255,0 f* f>s colors i + c!
     loop
   ;
@@ -88,12 +88,18 @@ begin-module mandelbrot
 
   \ Convert iteration to color
   : iteration>color { iteration -- color }
-    0 colors iteration + c@ 0 rgb16
+    iteration max-iteration < if
+      0 colors iteration + c@ 0 rgb16
+    else
+      0 0 255 rgb16
+    then
   ;
   
   \ Mandelbrot test
   : draw { D: xa D: xb D: ya D: yb -- }
     inited? not if init-test true to inited? then
+    my-display clear-pixmap
+    my-display update-display
     xb xa d- { D: x-mult }
     yb ya d- { D: y-mult }
     height 0 ?do
@@ -111,8 +117,8 @@ begin-module mandelbrot
           1 +to iteration
         repeat
         iteration iteration>color i height j - my-display draw-pixel-const
-        my-display update-display
       loop
+      my-display update-display
     loop
   ;
 
