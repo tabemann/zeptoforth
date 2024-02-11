@@ -20,11 +20,33 @@
 
 begin-module mandelbrot
 
+  oo import
+  pixmap16 import
+  pixmap16-utils import
+  st7735s import
+
   \ Displayed X size
-  80 constant width
+  160 constant width
 
   \ Displayed Y size
-  40 constant height
+  80 constant height
+
+  \ SPI device
+  1 constant my-device
+
+  \ Pins
+  11 constant lcd-din 
+  10 constant lcd-clk
+  8 constant lcd-dc
+  12 constant lcd-rst
+  9 constant lcd-cs
+  25 constant lcd-bl
+
+  \ Buffer
+  width height pixmap16-buf-size buffer: my-buffer
+
+  \ Display
+  <st7735s> class-size buffer: my-display
 
   \ X scale offset
   -2,00 2constant x-offset
@@ -38,20 +60,43 @@ begin-module mandelbrot
   \ Y scale multiplier
   1,12 -1,12 d- 2constant y-multiplier
 
-  \ The color array
-  : color
-    c\"  .`'-~+^\":;Il!i><tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$ "
+  \ The maximum number of iterations
+  24 constant max-iteration
+
+  \ Color table
+  max-iteration 1+ cell align aligned-buffer: colors
+
+  \ Initialize the colors
+  : init-colors ( -- )
+    max-iteration 1+ 0 ?do
+      i s>f max-iteration s>f f/ 1,0 d+ ln 2,0 ln f/
+      255,0 f* f>s colors i + c!
+    loop
+  ;
+  
+  \ Initialize the test
+  : init-test ( -- )
+    lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
+    my-buffer width height my-device <st7735s> my-display init-object
+    my-display clear-pixmap
+    my-display update-display
+    init-colors
   ;
 
-  \ The maximum number of iterations
-  color c@ constant max-iteration
+  \ Are we initialized
+  false value inited?
+
+  \ Convert iteration to color
+  : iteration>color { iteration -- color }
+    0 colors iteration + c@ 0 rgb16
+  ;
   
   \ Mandelbrot test
   : draw { D: xa D: xb D: ya D: yb -- }
+    inited? not if init-test true to inited? then
     xb xa d- { D: x-mult }
     yb ya d- { D: y-mult }
     height 0 ?do
-      cr
       width 0 ?do
         i s>f width s>f f/ x-mult f* xa d+ { D: x0 }
         j s>f height s>f f/ y-mult f* ya d+ { D: y0 }
@@ -65,7 +110,8 @@ begin-module mandelbrot
           xtemp to x
           1 +to iteration
         repeat
-        color iteration + c@ emit
+        iteration iteration>color i height j - my-display draw-pixel-const
+        my-display update-display
       loop
     loop
   ;
