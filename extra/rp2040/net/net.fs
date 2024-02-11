@@ -3294,6 +3294,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       TCP_ESTABLISHED endpoint endpoint-tcp-state!
       addr bytes endpoint self process-ipv4-basic-ack
+      endpoint self put-ready-endpoint
     ; define process-ipv4-ack-syn-received
     
     \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
