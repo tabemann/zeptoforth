@@ -61,7 +61,7 @@ begin-module mandelbrot
   1,12 -1,12 d- 2constant y-multiplier
 
   \ The maximum number of iterations
-  24 constant max-iteration
+  16 constant max-iteration
 
   \ Color table
   max-iteration 1+ cell align aligned-buffer: colors
