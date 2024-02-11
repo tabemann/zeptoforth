@@ -108,12 +108,6 @@ begin-module pico-w-net-http-server
 
   \ Close delay in ticks
   10000 constant close-delay
-  
-  \ Listen delay in ticks
-  1000 constant listen-delay
-    
-  \ Our listen alarm
-  alarm-size aligned-buffer: my-listen-alarm
     
   \ HTTP server class
   <object> begin-class <http-server>
@@ -129,9 +123,6 @@ begin-module pico-w-net-http-server
     
     \ Our closing state
     cell member closing?
-
-    \ Our connection has been closed
-    cell member actually-closed?
     
     \ The HTTP buffer
     http-buffer-size cell align member http-buffer
@@ -241,17 +232,8 @@ begin-module pico-w-net-http-server
     \ Handle HTTP input
     method handle-http-input ( in-buffer in-size self -- )
     
-    \ Do a connection close
-    method actually-close ( self -- ) 
-
-    \ Schedule a connection close
-    method schedule-close ( self -- ) 
-
-    \ Force a connection close
-    method force-close ( self -- ) 
-
-    \ Start HTTP connection
-    method start-connection ( self -- )
+    \ Close a connection
+    method close-http ( self -- )
 
   end-class
 
@@ -269,7 +251,6 @@ begin-module pico-w-net-http-server
       0 self http-buffer-offset !
       0 self out-buffer-offset !
       0 self http-endpoint !
-      true self actually-closed? !
       self http-lock init-lock
     ; define new
 
@@ -381,12 +362,17 @@ begin-module pico-w-net-http-server
       protocol-unsupported self http-protocol !
       0 self http-buffer-offset !
       0 self out-buffer-offset !
-      server-port my-interface @ allocate-tcp-listen-endpoint if
-        self http-endpoint !
-      else
-        drop 0 self http-endpoint !
+      true { new-endpoint? }
+      self http-endpoint @ ?dup if { endpoint }
+        endpoint endpoint-tcp-state@ TCP_LISTEN <> to new-endpoint?
       then
-      true self actually-closed? !
+      new-endpoint? if
+        server-port my-interface @ allocate-tcp-listen-endpoint if
+          self http-endpoint !
+        else
+          drop 0 self http-endpoint !
+        then
+      then
     ; define init-http-state
     
     \ Process the first HTTP header
@@ -577,7 +563,7 @@ begin-module pico-w-net-http-server
     ; define add-http-buffer
 
     \ Handle HTTP input
-    :noname { in-buffer in-size self -- }
+    :noname { in-buffer in-size self -- closed? }
 \      self schedule-close
       in-buffer in-size self add-http-buffer
       self parse-http-headers if
@@ -593,64 +579,20 @@ begin-module pico-w-net-http-server
           endcase
         then
         self send-output
-        self force-close
+        self close-http
       then
     ; define handle-http-input
-    
-    \ Do a connection close
-    :noname { self -- }
-      self [: { self }
-        self actually-closed? @ not if
-          self http-endpoint @ ?dup if { endpoint }
-            endpoint endpoint-tcp-state@ TCP_LISTEN <> if
-              endpoint my-interface @ close-tcp-endpoint
-              self init-http-state
-            then
-          then
-        then
-      ;] self http-lock with-lock
-    ; define actually-close
-
-    \ Schedule a connection close
-    :noname { self -- }
-      self closing? @ not if
-        true self closing? !
-        close-delay 0 self [: drop actually-close ;]
-        self my-close-alarm set-alarm-delay-default
-      then
-    ; define schedule-close
 
     \ Force a connection close
     :noname { self -- }
-      self my-close-alarm unset-alarm
-      0 0 self [: drop actually-close ;]
-      self my-close-alarm set-alarm-delay-default
-    ; define force-close
-
-    \ Start HTTP connection
-    :noname { self -- }
-      false self actually-closed? !
-    ; define start-connection
+      self http-endpoint @ my-interface @ close-tcp-endpoint
+      self init-http-state
+    ; define close-http
 
   end-implement
 
   \ Our HTTP servers
   net-config::max-endpoints <http-server> class-size * buffer: http-servers
-
-  \ Our listen alarm initializer
-  defer init-listen-alarm
-  :noname ( -- )
-    listen-delay 0 0 [: ( alarm -- )
-      drop
-      net-config::max-endpoints 0 ?do
-        http-servers <http-server> class-size i * + { http-server }
-        http-server http-endpoint @ 0= if
-          http-server init-http-state
-        then
-      loop
-      init-listen-alarm
-    ;] my-listen-alarm set-alarm-delay-default
-  ; is init-listen-alarm
 
   \ Initialize our HTTP servers
   : init-http-servers ( -- )
@@ -660,7 +602,6 @@ begin-module pico-w-net-http-server
     net-config::max-endpoints 0 ?do
       http-servers <http-server> class-size i * + init-http-state
     loop
-    \ init-listen-alarm
   ;
 
   \ Find our HTTP server
@@ -684,12 +625,13 @@ begin-module pico-w-net-http-server
       then { http-server }
       endpoint self http-server [: { endpoint self http-server }
         endpoint endpoint-tcp-state@ { state }
-        state TCP_SYN_RECEIVED = state TCP_ESTABLISHED = or state TCP_CLOSE_WAIT = or if
-          http-server start-connection
-        then
-        state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or state TCP_CLOSED = or if
-          http-server schedule-close
+        state TCP_ESTABLISHED =
+        state TCP_CLOSE_WAIT = or if
           endpoint endpoint-rx-data@ http-server handle-http-input
+        else
+          state TCP_CLOSED = if
+            http-server close-http
+          then
         then
         endpoint my-interface @ endpoint-done
       ;] http-server http-lock with-lock
