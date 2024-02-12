@@ -107,7 +107,10 @@ begin-module pico-w-net-http-server
   1024 constant out-buffer-size
 
   \ Close delay in ticks
-  10000 constant close-delay
+  50000 constant close-delay
+  
+  \ Timed out connection close delay
+  1000 constant timed-out-close-delay
     
   \ HTTP server class
   <object> begin-class <http-server>
@@ -150,6 +153,12 @@ begin-module pico-w-net-http-server
 
     \ Output buffer offset
     cell member out-buffer-offset
+    
+    \ HTTP timeout
+    cell member http-timeout
+
+    \ HTTP timeout set
+    cell member http-timeout-set?
 
     \ Match HTTP server
     method match-http-server ( endpoint self -- match? ) 
@@ -235,6 +244,9 @@ begin-module pico-w-net-http-server
     \ Close a connection
     method close-http ( self -- )
 
+    \ Force a connection to close on timeout
+    method force-close-http ( self -- )
+
   end-class
 
   <http-server> begin-implement
@@ -252,6 +264,8 @@ begin-module pico-w-net-http-server
       0 self out-buffer-offset !
       0 self http-endpoint !
       self http-lock init-lock
+      0 self http-timeout !
+      false self http-timeout-set? !
     ; define new
 
     \ Match HTTP server
@@ -373,6 +387,8 @@ begin-module pico-w-net-http-server
           drop 0 self http-endpoint !
         then
       then
+      0 self http-timeout !
+      false self http-timeout-set? !
     ; define init-http-state
     
     \ Process the first HTTP header
@@ -583,11 +599,26 @@ begin-module pico-w-net-http-server
       then
     ; define handle-http-input
 
-    \ Force a connection close
+    \ Close a connection
     :noname { self -- }
-      self http-endpoint @ my-interface @ close-tcp-endpoint
-      self init-http-state
+      self http-endpoint @ if
+        self http-endpoint @ my-interface @ close-tcp-endpoint
+        self init-http-state
+      then
     ; define close-http
+    
+    \ Force a connection to close on timeout
+    :noname { self -- }
+      self http-endpoint @ if
+        self [:
+          [: http-endpoint @ my-interface @ close-tcp-endpoint ;]
+          timed-out-close-delay task::with-timeout
+        ;] try
+        dup ['] task::x-timed-out = if 2drop 0 then
+        ?raise
+        self init-http-state
+      then
+    ; define force-close-http
 
   end-implement
 
@@ -617,6 +648,51 @@ begin-module pico-w-net-http-server
   end-class
 
   <tcp-echo-handler> begin-implement
+
+    \ Get timeout
+    :noname { self -- timeout }
+      task::no-timeout { current-timeout }
+      systick::systick-counter { current-systick }
+      net-config::max-endpoints 0 ?do
+        http-servers <http-server> class-size i * + { http-server }
+        http-server http-timeout-set? @ if
+          http-server http-endpoint @ ?dup if { endpoint }
+            endpoint endpoint-tcp-state@ { state }
+            state TCP_ESTABLISHED =
+            state TCP_CLOSE_WAIT = or
+            state TCP_CLOSED = or if
+              http-server http-timeout @ current-systick - 0 max
+              current-timeout task::no-timeout <> if
+                current-timeout min to current-timeout
+              else
+                to current-timeout
+              then
+            then
+          then
+        then
+      loop
+      current-timeout
+    ; define handler-timeout@
+    
+    \ Handle timeout
+    :noname { self -- } \ ." === "
+      systick::systick-counter { current-systick }
+      net-config::max-endpoints 0 ?do
+        http-servers <http-server> class-size i * + { http-server }
+        http-server http-timeout-set? @ if
+          http-server http-timeout @ current-systick - 0<= if
+            http-server http-endpoint @ ?dup if { endpoint }
+              endpoint endpoint-tcp-state@ { state }
+              state TCP_ESTABLISHED =
+              state TCP_CLOSE_WAIT = or
+              state TCP_CLOSED = or if
+                http-server force-close-http
+              then
+            then
+          then
+        then
+      loop
+    ; define handle-timeout
     
     \ Handle an HTTP request
     :noname { endpoint self -- }
@@ -625,6 +701,10 @@ begin-module pico-w-net-http-server
       then { http-server }
       endpoint self http-server [: { endpoint self http-server }
         endpoint endpoint-tcp-state@ { state }
+        http-server http-timeout-set? @ not if
+          systick::systick-counter close-delay + http-server http-timeout !
+          true http-server http-timeout-set? !
+        then
         state TCP_ESTABLISHED =
         state TCP_CLOSE_WAIT = or if
           endpoint endpoint-rx-data@ http-server handle-http-input

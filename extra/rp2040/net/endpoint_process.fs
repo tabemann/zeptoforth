@@ -21,6 +21,7 @@
 begin-module endpoint-process
 
   oo import
+  systick import
   task import
   net-misc import
   net import
@@ -43,6 +44,12 @@ begin-module endpoint-process
       
     \ Handle a endpoint packet
     method handle-endpoint ( endpoint self -- )
+
+    \ Handle a timeout
+    method handle-timeout ( self -- )
+    
+    \ Get endpoint timeout
+    method handler-timeout@ ( self -- timeout )
     
   end-class
 
@@ -69,6 +76,16 @@ begin-module endpoint-process
     :noname ( endpoint self -- )
       2drop
     ; define handle-endpoint
+
+    \ Handle a timeout
+    :noname ( self -- )
+      drop
+    ; define handle-timeout
+    
+    \ Get an handler timeout
+    :noname ( self -- timeout )
+      drop no-timeout
+    ; define handler-timeout@
     
   end-implement
   
@@ -86,6 +103,12 @@ begin-module endpoint-process
       \ Process a endpoint
       method process-endpoint ( endpoint self -- )
 
+      \ Get the current timeout
+      method get-handler-timeout ( self -- timeout )
+
+      \ Handle a timeout
+      method do-handler-timeouts ( start-systick self -- )
+      
     end-module
 
     \ Add a endpoint handler
@@ -128,11 +151,66 @@ begin-module endpoint-process
       repeat
     ; define process-endpoint
 
+    \ Get the current timeout
+    :noname { self -- timeout }
+      no-timeout { current-timeout }
+      self first-endpoint-handler @ { current-handler }
+      begin current-handler while
+        current-handler handler-timeout@ dup no-timeout <> if
+          current-timeout no-timeout <> if
+            current-timeout min to current-timeout
+          else
+            to current-timeout
+          then
+        else
+          drop
+        then
+        current-handler next-endpoint-handler @ to current-handler
+      repeat
+      current-timeout
+    ; define get-handler-timeout
+    
+    \ Handle a timeout
+    :noname { start-systick self -- }
+      systick-counter { current-systick }
+      self first-endpoint-handler @ { current-handler }
+      begin current-handler while
+        current-handler handler-timeout@ dup no-timeout <> if
+          start-systick + current-systick - 0<= if
+            current-handler handle-timeout
+          then
+        else
+          drop
+        then
+        current-handler next-endpoint-handler @ to current-handler
+      repeat
+    ; define do-handler-timeouts
+
     \ Run endpoint processor
     :noname { self -- }
       self 1 [: { self }
         begin
-          self interface @ get-ready-endpoint self process-endpoint
+          self get-handler-timeout { current-timeout }
+          current-timeout no-timeout = if
+            self interface @ get-ready-endpoint self process-endpoint
+          else
+            systick-counter { start-systick }
+            current-timeout start-systick self [:
+              { current-timeout start-systick self }
+              self [: interface @ get-ready-endpoint ;]
+              current-timeout start-systick with-timeout-from-start
+            ;] try dup ['] x-timed-out = if
+              2drop 2drop false 0
+            else
+              dup 0= if true swap then
+            then
+            ?raise  
+            if
+              self process-endpoint
+            else
+              start-systick self do-handler-timeouts
+            then
+          then
         again
       ;] 1024 256 1024 spawn c" endpoint-process" over task-name! run
     ; define run-endpoint-process
