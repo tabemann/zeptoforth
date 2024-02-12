@@ -49,7 +49,7 @@ begin-module julia
   <st7735s> class-size buffer: my-display
   
   \ The maximum number of iterations
-  12 constant max-iteration
+  16 constant max-iteration
 
   \ Color table
   max-iteration 1+ cell align aligned-buffer: colors
