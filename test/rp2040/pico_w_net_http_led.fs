@@ -702,7 +702,9 @@ begin-module pico-w-net-http-server
       then { http-server }
       endpoint self http-server [: { endpoint self http-server }
         endpoint endpoint-tcp-state@ { state }
-        http-server http-timeout-set? @ not if
+        http-server http-timeout-set? @ not
+        state TCP_CLOSED = not and
+        state TCP_LISTEN = not and if
           systick::systick-counter close-delay + http-server http-timeout !
           true http-server http-timeout-set? !
         then
