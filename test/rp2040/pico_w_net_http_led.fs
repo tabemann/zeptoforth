@@ -675,7 +675,7 @@ begin-module pico-w-net-http-server
     ; define handler-timeout@
     
     \ Handle timeout
-    :noname { self -- } \ ." === "
+    :noname { self -- }
       systick::systick-counter { current-systick }
       net-config::max-endpoints 0 ?do
         http-servers <http-server> class-size i * + { http-server }
@@ -686,6 +686,7 @@ begin-module pico-w-net-http-server
               state TCP_ESTABLISHED =
               state TCP_CLOSE_WAIT = or
               state TCP_CLOSED = or if
+                cr ." Force-closing connection... "
                 http-server force-close-http
               then
             then
