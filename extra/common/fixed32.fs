@@ -397,7 +397,7 @@ begin-module fixed32
             then
             dup if
               state @ if
-                swap negate swap lit,
+                swap negate lit,
               else
                 swap negate swap
               then

@@ -156,9 +156,9 @@ begin-module raytracing-fun
         u 0,0 d> if 1,0 else u 0,0 d< if -1,0 else 1,0 then then { D: q }
         camera-x camera-y camera-z u v w q ray
         i screen-height j - my-display draw-pixel-const
-        my-display update-display
       loop
     loop
+    my-display update-display
   ;
   
 end-module
