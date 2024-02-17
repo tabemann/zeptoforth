@@ -135,7 +135,7 @@ begin-module fixed32
   
   \ Get the sine of an S15.16 fixed-point number
   : f32-sin ( f32 -- f32' )
-    [ f32-pi 2 * ] literal f32mod
+    [ f32-pi 2 * ] literal f32-mod
     dup dup >r 1 begin
       swap r@ f32* r@ f32*
       over 2 * /
