@@ -21,8 +21,20 @@
 begin-module fixed32
 
   \ Multiply two S15.16 fixed-point numbers
-  : f32* ( x y -- z )
-    s>d rot s>d d* 16 2arshift d>s
+  : f32* { x y -- z }
+    y 0< if
+      x 0< if
+        x negate y negate um* 16 2rshift drop
+      else
+        x y negate um* 16 2rshift drop negate
+      then
+    else
+      x 0< if
+        x negate y um* 16 2rshift drop negate
+      else
+        x y um* 16 2rshift drop
+      then
+    then
   ;
 
   \ Divide an S15.16 fixed-point number by another
