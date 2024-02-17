@@ -20,19 +20,36 @@
 
 begin-module fixed32
 
+  armv6m import
+
+  begin-module fixed32-internal
+
+    \ Convert an unsigned 32.32 number to an unsigned 16.16 number
+    : 32.32>16.16 ( D: x -- x' )
+      [inlined]
+      code[
+      16 r6 r0 lsls_,_,#_
+      r6 1 r7 ldm
+      16 r6 r6 lsrs_,_,#_
+      r0 r6 orrs_,_
+      ]code
+    ;
+    
+  end-module> import
+
   \ Multiply two S15.16 fixed-point numbers
   : f32* { x y -- z }
     y 0< if
       x 0< if
-        x negate y negate um* 16 2rshift drop
+        x negate y negate um* 32.32>16.16
       else
-        x y negate um* 16 2rshift drop negate
+        x y negate um* 32.32>16.16 negate
       then
     else
       x 0< if
-        x negate y um* 16 2rshift drop negate
+        x negate y um* 32.32>16.16 negate
       else
-        x y um* 16 2rshift drop
+        x y um* 32.32>16.16
       then
     then
   ;
@@ -62,7 +79,7 @@ begin-module fixed32
   \ Pi as a S15.16 fixed-point number
   205887 constant f32pi
 
-  begin-module fixed32-internal
+  continue-module fixed32-internal
   
     \ Get whether two S15.16 fixed-point numbers are close enough for a square root
     : f32sqrt-close-enough ( x y -- flag )
@@ -74,7 +91,7 @@ begin-module fixed32
       dup rot rot f32/ + 2 /
     ;
 
-  end-module> import
+  end-module
 
   \ Get the square root of an S15.16 fixed-point number
   : f32sqrt ( x -- y )
