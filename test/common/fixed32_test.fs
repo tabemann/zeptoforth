@@ -57,20 +57,20 @@ begin-module fixed32-test
     cr ." 2,5 2,0 fmod f. : "
     2,5 2,0 fmod f.
     
-    cr ." 2;5 2;0 f32-mod f32. : "
-    2;5 2;0 f32-mod f32.
+    cr ." 2;5 2;0 f32mod f32. : "
+    2;5 2;0 f32mod f32.
     
     cr ." pi f. : "
     pi f.
     
-    cr ." f32-pi f32. : "
-    f32-pi f32.
+    cr ." f32pi f32. : "
+    f32pi f32.
     
     cr ." 9,0 sqrt f. : "
     9,0 sqrt f.
     
-    cr ." 9;0 f32-sqrt f32. : "
-    9;0 f32-sqrt f32.
+    cr ." 9;0 f32sqrt f32. : "
+    9;0 f32sqrt f32.
     
     cr ." 3,0 3 fi** f. : "
     3,0 3 fi** f.
@@ -81,92 +81,92 @@ begin-module fixed32-test
     cr ." 2,0 exp f. : "
     2,0 exp f.
     
-    cr ." 2;0 f32-exp f32. : "
-    2;0 f32-exp f32.
+    cr ." 2;0 f32exp f32. : "
+    2;0 f32exp f32.
     
     cr ." 2,0 exp ln f. : "
     2,0 exp ln f.
     
-    cr ." 2;0 f32-exp f32-ln f32. : "
-    2;0 f32-exp f32-ln f32.
+    cr ." 2;0 f32exp f32ln f32. : "
+    2;0 f32exp f32ln f32.
     
     cr ." 0,5 sin f. : "
     0,5 sin f.
     
-    cr ." 0;5 f32-sin f32. : "
-    0;5 f32-sin f32.
+    cr ." 0;5 f32sin f32. : "
+    0;5 f32sin f32.
     
     cr ." 0,5 cos f. : "
     0,5 cos f.
     
-    cr ." 0;5 f32-cos f32. : "
-    0;5 f32-cos f32.
+    cr ." 0;5 f32cos f32. : "
+    0;5 f32cos f32.
     
     cr ." 0,5 tan f. : "
     0,5 tan f.
     
-    cr ." 0;5 f32-tan f32. : "
-    0;5 f32-tan f32.
+    cr ." 0;5 f32tan f32. : "
+    0;5 f32tan f32.
     
     cr ." 0,5 asin f. : "
     0,5 asin f.
     
-    cr ." 0;5 f32-asin f32. : "
-    0;5 f32-asin f32.
+    cr ." 0;5 f32asin f32. : "
+    0;5 f32asin f32.
     
     cr ." 0,5 acos f. : "
     0,5 acos f.
     
-    cr ." 0;5 f32-acos f32. : "
-    0;5 f32-acos f32.
+    cr ." 0;5 f32acos f32. : "
+    0;5 f32acos f32.
     
     cr ." 0,5 atan f. : "
     0,5 atan f.
     
-    cr ." 0;5 f32-atan f32. : "
-    0;5 f32-atan f32.
+    cr ." 0;5 f32atan f32. : "
+    0;5 f32atan f32.
     
     cr ." 1,0 3,0 atan2 f. : "
     1,0 3,0 atan2 f.
     
-    cr ." 1;0 3;0 f32-atan2 f32. : "
-    1;0 3;0 f32-atan2 f32.
+    cr ." 1;0 3;0 f32atan2 f32. : "
+    1;0 3;0 f32atan2 f32.
     
     cr ." 0,5 sinh f. : "
     0,5 sinh f.
     
-    cr ." 0;5 f32-sinh f32. : "
-    0;5 f32-sinh f32.
+    cr ." 0;5 f32sinh f32. : "
+    0;5 f32sinh f32.
     
     cr ." 0,5 cosh f. : "
     0,5 cosh f.
     
-    cr ." 0;5 f32-cosh f32. : "
-    0;5 f32-cosh f32.
+    cr ." 0;5 f32cosh f32. : "
+    0;5 f32cosh f32.
     
     cr ." 0,5 tanh f. : "
     0,5 tanh f.
     
-    cr ." 0;5 f32-tanh f32. : "
-    0;5 f32-tanh f32.
+    cr ." 0;5 f32tanh f32. : "
+    0;5 f32tanh f32.
     
     cr ." 0,5 asinh f. : "
     0,5 asinh f.
     
-    cr ." 0;5 f32-asinh f32. : "
-    0;5 f32-asinh f32.
+    cr ." 0;5 f32asinh f32. : "
+    0;5 f32asinh f32.
     
     cr ." 3,0 acosh f. : "
     3,0 acosh f.
     
-    cr ." 3;0 f32-acosh f32. : "
-    3;0 f32-acosh f32.
+    cr ." 3;0 f32acosh f32. : "
+    3;0 f32acosh f32.
     
     cr ." 0,5 atanh f. : "
     0,5 atanh f.
     
-    cr ." 0;5 f32-atanh f32. : "
-    0;5 f32-atanh f32.
+    cr ." 0;5 f32atanh f32. : "
+    0;5 f32atanh f32.
     
     cr .\" s\" 2,5\" parse-fixed . f. : "
     s" 2,5" parse-fixed . f.

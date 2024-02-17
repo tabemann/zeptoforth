@@ -43,37 +43,37 @@ begin-module fixed32
   : f32>f64 ( x -- D: y ) s>d 16 2lshift ;
   
   \ Calculate the modulus of two S15.16 fixed-point numbers
-  : f32-mod { x y -- z }
+  : f32mod { x y -- z }
     x x y f32/ f32>s dup 0< if 1+ then s>f32 y f32* -
   ;
 
   \ Pi as a S15.16 fixed-point number
-  205887 constant f32-pi
+  205887 constant f32pi
 
   begin-module fixed32-internal
   
     \ Get whether two S15.16 fixed-point numbers are close enough for a square root
-    : f32-sqrt-close-enough ( x y -- flag )
+    : f32sqrt-close-enough ( x y -- flag )
       2dup - rot abs rot abs max f32/ abs 2 <
     ;
     
     \ Get a better guess for a square root of an S15.16 fixed-point number
-    : f32-sqrt-better-guess ( x y -- z )
+    : f32sqrt-better-guess ( x y -- z )
       dup rot rot f32/ + 2 /
     ;
 
   end-module> import
 
   \ Get the square root of an S15.16 fixed-point number
-  : f32-sqrt ( x -- y )
+  : f32sqrt ( x -- y )
     64 >r
     dup 2 /
     begin
       r@ 0> if
-        2dup f32/ over f32-sqrt-close-enough if
+        2dup f32/ over f32sqrt-close-enough if
           rdrop nip true
         else
-          r> 1- >r 2dup f32-sqrt-better-guess nip false
+          r> 1- >r 2dup f32sqrt-better-guess nip false
         then
       else
         rdrop nip true
@@ -104,7 +104,7 @@ begin-module fixed32
   ;
 
   \ Get the (e^x)-1 of an S15.16 fixed-point number
-  : f32-expm1 ( f32 -- f32' )
+  : f32expm1 ( f32 -- f32' )
     >r 0 [ 1 s>f32 ] literal 1 begin
       swap r@ f32* over / dup abs 2 < >r rot over +
       swap rot 1 + r>
@@ -113,12 +113,12 @@ begin-module fixed32
   ;
   
   \ Get the e^x of an S15.16 fixed-point number
-  : f32-exp ( f32 -- f32' ) f32-expm1 [ 1 s>f32 ] literal + ;
+  : f32exp ( f32 -- f32' ) f32expm1 [ 1 s>f32 ] literal + ;
   
   \ Get the ln(x+1) of an S15.16 fixed-point number
-  : f32-lnp1 ( f32 -- f32' )
+  : f32lnp1 ( f32 -- f32' )
     [ 1 s>f32 ] literal + >r 0 begin
-      dup f32-exp
+      dup f32exp
       dup r@ swap -
       r@ rot +
       f32/
@@ -131,11 +131,11 @@ begin-module fixed32
   ;
   
   \ Get the len(x) of an S15.16 fixed-point number
-  : f32-ln ( f32 -- f32' ) [ 1 s>f32 ] literal - f32-lnp1 ;
+  : f32ln ( f32 -- f32' ) [ 1 s>f32 ] literal - f32lnp1 ;
   
   \ Get the sine of an S15.16 fixed-point number
-  : f32-sin ( f32 -- f32' )
-    [ f32-pi 2 * ] literal f32-mod
+  : f32sin ( f32 -- f32' )
+    [ f32pi 2 * ] literal f32mod
     dup dup >r 1 begin
       swap r@ f32* r@ f32*
       over 2 * /
@@ -154,13 +154,13 @@ begin-module fixed32
   ;
   
   \ Get the cosine of an S15.16 fixed-point number
-  : f32-cos ( f32 -- f32' ) [ f32-pi 2 / ] literal swap - f32-sin ;
+  : f32cos ( f32 -- f32' ) [ f32pi 2 / ] literal swap - f32sin ;
   
   \ Get the tangent of an S15.16 fixed-point number
-  : f32-tan ( f32 -- f32' ) dup f32-sin swap f32-cos f32/ ;
+  : f32tan ( f32 -- f32' ) dup f32sin swap f32cos f32/ ;
   
   \ Get the arctangent of an S15.16 fixed-point number
-  : f32-atan ( f32 -- f32' )
+  : f32atan ( f32 -- f32' )
     [ 1 s>f32 ] literal 1 40 do
       over i * 2 f32i** swap f32/ i 2 * 1 - s>f32 +
     -1 +loop
@@ -168,21 +168,21 @@ begin-module fixed32
   ;
   
   \ Get the angle of an x and an y S15.16 fixed-point numbers
-  : f32-atan2 ( f32-x f32-y -- f32-angle )
+  : f32atan2 ( f32x f32y -- f32angle )
     dup 0> if
-      f32/ f32-atan
+      f32/ f32atan
     else
       2dup 0< swap 0>= and if
-        f32/ f32-atan f32-pi +
+        f32/ f32atan f32pi +
       else
         2dup 0< swap 0< and if
-          f32/ f32-atan f32-pi -
+          f32/ f32atan f32pi -
         else
           2dup 0= swap 0> and if
-            drop [ f32-pi 2 / ] literal
+            drop [ f32pi 2 / ] literal
           else
             2dup 0= swap 0< and if
-              drop [ f32-pi -2 / ] literal
+              drop [ f32pi -2 / ] literal
             else
               drop 0
             then
@@ -193,25 +193,25 @@ begin-module fixed32
   ;
   
   \ Get the arcsine of an S15.16 fixed-point number
-  : f32-asin ( f32 -- f32' )
+  : f32asin ( f32 -- f32' )
     dup 2 f32i** [ 1 s>f32 ] literal <  if
-      [ 1 s>f32 ] literal over 2 f32i** - f32-sqrt f32/ f32-atan
+      [ 1 s>f32 ] literal over 2 f32i** - f32sqrt f32/ f32atan
     else
       dup 0> if
-        drop [ f32-pi 2 / ] literal
+        drop [ f32pi 2 / ] literal
       else
-        drop [ f32-pi -2 / ] literal
+        drop [ f32pi -2 / ] literal
       then
     then
   ;
   
   \ Get the arccosine of an S15.16 fixed-point number
-  : f32-acos ( f32 -- f32' )
-    f32-asin negate [ f32-pi 2 / ] literal +
+  : f32acos ( f32 -- f32' )
+    f32asin negate [ f32pi 2 / ] literal +
   ;
   
   \ Exponentiate two S15.16 fixed-point numbers
-  : f32** ( f32-b f32-x -- f32-b^f32-x )
+  : f32** ( f32b f32x -- f32b^f32x )
     over 0= >r dup 0= r> and triggers x-domain-error
     dup $FFFF and 0= if
       dup f32>s 0>= if
@@ -220,38 +220,38 @@ begin-module fixed32
         f32>s negate f32i** [ 1 s>f32 ] literal swap f32/
       then
     else
-      over 0>= averts x-domain-error swap f32-ln f32* f32-exp
+      over 0>= averts x-domain-error swap f32ln f32* f32exp
     then
   ;
 
   \ Get the hyperbolic sine of an S15.16 fixed-point number
-  : f32-sinh ( f32 -- f32' )
-    f32-expm1 dup dup [ 1 s>f32 ] literal + f32/ + 2 /
+  : f32sinh ( f32 -- f32' )
+    f32expm1 dup dup [ 1 s>f32 ] literal + f32/ + 2 /
   ;
   
   \ Get the hyperbolic cosine of an S15.16 fixed-point number
-  : f32-cosh ( f32 -- f32' )
-    f32-expm1 dup dup [ 1 s>f32 ] literal + f32/ - 2 / [ 1 s>f32 ] literal +
+  : f32cosh ( f32 -- f32' )
+    f32expm1 dup dup [ 1 s>f32 ] literal + f32/ - 2 / [ 1 s>f32 ] literal +
   ;
 
   \ Get the hyperbolic tangent of an S15.16 fixed-point number
-  : f32-tanh ( f32 -- f32' )
-    dup f32-sinh swap f32-cosh f32/
+  : f32tanh ( f32 -- f32' )
+    dup f32sinh swap f32cosh f32/
   ;
 
   \ Get the hyperbolic arcsine of an S15.16 fixed-point number
-  : f32-asinh ( f32 -- f32' )
-    dup 2 f32i** [ 1 s>f32 ] literal + f32-sqrt + f32-ln
+  : f32asinh ( f32 -- f32' )
+    dup 2 f32i** [ 1 s>f32 ] literal + f32sqrt + f32ln
   ;
 
   \ Get the hyperbolic arccosine of an S15.16 fixed-point number
-  : f32-acosh ( f32 -- f32' )
-    dup 2 f32i** [ 1 s>f32 ] literal - f32-sqrt + f32-ln
+  : f32acosh ( f32 -- f32' )
+    dup 2 f32i** [ 1 s>f32 ] literal - f32sqrt + f32ln
   ;
 
   \ Get the hyperbolic arctangent of an S15.16 fixed-point number
-  : f32-atanh ( f32 -- f32' )
-    dup [ 1 s>f32 ] literal + swap negate [ 1 s>f32 ] literal + f32/ f32-ln
+  : f32atanh ( f32 -- f32' )
+    dup [ 1 s>f32 ] literal + swap negate [ 1 s>f32 ] literal + f32/ f32ln
     2 /
   ;
 
