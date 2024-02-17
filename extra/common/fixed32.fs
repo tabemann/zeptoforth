@@ -43,7 +43,7 @@ begin-module fixed32
   : f32>f64 ( x -- D: y ) s>d 16 2lshift ;
   
   \ Calculate the modulus of two S15.16 fixed-point numbers
-  : f32mod { x y -- z }
+  : f32-mod { x y -- z }
     x x y f32/ f32>s dup 0< if 1+ then s>f32 y f32* -
   ;
 

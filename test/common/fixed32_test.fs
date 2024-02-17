@@ -57,8 +57,8 @@ begin-module fixed32-test
     cr ." 2,5 2,0 fmod f. : "
     2,5 2,0 fmod f.
     
-    cr ." 2;5 2;0 f32mod f32. : "
-    2;5 2;0 f32mod f32.
+    cr ." 2;5 2;0 f32-mod f32. : "
+    2;5 2;0 f32-mod f32.
     
     cr ." pi f. : "
     pi f.
