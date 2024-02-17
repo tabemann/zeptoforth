@@ -180,4 +180,3 @@ Type an s15.16 fixed-point number with a following space
 ( f32 places -- )
 
 Type a truncated s15.16 fixed-point number with a following space
-o
