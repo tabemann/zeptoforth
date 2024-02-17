@@ -34,6 +34,18 @@ begin-module fixed32
       r0 r6 orrs_,_
       ]code
     ;
+
+    \ Convert an unsigned 16.16 number to an unsigned 32.32 number
+    : 16.16>32.32 ( x -- D: x' )
+      [inlined]
+      code[
+      r6 r0 movs_,_
+      16 r6 r6 lsls_,_,#_
+      4 r7 subs_,#_
+      0 r7 r6 str_,[_,#_]
+      16 r0 r6 lsrs_,_,#_
+      ]code
+    ;
     
   end-module> import
 
@@ -54,6 +66,31 @@ begin-module fixed32
     then
   ;
 
+  \ Devide an S15.16 fixed-point number by another
+  : f32/ { x y -- x }
+    y 0< if
+      x 0< if
+        x negate 16.16>32.32
+        y negate 16.16>32.32
+        ud/mod 2nip 32.32>16.16
+      else
+        x 16.16>32.32
+        y negate 16.16>32.32
+        ud/mod 2nip 32.32>16.16 negate
+      then
+    else
+      x 0< if
+        x negate 16.16>32.32
+        y 16.16>32.32
+        ud/mod 2nip 32.32>16.16 negate
+      else
+        x 16.16>32.32
+        y 16.16>32.32
+        ud/mod 2nip 32.32>16.16
+      then
+    then
+  ;
+  
   \ Divide an S15.16 fixed-point number by another
   : f32/ ( x y -- z )
     swap s>d 16 2lshift rot s>d d/ drop
