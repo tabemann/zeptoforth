@@ -1,0 +1,123 @@
+\ Copyright (c) 2023-2024 Travis Bemann
+\
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
+
+begin-module julia
+
+  oo import
+  pixmap16 import
+  pixmap16-utils import
+  st7735s import
+  fixed32 import
+
+  \ Displayed X size
+  160 constant width
+
+  \ Displayed Y size
+  80 constant height
+
+  \ SPI device
+  1 constant my-device
+
+  \ Pins
+  11 constant lcd-din 
+  10 constant lcd-clk
+  8 constant lcd-dc
+  12 constant lcd-rst
+  9 constant lcd-cs
+  25 constant lcd-bl
+
+  \ Buffer
+  width height pixmap16-buf-size buffer: my-buffer
+
+  \ Display
+  <st7735s> class-size buffer: my-display
+  
+  \ The maximum number of iterations
+  24 constant max-iteration
+
+  \ Color table
+  max-iteration 1+ cell align aligned-buffer: colors
+
+  \ Initialize the colors
+  : init-colors ( -- )
+    max-iteration 1+ 0 ?do
+      i s>f max-iteration 1- s>f f/ 1,0 d+ ln 2,0 ln f/
+      255,0 f* f>s colors i + c!
+    loop
+  ;
+  
+  \ Initialize the test
+  : init-test ( -- )
+    lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
+    my-buffer width height my-device <st7735s> my-display init-object
+    my-display clear-pixmap
+    my-display update-display
+    init-colors
+  ;
+
+  \ Are we initialized
+  false value inited?
+
+  \ Convert iteration to color
+  : iteration>color { iteration -- color }
+    iteration max-iteration < if
+      0 colors iteration + c@ 0 rgb16
+    else
+      0 0 255 rgb16
+    then
+  ;
+  
+  \ Julia test
+  : draw { cx cy r -- }
+    inited? not if init-test true to inited? then
+    r 2;0 f32* { 2r }
+    r r f32* { r2** }
+    height 0 ?do
+      width 0 ?do
+        i s>f32 width s>f32 f32/ 0;5 - 2r f32* { zx }
+        j s>f32 height s>f32 f32/ 0;5 - 2r f32* { zy }
+        0 { iteration }
+        begin
+          zx dup f32* zy dup f32* + r2** < iteration max-iteration < and
+        while
+          zx dup f32* zy dup f32* - { xtemp }
+          zx zy f32* 2;0 f32* cy + to zy
+          xtemp cx + to zx
+          1 +to iteration
+        repeat
+        iteration iteration>color i height j - my-display draw-pixel-const
+      loop
+    loop
+    my-display update-display
+  ;
+
+  \ Draw a julia set
+  : test ( -- )
+    inited? not if init-test true to inited? then
+    my-display clear-pixmap
+    my-display update-display
+    0,0 { D: angle }
+    begin key? not while
+      0,7885 angle cos f* f64>f32 0,7885 angle sin f* f64>f32 1;5 julia::draw
+      [ pi 16,0 f/ swap ] literal literal +to angle
+    repeat
+  ;
+  
+end-module
