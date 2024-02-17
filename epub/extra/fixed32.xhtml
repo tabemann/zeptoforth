@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>S15.16 Fixed Point Numbers</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="s15-16-fixed-point-numbers">
+<h1>S15.16 Fixed Point Numbers</h1>
+<p>32-bit, or more specifically S15.16 (15 bits before the decimal point, 16 bits after the decimal point, one bit for the sign, two’s complement) fixed-point numbers are optionally supported by zeptoforth. They are not in any builds, but are available to be loaded by the user, both into RAM and into flash.</p>
+<section id="fixed32">
+<h2><code class="docutils literal notranslate"><span class="pre">fixed32</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">fixed2</span></code> module contains the following words:</p>
+<section id="f32">
+<h3><code class="docutils literal notranslate"><span class="pre">f32*</span></code></h3>
+<p>( x y – z )</p>
+<p>Multiply two S15.16 fixed-point numbers</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">f32/</span></code></h3>
+<p>( x y – z )</p>
+<p>Divide an S15.16 fixed-point number by another</p>
+</section>
+<section id="f32-s">
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;s</span></code></h3>
+<p>( x – y )</p>
+<p>Convert an S15.16 fixed-point number to a 16-bit integer</p>
+</section>
+<section id="s-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">s&gt;f32</span></code></h3>
+<p>( x – y )</p>
+<p>Convert a 16-bit integer to an S15.16 fixed-point number</p>
+</section>
+<section id="f64-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;f32</span></code></h3>
+<p>( D: x – y )</p>
+<p>Convert an S31.32 fixed-point number to an S15.16 fixed-point number</p>
+</section>
+<section id="f32-f64">
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;f64</span></code></h3>
+<p>( x – D: y )</p>
+<p>Convert an S15.16 fixed-point number to an S31.32 fixed-point number</p>
+</section>
+<section id="f32mod">
+<h3><code class="docutils literal notranslate"><span class="pre">f32mod</span></code></h3>
+<p>( x y – z )</p>
+<p>Calculate the modulus of two S15.16 fixed-point numbers</p>
+</section>
+<section id="f32pi">
+<h3><code class="docutils literal notranslate"><span class="pre">f32pi</span></code></h3>
+<p>( – pi )</p>
+<p>Pi as a S15.16 fixed-point number</p>
+</section>
+<section id="f32sqrt">
+<h3><code class="docutils literal notranslate"><span class="pre">f32sqrt</span></code></h3>
+<p>( x – y )</p>
+<p>Get the square root of an S15.16 fixed-point number</p>
+</section>
+<section id="f32i">
+<h3><code class="docutils literal notranslate"><span class="pre">f32i**</span></code></h3>
+<p>( f32 exponent – f32’ )</p>
+<p>Exponentiate an S15.16 fixed-point number by an integer</p>
+</section>
+<section id="f32expm1">
+<h3><code class="docutils literal notranslate"><span class="pre">f32expm1</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the (e^x)-1 of an S15.16 fixed-point number</p>
+</section>
+<section id="f32exp">
+<h3><code class="docutils literal notranslate"><span class="pre">f32exp</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the e^x of an S15.16 fixed-point number</p>
+</section>
+<section id="f32lnp1">
+<h3><code class="docutils literal notranslate"><span class="pre">f32lnp1</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the ln(x+1) of an S15.16 fixed-point number</p>
+</section>
+<section id="f32ln">
+<h3><code class="docutils literal notranslate"><span class="pre">f32ln</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the ln(x) of an S15.16 fixed-point number</p>
+</section>
+<section id="f32sin">
+<h3><code class="docutils literal notranslate"><span class="pre">f32sin</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the sine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32cos">
+<h3><code class="docutils literal notranslate"><span class="pre">f32cos</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the cosine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32tan">
+<h3><code class="docutils literal notranslate"><span class="pre">f32tan</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the tangent of an S15.16 fixed-point number</p>
+</section>
+<section id="f32atan">
+<h3><code class="docutils literal notranslate"><span class="pre">f32atan</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the arctangent of an S15.16 fixed-point number</p>
+</section>
+<section id="f32atan2">
+<h3><code class="docutils literal notranslate"><span class="pre">f32atan2</span></code></h3>
+<p>( f32x f32y – f32angle )</p>
+<p>Get the angle of an x and an y S15.16 fixed-point numbers</p>
+</section>
+<section id="f32asin">
+<h3><code class="docutils literal notranslate"><span class="pre">f32asin</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the arcsine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32acos">
+<h3><code class="docutils literal notranslate"><span class="pre">f32acos</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the arccosine of an S15.16 fixed-point number</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">f32**</span></code></h3>
+<p>( f32b f32x – f32b^f32x )</p>
+<p>Exponentiate two S15.16 fixed-point numbers</p>
+</section>
+<section id="f32sinh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32sinh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic sine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32cosh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32cosh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic cosine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32tanh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32tanh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic tangent of an S15.16 fixed-point number</p>
+</section>
+<section id="f32asinh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32asinh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic arcsine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32acosh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32acosh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic arccosine of an S15.16 fixed-point number</p>
+</section>
+<section id="f32atanh">
+<h3><code class="docutils literal notranslate"><span class="pre">f32atanh</span></code></h3>
+<p>( f32 – f32’ )</p>
+<p>Get the hyperbolic arctangent of an S15.16 fixed-point number</p>
+</section>
+<section id="parse-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-f32</span></code></h3>
+<p>( c-addr bytes – f32 success? )</p>
+<p>Parse a 32-bit fixed-point number</p>
+</section>
+<section id="format-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">format-f32</span></code></h3>
+<p>( c-addr f32 – c-addr bytes )</p>
+<p>Format an S15.16 number</p>
+</section>
+<section id="format-f32-truncate">
+<h3><code class="docutils literal notranslate"><span class="pre">format-f32-truncate</span></code></h3>
+<p>( c-addr f32 places – c-addr bytes )</p>
+<p>Format a truncated S15,16 number</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">(f32.)</span></code></h3>
+<p>( f32 – )</p>
+<p>Type an s15.16 fixed-point number without a following space</p>
+</section>
+<section id="f32-n">
+<h3><code class="docutils literal notranslate"><span class="pre">(f32.n)</span></code></h3>
+<p>( f32 places – )</p>
+<p>Type a truncated s15.16 fixed-point number without a following space</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">f32.</span></code></h3>
+<p>( f32 – )</p>
+<p>Type an s15.16 fixed-point number with a following space</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">f32.n</span></code></h3>
+<p>( f32 places – )</p>
+<p>Type a truncated s15.16 fixed-point number with a following space
+o</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

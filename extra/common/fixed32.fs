@@ -130,7 +130,7 @@ begin-module fixed32
     rdrop
   ;
   
-  \ Get the len(x) of an S15.16 fixed-point number
+  \ Get the ln(x) of an S15.16 fixed-point number
   : f32ln ( f32 -- f32' ) [ 1 s>f32 ] literal - f32lnp1 ;
   
   \ Get the sine of an S15.16 fixed-point number
