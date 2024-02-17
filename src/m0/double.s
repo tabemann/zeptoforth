@@ -388,7 +388,7 @@ _ummul: ldmia dp!, {r0}
 	end_inlined
 
 	@@ Multiply two signed 32-bit values to get a signed 64-bit value
-	define_word "m*", visible_flag | inlined_flag
+	define_word "m*", visible_flag
 _mmul:	movs r0, tos
 	asrs tos, tos, #31
 	ldmia dp!, {r2}
