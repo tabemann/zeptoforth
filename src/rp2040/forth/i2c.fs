@@ -881,23 +881,6 @@ begin-module i2c
       enable-int
     ;
 
-    \ Saved second core hook
-    variable core-init-hook-saved
-
-    \ Initialize I2C on the second core
-    : init-i2c-core-1 ( -- )
-      task::core-init-hook @ core-init-hook-saved !
-      [:
-        core-init-hook-saved @ execute
-        disable-int
-        0 0 i2c-irq NVIC_IPR_IP!
-        0 1 i2c-irq NVIC_IPR_IP!
-        0 i2c-irq NVIC_ISER_SETENA!
-        1 i2c-irq NVIC_ISER_SETENA!
-        enable-int
-      ;] task::core-init-hook !
-    ;
-    
     \ Wait for I2C completion or timeout
     : wait-i2c-complete-or-timeout { buf -- } \ [char] C internal::serial-emit depth.
       timeout @ no-timeout = if \ [char] D internal::serial-emit depth.
@@ -1557,7 +1540,6 @@ end-module> import
   init
   0 i2c-internal::init-i2c
   1 i2c-internal::init-i2c
-  i2c-internal::init-i2c-core-1
 ;
 
 reboot
