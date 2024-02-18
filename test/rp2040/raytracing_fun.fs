@@ -68,11 +68,14 @@ begin-module raytracing-fun
   \ Generate a color
   : color { D: x D: y D: z D: u D: v D: w -- color }
     v 0,0 d>= if
-      v 1,0 2swap d- 0,0 dmax 1,0 dmin 255,0 f* f>s 0 0 rgb16
+      0 v 1,0 2swap d- 0,0 dmax 1,0 dmin 255,0 f* f>s dup rgb16
     else
       y 2,0 d+ v f/ { D: p }
-      x u p f* d- f>s z w p f* d- f>s + 1 and s>f 2,0 f/ 0,3 d+
-      v dnegate f* 0,2 d+ 0,0 dmax 1,0 dmin 255,0 f* f>s 0 swap 0 rgb16
+      x u p f* d- f>s z w p f* d- f>s + 1 and if
+        0,8 v dnegate f* 0,2 d+ 0,0 dmax 1,0 dmin 255,0 f* f>s 0 0 rgb16
+      else
+        0 0,8 v dnegate f* 0,2 d+ 0,0 dmax 1,0 dmin 255,0 f* f>s 0 rgb16
+      then
     then
   ;
   

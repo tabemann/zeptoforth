@@ -72,11 +72,14 @@ begin-module raytracing-fun
   \ Generate a color
   : color { x y z u v w -- color }
     v 0;0 >= if
-      v 1;0 swap - 0;0 max 1;0 min 255;0 f32* f32>s 0 0 rgb16
+      0 v 1;0 swap - 0;0 max 1;0 min 255;0 f32* f32>s dup rgb16
     else
       y 2;0 + v f32/ { p }
-      x u p f32* - f32>s z w p f32* - f32>s + 1 and s>f32 2;0 f32/ 0;3 +
-      v negate f32* 0;2 + 0;0 max 1;0 min 255;0 f32* f32>s 0 swap 0 rgb16
+      x u p f32* - f32>s z w p f32* - f32>s + 1 and if
+        0;8 v negate f32* 0;2 + 0;0 max 1;0 min 255;0 f32* f32>s 0 0 rgb16
+      else
+        0 0;8 v negate f32* 0;2 + 0;0 max 1;0 min 255;0 f32* f32>s 0 rgb16
+      then
     then
   ;
   
