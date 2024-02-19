@@ -28,7 +28,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Implicit compilation, i.e. automatically compiling temporary anonymous words from the REPL
 * Action scheduler support
 * Multicore support (on the RP2040)
-* Double cell and fixed point numeric support
+* Double cell and S31.32 fixed-point numeric support
 * Lambda expressions
 * `value`s and lexically scoped local variables
 * Closures
@@ -70,6 +70,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 
 There is also support for loadable extras not included in any builds:
 
+* Single-cell S15.16 fixed-point numeric support
 * An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
 * A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.
 * An SNTP (Simple Network Time Protocol) implementation for use with zeptoIP
