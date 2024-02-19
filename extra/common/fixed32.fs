@@ -113,6 +113,66 @@ begin-module fixed32
     x x y f32/ f32>s dup 0< if 1+ then s>f32 y f32* -
   ;
 
+  \ Get the ceiling of an S15.16 fixed-point number
+  : f32ceil ( f32 -- n ) dup $FFFF and if 16 arshift 1+ else 16 arshift then ;
+
+  \ Get the floor of an S15.16 fixed-point number
+  : f32floor ( f32 -- n ) 16 arshift ;
+
+  \ Round an S15.16 fixed-point number to the nearest integer with half
+  \ rounding up
+  : f32round-half-up ( f32 -- n )
+    dup $FFFF and 15 rshift if 16 arshift 1+ else 16 arshift then
+  ;
+
+  \ Round an S15.16 fixed-point number to the nearest integer with half
+  \ rounding down
+  : f32round-half-down ( f32 -- n )
+    dup $FFFF and dup [ 15 bit ] literal <> if
+      15 rshift if 16 arshift 1+ else 16 arshift then
+    else
+      drop 16 arshift
+    then
+  ;
+
+  \ Round a S15.16 fixed-point number to the nearest integer with half rounding
+  \ towards zero
+  : f32round-half-zero ( f32 -- n )
+    dup 16 arshift 0>= if f32round-half-down else f32round-half-up then
+  ;
+  
+  \ Round a S15.16 fixed-point number to the nearest integer with half rounding
+  \ away from zero
+  : f32round-half-away-zero ( f32 -- n )
+    dup 16 arshift 0>= if f32round-half-up else f32round-half-down then
+  ;
+  
+  \ Round a S15.16 fixed-point number to the nearest integer with half rounding
+  \ towards even
+  : f32round-half-even ( f32 -- n )
+    dup 16 arshift 1 and if f32round-half-up else f32round-half-down then
+  ;
+  
+  \ Round a S15.16 fixed-point number to the nearest integer with half rounding
+  \ towards even
+  : f32round-half-odd ( f32 -- n )
+    dup 16 arshift 1 and if f32round-half-down else f32round-half-up then
+  ;
+  
+  \ Round a S15.16 fixed-point number towards zero
+  : f32round-zero ( f32 -- n )
+    dup 16 arshift 0>= if
+      16 arshift
+    else
+      dup $FFFF and if 16 arshift 1+ else 16 arshift then
+    then
+  ;
+  
+  \ Round a S15.16 fixed-point number away from zero
+  : f32round-away-zero ( f32 -- n )
+    dup $FFFF and if 16 arshift dup 0>= if 1+ then else 16 arshift then
+  ;
+
   \ Pi as a S15.16 fixed-point number
   205887 constant f32pi
 

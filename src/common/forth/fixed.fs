@@ -46,10 +46,10 @@ internal import
 \ Get the floor of a fixed-point number as a single-cell number
 : floor ( f -- n ) nip ;
 
-\ Round a fixed-point number up to the nearest integer with half rounding up
+\ Round a fixed-point number to the nearest integer with half rounding up
 : round-half-up ( f -- n ) swap 31 rshift if 1+ then ;
 
-\ Round a fixed-point number down to the nearest integer with half rounding down
+\ Round a fixed-point number to the nearest integer with half rounding down
 : round-half-down ( f -- n )
   swap dup [ 31 bit ] literal <> if 31 rshift if 1+ then else drop then
 ;
