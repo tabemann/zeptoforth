@@ -41,6 +41,56 @@ Convert an S15.16 fixed-point number to an S31.32 fixed-point number
 
 Calculate the modulus of two S15.16 fixed-point numbers
 
+##### `f32ceil`
+( f -- n )
+
+Get the ceiling of an S15.16 fixed-point number as a single-cell number.
+
+##### `f32floor`
+( f -- n )
+
+Get the floor of an S15.16 fixed-point number as a single-cell number.
+
+##### `f32round-half-up`
+( f -- n )
+
+Round an S15.16 fixed-point number up to the nearest integer with half rounding up.
+
+##### `f32round-half-down`
+( f -- n )
+
+Round an S15.16 fixed-point number down to the nearest integer with half rounding down.
+
+##### `f32round-half-zero`
+( f -- n )
+
+Round an S15.16 fixed-point number to the nearest integer with half rounding towards zero.
+
+##### `f32round-half-away-zero`
+( f -- n )
+
+Round an S15.16 fixed-point number to the nearest integer with half rounding away from zero.
+
+##### `f32round-half-even`
+( f -- n )
+
+Round an S15.16 fixed-point number to the nearest integer with half rounding towards even.
+
+##### `f32round-half-odd`
+( f -- n )
+
+Round an S15.16 fixed-point number to the nearest integer with half rounding towards even.
+
+##### `f32round-zero`
+( f -- n )
+
+Round an S15.16 fixed-point number towards zero.
+
+##### `f32round-away-zero`
+( f -- n )
+
+Round an S15.16 fixed-point number away from zero.
+
 ##### `f32pi`
 ( -- pi )
 
