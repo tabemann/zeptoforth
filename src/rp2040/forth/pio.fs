@@ -79,7 +79,48 @@ begin-module pio
 
   \ Relocation out of range exception
   : x-relocate-out-of-range ( -- ) ." relocation out of range" cr ;
-  
+
+  \ :pio when inside a previous :pio
+  : x-in-pio ( -- ) ." :pio when in a PIO definition" cr ;
+
+  \ ;pio or other word valid only after :pio
+  : x-not-in-pio ( -- ) ." not in a PIO definition" cr ;
+
+  \ wrong mark for jump or mark
+  : x-incorrect-mark-type ( -- ) ." incorrect marker type" cr ;
+
+  \ alloc-piomem has no room for a program this big
+  : x-pio-no-room ( -- ) ." No room for PIO program" cr ;
+
+  \ alloc-piomem size argument > 32
+  : x-invalid-size ( -- ) ." Invalid PIO program size" cr ;
+
+  \ invalid program base address in setup-prog or free-piomem
+  : x-invalid-base ( -- ) ." Invalid PIO program base" cr ;
+
+  \ words to access properties of a PIO program
+  \ the start of the code (PIO instructions)
+  : p-code ( prog -- code ) 4 + ;
+
+  \ program size in instructions
+  : p-size ( prog -- size ) 3 + c@ ;
+
+  \ wrap bottom (.wrap_target)
+  : p-wrap-bot ( prog -- wrap-bot ) c@ ;
+
+  \ wrap top (.wrap) 
+  : p-wrap-top ( prog -- wrap-top ) 1+ c@ ;
+
+  \ both wrap points (bottom top)
+  : p-wrap ( prog -- wrap-bot wrap-top )
+    dup p-wrap-bot swap p-wrap-top ;
+
+  \ transfer (start) address
+  : p-transfer ( prog -- transfer ) 2 + c@ ;
+
+  \ code address and program length, suitable for pio-instr-mem!
+  : p-prog ( prog -- code size ) dup p-code swap p-size ;
+
   begin-module pio-internal
 
     \ Validate a PIO
@@ -168,6 +209,32 @@ begin-module pio
       lit, postpone -rot lit, postpone -rot r> lit, postpone execute
       postpone field@
       visible end-compile,
+    ;
+
+    variable (pbase)
+    variable current-wrap-top
+    
+    : pbase ( -- prog-base )
+      (pbase) @ dup averts x-not-in-pio
+    ;
+
+    \ Magic value to identify a valid marker
+    $4255 constant jmp-mark
+    $4242 constant pio-mark
+
+    \ Variables to track free PIO memory
+    variable pio0-freemem
+    variable pio1-freemem
+
+    : pio-init ( -- )
+      0 (pbase) !
+      0 pio0-freemem !
+      0 pio1-freemem !
+    ;
+    
+    \ helper word to convert memory address to pio program offset
+    : addr>off ( addr - offset )
+      pbase p-code - 2/ dup 32 u<= averts x-too-many-instructions
     ;
 
   end-module> import
@@ -985,6 +1052,51 @@ begin-module pio
     $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $E000 or h,
   ;
 
+  begin-module pioasm
+
+    \ Pseudo-operations for use within the PIO program.
+    \ Note: at some point when everyone has migrated to using :pio the plan
+    \ is to move all the instructions defined above into this module also.
+
+    \ set beginning of wrap at this line (defaults to first instruction)
+    : wrap> ( -- ) here addr>off pbase ccurrent! ;
+
+    \ set end of wrap at preceding line (defaults to end of program)
+    : <wrap ( -- ) here addr>off 1- dup current-wrap-top ! pbase 1+ ccurrent! ;
+
+    \ set transfer address (program start) at this line (defaults to first instruction)
+    : start> ( -- ) here addr>off pbase 2 + ccurrent! ;
+
+    \ adapted from armv6m:
+    \ Mark a backward destination
+    : mark< ( -- jmp-mark ) here jmp-mark ;
+
+    \ Mark a forward destination (store the jump that jumps to here)
+    : >mark ( jmp-mark -- )
+      dup $ffff and jmp-mark = averts x-incorrect-mark-type
+      16 rshift here addr>off or swap hcurrent!
+    ;
+
+    \ Forward PIO JMP to >mark with delay or side-set
+    : jmp+> ( delay/side-set condition -- mark-add marker )
+      $07 and 5 lshift swap $1F and 8 lshift or
+      16 lshift jmp-mark or here swap 0 h,
+    ;
+
+    \ Backward jump to mark< with delay or side-set
+    : jmp+< ( jmp-mark marker delay/side-set condition -- )
+      >r >r jmp-mark = averts x-incorrect-mark-type
+      addr>off r> r> jmp+,
+    ;
+
+    \ Forward PIO JMP to >mark without delay/side-set
+    : jmp> ( condition -- jmp-mark ) 0 swap jmp+> ;
+
+    \ Backward jump to mark< without delay or side-set
+    : jmp< ( jmp-mark condition -- ) 0 swap jmp+< ;
+
+  end-module
+  
   \ Enable state machines
   : sm-enable ( state-machine-bits pio -- )
     dup validate-pio
@@ -1304,7 +1416,79 @@ begin-module pio
     INTS @
   ;
 
+  \ Begin a PIO program.  Must be paired with ;pio
+  \ In between are a set of PIO assembly instructions plus pseudos defined below.
+  \ At execution time, the program name acts somewhat like a struct, with a number
+  \ of attributes p-<name>.
+  \ The header fields (each one byte) are: wrap bottom, wrap top, start address,
+  \ size.
+  : :pio ( -- pio-mark )
+    (pbase) @ triggers x-in-pio
+    create here (pbase) !
+    0 , 0 current-wrap-top !
+    pioasm import
+    pio-mark
+  ;
+
+  \ End a PIO program started by the preceding :pio
+  : ;pio ( marker -- )
+    pio-mark = averts x-incorrect-mark-type
+    here addr>off pbase 3 + ccurrent!  \ set size
+    current-wrap-top @ 0= if pioasm::<wrap then
+    0 (pbase) !
+    pioasm unimport
+  ;
+
+  \ Load and configure a pio/sm with the given program.
+  \
+  \ This loads the program at the specified base address, and sets the
+  \ start address and wrap registers.  Sometimes the same program is
+  \ used for more than one state machine; if so it is fine to use this
+  \ word for each of them (with the same PIO and base address).  That
+  \ will result in the program being loaded multiple times but that
+  \ has no effect since it is already loaded, and it will still
+  \ configure the state machine specific state like wrap address for
+  \ each state machine.
+  : setup-prog ( state-machine pio prog base -- )
+    dup 32 u< averts x-invalid-base
+    >r dup p-prog r@ 4 pick pio-instr-relocate-mem!
+    3dup p-transfer r@ + -rot sm-addr!
+    p-wrap swap r@ + swap r> + 2swap sm-wrap!
+  ;
+
+  \ Reserve space for a program
+  : alloc-piomem ( pio size -- base )
+    dup averts x-invalid-size dup 32 u<= averts x-invalid-size
+    over validate-pio
+    1 swap lshift 1-
+    swap PIO0 = if pio0-freemem else pio1-freemem then
+    32 0 do
+      2dup @ and 0= if
+	bis! i unloop exit
+      then
+      swap dup 0<  triggers x-pio-no-room
+      2* swap
+    loop
+    \ We should not fall through because of earlier checks.
+    1 triggers x-pio-no-room
+  ;
+
+  \ Release previously allocated program space
+  : free-piomem ( pio base size -- )
+    over 32 u< averts x-invalid-base
+    dup averts x-invalid-size
+    2dup + 32 u<= averts x-invalid-size
+    1 swap lshift 1- .s swap .s lshift
+    swap PIO0 = if pio0-freemem else pio1-freemem then .s bic!
+  ;
+  
 end-module
+
+\ Initialize
+: init ( -- )
+  init
+  pio::pio-internal::pio-init
+;
 
 \ Reboot
 reboot

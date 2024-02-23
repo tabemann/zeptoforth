@@ -16,7 +16,11 @@ The clock divider for a state machine is set with `sm-clkdiv!`, which takes a fr
 
 PIO state machines may have an optional delay in cycles associated with each PIO instruction and may have *sideset* enabled for up to five pins; the sideset pins belong to the upper bits in the delay/sideset fields for instructions that have them and the delay pins belong to the lower bits in said fields. Sideset pin bits set the state of pins each cycle simultaneous with whatever other operations they are carrying out. `sm-sideset-pins!` sets the number of bits that will be used for sideset. Note that the highest bit in the five-bit delay/sideset field may be optionally set to mean sideset enabled if `sm-sideset-high-enable!` is set, leaving four bits for delay and sideset.
 
-PIO assembler words compile PIO instructions to `here` as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay or sideset. The latter kind of instruction is marked with an `+` in its assembling word.
+The legacy way of defining a PIO program is simply to use `create` to give it a name, then lists the instructions one at a time.  This requires manually dealing with addresses in jumps, as well as program attributes such as the wrap points.
+
+A more convenient way to define a PIO program is using the `:pio` defining word.  Following that, the instructions are given including some additional ones that work only in the context of a `:pio` and are defined in word list `pioasm`.  Such a PIO program is ended with `;pio`.  Space for a program can be allocated by `alloc-piomem`.  It can then be loaded and set up with `setup-prog`, which takes care of loading as well as setting transfer address and wrap in a single operation.  Similar to the `armv6m` module, in this mode jumps use "marks", which are cells on the data stack, for forward and backward references.
+
+PIO assembler words compile PIO instructions to `here` as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay and/or sideset. The latter kind of instruction is marked with an `+` in its assembling word.
 
 ### `pio`
 
@@ -305,6 +309,69 @@ Set autopush on/off.
 
 Manually write instructions to a state machine.
 
+#### Words for "new style" PIO programs
+
+##### `:pio`
+( "name" -- pio-mark )
+
+Starts the definition of PIO program `name`.  This imports word list `pioasm` to enable words that are only valid within a PIO program.  End the definition with `;pio`.
+
+##### `;pio`
+( pio-mark -- )
+
+Ends the definition of the PIO program begun with `:pio`.
+
+##### `p-code`
+( prog -- code )
+
+The start of the code (PIO instructions) for the given PIO program.
+
+##### `p-size`
+( prog -- size )
+
+Program size in instructions for the given PIO program.
+
+##### `p-wrap-bot`
+( prog -- wrap-bot )
+
+Wrap bottom for the given PIO program.
+
+##### `p-wrap-top`
+( prog -- wrap-top )
+
+Wrap top for the given PIO program.
+
+##### `p-wrap`
+( prog -- wrap-bot wrap-top )
+
+Both wrap points for the given PIO program.
+
+##### `p-transfer`
+( prog -- transfer )
+
+Transfer (start) address for the given PIO program.
+##### `p-prog`
+( prog -- code size )
+
+Code address and program length for the given PIO program, suitable for `pio-instr-mem!`.
+
+##### `alloc-piomem`
+( pio size -- base )
+
+Allocate space for a program of length `size` in the specified PIO (PIO0 or PIO1) and returns the base address.  Raises `x-pio-no-room` if there is no room for a program of that size in the specified PIO.
+
+##### `free-piomem`
+( pio base size -- )
+
+Frees previously allocated PIO program space.
+
+##### `setup-prog`
+( state-machine pio prog base -- )
+
+This loads the specified program (defined by `:pio`) into `pio` starting at `base` and sets up `state-machine` in that PIO to run it.  The starting address and wrap parameters are set from the program attributes, i.e., `sm-wrap!` and `sm-addr!` have been done.  Other state machine specific setup such as pin mappings, as well as FIFO and clock parameters, have to be done separately.
+
+In some applications the same program is used in several state machines of the same PIO, which allows the same program words to drive both state machines.  The simplest way to deal with this is to invoke `setup-prog` once for each state machine, with the same `base` each time.  That will load the program words each time, but this is harmless.
+
 #### PIO Assembler Words
 
 ##### `jmp,`
@@ -396,6 +463,55 @@ PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ *index*, fr
 ( data delay/side-set destination -- )
 
 PIO SET instruction with delay or side-set. Set *destination* to *data*, which is a value from $00 to $1F. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
+
+#### Module `pioasm`
+
+These words are useful only within the context of a `:pio` program definition.  They are in the `pioasm` word list, which is automatically imported by `:pio` and unimported by `;pio`.
+
+##### `mark>`
+( -- jmp-mark )
+
+Mark a backward destination.
+
+##### `>mark`
+( jmp-mark -- )
+
+Mark a forward destination.
+
+##### `jmp>`
+( condition -- jmp-mark )
+
+Forward PIO JMP to next unmatched `>mark`, without delay/side-set.
+
+##### `jmp<`
+( jmp-mark condition -- )
+
+Backward jump to preceding unmatched `mark<`, without delay or side-set.
+
+##### `jmp+>`
+( delay/side-set condition -- mark-add marker )
+
+Forward PIO JMP to next unmatched `>mark` with delay or side-set.
+
+##### `jmp+<`
+( jmp-mark marker delay/side-set condition -- )
+
+Backward jump to preceding unmatched `mark<` with delay or side-set.
+
+##### `wrap>`
+( -- )
+
+Set wrap *bottom* at this line (defaults to first instruction).
+
+##### `<wrap`
+( -- )
+
+Set wrap *top* at preceding line (defaults to end of program).
+
+##### `start>`
+( -- )
+
+Set transfer address (program start) at this line (defaults to first instruction).
 
 ##### `COND_ALWAYS`
 ( -- condition )
@@ -747,4 +863,34 @@ Bit out of range exception.
 ##### `x-relocate-out-of-range`
 ( -- )
 
-Relocation out of range exception
+Relocation out of range exception.
+
+##### `x-in-pio`
+( -- )
+
+`:pio` when inside a previous `:pio` exception.
+
+##### `x-not-in-pio`
+( -- )
+
+`;pio` or other word valid only after `:pio` exception.
+
+##### `x-incorrect-mark-type`
+( -- )
+
+Wrong mark for jump or mark exception.
+
+##### `x-pio-no-room`
+( -- )
+
+`alloc-piomem` has no room for a program this big exception.
+
+##### `x-invalid-size`
+( -- )
+
+`alloc-piomem` size argument > 32 exception.
+
+##### `x-invalid-base`
+( -- )
+
+Invalid program base address in `setup-prog` or `free-piomem` exception.
