@@ -39,16 +39,23 @@ begin-module cyw43-spi
     \ The PIO program used for communicating
     0 constant SIDE_0
     16 constant SIDE_1
-    create cyw43-pio-program
+    :pio cyw43-pio-program
+    start>
+    wrap>
+    mark<
     1 SIDE_0 OUT_PINS out+,
-    0 SIDE_1 COND_X1- jmp+,
+    SIDE_1 COND_X1- jmp+<
     0 SIDE_0 SET_PINDIRS set+,
     MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
+    mark<
     1 SIDE_1 IN_PINS in+,
-    4 SIDE_0 COND_Y1- jmp+,
+    SIDE_0 COND_Y1- jmp+<
     0 SIDE_0 WAIT_PIN 1 wait+,
     0 SIDE_0 IRQ_SET irq+,
-    8 SIDE_0 COND_ALWAYS jmp+, \ DEBUG
+    mark<
+    SIDE_0 COND_ALWAYS jmp+<
+    <wrap
+    ;pio
 
     \ Program for setting X
     create cyw43-x!-program
@@ -216,10 +223,9 @@ begin-module cyw43-spi
       sm bit pio sm-disable
 
       \ Set up the PIO program
-      \      cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
-      cyw43-pio-program 9 pio-addr pio pio-instr-relocate-mem!
-      pio-addr sm pio sm-addr!
-      pio-addr pio-addr 8 + sm pio sm-wrap!
+      pio cyw43-pio-program p-size alloc-piomem { base-addr }
+      sm pio cyw43-pio-program base-addr setup-prog
+      base-addr sm pio sm-addr!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 pio pins-pio-alternate

@@ -45,7 +45,9 @@
 <p>PIO state machines may automatically <em>pull</em> from its TX FIFO after a threshold number of bits have been shifted out of its OSR register. They may also automatically <em>push</em> to its RX FIFO after a threshold number of bits have been shifted into its ISR register.</p>
 <p>The clock divider for a state machine is set with <code class="docutils literal notranslate"><span class="pre">sm-clkdiv!</span></code>, which takes a fractional component (from 0 to 255) and an integral component (from 0 to 65536) to divide the system clock by for the clock rate of the state machine in question. Note that if the integral clock divisor is 0 it is treated as 65536, and in those cases the fractional clock divisor must be 0.</p>
 <p>PIO state machines may have an optional delay in cycles associated with each PIO instruction and may have <em>sideset</em> enabled for up to five pins; the sideset pins belong to the upper bits in the delay/sideset fields for instructions that have them and the delay pins belong to the lower bits in said fields. Sideset pin bits set the state of pins each cycle simultaneous with whatever other operations they are carrying out. <code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code> sets the number of bits that will be used for sideset. Note that the highest bit in the five-bit delay/sideset field may be optionally set to mean sideset enabled if <code class="docutils literal notranslate"><span class="pre">sm-sideset-high-enable!</span></code> is set, leaving four bits for delay and sideset.</p>
-<p>PIO assembler words compile PIO instructions to <code class="docutils literal notranslate"><span class="pre">here</span></code> as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay or sideset. The latter kind of instruction is marked with an <code class="docutils literal notranslate"><span class="pre">+</span></code> in its assembling word.</p>
+<p>The legacy way of defining a PIO program is simply to use <code class="docutils literal notranslate"><span class="pre">create</span></code> to give it a name, then lists the instructions one at a time.  This requires manually dealing with addresses in jumps, as well as program attributes such as the wrap points.</p>
+<p>A more convenient way to define a PIO program is using the <code class="docutils literal notranslate"><span class="pre">:pio</span></code> defining word.  Following that, the instructions are given including some additional ones that work only in the context of a <code class="docutils literal notranslate"><span class="pre">:pio</span></code> and are defined in word list <code class="docutils literal notranslate"><span class="pre">pioasm</span></code>.  Such a PIO program is ended with <code class="docutils literal notranslate"><span class="pre">;pio</span></code>.  Space for a program can be allocated by <code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code>.  It can then be loaded and set up with <code class="docutils literal notranslate"><span class="pre">setup-prog</span></code>, which takes care of loading as well as setting transfer address and wrap in a single operation.  Similar to the <code class="docutils literal notranslate"><span class="pre">armv6m</span></code> module, in this mode jumps use “marks”, which are cells on the data stack, for forward and backward references.</p>
+<p>PIO assembler words compile PIO instructions to <code class="docutils literal notranslate"><span class="pre">here</span></code> as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay and/or sideset. The latter kind of instruction is marked with an <code class="docutils literal notranslate"><span class="pre">+</span></code> in its assembling word.</p>
 <section id="pio">
 <h2><code class="docutils literal notranslate"><span class="pre">pio</span></code><a class="headerlink" href="#pio" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pio</span></code> module contains the following words:</p>
@@ -334,6 +336,70 @@
 <p>Manually write instructions to a state machine.</p>
 </section>
 </section>
+<section id="words-for-new-style-pio-programs">
+<h3>Words for “new style” PIO programs<a class="headerlink" href="#words-for-new-style-pio-programs" title="Permalink to this heading">¶</a></h3>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">:pio</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<p>( “name” – pio-mark )</p>
+<p>Starts the definition of PIO program <code class="docutils literal notranslate"><span class="pre">name</span></code>.  This imports word list <code class="docutils literal notranslate"><span class="pre">pioasm</span></code> to enable words that are only valid within a PIO program.  End the definition with <code class="docutils literal notranslate"><span class="pre">;pio</span></code>.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">;pio</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<p>( pio-mark – )</p>
+<p>Ends the definition of the PIO program begun with <code class="docutils literal notranslate"><span class="pre">:pio</span></code>.</p>
+</section>
+<section id="p-code">
+<h4><code class="docutils literal notranslate"><span class="pre">p-code</span></code><a class="headerlink" href="#p-code" title="Permalink to this heading">¶</a></h4>
+<p>( prog – code )</p>
+<p>The start of the code (PIO instructions) for the given PIO program.</p>
+</section>
+<section id="p-size">
+<h4><code class="docutils literal notranslate"><span class="pre">p-size</span></code><a class="headerlink" href="#p-size" title="Permalink to this heading">¶</a></h4>
+<p>( prog – size )</p>
+<p>Program size in instructions for the given PIO program.</p>
+</section>
+<section id="p-wrap-bot">
+<h4><code class="docutils literal notranslate"><span class="pre">p-wrap-bot</span></code><a class="headerlink" href="#p-wrap-bot" title="Permalink to this heading">¶</a></h4>
+<p>( prog – wrap-bot )</p>
+<p>Wrap bottom for the given PIO program.</p>
+</section>
+<section id="p-wrap-top">
+<h4><code class="docutils literal notranslate"><span class="pre">p-wrap-top</span></code><a class="headerlink" href="#p-wrap-top" title="Permalink to this heading">¶</a></h4>
+<p>( prog – wrap-top )</p>
+<p>Wrap top for the given PIO program.</p>
+</section>
+<section id="p-wrap">
+<h4><code class="docutils literal notranslate"><span class="pre">p-wrap</span></code><a class="headerlink" href="#p-wrap" title="Permalink to this heading">¶</a></h4>
+<p>( prog – wrap-bot wrap-top )</p>
+<p>Both wrap points for the given PIO program.</p>
+</section>
+<section id="p-transfer">
+<h4><code class="docutils literal notranslate"><span class="pre">p-transfer</span></code><a class="headerlink" href="#p-transfer" title="Permalink to this heading">¶</a></h4>
+<p>( prog – transfer )</p>
+<p>Transfer (start) address for the given PIO program.</p>
+</section>
+<section id="p-prog">
+<h4><code class="docutils literal notranslate"><span class="pre">p-prog</span></code><a class="headerlink" href="#p-prog" title="Permalink to this heading">¶</a></h4>
+<p>( prog – code size )</p>
+<p>Code address and program length for the given PIO program, suitable for <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code>.</p>
+</section>
+<section id="alloc-piomem">
+<h4><code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code><a class="headerlink" href="#alloc-piomem" title="Permalink to this heading">¶</a></h4>
+<p>( pio size – base )</p>
+<p>Allocate space for a program of length <code class="docutils literal notranslate"><span class="pre">size</span></code> in the specified PIO (PIO0 or PIO1) and returns the base address.  Raises <code class="docutils literal notranslate"><span class="pre">x-pio-no-room</span></code> if there is no room for a program of that size in the specified PIO.</p>
+</section>
+<section id="free-piomem">
+<h4><code class="docutils literal notranslate"><span class="pre">free-piomem</span></code><a class="headerlink" href="#free-piomem" title="Permalink to this heading">¶</a></h4>
+<p>( pio base size – )</p>
+<p>Frees previously allocated PIO program space.</p>
+</section>
+<section id="setup-prog">
+<h4><code class="docutils literal notranslate"><span class="pre">setup-prog</span></code><a class="headerlink" href="#setup-prog" title="Permalink to this heading">¶</a></h4>
+<p>( state-machine pio prog base – )</p>
+<p>This loads the specified program (defined by <code class="docutils literal notranslate"><span class="pre">:pio</span></code>) into <code class="docutils literal notranslate"><span class="pre">pio</span></code> starting at <code class="docutils literal notranslate"><span class="pre">base</span></code> and sets up <code class="docutils literal notranslate"><span class="pre">state-machine</span></code> in that PIO to run it.  The starting address and wrap parameters are set from the program attributes, i.e., <code class="docutils literal notranslate"><span class="pre">sm-wrap!</span></code> and <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code> have been done.  Other state machine specific setup such as pin mappings, as well as FIFO and clock parameters, have to be done separately.</p>
+<p>In some applications the same program is used in several state machines of the same PIO, which allows the same program words to drive both state machines.  The simplest way to deal with this is to invoke <code class="docutils literal notranslate"><span class="pre">setup-prog</span></code> once for each state machine, with the same <code class="docutils literal notranslate"><span class="pre">base</span></code> each time.  That will load the program words each time, but this is harmless.</p>
+</section>
+</section>
 <section id="pio-assembler-words">
 <h3>PIO Assembler Words<a class="headerlink" href="#pio-assembler-words" title="Permalink to this heading">¶</a></h3>
 <section id="jmp">
@@ -381,50 +447,99 @@
 <p>( data destination – )</p>
 <p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F.</p>
 </section>
-<section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
 <p>( address delay/side-set condition – )</p>
 <p>PIO JMP instruction with delay or side-set. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
 <p>( index delay/side-set source polarity – )</p>
 <p>PIO WAIT instruction with delay or side-set. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count delay/side-set source – )</p>
 <p>PIO IN instruction with delay or side-set. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count delay/side-set destination – )</p>
 <p>PIO OUT instruction with delay or side-set. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
 <p>( delay/side-set block if-full – )</p>
 <p>PIO PUSH instruction with delay or side-set. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
 <p>( delay/side-set block if-empty – )</p>
 <p>PIO PULL instruction with delay or side-set. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
 </section>
-<section id="id7">
-<h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h4>
 <p>( source delay/side-set op destination – )</p>
 <p>PIO MOV instruction with delay or side-set. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id8">
-<h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
 <p>( index delay/side-set set/wait – )</p>
 <p>PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id9">
-<h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h4>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h4>
 <p>( data delay/side-set destination – )</p>
 <p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+</section>
+<section id="module-pioasm">
+<h3>Module <code class="docutils literal notranslate"><span class="pre">pioasm</span></code><a class="headerlink" href="#module-pioasm" title="Permalink to this heading">¶</a></h3>
+<p>These words are useful only within the context of a <code class="docutils literal notranslate"><span class="pre">:pio</span></code> program definition.  They are in the <code class="docutils literal notranslate"><span class="pre">pioasm</span></code> word list, which is automatically imported by <code class="docutils literal notranslate"><span class="pre">:pio</span></code> and unimported by <code class="docutils literal notranslate"><span class="pre">;pio</span></code>.</p>
+<section id="mark">
+<h4><code class="docutils literal notranslate"><span class="pre">mark&gt;</span></code><a class="headerlink" href="#mark" title="Permalink to this heading">¶</a></h4>
+<p>( – jmp-mark )</p>
+<p>Mark a backward destination.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h4>
+<p>( jmp-mark – )</p>
+<p>Mark a forward destination.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp&gt;</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h4>
+<p>( condition – jmp-mark )</p>
+<p>Forward PIO JMP to next unmatched <code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code>, without delay/side-set.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp&lt;</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
+<p>( jmp-mark condition – )</p>
+<p>Backward jump to preceding unmatched <code class="docutils literal notranslate"><span class="pre">mark&lt;</span></code>, without delay or side-set.</p>
+</section>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp+&gt;</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h4>
+<p>( delay/side-set condition – mark-add marker )</p>
+<p>Forward PIO JMP to next unmatched <code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code> with delay or side-set.</p>
+</section>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp+&lt;</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h4>
+<p>( jmp-mark marker delay/side-set condition – )</p>
+<p>Backward jump to preceding unmatched <code class="docutils literal notranslate"><span class="pre">mark&lt;</span></code> with delay or side-set.</p>
+</section>
+<section id="wrap">
+<h4><code class="docutils literal notranslate"><span class="pre">wrap&gt;</span></code><a class="headerlink" href="#wrap" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p>Set wrap <em>bottom</em> at this line (defaults to first instruction).</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">&lt;wrap</span></code><a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p>Set wrap <em>top</em> at preceding line (defaults to end of program).</p>
+</section>
+<section id="start">
+<h4><code class="docutils literal notranslate"><span class="pre">start&gt;</span></code><a class="headerlink" href="#start" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p>Set transfer address (program start) at this line (defaults to first instruction).</p>
 </section>
 <section id="cond-always">
 <h4><code class="docutils literal notranslate"><span class="pre">COND_ALWAYS</span></code><a class="headerlink" href="#cond-always" title="Permalink to this heading">¶</a></h4>
@@ -777,7 +892,37 @@
 <section id="x-relocate-out-of-range">
 <h4><code class="docutils literal notranslate"><span class="pre">x-relocate-out-of-range</span></code><a class="headerlink" href="#x-relocate-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
-<p>Relocation out of range exception</p>
+<p>Relocation out of range exception.</p>
+</section>
+<section id="x-in-pio">
+<h4><code class="docutils literal notranslate"><span class="pre">x-in-pio</span></code><a class="headerlink" href="#x-in-pio" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p><code class="docutils literal notranslate"><span class="pre">:pio</span></code> when inside a previous <code class="docutils literal notranslate"><span class="pre">:pio</span></code> exception.</p>
+</section>
+<section id="x-not-in-pio">
+<h4><code class="docutils literal notranslate"><span class="pre">x-not-in-pio</span></code><a class="headerlink" href="#x-not-in-pio" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p><code class="docutils literal notranslate"><span class="pre">;pio</span></code> or other word valid only after <code class="docutils literal notranslate"><span class="pre">:pio</span></code> exception.</p>
+</section>
+<section id="x-incorrect-mark-type">
+<h4><code class="docutils literal notranslate"><span class="pre">x-incorrect-mark-type</span></code><a class="headerlink" href="#x-incorrect-mark-type" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p>Wrong mark for jump or mark exception.</p>
+</section>
+<section id="x-pio-no-room">
+<h4><code class="docutils literal notranslate"><span class="pre">x-pio-no-room</span></code><a class="headerlink" href="#x-pio-no-room" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p><code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code> has no room for a program this big exception.</p>
+</section>
+<section id="x-invalid-size">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-size</span></code><a class="headerlink" href="#x-invalid-size" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p><code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code> size argument &gt; 32 exception.</p>
+</section>
+<section id="x-invalid-base">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-base</span></code><a class="headerlink" href="#x-invalid-base" title="Permalink to this heading">¶</a></h4>
+<p>( – )</p>
+<p>Invalid program base address in <code class="docutils literal notranslate"><span class="pre">setup-prog</span></code> or <code class="docutils literal notranslate"><span class="pre">free-piomem</span></code> exception.</p>
 </section>
 </section>
 </section>
@@ -823,6 +968,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -863,11 +1009,13 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

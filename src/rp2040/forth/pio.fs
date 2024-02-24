@@ -1425,7 +1425,7 @@ begin-module pio
   : :pio ( -- pio-mark )
     (pbase) @ triggers x-in-pio
     create here (pbase) !
-    0 , 0 current-wrap-top !
+    compiling-to-flash? if cell reserve drop else 0 , then 0 current-wrap-top !
     pioasm import
     pio-mark
   ;
@@ -1433,6 +1433,12 @@ begin-module pio
   \ End a PIO program started by the preceding :pio
   : ;pio ( marker -- )
     pio-mark = averts x-incorrect-mark-type
+    compiling-to-flash? if
+      pbase c@ $FF = if 0 pbase ccurrent! then
+      pbase 2 + c@ $FF = if 0 pbase 2 + ccurrent! then
+    else
+      pbase 2 + c@ $00 = if 0 pbase 2 + ccurrent! then
+    then
     here addr>off pbase 3 + ccurrent!  \ set size
     current-wrap-top @ 0= if pioasm::<wrap then
     0 (pbase) !
