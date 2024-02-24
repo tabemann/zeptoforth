@@ -30,7 +30,7 @@
         drop c 3 * + 3 type
       else
         c $20 < if
-          S" DLEDC1DC2DC3DC4NAKSYNETBCANEM SUBESCFS GS RS US "
+          s" DLEDC1DC2DC3DC4NAKSYNETBCANEM SUBESCFS GS RS US "
           drop c $10 - 3 * + 3 type
         else
           ." DEL"
