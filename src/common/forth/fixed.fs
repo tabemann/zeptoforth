@@ -26,7 +26,7 @@ compress-flash
 internal import
 
 \ Get the value of pi
-0 314159265 0 100000000 f/ 2constant pi
+$243f6a89 $3 2constant pi
 
 \ Domain error exception
 : x-domain-error ( -- ) ." domain error" cr ;
