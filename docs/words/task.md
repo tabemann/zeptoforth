@@ -84,9 +84,9 @@ Configure notification for a task, with *notify-count* being the number of suppo
 To reinitialize existing tasks, one executes:
 
 ##### `init-task`
-( xn...x0 count xt task -- )
+( xn...x0 count xt task core -- )
 
-These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.
+These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.  It will execute on *core*.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 

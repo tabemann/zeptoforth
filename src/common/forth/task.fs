@@ -53,21 +53,6 @@ begin-module task
     \ The maximum task priority
     $7FFF constant max-priority
 
-    \ Task has not terminated
-    0 constant not-terminated
-
-    \ Task has terminated normally
-    1 constant terminated-normally
-
-    \ Task has been killed
-    2 constant terminated-killed
-
-    \ Task has terminated due to a hardware exception
-    3 constant terminated-crashed
-
-    \ Task has terminated due to a stack overflow
-    4 constant terminated-overflowed
-
     \ Task guard value
     $DEADCAFE constant task-guard-value
     
@@ -282,6 +267,21 @@ begin-module task
   \ No timeout
   $80000000 constant no-timeout
   
+  \ Task has not terminated
+  0 constant not-terminated
+
+  \ Task has terminated normally
+  1 constant terminated-normally
+
+  \ Task has been killed
+  2 constant terminated-killed
+
+  \ Task has terminated due to a hardware exception
+  3 constant terminated-crashed
+
+  \ Task has terminated due to a stack overflow
+  4 constant terminated-overflowed
+
   \ Attempted to use a terminated task
   : x-terminated ( -- ) ." task has been terminated" cr ;
 
