@@ -176,7 +176,7 @@ begin-module bitmap
         r5 r3 ands_,_
         0 r0 cmp_,#_
         eq bc>
-        mark>
+        mark<
         0 tos r4 ldrb_,[_,#_]
         \ r4: dst-byte
         r5 r4 bics_,_
@@ -216,7 +216,7 @@ begin-module bitmap
         r5 r3 ands_,_
         0 r0 cmp_,#_
         eq bc>
-        mark>
+        mark<
         0 tos r4 ldrb_,[_,#_]
         \ r4: dst-byte
         r3 r4 orrs_,_
@@ -256,7 +256,7 @@ begin-module bitmap
         r5 r3 ands_,_
         0 r0 cmp_,#_
         eq bc>
-        mark>
+        mark<
         0 tos r4 ldrb_,[_,#_]
         \ r4: dst-byte
         r3 r4 bics_,_
@@ -295,7 +295,7 @@ begin-module bitmap
         r5 r3 ands_,_
         0 r0 cmp_,#_
         eq bc>
-        mark>
+        mark<
         0 tos r4 ldrb_,[_,#_]
         \ r4: dst-byte
         r3 r4 bics_,_
@@ -334,7 +334,7 @@ begin-module bitmap
         r5 r3 ands_,_
         0 r0 cmp_,#_
         eq bc>
-        mark>
+        mark<
         0 tos r4 ldrb_,[_,#_]
         \ r4: dst-byte
         r3 r4 eors_,_
@@ -378,7 +378,7 @@ begin-module bitmap
         r1 1 pop
         0 r1 cmp_,#_
         eq bc>
-        mark>
+        mark<
         r5 1 push
         tos r0 2 push
         0 tos tos ldrb_,[_,#_]
@@ -445,7 +445,7 @@ begin-module bitmap
         r1 1 pop
         0 r1 cmp_,#_
         eq bc>
-        mark>
+        mark<
         r5 1 push
         tos r0 2 push
         0 tos tos ldrb_,[_,#_]
@@ -508,7 +508,7 @@ begin-module bitmap
         r1 1 pop
         0 r1 cmp_,#_
         eq bc>
-        mark>
+        mark<
         r5 1 push
         tos r0 2 push
         0 tos tos ldrb_,[_,#_]
@@ -573,7 +573,7 @@ begin-module bitmap
         r1 1 pop
         0 r1 cmp_,#_
         eq bc>
-        mark>
+        mark<
         r5 1 push
         tos r0 2 push
         0 tos tos ldrb_,[_,#_]
@@ -636,7 +636,7 @@ begin-module bitmap
         r1 1 pop
         0 r1 cmp_,#_
         eq bc>
-        mark>
+        mark<
         r5 1 push
         tos r0 2 push
         0 tos tos ldrb_,[_,#_]

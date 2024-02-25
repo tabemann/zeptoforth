@@ -41,7 +41,7 @@ begin-module cyw43-spi
     16 constant SIDE_1
     :pio cyw43-pio-program
     start>
-    wrap>
+    wrap<
     mark<
     1 SIDE_0 OUT_PINS out+,
     SIDE_1 COND_X1- jmp+<

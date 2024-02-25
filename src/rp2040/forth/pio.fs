@@ -87,42 +87,74 @@ begin-module pio
   \ ;pio or other word valid only after :pio
   : x-not-in-pio ( -- ) ." not in a PIO definition" cr ;
 
-  \ wrong mark for jump or mark
+  \ Wrong mark for jump or mark
   : x-incorrect-mark-type ( -- ) ." incorrect marker type" cr ;
 
   \ alloc-piomem has no room for a program this big
   : x-pio-no-room ( -- ) ." No room for PIO program" cr ;
 
   \ alloc-piomem size argument > 32
-  : x-invalid-size ( -- ) ." Invalid PIO program size" cr ;
+  : x-invalid-size ( -- ) ." invalid PIO program size" cr ;
 
-  \ invalid program base address in setup-prog or free-piomem
-  : x-invalid-base ( -- ) ." Invalid PIO program base" cr ;
+  \ Invalid program base address in setup-prog or free-piomem
+  : x-invalid-base ( -- ) ." invalid PIO program base" cr ;
 
-  \ words to access properties of a PIO program
+  \ PIO program wrap bottom already set
+  : x-wrap-bottom-already-set ( -- )
+    ." PIO program wrap bottom already set" cr
+  ;
+  
+  \ PIO program wrap top already set
+  : x-wrap-top-already-set ( -- ) ." PIO program wrap top already set" cr ;
+
+  \ PIO program start already set
+  : x-start-already-set ( -- ) ." PIO program start already set" cr ;
+
+  begin-module pio-internal
+    
+    begin-structure pio-header-size
+      
+      \ PIO program wrap bottom
+      cfield: pio-program-wrap-bottom
+
+      \ PIO program wrap top
+      cfield: pio-program-wrap-top
+      
+      \ PIO program start
+      cfield: pio-program-start
+      
+      \ PIO program size
+      cfield: pio-program-size
+      
+    end-structure
+
+  end-module> import
+
+    \ words to access properties of a PIO program
   \ the start of the code (PIO instructions)
-  : p-code ( prog -- code ) 4 + ;
+  : p-code ( prog -- code ) pio-header-size + ;
 
   \ program size in instructions
-  : p-size ( prog -- size ) 3 + c@ ;
+  : p-size ( prog -- size ) pio-program-size c@ ;
 
   \ wrap bottom (.wrap_target)
-  : p-wrap-bot ( prog -- wrap-bot ) c@ ;
+  : p-wrap-bot ( prog -- wrap-bot ) pio-program-wrap-bottom c@ ;
 
   \ wrap top (.wrap) 
-  : p-wrap-top ( prog -- wrap-top ) 1+ c@ ;
+  : p-wrap-top ( prog -- wrap-top ) pio-program-wrap-top c@ ;
 
   \ both wrap points (bottom top)
   : p-wrap ( prog -- wrap-bot wrap-top )
-    dup p-wrap-bot swap p-wrap-top ;
+    dup p-wrap-bot swap p-wrap-top
+  ;
 
   \ transfer (start) address
-  : p-transfer ( prog -- transfer ) 2 + c@ ;
+  : p-transfer ( prog -- transfer ) pio-program-start c@ ;
 
   \ code address and program length, suitable for pio-instr-mem!
   : p-prog ( prog -- code size ) dup p-code swap p-size ;
 
-  begin-module pio-internal
+  continue-module pio-internal
 
     \ Validate a PIO
     : validate-pio ( pio -- )
@@ -212,8 +244,11 @@ begin-module pio
       visible end-compile,
     ;
 
+    \ PIO program definition variables
     variable (pbase)
+    variable current-wrap-bottom
     variable current-wrap-top
+    variable current-start
     
     : pbase ( -- prog-base )
       (pbase) @ dup averts x-not-in-pio
@@ -238,7 +273,7 @@ begin-module pio
       pbase p-code - 2/ dup 32 u<= averts x-too-many-instructions
     ;
 
-  end-module> import
+  end-module>
 
   \ PIO0 IRQ0 index
   7 constant PIO0_IRQ0
@@ -1059,14 +1094,24 @@ begin-module pio
     \ Note: at some point when everyone has migrated to using :pio the plan
     \ is to move all the instructions defined above into this module also.
 
-    \ set beginning of wrap at this line (defaults to first instruction)
-    : wrap> ( -- ) here addr>off pbase ccurrent! ;
+    \ Set beginning of wrap at this line (defaults to first instruction)
+    : wrap< ( -- )
+      current-wrap-bottom @ -1 = averts x-wrap-bottom-already-set
+      here addr>off current-wrap-bottom !
+    ;
 
-    \ set end of wrap at preceding line (defaults to end of program)
-    : <wrap ( -- ) here addr>off 1- dup current-wrap-top ! pbase 1+ ccurrent! ;
+    \ Set end of wrap at preceding line (defaults to end of program)
+    : <wrap ( -- )
+      current-wrap-top @ -1 = averts x-wrap-top-already-set
+      here addr>off 1- current-wrap-top !
+    ;
 
-    \ set transfer address (program start) at this line (defaults to first instruction)
-    : start> ( -- ) here addr>off pbase 2 + ccurrent! ;
+    \ Set transfer address (program start) at this line (defaults to first
+    \ instruction)
+    : start> ( -- )
+      current-start @ -1 = averts x-start-already-set
+      here addr>off current-start !
+    ;
 
     \ adapted from armv6m:
     \ Mark a backward destination
@@ -1426,7 +1471,10 @@ begin-module pio
   : :pio ( -- pio-mark )
     (pbase) @ triggers x-in-pio
     create here (pbase) !
-    compiling-to-flash? if cell reserve drop else 0 , then 0 current-wrap-top !
+    cell reserve drop
+    -1 current-wrap-bottom !
+    -1 current-wrap-top !
+    -1 current-start !
     pioasm import
     pio-mark
   ;
@@ -1434,14 +1482,13 @@ begin-module pio
   \ End a PIO program started by the preceding :pio
   : ;pio ( marker -- )
     pio-mark = averts x-incorrect-mark-type
-    compiling-to-flash? if
-      pbase c@ $FF = if 0 pbase ccurrent! then
-      pbase 2 + c@ $FF = if 0 pbase 2 + ccurrent! then
-    else
-      pbase 2 + c@ $00 = if 0 pbase 2 + ccurrent! then
-    then
-    here addr>off pbase 3 + ccurrent!  \ set size
-    current-wrap-top @ 0= if pioasm::<wrap then
+    current-wrap-bottom @ -1 = if 0 current-wrap-bottom ! then
+    current-wrap-top @ -1 = if 0 current-wrap-top ! then
+    current-start @ -1 = if 0 current-start ! then
+    current-wrap-bottom @ pbase pio-program-wrap-bottom ccurrent!
+    current-wrap-top @ pbase pio-program-wrap-top ccurrent!
+    current-start @ pbase pio-program-start ccurrent!
+    here addr>off pbase pio-program-size ccurrent!  \ set size
     0 (pbase) !
     pioasm unimport
   ;

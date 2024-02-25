@@ -33,7 +33,7 @@ continue-module forth
   \ Our PIO program
   :pio pio-program
   start>
-  wrap>
+  wrap<
   %00001 SET_PINS set,
   %00000 SET_PINS set,
   <wrap

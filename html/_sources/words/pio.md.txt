@@ -499,7 +499,7 @@ Forward PIO JMP to next unmatched `>mark` with delay or side-set.
 
 Backward jump to preceding unmatched `mark<` with delay or side-set.
 
-##### `wrap>`
+##### `wrap<`
 ( -- )
 
 Set wrap *bottom* at this line (defaults to first instruction).

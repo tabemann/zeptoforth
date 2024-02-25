@@ -637,9 +637,12 @@ begin-module armv6m
 
     \ Assemble a YIELD instruction
     $BF10 instr-16-const yield ( -- )
+    
+    \ Mark a backward destination a fashion that makes more sense.
+    : mark< ( -- mark-addr mark ) here mark-dest ;
 
-    \ Mark a backward destination
-    : mark> ( -- mark-addr mark ) here mark-dest ;
+    \ Mark a backward destination (deprecated)
+    : mark> ( -- mark-addr mark ) mark< ;
 
     \ Mark a forward destination
     : >mark ( mark-addr mark -- )

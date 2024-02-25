@@ -468,7 +468,7 @@ begin-module task
       cpu-last-task
       code[
       0 tos tos ldr_,[_,#_]
-      mark>
+      mark<
       0 tos cmp_,#_
       ne bc>
       pc r0 2 pop
@@ -1550,7 +1550,7 @@ begin-module task
       first-task
       code[
       0 tos tos ldr_,[_,#_]
-      mark>
+      mark<
       0 tos cmp_,#_
       ne bc>
       pc 1 pop
@@ -1667,7 +1667,7 @@ begin-module task
       code[
       r6 r0 movs_,_
       r6 1 r7 ldm
-      mark>
+      mark<
       0 r0 cmp_,#_
       ne bc>
       pc 1 pop
