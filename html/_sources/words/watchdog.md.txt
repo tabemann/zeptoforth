@@ -1,6 +1,6 @@
 # Watchdog Words
 
-The RP2040 includes watchdog functionality that, when enabled, triggers a reboot after a set delay during which the watchdog timer is not updated. It also has the capability to force a reset. By default the watchdog timer is disabled, the watchog delay is 1 second, and the watchdog (once enabled) is updated automatically each time the multitasker runs outside of a critical section. This behavior chan be changed in that the watchdog delay can be set to any time between 0 seconds (i.e. trigger immediately, and report a 'force' reboot reason rather than a 'timer' reason) and 16.777 seconds, and the multitasker can be set to not automatically update the watchdog timer (and this require manual updating by the user).
+The RP2040 includes watchdog functionality that, when enabled, triggers a reboot after a set delay during which the watchdog timer is not updated. It also has the capability to force a reset. By default the watchdog timer is disabled, the watchog delay is 1 second, and the watchdog (once enabled) is updated automatically each time the multitasker runs outside of a critical section. This behavior chan be changed in that the watchdog delay can be set to any time between 0 microseconds (i.e. trigger immediately, and report a 'force' reboot reason rather than a 'timer' reason) and 8388607 microseconds, and the multitasker can be set to not automatically update the watchdog timer (and this require manual updating by the user).
 
 ### `watchdog`
 
