@@ -469,7 +469,7 @@ PIO SET instruction with delay or side-set. Set *destination* to *data*, which i
 
 These words are useful only within the context of a `:pio` program definition.  They are in the `pioasm` word list, which is automatically imported by `:pio` and unimported by `;pio`.
 
-##### `mark>`
+##### `mark<`
 ( -- jmp-mark )
 
 Mark a backward destination.
