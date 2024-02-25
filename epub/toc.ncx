@@ -7566,12 +7566,12 @@
     </navPoint>
     <navPoint id="navPoint1260" playOrder="1191">
       <navLabel>
-        <text>Watchdog</text>
+        <text>Watchdog Words</text>
       </navLabel>
       <content src="words/watchdog.xhtml" />  
       <navPoint id="navPoint1261" playOrder="1191">
         <navLabel>
-          <text>Watchdog</text>
+          <text>Watchdog Words</text>
         </navLabel>
         <content src="words/watchdog.xhtml" />  
       </navPoint>
@@ -7579,12 +7579,12 @@
         <navLabel>
           <text>watchdog</text>
         </navLabel>
-        <content src="words/watchdog.xhtml#id1" />  
+        <content src="words/watchdog.xhtml#watchdog" />  
         <navPoint id="navPoint1263" playOrder="1192">
           <navLabel>
             <text>watchdog</text>
           </navLabel>
-          <content src="words/watchdog.xhtml#id1" />  
+          <content src="words/watchdog.xhtml#watchdog" />  
         </navPoint>
         <navPoint id="navPoint1264" playOrder="1193">
           <navLabel>
