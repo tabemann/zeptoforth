@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2024 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -41,6 +41,7 @@
 #include src/rp2040/forth/pin.fs
 #include src/rp2040/forth/pio.fs
 #include src/common/forth/task.fs
+#include src/rp2040/forth/watchdog.fs
 #include src/rp2040/forth/led.fs
 #include src/common/forth/full_default.fs
 #include src/rp2040/forth/timer.fs

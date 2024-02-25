@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@
 #include src/rp2040/forth/int_io.fs
 #include src/rp2040/forth/gpio.fs
 #include src/common/forth/task.fs
+#include src/rp2040/forth/watchdog.fs
 #include src/common/forth/save_minidict.fs
 
 mini-dict::save-flash-mini-dict

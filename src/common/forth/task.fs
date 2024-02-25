@@ -254,6 +254,9 @@ begin-module task
 
   \ Initialize on core boot hook
   variable core-init-hook
+
+  \ Watchdog hook
+  variable watchdog-hook
   
   \ The latest lock currently held by a tack
   user current-lock-held
@@ -1698,6 +1701,8 @@ begin-module task
         handle-pending-ops
 
         do-pause? @ if
+
+          watchdog-hook @ ?execute
           
           1 pause-count +!
 
@@ -2188,6 +2193,7 @@ begin-module task
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    0 watchdog-hook !
     NVIC_ICPR_CLRPEND_All!
     0 pause-enabled !
     $7F SHPR3_PRI_15!

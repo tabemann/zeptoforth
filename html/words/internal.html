@@ -600,6 +600,14 @@ the next column</p>
 <p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> blocks.</p>
 </section>
 </section>
+<section id="exception">
+<h2><code class="docutils literal notranslate"><span class="pre">exception</span></code><a class="headerlink" href="#exception" title="Permalink to this heading">¶</a></h2>
+<section id="fault-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">fault-hook</span></code><a class="headerlink" href="#fault-hook" title="Permalink to this heading">¶</a></h3>
+<p>( – addr )</p>
+<p>This returns the of the address of the fault hook variable, which if set to an execution token rather than its default value of 0, will be called immediately upon a hardware fault before the backtrace is generated. This may be used for purposes such as automatically rebooting upon a hardware exception. Note that this will be called in a faulted context, so anything that the execution token does must be safe inside a fault handler.</p>
+</section>
+</section>
 </section>
 
 
@@ -642,12 +650,14 @@ the next column</p>
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
@@ -672,6 +682,7 @@ the next column</p>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -681,10 +692,13 @@ the next column</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

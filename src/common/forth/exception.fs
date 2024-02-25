@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,9 @@ begin-module exception
   variable saved-key-hook
   variable saved-key?-hook
   variable saved-pause-hook
+
+  \ The fault hook
+  variable fault-hook
   
   \ Prepare a faulted state
   : prepare-faulted-state ( -- )
@@ -220,6 +223,7 @@ begin-module exception
 
   \ Handle a hard fault
   : handle-hard-fault ( -- )
+    fault-hook @ ?execute
     collect-registers prepare-faulted-state
     display-red cr ." *** HARD FAULT *** "
     dump-registers dump-stack dump-rstack display-normal
@@ -228,6 +232,7 @@ begin-module exception
 
   \ Handle a mem fault
   : handle-mem-fault ( -- )
+    fault-hook @ ?execute
     collect-registers prepare-faulted-state
     display-red cr ." *** MEM FAULT *** "
     dump-registers dump-stack dump-rstack display-normal
@@ -236,6 +241,7 @@ begin-module exception
 
   \ Handle a bus fault
   : handle-bus-fault ( -- )
+    fault-hook @ ?execute
     collect-registers prepare-faulted-state
     display-red cr ." *** BUS FAULT *** "
     dump-registers dump-stack dump-rstack display-normal
@@ -244,6 +250,7 @@ begin-module exception
 
   \ Handle a usage fault
   : handle-usage-fault ( -- )
+    fault-hook @ ?execute
     collect-registers prepare-faulted-state
     display-red cr ." *** USAGE FAULT *** "
     dump-registers dump-stack dump-rstack display-normal
@@ -252,6 +259,7 @@ begin-module exception
 
   \ Handle a system manic
   : handle-panic ( -- )
+    fault-hook @ ?execute
     collect-registers prepare-faulted-state
     display-red cr ." *** PANIC *** "
     dump-registers dump-stack dump-rstack 
@@ -262,6 +270,7 @@ begin-module exception
 
   \ Initialize processor exception handling
   : init-exception ( -- )
+    0 fault-hook !
     ['] handle-hard-fault hard-fault-vector vector!
     ['] handle-mem-fault mem-fault-vector vector!
     ['] handle-bus-fault bus-fault-vector vector!

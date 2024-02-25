@@ -416,6 +416,11 @@ Force pending operations to execute immediately.
 
 Dump information for each task that is in the schedule.
 
+##### `watchdog-hook`
+( -- addr )
+
+Get the address of the watchdog hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called each time the multitasker runs outside of a critical section.
+
 ### `monitor`
 
 The following words are in the `monitor` module (note that this module is only present in full builds):

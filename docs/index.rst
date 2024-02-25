@@ -33,6 +33,7 @@ Zeptoforth Documentation
    words/fat32_tools
    words/interrupt
    words/multicore
+   words/watchdog
    words/dev_tools
    words/armv6m
    words/line

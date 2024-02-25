@@ -12,8 +12,8 @@
     <dc:publisher>Travis Bemann</dc:publisher>
     <dc:rights>2020, Travis Bemann</dc:rights>
     <dc:identifier id="unknown">unknown</dc:identifier>
-    <dc:date>2024-02-24T16:38:38Z</dc:date>
-    <meta property="dcterms:modified">2024-02-24T16:38:38Z</meta>
+    <dc:date>2024-02-24T22:44:43Z</dc:date>
+    <meta property="dcterms:modified">2024-02-24T22:44:43Z</meta>
     <meta property="ibooks:version"></meta>
     <meta property="ibooks:specified-fonts">true</meta>
     <meta property="ibooks:binding">true</meta>
@@ -103,7 +103,8 @@
     <item id="epub-78" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-79" href="words/uart.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-80" href="words/value.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-81" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-81" href="words/watchdog.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-82" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
   </manifest>
   <spine toc="ncx" page-progression-direction="ltr">
     <itemref idref="epub-1" />
@@ -111,7 +112,7 @@
     <itemref idref="epub-54" />
     <itemref idref="epub-49" />
     <itemref idref="epub-32" />
-    <itemref idref="epub-81" />
+    <itemref idref="epub-82" />
     <itemref idref="epub-33" />
     <itemref idref="epub-73" />
     <itemref idref="epub-23" />
@@ -135,6 +136,7 @@
     <itemref idref="epub-42" />
     <itemref idref="epub-48" />
     <itemref idref="epub-55" />
+    <itemref idref="epub-81" />
     <itemref idref="epub-35" />
     <itemref idref="epub-25" />
     <itemref idref="epub-51" />
