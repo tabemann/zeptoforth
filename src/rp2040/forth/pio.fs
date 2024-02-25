@@ -1482,13 +1482,14 @@ begin-module pio
   \ End a PIO program started by the preceding :pio
   : ;pio ( marker -- )
     pio-mark = averts x-incorrect-mark-type
+    here addr>off { size }
     current-wrap-bottom @ -1 = if 0 current-wrap-bottom ! then
-    current-wrap-top @ -1 = if 0 current-wrap-top ! then
+    current-wrap-top @ -1 = if size current-wrap-top ! then
     current-start @ -1 = if 0 current-start ! then
     current-wrap-bottom @ pbase pio-program-wrap-bottom ccurrent!
     current-wrap-top @ pbase pio-program-wrap-top ccurrent!
     current-start @ pbase pio-program-start ccurrent!
-    here addr>off pbase pio-program-size ccurrent!  \ set size
+    size pbase pio-program-size ccurrent!  \ set size
     0 (pbase) !
     pioasm unimport
   ;
