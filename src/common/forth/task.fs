@@ -257,6 +257,9 @@ begin-module task
 
   \ Watchdog hook
   variable watchdog-hook
+
+  \ Task initialization hook
+  variable task-init-hook
   
   \ The latest lock currently held by a tack
   user current-lock-held
@@ -1344,6 +1347,7 @@ begin-module task
 	0 over task-next !
         0 over task-prev !
         task-guard-value over task-guard !
+        task-init-hook @ ?dup if over swap execute then
 	dup >r init-aux-task-stack
 	r> ['] task-rstack-base for-task@
       ;
@@ -1458,6 +1462,7 @@ begin-module task
     0 over task-next !
     0 over task-prev !
     task-guard-value over task-guard !
+    task-init-hook @ ?dup if over swap execute then
     swap >r >r
     begin dup 0<> while
       dup roll r@ push-task-stack 1-
@@ -2193,6 +2198,7 @@ begin-module task
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    0 task-init-hook !
     0 watchdog-hook !
     NVIC_ICPR_CLRPEND_All!
     0 pause-enabled !

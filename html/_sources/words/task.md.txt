@@ -416,6 +416,11 @@ Force pending operations to execute immediately.
 
 Dump information for each task that is in the schedule.
 
+##### `task-init-hook`
+( -- addr )
+
+Get the address of the task initialization hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called with the signature ( task -- ) for any new tasks that are created (except for the main task, that is).
+
 ##### `watchdog-hook`
 ( -- addr )
 

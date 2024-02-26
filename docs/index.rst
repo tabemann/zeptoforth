@@ -8,6 +8,7 @@ Zeptoforth Documentation
    words/basic
    words/module
    words/lambda
+   words/dynamic
    words/compat
    words/wordlist
    words/console
