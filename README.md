@@ -65,6 +65,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)
 * Pseudorandom number generator support (using the TinyMT32 PRNG)
 * Programmable input/output support (on the RP2040)
+* Watchdog support (on the RP2040)
 * Optional swdcom support
 * Optional task monitor
 
