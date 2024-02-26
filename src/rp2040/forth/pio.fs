@@ -1484,7 +1484,7 @@ begin-module pio
     pio-mark = averts x-incorrect-mark-type
     here addr>off { size }
     current-wrap-bottom @ -1 = if 0 current-wrap-bottom ! then
-    current-wrap-top @ -1 = if size current-wrap-top ! then
+    current-wrap-top @ -1 = if size 1- current-wrap-top ! then
     current-start @ -1 = if 0 current-start ! then
     current-wrap-bottom @ pbase pio-program-wrap-bottom ccurrent!
     current-wrap-top @ pbase pio-program-wrap-top ccurrent!
