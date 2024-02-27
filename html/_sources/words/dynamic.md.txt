@@ -29,4 +29,9 @@ This sets a dynamically-scoped variable *variable* to *xt* or *xd* depending on 
 ##### `dyn@`
 ( variable -- x|xd )
 
-This gets the current value of a dynamically-scoped variable *variable* within the current task as *x* or *xd* dependingon whether it is single-cell or double-cell.
+This gets the current value of a dynamically-scoped variable *variable* within the current task as *x* or *xd* depending on whether it is single-cell or double-cell. If it has not been set in the current scope in the current task, `x-dyn-variable-not-set` is raised.
+
+##### `x-dyn-variable-not-set`
+( -- )
+
+Dynamic variable not set exception.
