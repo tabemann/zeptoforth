@@ -30,8 +30,9 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Multicore support (on the RP2040)
 * Double cell and S31.32 fixed-point numeric support
 * Lambda expressions
-* `value`s and lexically scoped local variables
+* `value`s and block-scoped local variables
 * Closures
+* Dynamically-scoped task-local variables
 * Object orientation
 * A disassembler
 * SysTick support
