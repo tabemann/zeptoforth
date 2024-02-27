@@ -43,7 +43,12 @@
 <section id="id3">
 <h3><code class="docutils literal notranslate"><span class="pre">dyn&#64;</span></code></h3>
 <p>( variable – x|xd )</p>
-<p>This gets the current value of a dynamically-scoped variable <em>variable</em> within the current task as <em>x</em> or <em>xd</em> dependingon whether it is single-cell or double-cell.</p>
+<p>This gets the current value of a dynamically-scoped variable <em>variable</em> within the current task as <em>x</em> or <em>xd</em> depending on whether it is single-cell or double-cell. If it has not been set in the current scope in the current task, <code class="docutils literal notranslate"><span class="pre">x-dyn-variable-not-set</span></code> is raised.</p>
+</section>
+<section id="x-dyn-variable-not-set">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dyn-variable-not-set</span></code></h3>
+<p>( – )</p>
+<p>Dynamic variable not set exception.</p>
 </section>
 </section>
 </section>
