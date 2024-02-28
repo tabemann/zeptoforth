@@ -102,6 +102,13 @@ begin-module rtc
     create days-in-month 0 c, 31 c, 28 c, 31 c, 30 c, 31 c, 30 c, 31 c,
     31 c, 30 c, 31 c, 30 c, 31 c,
     
+    \ Get the number of seconds in a year
+    : year-secs ( year -- )
+      [ 365 24 * 60 * 60 * ] literal swap leap-year? if
+        [ 24 60 * 60 * ] literal +
+      then
+    ;
+    
     \ Validate a date/time match
     : validate-date-time-not-current { date-time -- }
       date-time date-time-year @ -1 <> if
