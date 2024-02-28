@@ -343,7 +343,7 @@ begin-module rtc
             test-range
           else
             new-date-time date-time-day c@ 1
-            test-year leap-year? if 29 else 28 then test-month
+            test-year leap-year? if 29 else 28 then test-month test-range
           then
         then
         new-date-time date-time-dotw c@ $FF <> if

@@ -130,7 +130,7 @@ begin-module pico-w-net-ntp
         then
         1000 ms
       again
-    ;] 512 256 512 task::spawn
+    ;] 512 128 512 task::spawn
     c" ntp-display" over task::task-name!
     task::run
   ;
