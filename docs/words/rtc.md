@@ -66,6 +66,11 @@ Enable the realtime clock. (Note that it is enabled by default.)
 
 Disable the realtime clock.
 
+##### `date-time-equal?`
+( date-time0 date-time1 -- equal? )
+
+Check whether two date-times are equal (ignoring the day of the week).
+
 ##### `date-time@`
 ( date-time -- )
 
@@ -125,3 +130,8 @@ Calculate the day of the week for a date/time, ignoring its day of the week fiel
 ( date-time )
 
 Update the day of the week for a date/time, ignoring its preexisting day of the week field. Note that if the `date-time-year` field of *date-time* is -1, the `date-time-month` field of *date-time* is 255, or the `date-time-day` field of *date-time* is 255, 255 will be set for the day of the week.
+
+##### `convert-secs-since-1970`
+( seconds date-time -- )
+
+Set a day-time with seconds from 1970-01-01 00:00:00 UTC.

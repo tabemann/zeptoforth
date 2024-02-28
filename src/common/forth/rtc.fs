@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,16 @@ begin-module rtc
     
   end-structure
 
+  \ Check whether two date-times are equal (ignoring the day of the week)
+  : date-time-equal? { date-time0 date-time1 -- equal? }
+    date-time0 date-time-year @ date-time1 date-time-year @ =
+    date-time0 date-time-month c@ date-time1 date-time-month c@ = and
+    date-time0 date-time-day c@ date-time1 date-time-day c@ = and
+    date-time0 date-time-hour c@ date-time1 date-time-hour c@ = and
+    date-time0 date-time-minute c@ date-time1 date-time-minute c@ = and
+    date-time0 date-time-second c@ date-time1 date-time-second c@ = and
+  ;
+  
   \ Get the current date and time
   : date-time@ { date-time -- }
     0 date-time date-time-second c!
@@ -240,6 +250,30 @@ begin-module rtc
     date-time get-dotw date-time date-time-dotw c!
   ;
     
+  \ Set a day-time from seconds since 1970-01-01 00:00:00 UTC
+  : convert-secs-since-1970 { second date-time -- }
+    1970 { year }
+    begin second year year-secs u>= while
+      year year-secs negate +to second
+      1 +to year
+    repeat
+    1 { month }
+    begin second days-in-month month + c@ [ 24 60 * 60 * ] literal * u>= while
+      days-in-month month + c@ [ -24 60 * 60 * ] literal * +to second
+      1 +to month
+    repeat
+    second [ 24 60 * 60 * ] literal u/mod 1+ { day } to second
+    second 3600 u/mod { hour } to second
+    second 60 u/mod { minute } to second
+    year date-time date-time-year !
+    month date-time date-time-month c!
+    day date-time date-time-day c!
+    hour date-time date-time-hour c!
+    minute date-time date-time-minute c!
+    second date-time date-time-second c!
+    date-time update-dotw
+  ;
+
 end-module
 
 reboot
