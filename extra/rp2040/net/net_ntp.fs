@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ begin-module ntp
   net-consts import
   endpoint-process import
   alarm import
+  rtc import
 
   begin-module ntp-internal
 
@@ -150,7 +151,7 @@ begin-module ntp
 
       \ Is the time delay set
       cell member ntp-time-alarm-set
-      
+
       \ The starting time
       2 cells member ntp-start-time
 
@@ -275,6 +276,15 @@ begin-module ntp
       then
       timer::us-counter self ntp-start-us 2!
       true self ntp-time-set !
+      self ntp-start-time 2@ nip date-time-size [:
+        date-time-size [: { secs date-time current-date-time }
+          secs secs-between-1900-and-1970 - date-time convert-secs-since-1970
+          current-date-time date-time@
+          date-time current-date-time date-time-equal? not if
+            date-time date-time!
+          then
+        ;] with-aligned-allot
+      ;] with-aligned-allot
       reset-alarm if self set-ntp-alarm then
     ; define current-time!
 

@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -66,6 +66,7 @@ begin-module pico-w-net-ntp
   simple-cyw43-net import
   pico-w-cyw43-net import
   ntp import
+  rtc import
 
   <pico-w-cyw43-net> class-size buffer: my-cyw43-net
   variable my-cyw43-control
@@ -123,10 +124,13 @@ begin-module pico-w-net-ntp
       begin
         my-ntp time-set? if
           my-ntp current-time@ f.
+          date-time-size [: { date-time }
+            date-time date-time@ date-time date-time. space
+          ;] with-aligned-allot
         then
         1000 ms
       again
-    ;] 320 128 512 task::spawn
+    ;] 512 128 512 task::spawn
     c" ntp-display" over task::task-name!
     task::run
   ;
