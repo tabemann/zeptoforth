@@ -2591,11 +2591,14 @@ commit-flash
   token-word >xt 
   compiling-to-flash? if
     s" init" flash-latest find-all-dict
+    get-current -rot
+    forth set-current
     s" init" start-compile
     visible
     ?dup if >xt lit, postpone execute then
     lit, postpone execute
     end-compile,
+    set-current
   else
     execute
   then
