@@ -1,5 +1,6 @@
 @ Copyright (c) 2021-2023 Travis Bemann
 @ Copyright (c) 2021 Jan Bramkamp
+@ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -565,6 +566,14 @@ _time_divisor:
 _systick_divisor:
 	push_tos
 	movs tos, #10
+	bx lr
+	end_inlined
+
+	@@ Crystal oscillator frequency
+	define_word "xosc-frequency", visible_flag
+_xosc_freq:
+	push_tos
+	ldr tos, =XOSC_MHZ * 1000000
 	bx lr
 	end_inlined
 

@@ -85,8 +85,8 @@
 </section>
 <section id="init-task">
 <h3><code class="docutils literal notranslate"><span class="pre">init-task</span></code></h3>
-<p>( xn…x0 count xt task – )</p>
-<p>These tasks may be in any state, including being terminated. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed.</p>
+<p>( xn…x0 count xt task core – )</p>
+<p>These tasks may be in any state, including being terminated. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed.  It will execute on <em>core</em>.</p>
 <p>New tasks do not execute right away, rather to enable their execution, one executes:</p>
 </section>
 <section id="run">
@@ -406,6 +406,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code></h3>
 <p>( – )</p>
 <p>Dump information for each task that is in the schedule.</p>
+</section>
+<section id="task-init-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">task-init-hook</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of the task initialization hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called with the signature ( task – ) for any new tasks that are created (except for the main task, that is).</p>
+</section>
+<section id="watchdog-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">watchdog-hook</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of the watchdog hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called each time the multitasker runs outside of a critical section.</p>
 </section>
 </section>
 <section id="monitor">

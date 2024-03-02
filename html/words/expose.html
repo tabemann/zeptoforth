@@ -17,7 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Bitmaps and Displays" href="../extra/display.html" />
+    <link rel="next" title="zeptoed" href="../extra/zeptoed.html" />
     <link rel="prev" title="Compilation-specific words" href="asm.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -39,7 +39,7 @@
 <h1>Exposed Kernel Variables<a class="headerlink" href="#exposed-kernel-variables" title="Permalink to this heading">¶</a></h1>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
-<p>Thes words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
 <section id="state">
 <h3><code class="docutils literal notranslate"><span class="pre">state</span></code><a class="headerlink" href="#state" title="Permalink to this heading">¶</a></h3>
 <p>Get the STATE variable address</p>
@@ -194,6 +194,18 @@ built</p>
 <p>Get the SYSTICK-HANDLER-HOOK variable address</p>
 </section>
 </section>
+<section id="rp2040-word">
+<h2>RP2040 Word<a class="headerlink" href="#rp2040-word" title="Permalink to this heading">¶</a></h2>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>This word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="unique-id">
+<h4><code class="docutils literal notranslate"><span class="pre">unique-id</span></code><a class="headerlink" href="#unique-id" title="Permalink to this heading">¶</a></h4>
+<p>( – d )</p>
+<p>Returns the 64-bit board unique ID value, as a double number.</p>
+</section>
+</section>
+</section>
 </section>
 
 
@@ -236,6 +248,7 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -266,6 +279,7 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -275,9 +289,12 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
@@ -288,7 +305,7 @@ built</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="asm.html" title="previous chapter">Compilation-specific words</a></li>
-      <li>Next: <a href="../extra/display.html" title="next chapter">Bitmaps and Displays</a></li>
+      <li>Next: <a href="../extra/zeptoed.html" title="next chapter">zeptoed</a></li>
   </ul></li>
 </ul>
 </div>

@@ -1,5 +1,6 @@
 \ Copyright (c) 2013? Matthias Koch
 \ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2024 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -284,7 +285,7 @@ begin-module uart
   \ Set a UART's baud
   : uart-baud! ( baud uart -- )
     [:
-      >r 0 swap 16,0 f* 125000000,0 2swap f/
+      >r 0 swap 16,0 f* sysclk @ s>f 2swap f/
       r@ 0= if UART0_UARTIBRD else UART1_UARTIBRD then !
       0 64,0 f* 0,5 d+ nip r> 0= if UART0_UARTFBRD else UART1_UARTFBRD then !
     ;] over with-uart-disabled

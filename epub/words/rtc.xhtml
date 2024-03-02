@@ -75,6 +75,11 @@
 <p>( – )</p>
 <p>Disable the realtime clock.</p>
 </section>
+<section id="date-time-equal">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-equal?</span></code></h3>
+<p>( date-time0 date-time1 – equal? )</p>
+<p>Check whether two date-times are equal (ignoring the day of the week).</p>
+</section>
 <section id="date-time">
 <h3><code class="docutils literal notranslate"><span class="pre">date-time&#64;</span></code></h3>
 <p>( date-time – )</p>
@@ -134,6 +139,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">update-dotw</span></code></h3>
 <p>( date-time )</p>
 <p>Update the day of the week for a date/time, ignoring its preexisting day of the week field. Note that if the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code> field of <em>date-time</em> is -1, the <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code> field of <em>date-time</em> is 255, or the <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code> field of <em>date-time</em> is 255, 255 will be set for the day of the week.</p>
+</section>
+<section id="convert-secs-since-1970">
+<h3><code class="docutils literal notranslate"><span class="pre">convert-secs-since-1970</span></code></h3>
+<p>( seconds date-time – )</p>
+<p>Set a day-time with seconds from 1970-01-01 00:00:00 UTC.</p>
 </section>
 </section>
 </section>

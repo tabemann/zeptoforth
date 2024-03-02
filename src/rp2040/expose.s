@@ -1,4 +1,5 @@
 @ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +58,14 @@ _sio_hook:
 _core_1_launched:
 	push_tos
 	ldr tos, =core_1_launched
+	bx lr
+	end_inlined
+
+	@@ Get the sysclk variable
+	define_word "sysclk", visible_flag
+_sysclk:
+	push_tos
+	ldr tos, =sysclk
 	bx lr
 	end_inlined
 

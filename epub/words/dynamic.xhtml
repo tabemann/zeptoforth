@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Dynamically-Scoped Variable Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="dynamically-scoped-variable-words">
+<h1>Dynamically-Scoped Variable Words</h1>
+<p>Dynamically-scoped variables enable the definition of variables with a scope within a called execution token or within all execution inside a given thread except for within scopes in which they are redefined. Note that values of dynamically-scoped variables are specific to individual tasks, and do not exist for the main task on bootup or within new tasks on spawning.</p>
+<section id="dynamic">
+<h2><code class="docutils literal notranslate"><span class="pre">dynamic</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dynamic</span></code> module contains the following words:</p>
+<section id="dyn">
+<h3><code class="docutils literal notranslate"><span class="pre">dyn</span></code></h3>
+<p>( “name” – )</p>
+<p>This defines a dynamically-scoped single-cell variable with the specified <em>name</em>. Note that this does not give it any value. If this is executed during compilation to flash the defined variable will persist across reboots.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">2dyn</span></code></h3>
+<p>( “name” – )</p>
+<p>This defines a dynamically-scoped double-cell variable with the specified <em>name</em>. Note that this does not give it any value. If this is executed during compilation to flash the defined variable will persist across reboots.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">dyn!</span></code></h3>
+<p>( xt x|xd variable – )</p>
+<p>This sets a dynamically-scoped variable <em>variable</em> to <em>x</em> or <em>xd</em> depending on whether it is single-cell or double-cell within the scope defined by the execution token <em>xt</em> within the current task. This temporarily uses space in the current task’s RAM dictionary to store the defined value of <em>variable</em>.</p>
+</section>
+<section id="dyn-no-scope">
+<h3><code class="docutils literal notranslate"><span class="pre">dyn-no-scope!</span></code></h3>
+<p>( x|xd variable – )</p>
+<p>This sets a dynamically-scoped variable <em>variable</em> to <em>xt</em> or <em>xd</em> depending on whether it is single-cell or double-cell within the scope defined by all execution after this point within the current task until overridden by another execution of <code class="docutils literal notranslate"><span class="pre">dyn!</span></code> or <code class="docutils literal notranslate"><span class="pre">dyn-no-scope!</span></code>. Note that this permanently uses space in the current task’s RAM dictionary to store the defined value of <em>variable</em>; do not use this within implicit compilation.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">dyn&#64;</span></code></h3>
+<p>( variable – x|xd )</p>
+<p>This gets the current value of a dynamically-scoped variable <em>variable</em> within the current task as <em>x</em> or <em>xd</em> depending on whether it is single-cell or double-cell. If it has not been set in the current scope in the current task, <code class="docutils literal notranslate"><span class="pre">x-dyn-variable-not-set</span></code> is raised.</p>
+</section>
+<section id="x-dyn-variable-not-set">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dyn-variable-not-set</span></code></h3>
+<p>( – )</p>
+<p>Dynamic variable not set exception.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

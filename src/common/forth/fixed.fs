@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ compress-flash
 internal import
 
 \ Get the value of pi
-0 314159265 0 100000000 f/ 2constant pi
+$243f6a89 $3 2constant pi
 
 \ Domain error exception
 : x-domain-error ( -- ) ." domain error" cr ;
@@ -39,6 +39,56 @@ internal import
 
 \ Get the absolute value of a double-cell number
 : dabs ( nd -- ud ) dup 31 arshift 0<> if dnegate then ;
+
+\ Get the ceiling of a fixed-point number as a single-cell number
+: ceil ( f -- n ) swap if 1+ then ;
+
+\ Get the floor of a fixed-point number as a single-cell number
+: floor ( f -- n ) nip ;
+
+\ Round a fixed-point number to the nearest integer with half rounding up
+: round-half-up ( f -- n ) swap 31 rshift if 1+ then ;
+
+\ Round a fixed-point number to the nearest integer with half rounding down
+: round-half-down ( f -- n )
+  swap dup [ 31 bit ] literal <> if 31 rshift if 1+ then else drop then
+;
+
+commit-flash
+
+\ Round a fixed-point number to the nearest integer with half rounding towards
+\ zero
+: round-half-zero ( f -- n )
+  dup 0>= if round-half-down else round-half-up then
+;
+
+\ Round a fixed-point number to the nearest integer with half rounding away
+\ from zero
+: round-half-away-zero ( f -- n )
+  dup 0>= if round-half-up else round-half-down then
+;
+
+\ Round a fixed-point number to the nearest integer with half rounding towards
+\ even
+: round-half-even ( f -- n )
+  dup 1 and if round-half-up else round-half-down then
+;
+
+\ Round a fixed-point number to the nearest integer with half rounding towards
+\ even
+: round-half-odd ( f -- n )
+  dup 1 and if round-half-down else round-half-up then
+;
+
+\ Round a fixed-point number towards zero
+: round-zero ( f -- n )
+  dup 0>= if nip else swap if 1+ then then
+;
+
+\ Round a fixed-point number away from zero
+: round-away-zero ( f -- n )
+  swap if dup 0>= if 1+ then then
+;
 
 commit-flash
 
@@ -105,7 +155,7 @@ continue-module internal
   ;
   
   \ Calculate a better square root guess
-  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
+  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 0 2 f/ ;
 
   commit-flash
   
@@ -113,12 +163,17 @@ end-module
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 )
-  2dup 2 0 d/
+  64 >r
+  2dup 0 2 f/
   begin
-    4dup f/ 2over sqrt-close-enough if
-      2nip true
+    r@ 0> if
+      4dup f/ 2over sqrt-close-enough if
+        rdrop 2nip true
+      else
+        r> 1- >r 4dup sqrt-better-guess 2nip false
+      then
     else
-      4dup sqrt-better-guess 2nip false
+      rdrop 2nip true
     then
   until
 ;
@@ -162,6 +217,7 @@ commit-flash
 
 \ Calculate sin(x)
 : sin ( f1 -- f2 )
+  [ pi 0 2 f* swap ] literal literal fmod
   2dup 2dup >r >r 1 0 begin
     2swap 2r@ f* 2r@ f*
     2over 2 0 d* d/
@@ -180,7 +236,7 @@ commit-flash
 ;
 
 \ Calculate cos(x)
-: cos ( f1 -- f2 ) pi 2 0 d/ 2swap d- sin ;
+: cos ( f1 -- f2 ) pi 0 2 f/ 2swap d- sin ;
 
 commit-flash
 

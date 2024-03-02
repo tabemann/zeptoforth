@@ -379,7 +379,7 @@ begin-module armv6m-test
   : test-simple-cmp-loop ( -- )
     16 code[
     0 r0 movs_,#_
-    mark>
+    mark<
     2 r0 adds_,#_
     1 tos subs_,#_
     0 tos cmp_,#_
@@ -392,7 +392,7 @@ begin-module armv6m-test
   : test-reg-cmp-loop ( -- )
     16 code[
     0 r0 movs_,#_
-    mark>
+    mark<
     2 r0 adds_,#_
     1 tos subs_,#_
     0 r1 movs_,#_
@@ -407,7 +407,7 @@ begin-module armv6m-test
     16 code[
     0 r0 movs_,#_
     r12 r2 mov4_,4_
-    mark>
+    mark<
     2 r0 adds_,#_
     1 tos subs_,#_
     0 r1 movs_,#_
@@ -423,7 +423,7 @@ begin-module armv6m-test
   : test-reg-tst-loop ( -- )
     16 code[
     0 r0 movs_,#_
-    mark>
+    mark<
     2 r0 adds_,#_
     1 tos subs_,#_
     $FF r1 movs_,#_
@@ -437,7 +437,7 @@ begin-module armv6m-test
   : test-reg-cmn-loop ( -- )
     16 code[
     0 r0 movs_,#_
-    mark>
+    mark<
     2 r0 adds_,#_
     1 tos subs_,#_
     0 r1 movs_,#_
@@ -451,7 +451,7 @@ begin-module armv6m-test
   : test-b-backward ( -- )
     1 [:
       code[
-      mark>
+      mark<
       0 tos cmp_,#_
       ne bc>
       pc 1 pop

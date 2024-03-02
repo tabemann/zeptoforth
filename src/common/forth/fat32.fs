@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -697,15 +697,15 @@ begin-module fat32
     ;
     
     \ Validate a filename
-    : validate-file-name ( c-addr u -- )
-      2dup validate-file-name-chars
-      dup 12 <= averts x-file-name-format
-      2dup dot-count 1 = averts x-file-name-format
-      2dup dot-index dup 0 > averts x-file-name-format
-      dup 8 <= averts x-file-name-format
-      2dup swap 1- < averts x-file-name-format
-      swap 4 - >= averts x-file-name-format
-      drop
+    : validate-file-name { addr bytes -- }
+      addr bytes validate-file-name-chars
+      bytes 12 <= averts x-file-name-format
+      addr bytes dot-count 1 = averts x-file-name-format
+      addr bytes dot-index { index }
+      index 0> averts x-file-name-format
+      index 8 <= averts x-file-name-format
+      bytes index - 4 <= averts x-file-name-format
+      bytes index - 1 > averts x-file-name-format
     ;
     
     \ Validate a directory name

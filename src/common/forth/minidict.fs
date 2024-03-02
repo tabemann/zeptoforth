@@ -47,7 +47,7 @@ begin-module mini-dict
     r0 1 dp ldm \ r0: prime
     r1 1 dp ldm \ r1: bytes
     r2 1 dp ldm \ r2: c-addr
-    mark>
+    mark<
     0 r1 cmp_,#_
     eq bc> 2swap
     r0 tos muls_,_
@@ -108,7 +108,7 @@ begin-module mini-dict
     code[
     r0 1 dp ldm
     0 r1 movs_,#_
-    mark>
+    mark<
     4 r0 subs_,#_
     r0 tos r1 str_,[_,_]
     0 r0 cmp_,#_
@@ -162,7 +162,7 @@ begin-module mini-dict
     code[
     r5 r4 2 push
     r4 r3 r2 r1 4 dp ldm
-    mark>
+    mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
     4 r0 r5 ldr_,[_,#_]
@@ -209,7 +209,7 @@ begin-module mini-dict
     code[
     r5 r4 2 push
     r4 r3 r2 r1 4 dp ldm
-    mark>
+    mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
     4 r0 r5 ldr_,[_,#_]
@@ -252,7 +252,7 @@ begin-module mini-dict
     code[
     r1 r0 2 dp ldm
     0 r1 r2 ldr_,[_,#_]
-    mark>
+    mark<
     r0 tos cmp_,_
     ne bc>
     0 r1 r2 str_,[_,#_]
@@ -303,7 +303,7 @@ begin-module mini-dict
     code[
     r5 r4 2 push
     r4 r3 r2 r1 4 dp ldm
-    mark>
+    mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
     0 r0 r5 ldr_,[_,#_]
@@ -386,7 +386,7 @@ begin-module mini-dict
     code[
     tos r0 movs_,_
     r3 r2 r1 3 dp ldm
-    mark>
+    mark<
     8 dp subs_,#_
     0 dp r2 str_,[_,#_]
     4 dp r3 str_,[_,#_]
@@ -439,7 +439,7 @@ begin-module mini-dict
     r4 1 push
     1 r4 movs_,#_
     r1 r0 2 dp ldm
-    mark>
+    mark<
     r0 tos cmp_,_
     ne bc>
     0 tos movs_,#_

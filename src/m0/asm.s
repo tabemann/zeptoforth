@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -488,6 +488,7 @@ _asm_extract_constant:
 	define_internal_word "fold,", visible_flag
 _asm_fold:
 	push {lr}
+        bl _asm_cond_dump_consts
 	ldr r1, =literal_deferred_q
 	ldr r0, [r1]
 	cmp r0, #0
@@ -934,6 +935,7 @@ _asm_fold_pick:
 	define_internal_word "inline,", visible_flag
 _asm_inline:
 	push {lr}
+        bl _asm_cond_dump_consts
 	push_tos
 	bl _asm_extract_constant
 	cmp tos, #0
@@ -984,6 +986,7 @@ _asm_inline:
 	define_internal_word "call,", visible_flag
 _asm_call:	
 	push {lr}
+        bl _asm_cond_dump_consts
 	bl _asm_undefer_lit
 	ldr r0, =-1
 	ldr r1, =suppress_inline

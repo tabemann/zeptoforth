@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -164,6 +164,9 @@ begin-module multicore
   \ Reset an auxiliary core
   : reset-aux-core ( core -- ) ['] x-core-out-of-range ?raise ;
 
+  \ Placeholder for executing code with cores held
+  : with-hold-core ( xt -- ) execute ;
+  
 end-module
 
 \ Reboot

@@ -53,15 +53,6 @@ begin-module sd
     \ Reverse byte order
     : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
 
-    \ Dummy buffer size
-    128 constant dummy-size
-
-    \ Write out a dummy buffer
-    : dummy, ( -- ) dummy-size 0 ?do $FF c, loop ;
-    
-    \ Dummy buffer
-    create dummy-buffer dummy,
-    
     \ SD Card init timeout
     $1000000 constant sd-init-timeout
 
@@ -152,6 +143,9 @@ begin-module sd
 
     \ Sector size
     512 constant sector-size
+
+    \ Dummy iterations
+    12 constant dummy-iters
     
   end-module> import
     
@@ -468,10 +462,7 @@ begin-module sd
     ; define dummy-byte
     
     :noname { sd-card -- }
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
-      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      64 begin ?dup while sd-card dummy-byte 1- repeat
     ; define dummy-bytes
     
     :noname { argument command sd-card -- response }
@@ -546,7 +537,7 @@ begin-module sd
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
-        25000000 r@ spi-device @ spi-baud!
+        12500000 r@ spi-device @ spi-baud!
         0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error
         r@ get-word r@ end-sd-cmd
         $C0000000 and averts x-sd-not-sdhc

@@ -4,6 +4,8 @@ zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of
 
 zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space.
 
+Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040, so it is a good idea to leave these cores be and run one's user code on core 0.
+
 For examples of demos involving zeptoIP, there are:
 
 * `test/rp2040/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W

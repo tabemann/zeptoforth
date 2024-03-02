@@ -579,6 +579,11 @@ _quit:	bl _rstack_base
         ldr r0, =syntax_stack + syntax_stack_size
         ldr r1, =syntax_stack_ptr
         str r0, [r1]
+        ldr r0, =state
+        movs r1, #0
+        str r1, [r0]
+        ldr r0, =current_compile
+        str r1, [r0]
         bl _prepare_prompt
 	ldr tos, =_main
 	bl _try

@@ -23,6 +23,7 @@ begin-module i2c-test
   task import
   task-pool import
   i2c import
+  pin import
   
   2 constant task-count
   task-count task-pool-size buffer: my-task-pool
@@ -41,25 +42,167 @@ begin-module i2c-test
     1 enable-i2c
     1 14 i2c-pin
     1 15 i2c-pin
-    0 16 i2c-pin
-    0 17 i2c-pin
-    320 128 512 task-count my-task-pool init-task-pool
+    0 12 i2c-pin
+    0 13 i2c-pin
+    512 128 512 task-count my-task-pool init-task-pool
   ;
   
   : do-test-0 ( -- )
     0 [:
       20000 timeout !
       1 wait-i2c-master-send
-      recv-buffer recv-buffer-size 1 i2c>
-      recv-buffer swap type
-      1 clear-i2c
+      begin
+        recv-buffer recv-buffer-size 1 i2c>
+        recv-buffer over type
+      0= until
+      ."  *** "
+      1 wait-i2c-master-send
+      begin
+        recv-buffer recv-buffer-size 1 i2c>
+        recv-buffer over type
+      0= until
+      \ 1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     pause 1000 ms
     0 [:
-      s" FOO" 0 >i2c .
-      s" BAR" 0 >i2c .
-      s" BAZ" 0 >i2c-stop .
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c-stop .
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c-stop .
 \      0 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-0a ( -- )
+    0 [:
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      \ 1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    pause 1000 ms
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-0b ( -- )
+    0 [:
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      1 wait-i2c-master-send
+      begin
+        recv-buffer recv-buffer-size 1 i2c>
+        recv-buffer over type
+      0= until
+    ;] my-task-pool spawn-from-task-pool run
+    pause 1000 ms
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c-stop .
+    ;] my-task-pool spawn-from-task-pool run 
+  ;
+  
+  : do-test-0c ( -- )
+    0 [:
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      \ 1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    pause 1000 ms
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c-restart>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-0d ( -- )
+    0 [:
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      \ 1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    pause 1000 ms
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c-restart>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+
+  : do-test-0e ( -- )
+    0 [:
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+      \ 1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    pause 1000 ms
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -102,26 +245,27 @@ begin-module i2c-test
   ;
   
   : do-test-5 ( -- )
-    0 [:
-      750 ms
-      20000 timeout !
-      1 wait-i2c-master-send
-      recv-buffer recv-buffer-size 1 i2c>
-      recv-buffer swap type
+    0 [: [char] a internal::serial-emit
+      750 ms [char] b internal::serial-emit
+      20000 timeout ! [char] c internal::serial-emit
+      1 wait-i2c-master-send [char] d internal::serial-emit
+      recv-buffer recv-buffer-size 1 i2c> [char] e internal::serial-emit
+      recv-buffer swap type [char] f internal::serial-emit
 \      1 clear-i2c
-    ;] my-task-pool spawn-from-task-pool run
-    0 [:
-      [:
-        5000 timeout !
-        s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
-      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then
-      1000 ms
-      no-timeout timeout !
-      s" FOO" 0 >i2c .
-      s" BAR" 0 >i2c .
-      s" BAZ" 0 >i2c-stop .
+    ;] my-task-pool spawn-from-task-pool run [char] g internal::serial-emit
+    \ pause 1000 ms
+    0 [: [char] h internal::serial-emit
+      [: [char] i internal::serial-emit
+        5000 timeout ! [char] j internal::serial-emit
+        s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c . [char] k internal::serial-emit
+      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then [char] l internal::serial-emit
+      1000 ms [char] m internal::serial-emit
+      no-timeout timeout ! [char] n internal::serial-emit
+      s" FOO" 0 >i2c . [char] o internal::serial-emit
+      s" BAR" 0 >i2c . [char] p internal::serial-emit
+      s" BAZ" 0 >i2c-stop . [char] q internal::serial-emit
 \      0 clear-i2c
-    ;] my-task-pool spawn-from-task-pool run
+    ;] my-task-pool spawn-from-task-pool run [char] a internal::serial-emit [char] r internal::serial-emit
   ;
   
   : do-test-6 ( -- )
@@ -310,10 +454,10 @@ begin-module i2c-test
   
   : do-test-14 ( -- )
     0 [:
-      1 wait-i2c-master-send
-      recv-buffer recv-buffer-size 1 i2c>
-      recv-buffer swap type
-      1 i2c-nack
+      1 wait-i2c-master-send ." *"
+      recv-buffer recv-buffer-size 1 i2c> ." *"
+      recv-buffer swap type ." *"
+      1 i2c-nack ." *"
 \      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:

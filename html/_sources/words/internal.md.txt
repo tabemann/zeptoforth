@@ -562,3 +562,9 @@ Syntax constant for `begin-class` blocks.
 
 Syntax constant for `begin-implement` blocks.
 
+### `exception`
+
+##### `fault-hook`
+( -- addr )
+
+This returns the of the address of the fault hook variable, which if set to an execution token rather than its default value of 0, will be called immediately upon a hardware fault before the backtrace is generated. This may be used for purposes such as automatically rebooting upon a hardware exception. Note that this will be called in a faulted context, so anything that the execution token does must be safe inside a fault handler.

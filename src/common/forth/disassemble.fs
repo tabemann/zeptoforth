@@ -717,9 +717,14 @@ begin-module disassemble-internal
     ." ADD" csp. dup 8_3_bf reg. ." , SP, #" 0_8_bf 2 lshift val. drop
   ;
 
-  \ Parse an ADD SP to immediate instruction
+  \ Parse an ADD immediate to SP instruction
   : p-add-sp-imm-2
     ." ADD" csp. ." SP, SP, #" 0 7 bitfield 2 lshift val. drop
+  ;
+
+  \ Parse an SUB immediate from  SP instruction
+  : p-sub-sp-imm-1
+    ." SUB" csp. ." SP, SP, #" 0 7 bitfield 2 lshift val. drop
   ;
 
   \ \ Parse an ADD SP to immediate instruction
@@ -1690,6 +1695,7 @@ begin-module disassemble-internal
   ' p-sub-imm-1 ,    %1111111000000000 h, %0001111000000000 h,
   ' p-sub-imm-2 ,    %1111100000000000 h, %0011100000000000 h,
   ' p-sub-reg-1 ,    %1111111000000000 h, %0001101000000000 h,
+  ' p-sub-sp-imm-1 , %1111111110000000 h, %1011000010000000 h,
   ' p-svc ,          %1111111100000000 h, %1101111100000000 h,
   ' p-sxtb-reg-1 ,   %1111111111000000 h, $B240 h,
   ' p-sxth-reg-1 ,   %1111111111000000 h, $B200 h,

@@ -783,6 +783,16 @@ commit-flash
   then
 ;
 
+\ Start an END statement
+: end ( -- )
+  [immediate]
+  [compile-only]
+  syntax-begin verify-syntax drop-syntax
+  drop
+  undefer-lit
+  end-block
+;
+
 \ Start a CASE statement
 : case ( -- )
   [immediate]
@@ -1341,14 +1351,14 @@ commit-flash
 \ Safely emit a character
 : safe-emit ( b -- )
   begin-critical
-  swap serial-emit
+  serial-emit
   end-critical
 ;
 
 \ Safely type a string
 : safe-type ( b-addr bytes -- )
   begin-critical
-  -rot serial-type
+  serial-type
   end-critical
 ;
 
@@ -2225,7 +2235,7 @@ internal set-current
 \ Fraction size lookup table
 create fraction-size-table
 32 , 21 , 16 , 14 , 13 , 12 , 11 , 11 , 10 , 10 , 9 , 9 , 9 , 9 , 8 , 8 ,
-8 , 8 , 8 , 8 , 8 , 8 , 7 , 7 , 7 , 7 , 7 , 7 ,
+8 , 8 , 8 , 8 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 6 , 6 , 6 , 6 ,
 
 \ Commit to flash
 commit-flash
@@ -2581,11 +2591,14 @@ commit-flash
   token-word >xt 
   compiling-to-flash? if
     s" init" flash-latest find-all-dict
+    get-current -rot
+    forth set-current
     s" init" start-compile
     visible
     ?dup if >xt lit, postpone execute then
     lit, postpone execute
     end-compile,
+    set-current
   else
     execute
   then

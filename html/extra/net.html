@@ -338,11 +338,21 @@
 <section id="endpoint-handler">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code><a class="headerlink" href="#endpoint-handler" title="Permalink to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code> method.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class contains the following method:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class contains the following methods:</p>
 <section id="handle-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code><a class="headerlink" href="#handle-endpoint" title="Permalink to this heading">¶</a></h4>
 <p>( endpoint process – )</p>
 <p>Handle a ready <em>endpoint</em>; note that <em>endpoint</em> should be marked as done before it is available for furthe processing. The user shall provide their own implementation of this method.</p>
+</section>
+<section id="handle-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-timeout</span></code><a class="headerlink" href="#handle-timeout" title="Permalink to this heading">¶</a></h4>
+<p>( process – )</p>
+<p>Handle a timeout, based on the timeout returned by <code class="docutils literal notranslate"><span class="pre">handler-timeout&#64;</span></code>.</p>
+</section>
+<section id="handler-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">handler-timeout&#64;</span></code><a class="headerlink" href="#handler-timeout" title="Permalink to this heading">¶</a></h4>
+<p>( process – timeout )</p>
+<p>Get the current timeout for an endpoint handler in ticks from the present; note that <code class="docutils literal notranslate"><span class="pre">task::no-timeout</span></code> signifies there being no timeout.</p>
 </section>
 </section>
 <section id="id10">
@@ -622,6 +632,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -652,6 +663,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -661,10 +673,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>

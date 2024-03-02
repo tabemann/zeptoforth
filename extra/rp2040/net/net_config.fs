@@ -144,16 +144,16 @@ begin-module net-config
   3 value last-ack-max-refreshes
   
   \ Close timeout
-  1000 value close-timeout
+  100000 value close-timeout
 
   \ TIME_WAIT count
   8 constant time-wait-count
 
   \ TIME_WAIT timeout
-  50000 value time-wait-timeout
+  25000 value time-wait-timeout
 
   \ TIME_WAIT interval timeout
-  10000 value time-wait-interval-timeout
+  2500 value time-wait-interval-timeout
   
   \ IPv4 discover attempts
   50000 value dhcp-discover-timeout

@@ -24,22 +24,24 @@ continue-module forth
   pio import
 
   \ The initial setup
-  create pio-init
-  1 SET_PINDIRS set,
-  0 SET_PINS set,
+  :pio pio-init
+    1 SET_PINDIRS set,
+    0 SET_PINS set,
+  ;pio
   
   \ The PIO code
-  create pio-code
-  1 19 SET_PINS set+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  0 19 SET_PINS set+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
-  MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+  :pio pio-code
+    1 19 SET_PINS set+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    0 19 SET_PINS set+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+    MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+  ;pio
   
   \ Init blinker
   : init-blinker ( -- )
@@ -48,11 +50,9 @@ continue-module forth
     0 62500 0 PIO0 sm-clkdiv!
     25 1 PIO0 pins-pio-alternate
     25 1 0 PIO0 sm-set-pins!
-    0 9 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
-    pio-init 2 0 PIO0 sm-instr!
-    pio-code 10 PIO0 pio-instr-mem!
-    0 0 PIO0 sm-addr!
+    pio-init p-prog 0 PIO0 sm-instr!
+    0 PIO0 pio-code 0 setup-prog
     %0001 PIO0 sm-enable
   ;
 

@@ -1,5 +1,5 @@
-\ Copyright (c) 2023 Travis Bemann
-\ Copyright (c) 2023 Ralph W. Lundvall
+\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2024 Ralph W. Lundvall
 \ Copyright (c) 2023 Rob Probin
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -309,6 +309,15 @@ begin-module music
   2960 constant F7# 3136 constant G7 3322 constant G7# 
   3520 constant A7 3729 constant A7# 3951 constant B7 
   4186 constant C8 4435 constant C8# 
+  
+  \ 5 octaves of the 5 black keys ( flats )
+  \ D, E, G, A, B
+  : D2B C2# ; : E2B D2# ; : G2B F2# ; : A2B G2# ; : B2B A2# ;
+  : D3B C3# ; : E3B D3# ; : G3B F3# ; : A3B G3# ; : B3B A3# ;
+  : D4B C4# ; : E4B D4# ; : G4B F4# ; : A4B G4# ; : B4B A4# ;
+  : D5B C5# ; : E5B D5# ; : G5B F5# ; : A5B G5# ; : B5B A5# ;
+  : D6B C6# ; : E6B D6# ; : G6B F6# ; : A6B G6# ; : B6B A6# ;
+
   0 constant rst
 
   2000000 value ~mpm 
@@ -336,6 +345,7 @@ begin-module music
   : .2   ~mpm 2000 / ntr note ;
   : .4   ~mpm 4000 / ntr note ;
   : .8   ~mpm 8000 / ntr note ;
+  : .12   ~mpm 12000 / ntr NOTE ;
   : .16   ~mpm 16000 / ntr note ;
   : .32   ~mpm 32000 / ntr note ;
   : .64   ~mpm 64000 / ntr note ;
@@ -352,6 +362,7 @@ begin-module music
   : ,2   ~mpm 2000 / rest drop ;
   : ,4   ~mpm 4000 / rest drop ;
   : ,8   ~mpm 8000 / rest drop ;
+  : ,12   ~mpm 12000 / rest drop ;
   : ,16   ~mpm 16000 / rest drop ;
   : ,32   ~mpm 32000 / rest drop ;
   : ,64   ~mpm 64000 / rest drop ;

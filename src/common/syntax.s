@@ -1,4 +1,4 @@
-@ Copyright (c) 2023 Travis Bemann
+@ Copyright (c) 2023-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,24 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+        @ Dump the syntax stack
+        define_internal_word "dump-syntax", visible_flag
+_dump_syntax:
+        ldr r0, =syntax_stack + syntax_stack_size - 1
+        ldr r1, =syntax_stack_ptr
+        ldr r1, [r1]
+1:      cmp r0, r1
+        blo 2f
+        push_tos
+        ldrb tos, [r0]
+        subs r0, #1
+        b 1b
+2:      push_tos
+        ldr tos, =syntax_stack + syntax_stack_size
+        subs tos, r1
+        bx lr
+        end_inlined
+        
         @ Push a syntax onto the syntax stack
         @ ( syntax -- )
         define_internal_word "push-syntax", visible_flag

@@ -295,12 +295,22 @@ The `endpoint-process` module contains the following classes:
 
 The `<endpoint-handler>` class is meant to be subclassed by the user, who shall provide an implementation of the `handle-endpoint` method.
 
-The `<endpoint-handler>` class contains the following method:
+The `<endpoint-handler>` class contains the following methods:
 
 ##### `handle-endpoint`
 ( endpoint process -- )
 
 Handle a ready *endpoint*; note that *endpoint* should be marked as done before it is available for furthe processing. The user shall provide their own implementation of this method.
+
+##### `handle-timeout`
+( process -- )
+
+Handle a timeout, based on the timeout returned by `handler-timeout@`.
+
+##### `handler-timeout@`
+( process -- timeout )
+
+Get the current timeout for an endpoint handler in ticks from the present; note that `task::no-timeout` signifies there being no timeout.
 
 #### `<endpoint-process>`
 

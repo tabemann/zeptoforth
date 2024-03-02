@@ -539,10 +539,15 @@ Assemble a WFI instruction.
 
 Assemble a YIELD instruction.
 
-##### `mark>`
+##### `mark<`
 ( -- mark-addr mark )
 
 Mark a backward destination.
+
+##### `mark>`
+( -- mark-addr mark )
+
+The old way to mark a backward destination (now deprecated).
 
 ##### `>mark`
 ( mark-addr mark -- )

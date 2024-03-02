@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -177,7 +177,7 @@ begin-module multicore
     ]code
     SPINLOCK
     code[
-    mark>
+    mark<
     0 tos r0 ldr_,[_,#_]
     0 r0 cmp_,#_
     eq bc<
@@ -235,7 +235,7 @@ begin-module multicore
     ]code
     SPINLOCK
     code[
-    mark>
+    mark<
     0 tos r0 ldr_,[_,#_]
     0 r0 cmp_,#_
     eq bc<
@@ -420,7 +420,7 @@ begin-module multicore
     code[
     cpsid
     r1 r0 2 dp ldm
-    mark>
+    mark<
     0 tos r2 ldr_,[_,#_]
     0 r2 cmp_,#_
     eq bc<
@@ -448,7 +448,7 @@ begin-module multicore
     [ test-set-spinlock SPINLOCK ] literal
     code[
     r1 r0 2 dp ldm
-    mark>
+    mark<
     0 tos r2 ldr_,[_,#_]
     0 r2 cmp_,#_
     eq bc<
@@ -537,6 +537,11 @@ begin-module multicore
     1 = averts x-core-out-of-range
   ;
 
+  \ Execute code with a core held
+  : with-hold-core ( xt -- )
+    hold-core try release-core ?raise
+  ;
+  
 end-module> import
 
 \ Initialize

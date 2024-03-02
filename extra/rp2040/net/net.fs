@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -400,6 +400,9 @@ begin-module net
 
     \ Current ACK
     cell member current-in-packet-ack
+
+    \ Last seq
+    cell member last-in-packet-seq
     
     \ Pending data size
     method pending-in-size@ ( self -- bytes )
@@ -445,6 +448,9 @@ begin-module net
 
     \ Get the packet to ACK
     method in-packet-ack@ ( self -- ack )
+
+    \ Get the last seq
+    method in-packet-seq@ ( self -- seq )
 
     \ Promote incoming data to pending
     method promote-in-packets ( self -- bytes )
@@ -493,6 +499,7 @@ begin-module net
       seq self first-in-packet-seq !
       seq self in-packet-last-ack-sent !
       seq self current-in-packet-ack !
+      seq self last-in-packet-seq !
       [ debug? ] [if]
         self [: cr ." @@@ reset-in-tcp-packets: " in-packets. ;]
         debug-hook execute
@@ -515,6 +522,7 @@ begin-module net
       0 self first-in-packet-seq !
       0 self in-packet-last-ack-sent !
       0 self current-in-packet-ack !
+      0 self last-in-packet-seq !
       [ debug? ] [if]
         self [: cr ." @@@ reset-in-udp-packets: " in-packets. ;]
         debug-hook execute
@@ -589,6 +597,8 @@ begin-module net
 
     \ Add incoming TCP packet
     :noname { addr bytes push? seq self -- }        
+      seq self last-in-packet-seq !
+
       seq self first-in-packet-seq @ - { diff }
 
       [ debug? ] [if]
@@ -792,6 +802,11 @@ begin-module net
       [then]
     ; define in-packet-ack@
 
+    \ Get the last packet's seq
+    :noname ( self -- seq )
+      last-in-packet-seq @
+    ; define in-packet-seq@
+    
     \ Get whether there is waiting data
     :noname ( self -- waiting? )
       dup pending-in-packet-offset @ swap in-packet-offset @ <>
@@ -1489,6 +1504,9 @@ begin-module net
       \ Get the ACK for an endpoint
       method endpoint-ack@ ( self -- ack )
 
+      \ Get the last remote seq
+      method endpoint-remote-seq@ ( self -- seq )
+
       \ Get whether to send an ACK packet
       method endpoint-send-ack? ( self -- send? )
 
@@ -1927,6 +1945,11 @@ begin-module net
       [: endpoint-in-packets in-packet-ack@ ;] over endpoint-lock with-lock
     ; define endpoint-ack@
 
+    \ Get the last remote seq
+    :noname ( self -- seq )
+      [: endpoint-in-packets in-packet-seq@ ;] over endpoint-lock with-lock
+    ; define endpoint-remote-seq@
+
     \ Get whether to send an ACK packet
     :noname ( self -- send? )
       [: endpoint-in-packets in-packet-send-ack? ;] over endpoint-lock with-lock
@@ -2172,7 +2195,7 @@ begin-module net
       cell member time-wait-local-window
       
       \ Set a TCP_WAIT record
-      method time-wait! ( addr bytes endpoint self -- )
+      method time-wait! ( seq endpoint self -- )
 
     end-class
 
@@ -2186,15 +2209,15 @@ begin-module net
     ; define new
 
     \ Set a TIME_WAIT record
-    :noname ( addr bytes endpoint self -- )
-      [: { addr bytes endpoint self }
+    :noname ( seq endpoint self -- )
+      [: { seq endpoint self }
         endpoint endpoint-ipv4-remote@
         self time-wait-remote-port h!
         self time-wait-remote-ipv4-addr !
         endpoint endpoint-local-port@ self time-wait-local-port h!
         endpoint endpoint-remote-mac-addr@ self time-wait-remote-mac-addr 2!
         endpoint endpoint-local-seq@ 1+ self time-wait-local-seq !
-        addr tcp-seq-no unaligned@ rev 1+ self time-wait-ack !
+        seq 1+ self time-wait-ack !
         endpoint endpoint-local-window@ self time-wait-local-window !
         systick::systick-counter self time-wait-start-time !
       ;] 2 pick with-endpoint
@@ -2605,7 +2628,7 @@ begin-module net
       method wait-endpoint-closed ( timeout start endpoint self -- )
 
       \ Add an endpoint time wait
-      method add-time-wait ( addr bytes endpoint self -- )
+      method add-time-wait ( seq endpoint self -- )
 
       \ Refresh endpoint time waits
       method refresh-time-wait ( self -- )
@@ -3054,7 +3077,6 @@ begin-module net
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv4-rst
 
     \ Send a basic IPv4 TCP packet
@@ -3270,8 +3292,9 @@ begin-module net
     
     \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv4-basic-ack
       TCP_ESTABLISHED endpoint endpoint-tcp-state!
+      addr bytes endpoint self process-ipv4-basic-ack
+      endpoint self put-ready-endpoint
     ; define process-ipv4-ack-syn-received
     
     \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
@@ -3282,7 +3305,7 @@ begin-module net
     \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
       addr tcp-ack-no unaligned@ rev
-      endpoint endpoint-local-seq@ = if
+      endpoint endpoint-local-seq@ 1+ = if
         TCP_FIN_WAIT_2 endpoint endpoint-tcp-state!
       else
         addr bytes endpoint self process-ipv4-basic-ack
@@ -3291,7 +3314,7 @@ begin-module net
     
     \ Process an IPv4 ACK packet in TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv4-basic-ack
+      \ addr bytes endpoint self process-ipv4-basic-ack
     ; define process-ipv4-ack-fin-wait-2
     
     \ Process an IPv4 ACK packet in TCP_CLOSE_WAIT state
@@ -3305,6 +3328,7 @@ begin-module net
       addr tcp-ack-no unaligned@ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
+        endpoint self put-ready-endpoint
       then
     ; define process-ipv4-ack-last-ack
 
@@ -3314,7 +3338,6 @@ begin-module net
       self send-ipv4-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv4-rst-for-ack
     
     \ \ Process an IPv4 FIN packet
@@ -3352,7 +3375,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr bytes endpoint self add-time-wait
+      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-1
 
@@ -3360,7 +3383,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr bytes endpoint self add-time-wait
+      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-2
 
@@ -3368,8 +3391,8 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
-      addr bytes endpoint self add-time-wait
-      endpoint wake-endpoint
+      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      endpoint self put-ready-endpoint
     ; define process-ipv4-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
@@ -3379,7 +3402,8 @@ begin-module net
       endpoint endpoint-local-seq@ 1+
       addr tcp-seq-no unaligned@ rev 1+
       endpoint endpoint-local-window@
-      [ TCP_FIN TCP_ACK or ] literal
+      TCP_ACK
+\      [ TCP_FIN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
     ; define send-ipv4-fin-reply-ack
@@ -4042,11 +4066,11 @@ begin-module net
     ; define close-udp-endpoint
 
     \ Add an endpoint to wait
-    :noname ( addr bytes endpoint self -- )
-      [: { addr bytes endpoint self }
+    :noname ( seq endpoint self -- )
+      [: { seq endpoint self }
         self time-wait-list
         self time-wait-list-end @ <time-wait> class-size * + { time-wait }
-        addr bytes endpoint time-wait time-wait!
+        seq endpoint time-wait time-wait!
         self time-wait-list-end @ 1+ time-wait-count umod
         self time-wait-list-end !
         self time-wait-list-count @ 0= if
@@ -4089,7 +4113,7 @@ begin-module net
             time-wait time-wait-local-seq @
             time-wait time-wait-ack @
             time-wait time-wait-local-window @
-            [ TCP_FIN TCP_ACK or ] literal
+            TCP_ACK
             time-wait time-wait-remote-mac-addr 2@
             self send-ipv4-basic-tcp
           else
@@ -4105,7 +4129,15 @@ begin-module net
       systick::systick-counter { start }
       task::timeout @ start 2swap [:
         [: { timeout start endpoint self }
-          endpoint endpoint-tcp-state@ case
+          endpoint [: { endpoint }
+            endpoint endpoint-tcp-state@ dup case
+              TCP_LISTEN of
+                TCP_CLOSED endpoint endpoint-tcp-state!
+                endpoint free-endpoint
+              endof
+            endcase
+          ;] endpoint with-endpoint
+          case
             TCP_SYN_SENT of endpoint self send-ipv4-rst endof
             TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
             TCP_ESTABLISHED of
@@ -4122,6 +4154,9 @@ begin-module net
             endof
             TCP_LAST_ACK of
               timeout start endpoint self wait-endpoint-closed
+            endof
+            TCP_CLOSED of
+              endpoint free-endpoint
             endof
           endcase
         ;] 2 pick with-ctrl-endpoint
@@ -4146,6 +4181,7 @@ begin-module net
         dup ['] task::x-timed-out = if 2drop drop true 0 else false swap then
         ?raise
         if
+          endpoint endpoint-remote-seq@ endpoint self add-time-wait
           TCP_CLOSED endpoint endpoint-tcp-state!
           endpoint free-endpoint
           exit

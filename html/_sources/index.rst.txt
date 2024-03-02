@@ -8,6 +8,7 @@ Zeptoforth Documentation
    words/basic
    words/module
    words/lambda
+   words/dynamic
    words/compat
    words/wordlist
    words/console
@@ -26,12 +27,14 @@ Zeptoforth Documentation
    words/pwm
    words/rtc
    words/timer
+   words/dma
    words/sdcard
    words/fat32
    words/simple_fat32
    words/fat32_tools
    words/interrupt
    words/multicore
+   words/watchdog
    words/dev_tools
    words/armv6m
    words/line
@@ -56,6 +59,7 @@ Zeptoforth Documentation
    words/stream
    words/tqueue
    words/systick
+   words/clocks
    words/rng
    words/ansi_term
    words/qspi
@@ -66,10 +70,13 @@ Zeptoforth Documentation
    words/internal
    words/asm
    words/expose
+   extra/fixed32
+   extra/zeptoed
    extra/display
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils
+   extra/turtle
    extra/neopixel
    extra/net
    extra/net_ntp

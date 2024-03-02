@@ -84,9 +84,9 @@ Configure notification for a task, with *notify-count* being the number of suppo
 To reinitialize existing tasks, one executes:
 
 ##### `init-task`
-( xn...x0 count xt task -- )
+( xn...x0 count xt task core -- )
 
-These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.
+These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.  It will execute on *core*.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 
@@ -415,6 +415,16 @@ Force pending operations to execute immediately.
 ( -- )
 
 Dump information for each task that is in the schedule.
+
+##### `task-init-hook`
+( -- addr )
+
+Get the address of the task initialization hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called with the signature ( task -- ) for any new tasks that are created (except for the main task, that is).
+
+##### `watchdog-hook`
+( -- addr )
+
+Get the address of the watchdog hook variable. If this is set to a value other than 0 (its default value), the execution token stored in it will be called each time the multitasker runs outside of a critical section.
 
 ### `monitor`
 

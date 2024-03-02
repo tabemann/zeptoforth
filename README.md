@@ -25,12 +25,14 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Interrupt service handler-safe channels, aka "schannels"
 * Task notifications
 * Console redirection
+* Implicit compilation, i.e. automatically compiling temporary anonymous words from the REPL
 * Action scheduler support
 * Multicore support (on the RP2040)
-* Double cell and fixed point numeric support
+* Double cell and S31.32 fixed-point numeric support
 * Lambda expressions
-* `value`s and lexically scoped local variables
+* `value`s and block-scoped local variables
 * Closures
+* Dynamically-scoped task-local variables
 * Object orientation
 * A disassembler
 * SysTick support
@@ -64,12 +66,15 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)
 * Pseudorandom number generator support (using the TinyMT32 PRNG)
 * Programmable input/output support (on the RP2040)
+* Watchdog support (on the RP2040)
 * Optional swdcom support
 * Optional task monitor
 
 There is also support for loadable extras not included in any builds:
 
+* Single-cell S15.16 fixed-point numeric support
 * An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
+* A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.
 * An SNTP (Simple Network Time Protocol) implementation for use with zeptoIP
 * Bitmaps (in `extra/common/bitmap.fs`)
 * 16-bit pixmaps (in `extra/common/pixmap16.fs`)
@@ -77,6 +82,7 @@ There is also support for loadable extras not included in any builds:
 * ST7735S-based displays (in `extra/common/st7735s.fs`)
 * Monospace, bitmap fonts (in `extra/common/font.fs`)
 * A simple monospace, bitmap ASCII font (in `extra/common/simple_font.fs`)
+* Turtle graphics for ST7735S displays (in `extra/rp2040/turtle.fs`)
 * Neopixel support (in `extra/rp2040/neopixel.fs`, for the RP2040)
 
 ## Loading

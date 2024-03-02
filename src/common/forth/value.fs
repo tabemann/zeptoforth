@@ -139,14 +139,23 @@ continue-module internal
   : fill-locals ( u -- )
     dup 0> if
       undefer-lit
-      dup 4 * negate 0 literal,
-      [ armv6m-instr import ]
-      r0 addsp,sp,4_
-      0 ?do
-        i 4 * tos str_,[sp,#_]
-        tos 1 dp ldm
-      loop
-      [ armv6m-instr unimport ]
+      dup 128 < if
+        [ armv6m-instr import ]
+        dup 4 * subsp,sp,#_
+        0 ?do
+          i 4 * tos str_,[sp,#_]
+          tos 1 dp ldm
+        loop
+        [ armv6m-instr unimport ]
+      else
+        0 swap 1- ?do
+          i lit, postpone roll
+          [ armv6m-instr import ]
+          tos 1 push
+          tos 1 dp ldm
+          [ armv6m-instr unimport ]
+        -1 +loop
+      then
     else
       drop
     then
@@ -178,7 +187,7 @@ continue-module internal
       dup 128 < if
         4 * addsp,sp,#_
       else
-        4 * 0 literal,
+        4 * r0 literal,
         r0 addsp,sp,4_
       then
       [ armv6m-instr unimport ]
@@ -195,7 +204,7 @@ continue-module internal
           dup 128 < if
             4 * addsp,sp,#_
           else
-            4 * 0 literal,
+            4 * r0 literal,
             r0 addsp,sp,4_
           then
           [ armv6m-instr unimport ]
@@ -214,7 +223,7 @@ continue-module internal
     dup 128 < if
       4 * addsp,sp,#_
     else
-      4 * 0 literal,
+      4 * r0 literal,
       r0 addsp,sp,4_
     then
     [ armv6m-instr unimport ]
@@ -264,7 +273,13 @@ continue-module internal
     undefer-lit
     6 push,
     [ armv6m-instr import ]
-    4 * r6 ldr_,[sp,#_]
+    dup 128 < if
+      4 * r6 ldr_,[sp,#_]
+    else
+      4 * r0 literal,
+      r0 add4_,sp
+      0 r0 r6 ldr_,[_,#_]
+    then
     [ armv6m-instr unimport ]
   ;
 
@@ -273,11 +288,23 @@ continue-module internal
     undefer-lit
     6 push,
     [ armv6m-instr import ]
-    dup 1+ 4 * r6 ldr_,[sp,#_]
+    dup 127 < if
+      dup 1+ 4 * r6 ldr_,[sp,#_]
+    else
+      dup 1+ 4 * r0 literal,
+      r0 add4_,sp
+      0 r0 r6 ldr_,[_,#_]
+    then
     [ armv6m-instr unimport ]
     6 push,
     [ armv6m-instr import ]
-    4 * r6 ldr_,[sp,#_]
+    dup 128 < if
+      4 * r6 ldr_,[sp,#_]
+    else
+      4 * r0 literal,
+      r0 add4_,sp
+      0 r0 r6 ldr_,[_,#_]
+    then
     [ armv6m-instr unimport ]
   ;
 
@@ -286,7 +313,12 @@ continue-module internal
     undefer-lit
     6 push,
     [ armv6m-instr import ]
-    4 * r6 add_,sp,#_
+    dup 128 < if
+      4 * r6 add_,sp,#_
+    else
+      4 * r6 literal,
+      r6 add4_,sp
+    then
     [ armv6m-instr unimport ]
   ;
 
@@ -316,7 +348,13 @@ continue-module internal
   : compile-set-cell-local ( u -- )
     undefer-lit
     [ armv6m-instr import ]
-    4 * tos str_,[sp,#_]
+    dup 128 < if
+      4 * tos str_,[sp,#_]
+    else
+      4 * r0 literal,
+      r0 add4_,sp
+      0 r0 tos str_,[_,#_]
+    then
     [ armv6m-instr unimport ]
     6 pull,
   ;
@@ -324,11 +362,23 @@ continue-module internal
   \ Compile setting a double cell variable
   : compile-set-double-local ( u -- )
     [ armv6m-instr import ]
-    dup 4 * tos str_,[sp,#_]
+    dup 128 < if
+      dup 4 * tos str_,[sp,#_]
+    else
+      dup 4 * r0 literal,
+      r0 add4_,sp
+      0 r0 tos str_,[_,#_]
+    then
     [ armv6m-instr unimport ]
     6 pull,
     [ armv6m-instr import ]
-    1+ 4 * tos str_,[sp,#_]
+    dup 127 < if
+      1+ 4 * tos str_,[sp,#_]
+    else
+      1+ 4 * r0 literal,
+      r0 add4_,sp
+      0 r0 tos str_,[_,#_]
+    then
     [ armv6m-instr unimport ]
     6 pull,
   ;
@@ -359,9 +409,17 @@ continue-module internal
   : compile-add-cell-local ( u -- )
     undefer-lit
     [ armv6m-instr import ]
-    dup 4 * r0 ldr_,[sp,#_]
-    r0 tos tos adds_,_,_
-    4 * tos str_,[sp,#_]
+    dup 128 < if
+      dup 4 * r0 ldr_,[sp,#_]
+      r0 tos tos adds_,_,_
+      4 * tos str_,[sp,#_]
+    else
+      4 * r0 literal,
+      r0 add4_,sp
+      0 r0 r1 ldr_,[_,#_]
+      r1 tos tos adds_,_,_
+      0 r0 tos str_,[_,#_]
+    then
     [ armv6m-instr unimport ]
     6 pull,
   ;
@@ -370,14 +428,27 @@ continue-module internal
   : compile-add-double-local ( u -- )
     undefer-lit
     [ armv6m-instr import ]
-    dup 1+ 4 * r1 ldr_,[sp,#_]
-    dup 4 * r2 ldr_,[sp,#_]
-    r3 1 dp ldm
-    r3 r1 r1 adds_,_,_
-    tos r2 adcs_,_
-    dup 1+ 4 * r1 str_,[sp,#_]
-    4 * r2 str_,[sp,#_]
-    tos 1 dp ldm
+    dup 127 < if
+      dup 1+ 4 * r1 ldr_,[sp,#_]
+      dup 4 * r2 ldr_,[sp,#_]
+      r3 1 dp ldm
+      r3 r1 r1 adds_,_,_
+      tos r2 adcs_,_
+      dup 1+ 4 * r1 str_,[sp,#_]
+      4 * r2 str_,[sp,#_]
+      tos 1 dp ldm
+    else
+      4 * r0 literal,
+      r0 add4_,sp
+      4 r0 r1 ldr_,[_,#_]
+      0 r0 r2 ldr_,[_,#_]
+      r3 1 dp ldm
+      r3 r1 r1 adds_,_,_
+      tos r2 adcs_,_
+      4 r0 r1 str_,[_,#_]
+      0 r0 r2 str_,[_,#_]
+      tos 1 dp ldm
+    then
     [ armv6m-instr unimport ]
   ;
   
@@ -718,9 +789,7 @@ end-module> import
   [else]
     tos r3 2 dp ldm
   [then]
-  sp r1 mov4_,4_
-  12 r1 subs_,#_
-  r1 sp mov4_,4_
+  12 subsp,sp,#_
   8 r0 str_,[sp,#_]
   0 r2 str_,[sp,#_]
   4 r3 str_,[sp,#_]
@@ -751,9 +820,7 @@ end-module> import
   ne bc>
   r0 bx_
   >mark
-  sp r1 mov4_,4_
-  12 r1 subs_,#_
-  r1 sp mov4_,4_
+  12 subsp,sp,#_
   8 r0 str_,[sp,#_]
   0 r2 str_,[sp,#_]
   4 r3 str_,[sp,#_]
@@ -771,12 +838,33 @@ end-module> import
   end-block
   swap
   [ armv6m-instr import ]
-  find-i-var 4 * r0 ldr_,[sp,#_]
+  find-i-var 4 *
+  dup 128 < if
+    r0 ldr_,[sp,#_]
+  else
+    r2 literal,
+    r2 add4_,sp
+    0 r2 r0 ldr_,[_,#_]
+  then
   1 r0 adds_,#_
-  find-limit-var 4 * r1 ldr_,[sp,#_]
+  find-limit-var 4 *
+  dup 128 < if
+    r1 ldr_,[sp,#_]
+  else
+    r2 literal,
+    r2 add4_,sp
+    0 r2 r1 ldr_,[_,#_]
+  then
   r1 r0 cmp_,_
   eq bc>
-  find-i-var 4 * r0 str_,[sp,#_]
+  find-i-var 4 *
+  dup 128 < if
+    r0 str_,[sp,#_]
+  else
+    r2 literal,
+    r2 add4_,sp
+    0 r2 r0 str_,[_,#_]
+  then
   rot branch,
   >mark
   [ armv6m-instr unimport ]
@@ -792,11 +880,32 @@ end-module> import
   end-block
   swap
   [ armv6m-instr import ]
-  find-i-var 4 * r0 ldr_,[sp,#_]
+  find-i-var 4 *
+  dup 128 < if
+    r0 ldr_,[sp,#_]
+  else
+    r3 literal,
+    r3 add4_,sp
+    0 r3 r0 ldr_,[_,#_]
+  then
   r0 r2 movs_,_
   tos r0 r0 adds_,_,_
-  find-i-var 4 * r0 str_,[sp,#_]
-  find-limit-var 4 * r1 ldr_,[sp,#_]
+  find-i-var 4 *
+  dup 128 < if
+    r0 str_,[sp,#_]
+  else
+    r3 literal,
+    r3 add4_,sp
+    0 r3 r0 str_,[_,#_]
+  then
+  find-limit-var 4 *
+  dup 128 < if
+    r1 ldr_,[sp,#_]
+  else
+    r3 literal,
+    r3 add4_,sp
+    0 r3 r1 ldr_,[_,#_]
+  then
 
   0 tos cmp_,#_
   lt bc>
@@ -841,7 +950,14 @@ end-module> import
   undefer-lit
   6 push,
   [ armv6m-instr import ]
-  find-i-var 4 * tos ldr_,[sp,#_]
+  find-i-var 4 *
+  dup 128 < if
+    tos ldr_,[sp,#_]
+  else
+    r0 literal,
+    r0 add4_,sp
+    0 r0 tos ldr_,[_,#_]
+  then
   [ armv6m-instr unimport ]
 ;
 
@@ -851,7 +967,14 @@ end-module> import
   undefer-lit
   6 push,
   [ armv6m-instr import ]
-  find-j-var 4 * tos ldr_,[sp,#_]
+  find-j-var 4 *
+    dup 128 < if
+    tos ldr_,[sp,#_]
+  else
+    r0 literal,
+    r0 add4_,sp
+    0 r0 tos ldr_,[_,#_]
+  then
   [ armv6m-instr unimport ]
 ;
 
@@ -861,7 +984,14 @@ end-module> import
   undefer-lit
   6 push,
   [ armv6m-instr import ]
-  find-leave-var 4 * tos ldr_,[sp,#_]
+  find-leave-var 4 *
+  dup 128 < if
+    tos ldr_,[sp,#_]
+  else
+    r0 literal,
+    r0 add4_,sp
+    0 r0 tos ldr_,[_,#_]
+  then
   drop-loop-locals
   tos r0 movs_,_
   tos 1 dp ldm

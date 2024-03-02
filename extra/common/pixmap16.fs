@@ -156,7 +156,7 @@ begin-module pixmap16
         0 r0 ldr_,[sp,#_] \ addr
         8 r1 ldr_,[sp,#_] \ col-count
         20 r2 ldr_,[sp,#_] \ color
-        mark>
+        mark<
         0 r1 cmp_,#_
         le bc>
         0 r0 r2 strh_,[_,#_]
@@ -176,7 +176,7 @@ begin-module pixmap16
         0 r0 ldr_,[sp,#_] \ dst-addr
         4 r1 ldr_,[sp,#_] \ src-addr
         16 r2 ldr_,[sp,#_] \ col-count
-        mark>
+        mark<
         0 r2 cmp_,#_
         le bc>
         0 r1 r3 ldrh_,[_,#_]
@@ -203,7 +203,7 @@ begin-module pixmap16
         32 r3 ldr_,[sp,#_] \ mask-row
         7 r4 movs_,#_
         r4 r3 ands_,_
-        mark>
+        mark<
         0 r2 cmp_,#_
         le bc>
         0 r1 r4 ldrb_,[_,#_]
@@ -240,7 +240,7 @@ begin-module pixmap16
         44 r4 ldr_,[sp,#_] \ mask-row
         7 r5 movs_,#_
         r5 r4 ands_,_
-        mark>
+        mark<
         0 r3 cmp_,#_
         le bc>
         0 r2 r5 ldrb_,[_,#_]

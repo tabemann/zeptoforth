@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Turtle graphics</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="turtle-graphics">
+<h1>Turtle graphics</h1>
+<p>Optional support for turtle graphics is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/turtle.fs</span></code>. It is designed for compatibility with Thurtle, which is based on WAForth and runs in web browsers, and Forthtoise, which is on top of gforth and uses SDL. It allows changing the color of both the lines drawn and the turtle, but does not currently support changing the line thickness (even though that will likely change in the near future).</p>
+<p>It is currently setup up for use with 16-bit graphics on the 160x80 ST7735S-based display on the Waveshare RP2040-LCD-0.96 but can be readily modified for other ST7735S-based displays, including ones on non-RP2040 based boards. Porting to SSD1306-based displays should be trivial and is an exercise left to the user.</p>
+<p>The display the turtle is in is such that the (0, 0) lies in the center of the display (all distances are specified in pixels, and <em>x</em> coordinates increase from left to right while <em>y</em> coordinates increase from bottom to top) and a heading of 0 degrees (all angles here are specified in degrees, not radians) is pointing directly up along the Y dimension. The turtle starts (and is reset to by <code class="docutils literal notranslate"><span class="pre">home</span></code>) at (0, 0) with a heading of 0 degrees. Also note that the turtle begins pen down, the turtle starts out with the color (0, 255, 0), i.e. green, and the lined drawn by the turtle starts out with the color (255, 255, 255), i.e white. Note however that not all possibly-specified colors can be distinguished due to the 16-bit color of the display.</p>
+<section id="turtle">
+<h2><code class="docutils literal notranslate"><span class="pre">turtle</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">turtle</span></code> module contains the following words:</p>
+<section id="setpencolor">
+<h3><code class="docutils literal notranslate"><span class="pre">setpencolor</span></code></h3>
+<p>( r g b – )</p>
+<p>Set the current pen color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 to 255 (but note that 16-bit displays do not permit all possible colors in this color space to be distinguished from one another).</p>
+</section>
+<section id="setturtlecolor">
+<h3><code class="docutils literal notranslate"><span class="pre">setturtlecolor</span></code></h3>
+<p>( r g b – )</p>
+<p>Set the current turtle color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 and 255 (likewise not all colors so specified may be distinguished in 16-bit color).</p>
+</section>
+<section id="forward">
+<h3><code class="docutils literal notranslate"><span class="pre">forward</span></code></h3>
+<p>( pixels – )</p>
+<p>Move the turtle forward a given number of <em>pixels</em>.</p>
+</section>
+<section id="backward">
+<h3><code class="docutils literal notranslate"><span class="pre">backward</span></code></h3>
+<p>( pixel – )</p>
+<p>Move the turtle backward a given number of <em>pixels</em>.</p>
+</section>
+<section id="left">
+<h3><code class="docutils literal notranslate"><span class="pre">left</span></code></h3>
+<p>( angle – )</p>
+<p>Turn the turtle left <em>angle</em> degrees (not radians).</p>
+</section>
+<section id="right">
+<h3><code class="docutils literal notranslate"><span class="pre">right</span></code></h3>
+<p>( right – )</p>
+<p>Turn the turtle right <em>angle</em> degrees (not radians).</p>
+</section>
+<section id="penup">
+<h3><code class="docutils literal notranslate"><span class="pre">penup</span></code></h3>
+<p>( – )</p>
+<p>Pen up, i.e. stop drawing lines with turtle movement.</p>
+</section>
+<section id="pendown">
+<h3><code class="docutils literal notranslate"><span class="pre">pendown</span></code></h3>
+<p>( – )</p>
+<p>Pen down, i.e. start drawing lines with turtle movement.</p>
+</section>
+<section id="getpendown">
+<h3><code class="docutils literal notranslate"><span class="pre">getpendown</span></code></h3>
+<p>( – pen-down? )</p>
+<p>Get whether the pen is down.</p>
+</section>
+<section id="setxy">
+<h3><code class="docutils literal notranslate"><span class="pre">setxy</span></code></h3>
+<p>( x y – )</p>
+<p>Set the position of the turtle to <em>x</em> and <em>y</em>, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
+</section>
+<section id="getxy">
+<h3><code class="docutils literal notranslate"><span class="pre">getxy</span></code></h3>
+<p>( – x y )</p>
+<p>Get the position of the turtle, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.</p>
+</section>
+<section id="setheading">
+<h3><code class="docutils literal notranslate"><span class="pre">setheading</span></code></h3>
+<p>( angle – )</p>
+<p>Set the heading of the turtnle to <em>angle</em> degrees, where 0 is pointing right along the X dimension and 90 is pointing up along the Y dimension.</p>
+</section>
+<section id="hideturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">hideturtle</span></code></h3>
+<p>( – )</p>
+<p>Hide the turtle.</p>
+</section>
+<section id="showturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">showturtle</span></code></h3>
+<p>( – )</p>
+<p>Show the turtle.</p>
+</section>
+<section id="getshowturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">getshowturtle</span></code></h3>
+<p>( – show-turtle? )</p>
+<p>Get whether the turtle is shown.</p>
+</section>
+<section id="updateoff">
+<h3><code class="docutils literal notranslate"><span class="pre">updateoff</span></code></h3>
+<p>( – )</p>
+<p>Disable updating the display.</p>
+</section>
+<section id="updateon">
+<h3><code class="docutils literal notranslate"><span class="pre">updateon</span></code></h3>
+<p>( – )</p>
+<p>Enable updating the display, and update it.</p>
+</section>
+<section id="getupdateon">
+<h3><code class="docutils literal notranslate"><span class="pre">getupdateon</span></code></h3>
+<p>( – update-on? )</p>
+<p>Get whether updating the display is on.</p>
+</section>
+<section id="clear">
+<h3><code class="docutils literal notranslate"><span class="pre">clear</span></code></h3>
+<p>( – )</p>
+<p>Clear the display but leave the turtle in the same position and heading (and it will remain visible unless the turtle is hidden).</p>
+</section>
+<section id="setpensize">
+<h3><code class="docutils literal notranslate"><span class="pre">setpensize</span></code></h3>
+<p>( pixels – )</p>
+<p>Set the pen size in pixels.</p>
+</section>
+<section id="getpensize">
+<h3><code class="docutils literal notranslate"><span class="pre">getpensize</span></code></h3>
+<p>( – pixels )</p>
+<p>Get the pen size in pixels.</p>
+</section>
+<section id="home">
+<h3><code class="docutils literal notranslate"><span class="pre">home</span></code></h3>
+<p>( – )</p>
+<p>Move the turtle to the center of the display, pointing up. No lines are drawn by this.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

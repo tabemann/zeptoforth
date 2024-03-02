@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ begin-module fat32-tools
   internal import
   oo import
   fat32 import
+  simple-fat32 import
   lock import
   rtc import
   
@@ -156,10 +157,12 @@ begin-module fat32-tools
       ?raise
     ;
 
-    \ List a directory
+    \ List a directory with file sizes
     : list-dir ( dir -- )
-      cr ." filename      creation date              modification date"
-      cr ." ------------  -------------------------  -------------------------"
+      cr ." filename     creation date             modification date        "
+      ."  file size"
+      cr ." ------------ ------------------------- -------------------------"
+      ."  ----------"
       <fat32-entry> class-size [:
         swap
         begin
@@ -169,11 +172,14 @@ begin-module fat32-tools
                 file-name-buf 12 3 pick file-name@ { file-name-len } drop
                 cr file-name-buf file-name-len type
                 over entry-dir? if ." /" 1 +to file-name-len then
-                14 file-name-len - spaces
+                13 file-name-len - spaces
                 date-time 2 pick create-date-time@
-                date-time date-time. 2 spaces
+                date-time date-time. space
                 date-time 2 pick modify-date-time@
-                date-time date-time.
+                date-time date-time. space
+                over entry-file? if
+                  over entry-file-size @ 10 compat::u.r
+                then
                 false
               ;] with-aligned-allot
             ;] with-allot
@@ -227,6 +233,28 @@ begin-module fat32-tools
   
   \ Get the current filesystem
   : current-fs@ ( fs -- ) current-fs @ ;
+  
+  \ Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card
+  \ interface and FAT32 filesystem and, if successful, sets it as the current
+  \ filesystem.
+  \
+  \ sck-pin, tx-pin, rx-pin, and cs-pin are the clock, transmit, receive, and
+  \ chip select pins to use. spi-device is the SPI peripheral to use; it must
+  \ match sck-pin, tx-pin, and rx-pin. write-through is whether to enable
+  \ write-through; enabling write-through will result in greater data integrity
+  \ in the case of failures, but slower performance. If write-through is not
+  \ enabled, manually flushing at opportune moments is highly recommended.
+  \
+  \ Note that this permanently allots space for the FAT32 filesystem and its
+  \ support structures in the current task's RAM dictionary.
+  : init-simple-fat32
+    { write-through sck-pin tx-pin rx-pin cs-pin spi-device -- }
+    here { simple-fat32-fs } <simple-fat32-fs> class-size allot
+    sck-pin tx-pin rx-pin cs-pin spi-device <simple-fat32-fs> simple-fat32-fs
+    init-object
+    write-through simple-fat32-fs write-through!
+    simple-fat32-fs current-fs!
+  ;
   
   \ Load a file
   : load-file ( file -- )

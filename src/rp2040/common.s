@@ -1,4 +1,5 @@
 @ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +98,9 @@ _init_platform_variables:
 	ldr r1, =hold_core
 	str r0, [r1]
 	str r0, [r1, #4]
+	ldr r0, =125000000
+	ldr r1, =sysclk
+	str r0, [r1]
 	bx lr
 
 	@ Prepare for rebooting

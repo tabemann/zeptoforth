@@ -256,6 +256,128 @@ Unsigned less than or equal
 
 Unsigned greater than or equal
 
+##### `if`
+Compile-time: ( -- if-block ) Runtime: ( flag -- )
+
+Compile the start if an *if* conditional block. If *flag* is false at runtime, branch after a following *else*, or if there is no *else*, *then*. If not compiling, begin implicit compilation (i.e. automatically compiling a temporary anonymous word at the REPL).
+
+##### `else`
+Compile-time: ( if-block -- if-block) Runtime: ( -- )
+
+Compile an *else* in an *if* conditional block. At runtime jump past the end of the corresponding *then*.
+
+##### `then`
+Compile-time: ( if-block -- ) Runtime: ( -- )
+
+Compile the end of an *if* conditional block. If matching an *if* that started implict compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `begin`
+Compile-time: ( -- begin-block ) Runtime: ( -- )
+
+Compile the beginning of a *begin* block. If not compiling, begin implicit compilation (i.e. automatically compiling a temporary anonymous word at the REPL).
+
+##### `end`
+Compile-time: ( begin-block -- ) Runtime: ( -- )
+
+Compile the end of a *begin* block. If matching a *begin* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `while`
+Compile-time: ( begin-block -- while-block ) Runtime: ( flag -- )
+
+Compile the end of a *begin* block and the beginning of a *while* block. If *flag* is false at runtime, jump past the end of the corresponding *repeat*.
+
+##### `repeat`
+Compile-time: ( while-block -- ) Runtime: ( -- )
+
+Compile the end of a *while* block. At runtime jump to the previous corresponding *begin*. If matching a *while* corresponding to a *begin* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `until`
+Compile-time: ( begin-block -- ) Runtime: ( flag -- )
+
+Compile an *until* to end a *begin* block. At runtime, if *flag* is false, jump back to the corresponding *begin*. If matching a *begin* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `again`
+Compile-time: ( begin-block -- ) Runtime: ( -- )
+
+Compile an *again* to end a *begin* block. At runtime jump back to the corresponding *begin*. If matching a *begin* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `do`
+Compile-time: ( -- do-block ) Runtime: ( end start -- )
+
+Compile the beginning of a *do* block. At runtime take *end* and *start* to initialize loop variables. If not compiling, begin implicit compilation (i.e. automatically compiling a temporary anonymous word at the REPL).
+
+##### `?do`
+Compile-time: ( -- do-block ) Runtime: ( end start -- )
+
+Compile the beginning of a *do* block. At runtime take *end* and *start* to initialize loop variables, with *i* being set to *start*, and if they are equal jump past the corresponding *loop* or *+loop*. If not compiling, begin implicit compilation (i.e. automatically compiling an a temporary anonymous word at the REPL).
+
+##### `loop`
+Compile-time: ( do-block -- ) Runtime: ( -- )
+
+Compile the end of a *do* block. Increment *i* by 1, and if it does not equal the *end* loop variable jump back to just after the corresponding *do* or *?do*. If matching a *do* or *?do* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `+loop`
+Compile-time: ( do-block -- ) Runtime: ( increment -- )
+
+Compile the end of a *do* block. Increment *i* by *increment*; if *increment* is positive and *i* moves past or equals the *end* loop variable, or if *increment* is negative and *i* moves past (but not equals) the *end* loop variable, jump back to just after the corresponding *do* or *?do*. If matching a *do* or *?do* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `i`
+Compile-time: ( do-block -- do-block ) Runtime: ( -- i )
+
+Get the loop index for a *do* block.
+
+##### `j`
+Compile-time: ( do-block -- do-block ) Runtime: ( -- j )
+
+Get the loop index for the *do* block immediately outside the current *do* block.
+
+##### `leave`
+Compile-time: ( do-block -- do-block ) Runtime ( -- )
+
+Jump to the end of a *do* block.
+
+Leave a do loop
+
+##### `unloop`
+Compile-time: ( do-block -- do-block ) Runtime ( -- )
+
+In ANS Forth and Forth 2012 this removes the current loop's loop variables, but in zeptofrth this is a no-op.
+
+##### `case`
+Compile-time: ( -- case-block )
+
+Compile the beginning of a *case* block. If not compiling, begin implicit compilation (i.e. automatically compiling a temporary anonymous word at the REPL).
+
+##### `of`
+Compile-time: ( case-block -- case-block of-block ) Runtime: ( x1 x0 -- )
+
+Compile the beginning of an *of* block within a *case* block. If *x1* does not match *x0* jump past the corresponding *endof*.
+
+##### `endof`
+Compile-time: ( case-block of-block -- case-block ) Runtime: ( -- )
+
+Compile the end of an *of* block within a *case* block. Jump to the end of the *case* block.
+
+##### `endcase`
+Compile-time: ( case-block -- ) Runtime: ( x -- )
+
+Compile the end of a *case* block comparing against a cell. If matching a *case* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
+##### `ofstr`
+Compile-time: ( case-block -- case-block of-block ) Runtime: ( c-addr1 u1 c-addr0 u0 -- )
+
+Compile the beginning of an *of* block within a *case* block. If the string defined by *c-addr1* *u1* does not match the string defined by *c-addr0* *u0* jump past the corresponding *endof*.
+
+##### `ofstrcase`
+Compile-time: ( case-block -- case-block of-block ) Runtime: ( c-addr1 u1 c-addr0 u0 -- )
+
+Compile the beginning of an *of* block within a *case* block. If the string defined by *c-addr1* *u1* does not match (in a case-insensitive fashion, for ASCII characters) the string defined by *c-addr0* *u0* jump past the corresponding *endof*.
+
+##### `endcasestr`
+Compile-time: ( case-block -- ) Runtime: ( c-addr u -- )
+
+Compile the end of a *case* block comparing against a string. If matching a *case* that started implicit compilation, end implicit compilation, execute the anonymous word, and then forget it.
+
 ##### `goto`
 ( "word" -- )
 
@@ -503,7 +625,7 @@ Get whether compilation is to flash
 ##### `begin-critical`
 ( -- )
 
-Begin a critical section, within which context switches will not take place; note that critical sections do nest.
+Begin a critical section, within which context switches will not take place on the current core; note that critical sections do nest.
 
 ##### `end-critical`
 ( -- )
@@ -513,7 +635,7 @@ End a critical section; if a context switch would have occurred within the criti
 ##### `critical`
 ( xt -- )
 
-Execute code within a critical section, properly handling exceptions.
+Execute code within a critical section; if an exception was raised within *xt* it is re-raised afterwards.
 
 ##### `with-allot`
 ( bytes xt -- ) ( xt: addr -- )
@@ -1215,41 +1337,6 @@ Create a double cell-sized field
 
 Get whether two strings are equal
 
-##### `case`
-( -- )
-
-Start a CASE statement
-
-##### `of`
-( x -- )
-
-Start an OF clause
-
-##### `endof`
-( -- )
-
-End an OF clause
-
-##### `endcase`
-( x -- )
-
-End a CASE statement
-
-##### `ofstr`
-( x -- )
-
-Start an OFSTR clause
-
-##### `ofstrcase`
-( x -- )
-
-Start an OFSTRCASE clause
-
-##### `endcasestr`
-( x -- )
-
-End a CASE statement comparing against a string
-
 ##### `begin-jumptable`
 ( "name" -- )
 
@@ -1344,46 +1431,6 @@ Create a RAM wordlist
 ( -- wid )
 
 Create a new wordlist
-
-##### `do`
-( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
-
-Begin a do loop
-
-##### `?do`
-( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
-
-Begin a ?do loop
-
-##### `loop`
-( R leave current end -- leave current end | )
-
-End a do loop
-
-##### `+loop`
-( increment -- ) ( R: leave current end -- leave current end | )
-
-End a do +loop
-
-##### `i`
-( R current end -- current end ) ( -- current )
-
-Get the loop index
-
-##### `j`
-( R cur1 end1 leave cur2 end2 -- cur1 end1 leave cur2 end2 ) ( -- cur1 )
-
-Get the loop index beneath the current loop
-
-##### `leave`
-( R leave current end -- )
-
-Leave a do loop
-
-##### `unloop`
-( R: leave current end -- )
-
-Unloop from a do loop (to exit, e.g.)
 
 ##### `dump`
 ( start-addr end-addr -- )

@@ -39,7 +39,7 @@ continue-module forth
       [else]
         tos r2 r1 3 dp ldm
       [then]
-      mark>
+      mark<
       0 r1 cmp_,#_
       eq bc>
       1 r1 subs_,#_
@@ -61,7 +61,7 @@ continue-module forth
       [else]
         tos r2 r1 3 dp ldm
       [then]
-      mark>
+      mark<
       0 r1 cmp_,#_
       eq bc>
       4 r1 subs_,#_

@@ -2,7 +2,7 @@
 
 ### `forth`
 
-Thes words are in `forth`.
+These words are in `forth`.
 
 ##### `state`
 
@@ -156,3 +156,14 @@ Get the PENDSV-HANDLER-HOOK variable address
 ##### `systick-handler-hook`
 
 Get the SYSTICK-HANDLER-HOOK variable address
+
+## RP2040 Word
+
+### `forth`
+
+This word is in `forth`.
+
+##### `unique-id`
+( -- d )
+
+Returns the 64-bit board unique ID value, as a double number.

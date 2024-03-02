@@ -267,107 +267,157 @@
 <section id="fi">
 <h3><code class="docutils literal notranslate"><span class="pre">fi**</span></code></h3>
 <p>( f1 u – f2 )</p>
-<p>Exponentiation of a fixed point number by an unsigned integer</p>
+<p>Exponentiation of an S31.32 fixed-point number by an unsigned integer</p>
 </section>
 <section id="fmod">
 <h3><code class="docutils literal notranslate"><span class="pre">fmod</span></code></h3>
 <p>( f1 f2 – f3 )</p>
-<p>Compute the symmetric modulus of two S31.32 fixed point numbers.</p>
+<p>Compute the symmetric modulus of two S31.32 S31.32 fixed-point numbers.</p>
+</section>
+<section id="ceil">
+<h3><code class="docutils literal notranslate"><span class="pre">ceil</span></code></h3>
+<p>( f – n )</p>
+<p>Get the ceiling of a fixed-point number as a single-cell number.</p>
+</section>
+<section id="floor">
+<h3><code class="docutils literal notranslate"><span class="pre">floor</span></code></h3>
+<p>( f – n )</p>
+<p>Get the floor of a fixed-point number as a single-cell number.</p>
+</section>
+<section id="round-half-up">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-up</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number up to the nearest integer with half rounding up.</p>
+</section>
+<section id="round-half-down">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-down</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number down to the nearest integer with half rounding down.</p>
+</section>
+<section id="round-half-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-zero</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards zero.</p>
+</section>
+<section id="round-half-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-away-zero</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding away from zero.</p>
+</section>
+<section id="round-half-even">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-even</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="round-half-odd">
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-odd</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="round-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-zero</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number towards zero.</p>
+</section>
+<section id="round-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">round-away-zero</span></code></h3>
+<p>( f – n )</p>
+<p>Round a fixed-point number away from zero.</p>
 </section>
 <section id="sqrt">
 <h3><code class="docutils literal notranslate"><span class="pre">sqrt</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Square root of a fixed point number</p>
+<p>Square root of an S31.32 fixed-point number</p>
 </section>
 <section id="expm1">
 <h3><code class="docutils literal notranslate"><span class="pre">expm1</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate (e^x)-1 where x is a fixed point number</p>
+<p>Calculate (e^x)-1 where x is an S31.32 fixed-point number</p>
 </section>
 <section id="exp">
 <h3><code class="docutils literal notranslate"><span class="pre">exp</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate e^x where x is a fixed point number</p>
+<p>Calculate e^x where x is an S31.32 fixed-point number</p>
 </section>
 <section id="lnp1">
 <h3><code class="docutils literal notranslate"><span class="pre">lnp1</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate ln(x + 1) where x is a fixed point number</p>
+<p>Calculate ln(x + 1) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="ln">
 <h3><code class="docutils literal notranslate"><span class="pre">ln</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate ln(x) where x is a fixed point number</p>
+<p>Calculate ln(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="id23">
 <h3><code class="docutils literal notranslate"><span class="pre">f**</span></code></h3>
 <p>( fb fx – fb^x )</p>
-<p>Calculate b^x where b and x are fixed point numbers</p>
+<p>Calculate b^x where b and x are S31.32 fixed-point numbers</p>
 </section>
 <section id="sin">
 <h3><code class="docutils literal notranslate"><span class="pre">sin</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate sin(x) where x is a fixed point number</p>
+<p>Calculate sin(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="cos">
 <h3><code class="docutils literal notranslate"><span class="pre">cos</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate cos(x) where x is a fixed point number</p>
+<p>Calculate cos(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="tan">
 <h3><code class="docutils literal notranslate"><span class="pre">tan</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate tan(x) where x is a fixed point number</p>
+<p>Calculate tan(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="asin">
 <h3><code class="docutils literal notranslate"><span class="pre">asin</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate asin(x) where x is a fixed point number</p>
+<p>Calculate asin(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="acos">
 <h3><code class="docutils literal notranslate"><span class="pre">acos</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate acos(x) where x is a fixed point number</p>
+<p>Calculate acos(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atan">
 <h3><code class="docutils literal notranslate"><span class="pre">atan</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate atan(x) where x is a fixed point number</p>
+<p>Calculate atan(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atan2">
 <h3><code class="docutils literal notranslate"><span class="pre">atan2</span></code></h3>
 <p>( fy fx – fangle )</p>
-<p>Calculate the angle of any pair of x and y coordinates where they are all fixed point numbers</p>
+<p>Calculate the angle of any pair of x and y coordinates where they are all S31.32 fixed-point numbers</p>
 </section>
 <section id="sinh">
 <h3><code class="docutils literal notranslate"><span class="pre">sinh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate sinh(x) where x is a fixed point number</p>
+<p>Calculate sinh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="cosh">
 <h3><code class="docutils literal notranslate"><span class="pre">cosh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate cosh(x) where x is a fixed point number</p>
+<p>Calculate cosh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="tanh">
 <h3><code class="docutils literal notranslate"><span class="pre">tanh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate tanh(x) where x is a fixed point number</p>
+<p>Calculate tanh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="asinh">
 <h3><code class="docutils literal notranslate"><span class="pre">asinh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate asinh(x) where x is a fixed point number</p>
+<p>Calculate asinh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="acosh">
 <h3><code class="docutils literal notranslate"><span class="pre">acosh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate acosh(x) where x is a fixed point number</p>
+<p>Calculate acosh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atanh">
 <h3><code class="docutils literal notranslate"><span class="pre">atanh</span></code></h3>
 <p>( f1 – f2 )</p>
-<p>Calculate atanh(x) where x is a fixed point number</p>
+<p>Calculate atanh(x) where x is an S31.32 fixed-point number</p>
 </section>
 </section>
 </section>

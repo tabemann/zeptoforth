@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Turtle graphics &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Neopixels on the RP2040" href="neopixel.html" />
+    <link rel="prev" title="Pixmap Utilities" href="pixmap16_utils.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="turtle-graphics">
+<h1>Turtle graphics<a class="headerlink" href="#turtle-graphics" title="Permalink to this heading">¶</a></h1>
+<p>Optional support for turtle graphics is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/turtle.fs</span></code>. It is designed for compatibility with Thurtle, which is based on WAForth and runs in web browsers, and Forthtoise, which is on top of gforth and uses SDL. It allows changing the color of both the lines drawn and the turtle, but does not currently support changing the line thickness (even though that will likely change in the near future).</p>
+<p>It is currently setup up for use with 16-bit graphics on the 160x80 ST7735S-based display on the Waveshare RP2040-LCD-0.96 but can be readily modified for other ST7735S-based displays, including ones on non-RP2040 based boards. Porting to SSD1306-based displays should be trivial and is an exercise left to the user.</p>
+<p>The display the turtle is in is such that the (0, 0) lies in the center of the display (all distances are specified in pixels, and <em>x</em> coordinates increase from left to right while <em>y</em> coordinates increase from bottom to top) and a heading of 0 degrees (all angles here are specified in degrees, not radians) is pointing directly up along the Y dimension. The turtle starts (and is reset to by <code class="docutils literal notranslate"><span class="pre">home</span></code>) at (0, 0) with a heading of 0 degrees. Also note that the turtle begins pen down, the turtle starts out with the color (0, 255, 0), i.e. green, and the lined drawn by the turtle starts out with the color (255, 255, 255), i.e white. Note however that not all possibly-specified colors can be distinguished due to the 16-bit color of the display.</p>
+<section id="turtle">
+<h2><code class="docutils literal notranslate"><span class="pre">turtle</span></code><a class="headerlink" href="#turtle" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">turtle</span></code> module contains the following words:</p>
+<section id="setpencolor">
+<h3><code class="docutils literal notranslate"><span class="pre">setpencolor</span></code><a class="headerlink" href="#setpencolor" title="Permalink to this heading">¶</a></h3>
+<p>( r g b – )</p>
+<p>Set the current pen color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 to 255 (but note that 16-bit displays do not permit all possible colors in this color space to be distinguished from one another).</p>
+</section>
+<section id="setturtlecolor">
+<h3><code class="docutils literal notranslate"><span class="pre">setturtlecolor</span></code><a class="headerlink" href="#setturtlecolor" title="Permalink to this heading">¶</a></h3>
+<p>( r g b – )</p>
+<p>Set the current turtle color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 and 255 (likewise not all colors so specified may be distinguished in 16-bit color).</p>
+</section>
+<section id="forward">
+<h3><code class="docutils literal notranslate"><span class="pre">forward</span></code><a class="headerlink" href="#forward" title="Permalink to this heading">¶</a></h3>
+<p>( pixels – )</p>
+<p>Move the turtle forward a given number of <em>pixels</em>.</p>
+</section>
+<section id="backward">
+<h3><code class="docutils literal notranslate"><span class="pre">backward</span></code><a class="headerlink" href="#backward" title="Permalink to this heading">¶</a></h3>
+<p>( pixel – )</p>
+<p>Move the turtle backward a given number of <em>pixels</em>.</p>
+</section>
+<section id="left">
+<h3><code class="docutils literal notranslate"><span class="pre">left</span></code><a class="headerlink" href="#left" title="Permalink to this heading">¶</a></h3>
+<p>( angle – )</p>
+<p>Turn the turtle left <em>angle</em> degrees (not radians).</p>
+</section>
+<section id="right">
+<h3><code class="docutils literal notranslate"><span class="pre">right</span></code><a class="headerlink" href="#right" title="Permalink to this heading">¶</a></h3>
+<p>( right – )</p>
+<p>Turn the turtle right <em>angle</em> degrees (not radians).</p>
+</section>
+<section id="penup">
+<h3><code class="docutils literal notranslate"><span class="pre">penup</span></code><a class="headerlink" href="#penup" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Pen up, i.e. stop drawing lines with turtle movement.</p>
+</section>
+<section id="pendown">
+<h3><code class="docutils literal notranslate"><span class="pre">pendown</span></code><a class="headerlink" href="#pendown" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Pen down, i.e. start drawing lines with turtle movement.</p>
+</section>
+<section id="getpendown">
+<h3><code class="docutils literal notranslate"><span class="pre">getpendown</span></code><a class="headerlink" href="#getpendown" title="Permalink to this heading">¶</a></h3>
+<p>( – pen-down? )</p>
+<p>Get whether the pen is down.</p>
+</section>
+<section id="setxy">
+<h3><code class="docutils literal notranslate"><span class="pre">setxy</span></code><a class="headerlink" href="#setxy" title="Permalink to this heading">¶</a></h3>
+<p>( x y – )</p>
+<p>Set the position of the turtle to <em>x</em> and <em>y</em>, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
+</section>
+<section id="getxy">
+<h3><code class="docutils literal notranslate"><span class="pre">getxy</span></code><a class="headerlink" href="#getxy" title="Permalink to this heading">¶</a></h3>
+<p>( – x y )</p>
+<p>Get the position of the turtle, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.</p>
+</section>
+<section id="setheading">
+<h3><code class="docutils literal notranslate"><span class="pre">setheading</span></code><a class="headerlink" href="#setheading" title="Permalink to this heading">¶</a></h3>
+<p>( angle – )</p>
+<p>Set the heading of the turtnle to <em>angle</em> degrees, where 0 is pointing right along the X dimension and 90 is pointing up along the Y dimension.</p>
+</section>
+<section id="hideturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">hideturtle</span></code><a class="headerlink" href="#hideturtle" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Hide the turtle.</p>
+</section>
+<section id="showturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">showturtle</span></code><a class="headerlink" href="#showturtle" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Show the turtle.</p>
+</section>
+<section id="getshowturtle">
+<h3><code class="docutils literal notranslate"><span class="pre">getshowturtle</span></code><a class="headerlink" href="#getshowturtle" title="Permalink to this heading">¶</a></h3>
+<p>( – show-turtle? )</p>
+<p>Get whether the turtle is shown.</p>
+</section>
+<section id="updateoff">
+<h3><code class="docutils literal notranslate"><span class="pre">updateoff</span></code><a class="headerlink" href="#updateoff" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Disable updating the display.</p>
+</section>
+<section id="updateon">
+<h3><code class="docutils literal notranslate"><span class="pre">updateon</span></code><a class="headerlink" href="#updateon" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Enable updating the display, and update it.</p>
+</section>
+<section id="getupdateon">
+<h3><code class="docutils literal notranslate"><span class="pre">getupdateon</span></code><a class="headerlink" href="#getupdateon" title="Permalink to this heading">¶</a></h3>
+<p>( – update-on? )</p>
+<p>Get whether updating the display is on.</p>
+</section>
+<section id="clear">
+<h3><code class="docutils literal notranslate"><span class="pre">clear</span></code><a class="headerlink" href="#clear" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Clear the display but leave the turtle in the same position and heading (and it will remain visible unless the turtle is hidden).</p>
+</section>
+<section id="setpensize">
+<h3><code class="docutils literal notranslate"><span class="pre">setpensize</span></code><a class="headerlink" href="#setpensize" title="Permalink to this heading">¶</a></h3>
+<p>( pixels – )</p>
+<p>Set the pen size in pixels.</p>
+</section>
+<section id="getpensize">
+<h3><code class="docutils literal notranslate"><span class="pre">getpensize</span></code><a class="headerlink" href="#getpensize" title="Permalink to this heading">¶</a></h3>
+<p>( – pixels )</p>
+<p>Get the pen size in pixels.</p>
+</section>
+<section id="home">
+<h3><code class="docutils literal notranslate"><span class="pre">home</span></code><a class="headerlink" href="#home" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Move the turtle to the center of the display, pointing up. No lines are drawn by this.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pixmap16_utils.html" title="previous chapter">Pixmap Utilities</a></li>
+      <li>Next: <a href="neopixel.html" title="next chapter">Neopixels on the RP2040</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/extra/turtle.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

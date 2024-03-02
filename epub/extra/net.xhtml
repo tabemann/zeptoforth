@@ -317,11 +317,21 @@
 <section id="endpoint-handler">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code> method.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class contains the following method:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class contains the following methods:</p>
 <section id="handle-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code></h4>
 <p>( endpoint process – )</p>
 <p>Handle a ready <em>endpoint</em>; note that <em>endpoint</em> should be marked as done before it is available for furthe processing. The user shall provide their own implementation of this method.</p>
+</section>
+<section id="handle-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-timeout</span></code></h4>
+<p>( process – )</p>
+<p>Handle a timeout, based on the timeout returned by <code class="docutils literal notranslate"><span class="pre">handler-timeout&#64;</span></code>.</p>
+</section>
+<section id="handler-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">handler-timeout&#64;</span></code></h4>
+<p>( process – timeout )</p>
+<p>Get the current timeout for an endpoint handler in ticks from the present; note that <code class="docutils literal notranslate"><span class="pre">task::no-timeout</span></code> signifies there being no timeout.</p>
 </section>
 </section>
 <section id="id10">

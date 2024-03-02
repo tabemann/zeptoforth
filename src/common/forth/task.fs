@@ -53,21 +53,6 @@ begin-module task
     \ The maximum task priority
     $7FFF constant max-priority
 
-    \ Task has not terminated
-    0 constant not-terminated
-
-    \ Task has terminated normally
-    1 constant terminated-normally
-
-    \ Task has been killed
-    2 constant terminated-killed
-
-    \ Task has terminated due to a hardware exception
-    3 constant terminated-crashed
-
-    \ Task has terminated due to a stack overflow
-    4 constant terminated-overflowed
-
     \ Task guard value
     $DEADCAFE constant task-guard-value
     
@@ -269,6 +254,12 @@ begin-module task
 
   \ Initialize on core boot hook
   variable core-init-hook
+
+  \ Watchdog hook
+  variable watchdog-hook
+
+  \ Task initialization hook
+  variable task-init-hook
   
   \ The latest lock currently held by a tack
   user current-lock-held
@@ -282,6 +273,21 @@ begin-module task
   \ No timeout
   $80000000 constant no-timeout
   
+  \ Task has not terminated
+  0 constant not-terminated
+
+  \ Task has terminated normally
+  1 constant terminated-normally
+
+  \ Task has been killed
+  2 constant terminated-killed
+
+  \ Task has terminated due to a hardware exception
+  3 constant terminated-crashed
+
+  \ Task has terminated due to a stack overflow
+  4 constant terminated-overflowed
+
   \ Attempted to use a terminated task
   : x-terminated ( -- ) ." task has been terminated" cr ;
 
@@ -465,7 +471,7 @@ begin-module task
       cpu-last-task
       code[
       0 tos tos ldr_,[_,#_]
-      mark>
+      mark<
       0 tos cmp_,#_
       ne bc>
       pc r0 2 pop
@@ -1304,6 +1310,14 @@ begin-module task
 	0 over task-saved-priority h!
 	0 over task-active h!
 	base @ over ['] task-base for-task!
+        key-hook @ over ['] task-key-hook for-task!
+        key?-hook @ over ['] task-key?-hook for-task!
+        emit-hook @ over ['] task-emit-hook for-task!
+        emit?-hook @ over ['] task-emit?-hook for-task!
+        error-emit-hook @ over ['] error-emit-hook for-task!
+        error-emit?-hook @ over ['] error-emit?-hook for-task!
+        flush-console-hook @ over ['] flush-console-hook for-task!
+        error-flush-console-hook @ over ['] error-flush-console-hook for-task!
 	0 over ['] current-lock-held for-task!
 	readied over task-state h!
 	no-timeout over ['] timeout for-task!
@@ -1333,6 +1347,7 @@ begin-module task
 	0 over task-next !
         0 over task-prev !
         task-guard-value over task-guard !
+        task-init-hook @ ?dup if over swap execute then
 	dup >r init-aux-task-stack
 	r> ['] task-rstack-base for-task@
       ;
@@ -1447,6 +1462,7 @@ begin-module task
     0 over task-next !
     0 over task-prev !
     task-guard-value over task-guard !
+    task-init-hook @ ?dup if over swap execute then
     swap >r >r
     begin dup 0<> while
       dup roll r@ push-task-stack 1-
@@ -1491,7 +1507,7 @@ begin-module task
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- waiting? )
-      code[ \ ( task tos: task-state-mask )
+      code[ ( tos: task )
       .task-state tos r0 ldrh_,[_,#_]
       ( tos: task r0: *task-state )
       readied r0 cmp_,#_ ( tos: task r0: *task-state )
@@ -1509,8 +1525,9 @@ begin-module task
       r0 1 dp ldm ( r1: *wake-counter r0: task tos: 0 )
       .task-wake-after r0 r0 ldr_,[_,#_]
       ( r1: *wake-counter r0: *task-wake-after tos: 0 )
-      r0 r1 cmp_,_
-      ne bc>
+      r0 r1 r1 subs_,_,_
+      tos r1 cmp_,_
+      gt bc>
       tos tos mvns_,_
       >mark
       pc 1 pop
@@ -1538,7 +1555,7 @@ begin-module task
       first-task
       code[
       0 tos tos ldr_,[_,#_]
-      mark>
+      mark<
       0 tos cmp_,#_
       ne bc>
       pc 1 pop
@@ -1590,7 +1607,7 @@ begin-module task
 
     \ Body of extra task
     : do-extra-task ( -- )
-      begin wake-counter 1+ current-task @ block-wait again
+      begin wake-counter @ 1+ current-task @ block-wait again
     ;
 
     \ Initialize the extra task
@@ -1655,7 +1672,7 @@ begin-module task
       code[
       r6 r0 movs_,_
       r6 1 r7 ldm
-      mark>
+      mark<
       0 r0 cmp_,#_
       ne bc>
       pc 1 pop
@@ -1689,6 +1706,8 @@ begin-module task
         handle-pending-ops
 
         do-pause? @ if
+
+          watchdog-hook @ ?execute
           
           1 pause-count +!
 
@@ -2179,6 +2198,8 @@ begin-module task
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    0 task-init-hook !
+    0 watchdog-hook !
     NVIC_ICPR_CLRPEND_All!
     0 pause-enabled !
     $7F SHPR3_PRI_15!

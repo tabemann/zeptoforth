@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -1172,78 +1172,71 @@ _unknown_word:
 	@@ Store a byte
 	define_word "c!", visible_flag | fold_flag
 _store_1:
-	ldr r0, [dp]
-	strb r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        strb r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a halfword
 	define_word "h!", visible_flag | fold_flag
 _store_2:
-	ldr r0, [dp]
-	strh r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        strh r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a word
 	define_word "!", visible_flag | fold_flag
 _store_4:
-	ldr r0, [dp]
-	str r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        str r0, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Store a doubleword
 	define_word "2!", visible_flag
 _store_8:
-	movs r0, tos
-	pull_tos
-	str tos, [r0]
-	pull_tos
-	str tos, [r0, #4]
-	pull_tos
+        ldmia dp!, {r0}
+        str r0, [tos]
+        ldmia dp!, {r0}
+        str r0, [tos, #4]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a byte from an address, add a value, and write it back
 	define_word "c+!", visible_flag
 _add_store_1:
-	ldrb r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	strb r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        adds r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a halfword from an address, add a value, and write it back
 	define_word "h+!", visible_flag
 _add_store_2:	
-	ldrh r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	strh r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        adds r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Read a word from an address, add a value, and write it back
 	define_word "+!", visible_flag
 _add_store_4:	
-	ldr r0, [tos]
-	ldr r1, [dp]
-	adds r0, r1
-	str r0, [tos]
-	ldr tos, [dp, #4]
-	adds dp, #8
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        adds r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
@@ -1271,112 +1264,103 @@ _bit:	movs r0, tos
 	end_inlined
 
 	@@ Bit set a byte
-	define_word "cbis!", visible_flag
+	define_word "cbis!", visible_flag | inlined_flag
 _bit_set_1:
-	movs r0, tos
-	pull_tos
-	ldrb r1, [r0]
-	orrs r1, tos
-	strb r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        orrs r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit set a halfword
-	define_word "hbis!", visible_flag
+	define_word "hbis!", visible_flag | inlined_flag
 _bit_set_2:
-	movs r0, tos
-	pull_tos
-	ldrh r1, [r0]
-	orrs r1, tos
-	strh r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        orrs r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 	
 	@@ Bit set a word
-	define_word "bis!", visible_flag
+	define_word "bis!", visible_flag | inlined_flag
 _bit_set_4:
-	movs r0, tos
-	pull_tos
-	ldr r1, [r0]
-	orrs r1, tos
-	str r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        orrs r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit clear a byte
-	define_word "cbic!", visible_flag | fold_flag
+	define_word "cbic!", visible_flag | inlined_flag
 _bit_clear_1:
-	movs r0, tos
-	pull_tos
-	ldrb r1, [r0]
-	bics r1, tos
-	strb r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        bics r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	@@ Bit clear a halfword
-	define_word "hbic!", visible_flag | fold_flag
+	define_word "hbic!", visible_flag | inlined_flag
 _bit_clear_2:
-	movs r0, tos
-	pull_tos
-	ldrh r1, [r0]
-	bics r1, tos
-	strh r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        bics r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
 	.ltorg
 	
 	@@ Bit clear a word
-	define_word "bic!", visible_flag | fold_flag
+	define_word "bic!", visible_flag | inlined_flag
 _bit_clear_4:
-	movs r0, tos
-	pull_tos
-	ldr r1, [r0]
-	bics r1, tos
-	str r1, [r0]
-	pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        bics r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
 	bx lr
 	end_inlined
 
         @ Load, exclusive-or, and store a byte
-        define_word "cxor!", visible_flag
+        define_word "cxor!", visible_flag | inlined_flag
 _xor_set_1:
-        movs r0, tos
-        pull_tos
-        ldrb r1, [r0]
-        eors r1, tos
-        strb r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldrb r1, [tos]
+        eors r1, r0
+        strb r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
 
         @ Load, exclusive-or, and store a halfword
-        define_word "hxor!", visible_flag
+        define_word "hxor!", visible_flag | inlined_flag
 _xor_set_2:
-        movs r0, tos
-        pull_tos
-        ldrh r1, [r0]
-        eors r1, tos
-        strh r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldrh r1, [tos]
+        eors r1, r0
+        strh r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
         
         @ Load, exclusive-or, and store a word
-        define_word "xor!", visible_flag
+        define_word "xor!", visible_flag | inlined_flag
 _xor_set_4:
-        movs r0, tos
-        pull_tos
-        ldr r1, [r0]
-        eors r1, tos
-        str r1, [r0]
-        pull_tos
+        ldmia dp!, {r0}
+        ldr r1, [tos]
+        eors r1, r0
+        str r1, [tos]
+        ldmia dp!, {tos}
         bx lr
         end_inlined
 
@@ -1457,8 +1441,6 @@ _comma_1:
 	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
-	movs r2, #0xFF
-	ands tos, r2
 	strb tos, [r1]
 	adds r1, #1
 	str r1, [r0]
@@ -1477,8 +1459,6 @@ _comma_2:
 	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
-	ldr r2, =0xFFFF
-	ands tos, r2
 	strh tos, [r1]
 	adds r1, #2
 	str r1, [r0]

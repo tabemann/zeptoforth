@@ -174,11 +174,6 @@ begin-module dma
 
   \ Start register to register transfer
   : start-register>register-dma { src dest count size treq channel -- }
-
-\    cr ." r>r src: " src h.8 ."  dest: " dest h.8 ."  count: " count . \ DEBUG
-\    ."  size: " size . ."  treq: " treq . ."  channel: " channel . \ DEBUG
-\    flush-console \ DEBUG
-    
     channel validate-dma
     treq validate-treq
     size bits-of-transfer-size { size-bits }
@@ -191,11 +186,6 @@ begin-module dma
 
   \ Start register to buffer transfer
   : start-register>buffer-dma { src dest count size treq channel -- }
-
-\    cr ." r>b src: " src h.8 ."  dest: " dest h.8 ."  count: " count . \ DEBUG
-\    ."  size: " size . ."  treq: " treq . ."  channel: " channel . \ DEBUG
-\    flush-console \ DEBUG
-
     channel validate-dma
     treq validate-treq
     size bits-of-transfer-size { size-bits }
@@ -209,11 +199,6 @@ begin-module dma
 
   \ Start buffer to register transfer
   : start-buffer>register-dma { src dest count size treq channel -- }
-
-\    cr ." b>r src: " src h.8 ."  dest: " dest h.8 ."  count: " count . \ DEBUG
-\    ."  size: " size . ."  treq: " treq . ."  channel: " channel . \ DEBUG
-\    flush-console \ DEBUG
-
     channel validate-dma
     treq validate-treq
     size bits-of-transfer-size { size-bits }
@@ -227,11 +212,6 @@ begin-module dma
 
   \ Start buffer to buffer transfer
   : start-buffer>buffer-dma { src dest count size treq channel -- }
-
-\    cr ." b>b src: " src h.8 ."  dest: " dest h.8 ."  count: " count . \ DEBUG
-\    ."  size: " size . ."  treq: " treq . ."  channel: " channel . \ DEBUG
-\    flush-console \ DEBUG
-
     channel validate-dma
     treq validate-treq
     size bits-of-transfer-size { size-bits }
