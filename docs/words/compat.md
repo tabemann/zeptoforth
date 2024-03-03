@@ -13,12 +13,12 @@ One important note is that when this is done within the default module, the word
 The `compat` module contains the following words:
 
 ##### `word`
-( delim "<delims>word<delim>" -- c-addr )
+( delim "\<delims>word\<delim>" -- c-addr )
 
 Parse a toke ndelimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code `token` / `parse-name` is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.
 
 ##### `parse`
-( delim "text<delim>" -- c-addr u )
+( delim "text\<delim>" -- c-addr u )
 
 Parse text up to a given character; the the returned string is in the input buffer and thus avoids the reentrancy problems of `word`.
 
