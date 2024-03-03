@@ -13680,33 +13680,69 @@
     </navPoint>
     <navPoint id="navPoint2279" playOrder="2093">
       <navLabel>
+        <text>Simple Network Time Protocol Client</text>
+      </navLabel>
+      <content src="extra/ntp.xhtml" />  
+      <navPoint id="navPoint2280" playOrder="2093">
+        <navLabel>
+          <text>Simple Network Time Protocol Client</text>
+        </navLabel>
+        <content src="extra/ntp.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint2281" playOrder="2094">
+        <navLabel>
+          <text>ntp</text>
+        </navLabel>
+        <content src="extra/ntp.xhtml#ntp" />  
+        <navPoint id="navPoint2282" playOrder="2094">
+          <navLabel>
+            <text>ntp</text>
+          </navLabel>
+          <content src="extra/ntp.xhtml#ntp" />  
+        </navPoint>
+        <navPoint id="navPoint2283" playOrder="2095">
+          <navLabel>
+            <text>ntp-port</text>
+          </navLabel>
+          <content src="extra/ntp.xhtml#ntp-port" />  
+        </navPoint>
+        <navPoint id="navPoint2284" playOrder="2096">
+          <navLabel>
+            <text>&lt;ntp&gt;</text>
+          </navLabel>
+          <content src="extra/ntp.xhtml#id1" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint2285" playOrder="2097">
+      <navLabel>
         <text>CYW43xxx Words</text>
       </navLabel>
       <content src="extra/cyw43.xhtml" />  
-      <navPoint id="navPoint2280" playOrder="2093">
+      <navPoint id="navPoint2286" playOrder="2097">
         <navLabel>
           <text>CYW43xxx Words</text>
         </navLabel>
         <content src="extra/cyw43.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2281" playOrder="2094">
+      <navPoint id="navPoint2287" playOrder="2098">
         <navLabel>
           <text>cyw43-control</text>
         </navLabel>
         <content src="extra/cyw43.xhtml#cyw43-control" />  
-        <navPoint id="navPoint2282" playOrder="2094">
+        <navPoint id="navPoint2288" playOrder="2098">
           <navLabel>
             <text>cyw43-control</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#cyw43-control" />  
         </navPoint>
-        <navPoint id="navPoint2283" playOrder="2095">
+        <navPoint id="navPoint2289" playOrder="2099">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint2284" playOrder="2096">
+        <navPoint id="navPoint2290" playOrder="2100">
           <navLabel>
             <text>&lt;cyw43-control&gt;</text>
           </navLabel>

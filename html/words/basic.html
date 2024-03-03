@@ -1524,7 +1524,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="id87">
 <h3><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id87" title="Permalink to this heading">¶</a></h3>
-<p>( “comment<NL>” – )</p>
+<p>( “comment&lt;NL&gt;” – )</p>
 <p>Parse a line comment</p>
 </section>
 <section id="id88">
@@ -1864,42 +1864,42 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="id104">
 <h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id104" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – )</p>
+<p>( “text&lt;quote&gt;” – )</p>
 <p>Compile a string to be printed.</p>
 </section>
 <section id="id105">
 <h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id105" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – ) ( compiled: – c-addr u )</p>
+<p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr u )</p>
 <p>Compile a non-counted string</p>
 </section>
 <section id="id106">
 <h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id106" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – ) ( compiled: – c-addr )</p>
+<p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr )</p>
 <p>Compile a counted-string</p>
 </section>
 <section id="id107">
 <h3><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id107" title="Permalink to this heading">¶</a></h3>
-<p>( “text<close-paren>” – )</p>
+<p>( “text&lt;close-paren&gt;” – )</p>
 <p>Immediately print a string.</p>
 </section>
 <section id="id108">
 <h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id108" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – )</p>
+<p>( “text&lt;quote&gt;” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </section>
 <section id="id109">
 <h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id109" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – ) ( compiled: – c-addr u )</p>
+<p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </section>
 <section id="id110">
 <h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id110" title="Permalink to this heading">¶</a></h3>
-<p>( “text<quote>” – ) ( compiled: – c-addr )</p>
+<p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr )</p>
 <p>Compile an escaped counted-string</p>
 </section>
 <section id="id111">
 <h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id111" title="Permalink to this heading">¶</a></h3>
-<p>( “text<close-paren>” – )</p>
+<p>( “text&lt;close-paren&gt;” – )</p>
 <p>Immediately print an escaped string.</p>
 </section>
 <section id="compile-cstring">
@@ -2127,6 +2127,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic.html">Dynamically-Scoped Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
@@ -2152,6 +2153,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
@@ -2186,6 +2188,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
@@ -2194,6 +2197,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
 </ul>
 

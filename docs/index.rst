@@ -79,5 +79,5 @@ Zeptoforth Documentation
    extra/turtle
    extra/neopixel
    extra/net
-   extra/net_ntp
+   extra/ntp
    extra/cyw43

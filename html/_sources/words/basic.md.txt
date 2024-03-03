@@ -1478,7 +1478,7 @@ Parse the input buffer for the end of a token
 Parse a token
 
 ##### `\`
-( "comment<NL>" -- )
+( "comment\<NL>" -- )
 
 Parse a line comment
 
@@ -1818,42 +1818,42 @@ Display space free for the main task and for flash in general
 Display the license notice
 
 ##### `."`
-( "text<quote>" -- )
+( "text\<quote>" -- )
 
 Compile a string to be printed.
 	
 ##### `s"`
-( "text<quote>" -- ) ( compiled: -- c-addr u )
+( "text\<quote>" -- ) ( compiled: -- c-addr u )
 
 Compile a non-counted string
 
 ##### `c"`
-( "text<quote>" -- ) ( compiled: -- c-addr )
+( "text\<quote>" -- ) ( compiled: -- c-addr )
 
 Compile a counted-string
 
 ##### `.(`
-( "text<close-paren>" -- )
+( "text\<close-paren>" -- )
 
 Immediately print a string.
 
 ##### `.\"`
-( "text<quote>" -- )
+( "text\<quote>" -- )
 
 Compile an escaped string to be printed.
 	
 ##### `s\"`
-( "text<quote>" -- ) ( compiled: -- c-addr u )
+( "text\<quote>" -- ) ( compiled: -- c-addr u )
 
 Compile an escaped non-counted string
 
 ##### `c\"`
-( "text<quote>" -- ) ( compiled: -- c-addr )
+( "text\<quote>" -- ) ( compiled: -- c-addr )
 
 Compile an escaped counted-string
 
 ##### `.\(`
-( "text<close-paren>" -- )
+( "text\<close-paren>" -- )
 
 Immediately print an escaped string.
 
