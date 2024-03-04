@@ -162,6 +162,66 @@
 <p>( src dest count size treq channel – )</p>
 <p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
+<section id="prepare-register-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma</span></code><a class="headerlink" href="#prepare-register-register-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Prepare without starting register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="prepare-register-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-register-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Prepare without starting register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="prepare-buffer-register-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma</span></code><a class="headerlink" href="#prepare-buffer-register-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Prepare without starting buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="prepare-buffer-buffer-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest count size treq channel – )</p>
+<p>Prepare without starting buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-register-register-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-register-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Start register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="start-register-buffer-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-register-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Start register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="start-buffer-register-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Start buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="start-buffer-buffer-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="prepare-register-register-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Prepare without starting register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="prepare-register-buffer-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Prepare without starting register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="prepare-buffer-register-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Prepare without starting buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
+<section id="prepare-buffer-buffer-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest count size treq channel – )</p>
+<p>Prepare without starting buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
+</section>
 <section id="dma-timer">
 <h3><code class="docutils literal notranslate"><span class="pre">dma-timer!</span></code><a class="headerlink" href="#dma-timer" title="Permalink to this heading">¶</a></h3>
 <p>( dividend divisor timer – )</p>
