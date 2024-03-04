@@ -161,6 +161,15 @@ begin-module net-config
   \ Default DHCP renewal time
   86400 10000 * 2 / value default-dhcp-renew-interval
 
+  \ Default DHCP rebinding time
+  86400 10000 * value default-dhcp-rebind-interval
+
+  \ Default DHCP renew/rebind limit divisor
+  3 value dhcp-renew-rebind-limit-divisor
+
+  \ Default DHCP renew/rebind limit multiplier
+  2 value dhcp-renew-rebind-limit-multiplier
+
   \ Initial DHCP renewal divisor
   2 value dhcp-renew-init-divisor
   

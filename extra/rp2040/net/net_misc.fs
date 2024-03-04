@@ -36,13 +36,42 @@ begin-module net-misc
   : make-ipv6-addr
     ( addr0 addr1 addr2 addr3 addr4 addr5 addr6 addr7 )
     ( -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-    $FFFF and swap $FFFF and lshift 16 or { ipv6-0 }
-    $FFFF and swap $FFFF and lshift 16 or { ipv6-1 }
-    $FFFF and swap $FFFF and lshift 16 or { ipv6-2 }
-    $FFFF and swap $FFFF and lshift 16 or { ipv6-3 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-0 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-1 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-2 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-3 }
     ipv6-0 ipv6-1 ipv6-2 ipv6-3
   ;
 
+  \ Is an IPv6 address multicast
+  : ipv6-addr-multicast? ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- multicast? )
+    nip nip nip $FFFF and $FF02 =
+  ;
+
+  \ Is this a multicast MAC address
+  : mac-addr-multicast? ( D: mac-addr -- multicast? )
+    40 2rshift 1 and 0<>
+  ;
+
+  \ Get the solicit link-local multicast address
+  : solicit-node-link-local-multicast
+    ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- ipv6-0' ipv6-1' ipv6-2' ipv6-3' )
+    drop drop drop $FFFFFF and $FF000000 or $1 $0 $FF020000
+  ;
+  
+  \ The DHCPv6 link-local multicast address
+  : DHCPV6_LINK_LOCAL_MULTICAST $0001002 $0 $0 $FF020000
+  ;
+
+  \ The all-nodes link-local multicast address
+  : ALL_NODES_LINK_LOCAL_MULTICAST $1 $0 $0 $FF020000 ;
+
+  \ The all-routers link-local multicast address
+  : ALL_ROUTERS_LINK_LOCAL_MULTICAST $2 $0 $0 $FF020000 ;
+
+  \ IPv6 version traffic flow
+  6 28 lshift constant IPV6_VERSION_TRAFFIC_FLOW_CONST
+  
   \ Max domain name length
   253 constant max-dns-name-len
   
@@ -52,11 +81,20 @@ begin-module net-misc
   \ DNS source port
   65535 constant dns-src-port
 
+  \ The AAAA DNS QTYPE
+  $001C constant DNS_QTYPE_AAAA
+  
   \ DHCP client port
   68 constant dhcp-client-port
 
   \ DHCP server port
   67 constant dhcp-server-port
+
+  \ IPv6 DHCP client port
+  546 constant ipv6-dhcp-client-port
+
+  \ IPv6 DHCP server port
+  547 constant ipv6-dhcp-server-port
 
   \ DHCP discovery state
   0 constant dhcp-not-discovering
@@ -68,6 +106,24 @@ begin-module net-misc
   6 constant dhcp-renewing
   7 constant dhcp-rebinding
   8 constant dhcp-declined
+
+  \ DHCPv6 discovery state
+  0 constant dhcpv6-not-discovering
+  1 constant dhcpv6-wait-advertise
+  2 constant dhcpv6-wait-reply
+  3 constant dhcpv6-discovered
+  4 constant dhcpv6-renewing
+  5 constant dhcpv6-rebinding
+  6 constant dhcpv6-declined
+
+  \ DHCPv6 options
+  1 constant OPTION_CLIENTID
+  2 constant OPTION_SERVERID
+  3 constant OPTION_IA_NA
+  5 constant OPTION_IAADDR
+  6 constant OPTION_ORO
+  8 constant OPTION_ELAPSED_TIME
+  82 constant OPTION_SOL_MAX_RT
   
   \ Maximumm IPv6 packet size
   1280 constant max-ipv6-packet-size
@@ -95,11 +151,28 @@ begin-module net-misc
   1 constant PROTOCOL_ICMP
   6 constant PROTOCOL_TCP
   17 constant PROTOCOL_UDP
+  58 constant PROTOCOL_ICMPV6
 
   \ ICMP types
   0 constant ICMP_TYPE_ECHO_REPLY
   8 constant ICMP_TYPE_ECHO_REQUEST
 
+  \ ICMPv6 types
+  128 constant ICMPV6_TYPE_ECHO_REQUEST
+  129 constant ICMPV6_TYPE_ECHO_REPLY
+  133 constant ICMPV6_TYPE_ROUTER_SOLICIT
+  134 constant ICMPV6_TYPE_ROUTER_ADVERTISE
+  135 constant ICMPV6_TYPE_NEIGHBOR_SOLICIT
+  136 constant ICMPV6_TYPE_NEIGHBOR_ADVERTISE
+  137 constant ICMPV6_TYPE_REDIRECT
+
+  \ ICMPv6 options
+  1 constant OPTION_SOURCE_LINK_LAYER_ADDR
+  2 constant OPTION_TARGET_LINK_LAYER_ADDR
+
+  \ ICMPv6 neighbor adverisement solicited flag
+  30 bit constant NEIGHBOR_SOLICITED
+  
   \ ICMP codes
   0 constant ICMP_CODE_UNUSED
 
@@ -264,6 +337,32 @@ begin-module net-misc
   6 constant DHCP_SERVICE_DNS_SERVER
   15 constant DHCP_SERVICE_DNS_NAME
 
+  \ DHCP header structure
+  begin-structure dhcpv6-header-size
+    cfield: dhcpv6-msg-type
+    3 +field dhcp6-transact-id
+  end-structure
+
+  \ IPv6 DHCP message types
+  1 constant DHCPV6_SOLICIT
+  2 constant DHCPV6_ADVERTISE
+  3 constant DHCPV6_REQUEST
+  4 constant DHCPV6_CONFIRM
+  5 constant DHCPV6_RENEW
+  6 constant DHCPV6_REBIND
+  7 constant DHCPV6_REPLY
+  8 constant DHCPV6_RELEASE
+  9 constant DHCPV6_DECLINE
+
+  \ DUID_LL type
+  3 constant DUID_LL
+
+  \ Minimum DUID size
+  4 constant min-duid-size
+  
+  \ Maximum DUID size
+  132 constant max-duid-size
+  
   \ Default requested IP address
   0 0 0 0 make-ipv4-addr constant DEFAULT_IPV4_ADDR
 \  192 168 1 100 make-ipv4-addr constant DEFAULT_IPV4_ADDR
@@ -467,7 +566,32 @@ begin-module net-misc
     PROTOCOL_TCP + dup 16 rshift + $FFFF and
     addr bytes zero-offset compute-checksum
   ;
-  
+
+  : compute-ipv6-udp-checksum
+    { zero-offset }
+    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes }
+    ( -- h )
+    src-3 16 rshift
+    src-3 $FFFF and + dup 16 rshift + $FFFF and
+    src-2 16 rshift + dup 16 rshift + $FFFF and
+    src-2 $FFFF and + dup 16 rshift + $FFFF and
+    src-1 16 rshift + dup 16 rshift + $FFFF and
+    src-1 $FFFF and + dup 16 rshift + $FFFF and
+    src-0 16 rshift + dup 16 rshift + $FFFF and
+    src-0 $FFFF and + dup 16 rshift + $FFFF and
+    dest-3 16 rshift + dup 16 rshift + $FFFF and
+    dest-3 $FFFF and + dup 16 rshift + $FFFF and
+    dest-2 16 rshift + dup 16 rshift + $FFFF and
+    dest-2 $FFFF and + dup 16 rshift + $FFFF and
+    dest-1 16 rshift + dup 16 rshift + $FFFF and
+    dest-1 $FFFF and + dup 16 rshift + $FFFF and
+    dest-0 16 rshift + dup 16 rshift + $FFFF and
+    dest-0 $FFFF and + dup 16 rshift + $FFFF and
+    bytes + dup 16 rshift + $FFFF and
+    PROTOCOL_UDP + dup 16 rshift + $FFFF and
+    addr bytes zero-offset compute-checksum
+  ;
+
   \ Get whether an IPv4 packet is fragmented
   : ipv4-fragment? ( addr -- fragmented? )
     ipv4-flags-fragment-offset h@ rev16
@@ -830,6 +954,40 @@ begin-module net-misc
         then
       then
     until
+  ;
+
+  \ Get a variable size DHCPv6 option
+  : find-dhcpv6-opt { opt addr bytes -- addr' len found? }
+    begin bytes 4 >= while
+      addr 2 + hunaligned@ rev16 { len }
+      addr hunaligned@ rev16 opt = if
+        bytes 4 - len >= if
+          addr 4 + len true exit
+        else
+          0 0 false exit
+        then
+      else
+        len 4 + dup +to addr negate +to bytes
+      then
+    repeat
+    0 0 false
+  ;
+
+  \ Get a variable size ICMPv6 option
+  : find-icmpv6-opt { opt addr bytes -- addr' len found? }
+    begin bytes 2 >= while
+      addr 1+ c@ 8 * { len }
+      addr c@ opt =  if
+        bytes len >= if
+          addr 2 + len 2 - true exit
+        else
+          0 0 false exit
+        then
+      else
+        len dup +to addr negate +to bytes
+      then
+    repeat
+    0 0 false
   ;
 
 end-module

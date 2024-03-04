@@ -1931,7 +1931,7 @@ begin-module net
     ; define add-endpoint-tcp-data
 
     \ Add data to a UDP endpoint if possible
-    :noname ( addr bytes self -- )
+    :noname ( addr bytes src-addr src-port self -- )
       [: endpoint-in-packets add-in-udp-packet ;] over endpoint-lock with-lock
     ; define add-endpoint-udp-data
 
