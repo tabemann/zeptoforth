@@ -1755,7 +1755,7 @@ Type an S31.32 fixed-point number without a leading space
 ##### `(f.n)`
 ( f places -- )
 
-Type an S31.32 fixed-point number to *places* to the left of the decimal point without a leading space
+Type an S31.32 fixed-point number to *places* to the right of the decimal point without a leading space
 
 ##### `f.`
 ( f -- )
@@ -1765,7 +1765,7 @@ Type an S31.32 fixed-point number with a leading space
 ##### `f.n`
 ( f places -- )
 
-Type an S31.32 fixed-point number to *places* to the left of the decimal point with a leading space
+Type an S31.32 fixed-point number to *places* to the right of the decimal point with a leading space
 
 ##### `s>d`
 ( n -- d )
