@@ -128,6 +128,66 @@ Start buffer to register transfer of *count* units of *size* bytes on DMA *chann
 
 Start buffer to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq*.
 
+##### `prepare-register>register-dma`
+( src dest count size treq channel -- )
+
+Prepare without starting register to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq*.
+
+##### `prepare-register>buffer-dma`
+( src dest count size treq channel -- )
+
+Prepare without starting register to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq*.
+
+##### `prepare-buffer>register-dma`
+( src dest count size treq channel -- )
+
+Prepare without starting buffer to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq*.
+
+##### `prepare-buffer>buffer-dma`
+( src dest count size treq channel -- )
+
+Prepare without starting buffer to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq*.
+
+##### `start-register>register-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Start register to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `start-register>buffer-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Start register to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `start-buffer>register-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Start buffer to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `start-buffer>buffer-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Start buffer to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `prepare-register>register-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Prepare without starting register to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `prepare-register>buffer-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Prepare without starting register to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `prepare-buffer>register-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Prepare without starting buffer to register transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
+##### `prepare-buffer>buffer-dma-with-chain`
+( chain-to src dest count size treq channel -- )
+
+Prepare without starting buffer to buffer transfer of *count* units of *size* bytes on DMA *channel* with source address *src* and destination address *dest* synchronized by DREQ/TREQ *treq* with chaining to DMA channel *chain-to*. Note that if *channel* is the same as *chain-to* no chaining will take place.
+
 ##### `dma-timer!`
 ( dividend divisor timer -- )
 
