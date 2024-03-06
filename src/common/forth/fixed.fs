@@ -331,7 +331,7 @@ commit-flash
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
 continue-module internal
-  
+
   \ Get the number of instances of a character in a string
   : char-count ( b-addr bytes b -- count )
     >r
