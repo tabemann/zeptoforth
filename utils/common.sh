@@ -157,7 +157,7 @@ flash_rp2040() {
     udisksctl mount -b ${BLOCK_DEVICE}
     sleep 1
     cp ${IMAGE} ${FILESYSTEM}
-    sleep 5
+    sleep 8
 }
 
 issue_bootsel() {
