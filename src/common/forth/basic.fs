@@ -142,16 +142,17 @@ internal set-current
 0 constant syntax-none
 1 constant syntax-word
 2 constant syntax-lambda
-3 constant syntax-if
-4 constant syntax-else
-5 constant syntax-begin
-6 constant syntax-while
-7 constant syntax-do
-8 constant syntax-case
-9 constant syntax-of
-10 constant syntax-begin-structure
-11 constant syntax-begin-class
-12 constant syntax-begin-implement
+3 constant syntax-naked-lambda
+4 constant syntax-if
+5 constant syntax-else
+6 constant syntax-begin
+7 constant syntax-while
+8 constant syntax-do
+9 constant syntax-case
+10 constant syntax-of
+12 constant syntax-begin-structure
+13 constant syntax-begin-class
+14 constant syntax-begin-implement
 
 \ Set forth
 forth set-current
@@ -2078,14 +2079,19 @@ commit-flash
 \ Begin lambda
 : [: ( -- )
   [immediate]
-  [compile-only]
-  undefer-lit
-  [ thumb-2? not ] [if] consts-inline, [then]
-  reserve-branch
-  here
-  $B500 h,
-  word-begin-hook @ ?execute
-  syntax-lambda push-syntax
+  state @ if
+    undefer-lit
+    [ thumb-2? not ] [if] consts-inline, [then]
+    reserve-branch
+    here
+    $B500 h,
+    word-begin-hook @ ?execute
+    syntax-lambda push-syntax
+  else
+    :noname
+    drop-syntax
+    syntax-naked-lambda push-syntax
+  then
 ;
 
 \ End lambda
@@ -2093,13 +2099,20 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
-  syntax-lambda verify-syntax drop-syntax
-  word-exit-hook @ ?execute
-  word-end-hook @ ?execute
-  [ thumb-2? not ] [if] consts-inline, [then]
-  $BD00 h,
-  here rot branch-back!
-  lit,
+  get-syntax dup syntax-lambda = if
+    drop drop-syntax
+    word-exit-hook @ ?execute
+    word-end-hook @ ?execute
+    [ thumb-2? not ] [if] consts-inline, [then]
+    $BD00 h,
+    here rot branch-back!
+    lit,
+  else
+    syntax-naked-lambda = averts x-unexpected-syntax
+    drop-syntax
+    syntax-word push-syntax
+    postpone ;
+  then
 ;
 
 commit-flash
