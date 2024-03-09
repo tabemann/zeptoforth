@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2020-2023 Travis Bemann
+# Copyright (c) 2020-2024 Travis Bemann
 # Copyright (c) 2023 Chris Salch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -150,3 +150,20 @@ screen_download_ihex_minidict() (
   screen_download ${PORT} src/common/forth/ihex_minidict.fs ${TARGET}
 )
 
+flash_rp2040() {
+    IMAGE=$1
+    BLOCK_DEVICE=$2
+    FILESYSTEM=$3
+    udisksctl mount -b ${BLOCK_DEVICE}
+    sleep 1
+    cp ${IMAGE} ${FILESYSTEM}
+    sleep 8
+}
+
+issue_bootsel() {
+    PORT=$1
+    screen -d -m ${PORT} 115200
+    screen -X stuff 'bootsel\n'
+    screen -X quit
+    sleep 5
+}
