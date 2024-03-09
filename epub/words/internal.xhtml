@@ -491,7 +491,12 @@ the next column</p>
 <section id="verify-syntax-2">
 <h3><code class="docutils literal notranslate"><span class="pre">verify-syntax-2</span></code></h3>
 <p>( syntax1 syntax0 – )</p>
-<p>Verify that the previous syntax on th syntax stack is one of two specified syntaxes.</p>
+<p>Verify that the previous syntax on the syntax stack is one of two specified syntaxes.</p>
+</section>
+<section id="get-syntax">
+<h3><code class="docutils literal notranslate"><span class="pre">get-syntax</span></code></h3>
+<p>( – syntax )</p>
+<p>Get the topmost syntax on the syntax stack.</p>
 </section>
 <section id="drop-syntax">
 <h3><code class="docutils literal notranslate"><span class="pre">drop-syntax</span></code></h3>
@@ -526,7 +531,12 @@ the next column</p>
 <section id="syntax-lambda">
 <h3><code class="docutils literal notranslate"><span class="pre">syntax-lambda</span></code></h3>
 <p>( – syntax )</p>
-<p>Syntax constant for lambda definitoin.</p>
+<p>Syntax constant for lambda definition.</p>
+</section>
+<section id="syntax-naked-lambda">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-naked-lambda</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for lambda definition outside of another word.</p>
 </section>
 <section id="syntax-if">
 <h3><code class="docutils literal notranslate"><span class="pre">syntax-if</span></code></h3>

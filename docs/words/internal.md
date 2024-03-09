@@ -475,7 +475,12 @@ Verify that the previous syntax on the syntax stack is the specified syntax.
 ##### `verify-syntax-2`
 ( syntax1 syntax0 -- )
 
-Verify that the previous syntax on th syntax stack is one of two specified syntaxes.
+Verify that the previous syntax on the syntax stack is one of two specified syntaxes.
+
+##### `get-syntax`
+( -- syntax )
+
+Get the topmost syntax on the syntax stack.
 
 ##### `drop-syntax`
 ( -- )
@@ -510,7 +515,12 @@ Syntax constant for word definition.
 ##### `syntax-lambda`
 ( -- syntax )
 
-Syntax constant for lambda definitoin.
+Syntax constant for lambda definition.
+
+##### `syntax-naked-lambda`
+( -- syntax )
+
+Syntax constant for lambda definition outside of another word.
 
 ##### `syntax-if`
 ( -- syntax )

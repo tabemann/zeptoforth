@@ -32,11 +32,12 @@ dp 	.req r7
         .equ syntax_none, 0
         .equ syntax_word, 1
         .equ syntax_lambda, 2
-        .equ syntax_if, 3
-        .equ syntax_else, 4
-        .equ syntax_begin, 5
-        .equ syntax_while, 6
-        .equ syntax_do, 7
+        .equ syntax_naked_lambda, 3
+        .equ syntax_if, 4
+        .equ syntax_else, 5
+        .equ syntax_begin, 6
+        .equ syntax_while, 7
+        .equ syntax_do, 8
         
 	@@ Invisible word
 	.equ invisible_flag, 0x0000
