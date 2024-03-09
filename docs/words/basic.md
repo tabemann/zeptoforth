@@ -1445,12 +1445,12 @@ Skip characters in the evaluation buffer until a predicate is met
 ##### `[:`
 ( -- )
 
-Begin lambda
+Begin lambda; note that when executed in interpretation mode this is equivalent to `:noname`.
 
 ##### `;]`
 ( -- ) ( compiled: -- xt )
 
-End lambda
+End lambda; note that when executed such that it matches a `[:` that was executed in interpretation mode this is equivalent to `;`.
 
 ##### `ws?`
 ( c -- flag )
