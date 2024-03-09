@@ -114,12 +114,12 @@
 <section id="buffer-spi">
 <h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code><a class="headerlink" href="#buffer-spi" title="Permalink to this heading">¶</a></h4>
 <p>( addr bytes spi – )</p>
-<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave.</p>
 </section>
 <section id="spi-buffer">
 <h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code><a class="headerlink" href="#spi-buffer" title="Permalink to this heading">¶</a></h4>
 <p>( add bytes filler spi – )</p>
-<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for each unit of data sent to the slave.</p>
 </section>
 <section id="id3">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
@@ -239,6 +239,19 @@
 </section>
 </section>
 </section>
+<section id="rp2040-only-words">
+<h2>RP2040-only words<a class="headerlink" href="#rp2040-only-words" title="Permalink to this heading">¶</a></h2>
+<section id="buffer-spi-raw-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi-raw-dma</span></code><a class="headerlink" href="#buffer-spi-raw-dma" title="Permalink to this heading">¶</a></h3>
+<p>( addr bytes dma1 dma0 spi – last-data )</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>, and returns the last data read from the SPI peripheral.</p>
+</section>
+<section id="spi-buffer-raw-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer-raw-dma</span></code><a class="headerlink" href="#spi-buffer-raw-dma" title="Permalink to this heading">¶</a></h3>
+<p>( add bytes filler dma1 dma0 spi – )</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for unit of data sent to the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>.</p>
+</section>
+</section>
 </section>
 
 
@@ -263,6 +276,7 @@
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic.html">Dynamically-Scoped Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
@@ -281,12 +295,14 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
@@ -311,6 +327,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -320,11 +337,16 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
 </ul>
 
