@@ -63,8 +63,7 @@ _rot:	ldr r0, [dp, #4]
 	@@ Pick a value at a specified depth on the stack
 	define_word "pick", visible_flag | fold_flag
 _pick:	lsls tos, tos, #2
-	adds tos, tos, dp
-	ldr tos, [tos]
+	ldr tos, [tos, dp]
 	bx lr
 	end_inlined
 
