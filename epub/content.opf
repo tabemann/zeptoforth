@@ -12,8 +12,8 @@
     <dc:publisher>Travis Bemann</dc:publisher>
     <dc:rights>2020, Travis Bemann</dc:rights>
     <dc:identifier id="unknown">unknown</dc:identifier>
-    <dc:date>2024-03-09T14:32:48Z</dc:date>
-    <meta property="dcterms:modified">2024-03-09T14:32:48Z</meta>
+    <dc:date>2024-03-10T00:48:53Z</dc:date>
+    <meta property="dcterms:modified">2024-03-10T00:48:53Z</meta>
     <meta property="ibooks:version"></meta>
     <meta property="ibooks:specified-fonts">true</meta>
     <meta property="ibooks:binding">true</meta>
@@ -39,153 +39,155 @@
     <item id="epub-14" href="extra/net.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-15" href="extra/ntp.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-16" href="extra/pixmap16_utils.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-17" href="extra/turtle.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-18" href="extra/zeptoed.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-19" href="extra/shelved/esp_at.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-20" href="words/action.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-21" href="words/action_pool.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-22" href="words/adc.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-23" href="words/alarm.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-24" href="words/ansi_term.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-25" href="words/armv6m.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-26" href="words/asm.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-27" href="words/basic.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-28" href="words/block.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-29" href="words/channel.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-30" href="words/clocks.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-31" href="words/closure.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-32" href="words/compat.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-33" href="words/console.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-34" href="words/core_lock.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-35" href="words/dev_tools.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-36" href="words/dma.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-37" href="words/double.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-38" href="words/dynamic.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-39" href="words/edit.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-40" href="words/expose.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-41" href="words/exti.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-42" href="words/fat32.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-43" href="words/fat32_tools.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-44" href="words/fchannel.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-45" href="words/gpio.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-46" href="words/heap.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-47" href="words/i2c.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-48" href="words/internal.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-49" href="words/interrupt.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-50" href="words/lambda.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-51" href="words/led.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-52" href="words/line.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-53" href="words/lock.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-54" href="words/map.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-55" href="words/module.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-56" href="words/multicore.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-57" href="words/oo.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-58" href="words/pin.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-59" href="words/pio.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-60" href="words/pool.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-61" href="words/pwm.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-62" href="words/qspi.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-63" href="words/rchannel.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-64" href="words/rng.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-65" href="words/rtc.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-66" href="words/schannel.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-67" href="words/sdcard.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-68" href="words/semaphore.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-69" href="words/simple_fat32.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-70" href="words/slock.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-71" href="words/spi.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-72" href="words/stream.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-73" href="words/systick.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-74" href="words/task.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-75" href="words/task_pool.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-76" href="words/temp.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-77" href="words/test.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-78" href="words/timer.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-79" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-80" href="words/uart.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-81" href="words/value.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-82" href="words/watchdog.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-83" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-17" href="extra/profile.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-18" href="extra/turtle.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-19" href="extra/zeptoed.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-20" href="extra/shelved/esp_at.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-21" href="words/action.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-22" href="words/action_pool.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-23" href="words/adc.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-24" href="words/alarm.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-25" href="words/ansi_term.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-26" href="words/armv6m.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-27" href="words/asm.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-28" href="words/basic.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-29" href="words/block.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-30" href="words/channel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-31" href="words/clocks.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-32" href="words/closure.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-33" href="words/compat.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-34" href="words/console.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-35" href="words/core_lock.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-36" href="words/dev_tools.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-37" href="words/dma.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-38" href="words/double.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-39" href="words/dynamic.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-40" href="words/edit.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-41" href="words/expose.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-42" href="words/exti.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-43" href="words/fat32.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-44" href="words/fat32_tools.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-45" href="words/fchannel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-46" href="words/gpio.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-47" href="words/heap.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-48" href="words/i2c.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-49" href="words/internal.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-50" href="words/interrupt.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-51" href="words/lambda.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-52" href="words/led.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-53" href="words/line.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-54" href="words/lock.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-55" href="words/map.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-56" href="words/module.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-57" href="words/multicore.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-58" href="words/oo.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-59" href="words/pin.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-60" href="words/pio.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-61" href="words/pool.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-62" href="words/pwm.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-63" href="words/qspi.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-64" href="words/rchannel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-65" href="words/rng.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-66" href="words/rtc.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-67" href="words/schannel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-68" href="words/sdcard.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-69" href="words/semaphore.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-70" href="words/simple_fat32.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-71" href="words/slock.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-72" href="words/spi.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-73" href="words/stream.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-74" href="words/systick.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-75" href="words/task.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-76" href="words/task_pool.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-77" href="words/temp.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-78" href="words/test.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-79" href="words/timer.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-80" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-81" href="words/uart.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-82" href="words/value.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-83" href="words/watchdog.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-84" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
   </manifest>
   <spine toc="ncx" page-progression-direction="ltr">
     <itemref idref="epub-1" />
-    <itemref idref="epub-27" />
-    <itemref idref="epub-55" />
-    <itemref idref="epub-50" />
-    <itemref idref="epub-38" />
-    <itemref idref="epub-32" />
-    <itemref idref="epub-83" />
-    <itemref idref="epub-33" />
-    <itemref idref="epub-74" />
-    <itemref idref="epub-23" />
-    <itemref idref="epub-20" />
-    <itemref idref="epub-58" />
+    <itemref idref="epub-28" />
+    <itemref idref="epub-56" />
     <itemref idref="epub-51" />
-    <itemref idref="epub-45" />
-    <itemref idref="epub-41" />
+    <itemref idref="epub-39" />
+    <itemref idref="epub-33" />
+    <itemref idref="epub-84" />
+    <itemref idref="epub-34" />
+    <itemref idref="epub-75" />
+    <itemref idref="epub-24" />
+    <itemref idref="epub-21" />
     <itemref idref="epub-59" />
-    <itemref idref="epub-80" />
+    <itemref idref="epub-52" />
+    <itemref idref="epub-46" />
+    <itemref idref="epub-42" />
+    <itemref idref="epub-60" />
+    <itemref idref="epub-81" />
+    <itemref idref="epub-23" />
+    <itemref idref="epub-72" />
+    <itemref idref="epub-48" />
+    <itemref idref="epub-62" />
+    <itemref idref="epub-66" />
+    <itemref idref="epub-79" />
+    <itemref idref="epub-37" />
+    <itemref idref="epub-68" />
+    <itemref idref="epub-43" />
+    <itemref idref="epub-70" />
+    <itemref idref="epub-44" />
+    <itemref idref="epub-50" />
+    <itemref idref="epub-57" />
+    <itemref idref="epub-83" />
+    <itemref idref="epub-36" />
+    <itemref idref="epub-26" />
+    <itemref idref="epub-53" />
+    <itemref idref="epub-38" />
+    <itemref idref="epub-82" />
+    <itemref idref="epub-32" />
+    <itemref idref="epub-77" />
+    <itemref idref="epub-76" />
     <itemref idref="epub-22" />
-    <itemref idref="epub-71" />
     <itemref idref="epub-47" />
     <itemref idref="epub-61" />
-    <itemref idref="epub-65" />
-    <itemref idref="epub-78" />
-    <itemref idref="epub-36" />
-    <itemref idref="epub-67" />
-    <itemref idref="epub-42" />
-    <itemref idref="epub-69" />
-    <itemref idref="epub-43" />
-    <itemref idref="epub-49" />
-    <itemref idref="epub-56" />
-    <itemref idref="epub-82" />
-    <itemref idref="epub-35" />
-    <itemref idref="epub-25" />
-    <itemref idref="epub-52" />
-    <itemref idref="epub-37" />
-    <itemref idref="epub-81" />
-    <itemref idref="epub-31" />
-    <itemref idref="epub-76" />
-    <itemref idref="epub-75" />
-    <itemref idref="epub-21" />
-    <itemref idref="epub-46" />
-    <itemref idref="epub-60" />
+    <itemref idref="epub-55" />
+    <itemref idref="epub-58" />
     <itemref idref="epub-54" />
-    <itemref idref="epub-57" />
-    <itemref idref="epub-53" />
-    <itemref idref="epub-70" />
-    <itemref idref="epub-34" />
-    <itemref idref="epub-29" />
-    <itemref idref="epub-44" />
-    <itemref idref="epub-66" />
-    <itemref idref="epub-63" />
-    <itemref idref="epub-68" />
-    <itemref idref="epub-72" />
-    <itemref idref="epub-79" />
-    <itemref idref="epub-73" />
+    <itemref idref="epub-71" />
+    <itemref idref="epub-35" />
     <itemref idref="epub-30" />
+    <itemref idref="epub-45" />
+    <itemref idref="epub-67" />
     <itemref idref="epub-64" />
-    <itemref idref="epub-24" />
-    <itemref idref="epub-62" />
-    <itemref idref="epub-28" />
-    <itemref idref="epub-39" />
-    <itemref idref="epub-77" />
-    <itemref idref="epub-48" />
-    <itemref idref="epub-26" />
+    <itemref idref="epub-69" />
+    <itemref idref="epub-73" />
+    <itemref idref="epub-80" />
+    <itemref idref="epub-74" />
+    <itemref idref="epub-31" />
+    <itemref idref="epub-65" />
+    <itemref idref="epub-25" />
+    <itemref idref="epub-63" />
+    <itemref idref="epub-29" />
     <itemref idref="epub-40" />
+    <itemref idref="epub-78" />
+    <itemref idref="epub-49" />
+    <itemref idref="epub-27" />
+    <itemref idref="epub-41" />
     <itemref idref="epub-11" />
-    <itemref idref="epub-18" />
+    <itemref idref="epub-17" />
+    <itemref idref="epub-19" />
     <itemref idref="epub-10" />
     <itemref idref="epub-12" />
     <itemref idref="epub-8" />
     <itemref idref="epub-16" />
-    <itemref idref="epub-17" />
+    <itemref idref="epub-18" />
     <itemref idref="epub-13" />
     <itemref idref="epub-14" />
     <itemref idref="epub-15" />
     <itemref idref="epub-9" />
     <itemref idref="epub-0" />
-    <itemref idref="epub-19" linear="no" />
+    <itemref idref="epub-20" linear="no" />
   </spine>
   <guide>
     <reference type="toc" title="Table of Contents" href="index.xhtml" />

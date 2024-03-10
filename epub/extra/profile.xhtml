@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Profiler Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="profiler-words">
+<h1>Profiler Words</h1>
+<p>An optional profiler may be loaded from <code class="docutils literal notranslate"><span class="pre">extra/common/profile.fs</span></code>. Once loaded, any <code class="docutils literal notranslate"><span class="pre">:</span></code> or <code class="docutils literal notranslate"><span class="pre">:noname</span></code> words defined afterwards may be profiled by executing <code class="docutils literal notranslate"><span class="pre">profile::init-profile</span></code> with a provided profiler map size, which initializes a map for storing profiler entries, and then dumped to the console by executing <code class="docutils literal notranslate"><span class="pre">profile::dump-profile</span></code>.</p>
+<p>Note that the profile map size is in entries, and each entry is eight bytes in size (take care to not exhaust all the RAM available); also note that this size must be a power of two. If more distinct words compiled after <code class="docutils literal notranslate"><span class="pre">extra/common/profile.fs</span></code> is loaded are executed than the profile map size, an infinite loop will arise. (This is a consequence of avoiding putting a check in the profiler for exhausting the profile map space, in order to optimize its performance.)</p>
+<section id="profile">
+<h2><code class="docutils literal notranslate"><span class="pre">profile</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">profile</span></code> module contains the following words:</p>
+<section id="init-profile">
+<h3><code class="docutils literal notranslate"><span class="pre">init-profile</span></code></h3>
+<p>( size – )</p>
+<p>Initialize the profiler with a profile map with <em>size</em> entries, where <em>size</em> must be a power of two and each entry takes up eight bytes of RAM.</p>
+</section>
+<section id="dump-profile">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-profile</span></code></h3>
+<p>( – )</p>
+<p>Dump the xt, name, and number of times executed for each <code class="docutils literal notranslate"><span class="pre">:</span></code> or <code class="docutils literal notranslate"><span class="pre">:noname</span></code> word compiled after <code class="docutils literal notranslate"><span class="pre">extra/common/profile.fs</span></code> is loaded and executed after <code class="docutils literal notranslate"><span class="pre">profile::init-profile</span></code> is invoked.</p>
+</section>
+</section>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">forth</span></code> module contains redefinitions of <code class="docutils literal notranslate"><span class="pre">:</span></code> and <code class="docutils literal notranslate"><span class="pre">:noname</span></code> to enable the profiler to function. Note that this does not change prior words defined with these words.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
