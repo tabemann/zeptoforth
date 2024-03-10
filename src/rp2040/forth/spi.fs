@@ -509,12 +509,13 @@ begin-module spi
     spi spi-irq NVIC_ICER_CLRENA!
     spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
     spi SPI_SSPDR { port }
+    bytes unit / { count }
     \ Here we declare a cell-sized local variable which pushes its address
     0 { W^ dma-hold }
     \ set up RX DMA first
-    port dma-hold bytes unit spi DREQ_SPI_RX dma0 start-register>register-dma
+    port dma-hold count unit spi DREQ_SPI_RX dma0 start-register>register-dma
     \ set up TX DMA to do the I/O
-    buffer port bytes unit spi DREQ_SPI_TX dma1 start-buffer>register-dma
+    buffer port count unit spi DREQ_SPI_TX dma1 start-buffer>register-dma
     \ Enable DMA, both ways, for the SPI
     3 spi SPI_SSPDMACR !
     \ wait for RX DMA done
@@ -546,10 +547,11 @@ begin-module spi
     0 spi SPI_SSPDMACR !
     spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
     spi SPI_SSPDR { port }
+    bytes unit / { count }
     \ set up RX DMA first
-    port buffer bytes unit spi DREQ_SPI_RX dma0 start-register>buffer-dma
+    port buffer count unit spi DREQ_SPI_RX dma0 start-register>buffer-dma
     \ set up TX DMA to do the I/O
-    filler port bytes unit spi DREQ_SPI_TX dma1 start-register>register-dma
+    filler port count unit spi DREQ_SPI_TX dma1 start-register>register-dma
     \ Enable DMA, both ways, for the SPI
     3 spi SPI_SSPDMACR !
     \ wait for RX DMA done
