@@ -71,6 +71,7 @@ Zeptoforth Documentation
    words/asm
    words/expose
    extra/fixed32
+   extra/profile
    extra/zeptoed
    extra/display
    extra/font
