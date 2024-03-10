@@ -56,7 +56,10 @@ begin-module profile
     \ Record entering a word
     : enter-word { xt -- }
       profile-map-addr 0= if exit then
-      xt 3 lshift profile-map-mask and profile-map-addr +
+      \ We shift this to the left by 2 as this is equivalent to first shifting
+      \ it right by 1, because the lowest bit of an xt will always be equal to
+      \ 0, then shifting it left by 3, because each entry is 8 bytes in size.
+      xt 2 lshift profile-map-mask and profile-map-addr +
       begin
         dup @ dup 0<> swap xt <> and
       while
