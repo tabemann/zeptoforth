@@ -20,20 +20,17 @@
 
 begin-module profile
 
-  \ Profile map size must be a power of two
-  : x-profile-map-size-not-power-of-two ( -- )
-    ." profile map size not a power of two" cr
+  \ Profile map entries must be a power of two
+  : x-profile-map-entries-not-power-of-two ( -- )
+    ." profiler map entries not a power of two" cr
   ;
 
-  \ Profile map is already initialized
-  : x-profile-map-already-inited ( -- )
-    ." profile map already initialized" cr
+  \ Profiler is already initialized
+  : x-profile-already-inited ( -- )
+    ." profiler already initialized" cr
   ;
 
   begin-module profile-internal
-
-    \ Profile map size
-    0 value profile-map-size
 
     \ The profile map address
     0 value profile-map-addr
@@ -44,13 +41,13 @@ begin-module profile
     \ Profile map mask
     0 value profile-map-mask
 
-    \ Validate profile map size
-    : validate-profile-map-size { size -- }
+    \ Validate profile map entries
+    : validate-profile-map-entries { entries -- }
       1 begin ?dup while
-        dup size = if drop exit then
+        dup entries = if drop exit then
         1 lshift
       repeat
-      ['] x-profile-map-size-not-power-of-two ?raise
+      ['] x-profile-map-entries-not-power-of-two ?raise
     ;
     
     \ Record entering a word
@@ -74,14 +71,13 @@ begin-module profile
   end-module> import
 
   \ Initialize the profiler
-  : init-profile { size -- }
-    size validate-profile-map-size
-    profile-map-addr 0= averts x-profile-map-already-inited
-    size to profile-map-size
-    size 2 cells * 1- to profile-map-mask
-    cell align, here to profile-map-addr size 2 cells * allot
-    profile-map-addr profile-map-size 2 cells * + to profile-map-end-addr
-    profile-map-addr profile-map-size 2 cells * 0 fill
+  : init-profile { entries -- }
+    entries validate-profile-map-entries
+    profile-map-addr 0= averts x-profile-already-inited
+    entries 2 cells * 1- to profile-map-mask
+    cell align, here to profile-map-addr entries 2 cells * allot
+    profile-map-addr entries 2 cells * + to profile-map-end-addr
+    profile-map-addr entries 2 cells * 0 fill
   ;
 
   \ Dump the profiled data
