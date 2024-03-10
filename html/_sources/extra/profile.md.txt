@@ -9,14 +9,24 @@ Note that the profile map size is in entries, and each entry is eight bytes in s
 The `profile` module contains the following words:
 
 ##### `init-profile`
-( size -- )
+( entries -- )
 
-Initialize the profiler with a profile map with *size* entries, where *size* must be a power of two and each entry takes up eight bytes of RAM.
+Initialize the profiler with a profile map with *entries* entries, where *entries* must be a power of two and each entry takes up eight bytes of RAM.
 
 ##### `dump-profile`
 ( -- )
 
 Dump the xt, name, and number of times executed for each `:` or `:noname` word compiled after `extra/common/profile.fs` is loaded and executed after `profile::init-profile` is invoked.
+
+##### `x-profile-map-entries-not-power-of-two`
+( -- )
+
+Profiler map entry count specified is not a power of two exception.
+
+##### `x-profile-already-inited`
+( -- )
+
+Profiler already initialized exception.
 
 ### `forth`
 

@@ -23,13 +23,23 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">profile</span></code> module contains the following words:</p>
 <section id="init-profile">
 <h3><code class="docutils literal notranslate"><span class="pre">init-profile</span></code></h3>
-<p>( size – )</p>
-<p>Initialize the profiler with a profile map with <em>size</em> entries, where <em>size</em> must be a power of two and each entry takes up eight bytes of RAM.</p>
+<p>( entries – )</p>
+<p>Initialize the profiler with a profile map with <em>entries</em> entries, where <em>entries</em> must be a power of two and each entry takes up eight bytes of RAM.</p>
 </section>
 <section id="dump-profile">
 <h3><code class="docutils literal notranslate"><span class="pre">dump-profile</span></code></h3>
 <p>( – )</p>
 <p>Dump the xt, name, and number of times executed for each <code class="docutils literal notranslate"><span class="pre">:</span></code> or <code class="docutils literal notranslate"><span class="pre">:noname</span></code> word compiled after <code class="docutils literal notranslate"><span class="pre">extra/common/profile.fs</span></code> is loaded and executed after <code class="docutils literal notranslate"><span class="pre">profile::init-profile</span></code> is invoked.</p>
+</section>
+<section id="x-profile-map-entries-not-power-of-two">
+<h3><code class="docutils literal notranslate"><span class="pre">x-profile-map-entries-not-power-of-two</span></code></h3>
+<p>( – )</p>
+<p>Profiler map entry count specified is not a power of two exception.</p>
+</section>
+<section id="x-profile-already-inited">
+<h3><code class="docutils literal notranslate"><span class="pre">x-profile-already-inited</span></code></h3>
+<p>( – )</p>
+<p>Profiler already initialized exception.</p>
 </section>
 </section>
 <section id="forth">
