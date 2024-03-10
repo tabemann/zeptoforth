@@ -79,7 +79,7 @@ begin-module profile
     profile-map-addr 0= averts x-profile-map-already-inited
     size to profile-map-size
     size 2 cells * 1- to profile-map-mask
-    here to profile-map-addr size 2 cells * allot
+    cell align, here to profile-map-addr size 2 cells * allot
     profile-map-addr profile-map-size 2 cells * + to profile-map-end-addr
     profile-map-addr profile-map-size 2 cells * 0 fill
   ;
