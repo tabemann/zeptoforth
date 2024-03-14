@@ -18,6 +18,11 @@ Initialize the profiler with a profile map with *entries* entries, where *entrie
 
 Dump the xt, name, and number of times executed for each `:` or `:noname` word compiled after `extra/common/profile.fs` is loaded and executed after `profile::init-profile` is invoked.
 
+##### `clear-profile`
+( -- )
+
+Reset the profiler execution counts to zero.
+
 ##### `x-profile-map-entries-not-power-of-two`
 ( -- )
 
