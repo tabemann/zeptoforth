@@ -956,6 +956,7 @@ begin-module usb
                 USB_DT_DEVICE of usb-handle-device-descr endof
                 USB_DT_CONFIG of usb-handle-config-descr endof
                 USB_DT_STRING of usb-handle-string-descr endof
+                usb-ack-out-request
               endcase
             endof
             usb-ack-out-request

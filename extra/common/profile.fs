@@ -24,13 +24,16 @@ begin-module profile
   : x-profile-map-entries-not-power-of-two ( -- )
     ." profiler map entries not a power of two" cr
   ;
-
+  
   \ Profiler is already initialized
   : x-profile-already-inited ( -- )
     ." profiler already initialized" cr
   ;
 
   begin-module profile-internal
+
+    \ The profile map entry count
+    0 value profile-map-entries
 
     \ The profile map address
     0 value profile-map-addr
@@ -74,6 +77,7 @@ begin-module profile
   : init-profile { entries -- }
     entries validate-profile-map-entries
     profile-map-addr 0= averts x-profile-already-inited
+    entries to profile-map-entries
     entries 2 cells * 1- to profile-map-mask
     cell align, here to profile-map-addr entries 2 cells * allot
     profile-map-addr entries 2 cells * + to profile-map-end-addr
@@ -101,6 +105,13 @@ begin-module profile
       then
     repeat
     drop
+  ;
+
+  \ Clear the profiled data
+  : clear-profile ( -- )
+    profile-map-addr if
+      profile-map-addr profile-map-entries 2 cells * 0 fill
+    then
   ;
 
 end-module
