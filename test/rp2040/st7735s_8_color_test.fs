@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module st7735s-random-test
+begin-module st7735s-color-test
 
   oo import
   pixmap8 import
@@ -58,28 +58,41 @@ begin-module st7735s-random-test
   ;
 
   initializer init-test
-
-  \ Generate a random coordinate
-  : random-coord ( -- col row )
-    random 0 my-cols s>f f* f>s random 0 my-rows s>f f* f>s
+  
+  \ Permutations
+  create permutations
+  1 c, 2 c, 0 c,
+  1 c, 0 c, 2 c,
+  0 c, 1 c, 2 c,
+  2 c, 1 c, 0 c,
+  2 c, 0 c, 1 c,
+  0 c, 2 c, 1 c,
+  here permutations - 3 / cell align, constant permutation-count 
+  
+  \ Get a color
+  : get-color { x y permutation -- color }
+    permutations permutation 3 * + { entry }
+    entry c@ case 0 of 0 endof 1 of x endof 2 of y endof endcase
+    entry 1 + c@ case 0 of 0 endof 1 of x endof 2 of y endof endcase
+    entry 2 + c@ case 0 of 0 endof 1 of x endof 2 of y endof endcase
+    rgb8
   ;
-
-  \ Generate a random color
-  : random-color ( -- color16 )
-    random 255 and random 255 and random 255 and rgb8
-  ;
-
-  \ Draw a random rectangle
-  : draw-random-line ( -- )
-    random-color random-coord random-coord my-display draw-pixel-line
-  ;
-
+  
   \ Carry out the test
   : run-test ( -- )
+    0 { permutation }
     begin key? not while
-      draw-random-line
+      256 0 ?do
+        256 0 ?do
+          j i permutation get-color
+          j my-cols * 8 arshift
+          i my-rows * 8 arshift
+          my-display draw-pixel-const
+        loop
+      loop
       my-display update-display
       100 ms
+      permutation 1+ permutation-count umod to permutation
     repeat
     key drop
   ;
