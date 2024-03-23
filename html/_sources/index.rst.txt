@@ -77,6 +77,7 @@ Zeptoforth Documentation
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils
+   extra/pixmap8_utils
    extra/turtle
    extra/neopixel
    extra/net

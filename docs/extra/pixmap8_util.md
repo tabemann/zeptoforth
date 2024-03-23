@@ -1,20 +1,20 @@
 # Pixmap Utilities
 
-Under `extra/common/pixmap16_utils.fs` there is optional code for supporting additional pixmap operations, particularly line and circle-drawing.
+Under `extra/common/pixmap8_utils.fs` there is optional code for supporting additional pixmap operations, particularly line and circle-drawing.
 
-### `pixmap16-utils`
+### `pixmap8-utils`
 
-The `pixmap16-utils` module contains the following words:
+The `pixmap8-utils` module contains the following words:
 
 ##### `draw-pixel-line`
 ( color x0 y0 x1 y1 dst-pixmap -- )
 
-This draws a pixel line on *dst-pixmap* from (*x0*, *y0) to (*x1*, *y1*) using the *color* value as used by `pixmap16::draw-pixel-const`.
+This draws a pixel line on *dst-pixmap* from (*x0*, *y0) to (*x1*, *y1*) using the *color* value as used by `pixmap8::draw-pixel-const`.
 
 ##### `draw-rect-line`
 ( color width height x0 y0 x1 y1 dst-pixmap -- )
 
-This draws a line with a rectangular pen of *width* and *height* on *dst-pixmap* from (*x0*, *y0*) to (*x1*, *y1*) with the pen centered on the line using the *color* value as used by `pixmap16::draw-rect-const`. Note that the drawing operation `op-xor` is not recommended because it will most likely give undesirable results.
+This draws a line with a rectangular pen of *width* and *height* on *dst-pixmap* from (*x0*, *y0*) to (*x1*, *y1*) with the pen centered on the line using the *color* value as used by `pixmap8::draw-rect-const`. Note that the drawing operation `op-xor` is not recommended because it will most likely give undesirable results.
 
 ##### `draw-bitmap-line`
 ( color mask-x mask-y width height x0 y0 x1 y1 mask-bitmap dst-pixmap -- )
@@ -34,12 +34,12 @@ This draws a line with a rectangle from (*src-x*, *src-y*) to (*src-x* + *width*
 ##### `draw-pixel-circle`
 ( color x y radius dst-pixmap -- )
 
-This draws an unfilled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap16::draw-pixel-const`.
+This draws an unfilled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap8::draw-pixel-const`.
 
 ##### `draw-rect-circle`
 ( color width height x y radius dst-pixmap -- )
 
-This draws an unfilled circle with a rectangular pen of *width* and *height* on *dst-pixmap* centered at (*x*, *y*) with *radius* with the pen centered on the edge of the circle using the *color* value as used by `pixmap16::draw-rect-const`.
+This draws an unfilled circle with a rectangular pen of *width* and *height* on *dst-pixmap* centered at (*x*, *y*) with *radius* with the pen centered on the edge of the circle using the *color* value as used by `pixmap8::draw-rect-const`.
 
 ##### `draw-bitmap-circle`
 ( color mask-x mask-y width height x y radius mask-bitmap dst-pixmap -- )
@@ -59,4 +59,4 @@ This draws an unfilled circle with a rectangle from (*src-x*, *src-y*) to (*src-
 ##### `draw-filled-circle`
 ( color x y radius dst-pixmap -- )
 
-This draws a filled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap16::draw-pixel-const`.
+This draws a filled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap8::draw-pixel-const`.

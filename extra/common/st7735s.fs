@@ -79,7 +79,7 @@ begin-module st7735s
       \ Set the ST7735S window
       method st7735s-window! ( start-col end-col start-row end-row self -- )
 
-      \ Update a rectangular space on the SSD1306 device
+      \ Update a rectangular space on the ST7735S device
       method update-area ( start-col end-col start-row end-row self -- )
       
     end-module> import
@@ -313,19 +313,19 @@ begin-module st7735s
       $2C self cmd>st7735s
     ; define st7735s-window!
 
-    \ Update a rectangular space on the SSD1306 device
+    \ Update a rectangular space on the ST7735S device
     :noname { start-col end-col start-row end-row self -- }
       start-col end-col start-row end-row self st7735s-window!
       high self st7735s-dc-pin @ pin!
       low self st7735s-cs-pin @ pin!
-      end-row start-row ?do
+      end-row 1+ start-row ?do
         start-col i self pixel-addr end-col start-col - 1+ 1 lshift
         self st7735s-device @ buffer>spi
       loop
       high self st7735s-cs-pin @ pin!
     ; define update-area
 
-    \ Update the SSD1306 device
+    \ Update the ST7735S device
     :noname { self -- }
       self dirty? if 
         self st7735s-dirty-start-col @

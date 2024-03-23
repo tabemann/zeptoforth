@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,12 @@ begin-module font
   \ Out of range character exception
   : x-out-of-range-char ( -- ) ." out of range character" cr ;
 
+  \ 8-bit pixmaps are not implemented
+  : x-pixmap8-not-available ( -- ) ." pixmap8 not available" cr ;
+  
   \ 16-bit pixmaps are not implemented
   : x-pixmap16-not-available ( -- ) ." pixmap16 not available" cr ;
-  
+
   \ Get the size of a font buffer in bytes for a given number or of columns and
   \ rows per character and a given minimum character index and a given maximum
   \ character index
@@ -75,7 +78,13 @@ begin-module font
     
     \ Draw a string onto a 16-bit pixmap
     method draw-string-to-pixmap16 ( color c-addr u col row pixmap16 font -- )
+
+    \ Draw a character onto a 8-bit pixmap
+    method draw-char-to-pixmap8 ( color c col row pixmap8 font -- )
     
+    \ Draw a string onto a 8-bit pixmap
+    method draw-string-to-pixmap8 ( color c-addr u col row pixmap8 font -- )
+
   end-class
 
   continue-module font-internal
@@ -160,6 +169,33 @@ begin-module font
       
     [then]
     
+    \ Draw a character onto a 8-bit pixmap
+    :noname { color c col row pixmap self -- }
+      [ defined? pixmap8 ] [if]
+        c self min-char-index @ u< if self default-char-index @ to c then
+        c self max-char-index @ u> if self default-char-index @ to c then
+        color
+        c self find-char-col 0 col row self char-cols @ self char-rows @
+        self font-bitmap pixmap pixmap8::draw-rect-const-mask
+      [else]
+        ['] x-pixmap8-not-available ?raise
+      [then]
+    ; define draw-char-to-pixmap8
+    
+    \ Draw a string onto a 8-bit pixmap
+    :noname { color c-addr u col row pixmap self -- }
+      [ defined? pixmap8 ] [if]
+        u 0 ?do
+          color c-addr i + c@ col i self char-cols @ * + row pixmap self
+          draw-char-to-pixmap8
+        loop
+      [else]
+        ['] x-pixmap8-not-available ?raise
+      [then]
+    ; define draw-string-to-pixmap8
+      
+    [then]
+
   end-implement
     
 end-module
