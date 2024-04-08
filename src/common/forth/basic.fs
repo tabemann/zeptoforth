@@ -168,7 +168,7 @@ forth set-current
 
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
-: depth ( -- u ) sp@ stack-base @ swap - cell / 1- ;
+: depth ( -- u ) sp@ stack-base @ swap - 2 arshift 1- ;
 
 \ Output a hexadecimal nibble
 : h.1 ( b -- )
