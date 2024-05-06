@@ -503,7 +503,9 @@ begin-module cyw43-runner
   \ Implement the CYW43 runner class
   <cyw43-runner> begin-implement
 
-    \ The constructor
+    \ The constructor.  Note that pio-addr is no longer used but it's
+    \ included in the argument list because it comes that way from
+    \ the outside.
     :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- }
 
       \ Initialize the superclass
@@ -519,7 +521,7 @@ begin-module cyw43-runner
       event-message-size event-count self cyw43-event-chan init-chan
       
       \ Instantiate the bus
-      pwr clk dio cs pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
+      pwr clk dio cs sm pio <cyw43-bus> self cyw43-bus init-object
       
       \ Instantiate the log
       <cyw43-log> self cyw43-log init-object
