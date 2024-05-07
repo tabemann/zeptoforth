@@ -160,7 +160,7 @@ begin-module cyw43-spi
   <cyw43-spi> begin-implement
 
     \ Constructor
-    :noname { clk dio cs pio-addr sm pio self -- }
+    :noname { clk dio cs sm pio self -- }
 
       \ Initialize the superclass
       self <object>->new
@@ -171,7 +171,9 @@ begin-module cyw43-spi
       dio self cyw43-dio !
       clk self cyw43-clk !
       cs self cyw43-cs !
-      pio-addr self cyw43-pio-addr !
+
+      \ Allocate space for the PIO program.
+      pio cyw43-pio-program p-size alloc-piomem self cyw43-pio-addr !
 
       \ Allocate our DMA channel
       allocate-dma self cyw43-dma-channel !
@@ -223,9 +225,8 @@ begin-module cyw43-spi
       sm bit pio sm-disable
 
       \ Set up the PIO program
-      pio cyw43-pio-program p-size alloc-piomem { base-addr }
-      sm pio cyw43-pio-program base-addr setup-prog
-      base-addr sm pio sm-addr!
+      sm pio cyw43-pio-program pio-addr setup-prog
+      pio-addr sm pio sm-addr!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 pio pins-pio-alternate
