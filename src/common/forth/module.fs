@@ -231,11 +231,6 @@ commit-flash
 : export ( xt "name" -- )
   token dup 0<> averts x-token-expected
   start-compile visible
-  dup >name ?dup if
-    word-flags h@
-    dup immediate-flag and if immediate then
-    compiled-flag and if compile-only then
-  then
   compile, end-compile,
 ;
 
