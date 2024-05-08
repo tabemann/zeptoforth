@@ -242,6 +242,16 @@ No DMA channels available exception.
 
 DMA channel is already free.
 
+##### `x-no-dma-timers-available`
+( -- )
+
+No DMA timers available exception.
+
+##### `x-dma-timer-already-free`
+( -- )
+
+DMA timer is already free.
+
 ##### `allocate-dma`
 ( -- channel )
 
@@ -251,3 +261,13 @@ Allocate a DMA channel.
 ( channel -- )
 
 Free a DMA channel
+
+##### `allocate-timer`
+( -- timer )
+
+Allocate a DMA timer.
+
+##### `free-timer`
+( timer -- )
+
+Free a DMA timer

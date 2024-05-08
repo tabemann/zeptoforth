@@ -113,7 +113,7 @@ begin-module dma
 
     \ Validate timer
     : validate-timer ( timer -- )
-      timer u< averts x-out-of-range-timer
+      timer-count u< averts x-out-of-range-timer
     ;
     
     \ Get bits for transfer size

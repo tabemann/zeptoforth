@@ -136,30 +136,10 @@ Unsigned modulus of two unsigned integers
 
 Add 1 to an integer
 
-##### `2+`
-( x1 -- x2 )
-
-Add 2 to an integer
-
-##### `4+`
-( x1 -- x2 )
-
-Add 4 to an integer
-	
 ##### `1-`
 ( x1 -- x2 )
 
 Subtract 1 from an integer
-
-##### `2-`
-( x1 -- x2 )
-
-Subtract 2 from an integer
-
-##### `4-`
-( x1 -- x2 )
-
-Subtract 4 from an integer
 
 ##### `2*`
 ( x1 -- x2 )
