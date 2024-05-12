@@ -313,6 +313,7 @@ begin-module bitmap-utils
     const x y radius + 1 1 op dst draw-rect-const
     const x y radius - 1 1 op dst draw-rect-const
     const x radius - y radius 2* 1 op dst draw-rect-const
+    dy { old-dy }
     begin dx dy < while
       f 0>= if
         dy 1- to dy
@@ -322,8 +323,11 @@ begin-module bitmap-utils
       dx 1+ to dx
       ddx 2 + dup to ddx
       f 1+ + to f
-      const x dx - y dy + dx 2* 1 op dst draw-rect-const
-      const x dx - y dy - dx 2* 1 op dst draw-rect-const
+      dx 1+ dy < dy old-dy <> and if
+        const x dx - y dy + dx 2* 1 op dst draw-rect-const
+        const x dx - y dy - dx 2* 1 op dst draw-rect-const
+        dy to old-dy
+      then
       const x dy - y dx + dy 2* 1 op dst draw-rect-const
       const x dy - y dx - dy 2* 1 op dst draw-rect-const
     repeat
