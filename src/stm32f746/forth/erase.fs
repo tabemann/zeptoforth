@@ -136,6 +136,16 @@ commit-flash
   then
 ;
 
+\ Forget up to and including a word in RAM
+: forget ( "name" -- )
+  token-word dup ram-base >= over ram-end < and if
+    dup internal::next-word @ ram-latest! ram-here!
+    latest ram-base >= latest ram-end < and if ram-latest latest! then
+  else
+    drop
+  then
+;
+
 \ Ending compiling code in flash
 end-compress-flash
 
