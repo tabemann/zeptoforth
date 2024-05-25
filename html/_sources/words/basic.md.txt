@@ -1915,12 +1915,17 @@ Store a string as counted string in the RAM dictionary.
 ##### `marker`
 ( "name" -- )
 
-Create a marker word named *name* to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed
+Create a marker word named *name* to restore the current dictionary when the marker word was created to its state immediately prior to the marker word's being created; the marker word is erased in the process. Note that if that dictionary is the flash dictionary the system will be rebooted immediately thereafter.
 
 ##### `cornerstone`
 ( "name" -- )
 
-Create a cornerstone word named *name* to erase flash/return the flash dictionary to its state immediately after `cornerstone` was executed; unlike `marker` the word created does not erase itself when executed and may be executed multiple times
+Create a cornerstone word named *name* to restore the current dictionary when the cornerstone word was creatd to its state immediately after the cornerstone word's being created; the cornerstone word is not erased in the process. Note that if the dictionary is the flash dictionary the system will be rebooted immediately thereafter.
+
+##### `forget`
+( "name" -- )
+
+Forget a named word in the RAM dictionary and everything added to the RAM dictionary afterwards. Note that this word is a no-op for words in the flash dictionary.
 
 ##### `with-error-console`
 ( xt -- )

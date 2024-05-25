@@ -54,22 +54,28 @@ end-module> import
 \ Commit flash
 commit-flash
 
-\ Create a MARKER to erase flash/return the flash dictionary to its prior state
+\ Create a MARKER to return the dictionary to its prior state
 : marker ( "name" -- )
-  compiling-to-flash?
   token
   dup 0= if ['] x-token-expected ?raise then
-  compile-to-flash
-  pad-flash-erase-block
-  flash-here
-  rot rot
-  start-compile
-  lit,
-  ['] restore-flash compile,
-  visible
-  end-compile,
-  not if
-    compile-to-ram
+  compiling-to-flash? if
+    pad-flash-erase-block
+    flash-here
+    rot rot
+    start-compile
+    lit,
+    ['] restore-flash compile,
+    visible
+    end-compile,
+  else
+    ram-latest
+    ram-here
+    2swap
+    start-compile
+    lit, postpone ram-here!
+    lit, postpone ram-latest!
+    visible
+    end-compile,
   then
 ;
 
@@ -82,6 +88,12 @@ continue-module internal
     erase-dict-after
   ;
 
+  \ Core of CORNERSTONE's DOES> for RAM
+  : ram-cornerstone-does> ( -- )
+    does> dup @ ram-latest! cell+ @ ram-here!
+    latest ram-base >= latest ram-end < and if ram-latest latest! then
+  ;
+
 end-module
 
 \ Committing code in flash
@@ -89,12 +101,22 @@ commit-flash
 
 \ Adapted from Terry Porter's code; not sure what license it was under
 : cornerstone ( "name" -- )
-  compiling-to-flash?
-  compile-to-flash
-  <builds here cell allot cornerstone-does> here swap current!
-  pad-flash-erase-block
-  not if
-    compile-to-ram
+  compiling-to-flash? if
+    <builds here cell allot cornerstone-does> here swap current!
+    pad-flash-erase-block
+  else
+    <builds reserve reserve ram-cornerstone-does>
+    here swap current! ram-latest swap current!
+  then
+;
+
+\ Forget up to and including a word in RAM
+: forget ( "name" -- )
+  token-word dup ram-base >= over ram-end < and if
+    dup internal::next-word @ ram-latest! ram-here!
+    latest ram-base >= latest ram-end < and if ram-latest latest! then
+  else
+    drop
   then
 ;
 

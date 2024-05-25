@@ -757,7 +757,7 @@ begin-module fat32
     ;
     
     \ Is name a directory name?
-    : dir-name? ( c-addr u -- )
+    : dir-name? ( c-addr u -- dir-name? )
       s" ." 2over equal-strings? if
         2drop true
       else
@@ -1241,7 +1241,7 @@ begin-module fat32
       0 swap file-current-cluster-index !
     ; define new
         
-    :noname ( c-addr u file -- bytes 
+    :noname ( c-addr u file -- bytes )
       >r 0 ( c-addr u read-bytes )
       begin ( c-addr u read-bytes )
         over 0<> if ( c-addr u read-bytes )
@@ -1414,7 +1414,7 @@ begin-module fat32
     
     :noname ( file -- )
       >r
-      r@ file-offset @ r@ file-size@ < if
+      r@ file-offset @ r@ file-size@ <= if
         r@ file-offset @ ( offset )
         r@ file-current-cluster-index @ 1+ ( offset index )
         r@ file-fs @ cluster-sectors @ sector-size * * = if ( )

@@ -46,5 +46,6 @@
 #include src/common/forth/full_extra.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
+compile-to-flash
 cornerstone restore-state
 
