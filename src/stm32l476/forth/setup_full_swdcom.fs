@@ -53,4 +53,5 @@
 \ Set a cornerstone to enable deleting everything compiled after this code
 compile-to-flash
 cornerstone restore-state
+compile-to-ram
 
