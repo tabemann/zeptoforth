@@ -1414,7 +1414,7 @@ begin-module fat32
     
     :noname ( file -- )
       >r
-      r@ file-offset @ r@ file-size@ < if
+      r@ file-offset @ r@ file-size@ <= if
         r@ file-offset @ ( offset )
         r@ file-current-cluster-index @ 1+ ( offset index )
         r@ file-fs @ cluster-sectors @ sector-size * * = if ( )
