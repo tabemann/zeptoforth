@@ -1939,12 +1939,17 @@ otherwise passing the specified argument through.</p>
 <section id="marker">
 <h3><code class="docutils literal notranslate"><span class="pre">marker</span></code></h3>
 <p>( “name” – )</p>
-<p>Create a marker word named <em>name</em> to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed</p>
+<p>Create a marker word named <em>name</em> to restore the current dictionary when the marker word was created to its state immediately prior to the marker word’s being created; the marker word is erased in the process. Note that if that dictionary is the flash dictionary the system will be rebooted immediately thereafter.</p>
 </section>
 <section id="cornerstone">
 <h3><code class="docutils literal notranslate"><span class="pre">cornerstone</span></code></h3>
 <p>( “name” – )</p>
-<p>Create a cornerstone word named <em>name</em> to erase flash/return the flash dictionary to its state immediately after <code class="docutils literal notranslate"><span class="pre">cornerstone</span></code> was executed; unlike <code class="docutils literal notranslate"><span class="pre">marker</span></code> the word created does not erase itself when executed and may be executed multiple times</p>
+<p>Create a cornerstone word named <em>name</em> to restore the current dictionary when the cornerstone word was creatd to its state immediately after the cornerstone word’s being created; the cornerstone word is not erased in the process. Note that if the dictionary is the flash dictionary the system will be rebooted immediately thereafter.</p>
+</section>
+<section id="forget">
+<h3><code class="docutils literal notranslate"><span class="pre">forget</span></code></h3>
+<p>( “name” – )</p>
+<p>Forget a named word in the RAM dictionary and everything added to the RAM dictionary afterwards. Note that this word is a no-op for words in the flash dictionary.</p>
 </section>
 <section id="with-error-console">
 <h3><code class="docutils literal notranslate"><span class="pre">with-error-console</span></code></h3>

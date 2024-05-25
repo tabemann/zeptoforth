@@ -54,7 +54,7 @@ end-module> import
 \ Commit flash
 commit-flash
 
-\ Create a MARKER to erase flash/return the flash dictionary to its prior state
+\ Create a MARKER to return the dictionary to its prior state
 : marker ( "name" -- )
   token
   dup 0= if ['] x-token-expected ?raise then
