@@ -1920,7 +1920,7 @@ Create a marker word named *name* to restore the current dictionary when the mar
 ##### `cornerstone`
 ( "name" -- )
 
-Create a cornerstone word named *name* to restore the current dictionary when the cornerstone word was creatd to its state immediately after the cornerstone word's being created; the cornerstone word is not erased in the process. Note that if the dictionary is the flash dictionary the system will be rebooted immediately thereafter.
+Create a cornerstone word named *name* to restore the current dictionary when the cornerstone word was created to its state immediately after the cornerstone word's being created; the cornerstone word is not erased in the process. Note that if the dictionary is the flash dictionary the system will be rebooted immediately thereafter.
 
 ##### `forget`
 ( "name" -- )
