@@ -149,21 +149,6 @@ begin-module pwm
     \ PWM wrap vector
     pwm-irq 16 + constant pwm-vector
 
-    \ Saved second core hook
-    variable core-init-hook-saved
-
-    \ Initialize PWM on the second core
-    : init-pwm-core-1 ( -- )
-      task::core-init-hook @ core-init-hook-saved !
-      [:
-        core-init-hook-saved @ execute
-        disable-int
-        0 pwm-irq NVIC_IPR_IP!
-        pwm-irq NVIC_ISER_SETENA!
-        enable-int
-      ;] task::core-init-hook !
-    ;
-
     \ Initialize PWM
     : init-pwm ( -- )
       disable-int
@@ -171,7 +156,6 @@ begin-module pwm
       0 pwm-irq NVIC_IPR_IP!
       pwm-irq NVIC_ISER_SETENA!
       enable-int
-      init-pwm-core-1
     ;
 
     \ Validate a PWM slice
