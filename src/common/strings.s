@@ -82,8 +82,8 @@ _parse_to_char:
 	cmp r1, r2
 	beq 3f
 	adds r1, #1
-	str r1, [r0]
-3:      bx lr
+3:      str r1, [r0]
+        bx lr
 
 	@@ Immediately type a string in the input stream
 	define_word ".(", visible_flag | immediate_flag
