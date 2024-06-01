@@ -95,7 +95,7 @@ begin-module adc
   \ Set a pin to be an ADC pin
   : adc-pin ( adc pin -- )
     dup pin-internal::validate-pin
-    dup 26 >= over 29 <= and averts x-pin-has-no-adc-chan
+    dup 26 >= swap 29 <= and averts x-pin-has-no-adc-chan
     validate-adc
   ;
 

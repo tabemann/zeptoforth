@@ -501,62 +501,75 @@ begin-module spi
     begin dup spi>? while dup spi> drop repeat drop
   ;
   
-  \ Write a buffer to SPI
-  : buffer>spi { buffer bytes spi -- }
+  \ Write a buffer to SPI using DMA
+  : buffer>spi-raw-dma { buffer bytes dma1 dma0 spi -- last-data }
     spi validate-spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
     spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
-    unit 1 = { byte }
-    0 { tx-offset }
-    bytes unit align unit / { rx-count }
     spi SPI_SSPDR { port }
-    spi SPI_SSPSR { flags }
-    begin tx-offset bytes < rx-count 0> or while
-      flags @ [ 0 bit ] literal and if
-        tx-offset bytes < if
-          buffer tx-offset + byte if c@ else h@ then port h!
-          unit +to tx-offset
-        then
-      then
-      flags @ [ 2 bit ] literal and if
-        rx-count if
-          port h@ drop
-          -1 +to rx-count
-        then
-      then
-    repeat
+    bytes unit / { count }
+    \ Here we declare a cell-sized local variable which pushes its address
+    0 { W^ dma-hold }
+    \ set up RX DMA first
+    port dma-hold count unit spi DREQ_SPI_RX dma0 start-register>register-dma
+    \ set up TX DMA to do the I/O
+    buffer port count unit spi DREQ_SPI_TX dma1 start-buffer>register-dma
+    \ Enable DMA, both ways, for the SPI
+    3 spi SPI_SSPDMACR !
+    \ wait for RX DMA done
+    dma0 wait-dma
     spi spi-irq NVIC_ISER_SETENA!
+    0 spi SPI_SSPDMACR !
+    dma-hold @
   ;
 
-  \ Read a buffer from SPI
-  : spi>buffer { buffer bytes filler spi -- }
+  \ Write a buffer to SPI using DMA
+  : buffer>spi { buffer bytes spi -- }
+    spi validate-spi
+    allocate-dma { dma0 }
+    allocate-dma { dma1 }
+    buffer bytes dma1 dma0 spi ['] buffer>spi-raw-dma try
+    spi spi-irq NVIC_ISER_SETENA!
+    dma0 free-dma
+    dma1 free-dma
+    ?raise
+    drop
+  ;
+
+  \ Read a buffer from SPI using DMA - note that FILLER pushes its address
+  : spi>buffer-raw-dma { buffer bytes W^ filler dma1 dma0 spi -- }
     spi validate-spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
+    0 spi SPI_SSPDMACR !
     spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
-    unit 1 = { byte }
-    0 { rx-offset }
-    bytes unit align unit / { tx-count }
     spi SPI_SSPDR { port }
-    spi SPI_SSPSR { flags }
-    begin tx-count 0> rx-offset bytes < or while
-      flags @ [ 0 bit ] literal and if
-        tx-count if
-          filler port h!
-          -1 +to tx-count
-        then
-      then
-      flags @ [ 2 bit ] literal and if
-        rx-offset bytes < if
-          port h@ buffer rx-offset + byte if c! 1 else h! 2 then
-          +to rx-offset
-        then
-      then
-    repeat
+    bytes unit / { count }
+    \ set up RX DMA first
+    port buffer count unit spi DREQ_SPI_RX dma0 start-register>buffer-dma
+    \ set up TX DMA to do the I/O
+    filler port count unit spi DREQ_SPI_TX dma1 start-register>register-dma
+    \ Enable DMA, both ways, for the SPI
+    3 spi SPI_SSPDMACR !
+    \ wait for RX DMA done
+    dma0 wait-dma
     spi spi-irq NVIC_ISER_SETENA!
+    0 spi SPI_SSPDMACR !
+  ;
+
+  \ Read a buffer from SPI using DMA while allocating DMA channels
+  : spi>buffer { buffer bytes filler spi -- }
+    spi validate-spi
+    allocate-dma { dma0 }
+    allocate-dma { dma1 }
+    buffer bytes filler dma1 dma0 spi ['] spi>buffer-raw-dma try
+    spi spi-irq NVIC_ISER_SETENA!
+    dma0 free-dma
+    dma1 free-dma
+    ?raise
   ;
 
 end-module> import

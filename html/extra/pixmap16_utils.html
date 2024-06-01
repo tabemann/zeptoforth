@@ -17,7 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Neopixels on the RP2040" href="neopixel.html" />
+    <link rel="next" title="Turtle graphics" href="turtle.html" />
     <link rel="prev" title="Bitmap Utilities" href="bitmap_utils.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -69,7 +69,7 @@
 <section id="draw-pixel-circle">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-circle</span></code><a class="headerlink" href="#draw-pixel-circle" title="Permalink to this heading">¶</a></h3>
 <p>( color x y radius dst-pixmap – )</p>
-<p>This draws an unfilled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by *pixmap16::draw-pixel-const`.</p>
+<p>This draws an unfilled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by <code class="docutils literal notranslate"><span class="pre">pixmap16::draw-pixel-const</span></code>.</p>
 </section>
 <section id="draw-rect-circle">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-rect-circle</span></code><a class="headerlink" href="#draw-rect-circle" title="Permalink to this heading">¶</a></h3>
@@ -94,7 +94,7 @@
 <section id="draw-filled-circle">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-filled-circle</span></code><a class="headerlink" href="#draw-filled-circle" title="Permalink to this heading">¶</a></h3>
 <p>( color x y radius dst-pixmap – )</p>
-<p>This draws a filled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by *pixmap16::draw-pixel-const`.</p>
+<p>This draws a filled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by <code class="docutils literal notranslate"><span class="pre">pixmap16::draw-pixel-const</span></code>.</p>
 </section>
 </section>
 </section>
@@ -121,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
@@ -139,12 +140,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
@@ -169,6 +172,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -178,12 +182,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
 </ul>
 
@@ -192,7 +201,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="bitmap_utils.html" title="previous chapter">Bitmap Utilities</a></li>
-      <li>Next: <a href="neopixel.html" title="next chapter">Neopixels on the RP2040</a></li>
+      <li>Next: <a href="turtle.html" title="next chapter">Turtle graphics</a></li>
   </ul></li>
 </ul>
 </div>
@@ -219,7 +228,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Travis Bemann.
+      &copy;2020-2024, Travis Bemann.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>

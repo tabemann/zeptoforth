@@ -153,7 +153,7 @@ begin-module cyw43-bus
   <cyw43-bus> begin-implement
 
     \ The constructor
-    :noname { pwr clk dio cs pio-addr sm pio self -- }
+    :noname { pwr clk dio cs sm pio self -- }
       
       \ Initialize the superclass
       self <object>->new
@@ -164,7 +164,7 @@ begin-module cyw43-bus
       $AAAAAAAA self cyw43-bp-window !
 
       \ Instantiate the SPI interface
-      clk dio cs pio-addr sm pio <cyw43-spi> self cyw43-spi init-object
+      clk dio cs sm pio <cyw43-spi> self cyw43-spi init-object
       
     ; define new
 

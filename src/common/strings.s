@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -82,8 +82,8 @@ _parse_to_char:
 	cmp r1, r2
 	beq 3f
 	adds r1, #1
-	str r1, [r0]
-3:      bx lr
+3:      str r1, [r0]
+        bx lr
 
 	@@ Immediately type a string in the input stream
 	define_word ".(", visible_flag | immediate_flag

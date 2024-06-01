@@ -76,6 +76,21 @@ _verify_syntax:
         pop {pc}
         end_inlined
 
+        @ Get the topmost syntax
+        define_internal_word "get-syntax", visible_flag
+_get_syntax: 
+        ldr r0, =syntax_stack_ptr
+        ldr r1, [r0]
+        ldr r2, =syntax_stack + syntax_stack_size
+        cmp r1, r2
+        bne 1f
+        ldr tos, =_syntax_underflow
+        bl _raise
+1:      push_tos
+        ldrb tos, [r1]
+        bx lr
+        end_inlined
+        
         @ Verify a syntax on the syntax stack against two syntaxes
         @ ( syntax1 syntax0 -- )
         define_internal_word "verify-syntax-2", visible_flag

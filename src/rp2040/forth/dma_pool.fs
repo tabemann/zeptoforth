@@ -31,6 +31,12 @@ begin-module dma-pool
   \ DMA channel is already free
   : x-dma-channel-already-free ( -- ) cr ." DMA channel is already free" ;
   
+  \ No DMA timers available exception
+  : x-no-dma-timers-available ( -- ) cr ." no DMA timers available" ;
+
+  \ DMA timer is already free
+  : x-dma-timer-already-free ( -- ) cr ." DMA timer is already free" ;
+  
   begin-module dma-pool-internal
 
     \ DMA pool simple lock
@@ -38,6 +44,9 @@ begin-module dma-pool
     
     \ DMA pool bits
     variable dma-pool-bits
+
+    \ DMA timer pool bits
+    variable dma-timer-pool-bits
 
   end-module> import
 
@@ -63,10 +72,33 @@ begin-module dma-pool
     ;] dma-pool-slock with-slock
   ;
   
+  \ Allocate a DMA timer
+  : allocate-timer ( -- timer )
+    [:
+      dma-internal::timer-count 0 ?do
+        i bit dma-timer-pool-bits bit@ not if
+          i bit dma-timer-pool-bits bis!
+          i unloop exit
+        then
+      loop
+      ['] x-no-dma-timers-available ?raise
+    ;] dma-pool-slock with-slock
+  ;
+
+  \ Free a DMA timer
+  : free-timer ( timer -- )
+    dup dma-internal::validate-timer
+    [:
+      dup bit dma-timer-pool-bits bit@ averts x-dma-timer-already-free
+      bit dma-timer-pool-bits bic!
+    ;] dma-pool-slock with-slock
+  ;
+  
   \ Initialize DMA pool
   : init-dma-pool ( -- )
     dma-pool-slock init-slock
     0 dma-pool-bits !
+    0 dma-timer-pool-bits !
   ;
   
 end-module

@@ -59,8 +59,6 @@ Note that it is good manners for `new` of a given class to call the `new` of its
 
 Destroying an object is done through calling `destroy` on an object, which will carry out cleanup for an object. Note that actually freeing space for the `<object>` is up to the user. The normal convention is that each `destroy` of a given class calls the `destroy` of its superclass after it has cleaned up for itself; however, this should be broken with if a class handles freeing memory allocated for itself, e.g. in a heap, where this should be done after all superclasses' `destroy` methods have been called.
 
-Early binding is carried out through `->`, an immediate state-sensitive word which takes the class to bind a method in off the top of the stack (including while compiling, so one will likely want to specify that class between `[` and `]`) and then either compiles that word (if compiling) or executes that word (if interpreting). The method definition used will be that defined closest in the chain of class definitions leading from that class to `<object>`. This can be used to call methods in superclasses explicitly, even if they are defined definitely in a given object's class.
-
 ### `oo`
 
 The following words are defined in this module:

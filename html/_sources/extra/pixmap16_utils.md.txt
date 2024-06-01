@@ -34,7 +34,7 @@ This draws a line with a rectangle from (*src-x*, *src-y*) to (*src-x* + *width*
 ##### `draw-pixel-circle`
 ( color x y radius dst-pixmap -- )
 
-This draws an unfilled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by *pixmap16::draw-pixel-const`.
+This draws an unfilled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap16::draw-pixel-const`.
 
 ##### `draw-rect-circle`
 ( color width height x y radius dst-pixmap -- )
@@ -59,4 +59,4 @@ This draws an unfilled circle with a rectangle from (*src-x*, *src-y*) to (*src-
 ##### `draw-filled-circle`
 ( color x y radius dst-pixmap -- )
 
-This draws a filled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by *pixmap16::draw-pixel-const`.
+This draws a filled pixel circle on *dst-pixmap* centered at (*x*, *y*) with *radius* using the *color* value as used by `pixmap16::draw-pixel-const`.

@@ -79,12 +79,12 @@ Read a word from an SPI peripheral.
 ##### `buffer>spi`
 ( addr bytes spi -- )
 
-Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.
+Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave.
 
 ##### `spi>buffer`
 ( add bytes filler spi -- )
 
-Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.
+Read a buffer of data from an SPI peripheral as a master, transmitting a filler for each unit of data sent to the slave.
 
 ##### `>spi?`
 ( spi -- flag )
@@ -199,3 +199,15 @@ Set the single wire in one-wire mode to be an input.
 ( spi -- )
 
 Set the single wire in one-wire mode to be an output.
+
+### RP2040-only words
+
+##### `buffer>spi-raw-dma`
+( addr bytes dma1 dma0 spi -- last-data )
+
+Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. This word uses the DMA channels *dma0* and *dma1*, and returns the last data read from the SPI peripheral.
+
+##### `spi>buffer-raw-dma`
+( add bytes filler dma1 dma0 spi -- )
+
+Read a buffer of data from an SPI peripheral as a master, transmitting a filler for unit of data sent to the slave. This word uses the DMA channels *dma0* and *dma1*.

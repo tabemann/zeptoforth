@@ -93,12 +93,12 @@
 <section id="buffer-spi">
 <h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code></h4>
 <p>( addr bytes spi – )</p>
-<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave.</p>
 </section>
 <section id="spi-buffer">
 <h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code></h4>
 <p>( add bytes filler spi – )</p>
-<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for each unit of data sent to the slave.</p>
 </section>
 <section id="id3">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code></h4>
@@ -216,6 +216,19 @@
 <p>( spi – )</p>
 <p>Set the single wire in one-wire mode to be an output.</p>
 </section>
+</section>
+</section>
+<section id="rp2040-only-words">
+<h2>RP2040-only words</h2>
+<section id="buffer-spi-raw-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi-raw-dma</span></code></h3>
+<p>( addr bytes dma1 dma0 spi – last-data )</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>, and returns the last data read from the SPI peripheral.</p>
+</section>
+<section id="spi-buffer-raw-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer-raw-dma</span></code></h3>
+<p>( add bytes filler dma1 dma0 spi – )</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for unit of data sent to the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>.</p>
 </section>
 </section>
 </section>

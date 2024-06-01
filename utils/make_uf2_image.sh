@@ -47,11 +47,6 @@ fi
 
 TARGET="bin/${VERSION}/${PLATFORM}/zeptoforth_${IMAGE}-${VERSION}"
 
-#st-flash erase
-#st-flash write bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin 0x08000000
-#st-flash reset
-#sleep 3
-
 codeloader ${PORT} src/$PLATFORM/forth/setup_$IMAGE.fs
 
 screen_download_ihex ${PORT} ${TARGET} 

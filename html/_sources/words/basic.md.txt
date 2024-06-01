@@ -136,30 +136,10 @@ Unsigned modulus of two unsigned integers
 
 Add 1 to an integer
 
-##### `2+`
-( x1 -- x2 )
-
-Add 2 to an integer
-
-##### `4+`
-( x1 -- x2 )
-
-Add 4 to an integer
-	
 ##### `1-`
 ( x1 -- x2 )
 
 Subtract 1 from an integer
-
-##### `2-`
-( x1 -- x2 )
-
-Subtract 2 from an integer
-
-##### `4-`
-( x1 -- x2 )
-
-Subtract 4 from an integer
 
 ##### `2*`
 ( x1 -- x2 )
@@ -1445,12 +1425,12 @@ Skip characters in the evaluation buffer until a predicate is met
 ##### `[:`
 ( -- )
 
-Begin lambda
+Begin lambda; note that when executed in interpretation mode this is equivalent to `:noname`.
 
 ##### `;]`
 ( -- ) ( compiled: -- xt )
 
-End lambda
+End lambda; note that when executed such that it matches a `[:` that was executed in interpretation mode this is equivalent to `;`.
 
 ##### `ws?`
 ( c -- flag )
@@ -1745,7 +1725,7 @@ Format an S31.32 fixed-point number
 ##### `format-fixed-truncate`
 ( c-addr f places -- c-addr bytes )
 
-Format an S31.32 fixed-point number to *places* to the left of the decimal point
+Format an S31.32 fixed-point number truncated to *places* to the right of the decimal point
 
 ##### `(f.)`
 ( f -- )
@@ -1755,7 +1735,7 @@ Type an S31.32 fixed-point number without a leading space
 ##### `(f.n)`
 ( f places -- )
 
-Type an S31.32 fixed-point number to *places* to the left of the decimal point without a leading space
+Type an S31.32 fixed-point number truncated to *places* to the right of the decimal point without a leading space
 
 ##### `f.`
 ( f -- )
@@ -1765,7 +1745,7 @@ Type an S31.32 fixed-point number with a leading space
 ##### `f.n`
 ( f places -- )
 
-Type an S31.32 fixed-point number to *places* to the left of the decimal point with a leading space
+Type an S31.32 fixed-point number truncated to *places* to the right of the decimal point with a leading space
 
 ##### `s>d`
 ( n -- d )
@@ -1935,12 +1915,17 @@ Store a string as counted string in the RAM dictionary.
 ##### `marker`
 ( "name" -- )
 
-Create a marker word named *name* to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed
+Create a marker word named *name* to restore the current dictionary when the marker word was created to its state immediately prior to the marker word's being created; the marker word is erased in the process. Note that if that dictionary is the flash dictionary the system will be rebooted immediately thereafter.
 
 ##### `cornerstone`
 ( "name" -- )
 
-Create a cornerstone word named *name* to erase flash/return the flash dictionary to its state immediately after `cornerstone` was executed; unlike `marker` the word created does not erase itself when executed and may be executed multiple times
+Create a cornerstone word named *name* to restore the current dictionary when the cornerstone word was created to its state immediately after the cornerstone word's being created; the cornerstone word is not erased in the process. Note that if the dictionary is the flash dictionary the system will be rebooted immediately thereafter.
+
+##### `forget`
+( "name" -- )
+
+Forget a named word in the RAM dictionary and everything added to the RAM dictionary afterwards. Note that this word is a no-op for words in the flash dictionary.
 
 ##### `with-error-console`
 ( xt -- )

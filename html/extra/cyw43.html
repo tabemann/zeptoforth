@@ -17,7 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="zeptoIP Words" href="net.html" />
+    <link rel="prev" title="Simple Network Time Protocol Client" href="ntp.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -52,7 +52,8 @@
 <section id="new">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h4>
 <p>( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs pio-addr sm pio – )</p>
-<p>This instantiates a <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> instance to use the MAC address <em>mac-addr</em> (which if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> indicates that the default MAC address is to be used<code class="docutils literal notranslate"><span class="pre">),</span> <span class="pre">CLM</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*clm-bytes*</span> <span class="pre">at</span> <span class="pre">*clm-addr*,</span> <span class="pre">main</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*fw-bytes*</span> <span class="pre">at</span> <span class="pre">*fw-addr*,</span> <span class="pre">*pwr*,</span> <span class="pre">*clk*,</span> <span class="pre">*dio*,</span> <span class="pre">and</span> <span class="pre">*cs*</span> <span class="pre">GPIO</span> <span class="pre">pins</span> <span class="pre">for</span> <span class="pre">communication</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">CYW43xxx,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instruction</span> <span class="pre">base</span> <span class="pre">address</span> <span class="pre">*pio-addr*,</span> <span class="pre">PIO</span> <span class="pre">state</span> <span class="pre">machine</span> <span class="pre">index</span> <span class="pre">*sm*,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instance</span> <span class="pre">*pio*</span> <span class="pre">(</span></code>pio::PIO0<code class="docutils literal notranslate"><span class="pre">or</span></code>pio::PIO1`).</p>
+<p>This instantiates a <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> instance to use the MAC address <em>mac-addr</em> (which if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> indicates that the default MAC address is to be used), CLM firmware of <em>clm-bytes</em> at <em>clm-addr</em>, main firmware of <em>fw-bytes</em> at <em>fw-addr</em>, <em>pwr</em>, <em>clk</em>, <em>dio</em>, and <em>cs</em> GPIO pins for communication with the CYW43xxx, and PIO state machine index <em>sm</em>, and PIO instance <em>pio</em> (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>).</p>
+<p>Note that <em>pio-addr</em> is no longer used, but it is retained in the argument list for backward compatibility.  The CYW43xxx driver uses <code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code> to obtain space for its PIO program.  If you need to place other PIO programs in the same PIO instance, you need to use <code class="docutils literal notranslate"><span class="pre">alloc-piomem</span></code> for those as well to avoid PIO memory addressing conflicts.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="init-cyw43">
@@ -166,6 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
@@ -184,12 +186,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
@@ -214,6 +218,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -223,11 +228,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CYW43xxx Words</a></li>
 </ul>
 
@@ -235,7 +246,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="net.html" title="previous chapter">zeptoIP Words</a></li>
+      <li>Previous: <a href="ntp.html" title="previous chapter">Simple Network Time Protocol Client</a></li>
   </ul></li>
 </ul>
 </div>
@@ -262,7 +273,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Travis Bemann.
+      &copy;2020-2024, Travis Bemann.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>

@@ -71,11 +71,13 @@ Zeptoforth Documentation
    words/asm
    words/expose
    extra/fixed32
+   extra/profile
    extra/zeptoed
    extra/display
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils
+   extra/pixmap8_utils
    extra/turtle
    extra/neopixel
    extra/net

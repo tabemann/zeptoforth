@@ -20,7 +20,9 @@ The `<cyw43-control>` class has the constructor:
 ##### `new`
 ( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs pio-addr sm pio -- )
 
-This instantiates a `<cyw43-control>` instance to use the MAC address *mac-addr* (which if `default-mac-addr` indicates that the default MAC address is to be used`), CLM firmware of *clm-bytes* at *clm-addr*, main firmware of *fw-bytes* at *fw-addr*, *pwr*, *clk*, *dio*, and *cs* GPIO pins for communication with the CYW43xxx, and PIO instruction base address *pio-addr*, PIO state machine index *sm*, and PIO instance *pio* (`pio::PIO0` or `pio::PIO1`).
+This instantiates a `<cyw43-control>` instance to use the MAC address *mac-addr* (which if `default-mac-addr` indicates that the default MAC address is to be used), CLM firmware of *clm-bytes* at *clm-addr*, main firmware of *fw-bytes* at *fw-addr*, *pwr*, *clk*, *dio*, and *cs* GPIO pins for communication with the CYW43xxx, and PIO state machine index *sm*, and PIO instance *pio* (`pio::PIO0` or `pio::PIO1`).
+
+Note that *pio-addr* is no longer used, but it is retained in the argument list for backward compatibility.  The CYW43xxx driver uses `alloc-piomem` to obtain space for its PIO program.  If you need to place other PIO programs in the same PIO instance, you need to use `alloc-piomem` for those as well to avoid PIO memory addressing conflicts.
 
 The `<cyw43-control>` class has the following methods:
       

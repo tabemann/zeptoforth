@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ begin-module i2c-scanner
     addr $80 u< if i2c-periph 7-bit-i2c-addr else i2c-periph 10-bit-i2c-addr then
     addr i2c-periph ['] i2c::i2c-target-addr! try 0= if
       i2c-periph i2c::enable-i2c
-      0. { D^ buf } buf 1 i2c-periph ['] i2c::>i2c-stop try
+      0. { D^ buf } buf 8 i2c-periph ['] i2c::>i2c-stop try
       i2c-periph i2c::disable-i2c
       addr h.4 ." : "
       ?dup if

@@ -209,7 +209,7 @@ Format an S15.16 number
 ##### `format-f32-truncate`
 ( c-addr f32 places -- c-addr bytes )
 
-Format a truncated S15,16 number
+Format a S15,16 number truncated to *places* to the right of the decimal point
   
 ##### `(f32.)`
 ( f32 -- )
@@ -219,7 +219,7 @@ Type an s15.16 fixed-point number without a following space
 ##### `(f32.n)`
 ( f32 places -- )
 
-Type a truncated s15.16 fixed-point number without a following space
+Type a s15.16 fixed-point number truncated to *places* to the right of the decimal point without a following space
 
 ##### `f32.`
 ( f32 -- )
@@ -229,4 +229,4 @@ Type an s15.16 fixed-point number with a following space
 ##### `f32.n`
 ( f32 places -- )
 
-Type a truncated s15.16 fixed-point number with a following space
+Type a s15.16 fixed-point number truncated to *places* to the right of the decimal point with a following space
