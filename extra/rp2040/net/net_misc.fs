@@ -32,6 +32,16 @@ begin-module net-misc
     swap $FF and 24 lshift or
   ;
 
+  \ Make a link-local IPv6 address
+  : make-link-local-ipv6-addr
+    { mac-addr-0 mac-addr-1 -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 }
+    mac-addr-0 $FFFFF and $FE000000 or \ ipv6-0
+    mac-addr-0 16 rshift $FF00 and $FF or mac-addr1 16 lshift or
+    $02000000 xor \ ipv6-1
+    0 \ ipv6-2
+    $FE800000 \ ipv6-3
+  ;
+
   \ Make an IPv6 address
   : make-ipv6-addr
     ( addr0 addr1 addr2 addr3 addr4 addr5 addr6 addr7 )
@@ -45,7 +55,7 @@ begin-module net-misc
 
   \ Is an IPv6 address multicast
   : ipv6-addr-multicast? ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- multicast? )
-    nip nip nip $FFFF and $FF02 =
+    nip nip nip $FFFF0000 and $FF020000 =
   ;
 
   \ Is this a multicast MAC address
@@ -60,8 +70,7 @@ begin-module net-misc
   ;
   
   \ The DHCPv6 link-local multicast address
-  : DHCPV6_LINK_LOCAL_MULTICAST $0001002 $0 $0 $FF020000
-  ;
+  : DHCPV6_LINK_LOCAL_MULTICAST $0001002 $0 $0 $FF020000 ;
 
   \ The all-nodes link-local multicast address
   : ALL_NODES_LINK_LOCAL_MULTICAST $1 $0 $0 $FF020000 ;
@@ -244,6 +253,19 @@ begin-module net-misc
     hfield: icmp-checksum
     field: icmp-rest-of-header
   end-structure
+
+  \ ICMPv6 router advertise header structure
+  begin-structure icmpv6-ra-header-size
+    field: icmpv6-ra-icmp-header
+    cfield: icmpv6-ra-cur-hop-limit
+    cfield: icmpv6-ra-m-o-reserved
+    hfield: icmpv6-ra-router-lifetime
+    field: icmpv6-ra-reachable-time
+    field: icmpv6-ra-retrans-timer
+  end-structure
+
+  \ ICMPv6 router advertise "managed" bit
+  $80 constant icmpv6-ra-managed
 
   \ DNS header structure
   begin-structure dns-header-size
