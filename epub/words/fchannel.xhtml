@@ -17,8 +17,8 @@
   <section id="rendezvous-channel-words">
 <h1>Rendezvous Channel Words</h1>
 <p>A rendezvous channel is a monodirectional means of communicating data between two different tasks. Rendezvous channels are not buffered queues; provided another task is listening to a rendezvous channel, sending on a rendezvous channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
-<p>Tasks attempting to send on rendezvous channels first check whether there is a queued task waiting to receive on the rendezvous channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the rendezvous channel and is blocked.</p>
-<p>Tasks attempting to receive on rendezvous channels first check whether there is a queued task waiting to send on the rendezvous channel; if there are tasks queued to send, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the sending task is readied. If no tasks are queued to send, the receiving task is queued to receive on the rendezvous channel and is blocked.</p>
+<p>Tasks attempting to send on rendezvous channels first check whether there is a queued task waiting to receive on the rendezvous channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the rendezvous channel and is blocked, if <code class="docutils literal notranslate"><span class="pre">send-fchan</span></code> had been called, otherwise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code> is raised, if <code class="docutils literal notranslate"><span class="pre">send-fchan-no-block</span></code> had been called.</p>
+<p>Tasks attempting to receive on rendezvous channels first check whether there is a queued task waiting to send on the rendezvous channel; if there are tasks queued to send, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the sending task is readied. If no tasks are queued to send, the receiving task is queued to receive on the rendezvous channel and is blocked, if <code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code> had been called, otherwise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code> is raised, if <code class="docutils literal notranslate"><span class="pre">recv-fchan-no-block</span></code> had been called.</p>
 <p>Both the send queues and receive queues are ordered first by task priority and second by the order in which tasks were added to them, with tasks of higher priority and tasks added earlier coming first.</p>
 <p>Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
 <section id="fchan">
@@ -59,10 +59,20 @@
 <p>( addr bytes fchan – )</p>
 <p>Send message with a buffer as a payload over a rendezvous channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
 </section>
+<section id="send-fchan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">send-fchan-no-block</span></code></h3>
+<p>( addr bytes fchan – )</p>
+<p>Send message with a buffer as a payload over a rendezvous channel. If a task is already waiting for a message, transfer control to it, otherwise raise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code>. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
+</section>
 <section id="recv-fchan">
 <h3><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code></h3>
 <p>( addr bytes fchan – recv-bytes )</p>
 <p>Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.</p>
+</section>
+<section id="recv-fchan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-fchan-no-block</span></code></h3>
+<p>( addr bytes fchan – recv-bytes )</p>
+<p>Receive message with a buffer as a payload over a rendezvous channel. If no task is waiting to send a message, raise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code>. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.</p>
 </section>
 </section>
 </section>

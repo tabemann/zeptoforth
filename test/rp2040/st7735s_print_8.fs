@@ -18,26 +18,42 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ssd1306-print
+begin-module st7735s-print
   
   oo import
   bitmap import
-  ssd1306 import
+  pixmap8 import
+  st7735s-8 import
   font import
   simple-font import
   lock import
   
-  begin-module ssd1306-print-internal
+  begin-module st7735s-print-internal
   
-    128 constant my-width
-    64 constant my-height
+    160 constant my-width
+    80 constant my-height
     
     7 constant my-char-width
     8 constant my-char-height
     
-    my-width my-height bitmap-buf-size constant my-buf-size
+    \ SPI device
+    1 constant my-device
+
+    \ Pins
+    11 constant lcd-din 
+    10 constant lcd-clk
+    8 constant lcd-dc
+    12 constant lcd-rst
+    9 constant lcd-cs
+    25 constant lcd-bl
+
+    my-width my-height pixmap8-buf-size constant my-buf-size
     my-buf-size 4 align buffer: my-buf
-    <ssd1306> class-size buffer: my-ssd1306
+    <st7735s-8> class-size buffer: my-st7735s
+
+    my-width my-height bitmap-buf-size constant my-front-buf-size
+    my-front-buf-size 4 align buffer: my-front-buf
+    <bitmap> class-size buffer: my-front
     
     my-width my-char-width / constant my-chars-width
     my-height my-char-height / constant my-chars-height
@@ -55,24 +71,28 @@ begin-module ssd1306-print
     variable dirty-end-row
     
     lock-size buffer: my-lock
+
+    \ Our colors
+    0 255 0 rgb8 constant my-fore-color
+    0 0 0 rgb8 constant my-back-color
     
     false value inited?
 
-    : dirty-all-ssd1306-text ( -- )
+    : dirty-all-st7735s-text ( -- )
       0 dirty-start-col !
       0 dirty-start-row !
       my-chars-width dirty-end-col !
       my-chars-height dirty-end-row !
     ;
 
-    : clear-ssd1306-dirty ( -- )
+    : clear-st7735s-dirty ( -- )
       0 dirty-start-col !
       0 dirty-start-row !
       0 dirty-end-col !
       0 dirty-end-row !
     ;
     
-    : dirty-ssd1306-char { col row -- }
+    : dirty-st7735s-char { col row -- }
       dirty-start-col @ col min dirty-start-col !
       dirty-start-row @ row min dirty-start-row !
       dirty-end-col @ col 1+ max dirty-end-col !
@@ -80,64 +100,87 @@ begin-module ssd1306-print
     ;
     
     : draw-cursor { col row -- }
-      $FF col my-char-width * row my-char-height * my-char-width my-char-height op-xor my-ssd1306 draw-rect-const
+      $FF col my-char-width * row my-char-height * my-char-width my-char-height op-xor my-front bitmap::draw-rect-const
     ;
 
-    : init-ssd1306-text ( -- )
+    : dirty-rect@ ( -- x y width height)
+      dirty-start-col @ cursor-col @ min old-cursor-col @ min { start-col }
+      dirty-start-row @ cursor-row @ min old-cursor-row @ min { start-row }
+      dirty-end-col @ cursor-col @ 1+ max old-cursor-col @ 1+ max { end-col }
+      dirty-end-row @ cursor-row @ 1+ max old-cursor-row @ 1+ max { end-row }
+      start-col my-char-width *
+      start-row my-char-height *
+      end-col start-col - my-char-width *
+      end-row start-row - my-char-height *
+    ;
+
+    : copy-display ( -- )
+      dirty-rect@ { start-col start-row width height }
+      my-back-color start-col start-row width height
+      my-st7735s pixmap8::draw-rect-const
+      my-fore-color start-col start-row start-col start-row width height
+      my-front my-st7735s pixmap8::draw-rect-const-mask
+      my-st7735s update-display
+    ;
+
+    : init-st7735s-text ( -- )
       my-lock init-lock
       [:
-        14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
+        lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
+        my-buf my-width my-height my-device <st7735s-8> my-st7735s init-object
+        my-front-buf my-width my-height <bitmap> my-front init-object
         my-char-buf my-char-buf-size $20 fill
         0 old-cursor-col !
         0 old-cursor-row !
         0 cursor-col !
         0 cursor-row !
-        dirty-all-ssd1306-text
+        dirty-all-st7735s-text
         init-simple-font
         0 0 draw-cursor
+        copy-display
         true to inited?
       ;] my-lock with-lock
     ;
     
-    : render-ssd1306-text ( -- )
+    : render-st7735s-text ( -- )
       old-cursor-col @ old-cursor-row @ draw-cursor
       dirty-end-row @ dirty-start-row @ ?do
         dirty-end-col @ dirty-start-col @ ?do 
           my-char-buf my-chars-width j * + i + c@
           my-char-width i * my-char-height j *
-          op-set my-ssd1306 a-simple-font draw-char
+          op-set my-front a-simple-font draw-char
         loop
       loop
       cursor-col @ cursor-row @ draw-cursor
-      my-ssd1306 update-display
-      clear-ssd1306-dirty
+      copy-display
+      clear-st7735s-dirty
       cursor-col @ old-cursor-col !
       cursor-row @ old-cursor-row !
     ;
     
-    : scroll-ssd1306-text ( -- )
+    : scroll-st7735s-text ( -- )
       my-char-buf my-chars-width + my-char-buf my-chars-width my-chars-height 1- * move
       my-char-buf my-chars-width my-chars-height 1- * + my-chars-width $20 fill
       cursor-row @ 1- 0 max cursor-row !
-      dirty-all-ssd1306-text
+      dirty-all-st7735s-text
     ;
     
-    : pre-advance-ssd1306-cursor ( -- )
+    : pre-advance-st7735s-cursor ( -- )
       cursor-col @ my-chars-width = if
         0 cursor-col !
         1 cursor-row +!
       then
       cursor-row @ my-chars-height = if
-        scroll-ssd1306-text
+        scroll-st7735s-text
         0 cursor-col !
       then
     ;
 
-    : advance-ssd1306-cursor ( -- )
+    : advance-st7735s-cursor ( -- )
       1 cursor-col +!
     ;
     
-    : bs-ssd1306-cursor ( -- )
+    : bs-st7735s-cursor ( -- )
       -1 cursor-col +!
       cursor-col @ 0< if
         my-chars-width 1- cursor-col !
@@ -149,103 +192,103 @@ begin-module ssd1306-print
       then
     ;
     
-    : add-ssd1306-char { c -- }
+    : add-st7735s-char { c -- }
       c $0A = if
         cursor-row @ 1+ my-chars-height min cursor-row !
         cursor-row @ my-chars-height = if
-          scroll-ssd1306-text
+          scroll-st7735s-text
         then
       else
         c $0D = if
           0 cursor-col !
         else
           c $08 = if
-            bs-ssd1306-cursor
+            bs-st7735s-cursor
           else
             c $20 >= c $7F < and if
-              pre-advance-ssd1306-cursor
+              pre-advance-st7735s-cursor
               c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
-              cursor-col @ cursor-row @ dirty-ssd1306-char
-              advance-ssd1306-cursor
+              cursor-col @ cursor-row @ dirty-st7735s-char
+              advance-st7735s-cursor
             then
           then
         then
       then
     ;
-    
+
   end-module> import
   
-  : erase-ssd1306 ( -- )
-    inited? not if init-ssd1306-text then
+  : erase-st7735s ( -- )
+    inited? not if init-st7735s-text then
     [:
       my-char-buf my-chars-width my-chars-height * $20 fill
       0 cursor-col !
       0 cursor-row !
       0 old-cursor-col !
       0 old-cursor-row !
-      dirty-all-ssd1306-text
-      my-ssd1306 clear-bitmap
-      my-ssd1306 update-display
+      dirty-all-st7735s-text
+      my-front clear-bitmap
       0 0 draw-cursor
+      copy-display
     ;] my-lock with-lock
   ;
   
-  : clear-ssd1306 ( -- )
-    inited? not if init-ssd1306-text then
+  : clear-st7735s ( -- )
+    inited? not if init-st7735s-text then
     [:
       my-char-buf my-chars-width my-chars-height * $20 fill
       0 cursor-col !
       0 cursor-row !
-      dirty-all-ssd1306-text
-      render-ssd1306-text
+      dirty-all-st7735s-text
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : emit-ssd1306 ( c -- )
-    inited? not if init-ssd1306-text then
+  : emit-st7735s ( c -- )
+    inited? not if init-st7735s-text then
     [:
-      add-ssd1306-char
-      render-ssd1306-text
+      add-st7735s-char
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : type-ssd1306 ( c-addr u -- )
-    inited? not if init-ssd1306-text then
+  : type-st7735s ( c-addr u -- )
+    inited? not if init-st7735s-text then
     [: { c-addr u }
-      u 0 ?do c-addr i + c@ add-ssd1306-char loop
-      render-ssd1306-text
+      u 0 ?do c-addr i + c@ add-st7735s-char loop
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : cr-ssd1306 ( -- )
-    inited? not if init-ssd1306-text then
+  : cr-st7735s ( -- )
+    inited? not if init-st7735s-text then
     [:
       cursor-row @ 1+ my-chars-height min cursor-row !
       0 cursor-col !
       cursor-row @ my-chars-height = if
-        scroll-ssd1306-text
+        scroll-st7735s-text
       then
-      render-ssd1306-text
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : bs-ssd1306 ( -- )
-    inited? not if init-ssd1306-text then
+  : bs-st7735s ( -- )
+    inited? not if init-st7735s-text then
     [:
-      bs-ssd1306-cursor
-      render-ssd1306-text
+      bs-st7735s-cursor
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : goto-ssd1306 ( col row -- )
-    inited? not if init-ssd1306-text then
+  : goto-st7735s ( col row -- )
+    inited? not if init-st7735s-text then
     [: { col row }
       col 0 max my-chars-width min cursor-col !
       row 0 max my-chars-height min cursor-row !
-      render-ssd1306-text
+      render-st7735s-text
     ;] my-lock with-lock
   ;
   
-  : ssd1306-cursor@ ( -- col row ) [: cursor-col @ cursor-row @ ;] my-lock with-lock ;
+  : st7735s-cursor@ ( -- col row ) [: cursor-col @ cursor-row @ ;] my-lock with-lock ;
   
 end-module

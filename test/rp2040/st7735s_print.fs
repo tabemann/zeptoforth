@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -205,10 +205,12 @@ begin-module st7735s-print
           c $08 = if
             bs-st7735s-cursor
           else
-            pre-advance-st7735s-cursor
-            c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
-            cursor-col @ cursor-row @ dirty-st7735s-char
-            advance-st7735s-cursor
+            c $20 >= c $7F < and if
+              pre-advance-st7735s-cursor
+              c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
+              cursor-col @ cursor-row @ dirty-st7735s-char
+              advance-st7735s-cursor
+            then
           then
         then
       then
