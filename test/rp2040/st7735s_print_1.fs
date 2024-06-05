@@ -26,6 +26,7 @@ begin-module st7735s-print
   font import
   simple-font import
   lock import
+  task import
 
   begin-module st7735s-print-internal
   
@@ -55,6 +56,9 @@ begin-module st7735s-print
     
     my-chars-width my-chars-height * constant my-char-buf-size
     my-char-buf-size 4 align buffer: my-char-buf
+
+    0 value update-task
+    variable update-mailbox
     
     variable old-cursor-col
     variable old-cursor-row
@@ -98,23 +102,6 @@ begin-module st7735s-print
       $FF col my-char-width * row my-char-height * my-char-width my-char-height op-xor my-st7735s draw-rect-const
     ;
 
-    : init-st7735s-text ( -- )
-      my-lock init-lock
-      [:
-        my-fore-color my-back-color lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
-        my-buf my-width my-height my-device <st7735s-1> my-st7735s init-object
-        my-char-buf my-char-buf-size $20 fill
-        0 old-cursor-col !
-        0 old-cursor-row !
-        0 cursor-col !
-        0 cursor-row !
-        dirty-all-st7735s-text
-        init-simple-font
-        0 0 draw-cursor
-        true to inited?
-      ;] my-lock with-lock
-    ;
-    
     : render-st7735s-text ( -- )
       old-cursor-col @ old-cursor-row @ draw-cursor
       dirty-end-row @ dirty-start-row @ ?do
@@ -129,6 +116,38 @@ begin-module st7735s-print
       clear-st7735s-dirty
       cursor-col @ old-cursor-col !
       cursor-row @ old-cursor-row !
+    ;
+
+    : do-update-st7735s ( -- )
+      begin
+        0 wait-notify drop
+        [: render-st7735s-text ;] my-lock with-lock
+        62 ms
+      again
+    ;
+
+    : init-st7735s-text ( -- )
+      my-lock init-lock
+      [:
+        my-fore-color my-back-color lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
+        my-buf my-width my-height my-device <st7735s-1> my-st7735s init-object
+        my-char-buf my-char-buf-size $20 fill
+        0 ['] do-update-st7735s 1024 128 512 spawn to update-task
+        update-mailbox 1 update-task config-notify
+        0 old-cursor-col !
+        0 old-cursor-row !
+        0 cursor-col !
+        0 cursor-row !
+        dirty-all-st7735s-text
+        init-simple-font
+        0 0 draw-cursor
+        true to inited?
+        update-task run
+      ;] my-lock with-lock
+    ;
+
+    : signal-st7735s-update ( -- )
+      update-task if 0 update-task notify then
     ;
     
     : scroll-st7735s-text ( -- )
@@ -201,8 +220,8 @@ begin-module st7735s-print
       0 old-cursor-row !
       dirty-all-st7735s-text
       my-st7735s clear-bitmap
-      my-st7735s update-display
       0 0 draw-cursor
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -213,7 +232,7 @@ begin-module st7735s-print
       0 cursor-col !
       0 cursor-row !
       dirty-all-st7735s-text
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -221,7 +240,7 @@ begin-module st7735s-print
     inited? not if init-st7735s-text then
     [:
       add-st7735s-char
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -229,7 +248,7 @@ begin-module st7735s-print
     inited? not if init-st7735s-text then
     [: { c-addr u }
       u 0 ?do c-addr i + c@ add-st7735s-char loop
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -241,7 +260,7 @@ begin-module st7735s-print
       cursor-row @ my-chars-height = if
         scroll-st7735s-text
       then
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -249,7 +268,7 @@ begin-module st7735s-print
     inited? not if init-st7735s-text then
     [:
       bs-st7735s-cursor
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   
@@ -258,7 +277,7 @@ begin-module st7735s-print
     [: { col row }
       col 0 max my-chars-width min cursor-col !
       row 0 max my-chars-height min cursor-row !
-      render-st7735s-text
+      signal-st7735s-update
     ;] my-lock with-lock
   ;
   

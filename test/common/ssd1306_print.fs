@@ -26,6 +26,7 @@ begin-module ssd1306-print
   font import
   simple-font import
   lock import
+  task import
   
   begin-module ssd1306-print-internal
   
@@ -44,6 +45,9 @@ begin-module ssd1306-print
     
     my-chars-width my-chars-height * constant my-char-buf-size
     my-char-buf-size 4 align buffer: my-char-buf
+    
+    0 value update-task
+    variable update-mailbox
     
     variable old-cursor-col
     variable old-cursor-row
@@ -83,22 +87,6 @@ begin-module ssd1306-print
       $FF col my-char-width * row my-char-height * my-char-width my-char-height op-xor my-ssd1306 draw-rect-const
     ;
 
-    : init-ssd1306-text ( -- )
-      my-lock init-lock
-      [:
-        14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
-        my-char-buf my-char-buf-size $20 fill
-        0 old-cursor-col !
-        0 old-cursor-row !
-        0 cursor-col !
-        0 cursor-row !
-        dirty-all-ssd1306-text
-        init-simple-font
-        0 0 draw-cursor
-        true to inited?
-      ;] my-lock with-lock
-    ;
-    
     : render-ssd1306-text ( -- )
       old-cursor-col @ old-cursor-row @ draw-cursor
       dirty-end-row @ dirty-start-row @ ?do
@@ -113,6 +101,37 @@ begin-module ssd1306-print
       clear-ssd1306-dirty
       cursor-col @ old-cursor-col !
       cursor-row @ old-cursor-row !
+    ;
+    
+    : do-update-ssd1306 ( -- )
+      begin
+        0 wait-notify drop
+        [: render-st7735s-text ;] my-lock with-lock
+        62 ms
+      again
+    ;
+
+    : init-ssd1306-text ( -- )
+      my-lock init-lock
+      [:
+        14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
+        my-char-buf my-char-buf-size $20 fill
+        0 ['] do-update-ssd1306 1024 128 512 spawn to update-task
+        update-mailbox 1 update-task config-notify
+        0 old-cursor-col !
+        0 old-cursor-row !
+        0 cursor-col !
+        0 cursor-row !
+        dirty-all-ssd1306-text
+        init-simple-font
+        0 0 draw-cursor
+        true to inited?
+        update-task run
+      ;] my-lock with-lock
+    ;
+    
+    : signal-ssd1306-update ( -- )
+      update-task if 0 update-task notify then
     ;
     
     : scroll-ssd1306-text ( -- )
@@ -185,8 +204,8 @@ begin-module ssd1306-print
       0 old-cursor-row !
       dirty-all-ssd1306-text
       my-ssd1306 clear-bitmap
-      my-ssd1306 update-display
       0 0 draw-cursor
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -197,7 +216,7 @@ begin-module ssd1306-print
       0 cursor-col !
       0 cursor-row !
       dirty-all-ssd1306-text
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -205,7 +224,7 @@ begin-module ssd1306-print
     inited? not if init-ssd1306-text then
     [:
       add-ssd1306-char
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -213,7 +232,7 @@ begin-module ssd1306-print
     inited? not if init-ssd1306-text then
     [: { c-addr u }
       u 0 ?do c-addr i + c@ add-ssd1306-char loop
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -225,7 +244,7 @@ begin-module ssd1306-print
       cursor-row @ my-chars-height = if
         scroll-ssd1306-text
       then
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -233,7 +252,7 @@ begin-module ssd1306-print
     inited? not if init-ssd1306-text then
     [:
       bs-ssd1306-cursor
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
@@ -242,7 +261,7 @@ begin-module ssd1306-print
     [: { col row }
       col 0 max my-chars-width min cursor-col !
       row 0 max my-chars-height min cursor-row !
-      render-ssd1306-text
+      signal-ssd1306-update
     ;] my-lock with-lock
   ;
   
