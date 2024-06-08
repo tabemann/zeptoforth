@@ -74,6 +74,7 @@ Zeptoforth Documentation
    extra/profile
    extra/zeptoed
    extra/display
+   extra/text_display
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils

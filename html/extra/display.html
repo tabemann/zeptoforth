@@ -17,7 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Fonts" href="font.html" />
+    <link rel="next" title="Text Displays" href="text_display.html" />
     <link rel="prev" title="zeptoed" href="zeptoed.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -338,12 +338,17 @@
 <h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h3>
 <p>( pin0 pin1 buffer-addr columns rows i2c-addr i2c-device ssd1306 – )</p>
 <p>This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> instance being initialized, <em>ssd1306</em>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following method:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following methoda:</p>
 </section>
 <section id="update-display">
 <h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#update-display" title="Permalink to this heading">¶</a></h3>
 <p>( ssd1306 – )</p>
 <p>This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="display-contrast">
+<h3><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#display-contrast" title="Permalink to this heading">¶</a></h3>
+<p>( constrast ssd1306 – )</p>
+<p>This sets the contrast of an SSD1306-based display to a value from 0 to 255.</p>
 </section>
 </section>
 <section id="st7735s">
@@ -538,6 +543,7 @@
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
@@ -553,7 +559,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="zeptoed.html" title="previous chapter">zeptoed</a></li>
-      <li>Next: <a href="font.html" title="next chapter">Fonts</a></li>
+      <li>Next: <a href="text_display.html" title="next chapter">Text Displays</a></li>
   </ul></li>
 </ul>
 </div>

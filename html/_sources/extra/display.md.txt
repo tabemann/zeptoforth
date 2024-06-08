@@ -325,12 +325,17 @@ The `<ssd1306>` class includes the following constructor:
 
 This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins *pin0* and *pin1* (it does not matter which is which), a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<bitmap>` instances), *columns* columns, *rows* rows, the I2C address *i2c-addr*, the I2C device index *i2c-device* (note that this must match the I2C device index for pins *pin0* and *pin1*), and the `<ssd1306>` instance being initialized, *ssd1306*.
 
-The `<ssd1306>` class includes the following method:
+The `<ssd1306>` class includes the following methoda:
 
 ##### `update-display`
 ( ssd1306 -- )
 
 This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `display-contrast!`
+( constrast ssd1306 -- )
+
+This sets the contrast of an SSD1306-based display to a value from 0 to 255.
 
 ### `st7735s`
 
