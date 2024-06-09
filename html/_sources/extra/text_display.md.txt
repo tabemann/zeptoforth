@@ -1,10 +1,12 @@
 # Text Displays
 
-In addition to bitmap and pixmap framebuffer-based graphics, there is also optional support for pure text displays with character matrices along with inverted video character maps. Currently support exists for SSD1306 and ST7735S-based displays with monospace bitmap fonts.
+In addition to bitmap and pixmap framebuffer-based graphics, there is also optional support for pure text displays with character matrices along with inverted video character maps. Currently support exists for SSD1306, ST7735S, and SH1122-based displays with monospace bitmap fonts.
 
-Support for SSD1306-based text displays is in `extra/common/ssd1306_text.fs`. With SSD1306-baed displays the user can select contrast settings from 0 to 255.
+Support for SSD1306-based text displays is in `extra/common/ssd1306_text.fs`. With SSD1306-based displays the user can select contrast settings from 0 to 255.
 
 Support for ST7735S-based text displays is in `extra/common/st7735s_text.fs`. With ST7735S-based displays the user can select 16-bit (5-bit red, 6-bit green, and 5-bit blue) foreground and background colors and backlight on/off.
+
+Support for SH1122-based text displays is in `extra/common/sh1122_text.fs`. With SH1122-based displays the user can select contrast settings from 0 to 255 and foreground and background grayscale values from 0 to 15.
 
 Note that these require `extra/common/clip.fs`, `extra/common/bitmap.fs`, `extra/common/font.fs`, and `extra/common/text_display.fs` to be loaded.
 
@@ -182,3 +184,51 @@ Get the foreground color of the ST7735S-based display.
 ( st7735s -- bg-color )
 
 Get the background color of the ST7735S-based display.
+
+### `sh1122-text`
+
+The `sh1122-text` module contains the following words:
+
+##### `<sh1122-text>`
+( -- class )
+
+The `<sh1122-text>` class is the class for grayscale SPI SH1122-based displays with 4-bit foreground and background gray levels and bitmap backing buffers. It inherits from the `<bitmap>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<sh1122-text>` class includes the following constructor:
+
+##### `new`
+( fg-gray bg-gray din-pin clk-pin dc-pin cs-pin reset-pin text-buffer-addr invert-buffer-addr font columns rows spi-device sh1122 -- )
+
+This constructor initializes an SPI SH1122 display at the SPI device *spi-device*, a text backing buffer at *text-buffer-addr* (with the same considerations as backing buffers for other `<text-display>` instances), an inverted video backing buffer at *invert-buffer-addr* (with the same considerations as backing buffers for other `<text-display>` instances), *columns* columns, *rows* rows, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the reset pin *reset-pin*, a 4-bit foreground gray level *fg-gray*, a 4-bit background gray level *bg-gray*, and the `<sh1122>` instance being initialized, *sh1122*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<sh1122>` class includes the following method:
+
+##### `update-display`
+( sh1122 -- )
+
+This updates the SH1122-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `display-contrast!`
+( constrast sh1122 -- )
+
+This sets the contrast of an SH1122-based display to a value from 0 to 255.
+
+##### `fg-gray!`
+( fg-gray sh1122 -- )
+
+Set the foreground gray of the SH1122-based display and dirty the display.
+
+##### `bg-gray!`
+( bg-gray sh1122 -- )
+
+Set the background gray of the SH1122-based display and dirty the display.
+
+##### `fg-gray@`
+( sh1122 -- fg-gray )
+
+Get the foreground gray of the SH1122-based display.
+
+##### `bg-gray@`
+( sh1122 -- bg-gray )
+
+Get the background gray of the SH1122-based display.
