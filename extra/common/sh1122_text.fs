@@ -1,0 +1,278 @@
+\ Copyright (c) 2023-2024 Travis Bemann
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
+
+begin-module sh1122-text
+
+  oo import
+  text-display import
+  pin import
+  spi import
+
+  <text-display> begin-class <sh1122-text>
+
+    begin-module sh1122-text-internal
+      
+      \ SPI device
+      cell member sh1122-text-device
+
+      \ Reset pin
+      cell member sh1122-text-reset-pin
+
+      \ DC pin
+      cell member sh1122-text-dc-pin
+
+      \ CS pin
+      cell member sh1122-text-cs-pin
+
+      \ CLK pin
+      cell member sh1122-text-clk-pin
+
+      \ DIN pin
+      cell member sh1122-text-din-pin
+
+      \ Foreground color (grayscale from 0 to 15)
+      cell member sh1122-text-fg-gray
+
+      \ Background color (grayscale from 0 to 15)
+      cell member sh1122-text-bg-gray
+      
+      \ Reset the SH1122
+      method reset-sh1122-text ( self -- )
+
+      \ Initialize the SH1122
+      method init-sh1122-text ( self -- )
+
+      \ Start a transfer
+      method start-sh1122-transfer ( self -- )
+
+      \ End a transfer
+      method end-sh1122-transfer ( self -- )
+
+      \ Send a command to the SH1122
+      method cmd>sh1122-text ( cmd self -- )
+
+      \ Send a byte of data to the SH1122
+      method data>sh1122-text ( data self -- )
+
+      \ Set the SH1122 window
+      method sh1122-text-window! ( start-col end-col start-row end-row self -- )
+
+      \ Update a rectangular space on the SH1122 device
+      method update-area ( start-col end-col start-row end-row self -- )
+      
+    end-module> import
+
+    \ Update the SH1122 device
+    method update-display ( self -- )
+    
+    \ Change the SH1122 device contrast
+    method display-contrast! ( contrast self -- )
+
+    \ Set the foreground color and dirty the display
+    method fg-gray! ( fg-gray self -- )
+
+    \ Set the background color and dirty the display
+    method bg-gray! ( bg-gray self -- )
+
+    \ Get the foreground color
+    method fg-gray@ ( self -- fg-gray )
+
+    \ Get the foreground color
+    method bg-gray@ ( self -- bg-gray )
+
+  end-class
+
+  <sh1122-text> begin-implement
+
+    \ Constructor
+    :noname
+      { fg bg din clk dc cs reset tbuf ibuf font cols rows device self -- }
+      tbuf ibuf font cols rows self <text-display>->new
+      device self sh1122-text-device !
+      reset self sh1122-text-reset-pin !
+      dc self sh1122-text-dc-pin !
+      cs self sh1122-text-cs-pin !
+      clk self sh1122-text-clk-pin !
+      din self sh1122-text-din-pin !
+      fg self sh1122-text-fg-gray !
+      bg self sh1122-text-bg-gray !
+      dc output-pin
+      cs output-pin
+      high dc pin!
+      high cs pin!
+      reset output-pin
+      low reset pin!
+      device clk spi-pin
+      device din spi-pin
+      device master-spi
+      40000000 device spi-baud!
+      8 device spi-data-size!
+      false false device motorola-spi
+      device enable-spi
+      self reset-sh1122-text
+      self init-sh1122-text
+      0 cols 0 rows self sh1122-text-window!
+    ; define new
+
+    \ Reset the SH1122
+    :noname { self -- }
+      high self sh1122-text-reset-pin @ pin!
+      200 ms
+      low self sh1122-text-reset-pin @ pin!
+      200 ms
+      high self sh1122-text-reset-pin @ pin!
+      200 ms
+    ; define reset-sh1122-text
+
+    \ Initialize the SH1122
+    :noname { self -- }
+      120 ms
+
+      self start-sh1122-transfer
+      
+      120 ms
+
+      $AE self cmd>sh1122-text \ display off
+      $40 self cmd>sh1122-text \ display start line
+      $A0 self cmd>sh1122-text \ remap
+      $C0 self cmd>sh1122-text \ remap
+      $81 self cmd>sh1122-text \ set display contrast
+      $80 self data>sh1122-text
+      $A8 self cmd>sh1122-text \ multiplex ratio 1/64 Duty (0x0F~0x3F)
+      $3F self data>sh1122-text
+      $AD self cmd>sh1122-text \ use buildin DC-DC with 0.6 * 500 kHz
+      $81 self data>sh1122-text
+      $D5 self cmd>sh1122-text \ set display clock divide ratio (lower 4 bit)/oscillator frequency (upper 4 bit)
+      $50 self data>sh1122-text
+      $D3 self cmd>sh1122-text \ display offset, shift mapping ram counter
+      $00 self data>sh1122-text
+      $D9 self cmd>sh1122-text \ pre charge (lower 4 bit) and discharge(higher 4 bit) period
+      $22 self data>sh1122-text
+      $DB self cmd>sh1122-text \ VCOM deselect level
+      $35 self data>sh1122-text
+      $DC self cmd>sh1122-text \ Pre Charge output voltage
+      $35 self data>sh1122-text
+      $30 self cmd>sh1122-text \ discharge level
+
+      120 ms
+
+      self end-sh1122-transfer
+      
+    ; define init-sh1122-text
+
+    \ Start a transfer
+    :noname ( self -- )
+      low swap sh1122-text-cs-pin @ pin!
+    ; define start-sh1122-transfer
+
+    \ End a transfer
+    :noname ( self -- )
+      high swap sh1122-text-cs-pin @ pin!
+    ; define end-sh1122-transfer
+
+    \ Send a command to the SH1122
+    :noname { W^ cmd self -- }
+      low self sh1122-text-dc-pin @ pin!
+      cmd 1 self sh1122-text-device @ buffer>spi
+    ; define cmd>sh1122-text
+
+    \ Send 8 bits of data to the SH1122
+    :noname { W^ data self -- }
+      low self sh1122-text-dc-pin @ pin!
+      low self sh1122-text-cs-pin @ pin!
+      data 1 self sh1122-text-device @ buffer>spi
+    ; define data>sh1122-text
+
+    \ Set the SH1122 window
+    :noname { start-col end-col start-row end-row self -- }
+      $B0 self cmd>sh1122-text
+      start-row self data>sh1122-text
+    ; define sh1122-text-window!
+
+    \ Update a rectangular space on the SH1122 device
+    :noname { start-col end-col start-row end-row self -- }
+      self start-sh1122-transfer
+      start-col end-col start-row end-row self sh1122-text-window!
+      low self sh1122-text-cs-pin @ pin!
+      end-row 1+ start-row ?do
+        self start-col i end-col start-col - 1+ dup 1 rshift [:
+          { self start-col row cols line-buf }
+          $80 self cmd>sh1122-text
+          row self data>sh1122-text
+          start-col $1 and if
+            start-col $1 bic to start-col
+            1 +to cols
+          then
+          start-col 1 rshift $F and self cmd>sh1122-text
+          start-col 5 rshift $10 or self cmd>sh1122-text
+          self sh1122-text-fg-gray @ self sh1122-text-bg-gray @ { fg bg }
+          high self sh1122-text-dc-pin @ pin!
+          0 begin dup cols < while
+            start-col over + row self pixel@ if fg else bg then 4 lshift
+            start-col 2 pick + 1+ row self pixel@ if fg else bg then or
+            over 1 rshift line-buf + c!
+            2 +
+          repeat
+          drop
+          line-buf cols 1 lshift self sh1122-text-device @ buffer>spi
+          low self sh1122-text-dc-pin @ pin!
+        ;] with-aligned-allot
+      loop
+      self end-sh1122-transfer
+    ; define update-area
+
+    \ Update the SH1122 device
+    :noname { self -- }
+      self dirty? if
+        self dirty-rect@ { start-col start-row end-col end-row }
+        start-col end-col start-row end-row self update-area
+        self clear-dirty
+      then
+    ; define update-display
+
+    \ Change the SH1122 device contrast
+    :noname { contrast self -- }
+      self start-sh1122-transfer
+      $81 self cmd>sh1122-text
+      contrast $FF and self data>sh1122-text
+      self end-sh1122-transfer
+    ; define display-contrast!
+
+    \ Set the foreground color and dirty the display
+    :noname { fg-gray self -- }
+      fg-gray self st7735s-text-fg-gray !
+      self set-dirty
+    ; define fg-gray!
+
+    \ Set the background color and dirty the display
+    :noname { bg-gray self -- }
+      bg-gray self st7735s-text-bg-gray !
+      self set-dirty
+    ; define bg-gray!
+
+    \ Get the foreground color
+    :noname ( self -- ) st7735s-text-fg-gray @ ; define fg-gray@
+
+    \ Get the background color
+    :noname ( self -- ) st7735s-text-bg-gray @ ; define bg-gray@
+
+  end-implement
+  
+end-module
