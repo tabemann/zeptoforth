@@ -52,6 +52,12 @@ begin-module sh1122-text
 
       \ Background color (grayscale from 0 to 15)
       cell member sh1122-text-bg-gray
+
+      \ Display columns
+      cell member sh1122-text-cols
+
+      \ Display rows
+      cell member sh1122-text-rows
       
       \ Reset the SH1122
       method reset-sh1122-text ( self -- )
@@ -59,6 +65,9 @@ begin-module sh1122-text
       \ Initialize the SH1122
       method init-sh1122-text ( self -- )
 
+      \ Erase the SH1122
+      method erase-sh1122-text ( self -- )
+      
       \ Start a transfer
       method start-sh1122-transfer ( self -- )
 
@@ -70,9 +79,6 @@ begin-module sh1122-text
 
       \ Send a byte of data to the SH1122
       method data>sh1122-text ( data self -- )
-
-      \ Set the SH1122 window
-      method sh1122-text-window! ( start-col end-col start-row end-row self -- )
 
       \ Update a rectangular space on the SH1122 device
       method update-area ( start-col end-col start-row end-row self -- )
@@ -113,9 +119,11 @@ begin-module sh1122-text
       din self sh1122-text-din-pin !
       fg self sh1122-text-fg-gray !
       bg self sh1122-text-bg-gray !
+      cols self sh1122-text-cols !
+      rows self sh1122-text-rows !
       dc output-pin
       cs output-pin
-      high dc pin!
+      low dc pin!
       high cs pin!
       reset output-pin
       low reset pin!
@@ -128,7 +136,7 @@ begin-module sh1122-text
       device enable-spi
       self reset-sh1122-text
       self init-sh1122-text
-      0 cols 0 rows self sh1122-text-window!
+      self erase-sh1122-text
     ; define new
 
     \ Reset the SH1122
@@ -171,7 +179,7 @@ begin-module sh1122-text
       $35 self data>sh1122-text
       $30 self cmd>sh1122-text \ discharge level
 
-      120 ms
+      100 ms
 
       self end-sh1122-transfer
       
@@ -196,25 +204,45 @@ begin-module sh1122-text
     \ Send 8 bits of data to the SH1122
     :noname { W^ data self -- }
       low self sh1122-text-dc-pin @ pin!
-      low self sh1122-text-cs-pin @ pin!
       data 1 self sh1122-text-device @ buffer>spi
     ; define data>sh1122-text
 
-    \ Set the SH1122 window
-    :noname { start-col end-col start-row end-row self -- }
-      $B0 self cmd>sh1122-text
-      start-row self data>sh1122-text
-    ; define sh1122-text-window!
+    \ Erase the SH1122
+    :noname { self -- }
+      self start-sh1122-transfer
+      self sh1122-text-rows @ 0 ?do
+        self 0 i self sh1122-text-cols @ dup 1 rshift [:
+          { self start-col row cols line-buf }
+          $B0 self cmd>sh1122-text
+          row self data>sh1122-text
+          start-col $1 and if
+            start-col $1 bic to start-col
+            1 +to cols
+          then
+          start-col 1 rshift $F and self cmd>sh1122-text
+          start-col 5 rshift $10 or self cmd>sh1122-text
+          self sh1122-text-bg-gray @ dup 4 lshift or { gray }
+          high self sh1122-text-dc-pin @ pin!
+          0 begin dup cols < while
+            gray over 1 rshift line-buf + c!
+            2 +
+          repeat
+          drop
+          line-buf cols 1 rshift self sh1122-text-device @ buffer>spi
+          low self sh1122-text-dc-pin @ pin!
+        ;] with-aligned-allot
+      loop
+      $AF self cmd>sh1122-text \ set display on
+      self end-sh1122-transfer
+    ; define erase-sh1122-text
 
     \ Update a rectangular space on the SH1122 device
     :noname { start-col end-col start-row end-row self -- }
       self start-sh1122-transfer
-      start-col end-col start-row end-row self sh1122-text-window!
-      low self sh1122-text-cs-pin @ pin!
       end-row 1+ start-row ?do
         self start-col i end-col start-col - 1+ dup 1 rshift [:
           { self start-col row cols line-buf }
-          $80 self cmd>sh1122-text
+          $B0 self cmd>sh1122-text
           row self data>sh1122-text
           start-col $1 and if
             start-col $1 bic to start-col
@@ -231,7 +259,7 @@ begin-module sh1122-text
             2 +
           repeat
           drop
-          line-buf cols 1 lshift self sh1122-text-device @ buffer>spi
+          line-buf cols 1 rshift self sh1122-text-device @ buffer>spi
           low self sh1122-text-dc-pin @ pin!
         ;] with-aligned-allot
       loop
@@ -257,21 +285,21 @@ begin-module sh1122-text
 
     \ Set the foreground color and dirty the display
     :noname { fg-gray self -- }
-      fg-gray self st7735s-text-fg-gray !
+      fg-gray self sh1122-text-fg-gray !
       self set-dirty
     ; define fg-gray!
 
     \ Set the background color and dirty the display
     :noname { bg-gray self -- }
-      bg-gray self st7735s-text-bg-gray !
+      bg-gray self sh1122-text-bg-gray !
       self set-dirty
     ; define bg-gray!
 
     \ Get the foreground color
-    :noname ( self -- ) st7735s-text-fg-gray @ ; define fg-gray@
+    :noname ( self -- ) sh1122-text-fg-gray @ ; define fg-gray@
 
     \ Get the background color
-    :noname ( self -- ) st7735s-text-bg-gray @ ; define bg-gray@
+    :noname ( self -- ) sh1122-text-bg-gray @ ; define bg-gray@
 
   end-implement
   
