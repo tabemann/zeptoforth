@@ -287,7 +287,7 @@ begin-module st7735s-text
       start-col end-col start-row end-row self st7735s-text-window!
       high self st7735s-text-dc-pin @ pin!
       low self st7735s-text-cs-pin @ pin!
-      end-row 1+ start-row ?do
+      end-row start-row ?do
         self start-col i end-col start-col - 1+ dup 1 lshift [:
           { self start-col row cols line-buf }
           self st7735s-text-fg-color @ self st7735s-text-bg-color @ { fg bg }

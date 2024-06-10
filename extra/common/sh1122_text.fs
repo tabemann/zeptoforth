@@ -239,7 +239,7 @@ begin-module sh1122-text
     \ Update a rectangular space on the SH1122 device
     :noname { start-col end-col start-row end-row self -- }
       self start-sh1122-transfer
-      end-row 1+ start-row ?do
+      end-row start-row ?do
         self start-col i end-col start-col - 1+ dup 1 rshift [:
           { self start-col row cols line-buf }
           $B0 self cmd>sh1122-text

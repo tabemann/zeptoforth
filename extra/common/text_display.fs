@@ -245,25 +245,27 @@ begin-module text-display
       row $7 and bit and 0<>
     ; define invert@
 
-    \ Get the state of a pixel
+    \ Get the state of a pixel - note that this does no validation
     :noname { pixel-col pixel-row self -- pixel-set? }
+
       self text-display-font @ { font }
-      font char-cols @ { font-cols }
-      font char-rows @ { font-rows }
-      pixel-col 0>= pixel-col font-cols self text-display-cols @ * < and if
-        pixel-row 0>=  pixel-row font-rows self text-display-rows @ * < and if
-          pixel-col font-cols /mod { font-pixel-col char-col }
-          pixel-row font-rows /mod { font-pixel-row char-row }
-          char-col char-row self char@ font find-char-col { font-char-col }
-          font-char-col font-pixel-col + font-pixel-row
-          font font-bitmap bitmap::pixel@
-          char-col char-row self invert@ xor
-        else
-          false
-        then
-      else
-        false
-      then
+      font font-bitmap { font-bitmap }
+      font char-cols @ { char-cols }
+      pixel-col char-cols /mod { font-pixel-col char-col }
+      pixel-row font char-rows @ /mod { font-pixel-row char-row }
+
+      char-row self text-display-cols @ * char-col +
+      self text-display-text-buf @ + c@
+      font min-char-index @ - char-cols *
+      
+      font-bitmap bitmap-internal::bitmap-buf @
+      font-bitmap bitmap-cols @ font-pixel-row 3 rshift * +
+      font-pixel-col + + c@
+      font-pixel-row 7 and rshift 1 and 0<>
+      
+      self text-display-invert-buf @
+      self text-display-cols @ char-row 3 rshift * + char-col + c@
+      char-row 7 and rshift 1 and 0<> xor
     ; define pixel@
 
   end-implement
