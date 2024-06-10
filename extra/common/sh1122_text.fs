@@ -77,8 +77,8 @@ begin-module sh1122-text
       \ Send a command to the SH1122
       method cmd>sh1122-text ( cmd self -- )
 
-      \ Send a byte of data to the SH1122
-      method data>sh1122-text ( data self -- )
+      \ Send a command and argument to the SH1122
+      method cmd-arg>sh1122-text ( cmd arg self -- )
 
       \ Update a rectangular space on the SH1122 device
       method update-area ( start-col end-col start-row end-row self -- )
@@ -161,22 +161,14 @@ begin-module sh1122-text
       $40 self cmd>sh1122-text \ display start line
       $A0 self cmd>sh1122-text \ remap
       $C0 self cmd>sh1122-text \ remap
-      $81 self cmd>sh1122-text \ set display contrast
-      $80 self data>sh1122-text
-      $A8 self cmd>sh1122-text \ multiplex ratio 1/64 Duty (0x0F~0x3F)
-      $3F self data>sh1122-text
-      $AD self cmd>sh1122-text \ use buildin DC-DC with 0.6 * 500 kHz
-      $81 self data>sh1122-text
-      $D5 self cmd>sh1122-text \ set display clock divide ratio (lower 4 bit)/oscillator frequency (upper 4 bit)
-      $50 self data>sh1122-text
-      $D3 self cmd>sh1122-text \ display offset, shift mapping ram counter
-      $00 self data>sh1122-text
-      $D9 self cmd>sh1122-text \ pre charge (lower 4 bit) and discharge(higher 4 bit) period
-      $22 self data>sh1122-text
-      $DB self cmd>sh1122-text \ VCOM deselect level
-      $35 self data>sh1122-text
-      $DC self cmd>sh1122-text \ Pre Charge output voltage
-      $35 self data>sh1122-text
+      $81 $80 self cmd>sh1122-text \ set display contrast
+      $A8 $3F self cmd>sh1122-text \ multiplex ratio 1/64 Duty (0x0F~0x3F)
+      $AD $81 self cmd>sh1122-text \ use buildin DC-DC with 0.6 * 500 kHz
+      $D5 $50 self cmd>sh1122-text \ set display clock divide ratio (lower 4 bit)/oscillator frequency (upper 4 bit)
+      $D3 $00 self cmd>sh1122-text \ display offset, shift mapping ram counter
+      $D9 $22 self cmd>sh1122-text \ pre charge (lower 4 bit) and discharge(higher 4 bit) period
+      $DB $35 self cmd>sh1122-text \ VCOM deselect level
+      $DC $35 self cmd>sh1122-text \ Pre Charge output voltage
       $30 self cmd>sh1122-text \ discharge level
 
       100 ms
@@ -201,20 +193,20 @@ begin-module sh1122-text
       cmd 1 self sh1122-text-device @ buffer>spi
     ; define cmd>sh1122-text
 
-    \ Send 8 bits of data to the SH1122
-    :noname { W^ data self -- }
+    \ Send a command and argument to the SH1122
+    :noname { W^ cmd arg self -- }
+      cmd @ arg 8 lshift or cmd !
       low self sh1122-text-dc-pin @ pin!
-      data 1 self sh1122-text-device @ buffer>spi
-    ; define data>sh1122-text
-
+      cmd 2 self sh1122-text-device @ buffer>spi
+    ; define cmd-arg>sh1122-text
+    
     \ Erase the SH1122
     :noname { self -- }
       self start-sh1122-transfer
       self sh1122-text-rows @ 0 ?do
         self i self sh1122-text-cols @ dup 1 rshift [:
           { self row cols line-buf }
-          $B0 self cmd>sh1122-text
-          row self data>sh1122-text
+          $B0 row self cmd-arg>sh1122-text
           0 self cmd>sh1122-text
           $10 self cmd>sh1122-text
           self sh1122-text-bg-gray @ dup 4 lshift or { gray }
@@ -237,12 +229,14 @@ begin-module sh1122-text
       start-col $1 and if
         start-col $1 bic to start-col
       then
+      end-col $1 and if
+        end-col 1+ to end-col
+      then
       self start-sh1122-transfer
       end-row start-row ?do
-        self start-col i end-col start-col - dup 1 rshift [:
+        self start-col i end-col start-col - 2 align dup 1 rshift [:
           { self start-col row cols line-buf }
-          $B0 self cmd>sh1122-text
-          row 26 lshift 26 arshift $FF and self data>sh1122-text
+          $B0 row self cmd-arg>sh1122-text
           start-col 1 rshift $F and self cmd>sh1122-text
           start-col 5 rshift $10 or self cmd>sh1122-text
           self sh1122-text-fg-gray @ self sh1122-text-bg-gray @ { fg bg }
@@ -273,20 +267,19 @@ begin-module sh1122-text
     \ Change the SH1122 device contrast
     :noname { contrast self -- }
       self start-sh1122-transfer
-      $81 self cmd>sh1122-text
-      contrast $FF and self data>sh1122-text
+      $81 contrast $FF and self cmd-arg>sh1122-text
       self end-sh1122-transfer
     ; define display-contrast!
 
     \ Set the foreground color and dirty the display
     :noname { fg-gray self -- }
-      fg-gray self sh1122-text-fg-gray !
+      fg-gray $F and self sh1122-text-fg-gray !
       self set-dirty
     ; define fg-gray!
 
     \ Set the background color and dirty the display
     :noname { bg-gray self -- }
-      bg-gray self sh1122-text-bg-gray !
+      bg-gray $F and self sh1122-text-bg-gray !
       self set-dirty
     ; define bg-gray!
 

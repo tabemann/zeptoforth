@@ -72,13 +72,9 @@ begin-module sh1122-print
     
     false value inited?
 
-    : draw-cursor { col row -- }
-      col row my-sh1122 toggle-invert!
-    ;
-
     : render-sh1122-text ( -- )
-      old-cursor-col @ old-cursor-row @ draw-cursor
-      cursor-col @ cursor-row @ draw-cursor
+      false old-cursor-col @ old-cursor-row @ my-sh1122 invert!
+      true cursor-col @ cursor-row @ my-sh1122 invert!
       my-sh1122 update-display
       cursor-col @ old-cursor-col !
       cursor-row @ old-cursor-row !
@@ -92,6 +88,10 @@ begin-module sh1122-print
       again
     ;
 
+    : signal-sh1122-update ( -- )
+      update-task if 0 update-task notify then
+    ;
+    
     : init-sh1122-text ( -- )
       my-lock init-lock
       [:
@@ -105,14 +105,10 @@ begin-module sh1122-print
         0 old-cursor-row !
         0 cursor-col !
         0 cursor-row !
-        0 0 draw-cursor
         true to inited?
         update-task run
+        signal-sh1122-update
       ;] my-lock with-lock
-    ;
-    
-    : signal-sh1122-update ( -- )
-      update-task if 0 update-task notify then
     ;
     
     : scroll-sh1122-text ( -- )
