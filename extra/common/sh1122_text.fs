@@ -211,23 +211,19 @@ begin-module sh1122-text
     :noname { self -- }
       self start-sh1122-transfer
       self sh1122-text-rows @ 0 ?do
-        self 0 i self sh1122-text-cols @ dup 1 rshift [:
-          { self start-col row cols line-buf }
+        self i self sh1122-text-cols @ dup 1 rshift [:
+          { self row cols line-buf }
           $B0 self cmd>sh1122-text
           row self data>sh1122-text
-          start-col $1 and if
-            start-col $1 bic to start-col
-            1 +to cols
-          then
-          start-col 1 rshift $F and self cmd>sh1122-text
-          start-col 5 rshift $10 or self cmd>sh1122-text
+          0 self cmd>sh1122-text
+          $10 self cmd>sh1122-text
           self sh1122-text-bg-gray @ dup 4 lshift or { gray }
-          high self sh1122-text-dc-pin @ pin!
           0 begin dup cols < while
             gray over 1 rshift line-buf + c!
             2 +
           repeat
           drop
+          high self sh1122-text-dc-pin @ pin!
           line-buf cols 1 rshift self sh1122-text-device @ buffer>spi
           low self sh1122-text-dc-pin @ pin!
         ;] with-aligned-allot
@@ -238,20 +234,18 @@ begin-module sh1122-text
 
     \ Update a rectangular space on the SH1122 device
     :noname { start-col end-col start-row end-row self -- }
+      start-col $1 and if
+        start-col $1 bic to start-col
+      then
       self start-sh1122-transfer
       end-row start-row ?do
-        self start-col i end-col start-col - 1+ dup 1 rshift [:
+        self start-col i end-col start-col - dup 1 rshift [:
           { self start-col row cols line-buf }
           $B0 self cmd>sh1122-text
-          row self data>sh1122-text
-          start-col $1 and if
-            start-col $1 bic to start-col
-            1 +to cols
-          then
+          row 26 lshift 26 arshift $FF and self data>sh1122-text
           start-col 1 rshift $F and self cmd>sh1122-text
           start-col 5 rshift $10 or self cmd>sh1122-text
           self sh1122-text-fg-gray @ self sh1122-text-bg-gray @ { fg bg }
-          high self sh1122-text-dc-pin @ pin!
           0 begin dup cols < while
             start-col over + row self pixel@ if fg else bg then 4 lshift
             start-col 2 pick + 1+ row self pixel@ if fg else bg then or
@@ -259,6 +253,7 @@ begin-module sh1122-text
             2 +
           repeat
           drop
+          high self sh1122-text-dc-pin @ pin!
           line-buf cols 1 rshift self sh1122-text-device @ buffer>spi
           low self sh1122-text-dc-pin @ pin!
         ;] with-aligned-allot
