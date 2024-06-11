@@ -226,32 +226,35 @@ begin-module sh1122-text
 
     \ Update a rectangular space on the SH1122 device
     :noname { start-col end-col start-row end-row self -- }
-      start-col $1 and if
-        start-col $1 bic to start-col
-      then
-      end-col $1 and if
-        end-col 1+ to end-col
-      then
+      start-col 1 bic to start-col
+      end-col start-col - 2 align { cols }
       self start-sh1122-transfer
-      end-row start-row ?do
-        self start-col i end-col start-col - 2 align dup 1 rshift [:
-          { self start-col row cols line-buf }
-          $B0 row self cmd-arg>sh1122-text
-          start-col 1 rshift $F and self cmd>sh1122-text
-          start-col 5 rshift $10 or self cmd>sh1122-text
-          self sh1122-text-fg-gray @ self sh1122-text-bg-gray @ { fg bg }
-          0 begin dup cols < while
-            start-col over + row self pixel@ if fg else bg then 4 lshift
-            start-col 2 pick + 1+ row self pixel@ if fg else bg then or
-            over 1 rshift line-buf + c!
-            2 +
-          repeat
-          drop
+      self start-row end-row start-col 1 rshift cols 1 rshift dup 4 + [:
+        { self start-row end-row start-col2/ cols2/ buf }
+        dma-pool::allocate-dma { dma0 }
+        dma-pool::allocate-dma { dma1 }
+        self sh1122-text-fg-gray @ self sh1122-text-bg-gray @ { fg bg }
+        buf 4 + { line-buf }
+        $B0 buf c!
+        start-col2/ $F and buf 2 + c!
+        start-col2/ 4 rshift $10 or buf 3 + c!
+        end-row start-row ?do
+          i buf 1+ c!
+          buf 4 dma1 dma0 self sh1122-text-device @ buffer>spi-raw-dma drop
+          cols2/ 0 ?do
+            start-col2/ i + 1 lshift
+            dup j self pixel@ if fg else bg then 4 lshift
+            swap 1+ j self pixel@ if fg else bg then or
+            i line-buf + c!
+          loop
           high self sh1122-text-dc-pin @ pin!
-          line-buf cols 1 rshift self sh1122-text-device @ buffer>spi
+          line-buf cols2/ dma1 dma0 self sh1122-text-device @ buffer>spi-raw-dma
+          drop
           low self sh1122-text-dc-pin @ pin!
-        ;] with-aligned-allot
-      loop
+        loop
+        dma0 dma-pool::free-dma
+        dma1 dma-pool::free-dma
+      ;] with-aligned-allot
       self end-sh1122-transfer
     ; define update-area
 
