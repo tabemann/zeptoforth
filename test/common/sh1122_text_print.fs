@@ -23,7 +23,7 @@ begin-module sh1122-print
   oo import
   text-display import
   sh1122-text import
-  simple-font import
+  simple-font-6x8 import
   lock import
   task import
   
@@ -32,7 +32,7 @@ begin-module sh1122-print
     256 constant my-width
     64 constant my-height
     
-    7 constant my-char-width
+    6 constant my-char-width
     8 constant my-char-height
     
     \ SPI device
@@ -95,9 +95,9 @@ begin-module sh1122-print
     : init-sh1122-text ( -- )
       my-lock init-lock
       [:
-        init-simple-font
+        init-simple-font-6x8
         my-fore-color my-back-color lcd-din lcd-clk lcd-dc lcd-cs lcd-rst
-        my-text-buf my-invert-buf a-simple-font my-width my-height
+        my-text-buf my-invert-buf a-simple-font-6x8 my-width my-height
         my-device <sh1122-text> my-sh1122 init-object
         0 ['] do-update-sh1122 1024 128 512 spawn to update-task
         update-mailbox 1 update-task config-notify
