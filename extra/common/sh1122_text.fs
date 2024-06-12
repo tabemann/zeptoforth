@@ -117,8 +117,8 @@ begin-module sh1122-text
       cs self sh1122-text-cs-pin !
       clk self sh1122-text-clk-pin !
       din self sh1122-text-din-pin !
-      fg self sh1122-text-fg-gray !
-      bg self sh1122-text-bg-gray !
+      fg $F and self sh1122-text-fg-gray !
+      bg $F and self sh1122-text-bg-gray !
       cols self sh1122-text-cols !
       rows self sh1122-text-rows !
       dc output-pin
