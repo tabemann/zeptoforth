@@ -228,7 +228,6 @@ begin-module sh1122-text
     :noname { start-col end-col start-row end-row self -- }
       start-col 1 bic to start-col
       end-col start-col - 2 align { cols }
-      self start-sh1122-transfer
       self start-row end-row start-col 1 rshift cols 1 rshift dup 4 + [:
         { self start-row end-row start-col2/ cols2/ buf }
         dma-pool::allocate-dma { dma0 }
@@ -238,6 +237,7 @@ begin-module sh1122-text
         $B0 buf c!
         start-col2/ $F and buf 2 + c!
         start-col2/ 4 rshift $10 or buf 3 + c!
+        self start-sh1122-transfer
         end-row start-row ?do
           i buf 1+ c!
           buf 4 dma1 dma0 self sh1122-text-device @ buffer>spi-raw-dma drop
@@ -252,10 +252,10 @@ begin-module sh1122-text
           drop
           low self sh1122-text-dc-pin @ pin!
         loop
+        self end-sh1122-transfer
         dma0 dma-pool::free-dma
         dma1 dma-pool::free-dma
       ;] with-aligned-allot
-      self end-sh1122-transfer
     ; define update-area
 
     \ Update the SH1122 device

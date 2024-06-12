@@ -237,5 +237,21 @@ begin-module sh1122-print
   : sh1122-cursor@ ( -- col row )
     [: cursor-col @ cursor-row @ ;] my-lock with-lock
   ;
+
+  : sh1122-fg-gray! ( fg -- )
+    [: my-sh1122 fg-gray! signal-sh1122-update ;] my-lock with-lock
+  ;
+
+  : sh1122-bg-gray! ( bg --)
+    [: my-sh1122 bg-gray! signal-sh1122-update ;] my-lock with-lock
+  ;
+
+  : sh1122-fg-gray@ ( -- fg )
+    my-sh1122 fg-gray@
+  ;
+
+  : sh1122-bg-gray@ ( -- bg )
+    my-sh1122 bg-gray@
+  ;
   
 end-module
