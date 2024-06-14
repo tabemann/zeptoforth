@@ -161,14 +161,14 @@ begin-module sh1122-text
       $40 self cmd>sh1122-text \ display start line
       $A0 self cmd>sh1122-text \ remap
       $C0 self cmd>sh1122-text \ remap
-      $81 $80 self cmd>sh1122-text \ set display contrast
-      $A8 $3F self cmd>sh1122-text \ multiplex ratio 1/64 Duty (0x0F~0x3F)
-      $AD $81 self cmd>sh1122-text \ use buildin DC-DC with 0.6 * 500 kHz
-      $D5 $50 self cmd>sh1122-text \ set display clock divide ratio (lower 4 bit)/oscillator frequency (upper 4 bit)
-      $D3 $00 self cmd>sh1122-text \ display offset, shift mapping ram counter
-      $D9 $22 self cmd>sh1122-text \ pre charge (lower 4 bit) and discharge(higher 4 bit) period
-      $DB $35 self cmd>sh1122-text \ VCOM deselect level
-      $DC $35 self cmd>sh1122-text \ Pre Charge output voltage
+      $81 $80 self cmd-arg>sh1122-text \ set display contrast
+      $A8 $3F self cmd-arg>sh1122-text \ multiplex ratio 1/64 Duty (0x0F~0x3F)
+      $AD $81 self cmd-arg>sh1122-text \ use buildin DC-DC with 0.6 * 500 kHz
+      $D5 $50 self cmd-arg>sh1122-text \ set display clock divide ratio (lower 4 bit)/oscillator frequency (upper 4 bit)
+      $D3 $00 self cmd-arg>sh1122-text \ display offset, shift mapping ram counter
+      $D9 $22 self cmd-arg>sh1122-text \ pre charge (lower 4 bit) and discharge(higher 4 bit) period
+      $DB $35 self cmd-arg>sh1122-text \ VCOM deselect level
+      $DC $35 self cmd-arg>sh1122-text \ Pre Charge output voltage
       $30 self cmd>sh1122-text \ discharge level
 
       100 ms
