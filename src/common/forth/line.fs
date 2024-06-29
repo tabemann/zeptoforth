@@ -203,14 +203,15 @@ begin-module line-internal
   \ Calculate number of lines text will take up
   : total-lines ( -- lines )
     line @ line-count h@ line @ line-start-column h@ +
-    line @ line-terminal-columns h@ /
+    line @ line-terminal-columns h@ / 1+
   ;
 
   \ Adjust start row
   : adjust-start-row ( -- )
-    line @ line-terminal-rows h@ 1- total-lines
-    line @ line-start-row h@ + - dup 0< if
-      dup line @ line-start-row h+! scroll-up
+    line @ line-terminal-rows h@ 1- total-lines 1-
+    line @ line-start-row h@ + -
+    dup 0< if
+      dup line @ line-start-row h+! negate scroll-up
     else
       drop
     then
