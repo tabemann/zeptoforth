@@ -209,7 +209,9 @@ begin-module ansi-term
   ;
 
   \ Reset terminal state
-  : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
+  : reset-ansi-term ( -- )
+    0 show-cursor-count ! 0 preserve-cursor-count ! 0 saved-key !
+  ;
 
   \ Clear window in ticks
   100 constant clear-ticks
