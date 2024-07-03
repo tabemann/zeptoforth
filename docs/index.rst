@@ -28,7 +28,7 @@ Zeptoforth Documentation
    words/rtc
    words/timer
    words/dma
-   words/sdcard
+   words/block_dev
    words/fat32
    words/simple_fat32
    words/fat32_tools

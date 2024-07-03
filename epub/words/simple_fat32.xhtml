@@ -16,14 +16,16 @@
             
   <section id="simple-fat32-support">
 <h1>Simple FAT32 Support</h1>
-<p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards in common use cases. Objects of this class are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in its constructor and in that writethrough is set/gotten on it directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (typically <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code>) instance.</p>
+<p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards (SD cards greater than or equal to 4 GB in size) in common use cases.</p>
+<p>zeptoforth also includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash, which can be accomplished by loading <code class="docutils literal notranslate"><span class="pre">test/common/init_fat32_test.fs</span></code> and executing <code class="docutils literal notranslate"><span class="pre">init-fat32-test::run-test</span></code>. (This example can be modified to initialize FAT32 filesystems on SDHC/SDXC cards as well.)</p>
+<p>Objects of these classes are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in their constructors and in that writethrough is set/gotten on them directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code>) instance.</p>
 <section id="simple-fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module contains the following words:</p>
 <section id="simple-fat32-fs">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code></h3>
 <p>( – class )</p>
-<p>This is the simple FAT32 filesystem class which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems on SDHC/SDXC cards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 <p>This class has the following constructor:</p>
 </section>
 <section id="new">
@@ -41,6 +43,32 @@
 <h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying SD card interface is set to writethrough or not.</p>
+</section>
+</section>
+<section id="simple-blocks-fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module contains the following words:</p>
+<section id="simple-blocks-fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code></h3>
+<p>( – class )</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI flash of RP2040 boards and STM32F746 DISCOVERY boards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This class has the following constructor:</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( fs – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> instance Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
+<p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code></h3>
+<p>( writethrough fs – )</p>
+<p>Set the underlying blocks interface to be either writethrough, i.e. write to blocks are immediately written out to the Quad SPI flash, or not writethrough, i.e. blocks are not written out to the Quad SPI flash except when evicted to load other blocks or if explicitly flushed with <code class="docutils literal notranslate"><span class="pre">flush</span></code>.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code></h3>
+<p>( fs – writethrough )</p>
+<p>Get whether the underlying blocks interface is set to writethrough or not.</p>
 </section>
 </section>
 </section>

@@ -1,6 +1,10 @@
-# SDHC/SDXC Card Support
+# SDHC/SDXC Card and Blocks Block Device Support
 
-zeptoforth includes SDHC/SDXC card support using the SPI interface for the supported and a separate chip-select pin independent of the SPI interface. It is built upon zeptoforth's object system, and involves an abstract block device `<block-dev>` in the `block-dev` module from which the `<sd>` class in the `sd` module inherits. It caches up to eight blocks in RAM at any given time, and has support for both write-through and non-write-through modes of operation, with the latter providing better performance at the expense of potential loss of data integrity in the event of unexpected resets or power loss. Note that the SPI pins used need to be configured appropriately and the chip-select pin must be configured as an output pin.
+zeptoforth includes SDHC/SDXC card support (SD cards greater or equal to 4 GB in size only) using the SPI interface for the supported and a separate chip-select pin independent of the SPI interface. It is built upon zeptoforth's object system, and involves an abstract block device `<block-dev>` in the `block-dev` module from which the `<sd>` class in the `sd` module inherits. Note that the SPI pins used need to be configured appropriately and the chip-select pin must be configured as an output pin.
+
+zeptoforth also includes blocks block device support on platforms that support Quad SPI flash, specifically RP2040 boards and the STM32F746 DISCOVERY board. It likewise uses zeptoforth's object system, and involves an abstract block device `<block-dev>` in the `block-dev` module from which the `<blocks>` class in the `blk` module inherits.
+
+These both cache up to eight blocks in RAM at any given time, and have support for both write-through and non-write-through modes of operation, with the latter providing better performance at the expense of potential loss of data integrity in the event of unexpected resets or power loss.
 
 ### `block-dev`
 
@@ -125,5 +129,33 @@ Init SDHC/SDXC card device.
 
 ##### `write-sd-block-zero!`
 ( enabled sd-card -- )
+
+Enable block zero writes.
+
+### `blk`
+
+The `blk` module provided by contains the following words:
+
+##### `x-block-zero-protected`
+( - )
+
+Attempted to write to protected block zero.
+
+##### `<blocks>`
+( -- class )
+
+The blocks block device interface class.
+
+The `<blocks>` class has the following constructor:
+
+##### `new`
+( -- )
+
+This constructs a `<blocks>` instance for the on-board Quad SPI flash of RP2040 boards and the STM32F746 DISCOVERY board. Note that write-through is set to `false` by default and block zero protection is set to `true` by default.
+
+The `<blocks>` class contains the following methods in addition to those in `<block-dev>`:
+
+##### `write-blk-block-zero!`
+( enabled blk -- )
 
 Enable block zero writes.

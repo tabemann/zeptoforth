@@ -84,6 +84,12 @@ begin-module fat32
 
   \ Seek from the end of a file
   2 constant seek-end
+
+  \ Partition is active
+  $80 constant active-partition
+  
+  \ FAT32 with LBA partition type
+  $0C constant fat32-lba-partition-type
   
   begin-module fat32-internal
 
@@ -113,6 +119,9 @@ begin-module fat32
       cell member mbr-device
       
     end-module
+
+    \ Format an MBR
+    method format-mbr ( mbr -- )
     
     \ Is the MBR valid
     method mbr-valid? ( mbr -- valid? )
@@ -863,6 +872,14 @@ begin-module fat32
       dup <object>->new
       mbr-device !
     ; define new
+
+    :noname ( mbr -- )
+      [: { mbr }
+        sector-scratchpad sector-size 0 fill
+        $AA55 sector-scratchpad $1FE + h!
+        sector-scratchpad sector-size 0 mbr mbr-device @ block!
+      ;] fat32-lock with-lock
+    ; define format-mbr
     
     :noname ( mbr -- valid? )
       [:
