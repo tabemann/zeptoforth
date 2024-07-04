@@ -60,6 +60,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * FAT32 support on SDHC/SDXC cards
 * Support for code loading from files in FAT32 filesystems
 * User-level FAT32 tools
+* FAT32 filesystem support on top of block storage in on-board Quad SPI flash (on the RP2040 and STM32F746 DISCOVERY boards)
 * Best-effort fault recovery
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the RP2040)
 * A block editor (on the STM32F746 DISCOVERY board and the RP2040)
@@ -153,6 +154,14 @@ Note that for the `rp2040` and `rp2040_big` platforms, to load code with the boo
 The `rp2040` and `rp2040_big` platforms only differ, aside from there are no `mini` builds for `rp2040_big`, in that `rp2040` builds devote 960 KB of space to the flash dictionary, 48 KB of space to the flash dictionary index, and 1 MB of space to block storage (but some of that space is not usable due to being used for metadata) while `rp2040_big` builds devote 1472 KB of space to the flash dictionary, 60 KB of space to the flash dictionary index, and 512 MB of space (with overhead) to block storage. `rp2040_big` is intended in particular for zeptoIP, due to the space taken up by the CYW43439 driver and zeptoIP. From this point on, all mentions of `rp2040` shall also encompass `rp2040_big`.
 
 \* There is no cornerstone for STM32F411 builds, because a cornerstone would exhaust all the remaining flash space on these targets.
+
+## Setting Up On-board FAT32 Filesystems
+
+On RP2040 and STM32F746 DISCOVERY boards there is support for FAT32 filesystems in block storage in on-board Quad SPI flash. Note that FAT32 filesystems must be initialized prior to use.
+
+However, there is a convenient means of configuring a board to use FAT32 filesystems in on-board flash. This involves loading `extra/common/setup_blocks_fat32.fs` with zeptocom.js, `utils/codeload3.sh`, or e4thcom. This first checks for the existence in block storage of a valid master boot record, and if there is not one, it first initializes one along with a partition containing a FAT32 filesystem, then, if it has not already been compiled, compiles to flash code which sets up the FAT32 filesystem and sets it as the current filesystem on boot-up. After this has been done, on subsequent boots a FAT32 filesystem in Quad SPI flash will be immediately available.
+
+Note that the general unsuitability of FAT32 for in-on board flash is tempered by the fact that block storage provided by zeptoforth has built-in wear leveling.
 
 ## Building the Kernel
 
