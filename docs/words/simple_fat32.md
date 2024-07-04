@@ -2,7 +2,11 @@
 
 zeptoforth includes the `<simple-fat32-fs>` class in the `simple-fat32` module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards (SD cards greater than or equal to 4 GB in size) in common use cases.
 
-zeptoforth also includes the `<simple-blocks-fat32-fs>` class in the `simple-blocks-fat32` module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash, which can be accomplished by loading `test/common/init_fat32_test.fs` and executing `init-fat32-test::run-test`. (This example can be modified to initialize FAT32 filesystems on SDHC/SDXC cards as well.)
+zeptoforth also includes the `<simple-blocks-fat32-fs>` class in the `simple-blocks-fat32` module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash.
+
+The easiest way to accomplish this is by loading with zeptocom.js, `utils/codeload3.sh`, or e4thcom `extra/common/setup_blocks_fat32.fs`, which initializes a master boot record and a single partition containing a FAT32 file system if an initialized master boot record does not exist, and compiles code to flash (if it has not already been compiled) which initializes a `<simple-blocks-fat32-fs>` instance and sets it as the current filesystem on bootup.
+
+This can also be accomplished by loading `test/common/init_fat32_test.fs` and executing `init-fat32-test::run-test`. (This example can be modified to initialize FAT32 filesystems on SDHC/SDXC cards as well.)
 
 Objects of these classes are interchangeable with objects of the `<fat32-fs>` class in the `fat32` module, the only differences being in their constructors and in that writethrough is set/gotten on them directly rather than through a separate `<block-dev>` (`<sd>` or `<blocks>`) instance.
 

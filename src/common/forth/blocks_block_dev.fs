@@ -263,10 +263,14 @@ begin-module blk
 
     :noname { index block blk -- }
       block 0= blk blk-protect-block-zero @ and triggers x-block-zero-protected
-      block 1 rshift find-block { addr }
       block 1 and sector-size * { same-offset }
       block 1 and 1 xor sector-size * { other-offset }
-      addr other-offset + blk blk-scratchpad other-offset + sector-size move
+      block 1 rshift find-block { addr }
+      addr 0<> if
+        addr other-offset + blk blk-scratchpad other-offset + sector-size move
+      else
+        blk blk-scratchpad other-offset + sector-size 0 fill
+      then
       index sector-size * blk blk-buffers + blk blk-scratchpad same-offset +
       sector-size move
       blk blk-scratchpad block 1 rshift block::block!
@@ -274,8 +278,13 @@ begin-module blk
 
     :noname { index block blk -- }
       block 1 rshift find-block { addr }
-      block 1 and sector-size * { same-offset }
-      addr same-offset + index sector-size * blk blk-buffers + sector-size move
+      addr 0<> if
+        block 1 and sector-size * { same-offset }
+        addr same-offset + index sector-size * blk blk-buffers + sector-size
+        move
+      else
+        index sector-size * blk blk-buffers + sector-size 0 fill
+      then
     ; define read-blk-block
 
     :noname ( index blk -- )
