@@ -163,6 +163,36 @@ However, there is a convenient means of configuring a board to use FAT32 filesys
 
 Note that the general unsuitability of FAT32 for in-on board flash is tempered by the fact that block storage provided by zeptoforth has built-in wear leveling.
 
+## Transferring Data to and from Filesystems on Boards
+
+When using SDHC or SDXC cards transferring files can be as simple as removing the card from its connection to your board and connecting it to a device connected to your computer, and transferring files with that. However, with FAT32 filesystems in Quad SPI flash that is not doable. Consequently, there are now tools for enabling such transfers.
+
+First, use zeptocom.js, `utils/codeload3.sh`, or e4thcom to load `extra/common/transfer_all.fs` (or more specifically, each of the files it includes) into RAM on your board.
+
+Second, if you want to transfer data from your computer to a file, which may or may not already exist, in a FAT32 filesystem accessed from your board, execute:
+
+    s" YOURFILE.TXT" recv-file::recv-file
+
+at the prompt on your terminal emulator and then disconnect your terminal emulator from your board without sending any bytes in between. Note that `s" YOURFILE.TXT"` may be any valid file path in a Forth string literal.
+
+Afterwards, execute:
+
+    utils/send_file.sh <your device> 115200 <your file>
+
+This will transfer \<your file> on your computer to `YOURFILE.TXT` on your board.
+
+In the opposite direction, if you want to transfer data from a file in a FAT32 filesystem accessed from your board to your computer, execute:
+
+    s" YOURFILE.TXT" send-file::send-file
+
+at the prompt on your terminal emulator and then disconnect your terminal emulator from your board without sending any bytes in between. Note that `s" YOURFILE.TXT"` may be any valid file path in a Forth string literal.
+
+Afterwards, execute:
+
+    utils/recv_file.sh <your device> 115200 <your file>
+
+This will transfer `YOURFILE.TXT` on your board to \<your file> on your computer.
+
 ## Building the Kernel
 
 To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later and the dependencies necessary for Python Venv (e.g. the package `python3.11-venv` for Python 3.11 on Debian or Ubuntu), and then execute:

@@ -3,7 +3,7 @@
 # The MIT License 
 #  
 # Copyright (c) 2020 TG9541 
-# Copyright (c) 2020 Travis Bemann
+# Copyright (c) 2020-2024 Travis Bemann
 #  
 # Permission is hereby granted, free of charge,  
 # to any person obtaining a copy of this software and  
@@ -27,7 +27,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # STM8EF code loader, experimental version for Python3
-# targets uCsim (telnet), serial interface, and text file
+# targets serial interface, and text file
 # supports e4thcom pseudo words, e.g. #include, #require, and \res .
 #
 # The include path is:
@@ -40,7 +40,6 @@
 import sys
 import os
 import serial
-import telnetlib
 import re
 import argparse
 import time
@@ -71,46 +70,6 @@ class ConnectDryRun(Connection):
         return "ok"
     def testtrans(self, line):
         return ""
-
-# uCsim telnet line transfer
-class ConnectUcsim(Connection):
-    tn = { }
-    def __init__(self, comspec):
-        try:
-            HOST = comspec.split(':')[0]
-            PORT = comspec.split(':')[1]
-            self.tn = telnetlib.Telnet(HOST,PORT)
-        except:
-            print("Error: couldn't open telnet port")
-            sys.exit(1)
-
-        self.tn.read_until("\n",1)
-
-    def transfer(self, line):
-        vprint('TX: ' + line)
-        return self.dotrans(line)
-
-    def dotrans(self, line):
-        self.tracef(line)
-
-        try:
-            line = removeComment(line)
-            if (line):
-                self.tn.write(str.encode(line+ '\r'))
-                tnResult = self.tn.expect(['\?\a\r\n', 'k\r\n', 'K\r\n'],5)
-            else:
-                return "ok"
-        except:
-            print('Error: telnet transfer failure')
-            sys.exit(1)
-
-        if (tnResult[0]<0):
-            print('Error: timeout %s' % line)
-            sys.exit(1)
-        elif (tnResult[0]==0):
-            return tnResult[2]
-        else:
-            return "ok"
 
 # serial line transfer
 class ConnectSerial(Connection):
@@ -346,14 +305,14 @@ def upload(path):
 
 # Python has a decent command line argument parser - use it
 parser = argparse.ArgumentParser()
-parser.add_argument("method", choices=['serial','telnet','dryrun'],
+parser.add_argument("method", choices=['serial','dryrun'],
         help="transfer method")
 parser.add_argument("files", nargs='*',
         help="name of one or more files to transfer")
 parser.add_argument("-b", "--target-base", dest="base", default="",
         help="target base folder, default: ./", metavar="base")
 parser.add_argument("-p", "--port", dest="port",
-        help="PORT for transfer, default: /dev/ttyUSB0, localhost:10000", metavar="port")
+        help="PORT for transfer, default: /dev/ttyUSB0", metavar="port")
 parser.add_argument("-q", "--quiet", action="store_false", dest="verbose", default=True,
         help="don't print status messages to stdout")
 parser.add_argument("-t", "--trace", dest="tracefile",
@@ -373,9 +332,7 @@ else:
     tracefile = False
 
 # Initalize transfer method with default destionation port
-if (args.method == "telnet"):
-    CN = ConnectUcsim(args.port or 'localhost:10000')
-elif (args.method == "serial"):
+if (args.method == "serial"):
     CN = ConnectSerial(args.port or '/dev/ttyUSB0', args.baud or 9600)
     CN.refresh()
 else:
