@@ -87,6 +87,16 @@ Overwrite a file at the specified path with data and then truncate it afterwards
 
 Write data at an offset to a file at the specified path without truncating it.
 
+##### `list-file`
+( path-addr path-u -- )
+
+List a file at the specified path on the console, converting lone LF characters to CRLF pairs.
+
+##### `list-file-window`
+( offset-u length-u path-addr path-u -- )
+
+List a defined window in a file at the specified path on the console, converting lone LF characters to CRLF pairs.
+
 ##### `dump-file`
 ( path-addr path-u -- )
 

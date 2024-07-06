@@ -431,7 +431,7 @@ begin-module fat32-tools
   ;
   
   \ List the contents of a window in a file with newline conversions
-  : list-file-window ( path-addr path-u -- )
+  : list-file-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
       <fat32-file> class-size [:
