@@ -214,10 +214,11 @@ begin-module compat
   \ be output but no padding spaces will be added.
   : .r { n width -- }
     n 0< if n negate 1 else n 0 then { current bytes }
-    begin current while
+    begin
       1 +to bytes
       current base @ u/ to current
-    repeat
+      current 0=
+    until
     width bytes u> if width bytes - spaces then
     n (.)
   ;
@@ -227,10 +228,11 @@ begin-module compat
   \ will be output but no padding spaces will be added.
   : u.r { u width -- }
     u 0 { current bytes }
-    begin current while
+    begin
       1 +to bytes
       current base @ u/ to current
-    repeat
+      current 0=
+    until
     width bytes u> if width bytes - spaces then
     u (u.)
   ;
