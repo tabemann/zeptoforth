@@ -218,6 +218,32 @@ begin-module fat32-tools
       until
     ;
 
+    \ Convert newlines in a read buffer; note that the original buffer is
+    \ read-buffer-size bytes, and the data in the buffer is at most half its
+    \ size
+    : convert-newlines { src-addr src-bytes -- }
+      src-bytes 0> if
+        read-buffer read-buffer-size + 0 { dest-addr dest-bytes }
+        src-addr src-addr src-bytes + 1- ?do
+          i c@ case
+            $0A of
+              -2 +to dest-addr
+              $0D dest-addr c!
+              $0A dest-addr 1+ c!
+              2 +to dest-bytes
+            endof
+            $0D of endof
+            -1 +to dest-addr
+            dup dest-addr c!
+            1 +to dest-bytes
+          endcase
+        -1 +loop
+        dest-addr dest-bytes
+      else
+        src-addr 0
+      then
+    ;
+    
     \ Initialize FAT32 including
     : init-fat32-tools ( -- )
       fs-lock init-lock
@@ -382,6 +408,44 @@ begin-module fat32-tools
         -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
         dup >r write-file drop r> truncate-file
         current-fs @ flush
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ List a file with newline conversions
+  : list-file ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        begin
+          read-buffer read-buffer-size 2 / 2 pick read-file dup 0> if
+            read-buffer swap convert-newlines type false
+          else
+            drop true
+          then
+        until
+        drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+  
+  \ List the contents of a window in a file with newline conversions
+  : list-file-window ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        begin
+          read-buffer read-buffer-size 2 / 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap convert-newlines type over 0=
+          else
+            drop true
+          then
+        until
+        2drop
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;

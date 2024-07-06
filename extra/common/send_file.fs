@@ -21,7 +21,6 @@
 begin-module send-file
 
   oo import
-  systick import
   fat32 import
   crc32 import
   base64 import
@@ -99,7 +98,7 @@ begin-module send-file
     ;
 
     \ Send a done packet
-    : send-done-packet ( resend? -- )
+    : send-done-packet ( -- )
       send-packet-done packet-buffer !
       0 packet-buffer cell + !
       packet-buffer 2 cells + packet-body-size 0 fill

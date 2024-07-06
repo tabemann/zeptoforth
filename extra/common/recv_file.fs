@@ -21,7 +21,6 @@
 begin-module recv-file
 
   oo import
-  systick import
   fat32 import
   crc32 import
   base64 import
@@ -141,7 +140,6 @@ begin-module recv-file
           swap to done?
           if
             recv-packet-ack send-packet
-            done? if my-file file-fs@ flush then
           else
             recv-packet-nak send-packet
           then
@@ -167,7 +165,9 @@ begin-module recv-file
 
   \ Receive a file
   : recv-file ( path-addr path-u -- )
-    open-or-create-file transfer-data my-file truncate-file
+    open-or-create-file transfer-data
+    my-file truncate-file
+    my-file file-fs@ flush
   ;
 
 end-module
