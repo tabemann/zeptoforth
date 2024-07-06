@@ -24,7 +24,7 @@ begin-module dyn-buffer
   heap import
   
   \ Default segment size
-  40 constant default-segment-size
+  256 constant default-segment-size
 
   begin-module dyn-buffer-internal
     
