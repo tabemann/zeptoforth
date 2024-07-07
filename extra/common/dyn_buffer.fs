@@ -78,6 +78,9 @@ begin-module dyn-buffer
 
       \ Request a segment before another segment
       method request-segment-before ( bytes next-segment dyn-buffer -- segment )
+
+      \ Insert a segment
+      method insert-segment ( prev-segment next-segment segment dyn-buffer -- )
       
       \ Replace a segment
       method replace-segment ( new-segment old-segment dyn-buffer -- )
@@ -225,6 +228,7 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-first !
         dup dyn-buffer dyn-buffer-last !
       then
+      led::green led::toggle-led \ DEBUG
     ; define request-segment
     
     \ Request a segment after another segment
@@ -240,6 +244,7 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-last !
       then
       dup prev-segment segment-next !
+      led::green led::toggle-led \ DEBUG
     ; define request-segment-after
 
     \ Request a segment before another segment
@@ -255,7 +260,24 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-first !
       then
       dup next-segment segment-prev !
+      led::green led::toggle-led \ DEBUG
     ; define request-segment-before
+
+    \ Insert a segment
+    :noname { prev-segment next-segment segment dyn-buffer -- }
+      prev-segment segment segment-prev !
+      prev-segment 0= if
+        segment dyn-buffer dyn-buffer-first !
+      else
+        segment prev-segment segment-next !
+      then
+      next-segment segment segment-next !
+      next-segment 0= if
+        segment dyn-buffer dyn-buffer-last !
+      else
+        segment next-segment segment-prev !
+      then
+    ; define insert-segment
     
     \ Replace a segment
     :noname { new-segment old-segment dyn-buffer -- }
@@ -481,27 +503,35 @@ begin-module dyn-buffer
 
     \ Insert data into segment
     :noname { addr bytes cursor -- addr' bytes' }
-      cursor cursor-dyn-buffer @ { dyn-buffer }
-      cursor cursor-segment @ { old-segment }
-      cursor cursor-offset @ { offset }
-      old-segment segment-size @ { old-size }
-      default-segment-size old-size bytes +
-      min old-size - { part-size }
-      old-size part-size + dyn-buffer request-segment { new-segment }
-      old-segment segment-header-size + { old-addr }
-      new-segment segment-header-size + { new-addr }
-      old-addr new-addr offset move
-      addr new-addr offset + part-size move
-      old-addr offset + new-addr offset + part-size +
-      old-size offset - move
-      new-segment old-segment dyn-buffer replace-segment
-      new-segment cursor cursor-segment !
-      part-size cursor cursor-offset +!
-      part-size cursor cursor-global-offset +!
-      part-size +to addr
-      part-size negate +to bytes
-      part-size dyn-buffer adjust-dyn-buffer-len
-      addr bytes
+      default-segment-size cursor cursor-segment @ segment-size @ bytes + min
+      { total-size }
+      addr bytes cursor total-size dup [:
+        { addr bytes cursor total-size temp-buffer }
+        cursor cursor-dyn-buffer @ { dyn-buffer }
+        cursor cursor-segment @ { old-segment }
+        cursor cursor-offset @ { offset }
+        old-segment segment-size @ { old-size }
+        total-size old-size - { part-size }
+        old-segment segment-prev @ { prev-segment }
+        old-segment segment-next @ { next-segment }
+        old-segment segment-header-size + { old-addr }
+        old-addr temp-buffer offset move
+        addr temp-buffer offset + part-size move
+        old-addr offset + temp-buffer offset + part-size +
+        old-size offset - move
+        old-segment dyn-buffer delete-segment
+        old-size part-size + dyn-buffer request-segment { new-segment }
+        new-segment segment-header-size + { new-addr }
+        temp-buffer new-addr old-size part-size +  move
+        prev-segment next-segment new-segment dyn-buffer insert-segment
+        new-segment cursor cursor-segment !
+        part-size cursor cursor-offset +!
+        part-size cursor cursor-global-offset +!
+        part-size +to addr
+        part-size negate +to bytes
+        part-size dyn-buffer adjust-dyn-buffer-len
+        addr bytes
+      ;] with-allot
     ; define insert-data-into-segment
 
     \ Insert data after segment
@@ -570,7 +600,7 @@ begin-module dyn-buffer
         cursor cursor-segment @ { old-segment }
         cursor cursor-offset @ { offset }
         old-segment segment-size @ { old-size }
-        old-size default-segment-size < if
+        old-size bytes + default-segment-size <= if
           addr bytes cursor insert-data-into-segment to bytes to addr
         else
           offset old-size = if

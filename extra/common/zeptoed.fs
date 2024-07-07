@@ -170,8 +170,7 @@ begin-module zeptoed-internal
   -20 constant delete-undo-accumulation
   
   \ My block size
-  default-segment-size dyn-buffer-internal::segment-header-size +
-  constant my-block-size
+  16 dyn-buffer-internal::segment-header-size + constant my-block-size
   
   \ Display width
   variable display-width
