@@ -228,7 +228,6 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-first !
         dup dyn-buffer dyn-buffer-last !
       then
-      led::green led::toggle-led \ DEBUG
     ; define request-segment
     
     \ Request a segment after another segment
@@ -244,7 +243,6 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-last !
       then
       dup prev-segment segment-next !
-      led::green led::toggle-led \ DEBUG
     ; define request-segment-after
 
     \ Request a segment before another segment
@@ -260,7 +258,6 @@ begin-module dyn-buffer
         dup dyn-buffer dyn-buffer-first !
       then
       dup next-segment segment-prev !
-      led::green led::toggle-led \ DEBUG
     ; define request-segment-before
 
     \ Insert a segment
