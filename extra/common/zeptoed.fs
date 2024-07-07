@@ -541,6 +541,12 @@ begin-module zeptoed-internal
     \ Page down in buffer
     method do-page-down ( buffer -- )
 
+    \ Home in buffer
+    method do-doc-home ( buffer -- )
+
+    \ End in buffer
+    method do-doc-end ( buffer -- )
+
     \ Indent in buffer
     method do-indent ( buffer -- )
 
@@ -597,6 +603,12 @@ begin-module zeptoed-internal
 
     \ Page down in buffer
     method handle-page-down ( buffer -- )
+
+    \ Home in buffer
+    method handle-doc-home ( buffer -- )
+
+    \ End in buffer
+    method handle-doc-end ( buffer -- )
     
     \ Indent in buffer
     method handle-indent ( buffer -- )
@@ -831,6 +843,12 @@ begin-module zeptoed-internal
 
     \ Handle editor page down
     method handle-editor-page-down ( editor -- )
+
+    \ Handle editor home
+    method handle-editor-doc-home ( editor -- )
+
+    \ Handle editor end
+    method handle-editor-doc-end ( editor -- )
 
     \ Handle editor indent
     method handle-editor-indent ( editor -- )
@@ -2098,6 +2116,16 @@ begin-module zeptoed-internal
         then
       loop
     ; define do-page-down
+
+    \ Home in buffer
+    :noname { buffer -- }
+      buffer buffer-left-bound @ buffer buffer-edit-cursor go-to-offset
+    ; define do-doc-home
+
+    \ End in buffer
+    :noname { buffer -- }
+      buffer buffer-edit-cursor go-to-end
+    ; define do-doc-end
     
     \ Indent in buffer
     :noname { buffer -- }
@@ -2553,6 +2581,20 @@ begin-module zeptoed-internal
       buffer update-display drop
       buffer refresh-display
     ; define handle-page-down
+
+    \ Home in buffer
+    :noname { buffer -- }
+      buffer do-doc-home
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-doc-home
+
+    \ End in buffer
+    :noname { buffer -- }
+      buffer do-doc-end
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-doc-end
 
     \ Indent in buffer
     :noname { buffer -- }
@@ -3399,6 +3441,24 @@ begin-module zeptoed-internal
       then
     ; define handle-editor-page-down
 
+    \ Handle editor home
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-doc-home
+      else
+        editor editor-current @ handle-doc-home
+      then
+    ; define handle-editor-doc-home
+
+    \ Handle editor end
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-doc-end
+      else
+        editor editor-current @ handle-doc-end
+      then
+    ; define handle-editor-doc-end
+
     \ Handle editor indent
     :noname { editor -- }
       editor editor-in-minibuffer @ if
@@ -3432,6 +3492,8 @@ begin-module zeptoed-internal
         [char] B of editor handle-editor-down endof
         [char] C of editor handle-editor-forward endof
         [char] D of editor handle-editor-backward endof
+        [char] F of editor handle-editor-doc-end endof
+        [char] H of editor handle-editor-doc-home endof
         [char] Z of editor handle-editor-unindent endof
         [char] 3 of
           get-key case
