@@ -2617,6 +2617,13 @@ commit-flash
   then
 ;
 
+\ Return control to the prompt
+: return-to-prompt
+  display-red cr ." *** HARDWARE EXCEPTION, RETURNING TO PROMPT ***"
+  display-normal cr
+  abort
+;
+
 #include src/common/forth/welcome.fs
 #include src/common/forth/legal.fs
 

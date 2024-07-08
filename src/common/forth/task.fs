@@ -2242,7 +2242,11 @@ begin-module task
     ['] switch-tasks pendsv-vector vector!
     ['] task-systick-handler systick-vector vector!
     [: cpu-index 0= current-task main-task = and ;] in-main?-hook !
-    [: terminated-crashed current-task terminate ;] crash-hook !
+    [:
+      display-red cr ." *** HARDWARE EXCEPTION, TASK TERMINATED ***"
+      display-normal cr
+      terminated-crashed current-task terminate
+    ;] crash-hook !
     [: 0 cpu-main-task @ task-dict-current ;] main-here-hook !
     1 pause-enabled !
     enable-int
