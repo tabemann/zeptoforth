@@ -832,6 +832,15 @@ begin-module zeptoed-internal
     \ Handle a prompted exit
     method do-editor-exit ( editor -- )
 
+    \ Handle editor close
+    method handle-editor-close ( editor -- )
+    
+    \ Handle a prompted close
+    method do-editor-close ( editor -- )
+
+    \ Close a buffer
+    method close-editor-buffer ( buffer editor -- )
+
     \ Handle editor start
     method handle-editor-start ( editor -- )
 
@@ -859,6 +868,9 @@ begin-module zeptoed-internal
     \ Handle editor refresh
     method handle-editor-refresh ( editor -- )
 
+    \ Handle editor close
+    method handle-editor-close ( editor -- )
+    
     \ Handle a special key
     method handle-special ( editor -- )
 
@@ -3316,7 +3328,7 @@ begin-module zeptoed-internal
             editor editor-current @ buffer buffer-prev !
             editor editor-current @ buffer-next @ buffer buffer-next !
             buffer buffer-next @ if
-              buffer buffer-next @ buffer-prev !
+              buffer buffer buffer-next @ buffer-prev !
             else
               buffer editor editor-last !
             then
@@ -3485,6 +3497,85 @@ begin-module zeptoed-internal
       editor refresh-editor
     ; define handle-editor-refresh
 
+    \ Handle editor close
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ buffer-dirty @ if
+          editor activate-minibuffer
+          s" The buffer is modified, close? (yes/no): "
+          editor ['] do-editor-close
+          editor editor-minibuffer @ set-prompt
+        else
+          editor editor-current @ editor close-editor-buffer
+        then
+      then
+    ; define handle-editor-close
+    
+    \ Handle a prompted close
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor 256 [: { editor data }
+          data 256 0 editor editor-minibuffer @ read-minibuffer { len }
+          begin
+            len 0> if
+              data c@ { byte }
+              byte bl <= byte delete = or if
+                1 +to data
+                -1 +to len
+                false
+              else
+                true
+              then
+            else
+              true
+            then
+          until
+          data c@ { byte }
+          byte [char] Y = byte [char] y = or if
+            editor editor-current @ editor close-editor-buffer true
+          else
+            byte [char] N = byte [char] n = or
+          then
+          if
+            editor editor-minibuffer @ clear-minibuffer
+            editor deactivate-minibuffer
+            editor editor-current @ refresh-display
+          then
+        ;] with-allot
+      then
+    ; define do-editor-close
+
+    \ Close a buffer
+    :noname { buffer editor -- }
+      buffer buffer-next @ 0<> buffer buffer-prev @ 0<> or if
+        buffer buffer-next @ dup 0= if
+          drop buffer buffer-prev @
+        then { next-buffer }
+        buffer buffer-prev @ if
+          buffer buffer-next @
+          buffer buffer-prev @ buffer-next !
+        else
+          buffer buffer-next @
+          editor editor-first !
+        then
+        buffer buffer-next @ if
+          buffer buffer-prev @
+          buffer buffer-next @ buffer-prev !
+        else
+          buffer buffer-prev @
+          editor editor-last !
+        then
+        buffer destroy
+        buffer editor editor-heap @ free
+        buffer editor editor-current @ = if
+          next-buffer editor editor-current !
+          next-buffer refresh-display
+        then
+      else
+        true editor editor-exit !
+      then
+    ; define close-editor-buffer
+
     \ Handle a special key
     :noname { editor -- }
       get-key case
@@ -3523,6 +3614,7 @@ begin-module zeptoed-internal
         tab of tab editor handle-editor-insert endof
         ctrl-k of editor handle-editor-copy endof
         ctrl-w of editor handle-editor-change-file-path endof
+        ctrl-x of editor handle-editor-close endof
         [char] [ of editor handle-special endof
         clear-keys
       endcase

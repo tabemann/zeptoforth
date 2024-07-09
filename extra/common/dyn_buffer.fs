@@ -206,6 +206,16 @@ begin-module dyn-buffer
       0 dyn-buffer dyn-buffer-first-cursor !
       0 dyn-buffer dyn-buffer-last-cursor !
     ; define new
+
+    \ Destructor
+    :noname { dyn-buffer -- }
+      dyn-buffer dyn-buffer-first @ { current-segment }
+      begin current-segment while
+        current-segment segment-next @ { next-segment }
+        current-segment dyn-buffer dyn-buffer-heap @ free
+        next-segment to current-segment
+      repeat
+    ; define destroy
     
     \ The dynamic buffer length
     :noname ( dyn-buffer -- len )
@@ -313,28 +323,28 @@ begin-module dyn-buffer
     ; define delete-segment
     
     \ Execute xt for all other cursors
-    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- ) \ ." *A* "
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *B* "
-      begin current-cursor while \ ." *C* "
-        current-cursor cursor <> if \ ." *D* "
-          current-cursor xt execute \ ." *E* "
-        then \ ." *F* "
-        current-cursor cursor-next @ to current-cursor \ ." *G* "
-      repeat \ ." *H* "
+    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- )
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
+      begin current-cursor while
+        current-cursor cursor <> if
+          current-cursor xt execute
+        then
+        current-cursor cursor-next @ to current-cursor
+      repeat
     ; define for-all-other-cursors
 
     \ Resolve invalidated cursors
-    :noname { dyn-buffer -- } \ ." *a* "
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *b* "
-      begin current-cursor while \ ." *c* "
-        current-cursor cursor-invalid @ if \ ." *d* "
-          current-cursor offset@ \ ." *e* "
-          current-cursor go-to-start \ ." *f* "
-          current-cursor go-to-offset \ ." *g* "
-          false current-cursor cursor-invalid ! \ ." *h* "
-        then \ ." *i* "
-        current-cursor cursor-next @ to current-cursor \ ." *j* "
-      repeat \ ." *k* "
+    :noname { dyn-buffer -- }
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
+      begin current-cursor while
+        current-cursor cursor-invalid @ if
+          current-cursor offset@
+          current-cursor go-to-start
+          current-cursor go-to-offset
+          false current-cursor cursor-invalid !
+        then
+        current-cursor cursor-next @ to current-cursor
+      repeat
     ; define resolve-cursors
     
   end-implement

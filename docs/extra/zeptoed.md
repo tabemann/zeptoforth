@@ -68,6 +68,7 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-W: Write the current buffer to its file and mark it clean.
 * Control-Meta-W: Select another file and write the current buffer into it, creating it if it did not exist and overwriting its contents if it did, and set the current buffer to point to it; the current buffer will be marked as clean.
 * Control-X: Reload the current buffer from its file and mark it clean.
+* Control-Meta-X: Close the current buffer; note that if the current buffer is dirty, the user will be prompted whether they wish to close it.
 * Control-K: Cut the current selection and transfer it to the clipboard.
 * Control-Meta-K: Copy the current selection and transfer it to the clipboard.
 * Control-Y: Paste the contents of the clipboard at the cursor.
