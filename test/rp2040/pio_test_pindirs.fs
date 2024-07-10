@@ -27,12 +27,16 @@ continue-module forth
 
   \ Our initial PIO instructions
   create pio-init
+  \ Set GPIO 2 to be an output
   %00001 SET_PINDIRS set,
+  \ Set GPIO 2 to be low
   %00000 SET_PINS set,
 
   \ Our PIO program
   create pio-code
+  \ Set GPIO 2 to be high
   %00001 %10000 SET_PINS set+,
+  \ Set GPIO 2 to be low
   %00000 %10000 SET_PINS set+,
   
   \ Initialize our test

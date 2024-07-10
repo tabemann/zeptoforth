@@ -25,18 +25,28 @@ continue-module forth
 
   \ The initial setup
   :pio pio-init
+    \ Set GPIO 25 to be output
     1 SET_PINDIRS set,
+
+    \ Set GPIO 25 to be low
     0 SET_PINS set,
   ;pio
   
   \ The PIO code
   :pio pio-code
+    \ Set GPIO 25 to be high with an added 19 cycle delay
     1 19 SET_PINS set+,
+
+    \ Wait 80 cycles doing nothing
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
+
+    \ Set GPIO 25 to be low with an added 19 cycle delay
     0 19 SET_PINS set+,
+
+    \ Wait 80 cycles doing nothing
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,
     MOV_SRC_X 19 MOV_OP_NONE MOV_DEST_X mov+,

@@ -40,37 +40,70 @@ begin-module cyw43-spi
     0 constant SIDE_0
     16 constant SIDE_1
     :pio cyw43-pio-program
-    start>
-    wrap<
-    mark<
-    1 SIDE_0 OUT_PINS out+,
-    SIDE_1 COND_X1- jmp+<
-    0 SIDE_0 SET_PINDIRS set+,
-    MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
-    mark<
-    1 SIDE_1 IN_PINS in+,
-    SIDE_0 COND_Y1- jmp+<
-    0 SIDE_0 WAIT_PIN 1 wait+,
-    0 SIDE_0 IRQ_SET irq+,
-    mark<
-    SIDE_0 COND_ALWAYS jmp+<
-    <wrap
+      \ Set the starting address
+      start>
+
+      \ Set the address to wrap to
+      wrap<
+
+      \ Set a mark for the next jump to jump to
+      mark<
+
+      \ Output a bit from OSR to DIO and sideset CLK to be low
+      1 SIDE_0 OUT_PINS out+,
+
+      \ Jump to the previous mark if X is non-zero, side-set CLK to be high,
+      \ post-decrement X
+      SIDE_1 COND_X1- jmp+<
+
+      \ Set the direction of DIO to be input and sideset CLK to be low
+      0 SIDE_0 SET_PINDIRS set+,
+
+      \ No op except for sideset CLK to be low
+      MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
+
+      \ Set a mark for the next jump to jump to
+      mark<
+
+      \ Input a bit from DIO to ISR and sideset CLK to be high
+      1 SIDE_1 IN_PINS in+,
+
+      \ Jump to the previous mark if Y is non-zero, side-set CLK to be low,
+      \ post-decrement Y
+      SIDE_0 COND_Y1- jmp+<
+
+      \ Wait for a 1 to be received from DIO and sideset CLK to be low
+      0 SIDE_0 WAIT_PIN 1 wait+,
+
+      \ Set PIO IRQ 0
+      0 SIDE_0 IRQ_SET irq+,
+
+      \ Enter an infinite loop, setting a mark and always jumping to it
+      mark<
+      SIDE_0 COND_ALWAYS jmp+<
+
+      \ Set the address to wrap to
+      <wrap
     ;pio
 
     \ Program for setting X
     create cyw43-x!-program
+    \ Transfer the OSR to X
     32 OUT_X out,
 
     \ Program for setting Y
     create cyw43-y!-program
+    \ Transfer the OSR to Y
     32 OUT_Y out,
 
     \ Program for getting X
     create cyw43-x@-program
+    \ Transfer X to the ISR
     32 IN_X in,
 
     \ Program for getting Y
     create cyw43-y@-program
+    \ Transfer Y to the ISR
     32 IN_Y in,
 
   end-module> import

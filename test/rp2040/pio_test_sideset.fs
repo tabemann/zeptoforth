@@ -27,14 +27,20 @@ continue-module forth
 
   \ Our initial PIO instructions
   create pio-init
+  \ Set GPIO 2 to be output
   %00001 SET_PINDIRS set,
+  \ Set GPIO 2 to be low
   %00000 SET_PINS set,
 
   \ Our PIO program
   create pio-code
+  \ Set GPIO 2 to be output and sideset GPIO 2 to be high
   %00001 %10000 SET_PINDIRS set+,
+  \ No op except sideset GPIO 2 to be high
   MOV_SRC_NULL %10000 MOV_OP_NONE MOV_DEST_X mov+,
+  \ Set GPIO 2 to be output and sideset GPIO 2 to be low
   %00001 %00000 SET_PINDIRS set+,
+  \ No op except sideset GPIO 2 to be low
   MOV_SRC_NULL %00000 MOV_OP_NONE MOV_DEST_X mov+,
 
   \ Initialize our test
