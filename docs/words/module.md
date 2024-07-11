@@ -56,6 +56,11 @@ End the definition of the module at the top of the module stack, removing each w
 
 Import a specified module into the current module's wordlist order; if the module does not exist `x-not-found` is raised.
 
+##### `import-from`
+( module "name" -- )
+
+Import a specified named word from within the specified module into the current namespace; note that this word will not shadow identically named words defined in the current namespace, and will persist until the end of the current module's definition.
+
 ##### `unimport`
 ( module -- )
 
