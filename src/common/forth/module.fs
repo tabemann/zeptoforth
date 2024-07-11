@@ -69,6 +69,8 @@ commit-flash
 \ Temporary word stack
 temp-word-count cells buffer: temp-word-stack
 
+commit-flash
+
 \ The module stack
 module-entry-size module-stack-count * buffer: module-stack
 
