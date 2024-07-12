@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -183,19 +183,32 @@ variable old-find-hook
 
 \ Execute or compile a particular word in a provided module
 : do-find-with-module ( c-addr u -- word|0 )
-  temp-word-index @ begin ?dup while
-    1- 3dup
-    cells temp-word-stack + @ word-name count equal-case-strings? if
-      3dup -rot 2>r
-      get-order module-stack@ module @ 1 set-order
-      2r> old-find-hook @ execute ?dup if
-        >r set-order r> nip
+  module-stack-index @ 0> if
+    temp-word-index @ module-stack-index @ begin ?dup while
+      1-
+      dup module-entry-size * module-stack +
+      dup module-temp-word-count @ 0> if
+        2 pick swap module-temp-word-count @ - 2 pick 1- do
+          2over
+          i cells temp-word-stack + @ word-name count equal-case-strings? if
+            2over i -rot 2>r over >r
+            get-order
+            r> module-entry-size * module-stack + module @ 1 set-order
+            2r> old-find-hook @ execute ?dup if
+              >r set-order r> nip
+            else
+              set-order i cells temp-word-stack + @
+            then
+            -rot 2drop -rot 2drop unloop exit
+          then
+        -1 +loop
+        tuck module-entry-size * module-stack + module-temp-word-count @ - swap
       else
-        set-order cells temp-word-stack + @
+        drop
       then
-      -rot 2drop exit
-    then
-  repeat
+    repeat
+    drop
+  then
   2dup find-path-sep dup -1 <> if
     2 pick over old-find-hook @ execute ?dup if
       >r 2 + tuck - -rot + swap r> -rot 2>r
@@ -256,8 +269,11 @@ commit-flash
 
 \ Import an individual word from a module
 : import-from ( module "name" -- )
+  temp-word-index @ module-stack-index @ 2>r
+  0 temp-word-index ! 0 module-stack-index !
   >r get-order r> 1 set-order
   token find ?dup if
+    2r> module-stack-index ! temp-word-index !
     temp-word-index @ temp-word-count < if
       temp-word-index @ cells temp-word-stack + !
       1 temp-word-index +!
@@ -266,10 +282,12 @@ commit-flash
     else
       drop
       set-order
+      2r> module-stack-index ! temp-word-index !
       ['] x-temp-words-overflow ?raise
     then
   else
     set-order
+    2r> module-stack-index ! temp-word-index !
     ['] x-unknown-word ?raise
   then
 ;
