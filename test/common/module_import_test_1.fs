@@ -32,23 +32,15 @@ begin-module baz
 
   : do-baz do-foo ." BAZ " ;
 
-  : do-foo ." *FOO* " ;
-
   begin-module qux
 
     bar import-from do-bar
 
     : do-qux do-bar ." QUX " ;
 
-    : do-bar ." *BAR* " ;
-
     begin-module quux
 
       : do-quux do-foo do-bar ." QUUX " ;
-
-      foo import-from do-foo
-
-      : do-quux1 do-foo do-bar ." QUUX1 " ;
 
     end-module
 
