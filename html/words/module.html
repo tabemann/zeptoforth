@@ -91,6 +91,22 @@
 <p>( module “name” – )</p>
 <p>Import a specified named word from within the specified module into the current namespace; note that this word will not shadow identically named words defined in the current namespace, and will persist until the end of the current module’s definition.</p>
 </section>
+<section id="begin-imports-from">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-imports-from</span></code><a class="headerlink" href="#begin-imports-from" title="Permalink to this heading">¶</a></h3>
+<p>( module “name0” … “namen” “end-imports-from” – )</p>
+<p>Import multiple specified named words from within the specified module into the current namespace; note that these words will not shadow identically named words defined in the current namespace, and will persist untilt he end of the current module’s definition. Note that these imports can cross multiple lines of input, as in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">begin</span><span class="o">-</span><span class="n">module</span> <span class="n">foobar</span>
+  <span class="p">:</span> <span class="n">foo</span> <span class="o">.</span><span class="s2">&quot; FOO &quot;</span> <span class="p">;</span>
+  <span class="p">:</span> <span class="n">bar</span> <span class="o">.</span><span class="s2">&quot; BAR &quot;</span> <span class="p">;</span>
+  <span class="p">:</span> <span class="n">baz</span> <span class="o">.</span><span class="s2">&quot; BAZ &quot;</span> <span class="p">;</span>
+<span class="n">end</span><span class="o">-</span><span class="n">module</span>
+
+<span class="n">foobar</span> <span class="n">begin</span><span class="o">-</span><span class="n">imports</span><span class="o">-</span><span class="kn">from</span>
+  <span class="nn">foo</span> <span class="n">bar</span>
+<span class="n">end</span><span class="o">-</span><span class="n">imports</span><span class="o">-</span><span class="kn">from</span>
+</pre></div>
+</div>
+</section>
 <section id="unimport">
 <h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this heading">¶</a></h3>
 <p>( module – )</p>

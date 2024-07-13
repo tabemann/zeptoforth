@@ -61,6 +61,23 @@ Import a specified module into the current module's wordlist order; if the modul
 
 Import a specified named word from within the specified module into the current namespace; note that this word will not shadow identically named words defined in the current namespace, and will persist until the end of the current module's definition.
 
+##### `begin-imports-from`
+( module "name0" ... "namen" "end-imports-from" -- )
+
+Import multiple specified named words from within the specified module into the current namespace; note that these words will not shadow identically named words defined in the current namespace, and will persist untilt he end of the current module's definition. Note that these imports can cross multiple lines of input, as in:
+
+```
+begin-module foobar
+  : foo ." FOO " ;
+  : bar ." BAR " ;
+  : baz ." BAZ " ;
+end-module
+
+foobar begin-imports-from
+  foo bar
+end-imports-from
+```
+
 ##### `unimport`
 ( module -- )
 

@@ -222,6 +222,13 @@ variable old-find-hook
   then
 ;
 
+\ Add word to the temporary words
+: add-temp-word ( word -- )
+  temp-word-index @ cells temp-word-stack + !
+  1 temp-word-index +!
+  1 module-stack@ module-temp-word-count +!
+;
+
 \ Switch wordlists
 forth set-current
 
@@ -275,14 +282,11 @@ commit-flash
   token find ?dup if
     2r> module-stack-index ! temp-word-index !
     temp-word-index @ temp-word-count < if
-      temp-word-index @ cells temp-word-stack + !
-      1 temp-word-index +!
-      1 module-stack@ module-temp-word-count +!
+      add-temp-word
       set-order
     else
       drop
       set-order
-      2r> module-stack-index ! temp-word-index !
       ['] x-temp-words-overflow ?raise
     then
   else
@@ -290,6 +294,40 @@ commit-flash
     2r> module-stack-index ! temp-word-index !
     ['] x-unknown-word ?raise
   then
+;
+
+\ Import a multiple words from a module
+: begin-imports-from ( module "name0" ... "namen" "end-imports-from" -- )
+  >r get-order r> 1 set-order
+  begin
+    token
+    dup 0= if
+      2drop display-prompt refill false
+    else
+      2dup s" end-imports-from" equal-case-strings? not if
+        temp-word-index @ module-stack-index @ 2>r
+        0 temp-word-index ! 0 module-stack-index !
+        find ?dup if
+          2r> module-stack-index ! temp-word-index !
+          temp-word-index @ temp-word-count < if
+            add-temp-word false
+          else
+            drop
+            set-order
+            ['] x-temp-words-overflow ?raise
+          then
+        else
+          set-order
+          2r> module-stack-index ! temp-word-index !
+          ['] x-unknown-word ?raise
+        then
+      else
+        2drop
+        set-order
+        true
+      then
+    then
+  until
 ;
 
 \ Unimport a module import
