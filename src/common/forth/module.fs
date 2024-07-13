@@ -296,7 +296,7 @@ commit-flash
   then
 ;
 
-\ Import a multiple words from a module
+\ Import multiple words from a module
 : begin-imports-from ( module "name0" ... "namen" "end-imports-from" -- )
   >r get-order r> 1 set-order
   begin
