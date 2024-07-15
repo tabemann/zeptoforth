@@ -40,17 +40,17 @@ Note that this permanently allots space for the FAT32 filesystem and its support
 ##### `load-file`
 ( file -- )
 
-Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process.
+Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated.
 
 ##### `included`
 ( path-addr path-u -- )
 
-Load code from a file with the specified path in the current include FAT32 filesystem.
+Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated.
 
 ##### `include`
 ( "path" -- )
 
-Load code from a file with the specified path as a token in the current include FAT32 filesystem.
+Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated.
 
 ##### `list-dir`
 ( path-addr path-u -- )
