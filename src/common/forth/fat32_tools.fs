@@ -58,6 +58,9 @@ begin-module fat32-tools
       \ Frame offset
       field: frame-offset
 
+      \ Frame newline
+      field: frame-newline
+
     end-structure
     
     \ The current filesystem
@@ -111,12 +114,20 @@ begin-module fat32-tools
     
     \ Update the EOF and get the input length
     : update-line ( -- u )
+      include-stack-top@ frame-newline @ if
+        cr
+        false include-stack-top@ frame-newline !
+      then
       execute-line-len dup include-stack-top@ frame-offset @ +
       include-stack-top@ frame-file file-size@ =
       include-stack-top@ frame-eof !
       dup dup 0> if
-        1- include-buffer + c@ dup $0A = swap $0D = or if 1- then
+        1- include-buffer + c@ dup $0A = if
+          true include-stack-top@ frame-newline !
+        then
+        dup $0A = swap $0D = or if 1- then
       then
+      include-buffer over type
     ;
 
     \ Refill file
@@ -139,6 +150,7 @@ begin-module fat32-tools
       frame-depth @ 0> if
         include-stack-top@ frame-offset @ seek-set
         include-stack-top@ frame-file seek-file
+        true include-stack-top@ frame-newline !
         0 include-buffer-content-len !
         read-file-into-buffer
       then 
@@ -292,6 +304,7 @@ begin-module fat32-tools
       frame-offset !
       1 frame-depth +!
       0 include-buffer-content-len !
+      true include-stack-top@ frame-newline !
     ;] fs-lock with-lock
     execute-file
   ;
@@ -307,6 +320,7 @@ begin-module fat32-tools
       0 include-stack-next@ frame-offset !
       1 frame-depth +!
       0 include-buffer-content-len !
+      true include-stack-top@ frame-newline !
     ;] fs-lock with-lock
     execute-file
   ;
