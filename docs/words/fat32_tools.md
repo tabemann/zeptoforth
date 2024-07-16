@@ -37,20 +37,30 @@ Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card interface
 
 Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task's RAM dictionary.
 
+##### `enable-echo`
+( -- )
+
+Enable echoing while loading code from a file. Note that echoing is enabled by default. Also note that a given number of enables require an equal number of disables to be canceled out.
+
+##### `disable-echo`
+( -- )
+
+Disable echoing while loading code from a file. Note that a given number of disables require an equal number of enables to be canceled out.
+
 ##### `load-file`
 ( file -- )
 
-Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated.
+Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.
 
 ##### `included`
 ( path-addr path-u -- )
 
-Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated.
+Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.
 
 ##### `include`
 ( "path" -- )
 
-Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated.
+Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.
 
 ##### `list-dir`
 ( path-addr path-u -- )

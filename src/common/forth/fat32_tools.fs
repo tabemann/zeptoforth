@@ -83,6 +83,9 @@ begin-module fat32-tools
 
     \ Read buffer
     read-buffer-size aligned-buffer: read-buffer
+
+    \ Whether echoing code is enabled (non-negative values are enabled)
+    variable echo-enabled
     
     \ Get the top frame of the include stack
     : include-stack-top@ ( -- frame )
@@ -115,7 +118,7 @@ begin-module fat32-tools
     \ Update the EOF and get the input length
     : update-line ( -- u )
       include-stack-top@ frame-newline @ if
-        cr
+        echo-enabled @ 0>= if cr then
         false include-stack-top@ frame-newline !
       then
       execute-line-len dup include-stack-top@ frame-offset @ +
@@ -127,7 +130,7 @@ begin-module fat32-tools
         then
         dup $0A = swap $0D = or if 1- then
       then
-      include-buffer over type
+      echo-enabled @ 0>= if include-buffer over type then
     ;
 
     \ Refill file
@@ -262,6 +265,7 @@ begin-module fat32-tools
       0 current-fs !
       0 include-buffer-content-len !
       0 frame-depth !
+      0 echo-enabled !
     ;
   
   end-module> import
@@ -271,6 +275,12 @@ begin-module fat32-tools
   
   \ Get the current filesystem
   : current-fs@ ( fs -- ) current-fs @ ;
+
+  \ Enable echo
+  : enable-echo ( -- ) 1 echo-enabled +! ;
+
+  \ Disable echo
+  : disable-echo ( -- ) -1 echo-enabled +! ;
   
   \ Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card
   \ interface and FAT32 filesystem and, if successful, sets it as the current
