@@ -191,7 +191,7 @@ variable old-find-hook
         2 pick swap module-temp-word-count @ - 2 pick 1- do
           2over
           i cells temp-word-stack + @ word-name count equal-case-strings? if
-            2over i -rot 2>r over >r
+            2over 2>r dup >r
             get-order
             r> module-entry-size * module-stack + module @ 1 set-order
             2r> old-find-hook @ execute ?dup if
