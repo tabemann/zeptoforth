@@ -101,12 +101,18 @@ begin-module rtc
     \ Number of days in a mont
     create days-in-month 0 c, 31 c, 28 c, 31 c, 30 c, 31 c, 30 c, 31 c,
     31 c, 30 c, 31 c, 30 c, 31 c,
-    
+
     \ Get the number of seconds in a year
-    : year-secs ( year -- )
+    : year-secs ( year -- secs )
       [ 365 24 * 60 * 60 * ] literal swap leap-year? if
         [ 24 60 * 60 * ] literal +
       then
+    ;
+
+    \ Get the number of seconds in a month
+    : month-secs ( year month -- secs )
+      dup days-in-month + c@ -rot
+      2 = swap leap-year? and if 1+ then [ 24 60 * 60 * ] literal *
     ;
     
     \ Validate a date/time match
@@ -265,8 +271,8 @@ begin-module rtc
       1 +to year
     repeat
     1 { month }
-    begin second days-in-month month + c@ [ 24 60 * 60 * ] literal * u>= while
-      days-in-month month + c@ [ -24 60 * 60 * ] literal * +to second
+    begin second year month month-secs u>= while
+      year month month-secs negate +to second
       1 +to month
     repeat
     second [ 24 60 * 60 * ] literal u/mod 1+ { day } to second

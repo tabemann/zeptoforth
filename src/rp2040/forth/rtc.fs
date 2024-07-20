@@ -321,6 +321,12 @@ begin-module rtc
       then
     ;
     
+    \ Get the number of seconds in a month
+    : month-secs ( year month -- secs )
+      dup days-in-month + c@ -rot
+      2 = swap leap-year? and if 1+ then [ 24 60 * 60 * ] literal *
+    ;
+    
     \ Validate a date/time
     : validate-date-time ( date-time -- )
       date-time-size [: { new-date-time old-date-time }
@@ -712,8 +718,8 @@ begin-module rtc
       1 +to year
     repeat
     1 { month }
-    begin second days-in-month month + c@ [ 24 60 * 60 * ] literal * u>= while
-      days-in-month month + c@ [ -24 60 * 60 * ] literal * +to second
+    begin second year month month-secs u>= while
+      year month month-secs negate +to second
       1 +to month
     repeat
     second [ 24 60 * 60 * ] literal u/mod 1+ { day } to second
