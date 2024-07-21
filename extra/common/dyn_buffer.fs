@@ -822,7 +822,7 @@ begin-module dyn-buffer
         part-bytes +to total-bytes
         segment segment-header-size + offset + part-bytes -
         addr part-bytes move
-        part-bytes offset <= if
+        part-bytes offset < if
           addr total-bytes exit
         else
           segment segment-prev @ to segment
