@@ -26,6 +26,9 @@ begin-module dyn-buffer
   \ Default segment size
   256 constant default-segment-size
 
+  \ Find search distance
+  128 constant find-search-distance
+
   begin-module dyn-buffer-internal
     
     \ Dynamic buffer segment structure
@@ -184,6 +187,12 @@ begin-module dyn-buffer
 
     \ Read data
     method read-data ( addr bytes cursor -- bytes' )
+
+    \ Read data without moving the cursor
+    method read-data-w/o-move ( addr bytes cursor -- bytes' )
+
+    \ Read data before the cursor without moving the cursor
+    method read-data-before-w/o-move ( addr bytes cursor -- addr' bytes' )
 
     \ Find previous
     method find-prev ( xt cursor -- ) ( xt: c -- match? )
@@ -775,37 +784,99 @@ begin-module dyn-buffer
       repeat
       total-bytes
     ; define read-data
-    
-    \ Find previous
-    :noname { xt cursor -- } ( xt: c -- match? )
-      0 { W^ buffer }
-      begin cursor offset@ 0> while
-        -1 cursor adjust-offset
-        buffer 1 cursor read-data 0> if
-          buffer c@ xt execute if
-            exit
-          else
-            -1 cursor adjust-offset
-          then
+
+    \ Read data without moving the cursor
+    :noname { addr bytes cursor -- bytes' }
+      cursor cursor-segment @ { segment }
+      segment 0= if 0 exit then
+      0 { total-bytes }
+      cursor cursor-offset @ { offset }
+      begin total-bytes bytes < segment 0<> and while
+        segment segment-header-size + offset + { segment-addr }
+        segment segment-size @ offset - { remaining }
+        bytes total-bytes - remaining >= if
+          segment-addr addr remaining move
+          remaining +to addr
+          remaining +to total-bytes
+          segment segment-next @ to segment
+          0 to offset
         else
-          -1 cursor adjust-offset exit
-        then
-      repeat
-    ; define find-prev
-    
-    \ Find next
-    :noname { xt cursor -- } ( xt: c -- match? )
-      0 { W^ buffer }
-      begin cursor offset@ cursor cursor-dyn-buffer @ dyn-buffer-len @ < while
-        buffer 1 cursor read-data 0> if
-          buffer c@ xt execute if
-            -1 cursor adjust-offset
-            exit
-          then
-        else
+          segment-addr addr bytes total-bytes - move
+          bytes
           exit
         then
       repeat
+      total-bytes
+    ; define read-data-w/o-move
+
+    \ Read data before the cursor without moving the cursor
+    :noname { addr bytes cursor -- addr' bytes' }
+      bytes +to addr
+      cursor cursor-segment @ { segment }
+      segment 0= if addr 0 exit then
+      0 { total-bytes }
+      cursor cursor-offset @ { offset }
+      begin total-bytes bytes < segment 0<> and while
+        bytes total-bytes - offset min { part-bytes }
+        part-bytes negate +to addr
+        part-bytes +to total-bytes
+        segment segment-header-size + offset + part-bytes -
+        addr part-bytes move
+        part-bytes offset <= if
+          addr total-bytes exit
+        else
+          segment segment-prev @ to segment
+          segment if
+            segment segment-size @ to offset
+          else
+            0 to offset
+          then
+        then
+      repeat
+      addr total-bytes
+    ; define read-data-before-w/o-move
+    
+    \ Find previous
+    :noname ( xt cursor -- ) ( xt: c -- match? )
+      find-search-distance [: { xt cursor buffer }
+        cursor offset@ { bytes }
+        begin bytes while
+          buffer find-search-distance cursor read-data-before-w/o-move
+          { buffer' count }
+          count 0> if
+            count 1+ 1 ?do
+              buffer' count + i - c@ xt execute if
+                i 1- negate cursor adjust-offset unloop exit
+              then
+            loop
+            count negate cursor adjust-offset
+            count negate +to bytes
+          else
+            exit
+          then
+        repeat
+      ;] with-allot
+    ; define find-prev
+    
+    \ Find next
+    :noname ( xt cursor -- ) ( xt: c -- match? )
+      find-search-distance [: { xt cursor buffer }
+        cursor cursor-dyn-buffer @ dyn-buffer-len @ cursor offset@ - { bytes }
+        begin bytes while
+          buffer find-search-distance cursor read-data-w/o-move { count }
+          count 0> if
+            count 0 ?do
+              buffer i + c@ xt execute if
+                i cursor adjust-offset unloop exit
+              then
+            loop
+            count cursor adjust-offset
+            count negate +to bytes
+          else
+            exit
+          then
+        repeat
+      ;] with-allot
     ; define find-next
 
   end-implement

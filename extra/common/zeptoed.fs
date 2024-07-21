@@ -459,6 +459,9 @@ begin-module zeptoed-internal
 
     \ Move the cursor to the last position in a buffer
     method output-last ( buffer -- )
+
+    \ Move the cursor to the previous line
+    method output-up ( buffer -- )
     
     \ Move the cursor to the next line
     method output-down ( buffer -- )
@@ -1197,32 +1200,23 @@ begin-module zeptoed-internal
     ; define char-dist
 
     \ Get the byte before a cursor
-    :noname ( orig-cursor buffer -- c|0 )
-      buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
-        orig-cursor offset@ 0> if
-          orig-cursor cursor copy-cursor
-          -1 cursor adjust-offset
-          0 { W^ data }
-          data 1 cursor read-data drop
-          data c@
-        else
-          0
-        then
-      ;] with-object
+    :noname { cursor buffer -- c|0 }
+      0 { W^ data }
+      data 1 cursor read-data-before-w/o-move if
+        c@
+      else
+        drop 0
+      then
     ; define cursor-before
 
     \ Get the byte at a cursor
-    :noname ( orig-cursor buffer -- c|0 )
-      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
-        orig-cursor offset@ buffer buffer-len@ < if
-          orig-cursor cursor copy-cursor
-          0 { W^ data }
-          data 1 cursor read-data drop
-          data c@
-        else
-          0
-        then
-      ;] with-object
+    :noname { cursor buffer -- c|0 }
+      0 { W^ data }
+      data 1 cursor read-data-w/o-move if
+        data c@
+      else
+        0
+      then
     ; define cursor-at
     
     \ Get the byte before the edit cursor
@@ -1748,6 +1742,14 @@ begin-module zeptoed-internal
       cols dist + buffer buffer-edit-col !
       buffer buffer-editor @ update-coord
     ; define output-last
+
+    \ Move the cursor to the previous line
+    :noname { buffer -- }
+      buffer edit-cursor-left-space { cols rows }
+      buffer buffer-edit-row @ 1- 0 max buffer buffer-edit-row !
+      cols buffer buffer-edit-col !
+      buffer buffer-editor @ update-coord
+    ; define output-up
     
     \ Move the cursor to the next line
     :noname { buffer -- }
@@ -2363,12 +2365,18 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer edit-cursor-first-row? if
         buffer do-first
-        buffer update-display drop
-        buffer refresh-display
+        buffer update-display if
+          buffer refresh-display
+        else
+          buffer output-up
+        then
       else
         buffer do-up
-        buffer update-display drop
-        buffer refresh-display
+        buffer update-display if
+          buffer refresh-display
+        else
+          buffer output-up
+        then
       then
     ; define handle-up
 
