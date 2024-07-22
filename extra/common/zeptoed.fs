@@ -244,6 +244,9 @@ begin-module zeptoed-internal
     \ Edit cursor
     <cursor> class-size member buffer-edit-cursor
 
+    \ Previous edit cursor
+    <cursor> class-size member buffer-prev-cursor
+
     \ Select cursor
     <cursor> class-size member buffer-select-cursor
 
@@ -259,6 +262,9 @@ begin-module zeptoed-internal
     \ Left bound index
     cell member buffer-left-bound
 
+    \ Update the previous cursor
+    method update-prev-cursor ( buffer -- )
+    
     \ Dirty buffer
     method dirty-buffer ( buffer -- )
 
@@ -373,17 +379,34 @@ begin-module zeptoed-internal
     \ Get the length of the last row of a line
     method cursor-line-last-row-len ( cursor buffer -- length )
 
+    \ Is a cursor in the first row of a line?
+    method cursor-line-first? ( cursor buffer -- first? )
+
     \ Is a cursor in the last row of a line?
     method cursor-line-last? ( cursor buffer -- last? )
 
     \ Edit cursor left space
     method edit-cursor-left-space ( buffer -- cols rows )
 
+    \ Get the number of rows making up the current edit line
+    method edit-cursor-line-rows ( buffer -- rows )
+
+    \ Get whether the current line takes up the full width
+    method edit-cursor-full-width? ( buffer -- full-width? )
+
     \ Edit cursor offset
     method edit-cursor-offset@ ( buffer -- offset )
 
     \ Buffer content length
     method buffer-len@ ( buffer -- length )
+
+    \ Get whether a cursor is on a special line
+    method cursor-special-line?
+    ( cursor buffer -- special? )
+
+    \ Get whether the edit cursor is on a special line
+    method edit-cursor-special-line?
+    ( buffer -- special? )
 
     \ Are we at the start of a line?
     method edit-cursor-at-start? ( buffer -- start? )
@@ -395,7 +418,7 @@ begin-module zeptoed-internal
     method edit-cursor-at-end? ( buffer -- end? )
 
     \ Are we at the end of a row?
-    method edit-cursor-at-row-end? ( bufer -- row-end? )
+    method edit-cursor-at-row-end? ( buffer -- row-end? )
 
     \ Is the edit cursor in the last row of a line
     method edit-cursor-line-last? ( buffer -- last? )
@@ -405,6 +428,12 @@ begin-module zeptoed-internal
 
     \ Is the edit cursor at the start of the last row of a line
     method edit-cursor-line-last-first? ( buffer -- last-first? )
+
+    \ Is a cursor in the first row of the first line
+    method cursor-first-row? ( cursor buffer -- first-row? )
+
+    \ Is a cursor in the last row of the last line
+    method cursor-last-row? ( cursor buffer -- last-row? )
 
     \ Is the edit cursor in the first row of the first line
     method edit-cursor-first-row? ( buffer -- first-row? )
@@ -911,6 +940,7 @@ begin-module zeptoed-internal
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-edit-cursor init-object
+      buffer buffer-dyn-buffer <cursor> buffer buffer-prev-cursor init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-select-cursor init-object
     ; define new
 
@@ -918,6 +948,7 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer clear-undos
       buffer buffer-select-cursor destroy
+      buffer buffer-prev-cursor destroy
       buffer buffer-edit-cursor destroy
       buffer buffer-display-cursor destroy
       buffer buffer-dyn-buffer destroy
@@ -926,6 +957,11 @@ begin-module zeptoed-internal
       buffer <object>->destroy
     ; define destroy
 
+    \ Update the previous cursor
+    :noname ( buffer -- )
+      dup buffer-edit-cursor swap buffer-prev-cursor copy-cursor
+    ; define update-prev-cursor
+    
     \ Dirty buffer
     :noname ( buffer -- )
       true swap buffer-dirty !
@@ -1314,8 +1350,7 @@ begin-module zeptoed-internal
     \ Get the number of rows making up a line
     :noname { cursor buffer -- rows }
       cursor buffer cursor-line-len { len }
-      len buffer buffer-width@ u/
-      len buffer buffer-width@ umod 0<> if 1+ then
+      len buffer buffer-width@ u/mod swap if 1+ then
     ; define cursor-line-rows
     
     \ Get the length of the last row of a line
@@ -1323,6 +1358,11 @@ begin-module zeptoed-internal
       cursor buffer cursor-line-len buffer buffer-width@ umod
     ; define cursor-line-last-row-len
 
+    \ Is a cursor in the first row of a line?
+    :noname { cursor buffer -- first? }
+      cursor buffer cursor-start-dist buffer buffer-width@ <
+    ; define cursor-line-first?
+    
     \ Is a cursor in the last row of a line?
     :noname { cursor buffer -- last? }
       cursor buffer cursor-line-last-row-len { len }
@@ -1335,6 +1375,17 @@ begin-module zeptoed-internal
       dup buffer-edit-cursor swap cursor-left-space
     ; define edit-cursor-left-space
 
+    \ Get the number of rows making up the current edit line
+    :noname ( buffer -- rows )
+      dup buffer-edit-cursor swap cursor-line-rows
+    ; define edit-cursor-line-rows
+
+    \ Get whether the current line takes up the full width
+    :noname { buffer -- full-width? }
+      buffer buffer-edit-cursor buffer cursor-line-len { len }
+      len buffer buffer-width@ u/mod swap 0= if 0> then
+    ; define edit-cursor-full-width?
+    
     \ Edit cursor offset
     :noname ( buffer -- offset )
       buffer-edit-cursor offset@
@@ -1344,6 +1395,34 @@ begin-module zeptoed-internal
     :noname ( buffer -- length )
       buffer-dyn-buffer dyn-buffer-len@
     ; define buffer-len@
+
+    \ Get whether a cursor is on a special line
+    :noname ( cursor buffer -- special? )
+      dup <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor cursor copy-cursor
+        [:
+          dup tab = over unicode? or over bl < or over delete = or
+          swap newline = or
+        ;] cursor find-prev
+        cursor offset@ { check-offset }
+        orig-cursor cursor copy-cursor
+        [: newline = ;] cursor find-prev
+        cursor offset@ check-offset <> { checked-before }
+        orig-cursor cursor copy-cursor
+        [: dup tab = over unicode? or over bl < or over delete = or
+          swap newline = or
+        ;] cursor find-next
+        cursor offset@ to check-offset
+        orig-cursor cursor copy-cursor
+        [: newline = ;] cursor find-next
+        cursor offset@ check-offset <> checked-before or
+      ;] with-object
+    ; define cursor-special-line?
+
+    \ Get whether the edit cursor is on a special line
+    :noname ( buffer -- special? )
+      dup buffer-edit-cursor swap cursor-special-line?
+    ; define edit-cursor-special-line?
     
     \ Are we at the start of a line?
     :noname ( buffer -- start? )
@@ -1385,21 +1464,30 @@ begin-module zeptoed-internal
       then
     ; define edit-cursor-line-last-first?
 
-    \ Is the edit cursor in the first row of the first line
-    :noname ( buffer -- first-row? )
-      dup buffer-edit-cursor 2dup swap cursor-left-space nip 0= -rot
-      dup rot cursor-start-dist swap offset@ = and
-    ; define edit-cursor-first-row?
+    \ Is a cursor in the first row of the first line
+    :noname { cursor buffer -- first-row? }
+      cursor buffer cursor-left-space nip 0=
+      cursor buffer cursor-raw-start-dist cursor offset@ = and
+    ; define cursor-first-row?
 
-    \ Is the edit cursor in the last row of the last line
-    :noname { buffer -- last-row? }
-      buffer buffer-edit-cursor offset@
-      buffer buffer-edit-cursor buffer cursor-raw-end-dist +
+    \ Is a cursor in the last row of the last line
+    :noname { cursor buffer -- last-row? }
+      cursor offset@ cursor buffer cursor-raw-end-dist +
       buffer buffer-dyn-buffer dyn-buffer-len@ = if
-        buffer edit-cursor-line-last?
+        cursor buffer cursor-line-last?
       else
         false
       then
+    ; define cursor-last-row?
+
+    \ Is the edit cursor in the first row of the first line
+    :noname ( buffer -- first-row? )
+      dup buffer-edit-cursor swap cursor-first-row?
+    ; define edit-cursor-first-row?
+
+    \ Is the edit cursor in the last row of the last line
+    :noname ( buffer -- last-row? )
+      dup buffer-edit-cursor swap cursor-last-row?
     ; define edit-cursor-last-row?
     
     \ Output buffer title
@@ -1424,22 +1512,19 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [:
         default-segment-size [: { buffer cursor data }
           buffer buffer-edit-cursor cursor copy-cursor
+          buffer buffer-prev-cursor buffer cursor-start-dist
+          buffer buffer-width@ u/ { before-rows }
           [: newline = ;] cursor find-prev
           cursor buffer cursor-raw-end-dist { end-dist }
           hide-cursor
-          buffer buffer-edit-row @ 0 buffer go-to-buffer-coord
+          buffer buffer-edit-row @ before-rows - 0 buffer go-to-buffer-coord
           end-dist { len }
           0 { chars }
-          false { cols-set? }
           begin len 0> while
             len default-segment-size min { part-size }
             cursor offset@ { prev-offset }
             data part-size cursor read-data { real-size }
             real-size 0 ?do
-              prev-offset i + buffer buffer-edit-cursor offset@ = if
-                chars buffer buffer-edit-col !
-                true to cols-set?
-              then
               data i + c@ { byte }
               byte tab = if
                 zeptoed-tab-size chars zeptoed-tab-size umod - { tab-spaces }
@@ -1455,8 +1540,14 @@ begin-module zeptoed-internal
             loop
             part-size negate +to len
           repeat
-          cols-set? not if chars buffer buffer-edit-col ! then
-          chars buffer buffer-width@ < if erase-end-of-line then
+          chars buffer buffer-width@ umod if erase-end-of-line then
+
+          buffer buffer-edit-cursor buffer cursor-start-dist
+          buffer buffer-width@ u/mod { after-cols after-rows }
+          buffer buffer-edit-row @ before-rows - after-rows +
+          buffer buffer-edit-row !
+          after-cols buffer buffer-edit-col !
+          
           buffer buffer-editor @ update-coord
           show-cursor
         ;] with-allot
@@ -1745,17 +1836,43 @@ begin-module zeptoed-internal
 
     \ Move the cursor to the previous line
     :noname { buffer -- }
-      buffer edit-cursor-left-space { cols rows }
-      buffer buffer-edit-row @ 1- 0 max buffer buffer-edit-row !
-      cols buffer buffer-edit-col !
+\      buffer buffer-prev-cursor buffer cursor-line-first? if
+        buffer buffer-edit-cursor buffer cursor-start-dist
+        buffer buffer-width@ umod { after-cols }
+        buffer buffer-prev-cursor buffer cursor-first-row? not if
+          -1 buffer buffer-edit-row +!
+        then
+        after-cols buffer buffer-edit-col !
+\      else
+\        buffer buffer-prev-cursor buffer cursor-start-dist
+\        buffer buffer-width@ u/ { before-rows }
+\        buffer buffer-edit-cursor buffer cursor-start-dist
+\        buffer buffer-width@ u/mod { after-cols after-rows }
+\        buffer buffer-edit-row @ before-rows - after-rows +
+\        buffer buffer-edit-row !
+\        after-cols buffer buffer-edit-col !
+\      then
       buffer buffer-editor @ update-coord
     ; define output-up
     
     \ Move the cursor to the next line
     :noname { buffer -- }
-      buffer edit-cursor-left-space { cols rows }
-      1 buffer buffer-edit-row +!
-      cols buffer buffer-edit-col !
+\      buffer buffer-prev-cursor buffer cursor-line-last? if
+        buffer buffer-edit-cursor buffer cursor-start-dist
+        buffer buffer-width@ umod { after-cols }
+        buffer buffer-prev-cursor buffer cursor-last-row? not if
+          1 buffer buffer-edit-row +!
+        then
+        after-cols buffer buffer-edit-col !
+\      else
+\        buffer buffer-prev-cursor buffer cursor-start-dist
+\        buffer buffer-width@ u/ { before-rows }
+\        buffer buffer-edit-cursor buffer cursor-start-dist
+\        buffer buffer-width@ u/mod { after-cols after-rows }
+\        buffer buffer-edit-row @ before-rows - after-rows +
+\        buffer buffer-edit-row !
+\        after-cols buffer buffer-edit-col !
+\      then
       buffer buffer-editor @ update-coord
     ; define output-down
 
@@ -1822,16 +1939,74 @@ begin-module zeptoed-internal
     \ Move the edit cursor up by one character
     :noname { buffer -- }
       buffer buffer-edit-cursor buffer cursor-start-dist { dist }
-      dist buffer buffer-width@ <= if
+      dist buffer buffer-width@ u/mod { cols rows }
+      rows 0= if
         [: newline = ;] buffer buffer-edit-cursor find-prev
         -1 buffer buffer-edit-cursor adjust-offset
-        buffer buffer-edit-cursor buffer cursor-start-dist { len }
-        len buffer buffer-width@ umod dup { last-len } dist >= if
-          last-len negate dist + buffer buffer-edit-cursor adjust-offset
+        buffer buffer-edit-cursor buffer cursor-start-dist to dist
+        dist buffer buffer-width@ umod { cols' }
+        buffer edit-cursor-special-line? if
+          0 { W^ data }
+          begin cols' cols > while
+            data 1 buffer buffer-edit-cursor read-data-before-w/o-move if
+              c@ dup tab = if
+                drop
+                -1 buffer buffer-edit-cursor adjust-offset
+                buffer buffer-edit-cursor buffer cursor-start-dist to dist
+                dist buffer buffer-width@ umod to cols'
+              else
+                -1 buffer buffer-edit-cursor adjust-offset
+                dup bl >= over delete < and swap unicode-start? or if
+                  -1 +to cols'
+                then
+              then
+            else
+              drop 0 to cols'
+            then
+          repeat
+        else
+          cols' cols > if
+            cols cols' - buffer buffer-edit-cursor adjust-offset
+          then            
         then
       else
-        buffer buffer-width@ negate buffer buffer-edit-cursor adjust-offset
+        buffer edit-cursor-special-line? if
+          buffer buffer-width@ { cols' }
+          0 { W^ data }
+          begin cols' 0> while
+            data 1 buffer buffer-edit-cursor read-data-before-w/o-move if
+              c@ dup tab = if
+                drop
+                buffer buffer-edit-cursor buffer cursor-start-dist { before }
+                -1 buffer buffer-edit-cursor adjust-offset
+                buffer buffer-edit-cursor buffer cursor-start-dist { after }
+                after before - +to cols'
+              else
+                -1 buffer buffer-edit-cursor adjust-offset
+                dup bl >= over delete < and swap unicode-start? or if
+                  -1 +to cols'
+                then
+              then
+            else
+              drop 0 to cols'
+            then
+          repeat
+        else
+          buffer buffer-width@ negate buffer buffer-edit-cursor adjust-offset
+        then
       then
+      
+\      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
+\      dist buffer buffer-width@ <= if
+\        [: newline = ;] buffer buffer-edit-cursor find-prev
+\        -1 buffer buffer-edit-cursor adjust-offset
+\        buffer buffer-edit-cursor buffer cursor-start-dist { len }
+\        len buffer buffer-width@ umod dup { last-len } dist >= if
+\          last-len negate dist + buffer buffer-edit-cursor adjust-offset
+\        then
+\      else
+\        buffer buffer-width@ negate buffer buffer-edit-cursor adjust-offset
+\      then
       buffer buffer-edit-cursor offset@ buffer buffer-left-bound @ < if
         buffer buffer-left-bound @ buffer buffer-edit-cursor go-to-offset
       then
@@ -1840,21 +2015,80 @@ begin-module zeptoed-internal
     \ Move the edit cursor down by one character
     :noname { buffer -- }
       buffer buffer-edit-cursor buffer cursor-start-dist { dist }
-      buffer buffer-edit-cursor buffer cursor-left-space { col row }
+      dist buffer buffer-width@ umod { cols }
       buffer edit-cursor-line-last? if
-        dist buffer buffer-width@ umod { last-len }
         [: newline = ;] buffer buffer-edit-cursor find-next
         1 buffer buffer-edit-cursor adjust-offset
-        buffer buffer-edit-cursor buffer cursor-line-len { next-len }
-        last-len next-len min buffer buffer-edit-cursor adjust-offset
-      else
-        buffer buffer-edit-cursor buffer cursor-line-len { len }
-        len dist - dist buffer buffer-width@ umod > if
-          buffer buffer-width@ buffer buffer-edit-cursor adjust-offset
+        buffer buffer-edit-cursor buffer cursor-end-dist to dist
+        dist cols >= if
+          0 { cols' }
+          buffer edit-cursor-special-line? if
+            0 { W^ data }
+            begin cols cols' > while
+              data 1 buffer buffer-edit-cursor read-data if
+                data c@ dup tab = if
+                  drop
+                  zeptoed-tab-size cols' zeptoed-tab-size umod - +to cols'
+                else
+                  dup bl >= over delete < and swap unicode-start? or if
+                    1 +to cols'
+                  then
+                then
+              else
+                cols to cols'
+              then
+            repeat
+          else
+            dist cols > if cols else dist then
+            buffer buffer-edit-cursor adjust-offset
+          then
         else
-          len dist - buffer buffer-edit-cursor adjust-offset
+          [: newline = ;] buffer buffer-edit-cursor find-next
+        then
+      else
+        buffer buffer-edit-cursor buffer cursor-end-dist { end-dist }
+        end-dist buffer buffer-width@ >= if
+          buffer edit-cursor-special-line? if
+            0 { cols' }
+            0 { W^ data }
+            begin buffer buffer-width@ cols' > while
+              data 1 buffer buffer-edit-cursor read-data if
+                data c@ dup tab = if
+                  drop
+                  zeptoed-tab-size cols' zeptoed-tab-size umod - +to cols'
+                else
+                  dup bl >= over delete < and swap unicode-start? or if
+                    1 +to cols'
+                  then
+                then
+              else
+                buffer buffer-width@ to cols'
+              then
+            repeat
+          else
+            buffer buffer-width@ buffer buffer-edit-cursor adjust-offset
+          then
+        else
+          [: newline = ;] buffer buffer-edit-cursor find-next
         then
       then
+
+      \      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
+\      buffer buffer-edit-cursor buffer cursor-left-space { col row }
+\      buffer edit-cursor-line-last? if
+\        dist buffer buffer-width@ umod { last-len }
+\        [: newline = ;] buffer buffer-edit-cursor find-next
+\        1 buffer buffer-edit-cursor adjust-offset
+\        buffer buffer-edit-cursor buffer cursor-line-len { next-len }
+\        last-len next-len min buffer buffer-edit-cursor adjust-offset
+\      else
+\        buffer buffer-edit-cursor buffer cursor-line-len { len }
+\        len dist - dist buffer buffer-width@ umod > if
+\          buffer buffer-width@ buffer buffer-edit-cursor adjust-offset
+\        else
+\          len dist - buffer buffer-edit-cursor adjust-offset
+\        then
+\      then
     ; define do-down
     
     \ Enter a character into the buffer
@@ -2302,9 +2536,12 @@ begin-module zeptoed-internal
     4 constant at-last-last
     5 constant in-single-row
     6 constant at-start
-  
+    7 constant full-width
+    8 constant insert/delete-tab
+    
     \ Go left one character
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-offset@ 0> if
         buffer edit-cursor-left-space { cols rows }
         buffer edit-cursor-before-spaces { spaces }
@@ -2316,11 +2553,7 @@ begin-module zeptoed-internal
             buffer edit-cursor-at tab <> if
               spaces buffer output-left
             else
-              buffer edit-cursor-single-row? if
-                buffer refresh-line
-              else
-                buffer refresh-display
-              then
+              buffer refresh-line
             then
           else
             buffer refresh-display
@@ -2331,6 +2564,7 @@ begin-module zeptoed-internal
 
     \ Go right one character
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-offset@ buffer buffer-len@ < if
         buffer edit-cursor-left-space { cols rows }
         buffer edit-cursor-at-spaces { spaces }
@@ -2347,11 +2581,7 @@ begin-module zeptoed-internal
               before-tab? not if
                 spaces buffer output-right
               else
-                buffer edit-cursor-single-row? if
-                  buffer refresh-line
-                else
-                  buffer refresh-display
-                then
+                buffer refresh-line
               then
             else
               buffer refresh-display
@@ -2363,6 +2593,7 @@ begin-module zeptoed-internal
 
     \ Go up one character
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-first-row? if
         buffer do-first
         buffer update-display if
@@ -2382,6 +2613,7 @@ begin-module zeptoed-internal
 
     \ Go down one character
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-last-row? if
         buffer do-last
         buffer update-display if
@@ -2401,32 +2633,27 @@ begin-module zeptoed-internal
     
     \ Enter a character into the buffer
     :noname { c buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-at-end? if
-        buffer edit-cursor-single-row?
-        buffer edit-cursor-at-row-end? not and if
-          c tab <> c unicode? not and if
-            at-end
-          else
-            in-single-row
-          then
-        else
-          at-last-last
-        then
-      else
-        buffer edit-cursor-single-row? if
-          in-single-row
+        c tab <> if
+          at-end
         else
           in-middle
         then
+      else
+        in-middle
       then { position }
+      buffer edit-cursor-line-rows { start-rows }
       c buffer do-insert
+      buffer edit-cursor-line-rows start-rows <> if
+        full-width to position
+      then
       buffer update-display if
         buffer refresh-display
       else
         position case
-          at-last-last of buffer refresh-display endof
-          in-middle of buffer refresh-display endof
-          in-single-row of buffer refresh-line endof
+          full-width of buffer refresh-display endof
+          in-middle of buffer refresh-line endof
           at-end of c buffer output-char endof
         endcase
       then
@@ -2441,6 +2668,7 @@ begin-module zeptoed-internal
 
     \ Backspace in the buffer
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer selected? if
         buffer do-delete-range
         buffer do-deselect
@@ -2450,29 +2678,31 @@ begin-module zeptoed-internal
         buffer buffer-left-bound @ buffer buffer-edit-cursor offset@ = if
           exit
         then
-        buffer edit-cursor-at-row-start? if
+        buffer edit-cursor-at-start? if
           at-start
         else
-          buffer edit-cursor-at-end?
-          buffer edit-cursor-at-row-end? and
-          buffer edit-cursor-before tab <> and if
-            at-end
-          else
-            buffer edit-cursor-single-row? if
-              in-single-row
-            else
+          buffer edit-cursor-at-end? if
+            buffer edit-cursor-before tab = if
               in-middle
+            else
+              at-end
             then
+          else
+            in-middle
           then
         then { position }
+        buffer edit-cursor-line-rows { start-rows }
         buffer do-delete
+        buffer edit-cursor-line-rows start-rows <> if
+          full-width to position
+        then
         buffer update-display if
           buffer refresh-display
         else
           position case
-            in-middle of buffer refresh-display endof
+            in-middle of buffer refresh-line endof
+            full-width of buffer refresh-display endof
             at-start of buffer refresh-display endof
-            in-single-row of buffer refresh-line endof
             at-end of buffer output-backspace endof
           endcase
         then
@@ -2481,6 +2711,7 @@ begin-module zeptoed-internal
 
     \ Delete in the buffer
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer selected? if
         buffer do-delete-range
         buffer do-deselect
@@ -2554,6 +2785,7 @@ begin-module zeptoed-internal
 
     \ Go to line start in the buffer
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-single-row? if
         in-single-row
       else
@@ -2572,6 +2804,7 @@ begin-module zeptoed-internal
 
     \ Go to line end in the buffer
     :noname { buffer -- }
+      buffer update-prev-cursor
       buffer edit-cursor-single-row? if
         in-single-row
       else
