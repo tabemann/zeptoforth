@@ -1012,6 +1012,7 @@ commit-flash
 \ Allocate a user buffer
 : user-buffer: ( bytes "name" -- )
   next-user-space
+  4 align
   compiling-to-flash?
   over
   compile-to-flash
@@ -1142,6 +1143,7 @@ internal set-current
 \ Allocate a buffer in RAM
 : ram-buffer: ( bytes "name" -- )
   next-ram-space
+  4 align
   compiling-to-flash?
   over
   compile-to-flash

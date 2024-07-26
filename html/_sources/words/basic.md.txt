@@ -1360,12 +1360,12 @@ Allocate a doubleword user variable
 ##### `user-buffer:`
 ( bytes "name" -- )
 
-Allocate a user buffer
+Allocate a cell-aligned user buffer
 
 ##### `user-aligned-buffer:`
 ( bytes "name" -- )
 
-Allocate a cell-aligned user buffer
+Allocate a cell-aligned user buffer (note that this is absoleted by `user-buffer:` not provided aligned user buffers)
 
 ##### `cvariable`
 ( "name" -- )
@@ -1390,12 +1390,12 @@ Create an eight-byte variable
 ##### `buffer:`
 ( # "name" -- )
 
-Specify a buffer of a given size
+Specify a cell-aligned buffer of a given size
 
 ##### `aligned-buffer:`
 ( # "name" -- )
 
-Specify a cell-aligned buffer of a given size
+Specify a cell-aligned buffer of a given size (this is obsoleted by `buffer:` now providing cell-aligned buffers)
 
 ##### `flash-wordlist`
 ( -- wid )
