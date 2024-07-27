@@ -49,6 +49,11 @@ begin-module file-close-test
     do-remove-file
     
     do-create-file
+    cr ." Checking for existence"
+    s" FRED1.TXT" exists? if
+      cr ." Removing FRED1.TXT"
+      s" FRED1.TXT" remove-file
+    then
     cr ." Running COPY-FILE"
     s" FRED.TXT" s" FRED1.TXT" copy-file
     do-remove-file
@@ -148,12 +153,13 @@ begin-module file-close-test
     cr ." Running WITH-FILE-OUTPUT"
     s" FRED.TXT" [: ." This is only a test, repeat, this is only a test!" ;]
     with-file-output
+    do-remove-file
 
     do-create-file
     cr ." Running WITH-FILE-ERROR-OUTPUT"
-    s" FRED.TXT" [: ." This is only a test, repeat, this is only a test!" ;]
+    cr s" FRED.TXT" [: ." This is only a test, repeat, this is only a test!" ;]
     with-file-error-output
-
+    do-remove-file
   ;
   
 end-module
