@@ -46,24 +46,35 @@ begin-module fat32-test
     true my-fs write-through!
   ;
   
+  
   : ls-root ( -- )
     <fat32-entry> my-entry init-object
     my-dir my-fs root-dir@
-    begin
-      my-entry my-dir read-dir if
-        12 [:
-          12 my-entry file-name@
-          cr type space false
-        ;] with-allot
-      else
-        true
-      then
-    until
+    [:
+      begin
+        my-entry my-dir read-dir if
+          12 [:
+            12 my-entry file-name@
+            cr type space false
+          ;] with-allot
+        else
+          true
+        then
+      until
+    ;] try
+    my-dir close-dir
+    my-dir destroy
+    ?raise
   ;
   
   : create-file ( data-addr data-u name-addr name-u )
     [: my-file swap create-file ;] my-fs with-root-path
-    my-file write-file
+    [:
+      my-file write-file
+    ;] try
+    my-file close-file
+    my-file destroy
+    ?raise
   ;
   
   : create-dir ( name-addr name-u )
@@ -72,28 +83,38 @@ begin-module fat32-test
 
   : ls ( name-addr name-u -- )
     [: my-dir swap open-dir ;] my-fs with-root-path
-    begin
-      my-entry my-dir read-dir if
-        12 [:
-          12 my-entry file-name@
-          cr type space false
-        ;] with-allot
-      else
-        true
-      then
-    until
+    [:
+      begin
+        my-entry my-dir read-dir if
+          12 [:
+            12 my-entry file-name@
+            cr type space false
+          ;] with-allot
+        else
+          true
+        then
+      until
+    ;] try
+    my-dir close-dir
+    my-dir destroy
+    ?raise
   ;
   
   : cat ( name-addr name-u -- )
     cr
     [: my-file swap open-file ;] my-fs with-root-path
-    begin
-      my-read-buffer my-read-size my-file read-file dup 0> if
-        my-read-buffer swap type false
-      else
-        drop true
-      then
-    until
+    [:
+      begin
+        my-read-buffer my-read-size my-file read-file dup 0> if
+          my-read-buffer swap type false
+        else
+          drop true
+        then
+      until
+    ;] try
+    my-file close-file
+    my-file destroy
+    ?raise
   ;
   
   : remove-file ( name-addr name-u -- )
@@ -110,33 +131,150 @@ begin-module fat32-test
   
   : seek-test ( -- )
     my-dir my-fs root-dir@
-    s" TEST.TXT" my-file my-dir open-file
-    cr ." Size : " my-file file-size@ .
-    my-file tell-file cr . ." : "
-    my-read-buffer small-read-size my-file read-file
-    my-read-buffer swap type
-    256 seek-cur my-file seek-file
-    my-file tell-file cr . ." : "
-    my-read-buffer small-read-size my-file read-file
-    my-read-buffer swap type
-    -256 seek-end my-file seek-file
-    my-file tell-file cr . ." : "
-    my-read-buffer my-read-size my-file read-file
-    my-read-buffer swap type
-    256 seek-set my-file seek-file
-    my-file tell-file cr . ." : "
-    my-read-buffer small-read-size my-file read-file
-    my-read-buffer swap type
+    [:
+      s" TEST.TXT" my-file my-dir open-file
+      [:
+        cr ." Size : " my-file file-size@ .
+        my-file tell-file cr . ." : "
+        my-read-buffer small-read-size my-file read-file
+        my-read-buffer swap type
+        256 seek-cur my-file seek-file
+        my-file tell-file cr . ." : "
+        my-read-buffer small-read-size my-file read-file
+        my-read-buffer swap type
+        -256 seek-end my-file seek-file
+        my-file tell-file cr . ." : "
+        my-read-buffer my-read-size my-file read-file
+        my-read-buffer swap type
+        256 seek-set my-file seek-file
+        my-file tell-file cr . ." : "
+        my-read-buffer small-read-size my-file read-file
+        my-read-buffer swap type
+      ;] try
+      my-file close-file
+      my-file destroy
+      ?raise
+    ;] try
+    my-dir close-dir
+    my-dir destroy
+    ?raise
   ;
   
   : create-big-file ( name-addr name-u -- )
-    false my-fs write-through!
+    false my-sd write-through!
     [: my-file swap fat32::create-file ;] my-fs with-root-path
-    $10000 0 ?do key? if key drop leave then
-      hex i 0 <# # # # # # # # # #> decimal my-file write-file drop
-      i $FF and 0= if i h.8 then
-    loop
-    true my-fs write-through!
+    [:
+      $10000 0 ?do key? if key drop leave then
+        hex i 0 <# # # # # # # # # #> decimal my-file write-file drop
+        i $FF and 0= if i h.8 then
+      loop
+    ;] try
+    my-file close-file
+    my-file destroy
+    true my-sd write-through!
+    ?raise
+  ;
+  
+  : create-big-binary-file ( name-addr name-u -- )
+    false my-sd write-through!
+    [: my-file swap fat32::create-file ;] my-fs with-root-path
+    [:
+      $10000 0 ?do key? if key drop leave then
+        i 256 cells [: { index buffer }
+          index 256 + index ?do i buffer i 255 and cells + ! loop
+          buffer 256 cells my-file write-file drop
+        ;] with-aligned-allot
+        i h.8
+      256 +loop
+    ;] try
+    my-file close-file
+    my-file destroy
+    true my-sd write-through!
+    ?raise
+  ;
+  
+  : create-many-big-binary-files { start -- }
+    false my-sd write-through!
+    [:
+      100000000 start ?do key? if key drop leave then
+        i 12 [: { file-index name-buffer }
+          file-index 0 <# # # # # # # # # #> name-buffer swap move
+          s" .BIN" name-buffer 8 + swap move
+          cr name-buffer 12 type ." : "
+          name-buffer 12 [: my-file swap fat32::create-file ;]
+          my-fs with-root-path
+          [:
+            $10000 0 ?do
+              i 256 cells [: { index buffer }
+                index 256 + index ?do i buffer i 255 and cells + ! loop
+                buffer 256 cells my-file write-file drop
+              ;] with-aligned-allot
+              i h.8
+            256 +loop
+          ;] try
+          my-file close-file
+          my-file destroy
+          ?raise
+        ;] with-aligned-allot
+      loop
+    ;] try
+    true my-sd write-through!
+    ?raise
+  ;
+  
+  : create-one-big-binary-file { start -- }
+    false my-sd write-through!
+    [:
+      begin key? not while
+        start 12 [: { file-index name-buffer }
+          file-index 0 <# # # # # # # # # #> name-buffer swap move
+          s" .BIN" name-buffer 8 + swap move
+          cr name-buffer 12 type ." : "
+          name-buffer 12 [: my-file swap fat32::create-file ;]
+          my-fs with-root-path
+          [:
+            $10000 0 ?do
+              i 256 cells [: { index buffer }
+                index 256 + index ?do i buffer i 255 and cells + ! loop
+                buffer 256 cells my-file write-file drop
+              ;] with-aligned-allot
+              i h.8
+            256 +loop
+            my-fs flush
+          ;] try
+          my-file close-file
+          my-file destroy
+          ?raise
+          name-buffer 12 ['] fat32::remove-file my-fs with-root-path
+          my-fs flush
+        ;] with-aligned-allot
+      repeat
+    ;] try
+    true my-sd write-through!
+    ?raise
+  ;
+
+  : create-many-small-binary-files { start -- }
+    false my-sd write-through!
+    [:
+      100000000 start ?do key? if key drop leave then
+        i 12 [: { file-index name-buffer }
+          file-index 0 <# # # # # # # # # #> name-buffer swap move
+          s" .BIN" name-buffer 8 + swap move
+          cr name-buffer 12 type ." : "
+          name-buffer 12 [: my-file swap fat32::create-file ;]
+          my-fs with-root-path
+          [:
+            s" QUUX" my-file write-file drop
+          ;] try
+          my-file close-file
+          my-file destroy
+          ?raise
+        ;] with-aligned-allot
+      loop
+    ;] try
+    true my-sd write-through!
+    ?raise
   ;
 
 end-module

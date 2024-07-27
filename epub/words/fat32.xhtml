@@ -17,6 +17,7 @@
   <section id="fat32-support">
 <h1>FAT32 Support</h1>
 <p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
+<p>Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with <code class="docutils literal notranslate"><span class="pre">close-file</span></code> and directories need to be closed with <code class="docutils literal notranslate"><span class="pre">close-dir</span></code>, followed by being destroyed with <code class="docutils literal notranslate"><span class="pre">destroy</span></code>, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.</p>
 <section id="fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module contains the following words:</p>
@@ -94,6 +95,21 @@
 <h3><code class="docutils literal notranslate"><span class="pre">x-invalid-path</span></code></h3>
 <p>( – )</p>
 <p>Invalid path exception.</p>
+</section>
+<section id="x-not-open">
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-open</span></code></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file or directory that is not open.</p>
+</section>
+<section id="x-shared-file">
+<h3><code class="docutils literal notranslate"><span class="pre">x-shared-file</span></code></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file where the file must only be open once (i.e. truncate a file).</p>
+</section>
+<section id="x-open">
+<h3><code class="docutils literal notranslate"><span class="pre">x-open</span></code></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file or directory that is open (i.e. remove a file or directory).</p>
 </section>
 <section id="seek-set">
 <h3><code class="docutils literal notranslate"><span class="pre">seek-set</span></code></h3>
@@ -214,6 +230,16 @@
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> class includes the following methods:</p>
 </section>
+<section id="close-file">
+<h3><code class="docutils literal notranslate"><span class="pre">close-file</span></code></h3>
+<p>( file – )</p>
+<p>Close a file.</p>
+</section>
+<section id="file-open">
+<h3><code class="docutils literal notranslate"><span class="pre">file-open?</span></code></h3>
+<p>( file – open? )</p>
+<p>Get whether a file is open.</p>
+</section>
 <section id="read-file">
 <h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code></h3>
 <p>( c-addr u file – bytes )</p>
@@ -254,6 +280,16 @@
 <p>( fs file – )</p>
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="close-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">close-dir</span></code></h3>
+<p>( dir – )</p>
+<p>Close a directory.</p>
+</section>
+<section id="dir-open">
+<h3><code class="docutils literal notranslate"><span class="pre">dir-open?</span></code></h3>
+<p>( dir – open? )</p>
+<p>Get whether a directory is open.</p>
 </section>
 <section id="with-path">
 <h3><code class="docutils literal notranslate"><span class="pre">with-path</span></code></h3>

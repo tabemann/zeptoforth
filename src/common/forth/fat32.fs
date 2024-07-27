@@ -76,6 +76,15 @@ begin-module fat32
   \ Invalid path exception
   : x-invalid-path ( -- ) ." invalid path" cr ;
 
+  \ File or directory is not open exception
+  : x-not-open ( -- ) ." file/directory is not open" cr ;
+
+  \ File is shared exception
+  : x-shared-file ( -- ) ." file is shared" cr ;
+
+  \ File or directory is open exception
+  : x-open ( -- ) ." file/directory is open" cr ;
+  
   \ Seek from the beginning of a file
   0 constant seek-set
 
@@ -214,6 +223,18 @@ begin-module fat32
       \ The most recently allocated cluster, -1 for all sectors free
       \ (Don't trust this value)
       cell member recent-allocated-cluster
+
+      \ The first open file
+      cell member first-open-file
+
+      \ The last open file
+      cell member last-open-file
+
+      \ The first open directory
+      cell member first-open-dir
+
+      \ The last open directory
+      cell member last-open-dir
       
       \ Read the FAT32 filesystem info sector
       method read-info-sector ( fs -- )
@@ -292,6 +313,12 @@ begin-module fat32
 
       \ Update a directory entry's modification date
       method update-entry-date-time ( index cluster fs -- )
+
+      \ Get the open count for a file
+      method file-open-count ( start-cluster fs -- count )
+
+      \ Get the open count for a directory
+      method dir-open-count ( start-cluster fs -- count )
     
     end-module
     
@@ -304,6 +331,15 @@ begin-module fat32
       
       \ Filesystem
       cell member file-fs
+
+      \ File is open flag
+      cell member file-open
+
+      \ The previous open file
+      cell member file-prev-open
+
+      \ The next open file
+      cell member file-next-open
       
       \ Parent directory index
       cell member file-parent-index
@@ -324,7 +360,10 @@ begin-module fat32
       cell member file-current-cluster-index
     
     end-module
-      
+
+    \ Close a file
+    method close-file ( file -- )
+    
     \ Read data from a file
     method read-file ( c-addr u file -- bytes )
     
@@ -345,8 +384,14 @@ begin-module fat32
 
     \ Get the filesystem of a file
     method file-fs@ ( file -- fs )
+
+    \ Get whether a file is open
+    method file-open? ( file -- open? )
     
     continue-module fat32-internal
+
+      \ Register a file as open
+      method register-file ( file -- )
       
       \ Do the work of creating a file
       method do-create-file ( c-addr u parent-dir file -- )
@@ -386,7 +431,16 @@ begin-module fat32
     
       \ Filesystem
       cell member dir-fs
-    
+
+      \ Directory is open flag
+      cell member dir-open
+
+      \ The previous open directory
+      cell member dir-prev-open
+
+      \ The next open directory
+      cell member dir-next-open
+      
       \ Parent directory index
       cell member dir-parent-index
       
@@ -406,6 +460,9 @@ begin-module fat32
       cell member dir-current-cluster-index
       
     end-module
+
+    \ Close a directory
+    method close-dir ( dir -- )
     
     \ Find a file or directory in a path from a directory
     method with-path ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
@@ -451,9 +508,15 @@ begin-module fat32
     
     \ Get the filesystem of a directory
     method dir-fs@ ( dir -- fs )
+
+    \ Get whether a directory is open
+    method dir-open? ( dir -- open? )
     
     continue-module fat32-internal
-    
+
+      \ Register a directory as open
+      method register-dir ( dir -- )
+      
       \ Do the work of creating a directory with . and .. entries
       method do-create-dir ( c-addr u parent-dir dir -- )
       
@@ -923,6 +986,10 @@ begin-module fat32
     :noname ( partition device fs -- )
       dup <object>->new
       tuck fat32-device !
+      0 over first-open-file !
+      0 over last-open-file !
+      0 over first-open-dir !
+      0 over last-open-dir !
       tuck swap partition-first-sector @ swap first-sector !
       [:
         >r sector-scratchpad sector-size r@ first-sector @ r@ fat32-device @ block@
@@ -943,21 +1010,37 @@ begin-module fat32
       2dup swap <fat32-dir> swap init-object
       2dup swap dir-fs !
       root-dir-cluster @ over dir-start-cluster !
+      false over dir-open !
+      0 over dir-prev-open !
+      0 over dir-next-open !
       -1 over dir-parent-cluster !
       -1 over dir-parent-index !
       0 over dir-offset !
       dup dir-start-cluster @ over dir-current-cluster !
-      0 swap dir-current-cluster-index !
+      0 over dir-current-cluster-index !
+      register-dir
     ; define root-dir@
     
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
       <fat32-dir> class-size
-      [: tuck swap root-dir@ with-path ;] with-aligned-allot
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ with-path ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
     ; define with-root-path
 
     :noname ( c-addr u fs -- exists? )
       <fat32-dir> class-size
-      [: tuck swap root-dir@ path-exists? ;] with-aligned-allot
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ path-exists? ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
     ; define root-path-exists?
     
     :noname ( fs -- ) fat32-device @ flush-blocks ; define flush
@@ -1243,13 +1326,42 @@ begin-module fat32
         ;] with-aligned-allot
       ;] with-object
     ; define update-entry-date-time
+
+    \ Get the open count for a file
+    :noname { start-cluster self -- count }
+      0 { count }
+      self first-open-file @ begin ?dup while
+        dup file-start-cluster @ start-cluster = if
+          1 +to count
+        then
+        file-next-open @
+      repeat
+      count
+    ; define file-open-count
+
+    \ Get the open count for a directory
+    :noname { start-cluster self -- count }
+      0 { count }
+      self first-open-dir @ begin ?dup while
+        dup dir-start-cluster @ start-cluster = if
+          1 +to count
+        then
+        dir-next-open @
+      repeat
+      count
+    ; define dir-open-count
+    
   end-implement
   
   \ Implement FAT32 file class
   <fat32-file> begin-implement
+    
     :noname ( fs file -- )
       dup <object>->new
       tuck file-fs !
+      false over file-open !
+      0 over file-prev-open !
+      0 over file-next-open !
       -1 over file-parent-index !
       -1 over file-parent-cluster !
       -1 over file-start-cluster !
@@ -1257,9 +1369,46 @@ begin-module fat32
       -1 over file-current-cluster !
       0 swap file-current-cluster-index !
     ; define new
+
+    :noname { self -- }
+      self file-open @ if self close-file then
+      self <object>->destroy
+    ; define destroy
+    
+    :noname { self -- }
+      self file-open @ averts x-not-open
+      self file-prev-open @ ?dup if
+        self file-next-open @ swap file-next-open !
+      else
+        self file-next-open @ self file-fs @ first-open-file !
+      then
+      self file-next-open @ ?dup if
+        self file-prev-open @ swap file-prev-open !
+      else
+        self file-prev-open @ self file-fs @ last-open-file !
+      then
+      0 self file-prev-open !
+      0 self file-next-open !
+      false self file-open !
+    ; define close-file
+    
+    :noname { self -- }
+      self file-open @ not averts x-open
+      self file-fs @ first-open-file @ ?dup if
+        self over file-prev-open !
+        self file-next-open !
+      else
+        self self file-fs @ last-open-file !
+        0 self file-next-open !
+      then
+      self self file-fs @ first-open-file !
+      0 self file-prev-open !
+      true self file-open !
+    ; define register-file
         
     :noname ( c-addr u file -- bytes )
       >r 0 ( c-addr u read-bytes )
+      r@ file-open @ averts x-not-open
       begin ( c-addr u read-bytes )
         over 0<> if ( c-addr u read-bytes )
           -rot 2dup r@ read-file-sector ( read-bytes c-addr u part-bytes )
@@ -1277,6 +1426,7 @@ begin-module fat32
     
     :noname ( c-addr u file -- bytes )
       >r 0 ( c-addr u write-bytes )
+      r@ file-open @ averts x-not-open
       begin ( c-addr u write-bytes )
         over 0<> if ( c-addr u write-bytes )
           -rot 2dup r@ write-file-sector ( write-bytes c-addr u part-bytes )
@@ -1296,12 +1446,16 @@ begin-module fat32
     
     :noname ( file -- )
       >r ( )
+      r@ file-open @ averts x-not-open
+      r@ file-start-cluster @ r@ file-fs @ file-open-count 1 =
+      averts x-shared-file
       r@ file-current-cluster @ r@ file-fs @ free-cluster-tail ( )
       r@ file-offset @ r@ file-size! ( )
       rdrop ( )
     ; define truncate-file
     
     :noname ( offset whence file -- )
+      dup file-open @ averts x-not-open
       >r case
         seek-set of endof
         seek-cur of r@ file-offset @ + endof
@@ -1310,11 +1464,17 @@ begin-module fat32
       r> do-seek-file
     ; define seek-file
     
-    :noname ( file -- offset ) file-offset @ ; define tell-file
+    :noname ( file -- offset )
+      dup file-open @ averts x-not-open
+      file-offset @
+    ; define tell-file
 
     :noname ( file -- fs ) file-fs @ ; define file-fs@
+
+    :noname ( file -- open? ) file-open @ ; define file-open?
     
     :noname ( c-addr u parent-dir file -- )
+      dup { self }
       3 pick 3 pick 3 pick dir-start-cluster @ 3 pick file-fs @ entry-exists?
       triggers x-entry-already-exists
       swap dir-start-cluster @ over file-fs @ allocate-entry ( c-addr u file parent-index parent-cluster )
@@ -1332,9 +1492,11 @@ begin-module fat32
         2 pick file-parent-cluster @ ( file entry parent-index parent-cluster )
         3 roll file-fs @ entry! ( )
       ;] with-object
+      self register-file
     ; define do-create-file
     
     :noname ( c-addr u parent-dir file -- )
+      dup { self }
       swap 2swap rot dir-start-cluster @ 3 pick file-fs @ lookup-entry ( file entry-index entry-cluster )
       2 pick file-parent-cluster ! ( file entry-index )
       2dup swap file-parent-index ! ( file entry-index )
@@ -1344,9 +1506,11 @@ begin-module fat32
         r@ entry-file? averts x-entry-not-file
         r> first-cluster@ swap 2dup file-start-cluster ! file-current-cluster ! ( )
       ;] with-object
+      self register-file
     ; define do-open-file
     
     :noname ( c-addr u file -- bytes )
+      dup file-open @ averts x-not-open
       >r r@ current-file-sector@ ( c-addr u sector )
       sector-size r@ file-offset @ sector-size umod - ( c-addr u sector limit )
       r@ file-size@ r@ file-offset @ - min ( c-addr u sector limit )
@@ -1361,6 +1525,7 @@ begin-module fat32
     ; define read-file-sector
     
     :noname ( c-addr u file -- bytes )
+      dup file-open @ averts x-not-open
       >r r@ current-file-sector@ ( c-addr u sector )
       sector-size r@ file-offset @ sector-size umod - ( c-addr u sector limit )
       rot min ( c-addr sector u )
@@ -1376,6 +1541,7 @@ begin-module fat32
     ; define write-file-sector
     
     :noname ( offset file -- )
+      dup file-open @ averts x-not-open
       >r r@ file-size@ min 0 max dup r@ file-offset ! ( offset )
       0 r@ file-current-cluster-index ! ( offset )
       r@ file-start-cluster @ begin ( offset cluster )
@@ -1394,6 +1560,7 @@ begin-module fat32
     ; define do-seek-file
     
     :noname ( file -- bytes )
+      dup file-open @ averts x-not-open
       <fat32-entry> [: ( file entry )
         dup rot dup file-parent-index @ ( entry entry file index )
         swap dup file-parent-cluster @ ( entry entry index file cluster )
@@ -1404,6 +1571,7 @@ begin-module fat32
     ; define file-size@
     
     :noname ( bytes file -- )
+      dup file-open @ averts x-not-open
       <fat32-entry> [:
         date-time-size [: >r ( bytes file entry )
           swap >r ( bytes entry )
@@ -1423,6 +1591,7 @@ begin-module fat32
     ; define file-size!
     
     :noname ( file -- sector )
+      dup file-open @ averts x-not-open
       >r r@ file-offset @
       r@ file-fs @ cluster-sectors @ sector-size * umod
       r@ file-current-cluster @
@@ -1430,6 +1599,7 @@ begin-module fat32
     ; define current-file-sector@
     
     :noname ( file -- )
+      dup file-open @ averts x-not-open
       >r
       r@ file-offset @ r@ file-size@ <= if
         r@ file-offset @ ( offset )
@@ -1448,6 +1618,7 @@ begin-module fat32
     ; define advance-cluster
     
     :noname ( file -- )
+      dup file-open @ averts x-not-open
       >r
       r@ file-offset @ ( offset )
       r@ file-current-cluster-index @ 1+ ( offset index )
@@ -1466,9 +1637,13 @@ begin-module fat32
   
   \ Implement FAT32 directory class
   <fat32-dir> begin-implement
+
     :noname ( fs dir -- )
       dup <object>->new
       tuck dir-fs !
+      false over dir-open !
+      0 over dir-prev-open !
+      0 over dir-next-open !
       -1 over dir-parent-index !
       -1 over dir-parent-cluster !
       -1 over dir-start-cluster !
@@ -1476,8 +1651,45 @@ begin-module fat32
       -1 over dir-current-cluster !
       0 swap dir-current-cluster-index !
     ; define new
+
+    :noname { self -- }
+      self dir-open @ if self close-dir then
+      self <object>->destroy
+    ; define destroy
+    
+    :noname { self -- }
+      self dir-open @ averts x-not-open
+      self dir-prev-open @ ?dup if
+        self dir-next-open @ swap dir-next-open !
+      else
+        self dir-next-open @ self dir-fs @ first-open-dir !
+      then
+      self dir-next-open @ ?dup if
+        self dir-prev-open @ swap dir-prev-open !
+      else
+        self dir-prev-open @ self dir-fs @ last-open-dir !
+      then
+      0 self dir-prev-open !
+      0 self dir-next-open !
+      false self dir-open !
+    ; define close-dir
+    
+    :noname { self -- }
+      self dir-open @ not averts x-open
+      self dir-fs @ first-open-dir @ ?dup if
+        self over dir-prev-open !
+        self dir-next-open !
+      else
+        self self dir-fs @ last-open-dir !
+        0 self dir-next-open !
+      then
+      self self dir-fs @ first-open-dir !
+      0 self dir-prev-open !
+      true self dir-open !
+    ; define register-dir
     
     :noname ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
+      dup dir-open @ averts x-not-open
       swap 2>r ( c-addr u )
       2dup validate-path ( c-addr' u' )
       strip-final-path-separator ( c-addr' u' )
@@ -1487,9 +1699,13 @@ begin-module fat32
         dup -1 = if ( c-addr' u' index )
           drop 2r> execute ( )
         else
-          2 pick over 2r> <fat32-dir> class-size [: ( c-addr' u' index c-addr'' u'' dir xt dir' )
+          2 pick over 2r> <fat32-dir> class-size [:
+            dup { nested-dir }
+            ( c-addr' u' index c-addr'' u'' dir xt dir' )
             -rot >r over >r open-dir ( c-addr' u' index )
             1+ tuck - -rot + swap 2r> swap with-path ( )
+            nested-dir close-dir
+            nested-dir destroy
           ;] with-aligned-allot
         then
       else ( c-addr' u' index )
@@ -1498,6 +1714,7 @@ begin-module fat32
     ; define with-path
 
     :noname ( c-addr u dir -- exists? )
+      dup dir-open @ averts x-not-open
       >r ( c-addr u )
       2dup validate-path ( c-addr' u' )
       strip-final-path-separator ( c-addr' u' )
@@ -1510,8 +1727,14 @@ begin-module fat32
           2 pick over r> <fat32-dir> class-size [: ( c-addr' u' index c-addr'' u'' dir dir' )
             dup >r swap ( c-addr' u' index c-addr'' u'' dir' dir )
             2over 2 pick exists? if ( c-addr' u' index c-addr'' u'' dir' dir )
-              open-dir ( c-addr' u' index )
-              1+ tuck - -rot + swap r> path-exists? ( exists? )
+              over { dir }
+              [:
+                open-dir ( c-addr' u' index )
+                1+ tuck - -rot + swap r> path-exists? ( exists? )
+              ;] try
+              dir close-dir
+              dir destroy
+              ?raise
             else
               rdrop 2drop 2drop drop false ( exists? )
             then
@@ -1523,6 +1746,7 @@ begin-module fat32
     ; define path-exists?
 
     :noname { entry dir -- entry-read? }
+      dir dir-open @ averts x-not-open
       dir dir-fs @ { fs }
       begin
         dir dir-offset @ dir dir-current-cluster-index @ 1+
@@ -1556,6 +1780,7 @@ begin-module fat32
     ; define read-dir 
     
     :noname ( c-addr u new-file dir -- )
+      dup dir-open @ averts x-not-open
       dup >r
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
@@ -1564,17 +1789,20 @@ begin-module fat32
     ; define create-file
     
     :noname ( c-addr u opened-file dir -- )
+      dup dir-open @ averts x-not-open
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
       swap do-open-file
     ; define open-file
         
     :noname ( c-addr u dir -- )
+      dup dir-open @ averts x-not-open
       dup >r
       dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( fs entry-index entry-cluster )
       <fat32-entry> [: ( fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
         dup entry-file? averts x-entry-not-file ( fs entry-index entry-cluster entry )
+        dup first-cluster@ 4 pick file-open-count 0= averts x-open
         dup first-cluster@ 4 pick free-cluster-chain ( fs entry-index entry-cluster entry )
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
@@ -1583,6 +1811,7 @@ begin-module fat32
     ; define remove-file
     
     :noname ( c-addr u new-dir dir -- )
+      dup dir-open @ averts x-not-open
       dup >r
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
@@ -1591,21 +1820,28 @@ begin-module fat32
     ; define create-dir
         
     :noname ( c-addr u opened-dir dir -- )
+      dup dir-open @ averts x-not-open
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
       swap do-open-dir
     ; define open-dir
         
     :noname ( c-addr u dir -- )
+      dup dir-open @ averts x-not-open
       dup >r
       3dup <fat32-dir> class-size [: ( c-addr u dir c-addr u dir dir' )
         dup >r swap open-dir r> ( c-addr u dir dir' )
-        dir-empty? averts x-dir-is-not-empty
+        dup { dir }
+        [: dir-empty? averts x-dir-is-not-empty ;] try
+        dir close-dir
+        dir destroy
+        ?raise
       ;] with-aligned-allot
       dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( fs entry-index entry-cluster )
       <fat32-entry> [: ( fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
         dup entry-dir? averts x-entry-not-dir ( fs entry-index entry-cluster entry )
+        dup first-cluster@ 4 pick dir-open-count 0= averts x-open
         dup first-cluster@ 4 pick free-cluster-chain ( fs entry-index entry-cluster entry )
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
@@ -1614,6 +1850,7 @@ begin-module fat32
     ; define remove-dir
     
     :noname ( c-addr' u' c-addr u dir - )
+      dup dir-open @ averts x-not-open
       dup >r
       dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( c-addr' u' fs entry-index entry-cluster )
       <fat32-entry> [: ( c-addr' u' fs entry-index entry-cluster entry )
@@ -1631,6 +1868,7 @@ begin-module fat32
     ; define rename
     
     :noname ( dir -- empty? )
+      dup dir-open @ averts x-not-open
       <fat32-entry> [: ( dir entry )
         swap 0 swap dup dir-start-cluster @ swap dir-fs @ begin ( entry index cluster fs )
           dup >r find-entry r> ( entry index cluster fs )
@@ -1649,10 +1887,12 @@ begin-module fat32
     ; define dir-empty?
 
     :noname ( c-addr u dir -- exists? )
+      dup dir-open @ averts x-not-open
       dup dir-start-cluster @ swap dir-fs @ entry-exists?
     ; define exists?
 
     :noname ( c-addr u dir -- file? )
+      dup dir-open @ averts x-not-open
       <fat32-entry> [: ( c-addr u dir entry )
         2swap 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry
         ( dir entry index cluster )
@@ -1662,6 +1902,7 @@ begin-module fat32
     ; define file?
     
     :noname ( c-addr u dir -- dir? )
+      dup dir-open @ averts x-not-open
       <fat32-entry> [: ( c-addr u dir entry )
         2swap 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry
         ( dir entry index cluster )
@@ -1671,8 +1912,11 @@ begin-module fat32
     ; define dir?
 
     :noname ( dir -- fs ) dir-fs @ ; define dir-fs@
+
+    :noname ( dir -- open? ) dir-open @ ; define dir-open?
     
     :noname ( c-addr u parent-dir dir -- )
+      dup { self }
       swap dir-start-cluster @ over dir-fs @ allocate-entry ( c-addr u dir parent-index parent-cluster )
       2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
       over dir-parent-index ! ( c-addr u dir )
@@ -1690,6 +1934,7 @@ begin-module fat32
         2 pick dir-parent-cluster @ ( dir entry parent-index parent-cluster )
         3 roll dir-fs @ entry! ( )
       ;] with-object
+      self register-dir
     ; define do-create-dir-raw
     
     :noname ( c-addr u parent-dir dir -- )
@@ -1702,6 +1947,7 @@ begin-module fat32
     
     \ Create . directory entry
     :noname ( dir -- )
+      dup dir-open @ averts x-not-open
       dup dir-start-cluster @ over dir-fs @ allocate-entry ( dir child-index child-cluster )
       <fat32-entry> [: ( dir child-index child-cluster entry )
         3 pick dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
@@ -1713,6 +1959,7 @@ begin-module fat32
     
     \ Create .. directory entry
     :noname ( parent-dir dir -- )
+      dup dir-open @ averts x-not-open
       dup dir-start-cluster @ over dir-fs @ allocate-entry ( parent-dir dir child-index child-cluster )
       <fat32-entry> [: ( parent-dir dir child-index child-cluster entry )
         4 roll dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
@@ -1723,6 +1970,7 @@ begin-module fat32
     ; define do-create-dot-dot-entry
     
     :noname ( c-addr u parent-dir dir -- )
+      dup { self }
       swap 2swap rot dir-start-cluster @ 3 pick dir-fs @ lookup-entry ( dir entry-index entry-cluster )
       2 pick dir-parent-cluster ! ( dir entry-index )
       2dup swap dir-parent-index ! ( dir entry-index )
@@ -1732,12 +1980,15 @@ begin-module fat32
         r@ entry-dir? averts x-entry-not-dir
         r> first-cluster@ swap 2dup dir-start-cluster ! dir-current-cluster ! ( )
       ;] with-object
+      self register-dir
     ; define do-open-dir
 
     :noname { dir -- }
+      dir dir-open @ averts x-not-open
       dir dir-parent-index @ dir dir-parent-cluster @ dir dir-fs @
       update-entry-date-time
     ; define update-dir-date-time
+    
   end-implement
   
   \ Implement FAT32 directory entry class

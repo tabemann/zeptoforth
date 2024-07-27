@@ -2,6 +2,8 @@
 
 zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the `<block-dev>` class defined in the module `block-dev` (currently only the `<sd>` class defined in the module `sd`). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.
 
+Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with `close-file` and directories need to be closed with `close-dir`, followed by being destroyed with `destroy`, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.
+
 ### `fat32`
 
 The `fat32` module contains the following words:
@@ -80,6 +82,21 @@ No file or directory referred to in path within directory exception.
 ( -- )
 
 Invalid path exception.
+
+##### `x-not-open`
+( -- )
+
+Attempted to carry out an operation on a file or directory that is not open.
+
+##### `x-shared-file`
+( -- )
+
+Attempted to carry out an operation on a file where the file must only be open once (i.e. truncate a file).
+
+##### `x-open`
+( -- )
+
+Attempted to carry out an operation on a file or directory that is open (i.e. remove a file or directory).
 
 ##### `seek-set`
 ( -- whence )
@@ -206,6 +223,16 @@ Construct an instance of `<fat32-file>` with the FAT32 filesystem *fs*.
 
 The `<fat32-file>` class includes the following methods:
 
+##### `close-file`
+( file -- )
+
+Close a file.
+
+##### `file-open?`
+( file -- open? )
+
+Get whether a file is open.
+
 ##### `read-file`
 ( c-addr u file -- bytes )
 
@@ -248,6 +275,16 @@ The `<fat32-dir>` class includes the following constructor:
 Construct an instance of `<fat32-dir>` with the FAT32 filesystem *fs*.
 
 The `<fat32-dir>` class includes the following methods:
+
+##### `close-dir`
+( dir -- )
+
+Close a directory.
+
+##### `dir-open?`
+( dir -- open? )
+
+Get whether a directory is open.
 
 ##### `with-path`
 ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )

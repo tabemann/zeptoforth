@@ -656,6 +656,9 @@ begin-module zeptoed-internal
     \ The file being edited
     <fat32-file> class-size member buffer-file
 
+    \ The file is open
+    cell member buffer-file-open
+
     \ Exception
     cell member file-buffer-exception
 
@@ -2873,6 +2876,7 @@ begin-module zeptoed-internal
       path-addr path-bytes heap editor buffer <buffer>->new
       0 buffer file-buffer-exception !
       false buffer file-buffer-accessed !
+      false buffer buffer-file-open !
       path-addr path-bytes buffer ['] access-file try ?dup if
         buffer file-buffer-exception ! 2drop drop exit
       then
@@ -2883,7 +2887,8 @@ begin-module zeptoed-internal
 
     \ Destructor
     :noname { buffer }
-      buffer file-buffer-exception @ 0= if
+      buffer buffer-file-open @ if
+        buffer buffer-file close-file
         buffer buffer-file destroy
       then
       buffer <buffer>->destroy
@@ -2921,6 +2926,11 @@ begin-module zeptoed-internal
 
     \ Access a file, creating or opening it
     :noname { path-addr path-bytes buffer -- }
+      buffer buffer-file-open @ if
+        buffer buffer-file close-file
+        buffer buffer-file destroy
+        false buffer buffer-file-open !
+      then
       path-addr path-bytes fat32-tools::current-fs@ root-path-exists? if
         buffer buffer-file path-addr path-bytes [:
           { file file-addr file-bytes dir }
@@ -2932,6 +2942,7 @@ begin-module zeptoed-internal
           file-addr file-bytes file dir create-file
         ;] fat32-tools::current-fs@ with-root-path
       then
+      true buffer buffer-file-open !
     ; define access-file
 
     \ Try to change the file path
@@ -3351,8 +3362,12 @@ begin-module zeptoed-internal
     :noname { editor -- }
       editor editor-minibuffer @ destroy
       editor editor-minibuffer @ editor editor-heap @ free
-      editor editor-current @ destroy
-      editor editor-current @ editor editor-heap @ free
+      editor editor-first @ begin ?dup while
+        { current }
+        current buffer-next @
+        current destroy
+        current editor editor-heap @ free
+      repeat
       editor <object>->destroy
     ; define destroy
 
@@ -3929,9 +3944,14 @@ end-implement
         editor my-heap free
         exit
       then
-      editor refresh-editor
-      editor editor-loop
+      editor [: { editor }
+        editor refresh-editor
+        editor editor-loop
+      ;] try
+      editor destroy
+      editor my-heap free
       display-height 0 go-to-coord cr
+      ?raise
     ;] with-aligned-allot
   ;
   
