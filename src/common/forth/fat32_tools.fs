@@ -403,8 +403,8 @@ begin-module fat32-tools
             >r
             -rot [: 3 pick swap fat32::create-file ;]
             current-fs @ with-root-path
-            dup { inner-file }
             r>
+            over { inner-file }
             [:
               begin
                 read-buffer read-buffer-size 2 pick read-file dup 0> if
