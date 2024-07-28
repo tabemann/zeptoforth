@@ -1780,13 +1780,17 @@ begin-module zeptoed-internal
 
     \ Backspace a single char
     :noname { buffer -- }
-      hide-cursor
-      $08 emit
-      space
-      $08 emit
-      show-cursor
-      -1 buffer buffer-edit-col +!
-      buffer buffer-editor @ update-coord
+      buffer buffer-edit-col @ 0> if
+        hide-cursor
+        $08 emit
+        space
+        $08 emit
+        show-cursor
+        -1 buffer buffer-edit-col +!
+        buffer buffer-editor @ update-coord
+      else
+        buffer output-prev-row
+      then
     ; define output-backspace
 
     \ Move the cursor to the left
@@ -2890,6 +2894,7 @@ begin-module zeptoed-internal
       buffer buffer-file-open @ if
         buffer buffer-file close-file
         buffer buffer-file destroy
+        false buffer buffer-file-open !
       then
       buffer <buffer>->destroy
     ; define destroy
