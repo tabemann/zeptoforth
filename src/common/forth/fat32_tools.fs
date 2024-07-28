@@ -362,17 +362,10 @@ begin-module fat32-tools
   : create-file ( data-addr data-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        dup { file }
-        -rot [: 3 pick swap create-file ;] current-fs @ with-root-path
-        [:
-          write-file drop
-          current-fs @ flush
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        write-file drop
+        current-fs @ flush
+      ;] current-fs @ with-create-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -380,13 +373,10 @@ begin-module fat32-tools
   : create-dir ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-dir> class-size [:
-        dup { dir }
-        -rot [: 3 roll swap create-dir ;] current-fs @ with-root-path
+      [:
+        drop
         current-fs @ flush
-        dir close-dir
-        dir destroy
-      ;] with-aligned-allot
+      ;] current-fs @ with-create-dir-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -394,37 +384,20 @@ begin-module fat32-tools
   : copy-file ( path-addr path-u new-path-addr new-path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      2swap
-      <fat32-file> class-size [:
-        <fat32-file> class-size [:
-          2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
-          dup { outer-file }
-          [:
-            >r
-            -rot [: 3 pick swap fat32::create-file ;]
-            current-fs @ with-root-path
-            r>
-            over { inner-file }
-            [:
-              begin
-                read-buffer read-buffer-size 2 pick read-file dup 0> if
-                  read-buffer swap 3 pick write-file drop false
-                else
-                  drop true
-                then
-              until
-              2drop
-              current-fs @ flush
-            ;] try
-            inner-file close-file
-            inner-file destroy
-            ?raise
-          ;] try
-          outer-file close-file
-          outer-file destroy
-          ?raise
-        ;] with-aligned-allot
-      ;] with-aligned-allot
+      2swap [:
+        -rot [:
+          swap
+          begin
+            read-buffer read-buffer-size 2 pick read-file dup 0> if
+              read-buffer swap 3 pick write-file drop false
+            else
+              drop true
+            then
+          until
+          2drop
+          current-fs @ flush
+        ;] current-fs @ with-create-file-at-root-path
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -432,18 +405,11 @@ begin-module fat32-tools
   : append-file ( data-addr data-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          0 seek-end 2 pick seek-file
-          write-file drop
-          current-fs @ flush
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [: { file }
+        0 seek-end file seek-file
+        file write-file drop
+        current-fs @ flush
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -451,18 +417,11 @@ begin-module fat32-tools
   : write-file-window ( data-addr data-u offset-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r seek-set r@ seek-file r>
-          write-file drop
-          current-fs @ flush
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [: { file }
+        seek-set file seek-file
+        file write-file drop
+        current-fs @ flush
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -470,17 +429,12 @@ begin-module fat32-tools
   : write-file ( data-addr data-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          dup >r write-file drop r> truncate-file
-          current-fs @ flush
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [: { file }
+        file write-file drop
+        current-fs @ flush
+        file truncate-file
+        current-fs @ flush
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -488,23 +442,16 @@ begin-module fat32-tools
   : list-file ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          begin
-            read-buffer read-buffer-size 2 / 2 pick read-file dup 0> if
-              read-buffer swap convert-newlines type false
-            else
-              drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        begin
+          read-buffer read-buffer-size 2 / 2 pick read-file dup 0> if
+            read-buffer swap convert-newlines type false
+          else
+            drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
@@ -512,26 +459,21 @@ begin-module fat32-tools
   : list-file-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          begin
-            read-buffer read-buffer-size 2 / 3 pick min 2 pick read-file
-            dup 0> if
-              rot over - -rot
-              read-buffer swap convert-newlines type over 0=
-            else
-              drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        begin
+          read-buffer read-buffer-size 2 / 3 pick min 2 pick read-file
+          dup 0> if
+            rot over - -rot
+            read-buffer swap convert-newlines type over 0=
+          else
+            drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -539,23 +481,16 @@ begin-module fat32-tools
   : dump-file-raw ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          begin
-            read-buffer read-buffer-size 2 pick read-file dup 0> if
-              read-buffer swap type false
-            else
-              drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        begin
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap type false
+          else
+            drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
@@ -563,25 +498,21 @@ begin-module fat32-tools
   : dump-file-raw-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          begin
-            read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
-              rot over - -rot
-              read-buffer swap type over 0=
-            else
-              drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        begin
+          read-buffer read-buffer-size 3 pick min 2 pick read-file
+          dup 0> if
+            rot over - -rot
+            read-buffer swap type over 0=
+          else
+            drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -589,26 +520,19 @@ begin-module fat32-tools
   : dump-file ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 2 pick read-file dup 0> if
-              read-buffer swap r> dump-with-offset false
-            else
-              rdrop drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap r> dump-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -616,28 +540,23 @@ begin-module fat32-tools
   : dump-file-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
-              rot over - -rot
-              read-buffer swap r> dump-with-offset over 0=
-            else
-              rdrop drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap r> dump-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -645,26 +564,19 @@ begin-module fat32-tools
   : dump-file-ascii ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 2 pick read-file dup 0> if
-              read-buffer swap r> dump-ascii-with-offset false
-            else
-              rdrop drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap r> dump-ascii-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
@@ -672,28 +584,23 @@ begin-module fat32-tools
   : dump-file-ascii-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
-              rot over - -rot
-              read-buffer swap r> dump-ascii-with-offset over 0=
-            else
-              rdrop drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap r> dump-ascii-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -701,26 +608,19 @@ begin-module fat32-tools
   : dump-file-halfs ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 2 pick read-file dup 0> if
-              read-buffer swap 1 bic r> dump-halfs-with-offset false
-            else
-              rdrop drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap 1 bic r> dump-halfs-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -729,28 +629,23 @@ begin-module fat32-tools
   : dump-file-halfs-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
-              rot over - -rot
-              read-buffer swap 1 bic r> dump-halfs-with-offset over 0=
-            else
-              rdrop drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap 1 bic r> dump-halfs-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -758,26 +653,19 @@ begin-module fat32-tools
   : dump-file-cells ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 2 pick read-file dup 0> if
-              read-buffer swap 3 bic r> dump-cells-with-offset false
-            else
-              rdrop drop true
-            then
-          until
-          drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap 3 bic r> dump-cells-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -786,28 +674,23 @@ begin-module fat32-tools
   : dump-file-cells-window ( offset-u length-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r swap seek-set r@ seek-file r>
-          cr
-          begin
-            dup tell-file >r
-            read-buffer read-buffer-size 0 fill
-            read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
-              rot over - -rot
-              read-buffer swap 3 bic r> dump-cells-with-offset over 0=
-            else
-              rdrop drop true
-            then
-          until
-          2drop
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap 3 bic r> dump-cells-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -816,17 +699,11 @@ begin-module fat32-tools
   : read-file ( buffer-addr buffer-u offset-u path-addr path-u -- read-u )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          >r seek-set r@ seek-file r>
-          read-file
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        { file }
+        swap seek-set file seek-file
+        file read-file
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -834,16 +711,9 @@ begin-module fat32-tools
   : file-size@ ( path-addr path-u -- size-u )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          file-size@
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      [:
+        file-size@
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
@@ -903,16 +773,10 @@ begin-module fat32-tools
   : with-file-input ( path-addr path-u xt -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          swap with-file-input
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      -rot
+      [:
+        swap with-file-input
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
@@ -920,16 +784,10 @@ begin-module fat32-tools
   : with-file-output ( path-addr path-u xt -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          swap with-file-output
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      -rot
+      [:
+        swap with-file-output
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
@@ -937,16 +795,10 @@ begin-module fat32-tools
   : with-file-error-output ( path-addr path-u xt -- )
     current-fs @ averts x-fs-not-set
     [:
-      <fat32-file> class-size [:
-        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup { file }
-        [:
-          swap with-file-error-output
-        ;] try
-        file close-file
-        file destroy
-        ?raise
-      ;] with-aligned-allot
+      -rot
+      [:
+        swap with-file-error-output
+      ;] current-fs @ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 

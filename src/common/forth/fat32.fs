@@ -171,6 +171,22 @@ begin-module fat32
 
     \ Find whether a file or directory in a path from the root directory exists
     method root-path-exists? ( c-addr u fs -- exists?  )
+
+    \ Create a file at a path from the root directory
+    method with-create-file-at-root-path
+    ( c-addr u xt fs -- ) ( xt: file -- )
+
+    \ Open a file at a path from the root directory
+    method with-open-file-at-root-path
+    ( c-addr u xt fs -- ) ( xt: file -- )
+
+    \ Create a directory at a path from the root directory
+    method with-create-dir-at-root-path
+    ( c-addr u xt fs -- ) ( xt: dir -- )
+
+    \ Open a directory at a path from the root directory
+    method with-open-dir-at-root-path
+    ( c-addr u xt fs -- ) ( xt: dir -- )
     
     \ Flush the block device for a filesystem
     method flush ( fs -- )
@@ -470,6 +486,22 @@ begin-module fat32
     \ Find whether a file or directory in a path from a directory exists
     method path-exists? ( c-addr u dir -- exists? )
 
+    \ Create a file at a path from the directory
+    method with-create-file-at-path
+    ( c-addr u xt fs -- ) ( xt: file -- )
+
+    \ Open a file at a path from the directory
+    method with-open-file-at-path
+    ( c-addr u xt fs -- ) ( xt: file -- )
+
+    \ Create a directory at a path from the directory
+    method with-create-dir-at-path
+    ( c-addr u xt fs -- ) ( xt: dir -- )
+
+    \ Open a directory at a path from the directory
+    method with-open-dir-at-path
+    ( c-addr u xt fs -- ) ( xt: dir -- )
+    
     \ Read an entry from a directory, and return whether an entry was read
     method read-dir ( entry dir -- entry-read? )
     
@@ -1043,6 +1075,50 @@ begin-module fat32
       ;] with-aligned-allot
     ; define root-path-exists?
     
+    :noname ( c-addr u xt fs -- ) ( xt: file -- )
+      <fat32-dir> class-size
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ with-create-file-at-path ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
+    ; define with-create-file-at-root-path
+    
+    :noname ( c-addr u xt fs -- ) ( xt: file -- )
+      <fat32-dir> class-size
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ with-open-file-at-path ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
+    ; define with-open-file-at-root-path
+
+    :noname ( c-addr u xt fs -- ) ( xt: dir -- )
+      <fat32-dir> class-size
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ with-create-dir-at-path ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
+    ; define with-create-dir-at-root-path
+    
+    :noname ( c-addr u xt fs -- ) ( xt: dir -- )
+      <fat32-dir> class-size
+      [:
+        dup { root-dir }
+        [: tuck swap root-dir@ with-open-dir-at-path ;] try
+        root-dir close-dir
+        root-dir destroy
+        ?raise
+      ;] with-aligned-allot
+    ; define with-open-dir-at-root-path
+
     :noname ( fs -- ) fat32-device @ flush-blocks ; define flush
     
     :noname ( fs -- )
@@ -1744,6 +1820,74 @@ begin-module fat32
         drop 1- swap 1+ swap r> path-exists? ( exists? )
       then ( exists? )
     ; define path-exists?
+
+    :noname ( c-addr u xt dir -- ) ( xt: file -- )
+      2swap rot
+      [: ( xt c-addr u dir' )
+        <fat32-file> class-size [: ( xt c-addr u dir' file )
+          dup { file }
+          [:
+            dup { file }
+            swap create-file
+            file swap execute
+          ;] try
+          file close-file
+          file destroy
+          ?raise
+        ;] with-aligned-allot
+      ;] swap with-path
+    ; define with-create-file-at-path
+
+    :noname ( c-addr u xt dir -- ) ( xt: file -- )
+      2swap rot
+      [: ( xt c-addr u dir' )
+        <fat32-file> class-size [: ( xt c-addr u dir' file )
+          dup { file }
+          [:
+            dup { file }
+            swap open-file
+            file swap execute
+          ;] try
+          file close-file
+          file destroy
+          ?raise
+        ;] with-aligned-allot
+      ;] swap with-path
+    ; define with-open-file-at-path
+
+    :noname ( c-addr u xt dir -- ) ( xt: dir'' -- )
+      2swap rot
+      [: ( xt c-addr u dir' )
+        <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
+          dup { dir }
+          [:
+            dup { dir }
+            swap create-dir
+            dir swap execute
+          ;] try
+          dir close-dir
+          dir destroy
+          ?raise
+        ;] with-aligned-allot
+      ;] swap with-path
+    ; define with-create-dir-at-path
+
+    :noname ( c-addr u xt dir -- ) ( xt: dir'' -- )
+      2swap rot
+      [: ( xt c-addr u dir' )
+        <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
+          dup { dir }
+          [:
+            dup { dir }
+            swap open-dir
+            dir swap execute
+          ;] try
+          dir close-dir
+          dir destroy
+          ?raise
+        ;] with-aligned-allot
+      ;] swap with-path
+    ; define with-open-dir-at-path
 
     :noname { entry dir -- entry-read? }
       dir dir-open @ averts x-not-open
