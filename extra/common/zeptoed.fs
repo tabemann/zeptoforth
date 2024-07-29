@@ -2003,18 +2003,6 @@ begin-module zeptoed-internal
           buffer buffer-width@ negate buffer buffer-edit-cursor adjust-offset
         then
       then
-      
-\      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
-\      dist buffer buffer-width@ <= if
-\        [: newline = ;] buffer buffer-edit-cursor find-prev
-\        -1 buffer buffer-edit-cursor adjust-offset
-\        buffer buffer-edit-cursor buffer cursor-start-dist { len }
-\        len buffer buffer-width@ umod dup { last-len } dist >= if
-\          last-len negate dist + buffer buffer-edit-cursor adjust-offset
-\        then
-\      else
-\        buffer buffer-width@ negate buffer buffer-edit-cursor adjust-offset
-\      then
       buffer buffer-edit-cursor offset@ buffer buffer-left-bound @ < if
         buffer buffer-left-bound @ buffer buffer-edit-cursor go-to-offset
       then
@@ -2080,23 +2068,6 @@ begin-module zeptoed-internal
           [: newline = ;] buffer buffer-edit-cursor find-next
         then
       then
-
-      \      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
-\      buffer buffer-edit-cursor buffer cursor-left-space { col row }
-\      buffer edit-cursor-line-last? if
-\        dist buffer buffer-width@ umod { last-len }
-\        [: newline = ;] buffer buffer-edit-cursor find-next
-\        1 buffer buffer-edit-cursor adjust-offset
-\        buffer buffer-edit-cursor buffer cursor-line-len { next-len }
-\        last-len next-len min buffer buffer-edit-cursor adjust-offset
-\      else
-\        buffer buffer-edit-cursor buffer cursor-line-len { len }
-\        len dist - dist buffer buffer-width@ umod > if
-\          buffer buffer-width@ buffer buffer-edit-cursor adjust-offset
-\        else
-\          len dist - buffer buffer-edit-cursor adjust-offset
-\        then
-\      then
     ; define do-down
     
     \ Enter a character into the buffer
