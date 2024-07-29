@@ -211,11 +211,11 @@ begin-module zeptoed-internal
     \ Heap
     cell member buffer-heap
     
-    \ Buffer name
-    2 cells member buffer-name
-
     \ Buffer path
     2 cells member buffer-path
+
+    \ Buffer name
+    2 cells member buffer-name
 
     \ Previous buffer
     cell member buffer-prev
@@ -1401,7 +1401,7 @@ begin-module zeptoed-internal
 
     \ Get whether a cursor is on a special line
     :noname ( cursor buffer -- special? )
-      dup <cursor> [: { orig-cursor buffer cursor }
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         [:
           dup tab = over unicode? or over bl < or over delete = or
@@ -1412,7 +1412,8 @@ begin-module zeptoed-internal
         [: newline = ;] cursor find-prev
         cursor offset@ check-offset <> { checked-before }
         orig-cursor cursor copy-cursor
-        [: dup tab = over unicode? or over bl < or over delete = or
+        [:
+          dup tab = over unicode? or over bl < or over delete = or
           swap newline = or
         ;] cursor find-next
         cursor offset@ to check-offset
