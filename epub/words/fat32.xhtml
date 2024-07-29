@@ -194,13 +194,33 @@
 </section>
 <section id="with-root-path">
 <h3><code class="docutils literal notranslate"><span class="pre">with-root-path</span></code></h3>
-<p>( c-addr u xt fs ) ( xt: c-addr’ u’ dir – )</p>
-<p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns.</p>
+<p>( c-addr u xt fs – ) ( xt: c-addr’ u’ dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="root-path-exists">
 <h3><code class="docutils literal notranslate"><span class="pre">root-path-exists?</span></code></h3>
 <p>( c-addr u fs – exists? )</p>
 <p>Get whether a file or directory exists at the specified path starting at the root directory of a FAT32 filesystem.</p>
+</section>
+<section id="with-create-file-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-file-at-root-path</span></code></h3>
+<p>( c-addr u xt fs – ) ( xt: file – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-file-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-file-at-root-path</span></code></h3>
+<p>( c-addr u xt fs – ) ( xt: file – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-create-dir-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-dir-at-root-path</span></code></h3>
+<p>( c-addr u xt fs – ) ( xt: dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-dir-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-dir-at-root-path</span></code></h3>
+<p>( c-addr u xt fs – ) ( xt: dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="flush">
 <h3><code class="docutils literal notranslate"><span class="pre">flush</span></code></h3>
@@ -300,6 +320,26 @@
 <h3><code class="docutils literal notranslate"><span class="pre">path-exists?</span></code></h3>
 <p>( c-addr u dir – exists? )</p>
 <p>Get whether a file or directory exist at the specified path starting at a given directory.</p>
+</section>
+<section id="with-create-file-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-file-at-path</span></code></h3>
+<p>( c-addr u xt dir – ) ( xt: file – )</p>
+<p>Parse a path starting at a given directory, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-file-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-file-at-path</span></code></h3>
+<p>( c-addr u xt dir – ) ( xt: file – )</p>
+<p>Parse a path starting at a given directory, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-create-dir-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-dir-at-path</span></code></h3>
+<p>( c-addr u xt dir – ) ( xt: dir’ – )</p>
+<p>Parse a path starting at a given directory, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-dir-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-dir-at-path</span></code></h3>
+<p>( c-addr u xt dir – ) ( xt: dir’ – )</p>
+<p>Parse a path starting at a given directory, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="exists">
 <h3><code class="docutils literal notranslate"><span class="pre">exists?</span></code></h3>

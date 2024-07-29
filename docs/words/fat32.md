@@ -183,14 +183,34 @@ The `<base-fat32-fs>` class includes the following methods, which are implemente
 Initialize a root directory of a FAT32 filesystem; the directory object need not be initialized already, but if it is no harm will result.
 
 ##### `with-root-path`
-( c-addr u xt fs ) ( xt: c-addr' u' dir -- )
+( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
 
-Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns.
+Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `root-path-exists?`
 ( c-addr u fs -- exists? )
 
 Get whether a file or directory exists at the specified path starting at the root directory of a FAT32 filesystem.
+
+##### `with-create-file-at-root-path`
+( c-addr u xt fs -- ) ( xt: file -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-open-file-at-root-path`
+( c-addr u xt fs -- ) ( xt: file -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-create-dir-at-root-path`
+( c-addr u xt fs -- ) ( xt: dir -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
+
+##### `with-open-dir-at-root-path`
+( c-addr u xt fs -- ) ( xt: dir -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `flush`
 ( fs -- )
@@ -295,6 +315,26 @@ Parse a path starting at a given directory, and pass the leaf's name along with 
 ( c-addr u dir -- exists? )
 
 Get whether a file or directory exist at the specified path starting at a given directory.
+
+##### `with-create-file-at-path`
+( c-addr u xt dir -- ) ( xt: file -- )
+
+Parse a path starting at a given directory, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-open-file-at-path`
+( c-addr u xt dir -- ) ( xt: file -- )
+
+Parse a path starting at a given directory, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-create-dir-at-path`
+( c-addr u xt dir -- ) ( xt: dir' -- )
+
+Parse a path starting at a given directory, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
+
+##### `with-open-dir-at-path`
+( c-addr u xt dir -- ) ( xt: dir' -- )
+
+Parse a path starting at a given directory, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `exists?`
 ( c-addr u dir -- exists? )
