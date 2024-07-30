@@ -146,7 +146,6 @@ commit-flash
   then
   module-stack-index @ 0<> averts x-module-stack-underflow
   module-stack@
-  0 over module-temp-word-count !
   1 swap module-count h+!
 ;
 
