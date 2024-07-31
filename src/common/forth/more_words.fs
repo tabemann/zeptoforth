@@ -99,19 +99,22 @@ end-module> import
 
 \ Lookup a word by its prefix with a pager
 : more-lookup ( "name" -- )
-  screen-height { screen }
-  cr token dup 0<> averts x-token-expected { addr len }
-  addr len ram-latest internal::find-prefix-len
-  addr len flash-latest internal::find-prefix-len max to len
-  0 0 0 { col row order-index }
-  begin order-index order-count @ < while
-    addr len ram-latest order order-index 2* + h@ col row screen
-    more-lookup-dict -rot to row to col not if exit then
-    addr len flash-latest order order-index 2* + h@ col row screen
-    more-lookup-dict -rot to row to col not if exit then
-    1 +to order-index
-  repeat
-  cr
+  ram-here
+  [:
+    screen-height { screen }
+    cr token dup 0<> averts x-token-expected { addr len }
+    addr len ram-latest internal::find-prefix-len
+    addr len flash-latest internal::find-prefix-len max to len
+    0 0 { col row }
+    internal::unique-order 2* over + swap ?do
+      addr len ram-latest i h@ col row screen
+      more-lookup-dict -rot to row to col not if exit then
+      addr len flash-latest i h@ col row screen
+      more-lookup-dict -rot to row to col not if exit then
+    2 +loop
+    cr
+  ;] try
+  swap ram-here! ?raise
 ;
 
 \ Lookup a word by its prefix in a wordlist with a pager
@@ -131,17 +134,20 @@ end-module> import
 
 \ Display all the words as four columns with a pager
 : more-words ( -- )
-  screen-height { screen }
-  cr
-  0 0 0 { col row order-index }
-  begin order-index order-count @ < while
-    ram-latest order order-index 2* + h@ col row screen
-    more-words-dict -rot to row to col not if exit then
-    flash-latest order order-index 2* + h@ col row screen
-    more-words-dict -rot to row to col not if exit then
-    1 +to order-index
-  repeat
-  cr
+  ram-here
+  [:
+    screen-height { screen }
+    cr
+    0 0 { col row }
+    internal::unique-order 2* over + swap ?do
+      ram-latest i h@ col row screen
+      more-words-dict -rot to row to col not if exit then
+      flash-latest i h@ col row screen
+      more-words-dict -rot to row to col not if exit then
+    2 +loop
+    cr
+  ;] try
+  swap ram-here! ?raise
 ;
 
 \ Display all the words as four columns in a wordlist with a pager
