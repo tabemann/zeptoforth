@@ -1434,7 +1434,7 @@ commit-flash
     then
     swap next-word @ swap
   repeat
-  nip rdrop
+  nip nip nip rdrop
 ;
 
 \ Find the common prefix length to a word
