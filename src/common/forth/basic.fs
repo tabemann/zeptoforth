@@ -1362,7 +1362,7 @@ internal set-current
   ram-here 0
   order-count @ 0 ?do
     2dup order i 2* + h@ -rot half-in-array not if
-      2dup 2* + order i 2* + h@ swap h! 1+
+      2 ram-allot 2dup 2* + order i 2* + h@ swap h! 1+
     then
   loop
   cell ram-align,

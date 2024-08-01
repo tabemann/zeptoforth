@@ -80,3 +80,27 @@ This word lists each word which has a prefix corresponding to the maximal prefix
 ( "name" -- )
 
 Dump all the words that go by a certain name.
+
+## Listing Words with a Pager
+
+In full builds of zeptoforth "more" versions of `words`, `words-in`, `lookup`, and `lookup-in` are provided. These are named `more-words`, `more-words-in`, `more-lookup`, and `more-lookup-in` respectively. Unlike their non-"more" counterparts these integrate a pager, where one screenful of words is printed to the console at a time, and then afterwards the user is prompted to either enter `q` to exit the "more" word or to enter any other key to continue
+
+##### `more-words`
+( -- )
+
+This word simply lists with a pager every user-viewable word in the current namespace in RAM or in flash, organized as four columns.
+
+##### `more-words-in`
+( module -- )
+
+This word list with a pager every user-viewable word in a selected module in RAM or in flash, organized as four columns.
+
+##### `more-lookup`
+( "name" -- )
+
+This word lists with a pager each word which has a prefix corresponding to the maximal prefix or the specified token which any word in the current namespace in RAM or in flash matches, organized as four columns.
+
+##### `more-lookup-in`
+( module "name" -- )
+
+This word lists with a pager each word which has a prefix corresponding to the maximal prefix or the specified token which any word in a selected module in RAM or in flash matches, organized as four columns.

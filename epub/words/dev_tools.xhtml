@@ -95,6 +95,30 @@
 <p>Dump all the words that go by a certain name.</p>
 </section>
 </section>
+<section id="listing-words-with-a-pager">
+<h2>Listing Words with a Pager</h2>
+<p>In full builds of zeptoforth “more” versions of <code class="docutils literal notranslate"><span class="pre">words</span></code>, <code class="docutils literal notranslate"><span class="pre">words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span></code>, and <code class="docutils literal notranslate"><span class="pre">lookup-in</span></code> are provided. These are named <code class="docutils literal notranslate"><span class="pre">more-words</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup</span></code>, and <code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code> respectively. Unlike their non-“more” counterparts these integrate a pager, where one screenful of words is printed to the console at a time, and then afterwards the user is prompted to either enter <code class="docutils literal notranslate"><span class="pre">q</span></code> to exit the “more” word or to enter any other key to continue</p>
+<section id="more-words">
+<h3><code class="docutils literal notranslate"><span class="pre">more-words</span></code></h3>
+<p>( – )</p>
+<p>This word simply lists with a pager every user-viewable word in the current namespace in RAM or in flash, organized as four columns.</p>
+</section>
+<section id="more-words-in">
+<h3><code class="docutils literal notranslate"><span class="pre">more-words-in</span></code></h3>
+<p>( module – )</p>
+<p>This word list with a pager every user-viewable word in a selected module in RAM or in flash, organized as four columns.</p>
+</section>
+<section id="more-lookup">
+<h3><code class="docutils literal notranslate"><span class="pre">more-lookup</span></code></h3>
+<p>( “name” – )</p>
+<p>This word lists with a pager each word which has a prefix corresponding to the maximal prefix or the specified token which any word in the current namespace in RAM or in flash matches, organized as four columns.</p>
+</section>
+<section id="more-lookup-in">
+<h3><code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code></h3>
+<p>( module “name” – )</p>
+<p>This word lists with a pager each word which has a prefix corresponding to the maximal prefix or the specified token which any word in a selected module in RAM or in flash matches, organized as four columns.</p>
+</section>
+</section>
 </section>
 
 
