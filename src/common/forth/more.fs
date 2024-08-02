@@ -49,6 +49,9 @@ begin-module more-internal
   0 constant normal-mode
   1 constant escape-mode
   2 constant csi-mode
+  3 constant 2byte-mode
+  4 constant 3byte-mode
+  5 constant 4byte-mode
   
   \ Character mode
   normal-mode value char-mode
@@ -142,15 +145,24 @@ begin-module more-internal
     normal-mode char-mode = if
       do-advance-char
     else
-      escape-mode char-mode = if
-        c [char] [ = if
-          csi-mode to char-mode
-        else
-          normal-mode to char-mode
-        then
+      2byte-mode char-mode =
+      3byte-mode char-mode = or
+      4byte-mode char-mode = or if
+        do-advance-char
+        normal-mode to char-mode
       else
-        c [char] m = if
-          normal-mode to char-mode
+        escape-mode char-mode = if
+          c [char] [ = if
+            csi-mode to char-mode
+          else
+            normal-mode to char-mode
+          then
+        else
+          csi-mode char-mode = if
+            c [char] m = if
+              normal-mode to char-mode
+            then
+          then
         then
       then
     then
@@ -190,6 +202,65 @@ begin-module more-internal
   ' do-emit , \ $1D
   ' do-emit , \ $1E
   ' do-emit , \ $1F
+
+  \ Handle initial Unicode byte
+  : do-unicode-start { c -- }
+    2byte-mode char-mode =
+    3byte-mode char-mode = or
+    4byte-mode char-mode = or if
+      do-advance-char
+    then
+    c do-emit
+    %11100000 c and %11000000 = if
+      2byte-mode to char-mode
+    else
+      %11110000 c and %11100000 = if
+        3byte-mode to char-mode
+      else
+        %11111000 c and %11110000 = if
+          4byte-mode to char-mode
+        then
+      then
+    then
+  ;
+
+  \ Handle tail Unicode byte
+  : do-unicode-tail { c -- }
+    c do-emit
+    2byte-mode char-mode = if
+      do-advance-char
+      normal-mode to char-mode
+    else
+      3byte-mode char-mode = if
+        c unicode? if
+          2byte-mode to char-mode
+        else
+          do-advance-char
+          normal-mode to char-mode
+        then
+      else
+        4byte-mode char-mode = if
+          c unicode? if
+            3byte-mode to char-mode
+          else
+            do-advance-char
+            normal-mode to char-mode
+          then
+        else
+          c do-normal
+        then
+      then
+    then
+  ;
+    
+  \ Handle Unicode
+  : do-unicode { c -- }
+    c unicode-start? if
+      c do-unicode-start
+    else
+      c do-unicode-tail
+    then
+  ;
   
   \ Emit handler
   : do-emit { c -- }
@@ -200,13 +271,7 @@ begin-module more-internal
       c $7F u< if
         c do-normal
       else
-        c unicode-start? if
-          c do-normal
-        else
-          c unicode? if
-            c do-emit
-          then
-        then
+        c do-unicode
       then
     then
   ;

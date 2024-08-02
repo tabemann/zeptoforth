@@ -9,7 +9,7 @@ These words are in `forth`.
 ##### `more`
 ( ? xt -- ? )
 
-A general-purpose pager provided by `full`, `full_swdcom`, and `full_usb` builds. It redirects output from a given xt such that it is displayed one screenful at a time, and the user can after each screenful enter `q` or `Q` to exit out of the pager early; entering any other page continues output. When exiting out of the pager early the data stack is cleaned up afterwards. Otherwise, the stack state before the pager is entered and the stack state left over after xt exits is left unperturbed.
+A general-purpose pager provided by `full`, `full_swdcom`, and `full_usb` builds. It redirects output from a given xt such that it is displayed one screenful at a time, and the user can after each screenful can enter `q` or `Q` to exit out of the pager early or any other key to continue output. When exiting out of the pager early the data stack is cleaned up afterwards. Otherwise, the stack state before the pager is entered and the stack state left over after xt exits is left unperturbed.
 
 Note that this words cannot be used with zeptocom.js or e4thcom as it assumes full ANSI terminal support, and xterm.js, used by zeptocom.js, and e4thcom do not provide this. This results in waiting forever for a response from the terminal when attempting to look up the size of the terminal or the current cursor coordinates.
 
