@@ -50,6 +50,7 @@
 #include src/common/forth/ansi_term.fs
 #include src/common/forth/line.fs
 #include src/common/forth/more_words.fs
+#include src/common/forth/more.fs
 #include src/common/forth/task_pool.fs
 #include src/common/forth/action_pool.fs
 #include src/common/forth/tinymt.fs

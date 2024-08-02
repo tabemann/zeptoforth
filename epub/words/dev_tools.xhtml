@@ -18,6 +18,15 @@
 <h1>Development Tools Words</h1>
 <p>There are a number of useful words provided with zeptoforth’s development tools.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="pager">
+<h2>Pager</h2>
+<section id="more">
+<h3><code class="docutils literal notranslate"><span class="pre">more</span></code></h3>
+<p>( ? xt – ? )</p>
+<p>A general-purpose pager provided by <code class="docutils literal notranslate"><span class="pre">full</span></code>, <code class="docutils literal notranslate"><span class="pre">full_swdcom</span></code>, and <code class="docutils literal notranslate"><span class="pre">full_usb</span></code> builds. It redirects output from a given xt such that it is displayed one screenful at a time, and the user can after each screenful enter <code class="docutils literal notranslate"><span class="pre">q</span></code> or <code class="docutils literal notranslate"><span class="pre">Q</span></code> to exit out of the pager early; entering any other page continues output. When exiting out of the pager early the data stack is cleaned up afterwards. Otherwise, the stack state before the pager is entered and the stack state left over after xt exits is left unperturbed.</p>
+<p>Note that this words cannot be used with zeptocom.js or e4thcom as it assumes full ANSI terminal support, and xterm.js, used by zeptocom.js, and e4thcom do not provide this. This results in waiting forever for a response from the terminal when attempting to look up the size of the terminal or the current cursor coordinates.</p>
+</section>
+</section>
 <section id="disassembler">
 <h2>Disassembler</h2>
 <p>A disassembler that covers (almost all of) the instructions utilized by zeptoforth is included with zeptoforth. It has two different orthogonal modes of operation; one is whether it disassembles instructions in a specified range of addresses or it disassembles just a selected word, the other is whether it disassembles user-friendly assembly including instruction addresses, instructions as hex, addresses to go along with labels, and in one set of cases computes absolute addresses from PC-relative instructions, or whether it disassembles assembler-friendly assembly without such niceities. In both modes it</p>
