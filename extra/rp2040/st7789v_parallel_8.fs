@@ -25,6 +25,7 @@ begin-module st7789v-8
   pixmap8-internal import
   pin import
   pio import
+  dma import
   dma-pool import
   armv6m import
 
@@ -53,19 +54,13 @@ begin-module st7789v-8
       <wrap
     ;pio
 
-    \ Rotate settings
-    0 constant ROTATE_0
-    1 constant ROTATE_90
-    2 constant ROTATE_180
-    3 constant ROTATE_270
-
-    \ ST7789V MADCTRL bits
-    %10000000 constant MADCTRL_ROW_ORDER
-    %01000000 constant MADCTRL_COL_ORDER
-    %00100000 constant MADCTRL_SWAP_XY
-    %00010000 constant MADCTRL_SCAN_ORDER
-    %00001000 constant MADCTRL_RGB_BGR
-    %00000100 constant MADCTRL_HORIZ_ORDER
+    \ ST7789V MADCTL bits
+    %10000000 constant MADCTL_ROW_ORDER
+    %01000000 constant MADCTL_COL_ORDER
+    %00100000 constant MADCTL_SWAP_XY
+    %00010000 constant MADCTL_SCAN_ORDER
+    %00001000 constant MADCTL_RGB_BGR
+    %00000100 constant MADCTL_HORIZ_ORDER
 
     \ ST7789V registers
     $01 constant REG_SWRESET
@@ -249,15 +244,15 @@ begin-module st7789v-8
       sm bit pio sm-disable
 
       \ Set up the PIO program
-      pio st7789v-8-pio-programmer p-size alloc-piomem { pio-addr }
+      pio st7789v-8-pio-program p-size alloc-piomem { pio-addr }
       sm pio st7789v-8-pio-program pio-addr setup-prog
       pio-addr sm pio sm-addr!
 
       \ Configure the pins to be PIO output and sideset pins
       data 8 pio pins-pio-alternate
-      sck 1 pio pins-pio-alternate
+      wr-sck 1 pio pins-pio-alternate
       data 8 sm pio sm-out-pins!
-      sck 1 sm pio sm-sideset-pins!
+      wr-sck 1 sm pio sm-sideset-pins!
       true sm pio sm-join-tx-fifo!
 
       \ Set the output shift direction and autopush
@@ -266,14 +261,16 @@ begin-module st7789v-8
       8 sm pio sm-push-threshold!
 
       \ Set the clock divisor
-      0 sysclk @ max-clock 1- max-clock / sm pio sm-sckdiv!
+      0 sysclk @ max-clock 1- max-clock / sm pio sm-clkdiv!
 
       \ Initialize the SCK and data pins' direction and value
-      out sck sm pio sm-pindir!
+      out wr-sck sm pio sm-pindir!
       data 8 + data ?do out i sm pio sm-pindir! loop
+      high wr-sck sm pio sm-pin!
+      data 8 + data ?do low i sm pio sm-pin! loop
 
       \ Enable the PIO state machine
-      sm bit pio pio-enable
+      sm bit pio sm-enable
       
       self reset-st7789v-8
       self init-st7789v-8
@@ -282,7 +279,7 @@ begin-module st7789v-8
 
     \ Destructor
     :noname { self -- }
-      self st7789-8-dma-channel @ free-dma
+      self st7789v-8-dma-channel @ free-dma
       self <object>->destroy
     ; define destroy
     
@@ -311,7 +308,7 @@ begin-module st7789v-8
       REG_VRHS s\" \x12" self cmd-args>st7789v-8
       REG_VDVS s\" \x20" self cmd-args>st7789v-8
       REG_PWCTRL1 s\" \xA4\xA1" self cmd-args>st7789v-8
-      REG_PWCTRL2 s\" \x0F" self cmd-args>st7789v-8
+      REG_FRCTRL2 s\" \x0F" self cmd-args>st7789v-8
 
       self dim@ 240 = swap 240 = and if
         REG_GCTRL s\" \x14" self cmd-args>st7789v-8
@@ -332,14 +329,14 @@ begin-module st7789v-8
         self cmd-args>st7789v-8
         REG_GMCTRN1
         s\" \xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31"
-        self cmd-args>st7789-v8
+        self cmd-args>st7789v-8
       then
 
       self dim@ 135 = swap 240 = and if
-        REG_VRHS s\" \x00" self cmd-args>st7789-v8
-        REG_GCTRL s\" \x7F" self cmd-args>st7789-v8
-        REG_VCOMS s\" \x3D" self cmd-args>st7789-v8
-        $D6 s\" \xA1" self cmd-args>st7789-v8
+        REG_VRHS s\" \x00" self cmd-args>st7789v-8
+        REG_GCTRL s\" \x7F" self cmd-args>st7789v-8
+        REG_VCOMS s\" \x3D" self cmd-args>st7789v-8
+        $D6 s\" \xA1" self cmd-args>st7789v-8
         REG_GMCTRP1
         s\" \x70\x04\x08\x09\x09\x05\x2A\x33\x41\x07\x13\x13\x29\x2F"
         self cmd-args>st7789v-8
@@ -408,7 +405,7 @@ begin-module st7789v-8
       \ machine's TXF register
       addr self st7789v-8-sm @ self st7789v-8-pio @ pio-registers::TXF count 1
       self st7789v-8-sm @
-      self st7789v-8-pio @ PIO0 = if 0 else 1 then DREQ_PIO
+      self st7789v-8-pio @ PIO0 = if 0 else 1 then DREQ_PIO_TX
       self st7789v-8-dma-channel @ start-buffer>register-dma
 
       \ Spin until DMA completes
@@ -480,10 +477,10 @@ begin-module st7789v-8
     
     \ Set the ST7789V-8 window
     :noname { start-col end-col start-row end-row self -- }
-      self st7789v-col-offset +to start-col
-      self st7789v-col-offset +to end-col
-      self st7789v-row-offset +to start-row
-      self st7789v-row-offset +to end-row
+      self st7789v-8-col-offset +to start-col
+      self st7789v-8-col-offset +to end-col
+      self st7789v-8-row-offset +to start-row
+      self st7789v-8-row-offset +to end-row
       0 0 { ^W col-values ^W row-values }
       start-col 8 rshift col-values c!
       start-col col-values 1 + c!
