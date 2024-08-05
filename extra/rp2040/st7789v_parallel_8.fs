@@ -143,9 +143,6 @@ begin-module st7789v-8
       \ Round
       cell member st7789v-8-round
 
-      \ Reset pin
-      cell member st7789v-8-reset-pin
-
       \ DC pin
       cell member st7789v-8-dc-pin
 
@@ -175,9 +172,6 @@ begin-module st7789v-8
 
       \ Dirty rectangle end row
       cell member st7789v-8-dirty-end-row
-
-      \ Reset the ST7789V-8
-      method reset-st7789v-8 ( self -- )
 
       \ Initialize the ST7789V-8
       method init-st7789v-8 ( self -- )
@@ -215,11 +209,10 @@ begin-module st7789v-8
     \ Constructor
     :noname
       { self }
-      { data wr-sck rd-sck dc cs backlight reset buf round cols rows sm pio }
+      { data wr-sck rd-sck dc cs backlight buf round cols rows sm pio }
       buf cols rows self <pixmap8>->new
       pio self st7789v-8-pio !
       sm self st7789v-8-sm !
-      reset self st7789v-8-reset-pin !
       dc self st7789v-8-dc-pin !
       cs self st7789v-8-cs-pin !
       backlight self st7789v-8-backlight-pin !
@@ -236,8 +229,6 @@ begin-module st7789v-8
       high dc pin!
       high cs pin!
       high backlight pin!
-      reset output-pin
-      low reset pin!
       high rd-sck pin!
 
       \ Disable the PIO state machine
@@ -272,7 +263,6 @@ begin-module st7789v-8
       \ Enable the PIO state machine
       sm bit pio sm-enable
       
-      self reset-st7789v-8
       self init-st7789v-8
       0 cols 0 rows self st7789v-8-window!
     ; define new
@@ -283,16 +273,6 @@ begin-module st7789v-8
       self <object>->destroy
     ; define destroy
     
-    \ Reset the ST7789V-8
-    :noname { self -- }
-      high self st7789v-8-reset-pin @ pin!
-      200 ms
-      low self st7789v-8-reset-pin @ pin!
-      200 ms
-      high self st7789v-8-reset-pin @ pin!
-      200 ms
-    ; define reset-st7789v-8
-
     \ Initialize the ST7789V-8
     :noname { self -- }
       REG_SWRESET self cmd>st7789v-8
