@@ -631,7 +631,7 @@ end-module> import
   token
   dup 0= triggers x-token-expected
   compiling-to-flash? not if
-    rot here cell allot tuck ! -rot
+    rot here cell align cell allot tuck ! -rot
   then
   start-compile-no-push
   visible
@@ -646,7 +646,7 @@ end-module> import
   word-end-hook @ ?execute
   $003F h,
   compiling-to-flash? if
-    next-ram-space dup >r
+    next-ram-space cell align, dup >r
   else
     swap
   then
@@ -661,7 +661,7 @@ end-module> import
   token
   dup 0= triggers x-token-expected
   compiling-to-flash? not if
-    2swap here 2 cells allot dup >r 2! r> -rot
+    2swap here cell align 2 cells allot dup >r 2! r> -rot
   then
   start-compile-no-push
   visible
@@ -679,7 +679,7 @@ end-module> import
   word-end-hook @ ?execute
   $003F h,
   compiling-to-flash? if
-    next-ram-space dup >r
+    next-ram-space cell align dup >r
   else
     swap
   then
