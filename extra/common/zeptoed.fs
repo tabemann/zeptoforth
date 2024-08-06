@@ -58,6 +58,7 @@ begin-module zeptoed-internal
   $0E constant ctrl-n
   $0F constant ctrl-o
   $10 constant ctrl-p
+  $12 constant ctrl-r
   $15 constant ctrl-u
   $16 constant ctrl-v
   $17 constant ctrl-w
@@ -65,6 +66,11 @@ begin-module zeptoed-internal
   $19 constant ctrl-y
   $1A constant ctrl-z
 
+  \ Character entry mode
+  0 constant insert-mode
+  1 constant search-forward-mode
+  2 constant search-backward-mode
+  
   \ Normal video
   : normal-video ( -- ) csi ." 0m" ;
 
@@ -76,6 +82,16 @@ begin-module zeptoed-internal
 
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
+
+  \ Get whether a string contains any uppercase characters
+  : contains-upper? ( c-addr u -- flag )
+    over + swap ?do
+      i c@ dup [char] A >= swap [char] Z <= and if
+        true unloop exit
+      then
+    loop
+    false
+  ;
 
   \ Get file error string
   : file-error-string ( exception -- c-addr u )
@@ -235,6 +251,12 @@ begin-module zeptoed-internal
     \ Is the buffer dirty
     cell member buffer-dirty
 
+    \ Character entry mode
+    cell member buffer-char-entry-mode
+
+    \ Search string
+    2 cells member buffer-search-text
+
     \ Buffer dynamic buffer
     <dyn-buffer> class-size member buffer-dyn-buffer
     
@@ -270,6 +292,15 @@ begin-module zeptoed-internal
 
     \ Clean buffer
     method clean-buffer ( buffer -- )
+
+    \ Leave search
+    method leave-search ( buffer -- )
+
+    \ Get whether a buffer is being searched
+    method searched? ( buffer -- searched? )
+
+    \ Get the buffer search text
+    method search-text@ ( buffer -- addr len )
 
     \ Buffer width in characters
     method buffer-width@ ( buffer -- width )
@@ -441,6 +472,18 @@ begin-module zeptoed-internal
     \ Is the edit cursor in the last row of the last line
     method edit-cursor-last-row? ( buffer -- last-row? )
 
+    \ Search forward
+    method edit-cursor-search-forward ( addr count buffer -- )
+
+    \ Search backward
+    method edit-cursor-search-backward ( addr count buffer -- )
+
+    \ Add character to search text
+    method add-search-text-char ( c buffer -- )
+
+    \ Delete character from search text
+    method delete-search-text-char ( buffer -- )
+    
     \ Output buffer title
     method output-title ( buffer -- )
     
@@ -585,6 +628,18 @@ begin-module zeptoed-internal
     \ Unindent in buffer
     method do-unindent ( buffer -- )
 
+    \ Search forward by one character
+    method do-search-forward ( c buffer -- )
+
+    \ Search backward by one character
+    method do-search-backward ( c buffer -- )
+
+    \ Delete one character from the search
+    method do-search-delete ( buffer -- )
+
+    \ Delete one character in the search
+    method do-delete-search ( buffer -- )
+
     \ Go left one character
     method handle-backward ( buffer -- )
 
@@ -648,6 +703,12 @@ begin-module zeptoed-internal
     \ Unindent in buffer
     method handle-unindent ( buffer -- )
 
+    \ Find a string forward
+    method handle-search-forward ( buffer -- )
+
+    \ Find a string backward
+    method handle-search-backward ( buffer -- )
+    
   end-class
 
   \ File buffer class
@@ -774,6 +835,9 @@ begin-module zeptoed-internal
     \ Exception
     cell member editor-exception
 
+    \ Are we displaying a search
+    cell member editor-searching
+
     \ Clipboard
     <clip> class-size member editor-clip
 
@@ -800,6 +864,9 @@ begin-module zeptoed-internal
 
     \ Set the cursor if the buffer is not the current buffer
     method update-different-coord ( buffer editor -- )
+
+    \ Display search text if applicable
+    method display-search-text ( editor -- )
     
     \ Go left one character
     method handle-editor-backward ( editor -- )
@@ -812,6 +879,12 @@ begin-module zeptoed-internal
 
     \ Go down one character
     method handle-editor-down ( editor -- )
+
+    \ Find a string forward
+    method handle-editor-search-forward ( editor -- )
+
+    \ Find a string backward
+    method handle-editor-search-backward ( editor -- )
     
     \ Enter a character into the editor
     method handle-editor-insert ( c editor -- )
@@ -940,6 +1013,8 @@ begin-module zeptoed-internal
       0 buffer buffer-left-bound !
       false buffer buffer-select-enabled !
       false buffer buffer-dirty !
+      insert-mode buffer buffer-char-entry-mode !
+      0 0 buffer buffer-search-text 2!
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-edit-cursor init-object
@@ -949,6 +1024,7 @@ begin-module zeptoed-internal
 
     \ Destructor
     :noname { buffer -- }
+      buffer buffer-search-text 2@ drop ?dup if buffer buffer-heap @ free then
       buffer clear-undos
       buffer buffer-select-cursor destroy
       buffer buffer-prev-cursor destroy
@@ -974,6 +1050,24 @@ begin-module zeptoed-internal
     :noname ( buffer -- )
       false swap buffer-dirty !
     ; define clean-buffer
+
+    \ Leave search
+    :noname { buffer -- }
+      insert-mode buffer buffer-char-entry-mode !
+      buffer buffer-search-text 2@ drop ?dup if buffer buffer-heap @ free then
+      0 0 buffer buffer-search-text 2!
+    ; define leave-search
+
+    \ Get whether a buffer is being searched
+    :noname { buffer -- searched? }
+      buffer buffer-char-entry-mode @
+      dup search-forward-mode = swap search-backward-mode = or
+    ; define searched?
+
+    \ Get the buffer search text
+    :noname ( buffer -- addr len )
+      buffer-search-text 2@
+    ; define search-text@
     
     \ Buffer width in characters
     :noname ( buffer -- width )
@@ -1493,7 +1587,106 @@ begin-module zeptoed-internal
     :noname ( buffer -- last-row? )
       dup buffer-edit-cursor swap cursor-last-row?
     ; define edit-cursor-last-row?
-    
+
+    \ Search forward
+    :noname ( addr count buffer -- )
+      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        begin
+          addr 1 cursor find-next if
+            cursor addr count dup [: { cursor addr count data }
+              data count cursor read-data-w/o-move count = if
+                addr count data count
+                addr count contains-upper? if
+                  equal-strings?
+                else
+                  equal-case-strings?
+                then
+                if
+                  true true
+                else
+                  1 cursor adjust-offset false
+                then
+              else
+                false true
+              then
+            ;] with-allot
+          else
+            false true
+          then
+        until
+        if cursor buffer buffer-edit-cursor copy-cursor then
+      ;] with-object
+    ; define edit-cursor-search-forward
+
+    \ Search backward
+    :noname ( addr count buffer -- )
+      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        begin
+          0 { W^ data }
+          data 1 cursor read-data-w/o-move if
+            data c@ addr c@ = if
+              cursor addr count dup [: { cursor addr count data }
+                data count cursor read-data-w/o-move count = if
+                  addr count data count
+                  addr count contains-upper? if
+                    equal-strings?
+                  else
+                    equal-case-strings?
+                  then
+                  if
+                    true true
+                  else
+                    -1 cursor adjust-offset false
+                  then
+                else
+                  false true
+                then
+              ;] with-allot
+            else
+              -1 cursor adjust-offset false
+            then
+          else
+            false true
+          then
+        until
+        if cursor buffer buffer-edit-cursor copy-cursor then
+      ;] with-object
+    ; define edit-cursor-search-backward
+
+    \ Add character to search text
+    :noname ( c buffer -- )
+      dup buffer-search-text 2@ nip 1+ [: { c buffer data }
+        buffer buffer-search-text 2@ { orig-data len }
+        orig-data if orig-data data len move then
+        c data len + c!
+        orig-data if orig-data buffer buffer-heap @ free then
+        len 1+ buffer buffer-heap @ allocate { new-data }
+        data new-data len 1+ move
+        new-data len 1+ buffer buffer-search-text 2!
+      ;] with-allot
+    ; define add-search-text-char
+
+    \ Delete character from search text
+    :noname { buffer -- }
+      buffer buffer-search-text 2@ nip 1 > if
+        buffer dup buffer-search-text 2@ nip 1- [: { buffer data }
+          buffer buffer-search-text 2@ { orig-data len }
+          orig-data data len 1- move
+          orig-data buffer buffer-heap @ free
+          len 1- buffer buffer-heap @ allocate { new-data }
+          data new-data len 1- move
+          new-data len 1- buffer buffer-search-text 2!
+        ;] with-allot
+      else
+        buffer buffer-search-text 2@ nip 1 = if
+          buffer buffer-search-text 2@ drop buffer buffer-heap @ free
+          0 0 buffer buffer-search-text 2!
+        then
+      then
+    ; define delete-search-text-char
+
     \ Output buffer title
     :noname { buffer -- }
       0 0 go-to-coord
@@ -2507,6 +2700,25 @@ begin-module zeptoed-internal
       then
     ; define do-unindent
 
+    \ Search forward by one character
+    :noname { c buffer -- }
+      c buffer add-search-text-char
+      buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+      buffer refresh-display
+    ; define do-search-forward
+
+    \ Search backward by one character
+    :noname { c buffer -- }
+      c buffer add-search-text-char
+      buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+      buffer refresh-display
+    ; define do-search-backward
+
+    \ Delete character in search
+    :noname { buffer -- }
+      buffer delete-search-text-char
+    ; define do-search-delete
+    
     \ Editor constants
     0 constant in-middle
     1 constant in-last-line
@@ -2520,6 +2732,7 @@ begin-module zeptoed-internal
     
     \ Go left one character
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-offset@ 0> if
         buffer edit-cursor-left-space { cols rows }
@@ -2543,6 +2756,7 @@ begin-module zeptoed-internal
 
     \ Go right one character
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-offset@ buffer buffer-len@ < if
         buffer edit-cursor-left-space { cols rows }
@@ -2572,6 +2786,7 @@ begin-module zeptoed-internal
 
     \ Go up one character
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-first-row? if
         buffer do-first
@@ -2592,6 +2807,7 @@ begin-module zeptoed-internal
 
     \ Go down one character
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-last-row? if
         buffer do-last
@@ -2612,6 +2828,12 @@ begin-module zeptoed-internal
     
     \ Enter a character into the buffer
     :noname { c buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode = if
+        c buffer do-search-forward exit
+      then
+      buffer buffer-char-entry-mode @ search-backward-mode = if
+        c buffer do-search-backward exit
+      then
       buffer update-prev-cursor
       buffer edit-cursor-at-end? if
         c tab <> if
@@ -2640,6 +2862,12 @@ begin-module zeptoed-internal
 
     \ Enter a newline into the buffer
     :noname { buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode = if
+        newline buffer do-search-forward exit
+      then
+      buffer buffer-char-entry-mode @ search-backward-mode = if
+        newline buffer do-search-backward exit
+      then
       buffer do-newline
       buffer update-display drop
       buffer refresh-display
@@ -2647,6 +2875,10 @@ begin-module zeptoed-internal
 
     \ Backspace in the buffer
     :noname { buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode =
+      buffer buffer-char-entry-mode @ search-backward-mode = or if
+        buffer do-search-delete exit
+      then
       buffer update-prev-cursor
       buffer selected? if
         buffer do-delete-range
@@ -2690,6 +2922,7 @@ begin-module zeptoed-internal
 
     \ Delete in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer selected? if
         buffer do-delete-range
@@ -2721,6 +2954,7 @@ begin-module zeptoed-internal
 
     \ Kill a range in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer selected? if
         buffer buffer-editor @ editor-clip buffer do-kill
         buffer do-deselect
@@ -2731,6 +2965,7 @@ begin-module zeptoed-internal
 
     \ Copy a range in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer selected? if
         buffer buffer-editor @ editor-clip buffer do-copy
         buffer do-deselect
@@ -2740,6 +2975,7 @@ begin-module zeptoed-internal
 
     \ Paste in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer buffer-editor @ editor-clip buffer do-paste
       buffer update-display drop
       buffer refresh-display
@@ -2747,6 +2983,7 @@ begin-module zeptoed-internal
 
     \ Select in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer selected? if
         buffer do-deselect
       else
@@ -2757,6 +2994,7 @@ begin-module zeptoed-internal
 
     \ Undo in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-undo
       buffer update-display drop
       buffer refresh-display
@@ -2764,6 +3002,7 @@ begin-module zeptoed-internal
 
     \ Go to line start in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-single-row? if
         in-single-row
@@ -2783,6 +3022,7 @@ begin-module zeptoed-internal
 
     \ Go to line end in the buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer update-prev-cursor
       buffer edit-cursor-single-row? if
         in-single-row
@@ -2802,6 +3042,7 @@ begin-module zeptoed-internal
 
     \ Page up in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-page-up
       buffer update-display drop
       buffer refresh-display
@@ -2809,6 +3050,7 @@ begin-module zeptoed-internal
 
     \ Page down in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-page-down
       buffer update-display drop
       buffer refresh-display
@@ -2816,6 +3058,7 @@ begin-module zeptoed-internal
 
     \ Home in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-doc-home
       buffer update-display drop
       buffer refresh-display
@@ -2823,6 +3066,7 @@ begin-module zeptoed-internal
 
     \ End in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-doc-end
       buffer update-display drop
       buffer refresh-display
@@ -2830,6 +3074,7 @@ begin-module zeptoed-internal
 
     \ Indent in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-indent
       buffer update-display drop
       buffer refresh-display
@@ -2837,11 +3082,32 @@ begin-module zeptoed-internal
 
     \ Unindent in buffer
     :noname { buffer -- }
+      buffer leave-search
       buffer do-unindent
       buffer update-display drop
       buffer refresh-display
     ; define handle-unindent
 
+    \ Start finding forward
+    :noname { buffer -- }
+      buffer searched? { buffer-searched? }
+      search-forward-mode buffer buffer-char-entry-mode !
+      buffer-searched? buffer buffer-search-text 2@ nip 0> and if
+        buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+        buffer refresh-display
+      then
+    ; define handle-search-forward
+
+    \ Start finding backward
+    :noname { buffer -- }
+      buffer searched? { buffer-searched? }
+      search-backward-mode buffer buffer-char-entry-mode !
+      buffer-searched? buffer buffer-search-text 2@ nip 0> and if
+        buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+        buffer refresh-display
+      then
+    ; define handle-search-backward
+    
   end-implement
 
   \ Implement the file buffer
@@ -3333,6 +3599,7 @@ begin-module zeptoed-internal
       minibuffer editor editor-minibuffer !
       false editor editor-in-minibuffer !
       false editor editor-exit !
+      false editor editor-searching !
     ; define new
 
     \ Destructor
@@ -3362,6 +3629,7 @@ begin-module zeptoed-internal
     :noname { editor -- }
       editor editor-current @ refresh-display
       editor editor-minibuffer @ refresh-display
+      editor display-search-text
     ; define refresh-editor
 
     \ Activate minibuffer
@@ -3394,6 +3662,31 @@ begin-module zeptoed-internal
         editor active-buffer@ set-buffer-coord
       then
     ; define update-different-coord
+
+    \ Display the search text
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-minibuffer @ minibuffer-read-only @ if
+          editor editor-current @ searched? if
+            true editor editor-searching !
+            editor editor-current @ search-text@ nip { search-len }
+            editor s" Search: " nip search-len + [: { editor data }
+              s" Search: " { prefix-addr prefix-len }
+              prefix-addr data prefix-len move
+              editor editor-current @ search-text@ { search-addr search-len }
+              search-addr data prefix-len + search-len move
+              data prefix-len search-len +
+              editor editor-minibuffer @ set-message
+            ;] with-allot
+          else
+            editor editor-searching @ if
+              false editor editor-searching !
+              editor editor-minibuffer @ clear-minibuffer
+            then
+          then
+        then
+      then
+    ; define display-search-text
     
     \ Go left one character
     :noname { editor -- }
@@ -3402,6 +3695,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-backward
       then
+      editor display-search-text
     ; define handle-editor-backward
 
     \ Go right one character
@@ -3411,6 +3705,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-forward
       then
+      editor display-search-text
     ; define handle-editor-forward
 
     \ Go up one character
@@ -3420,6 +3715,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-up
       then
+      editor display-search-text
     ; define handle-editor-up
 
     \ Go down one character
@@ -3429,6 +3725,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-down
       then
+      editor display-search-text
     ; define handle-editor-down
     
     \ Enter a character into the editor
@@ -3438,6 +3735,7 @@ begin-module zeptoed-internal
       else
         c editor editor-current @ handle-insert
       then
+      editor display-search-text
     ; define handle-editor-insert
 
     \ Enter a newline into the editor
@@ -3447,6 +3745,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-newline
       then
+      editor display-search-text
     ; define handle-editor-newline
 
     \ Backspace in the editor
@@ -3456,6 +3755,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-delete
       then
+      editor display-search-text
     ; define handle-editor-delete
 
     \ Delete in the editor
@@ -3465,6 +3765,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-delete-forward
       then
+      editor display-search-text
     ; define handle-editor-delete-forward
 
     \ Kill a range in the editor
@@ -3474,6 +3775,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-kill
       then
+      editor display-search-text
     ; define handle-editor-kill
 
     \ Copy a range in the editor
@@ -3483,6 +3785,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-copy
       then
+      editor display-search-text
     ; define handle-editor-copy
 
     \ Paste in the editor
@@ -3492,6 +3795,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-paste
       then
+      editor display-search-text
     ; define handle-editor-paste
 
     \ Select in the editor
@@ -3501,6 +3805,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-select
       then
+      editor display-search-text
     ; define handle-editor-select
 
     \ Undo in the editor
@@ -3510,6 +3815,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-undo
       then
+      editor display-search-text
     ; define handle-editor-undo
 
     \ Go to the previous buffer
@@ -3519,6 +3825,7 @@ begin-module zeptoed-internal
           buffer-prev @ ?dup if
             dup editor editor-current !
             refresh-display
+            editor display-search-text
           then
         then
       then
@@ -3531,6 +3838,7 @@ begin-module zeptoed-internal
           buffer-next @ ?dup if
             dup editor editor-current !
             refresh-display
+            editor display-search-text
           then
         then
       then
@@ -3572,6 +3880,7 @@ begin-module zeptoed-internal
         ;] with-allot
         editor deactivate-minibuffer
         editor editor-current @ refresh-display
+        editor display-search-text
       then
     ; define do-editor-new
 
@@ -3582,6 +3891,7 @@ begin-module zeptoed-internal
           editor editor-current @ handle-change-file-path
         then
       then
+      editor display-search-text
     ; define handle-editor-change-file-path
 
     \ Handle write
@@ -3591,6 +3901,7 @@ begin-module zeptoed-internal
           editor editor-current @ handle-write
         then
       then
+      editor display-search-text
     ; define handle-editor-write
 
     \ Handle revert
@@ -3600,6 +3911,7 @@ begin-module zeptoed-internal
           editor editor-current @ handle-revert
         then
       then
+      editor display-search-text
     ; define handle-editor-revert
 
     \ Handle exit
@@ -3645,6 +3957,7 @@ begin-module zeptoed-internal
             editor editor-minibuffer @ clear-minibuffer
             editor deactivate-minibuffer
             editor editor-current @ refresh-display
+            editor display-search-text
           then
         ;] with-allot
       then
@@ -3657,6 +3970,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-start
       then
+      editor display-search-text
     ; define handle-editor-start
 
     \ Handle editor end
@@ -3666,6 +3980,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-end
       then
+      editor display-search-text
     ; define handle-editor-end
 
     \ Handle editor page up
@@ -3675,6 +3990,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-page-up
       then
+      editor display-search-text
     ; define handle-editor-page-up
 
     \ Handle editor page down
@@ -3684,6 +4000,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-page-down
       then
+      editor display-search-text
     ; define handle-editor-page-down
 
     \ Handle editor home
@@ -3693,6 +4010,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-doc-home
       then
+      editor display-search-text
     ; define handle-editor-doc-home
 
     \ Handle editor end
@@ -3702,6 +4020,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-doc-end
       then
+      editor display-search-text
     ; define handle-editor-doc-end
 
     \ Handle editor indent
@@ -3711,6 +4030,7 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-indent
       then
+      editor display-search-text
     ; define handle-editor-indent
 
     \ Handle editor unindent
@@ -3720,8 +4040,29 @@ begin-module zeptoed-internal
       else
         editor editor-current @ handle-unindent
       then
+      editor display-search-text
     ; define handle-editor-unindent
 
+    \ Handle editor find forward
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-search-forward
+      else
+        editor editor-current @ handle-search-forward
+      then
+      editor display-search-text
+    ; define handle-editor-search-forward
+
+    \ Handle editor find backward
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-search-backward
+      else
+        editor editor-current @ handle-search-backward
+      then
+      editor display-search-text
+    ; define handle-editor-search-backward
+    
     \ Handle editor refresh
     :noname { editor -- }
       page
@@ -3773,6 +4114,7 @@ begin-module zeptoed-internal
             editor editor-minibuffer @ clear-minibuffer
             editor deactivate-minibuffer
             editor editor-current @ refresh-display
+            editor display-search-text
           then
         ;] with-allot
       then
@@ -3803,6 +4145,7 @@ begin-module zeptoed-internal
         buffer editor editor-current @ = if
           next-buffer editor editor-current !
           next-buffer refresh-display
+          editor display-search-text
         then
       else
         true editor editor-exit !
@@ -3848,6 +4191,7 @@ begin-module zeptoed-internal
         ctrl-k of editor handle-editor-copy endof
         ctrl-w of editor handle-editor-change-file-path endof
         ctrl-x of editor handle-editor-close endof
+        ctrl-r of editor handle-editor-search-backward endof
         [char] [ of editor handle-special endof
         clear-keys
       endcase
@@ -3870,6 +4214,7 @@ begin-module zeptoed-internal
             ctrl-n of editor handle-editor-next endof
             ctrl-p of editor handle-editor-prev endof
             ctrl-o of editor handle-editor-new endof
+            ctrl-r of editor handle-editor-search-forward endof
             ctrl-v of editor handle-editor-exit endof
             ctrl-w of editor handle-editor-write endof
             ctrl-x of editor handle-editor-revert endof
