@@ -2667,7 +2667,7 @@ commit-flash
   task-key?-hook @
   task-emit-hook @
   task-emit?-hook @
-  next-ram-space dict-base !
+  next-ram-space cell align dict-base !
   task-emit?-hook !
   task-emit-hook !
   task-key?-hook !
