@@ -1882,8 +1882,13 @@ begin-module zeptoed-internal
                           inverse-video
                         then
                       then
-                      buffer buffer-height@ rows-remaining - to edit-row
-                      buffer buffer-width@ cols-remaining - to edit-col
+                      cols-remaining 0 > if
+                        buffer buffer-height@ rows-remaining - to edit-row
+                        buffer buffer-width@ cols-remaining - to edit-col
+                      else
+                        buffer buffer-height@ rows-remaining - 1+ to edit-row
+                        0 to edit-col
+                      then
                     then
                     current-data c@ { byte }
                     byte newline = if
@@ -1897,7 +1902,7 @@ begin-module zeptoed-internal
                         { tab-spaces }
                         tab-spaces spaces
                         tab-spaces negate +to cols-remaining
-                        begin cols-remaining 0 < while
+                        begin cols-remaining 0 <= while
                           rows-remaining 0 > if
                             -1 +to rows-remaining
                           then
@@ -1907,11 +1912,12 @@ begin-module zeptoed-internal
                         byte emit
                         byte bl >= byte delete < and
                         byte unicode-start? or if
-                          cols-remaining 0 > if
-                            -1 +to cols-remaining
-                          else
-                            -1 +to rows-remaining
-                            buffer buffer-width@ to cols-remaining
+                          -1 +to cols-remaining
+                          cols-remaining 0 <= if
+                            rows-remaining 0 > if
+                              -1 +to rows-remaining
+                            then
+                            buffer buffer-width@ +to cols-remaining
                           then
                         then
                       then
@@ -1938,8 +1944,13 @@ begin-module zeptoed-internal
             rows-remaining 1- 0 ?do cr erase-end-of-line loop
           then
           edit-offset display-offset = if
-            buffer buffer-height@ rows-remaining - to edit-row
-            buffer buffer-width@ cols-remaining - to edit-col
+            cols-remaining 0 > if
+              buffer buffer-height@ rows-remaining - to edit-row
+              buffer buffer-width@ cols-remaining - to edit-col
+            else
+              buffer buffer-height@ rows-remaining - 1+ to edit-row
+              0 to edit-col
+            then
           then
           edit-row buffer buffer-edit-row !
           edit-col buffer buffer-edit-col !
@@ -2057,6 +2068,10 @@ begin-module zeptoed-internal
     :noname { c buffer -- }
       c emit
       1 buffer buffer-edit-col +!
+      buffer buffer-edit-col @ buffer buffer-width@ = if
+        0 buffer buffer-edit-col !
+        1 buffer buffer-edit-row +!
+      then
       buffer buffer-editor @ update-coord
     ; define output-char
 
@@ -2072,6 +2087,8 @@ begin-module zeptoed-internal
         buffer buffer-editor @ update-coord
       else
         buffer output-prev-row
+        space
+        buffer buffer-editor @ update-coord
       then
     ; define output-backspace
 
