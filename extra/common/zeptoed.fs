@@ -3269,41 +3269,23 @@ begin-module zeptoed-internal
 
     \ Access a file, creating or opening it
     :noname { path-addr path-bytes buffer -- }
-      [: ." *a* " ;] console::with-serial-output
       buffer buffer-file-open @ if
-        [: ." *b* " ;] console::with-serial-output
         buffer buffer-file close-file
-        [: ." *c* " ;] console::with-serial-output
         buffer buffer-file destroy
-        [: ." *d* " ;] console::with-serial-output
         false buffer buffer-file-open !
-        [: ." *e* " ;] console::with-serial-output
       then
-      [: ." *f* " ;] console::with-serial-output
       path-addr path-bytes fat32-tools::current-fs@ root-path-exists? if
-        [: ." *g* " ;] console::with-serial-output
         buffer buffer-file path-addr path-bytes [:
-          [: ." *h* " ;] console::with-serial-output
           { file file-addr file-bytes dir }
-          [: ." *i* " ;] console::with-serial-output
           file-addr file-bytes file dir open-file
-          [: ." *j* " ;] console::with-serial-output
         ;] fat32-tools::current-fs@ with-root-path
-        [: ." *k* " ;] console::with-serial-output
       else
-        [: ." *l* " ;] console::with-serial-output
         buffer buffer-file path-addr path-bytes [:
-          [: ." *m* " ;] console::with-serial-output
           { file file-addr file-bytes dir }
-          [: ." *n* " ;] console::with-serial-output
           file-addr file-bytes file dir create-file
-          [: ." *o* " ;] console::with-serial-output
         ;] fat32-tools::current-fs@ with-root-path
-        [: ." *p* " ;] console::with-serial-output
       then
-      [: ." *q* " ;] console::with-serial-output
       true buffer buffer-file-open !
-      [: ." *r* " ;] console::with-serial-output
     ; define access-file
 
     \ Try to change the file path
