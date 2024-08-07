@@ -1904,6 +1904,7 @@ begin-module zeptoed-internal
                         tab-spaces negate +to cols-remaining
                         begin cols-remaining 0 <= while
                           rows-remaining 0 > if
+                            cr
                             -1 +to rows-remaining
                           then
                           buffer buffer-width@ +to cols-remaining
@@ -1915,6 +1916,7 @@ begin-module zeptoed-internal
                           -1 +to cols-remaining
                           cols-remaining 0 <= if
                             rows-remaining 0 > if
+                              cr
                               -1 +to rows-remaining
                             then
                             buffer buffer-width@ +to cols-remaining
@@ -2951,9 +2953,12 @@ begin-module zeptoed-internal
       else
         in-middle
       then { position }
-      buffer edit-cursor-line-rows { start-rows }
+\      buffer edit-cursor-line-rows { start-rows }
       c buffer do-insert
-      buffer edit-cursor-line-rows start-rows <> if
+\      buffer edit-cursor-line-rows start-rows <> if
+\        full-width to position
+\      then
+      buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
         full-width to position
       then
       buffer update-display if
@@ -3004,14 +3009,17 @@ begin-module zeptoed-internal
               at-end
             then
           else
-            in-middle
+            full-width
           then
         then { position }
-        buffer edit-cursor-line-rows { start-rows }
-        buffer do-delete
-        buffer edit-cursor-line-rows start-rows <> if
+        buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
           full-width to position
         then
+\        buffer edit-cursor-line-rows { start-rows }
+        buffer do-delete
+\        buffer edit-cursor-line-rows start-rows <> if
+\          full-width to position
+\        then
         buffer update-display if
           buffer refresh-display
         else
