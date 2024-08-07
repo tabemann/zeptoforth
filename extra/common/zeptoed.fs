@@ -3009,7 +3009,7 @@ begin-module zeptoed-internal
               at-end
             then
           else
-            full-width
+            in-middle
           then
         then { position }
         buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
@@ -3020,6 +3020,9 @@ begin-module zeptoed-internal
 \        buffer edit-cursor-line-rows start-rows <> if
 \          full-width to position
 \        then
+        buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
+          full-width to position
+        then
         buffer update-display if
           buffer refresh-display
         else
