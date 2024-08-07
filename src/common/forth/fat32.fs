@@ -1801,12 +1801,12 @@ begin-module fat32
           drop r> exists? ( exists? )
         else
           2 pick over r> <fat32-dir> class-size [: ( c-addr' u' index c-addr'' u'' dir dir' )
-            dup >r swap ( c-addr' u' index c-addr'' u'' dir' dir )
+            swap ( c-addr' u' index c-addr'' u'' dir' dir )
             2over 2 pick exists? if ( c-addr' u' index c-addr'' u'' dir' dir )
               over { dir }
-              [:
+              [: over { dir }
                 open-dir ( c-addr' u' index )
-                1+ tuck - -rot + swap r> path-exists? ( exists? )
+                1+ tuck - -rot + swap dir path-exists? ( exists? )
               ;] try
               dir close-dir
               dir destroy

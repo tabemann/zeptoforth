@@ -297,7 +297,13 @@ begin-module zeptoed-internal
     method leave-search ( buffer -- )
 
     \ Get whether a buffer is being searched
-    method searched? ( buffer -- searched? )
+    method searching? ( buffer -- searching? )
+
+    \ Get whether a buffer is being searched forward
+    method searching-forward? ( buffer -- searching-forward? )
+
+    \ Get whether a buffer is being searched backward
+    method searching-backward? ( buffer -- searching-backward? )
 
     \ Get the buffer search text
     method search-text@ ( buffer -- addr len )
@@ -472,11 +478,23 @@ begin-module zeptoed-internal
     \ Is the edit cursor in the last row of the last line
     method edit-cursor-last-row? ( buffer -- last-row? )
 
+    \ Inner workings of searching forward
+    method cursor-search-forward ( addr count cursor buffer -- found? )
+
+    \ Inner workings of searching backward
+    method cursor-search-backward ( addr count cursor buffer -- found? )
+    
     \ Search forward
     method edit-cursor-search-forward ( addr count buffer -- )
 
     \ Search backward
     method edit-cursor-search-backward ( addr count buffer -- )
+
+    \ Continue searching forward
+    method edit-cursor-continue-forward ( addr count buffer -- )
+
+    \ Continue searching backward
+    method edit-cursor-continue-backward ( addr count buffer -- )
 
     \ Add character to search text
     method add-search-text-char ( c buffer -- )
@@ -636,9 +654,6 @@ begin-module zeptoed-internal
 
     \ Delete one character from the search
     method do-search-delete ( buffer -- )
-
-    \ Delete one character in the search
-    method do-delete-search ( buffer -- )
 
     \ Go left one character
     method handle-backward ( buffer -- )
@@ -1059,11 +1074,21 @@ begin-module zeptoed-internal
     ; define leave-search
 
     \ Get whether a buffer is being searched
-    :noname { buffer -- searched? }
+    :noname { buffer -- searching? }
       buffer buffer-char-entry-mode @
       dup search-forward-mode = swap search-backward-mode = or
-    ; define searched?
+    ; define searching?
 
+    \ Get whether a buffer is being searched forward
+    :noname ( buffer -- searching-forward? )
+      buffer-char-entry-mode @ search-forward-mode =
+    ; define searching-forward?
+
+    \ Get whether a buffer is being searched backward
+    :noname ( buffer -- searching-backward? )
+      buffer-char-entry-mode @ search-backward-mode =
+    ; define searching-backward?
+    
     \ Get the buffer search text
     :noname ( buffer -- addr len )
       buffer-search-text 2@
@@ -1588,12 +1613,18 @@ begin-module zeptoed-internal
       dup buffer-edit-cursor swap cursor-last-row?
     ; define edit-cursor-last-row?
 
-    \ Search forward
-    :noname ( addr count buffer -- )
-      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
-        buffer buffer-edit-cursor cursor copy-cursor
-        begin
-          addr 1 cursor find-next if
+    \ Inner workings of searching forward
+    :noname { addr count cursor buffer -- found? }
+      begin
+        0 { W^ data }
+        data 1 cursor read-data-w/o-move if
+          addr 1 data 1
+          addr count contains-upper? if
+            equal-strings?
+          else
+            equal-case-strings?
+          then
+          if
             cursor addr count dup [: { cursor addr count data }
               data count cursor read-data-w/o-move count = if
                 addr count data count
@@ -1612,48 +1643,105 @@ begin-module zeptoed-internal
               then
             ;] with-allot
           else
-            false true
+            1 cursor adjust-offset false
           then
-        until
+        else
+          false true
+        then
+      until
+    ; define cursor-search-forward
+
+    \ Inner workings of searching backward
+    :noname { addr count cursor buffer -- found? }
+      cursor offset@ 0= if false exit then
+      cursor offset@ buffer buffer-dyn-buffer dyn-buffer-len@ = if
+        -1 cursor adjust-offset
+      then
+      begin
+        0 { W^ data }
+        data 1 cursor read-data-w/o-move if
+          addr 1 data 1
+          addr count contains-upper? if
+            equal-strings?
+          else
+            equal-case-strings?
+          then
+          if
+            cursor addr count dup [: { cursor addr count data }
+              data count cursor read-data-w/o-move count = if
+                addr count data count
+                addr count contains-upper? if
+                  equal-strings?
+                else
+                  equal-case-strings?
+                then
+                if
+                  true true
+                else
+                  cursor offset@ 0= if
+                    false true
+                  else
+                    -1 cursor adjust-offset false
+                  then
+                then
+              else
+                false true
+              then
+            ;] with-allot
+          else
+            cursor offset@ 0= if
+              false true
+            else
+              -1 cursor adjust-offset false
+            then
+          then
+        else
+          false true
+        then
+      until
+    ; define cursor-search-backward
+    
+    \ Search forward
+    :noname ( addr count buffer -- )
+      over 0= if 2drop drop exit then
+      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        addr count cursor buffer cursor-search-forward
         if cursor buffer buffer-edit-cursor copy-cursor then
       ;] with-object
     ; define edit-cursor-search-forward
 
     \ Search backward
     :noname ( addr count buffer -- )
+      over 0= if 2drop drop exit then
       dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
         buffer buffer-edit-cursor cursor copy-cursor
-        begin
-          0 { W^ data }
-          data 1 cursor read-data-w/o-move if
-            data c@ addr c@ = if
-              cursor addr count dup [: { cursor addr count data }
-                data count cursor read-data-w/o-move count = if
-                  addr count data count
-                  addr count contains-upper? if
-                    equal-strings?
-                  else
-                    equal-case-strings?
-                  then
-                  if
-                    true true
-                  else
-                    -1 cursor adjust-offset false
-                  then
-                else
-                  false true
-                then
-              ;] with-allot
-            else
-              -1 cursor adjust-offset false
-            then
-          else
-            false true
-          then
-        until
+        addr count cursor buffer cursor-search-backward
         if cursor buffer buffer-edit-cursor copy-cursor then
       ;] with-object
     ; define edit-cursor-search-backward
+
+    \ Continue searching forward
+    :noname ( addr count buffer -- )
+      over 0= if 2drop drop exit then
+      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        1 cursor adjust-offset
+        addr count cursor buffer cursor-search-forward
+        if cursor buffer buffer-edit-cursor copy-cursor then
+      ;] with-object
+    ; define edit-cursor-continue-forward
+
+    \ Continue searching backward
+    :noname ( addr count buffer -- )
+      over 0= if 2drop drop exit then
+      dup buffer-dyn-buffer <cursor> [: { addr count buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        -1 cursor adjust-offset
+        addr count cursor buffer cursor-search-backward
+        if cursor buffer buffer-edit-cursor copy-cursor then
+      ;] with-object
+    ; define edit-cursor-continue-backward
 
     \ Add character to search text
     :noname ( c buffer -- )
@@ -2862,11 +2950,9 @@ begin-module zeptoed-internal
 
     \ Enter a newline into the buffer
     :noname { buffer -- }
-      buffer buffer-char-entry-mode @ search-forward-mode = if
-        newline buffer do-search-forward exit
-      then
-      buffer buffer-char-entry-mode @ search-backward-mode = if
-        newline buffer do-search-backward exit
+      buffer buffer-char-entry-mode @ search-forward-mode =
+      buffer buffer-char-entry-mode @ search-backward-mode = or if
+        insert-mode buffer buffer-char-entry-mode ! exit
       then
       buffer do-newline
       buffer update-display drop
@@ -3090,21 +3176,35 @@ begin-module zeptoed-internal
 
     \ Start finding forward
     :noname { buffer -- }
-      buffer searched? { buffer-searched? }
-      search-forward-mode buffer buffer-char-entry-mode !
-      buffer-searched? buffer buffer-search-text 2@ nip 0> and if
-        buffer buffer-search-text 2@ buffer edit-cursor-search-forward
-        buffer refresh-display
+      buffer searching? { buffer-searching? }
+      search-forward-mode buffer buffer-char-entry-mode @ <> if
+        search-forward-mode buffer buffer-char-entry-mode !
+        buffer-searching? buffer buffer-search-text 2@ nip 0> and if
+          buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+          buffer refresh-display
+        then
+      else
+        buffer-searching? buffer buffer-search-text 2@ nip 0> and if
+          buffer buffer-search-text 2@ buffer edit-cursor-continue-forward
+          buffer refresh-display
+        then
       then
     ; define handle-search-forward
 
     \ Start finding backward
     :noname { buffer -- }
-      buffer searched? { buffer-searched? }
-      search-backward-mode buffer buffer-char-entry-mode !
-      buffer-searched? buffer buffer-search-text 2@ nip 0> and if
-        buffer buffer-search-text 2@ buffer edit-cursor-search-backward
-        buffer refresh-display
+      buffer searching? { buffer-searching? }
+      search-backward-mode buffer buffer-char-entry-mode @ <> if
+        search-backward-mode buffer buffer-char-entry-mode !
+        buffer-searching? buffer buffer-search-text 2@ nip 0> and if
+          buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+          buffer refresh-display
+        then
+      else
+        buffer-searching? buffer buffer-search-text 2@ nip 0> and if
+          buffer buffer-search-text 2@ buffer edit-cursor-continue-backward
+          buffer refresh-display
+        then
       then
     ; define handle-search-backward
     
@@ -3169,23 +3269,41 @@ begin-module zeptoed-internal
 
     \ Access a file, creating or opening it
     :noname { path-addr path-bytes buffer -- }
+      [: ." *a* " ;] console::with-serial-output
       buffer buffer-file-open @ if
+        [: ." *b* " ;] console::with-serial-output
         buffer buffer-file close-file
+        [: ." *c* " ;] console::with-serial-output
         buffer buffer-file destroy
+        [: ." *d* " ;] console::with-serial-output
         false buffer buffer-file-open !
+        [: ." *e* " ;] console::with-serial-output
       then
+      [: ." *f* " ;] console::with-serial-output
       path-addr path-bytes fat32-tools::current-fs@ root-path-exists? if
+        [: ." *g* " ;] console::with-serial-output
         buffer buffer-file path-addr path-bytes [:
+          [: ." *h* " ;] console::with-serial-output
           { file file-addr file-bytes dir }
+          [: ." *i* " ;] console::with-serial-output
           file-addr file-bytes file dir open-file
+          [: ." *j* " ;] console::with-serial-output
         ;] fat32-tools::current-fs@ with-root-path
+        [: ." *k* " ;] console::with-serial-output
       else
+        [: ." *l* " ;] console::with-serial-output
         buffer buffer-file path-addr path-bytes [:
+          [: ." *m* " ;] console::with-serial-output
           { file file-addr file-bytes dir }
+          [: ." *n* " ;] console::with-serial-output
           file-addr file-bytes file dir create-file
+          [: ." *o* " ;] console::with-serial-output
         ;] fat32-tools::current-fs@ with-root-path
+        [: ." *p* " ;] console::with-serial-output
       then
+      [: ." *q* " ;] console::with-serial-output
       true buffer buffer-file-open !
+      [: ." *r* " ;] console::with-serial-output
     ; define access-file
 
     \ Try to change the file path
@@ -3667,11 +3785,22 @@ begin-module zeptoed-internal
     :noname { editor -- }
       editor editor-in-minibuffer @ not if
         editor editor-minibuffer @ minibuffer-read-only @ if
-          editor editor-current @ searched? if
+          editor editor-current @ searching? if
             true editor editor-searching !
             editor editor-current @ search-text@ nip { search-len }
-            editor s" Search: " nip search-len + [: { editor data }
-              s" Search: " { prefix-addr prefix-len }
+            editor
+            editor editor-current @ searching-forward? if
+              s" Search forward: "
+            else
+              s" Search backward: "
+            then
+            nip search-len + [: { editor data }
+              editor editor-current @ searching-forward? if
+                s" Search forward: "
+              else
+                s" Search backward: "
+              then
+              { prefix-addr prefix-len }
               prefix-addr data prefix-len move
               editor editor-current @ search-text@ { search-addr search-len }
               search-addr data prefix-len + search-len move
