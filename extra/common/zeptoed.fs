@@ -1907,7 +1907,7 @@ begin-module zeptoed-internal
                         byte emit
                         byte bl >= byte delete < and
                         byte unicode-start? or if
-                          cols-remaining 1 > if
+                          cols-remaining 0 > if
                             -1 +to cols-remaining
                           else
                             -1 +to rows-remaining
