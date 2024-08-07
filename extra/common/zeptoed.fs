@@ -2792,6 +2792,7 @@ begin-module zeptoed-internal
     :noname { c buffer -- }
       c buffer add-search-text-char
       buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+      buffer update-display drop
       buffer refresh-display
     ; define do-search-forward
 
@@ -2799,6 +2800,7 @@ begin-module zeptoed-internal
     :noname { c buffer -- }
       c buffer add-search-text-char
       buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+      buffer update-display drop
       buffer refresh-display
     ; define do-search-backward
 
@@ -3181,11 +3183,13 @@ begin-module zeptoed-internal
         search-forward-mode buffer buffer-char-entry-mode !
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
           buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+          buffer update-display drop
           buffer refresh-display
         then
       else
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
           buffer buffer-search-text 2@ buffer edit-cursor-continue-forward
+          buffer update-display drop
           buffer refresh-display
         then
       then
@@ -3198,11 +3202,13 @@ begin-module zeptoed-internal
         search-backward-mode buffer buffer-char-entry-mode !
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
           buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+          buffer update-display drop
           buffer refresh-display
         then
       else
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
           buffer buffer-search-text 2@ buffer edit-cursor-continue-backward
+          buffer update-display drop
           buffer refresh-display
         then
       then
