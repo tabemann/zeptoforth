@@ -27,6 +27,9 @@
 \ Tab character
 8 value zeptoed-tab-size
 
+\ Maximum search size
+4096 value zeptoed-max-search-size
+
 \ Save files with CRLF newlines
 false value zeptoed-save-crlf-enabled
 
@@ -499,6 +502,9 @@ begin-module zeptoed-internal
     \ Add character to search text
     method add-search-text-char ( c buffer -- )
 
+    \ Add text to search text
+    method add-search-text ( addr count buffer -- )
+    
     \ Delete character from search text
     method delete-search-text-char ( buffer -- )
     
@@ -654,6 +660,9 @@ begin-module zeptoed-internal
 
     \ Delete one character from the search
     method do-search-delete ( buffer -- )
+
+    \ Paste into the search buffer
+    method do-search-paste ( clip buffer -- )
 
     \ Go left one character
     method handle-backward ( buffer -- )
@@ -1745,6 +1754,9 @@ begin-module zeptoed-internal
 
     \ Add character to search text
     :noname ( c buffer -- )
+      dup buffer-search-text 2@ nip zeptoed-max-search-size = if
+        2drop exit
+      then
       dup buffer-search-text 2@ nip 1+ [: { c buffer data }
         buffer buffer-search-text 2@ { orig-data len }
         orig-data if orig-data data len move then
@@ -1755,6 +1767,22 @@ begin-module zeptoed-internal
         new-data len 1+ buffer buffer-search-text 2!
       ;] with-allot
     ; define add-search-text-char
+
+    \ Add string to search text
+    :noname ( addr count buffer -- )
+      dup buffer-search-text 2@ nip zeptoed-max-search-size swap -
+      rot min swap
+      over 0= if 2drop drop exit then
+      dup buffer-search-text 2@ nip over + [: { addr count buffer data }
+        buffer buffer-search-text 2@ { orig-data len }
+        orig-data if orig-data data len move then
+        addr data len + count move
+        orig-data if orig-data buffer buffer-heap @ free then
+        len count + buffer buffer-heap @ allocate { new-data }
+        data new-data len count + move
+        new-data len count + buffer buffer-search-text 2!
+      ;] with-allot
+    ; define add-search-text
 
     \ Delete character from search text
     :noname { buffer -- }
@@ -2827,6 +2855,34 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer delete-search-text-char
     ; define do-search-delete
+
+    \ Paste in search
+    :noname ( clip buffer -- )
+      default-segment-size [: { clip buffer data }
+        clip clip-cursor { src-cursor }
+        src-cursor offset@ { end-offset }
+        src-cursor go-to-start
+        begin
+          end-offset src-cursor offset@ - default-segment-size min { part-size }
+          part-size 0> if
+            data part-size src-cursor read-data to part-size
+            data part-size buffer add-search-text
+            false
+          else
+            true
+          then
+        until
+        buffer buffer-char-entry-mode @ search-forward-mode = if
+          buffer buffer-search-text 2@ buffer edit-cursor-search-forward
+        else
+          buffer buffer-char-entry-mode @ search-backward-mode = if
+            buffer buffer-search-text 2@ buffer edit-cursor-search-backward
+          then
+        then
+        buffer update-display drop
+        buffer refresh-display
+      ;] with-allot
+    ; define do-search-paste
     
     \ Editor constants
     0 constant in-middle
@@ -3091,7 +3147,10 @@ begin-module zeptoed-internal
 
     \ Paste in the buffer
     :noname { buffer -- }
-      buffer leave-search
+      buffer buffer-char-entry-mode @ search-forward-mode =
+      buffer buffer-char-entry-mode @ search-backward-mode = or if
+        buffer buffer-editor @ editor-clip buffer do-search-paste exit
+      then
       buffer buffer-editor @ editor-clip buffer do-paste
       buffer update-display drop
       buffer refresh-display

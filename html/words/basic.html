@@ -1290,7 +1290,7 @@ otherwise passing the specified argument through.</p>
 <section id="create">
 <h3><code class="docutils literal notranslate"><span class="pre">create</span></code><a class="headerlink" href="#create" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
-<p>Create a word referring to memory after it</p>
+<p>Create a word referring to memory after it. Note that when compiling to flash this is not of use to create arrays that can be modified at runtime, as the word will point into flash and not into RAM. It is primarily recommended to use this word for creating constant arrays as a result.</p>
 </section>
 <section id="builds">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;builds</span></code><a class="headerlink" href="#builds" title="Permalink to this heading">¶</a></h3>
@@ -2181,6 +2181,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>

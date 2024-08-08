@@ -1245,7 +1245,7 @@ Fill memory with a byte
 ##### `create`
 ( "name" -- )
 
-Create a word referring to memory after it
+Create a word referring to memory after it. Note that when compiling to flash this is not of use to create arrays that can be modified at runtime, as the word will point into flash and not into RAM. It is primarily recommended to use this word for creating constant arrays as a result.
 
 ##### `<builds`
 ( "name" -- )

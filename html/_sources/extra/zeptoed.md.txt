@@ -44,7 +44,7 @@ This is a `value` containing whether files saved by zeptoed will use CRLF endlin
 
 zeptoed has the following key mappings; all other non-control characters will be inserted at the cursor:
 
-* Enter: Insert a newline with indentation to match the indentation of the preceding line.
+* Enter: Insert a newline with indentation to match the indentation of the preceding line, unless prompted in the minibuffer, where then the prompt is responded to, or while searching, where then searching is ended.
 * Tab: Indent the current line or the current selection by one indentation incremnt.
 * Shift-Tab: Unindent the current lien or the current selection by one indentation increment. Note that tabs may be automatically converted to spaces in the process.
 * Control-Meta-Tab: Insert a single tab character (rather than indent).
@@ -61,16 +61,18 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-Space: Toggle selection; if there previously was no selection, the selection point is set to the current position of the cursor.
 * Control-A: Move the cursor to the start of the line; note that under many terminal programs (GNU Screen, picocom) Control-A is captured, and generating a Control-A requires more keys to be entered (e.g. entering Control-A again under picocom).
 * Control-E: Move the cursor to the end of the line.
+* Control-K: Cut the current selection and transfer it to the clipboard.
+* Control-Meta-K: Copy the current selection and transfer it to the clipboard.
 * Control-N: Go to the next buffer.
 * Control-P: Go to the previous buffer.
 * Control-O: Open a buffer with the specified file path; if a file with that path exists it is loaded, otherwise it is created.
+* Control-R: Begin searching forward, if not already searching forward, and if already searching forward, skip to the next string to search for if there is one.
+* Control-Meta-R: Begin searching backward, if not already searching backward, and if already searching backward, skip to the previous string to search for if there is one.
 * Control-V: Exit; note that if dirty buffers exist, the user will be prompted whether they wish to exit.
 * Control-W: Write the current buffer to its file and mark it clean.
 * Control-Meta-W: Select another file and write the current buffer into it, creating it if it did not exist and overwriting its contents if it did, and set the current buffer to point to it; the current buffer will be marked as clean.
 * Control-X: Reload the current buffer from its file and mark it clean.
 * Control-Meta-X: Close the current buffer; note that if the current buffer is dirty, the user will be prompted whether they wish to close it.
-* Control-K: Cut the current selection and transfer it to the clipboard.
-* Control-Meta-K: Copy the current selection and transfer it to the clipboard.
-* Control-Y: Paste the contents of the clipboard at the cursor.
+* Control-Y: Paste the contents of the clipboard at the cursor, unless searching, where then the contents of the clipboard will be pasted into the search string, and will then be searched for.
 * Control-Z: Carry out one undo; note that some operations have their undos combined, while others may be split into multiple undos (i.e. are non-atomic).
 * Control-L: Refresh the display, e.g. if the terminal has changed size.

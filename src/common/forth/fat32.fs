@@ -1812,7 +1812,7 @@ begin-module fat32
               dir destroy
               ?raise
             else
-              rdrop 2drop 2drop drop false ( exists? )
+              2drop 2drop 2drop drop false ( exists? )
             then
           ;] with-aligned-allot
         then
