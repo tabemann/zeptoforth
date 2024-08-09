@@ -1,6 +1,6 @@
 # Programmable Input/Output Words
 
-Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, `PIO0` and `PIO1`, each of which contain four *state machines*.
+Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) and the RP2350 (i.e. the Raspberry Pi Pico 2) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz, on the RP2040, or 150 MHz, on the RP2350. There are two PIO peripherals, `PIO0` and `PIO1`, on the RP2040, and a third PIO peripheral, `PIO2`, on the RP2350, each of which contain four *state machines*.
 
 PIO's may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a *top* instruction to a *bottom* instruction automatically, unless a `jmp` instruction is executed at the *top* address. Instructions may be loaded into a PIO's instruction memory with `pio-instr-mem!` or `pio-instr-relocate-mem!`. Instructions may also be fed into a state machine to be executed immediately with `sm-instr!`. The address to execute PIO instructions at may be set for a state machine with `sm-addr!`
 
@@ -58,6 +58,11 @@ PIO0.
 
 PIO1.
 
+##### `PIO2`
+( -- pio )
+
+PIO2 (`rp2350 only).
+
 ##### `IRQ0`
 ( -- irq )
 
@@ -87,6 +92,16 @@ PIO1 IRQ0 index.
 ( -- irq )
 
 PIO1 IRQ1 index.
+
+##### `PIO2_IRQ0`
+( -- irq )
+
+PIO2 IRQ0 index (`rp2350` only).
+
+##### `PIO2_IRQ1`
+( -- irq )
+
+PIO2 IRQ1 index (`rp2350` only).
 
 #### PIO Words
 
@@ -223,6 +238,11 @@ Set OSR threshold before autopull or conditional pull will take place; value may
 ( threshold state-machine pio -- )
 
 Set ISR threshold before autopush or conditional push will take place; value may be from 1 to 32.
+
+##### `sm-in-count!`
+( in-count state-machine pio -- )
+
+Set number of pins which are not masked to 0 when read by an IN PINS, WAIT PIN, or MOV x, PINS instruction; value may be from 1 to 32 (`rp2350` only).
 
 ##### `sm-txf!`
 ( x state-machine pio -- )

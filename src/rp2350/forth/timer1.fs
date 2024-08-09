@@ -56,14 +56,20 @@ begin-module timer1
     \ Pause the timer
     TIMER1_Base $30 + constant TIME_PAUSE
 
+    \ Timer locked bit
+    TIMER1_Base $34 + constant LOCKED
+
+    \ TImer source bit
+    TIMER1_Base $38 + constant TIME_SOURCE
+    
     \ Raw timer interrupts
-    TIMER1_Base $34 + constant INTR
+    TIMER1_Base $3C + constant INTR
 
     \ Interrupt enable
-    TIMER1_Base $38 + constant INTE
+    TIMER1_Base $40 + constant INTE
 
     \ Interrupt status after masking and forcing
-    TIMER1_Base $40 + constant INTS
+    TIMER1_Base $44 + constant INTS
 
     \ Validate an alarm
     : validate-alarm ( alarm -- ) timer-count u< averts x-out-of-range-alarm ;
@@ -148,7 +154,33 @@ begin-module timer1
     index bit INTR !
     index timer-irq NVIC_ICPR_CLRPEND!
   ;
+
   
+  \ Lock the timer
+  : lock-timer ( -- )
+    1 LOCKED bis!
+  ;
+
+  \ Is the timer locked?
+  : timer-locked? ( -- locked? )
+    LOCKED @ 1 and 0<>
+  ;
+
+  \ Set the timer to use the system clock as a source
+  : sysclk-timer ( -- )
+    1 TIME_SOURCE bis!
+  ;
+
+  \ Set the timer to use the 1 MHz tick as a source
+  : tick-timer ( -- )
+    1 TIME_SOURCE bic!
+  ;
+
+  \ Is the timer set to use the system clock as a source
+  : timer-sysclk? ( -- sysclk? )
+    TIME_SOURCE @ 1 and 0<>
+  ;
+
 end-module
 
 \ Initialize

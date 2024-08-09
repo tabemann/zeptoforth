@@ -300,7 +300,32 @@ begin-module pio
 
     \ PIO control register
     : CTRL ( pio -- addr ) [inlined] $000 + ;
+
+    \ Write 1 to restart the clock dividers of state machines in neighboring
+    \ PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the same
+    \ write
+    26 bit constant CTRL_NEXTPREV_CLKDIV_RESTART
+
+    \ Write 1 to disable state machines in neighboring PIO blocks, as specified
+    \ by NEXT_PIO_MASK and PREV_PIO_MASK in the same write
+    25 bit constant CTRL_NEXTPREV_SM_DISABLE
     
+    \ Write 1 to enable state machines in neighboring PIO blocks, as specified
+    \ by NEXT_PIO_MASK and PREV_PIO_MASK in the same write
+    24 bit constant CTRL_NEXTPREV_SM_ENABLE
+
+    \ Next PIO state machine mask LSB
+    20 constant CTRL_NEXT_PIO_MASK_LSB
+    
+    \ Next PIO state machine mask mask
+    $F CTRL_NEXT_PIO_MASK_LSB lshift constant CTRL_NEXT_PIO_MASK_MASK
+
+    \ Previous PIO state machine mask LSB
+    16 constant CTRL_PREV_PIO_MASK_LSB
+
+    \ Previous PIO state machine mask mask
+    $F CTRL_PREV_PIO_MASK_LSB lshift constant CTRL_PREV_PIO_MASK_MASK
+
     \ Restart state machines' clock dividers LSB
     8 constant CTRL_CLKDIV_RESTART_LSB
     
@@ -475,6 +500,12 @@ begin-module pio
     \ Configuration info
     : DBG_CFGINFO ( pio -- addr ) [inlined] $044 + ;
 
+    \ LSB of the VERSION field (0 for RP2040, 1 for RP2350)
+    28 constant DBG_CFGINFO_VERSION_LSB
+
+    \ Mask of the VERISON field
+    $F DBG_CFGINFO_VERSION_LSB lshift constant DBG_CFGINFO_VERSION_MASK
+
     \ LSB of the size of the instruction memory in instructions
     16 constant DBG_CFGINFO_IMEM_SIZE_LSB
 
@@ -615,22 +646,28 @@ begin-module pio
     SM_EXECCTRL_WRAP_BOTTOM_MASK SM_EXECCTRL_WRAP_BOTTOM_LSB
     make-sm-field SM_EXECCTRL SM_EXECCTRL_WRAP_BOTTOM! SM_EXECCTRL_WRAP_BOTTOM@
 
-    \ MOV x, STATUS comparison; 0 is all ones if TX FIFO level < N else all zeros
-    \ 1 is all ones if RX FIFO level < N else all zeros
-    4 bit constant SM_EXECCTRL_STATUS_SEL
+    \ MOV x, STATUS comparison:
+    \ 0 is all ones if TX FIFO < N, otherwise all zeroes
+    \ 1 is all ones if RX FIFO < N, otherwise all zeroes
+    \ 2 is all ones if the indexed IRQ flag is raised, otherwise all zeroes
 
-    \ Set/get MOV x, STATUS comparison; 0 is all ones if TX FIFO level < N else
-    \ all zeros 1 is all ones if RX FIFO level < N else all zeros
-    SM_EXECCTRL_STATUS_SEL
-    make-bit SM_EXECCTRL SM_EXECCTRL_STATUS_SEL! SM_EXECCTRL_STATUS_SEL@
+    \ LSB of MOV x, STATUS comparison
+    5 constant SM_EXECCTRL_STATUS_SEL_LSB
 
-    \ LSB of comparison level for MOV x, STATUS
+    \ Mask of MOV x, STATUS comparison
+    $7 SM_EXECTRL_STATUS_SEL_LSB lshift constant SM_EXECTRL_STATUS_SEL_MASK
+
+    \ Set/get MOV x, STATUS comparison
+    SM_EXECTRL_STATUS_SEL_MASK SM_EXECTRL_STATUS_SEL_LSB
+    make-sm-field SM_EXECCTRL SM_EXECTRL_STATUS_SEL! SM_EXECCTRL_STATUS_SEL@
+    
+    \ LSB of comparison level or IRQ index for MOV x, STATUS
     0 constant SM_EXECCTRL_STATUS_N_LSB
 
-    \ Mask of comparison level for MOV x, STATUS
-    $F 0 lshift constant SM_EXECCTRL_STATUS_N_MASK
+    \ Mask of comparison level or IRQ index for MOV x, STATUS
+    $1F 0 lshift constant SM_EXECCTRL_STATUS_N_MASK
 
-    \ Set/get comparison level for MOV x, STATUS
+    \ Set/get comparison level or IRQ index for MOV x, STATUS
     SM_EXECCTRL_STATUS_N_MASK SM_EXECCTRL_STATUS_N_LSB
     make-sm-field SM_EXECCTRL SM_EXECCTRL_STATUS_N! SM_EXECCTRL_STATUS_N@
 
@@ -709,6 +746,45 @@ begin-module pio
     \ Set/get push automatically when the input shift register is filled
     SM_SHIFTCTRL_AUTOPUSH
     make-bit SM_SHIFTCTRL SM_SHIFTCTRL_AUTOPUSH! SM_SHIFTCTRL_AUTOPUSH@
+
+    \ Disable this state machine's RX FIFO, make its storage available to random
+    \ write access by the state machine (using the PUT instruction) and, unless
+    \ FJOIN_RX_GET is also set, random read access by the processor (through the
+    \ RXFx_PUTGETy registers). If FJOIN_RX_PUT and FJOIN_RX_GET are both set,
+    \ then the RX FIFO's registers can be randomly read/written by the state
+    \ machine, but are completely inaccessible to the processor. Setting this
+    \ bit will clear the FJOIN_TX and FJOIN_RX bits.
+    15 bit constant SM_SHIFTCTRL_FJOIN_RX_PUT
+
+    \ Set/get the above
+    SM_SHIFTCTRL_FJOIN_RX_PUT
+    make-bit SM_SHIFTCTRL SM_SHIFTCTRL_FJOIN_RX_PUT! SM_SHIFTCTRL_FJOIN_RX_PUT@
+
+    \ Disable this state machine's RX FIFO, make its storage available to random
+    \ read access by the state machine (using the GET instruction) and, unless
+    \ FJOIN_RX_PUT is also set, random write access by the processor (through
+    \ the RXFx_PUTGETy registers). If FJOIN_RX_PUT and FJOIN_RX_GET are both
+    \ set, then the RX FIFO's registers can be randomly read/written by the
+    \ state machine, but are completely inaccessible to the processor. Setting
+    \ this bit will clear the FJOIN_TX and FJOIN_RX bits.
+    14 bit constant SM_SHIFTCTRL_FJOIN_RX_GET
+
+    \ Set/get the above
+    SM_SHIFTCTRL_FJOIN_RX_GET
+    make-bit SM_SHIFTCTRL SM_SHIFTCTRL_FJOIN_RX_GET! SM_SHIFTCTRL_FJOIN_RX_GET@
+
+    \ LSB of number of bits which are not marked to 0 when read by an IN PINS,
+    \ WAIT PIN, or MOV x, PINS instruction; 0 means 32
+    0 constant SM_SHIFTCTRL_IN_COUNT_LSB
+
+    \ Mask of number of bits which are not marked to 0 when read by an IN PINS,
+    \ WAIT PIN, or MOV x, PINS instruction; 0 means 32
+    $1F SM_SHIFTCTRL_IN_COUNT_LSB lshift constant SM_SHIFTCTRL_IN_COUNT_MASK
+
+    \ Set/get of number of bits which are not marked to 0 when read by an IN
+    \ PINS, WAIT PIN, or MOV x, PINS instruction; 0 means 32
+    SM_SHIFTCTRL_IN_COUNT_MASK SM_SHIFTCTRL_IN_COUNT_LSB
+    make-sm-field SM_SHIFTCTRL SM_SHIFTCTRL_IN_COUNT! SM_SHIFTCTRL_IN_COUNT@
 
     \ Current instruction address of state machines
     : SM_ADDR ( state-machine pio -- addr ) [inlined] swap $18 * + $0D4 + ;
@@ -798,6 +874,17 @@ begin-module pio
     \ operation
     SM_PINCTRL_OUT_BASE_MASK SM_PINCTRL_OUT_BASE_LSB
     make-sm-field SM_PINCTRL SM_PINCTRL_OUT_BASE! SM_PINCTRL_OUT_BASE@
+
+    \ Direct read/write access to an entry of a state machine's RX FIFO, if
+    \ SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
+    : RXF_PUTGET ( entry sm pio -- addr )
+      [inlined] $128 + swap 4 lshift + swap cells +
+    ;
+
+    \ Relocate GPIO 0 (from the PIO's point of view) in the system GPIO
+    \ numbering, to access more than 32 GPIOs from PIO; only the values 0 and
+    \ 16 are supported
+    : GPIOBASE ( pio -- addr ) [inlined] $168 + ;
 
     \ Raw interrupts
     : INTR ( pio -- addr ) [inlined] $128 + ;
@@ -1307,6 +1394,16 @@ begin-module pio
     2 pick dup 0 u> swap 33 u< and averts x-threshold-out-of-range
     rot dup 32 = if drop 0 then
     -rot SM_SHIFTCTRL_PUSH_THRESH!
+  ;
+
+  \ Set number of pins which are not masked to 0 when read by an IN PINS, WAIT
+  \ PIN, or MOV x, PINS instruction; value
+  \ may be from 1 to 32
+  : sm-in-count! ( count state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick dup 0 u> swap 33 u< and averts x-pins-out-of-range
+    rot dup 32 = if drop 0 then
+    -rot SM_SHIFTCTRL_IN_COUNT!
   ;
 
   \ Write to the TX FIFO of a state machine
