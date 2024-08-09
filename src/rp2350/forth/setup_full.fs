@@ -21,7 +21,7 @@
 
 \ This is not actual Forth code, but rather setup directives for e4thcom to be
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an RP2040 device.
+\ on an RP2350 device.
 
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
@@ -31,33 +31,34 @@
 #include src/common/forth/value.fs
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
-#include src/rp2040/forth/multicore.fs
-#include src/rp2040/forth/erase.fs
+#include src/rp2350/forth/multicore.fs
+#include src/rp2350/forth/erase.fs
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
-#include src/rp2040/forth/gpio.fs
-#include src/rp2040/forth/pin.fs
-#include src/rp2040/forth/pio.fs
+#include src/rp2350/forth/int_io.fs
+#include src/rp2350/forth/gpio.fs
+#include src/rp2350/forth/pin.fs
+#include src/rp2350/forth/pio.fs
 #include src/common/forth/task.fs
-#include src/rp2040/forth/watchdog.fs
-#include src/rp2040/forth/led.fs
+#include src/rp2350/forth/watchdog.fs
+#include src/rp2350/forth/led.fs
 #include src/common/forth/full_default.fs
-#include src/rp2040/forth/timer.fs
-#include src/rp2040/forth/rng.fs
-#include src/rp2040/forth/qspi.fs
+#include src/rp2350/forth/timer.fs
+#include src/rp2350/forth/timer1.fs
+#include src/rp2350/forth/rng.fs
+#include src/rp2350/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
-#include src/rp2040/forth/dma.fs
-#include src/rp2040/forth/dma_pool.fs
-#include src/rp2040/forth/uart.fs
-#include src/rp2040/forth/adc.fs
-#include src/rp2040/forth/spi.fs
-#include src/rp2040/forth/i2c.fs
-#include src/rp2040/forth/pwm.fs
-#include src/rp2040/forth/rtc.fs
-#include src/rp2040/forth/clocks.fs
+#include src/rp2350/forth/dma.fs
+#include src/rp2350/forth/dma_pool.fs
+#include src/rp2350/forth/uart.fs
+#include src/rp2350/forth/adc.fs
+#include src/rp2350/forth/spi.fs
+#include src/rp2350/forth/i2c.fs
+#include src/rp2350/forth/pwm.fs
+#include src/rp2350/forth/rtc.fs
+#include src/rp2350/forth/clocks.fs
 #include src/common/forth/full_extra.fs
 #include src/common/forth/blocks_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs

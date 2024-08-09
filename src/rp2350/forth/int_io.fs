@@ -62,7 +62,7 @@ begin-module int-io
     UART0_Base $38 + constant UART0_UARTIMSC
 
     \ UART0 IRQ number
-    20 constant uart0-irq
+    33 constant uart0-irq
 
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector

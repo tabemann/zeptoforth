@@ -379,7 +379,7 @@ begin-module i2c
     0 bit constant ACTIVITY_STATUS
     
     \ I2C IRQ
-    : i2c-irq ( i2c -- irq ) 23 + ;
+    : i2c-irq ( i2c -- irq ) 36 + ;
 
     \ I2C vector
     : i2c-vector ( i2c -- vector ) i2c-irq 16 + ;

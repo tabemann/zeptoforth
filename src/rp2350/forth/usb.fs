@@ -46,7 +46,7 @@ begin-module usb
     : 2c, ( h -- ) dup c, 8 rshift c, ;
 
     \ USB IRQ index
-    5 constant usbctrl-irq
+    14 constant usbctrl-irq
 
     \ USB vector
     usbctrl-irq 16 + constant usbctrl-vector

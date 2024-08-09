@@ -20,56 +20,56 @@
 
 compile-to-flash
 
-begin-module timer
+begin-module timer1
 
   interrupt import
 
   \ Out of range alarm index
   : x-out-of-range-alarm ." out of range alarm" cr ;
   
-  begin-module timer-internal
+  begin-module timer1-internal
 
     \ Timer count
     4 constant timer-count
 
-    \ Timer 0 base address
-    $400B0000 constant TIMER0_Base
+    \ Timer 1 base address
+    $400B8000 constant TIMER1_Base
 
     \ Time write high bits; always write TIMELW first
-    TIMER0_Base $00 + constant TIMEHW
+    TIMER1_Base $00 + constant TIMEHW
 
     \ Time write low bits
-    TIMER0_Base $04 + constant TIMELW
+    TIMER1_Base $04 + constant TIMELW
 
     \ Configure an alarm to fire at a given 32-bit time
-    : ALARM ( index -- addr ) cells TIMER0_Base $10 + + ;
+    : ALARM ( index -- addr ) cells TIMER1_Base $10 + + ;
 
     \ The armed state of alarms
-    TIMER0_Base $20 + constant ARMED
+    TIMER1_Base $20 + constant ARMED
     
     \ Time read high bits (no side effects)
-    TIMER0_Base $24 + constant TIMERAWH
+    TIMER1_Base $24 + constant TIMERAWH
 
     \ Time read low bits (no side effects)
-    TIMER0_Base $28 + constant TIMERAWL
+    TIMER1_Base $28 + constant TIMERAWL
 
     \ Pause the timer
-    TIMER0_Base $30 + constant TIME_PAUSE
+    TIMER1_Base $30 + constant TIME_PAUSE
 
     \ Raw timer interrupts
-    TIMER0_Base $34 + constant INTR
+    TIMER1_Base $34 + constant INTR
 
     \ Interrupt enable
-    TIMER0_Base $38 + constant INTE
+    TIMER1_Base $38 + constant INTE
 
     \ Interrupt status after masking and forcing
-    TIMER0_Base $40 + constant INTS
+    TIMER1_Base $40 + constant INTS
 
     \ Validate an alarm
     : validate-alarm ( alarm -- ) timer-count u< averts x-out-of-range-alarm ;
 
     \ Timer IRQ
-    : timer-irq ( alarm -- irq ) 0 + ;
+    : timer-irq ( alarm -- irq ) 4 + ;
 
     \ Timer vector
     : timer-vector ( alarm -- vector ) timer-irq 16 + ;
@@ -152,6 +152,6 @@ begin-module timer
 end-module
 
 \ Initialize
-: init init timer::timer-internal::init-timer ;
+: init init timer1::timer1-internal::init-timer ;
 
 reboot

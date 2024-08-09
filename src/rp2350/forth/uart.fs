@@ -83,10 +83,10 @@ begin-module uart
     UART1_Base $38 + constant UART1_UARTIMSC
 
     \ UART0 IRQ number
-    20 constant uart0-irq
+    33 constant uart0-irq
     
     \ UART1 IRQ number
-    21 constant uart1-irq
+    34 constant uart1-irq
 
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector

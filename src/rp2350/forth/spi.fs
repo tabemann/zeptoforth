@@ -165,7 +165,7 @@ begin-module spi
     ;
 
     \ SPI IRQ
-    : spi-irq ( spi -- irq ) 18 + ;
+    : spi-irq ( spi -- irq ) 31 + ;
 
     \ SPI vector
     : spi-vector ( spi -- vector ) spi-irq 16 + ;

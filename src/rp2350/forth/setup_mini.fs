@@ -20,9 +20,9 @@
 
 \ This is not actual Forth code, but rather setup directives for e4thcom to be
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an RP2040 device.
+\ on an RP2350 device.
 
-\ #include src/rp2040/forth/clock.fs
+\ #include src/rp2350/forth/clock.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/armv6m.fs
@@ -31,13 +31,13 @@
 #include src/common/forth/value.fs
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
-#include src/rp2040/forth/multicore.fs
-#include src/rp2040/forth/erase.fs
+#include src/rp2350/forth/multicore.fs
+#include src/rp2350/forth/erase.fs
 #include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
-#include src/rp2040/forth/gpio.fs
+#include src/rp2350/forth/int_io.fs
+#include src/rp2350/forth/gpio.fs
 #include src/common/forth/task.fs
-#include src/rp2040/forth/watchdog.fs
+#include src/rp2350/forth/watchdog.fs
 #include src/common/forth/save_minidict.fs
 
 mini-dict::save-flash-mini-dict

@@ -279,16 +279,22 @@ begin-module pio
   end-module>
 
   \ PIO0 IRQ0 index
-  7 constant PIO0_IRQ0
+  15 constant PIO0_IRQ0
 
   \ PIO0 IRQ1 index
-  8 constant PIO0_IRQ1
+  16 constant PIO0_IRQ1
   
   \ PIO1 IRQ0 index
-  9 constant PIO1_IRQ0
+  17 constant PIO1_IRQ0
 
   \ PIO1 IRQ1 index
-  10 constant PIO1_IRQ1
+  18 constant PIO1_IRQ1
+
+  \ PIO2 IRQ0 index
+  19 constant PIO2_IRQ0
+
+  \ PIO2 IRQ1 index
+  20 constant PIO2_IRQ1
 
   begin-module pio-registers
 
