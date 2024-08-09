@@ -980,7 +980,7 @@ begin-module pio
   %10 constant IRQ_CLEAR
 
   \ Wait for an IRQ to be lowered
-  %010 constant IRQ_WAIT
+  %01 constant IRQ_WAIT
 
   \ Set PINS
   %000 constant SET_PINS
