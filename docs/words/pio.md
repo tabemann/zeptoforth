@@ -430,6 +430,26 @@ PIO PULL instruction. Pull a 32-bit value from the current state machine's TX FI
 
 PIO MOV instruction. Transfer a value from *source* to *destination*, applying *op* (which may be a no-op) to the value in the process.
 
+##### `mov-isr-rx-idx-imm,`
+( index -- )
+
+PIO MOV ISR to RX instruction, with an immediate index. Transfer a value from the ISR to an immediate index in the RX FIFO.
+
+##### `mov-isr-rx-idx-y,`
+( -- )
+
+PIO MOV ISR to RX instruction, indexed by the Y register. Transfer a value from the ISR to an index in the RX FIFO determined by the Y register.
+
+##### `mov-rx-osr-idx-imm,`
+( index -- )
+
+PIO MOV RX to OSR instruction, with an immediate index. Transfer a value from an immediate index in the RX FIFO to the OSR.
+
+##### `mov-rx-osr-idx-y,`
+( -- )
+
+PIO MOV RX to OSR instruction, indexed by the Y register. Transfer a value from an index in the RX FIFO determined by the Y register to the OSR.
+
 ##### `irq,`
 ( index set/wait -- )
 
@@ -474,6 +494,26 @@ PIO PULL instruction with delay or side-set. Pull a 32-bit value from the curren
 ( source delay/side-set op destination -- )
 
 PIO MOV instruction with delay or side-set. Transfer a value from *source* to *destination*, applying *op* (which may be a no-op) to the value in the process. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
+
+##### `mov-isr-rx-idx-imm+,`
+( delay/side-set index -- )
+
+PIO MOV ISR to RX instruction, with an immediate index, with delay or side-set. Transfer a value from the ISR to an immediate index in the RX FIFO.
+
+##### `mov-isr-rx-idx-y+,`
+( delay/side-set -- )
+
+PIO MOV ISR to RX instruction, indexed by the Y register, with delay or side-set. Transfer a value from the ISR to an index in the RX FIFO determined by the Y register.
+
+##### `mov-rx-osr-idx-imm+,`
+( delay/side-set index -- )
+
+PIO MOV RX to OSR instruction, with an immediate index, with delay or side-set. Transfer a value from an immediate index in the RX FIFO to the OSR.
+
+##### `mov-rx-osr-idx-y+,`
+( delay/side-set -- )
+
+PIO MOV RX to OSR instruction, indexed by the Y register, with delay or side-set. Transfer a value from an index in the RX FIFO determined by the Y register to the OSR.
 
 ##### `irq+,`
 ( index delay/side-set set/wait -- )
@@ -588,6 +628,11 @@ Wait for a pin.
 ( -- wait )
 
 Wait for an IRQ.
+
+##### `WAIT_JMPPIN`
+( -- wait )
+
+Wait on the pin indexed by the PINCTRL_JMP_PIN configuration, plus an index in the range 0-3, modulo 32 (`rp2350` only).
 
 ##### `IN_PINS`
 ( -- in-source )
@@ -714,6 +759,11 @@ Move to scratch register X.
 
 Move to scratch register Y.
 
+##### `MOV_DEST_PINDIRS`
+( -- mov-destination )
+
+Move to PINDIRS (`rp2350` only).
+
 ##### `MOV_DEST_EXEC`
 ( -- mov-destination )
 
@@ -819,10 +869,20 @@ Set scratch register Y (5 LSBs are set to data, all others are cleared).
 
 Set PINDIRS.
 
+##### `PREV`
+( irq -- irq-prev )
+
+Reference an IRQ in the previous-numbered PIO, wrapping around (`rp2350` only).
+
 ##### `REL`
 ( irq -- irq-rel )
 
 Add the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB's.
+
+##### `NEXT`
+( irq -- irq-next )
+
+Reference an IRQ in the next-numbered PIO, wrapping around (`rp2350` only).
 
 #### Exceptions
 
@@ -915,3 +975,8 @@ Wrong mark for jump or mark exception.
 ( -- )
 
 Invalid program base address in `setup-prog` or `free-piomem` exception.
+
+##### `x-invalid-gpio-base`
+( -- )
+
+Invalid GPIO base (i.e. not 0 or 16) exception (`rp2350` only).

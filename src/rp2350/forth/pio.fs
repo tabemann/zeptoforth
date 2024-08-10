@@ -113,6 +113,9 @@ begin-module pio
   \ PIO program start already set
   : x-start-already-set ( -- ) ." PIO program start already set" cr ;
 
+  \ Invalid GPIO base (i.e. not 0 or 16)
+  : x-invalid-gpio-base ( -- ) ." invalid GPIO base" cr ;
+  
   begin-module pio-internal
     
     begin-structure pio-header-size
@@ -1219,7 +1222,7 @@ begin-module pio
   ;
 
   \ PIO MOV RX to OSR indexed by Y instruction
-  : mov-rx-osr-idx-y, ( delay/side-set -- )
+  : mov-rx-osr-idx-y+, ( delay/side-set -- )
     $1F and 8 lshift or $8090 or h,
   ;
 
@@ -1230,7 +1233,7 @@ begin-module pio
   ;
 
   \ PIO IRQ instruction with delay or side-set
-  : irq+, ( index delay/side-set index-mode set/wait -- )
+  : irq+, ( index delay/side-set set/wait -- )
     $03 and 5 lshift swap $1F and 8 lshift or swap $1F and or $C000 or h,
   ;
 
@@ -1696,6 +1699,13 @@ begin-module pio
     2dup + 32 u<= averts x-invalid-size
     1 swap lshift 1- .s swap .s lshift
     swap PIO0 = if pio0-freemem else pio1-freemem then .s bic!
+  ;
+
+  \ Set the GPIO base for a PIO
+  : pio-gpio-base! ( base pio -- )
+    dup validate-pio
+    over 16 bic 0= averts x-invalid-gpio-base
+    GPIOBASE !
   ;
   
 end-module
