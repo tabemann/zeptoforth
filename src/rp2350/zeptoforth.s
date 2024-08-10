@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
 @ SOFTWARE.
 	
 	.syntax	unified
-	.cpu cortex-m0
+	.cpu cortex-m33
 	.thumb
 
 	.include "config.s"

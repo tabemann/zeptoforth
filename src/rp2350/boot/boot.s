@@ -1,4 +1,4 @@
-@ Copyright (c) 2021-2023 Travis Bemann
+@ Copyright (c) 2021-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@
 @ SOFTWARE.
 
 	.syntax unified
-	.cpu cortex-m0plus
+	.cpu cortex-m33
 	.thumb
 
 	.equ RAM_BASE, 0x20000000
@@ -27,6 +27,7 @@
 	.equ IMAGE_SIZE, 0x8000
 	.equ PADS_QSPI_BASE, 0x40020000
 	.equ VTOR, 0xE000ED08
+        .equ RSTACK_TOP, 0x20082000
 
 	@ SPI clock divider
 	.equ PICO_FLASH_SPI_CLKDIV, 4
@@ -41,8 +42,79 @@
 	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET, 0x14
 	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS, 0x02
 
+        .text
+	.word RSTACK_TOP
+	.word _handle_reset+1 	@ 1: the reset handler
+	.word _handle_reset+1	@ 2: the NMI handler
+	.word _handle_reset+1    @ 3: the hard fault handler
+	.word _handle_reset+1  @ 4: the MPU fault handler
+	.word _handle_reset+1  @ 5: the bus fault handler
+	.word _handle_reset+1  @ 6: the usage fault handler
+	.word 0               @ 7: reserved
+	.word 0               @ 8: reserved
+	.word 0               @ 9: reserved
+	.word 0               @ 10: reserved
+	.word _handle_reset+1   @ 11: SVCall handler
+	.word _handle_reset+1   @ 12: debug handler
+	.word 0               @ 13: reserved
+	.word _handle_reset+1   @ 14: the PendSV handler
+	.word _handle_reset+1  @ 15: the Systick handler
+	.word _handle_reset+1 @ 16
+	.word _handle_reset+1 @ 17
+	.word _handle_reset+1 @ 18
+	.word _handle_reset+1 @ 19
+	.word _handle_reset+1 @ 20
+	.word _handle_reset+1 @ 21
+	.word _handle_reset+1 @ 22
+	.word _handle_reset+1 @ 23
+	.word _handle_reset+1 @ 24
+	.word _handle_reset+1 @ 25
+	.word _handle_reset+1 @ 26
+	.word _handle_reset+1 @ 27
+	.word _handle_reset+1 @ 28
+	.word _handle_reset+1 @ 29
+	.word _handle_reset+1 @ 30
+	.word _handle_reset+1 @ 31
+	.word _handle_reset+1 @ 32
+	.word _handle_reset+1 @ 33
+	.word _handle_reset+1 @ 34
+	.word _handle_reset+1 @ 35
+	.word _handle_reset+1 @ 36
+	.word _handle_reset+1 @ 37
+	.word _handle_reset+1 @ 38
+	.word _handle_reset+1 @ 39
+	.word _handle_reset+1 @ 40
+	.word _handle_reset+1 @ 41
+	.word _handle_reset+1 @ 42
+	.word _handle_reset+1 @ 43
+	.word _handle_reset+1 @ 44
+	.word _handle_reset+1 @ 45
+	.word _handle_reset+1 @ 46
+	.word _handle_reset+1 @ 47
+	.word _handle_reset+1 @ 48
+        .word _handle_reset+1 @ 49
+        .word _handle_reset+1 @ 50
+        .word _handle_reset+1 @ 51
+        .word _handle_reset+1 @ 52
+        .word _handle_reset+1 @ 53
+        .word _handle_reset+1 @ 54
+        .word _handle_reset+1 @ 55
+        .word _handle_reset+1 @ 56
+        .word _handle_reset+1 @ 57
+        .word _handle_reset+1 @ 58
+        .word _handle_reset+1 @ 59
+        .word _handle_reset+1 @ 60
+        .word _handle_reset+1 @ 61
+        .word _handle_reset+1 @ 62
+        .word _handle_reset+1 @ 63
+        .word _handle_reset+1 @ 64
+        .word _handle_reset+1 @ 65
+        .word _handle_reset+1 @ 66
+        .word _handle_reset+1 @ 67
+
+_handle_reset:  
 	@ Set stack pointer to the end of SRAM5 temporarily
-	ldr r3, =0x20082000
+	ldr r3, =RSTACK_TOP
 	mov sp, r3
 
 	@ Set up QSPI pads

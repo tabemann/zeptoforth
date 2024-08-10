@@ -1424,7 +1424,7 @@ begin-module pio
   \ Set pins to PIO mode for a given pio
   : pins-pio-alternate ( pin-base pin-count pio -- )
     dup validate-pio
-    PIO0 = if 6 else 7 then -rot
+    dup PIO0 = if drop 6 else PIO1 = if 7 else 8 then then -rot
     dup 30 u<= averts x-too-many-pins
     over 30 u< averts x-pin-out-of-range
     over + swap ?do dup i 30 umod alternate-pin loop

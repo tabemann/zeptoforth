@@ -4,7 +4,7 @@ There are a number of words for controlling SPI peripherals available on each of
 
 Note that *spi* values as mentioned below vary between the different supported platforms. The following applies:
 
-* On the RP2040 the available *spi* values are 0 and 1.
+* On the RP2040 and RP2350 the available *spi* values are 0 and 1.
 * On the STM32F411 the available *spi* values are 1 through 5.
 * On the STM32F407 the available *spi* values are 1 through 3.
 * On the STM32L476 the available *spi* values are 1 through 3.
