@@ -20,11 +20,8 @@ UF2_BLOCK_SIZE = 512
 
 # The coda flash address
 def CODA_ADDR(big):
-    if big:
-        return 0x0017FF00
-    else:
-        return 0x000FFF00
-
+    return 0x001FFF00
+    
 # Block flags
 FLAGS = 0x00002000
 
@@ -32,36 +29,24 @@ FLAGS = 0x00002000
 BASE_ADDR = 0x10000000
 
 # RP2040 family ID
-RP2040_FAMILY_ID = 0xE48BFF56
+RP2350_ABSOLUTE_FAMILY_ID = 0xE48BFF57
 
 # Coda count
 CODA_COUNT = 1
 
 # Minidictionary size
-MINI_DICT_SIZE = 49152
-
-# Big minidictionary size
-BIG_MINI_DICT_SIZE = 61440
+MINI_DICT_SIZE = 94208
 
 # Minidictionary address
-MINI_DICT_ADDR = 0xF0000
-
-# Big miniditionary address
-BIG_MINI_DICT_ADDR = 0x170000
+MINI_DICT_ADDR = 0x1E8000
 
 # Get the minidictionary size
 def mini_dict_size(big):
-    if big:
-        return BIG_MINI_DICT_SIZE
-    else:
-        return MINI_DICT_SIZE
+    return MINI_DICT_SIZE
 
 # Get the minidictionary address
 def mini_dict_addr(big):
-    if big:
-        return BIG_MINI_DICT_ADDR
-    else:
-        return MINI_DICT_ADDR
+    return MINI_DICT_ADDR
     
 # Get the block count
 def block_count(image_size, big):
@@ -73,20 +58,26 @@ def pack_block(buf, index, total_count, addr, data, data_off, data_len):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')
-#    print(("MAGIC_0: %x MAGIC_1: %x FLAGS: %x addr: %x BLOCK_SIZE: %d "
-#           "index: %d total_count: %d MAGIC_2: %x")
-#          % (MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE, index,
-#             total_count, MAGIC_2))
     struct.pack_into('<IIIIIIII476sI', buf, index * UF2_BLOCK_SIZE,
                      MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE,
-                     index, total_count, RP2040_FAMILY_ID, padded_data,
+                     index, total_count, RP2350_ABSOLUTE_FAMILY_ID, padded_data,
                      MAGIC_2);
 
 # Write the bootblock and padding to the output image
 def pack_boot_block(buf, boot_block, total_count):
-    pack_block(buf, 0, total_count, 0, boot_block, 0, 256)
-    for i in range(1, 16):
-        pack_block(buf, i, total_count, i * BLOCK_SIZE, b'', 0, 0)
+    while (len(boot_block) % 4) != 0:
+        boot_block += b'\x00';
+    boot_block += struct.pack('<IIIII',
+                              0xffffded3
+                              0x10210142,
+                              0x000001ff,
+                              0x00000000,
+                              0xab123579)
+    while len(boot_block) < 4096:
+        boot_block += b'\x00';
+    for i in range(0, 16):
+        pack_block(buf, i, total_count, i * BLOCK_SIZE, boot_block,
+                   i * BLOCK_SIZE, BLOCK_SIZE)
 
 # Write the image to the output image
 def pack_image(buf, image, total_count, pad_count):
@@ -135,8 +126,8 @@ def main():
                          % (sys.argv[0], args[0]))
             boot_block = boot_block_file.read()
             boot_block_file.close()
-            if len(boot_block) != 256:
-                sys.exit('Boot block is not 256 bytes in size')
+            if len(boot_block) < (4096 - IMAGE_DEF_SIZE):
+                sys.exit('Boot block is too big')
         try:
             image_file = open(args[-3], 'rb')
         except:

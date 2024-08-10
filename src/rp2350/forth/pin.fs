@@ -33,10 +33,10 @@ begin-module pin
   begin-module pin-internal
 
     \ Pin count
-    30 constant pin-count
+    48 constant pin-count
 
     \ Alternate function count
-    10 constant alternate-count
+    12 constant alternate-count
 
     \ Validate a pin
     : validate-pin pin-count u< averts x-pin-out-of-range ;
@@ -113,25 +113,41 @@ begin-module pin
   \ Set the output of a pin
   : pin! ( state pin -- )
     dup validate-pin
-    bit swap if GPIO_OUT_SET else GPIO_OUT_CLR then !
+    dup 32 < if
+      bit swap if GPIO_OUT_SET else GPIO_OUT_CLR then !
+    else
+      32 - bit swap if GPIO_HI_OUT_SET else GPIO_HI_OUT_CLR then !
+    then
   ;
 
   \ Get the input of a pin
   : pin@ ( pin -- state )
     dup validate-pin
-    bit GPIO_IN bit@
+    dup 32 < if
+      bit GPIO_IN bit@
+    else
+      32 - bit GPIO_HI_IN bit@
+    then
   ;
 
   \ Get the output of a pin
   : pin-out@ ( pin -- state )
     dup validate-pin
-    bit GPIO_OUT bit@
+    dup 32 < if
+      bit GPIO_OUT bit@
+    else
+      32 - bit GPIO_HI_OUT bit@
+    then
   ;
 
   \ Toggle a pin
   : toggle-pin ( pin -- )
     dup validate-pin
-    bit GPIO_OUT_XOR !
+    dup 32 < if
+      bit GPIO_OUT_XOR !
+    else
+      32 - bit GPIO_HI_OUT_XOR !
+    then
   ;
 
 end-module

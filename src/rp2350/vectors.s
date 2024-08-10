@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +35,8 @@
 	.word _handle_null+1 @ 28
 	.word _handle_null+1 @ 29
 	.word _handle_null+1 @ 30
-	.word _handle_sio+1 @ 31
-	.word _handle_sio+1 @ 32
+	.word _handle_null+1 @ 31
+	.word _handle_null+1 @ 32
 	.word _handle_null+1 @ 33
 	.word _handle_null+1 @ 34
 	.word _handle_null+1 @ 35
@@ -45,7 +45,7 @@
 	.word _handle_null+1 @ 38
 	.word _handle_null+1 @ 39
 	.word _handle_null+1 @ 40
-	.word _handle_null+1 @ 41
+	.word _handle_sio+1 @ 41
 	.word _handle_null+1 @ 42
 	.word _handle_null+1 @ 43
 	.word _handle_null+1 @ 44
@@ -53,5 +53,23 @@
 	.word _handle_null+1 @ 46
 	.word _handle_null+1 @ 47
 	.word _handle_null+1 @ 48
-
+        .word _handle_null+1 @ 49
+        .word _handle_null+1 @ 50
+        .word _handle_null+1 @ 51
+        .word _handle_null+1 @ 52
+        .word _handle_null+1 @ 53
+        .word _handle_null+1 @ 54
+        .word _handle_null+1 @ 55
+        .word _handle_null+1 @ 56
+        .word _handle_null+1 @ 57
+        .word _handle_null+1 @ 58
+        .word _handle_null+1 @ 59
+        .word _handle_null+1 @ 60
+        .word _handle_null+1 @ 61
+        .word _handle_null+1 @ 62
+        .word _handle_null+1 @ 63
+        .word _handle_null+1 @ 64
+        .word _handle_null+1 @ 65
+        .word _handle_null+1 @ 66
+        .word _handle_null+1 @ 67
 	

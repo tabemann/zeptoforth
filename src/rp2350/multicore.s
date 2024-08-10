@@ -48,8 +48,8 @@
 	@@ Read access to this core's RX FIFO
 	.equ FIFO_RD, SIO_BASE + 0x058
 
-        @@ SIO IRQ base
-        .equ SIO_IRQ_BASE, 15
+        @@ SIO IRQ FIFO
+        .equ SIO_IRQ_FIFO, 25
 
         @@ NVIC base address
         .equ NVIC_BASE, 0xE000E100
@@ -110,9 +110,7 @@ _handle_sio:
 	cmp r0, #0
 	beq 5f
 	bl _loop_forever_fifo
-5:    	ldr r3, =SIO_CPUID
-	ldr r3, [r3]
-        adds r3, #SIO_IRQ_BASE
+5:    	movs r3, #SIO_IRQ_BASE
         movs r0, #1
         lsls r0, r3
         ldr r1, =NVIC_ICPR_BASE

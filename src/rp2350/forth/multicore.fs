@@ -78,11 +78,8 @@ begin-module multicore
   \ Wait for an event
   : wfe ( -- ) [inlined] [ undefer-lit %1011111100100000 h, ] ;
 
-  \ SIO processor 0 IRQ
-  15 constant SIO_IRQ_PROC0
-
-  \ SIO processor 1 RIQ
-  16 constant SIO_IRQ_PROC1
+  \ SIO FIFO IRQ
+  25 constant SIO_IRQ_FIFO
 
   \ FIFO status register; note that core 0 can see the read side of the 1 -> 0
   \ FIFO and the write side of the 0 -> 1 FIFO; the converse is true of core 1
@@ -497,8 +494,7 @@ begin-module multicore
   : launch-aux-core ( xt stack-ptr rstack-ptr core -- )
     1 = averts x-core-out-of-range
     prepare-aux-rstack
-    SIO_IRQ_PROC0 NVIC_ICER_CLRENA!
-\    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
+    SIO_IRQ_FIFO NVIC_ICER_CLRENA!
     6 0 do
       i case
 	0 of 1 fifo-drain 0 endof
@@ -515,9 +511,8 @@ begin-module multicore
       then
     +loop
     drop
-\    true core-1-launched !
-    $00 SIO_IRQ_PROC0 NVIC_IPR_IP!
-    SIO_IRQ_PROC0 NVIC_ISER_SETENA!
+    $00 SIO_IRQ_FIFO NVIC_IPR_IP!
+    SIO_IRQ_FIFO NVIC_ISER_SETENA!
   ;
 
   \ Prepare for rebooting the second core

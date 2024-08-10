@@ -123,30 +123,57 @@ begin-module gpio
   
   \ GPIO input register
   SIO_BASE $004 + constant GPIO_IN
+
+  \ High GPIO input register
+  SIO_BASE $008 + constant GPIO_HI_IN
   
   \ GPIO output register
   SIO_BASE $010 + constant GPIO_OUT
 
+  \ High GPIO output register
+  SIO_BASE $014 + constant GPIO_HI_OUT
+
   \ GPIO output atomic bit-set register
-  SIO_BASE $014 + constant GPIO_OUT_SET
+  SIO_BASE $018 + constant GPIO_OUT_SET
+
+  \ High GPIO output atomic bit-set register
+  SIO_BASE $01C + constant GPIO_HI_OUT_SET
   
   \ GPIO output atomic bit-clear register
-  SIO_BASE $018 + constant GPIO_OUT_CLR
+  SIO_BASE $020 + constant GPIO_OUT_CLR
+
+  \ High GPIO output atomic bit-clear register
+  SIO_BASE $024 + constant GPIO_HI_OUT_CLR
 
   \ GPIO output atomic bit-xor register
-  SIO_BASE $01C + constant GPIO_OUT_XOR
+  SIO_BASE $028 + constant GPIO_OUT_XOR
+
+  \ High GPIO output atomic bit-xor register
+  SIO_BASE $02C + constant GPIO_HI_OUT_XOR
     
   \ GPIO output enable register
-  SIO_BASE $020 + constant GPIO_OE
+  SIO_BASE $030 + constant GPIO_OE
+
+  \ High GPIO output enable register
+  SIO_BASE $034 + constant GPIO_HI_OE
 
   \ GPIO output enable atomic bit-set register
-  SIO_BASE $024 + constant GPIO_OE_SET
+  SIO_BASE $038 + constant GPIO_OE_SET
+
+  \ High GPIO output enable atomic bit-set register
+  SIO_BASE $03C + constant GPIO_HI_OE_SET
   
   \ GPIO output enable atomic bit-clear register
-  SIO_BASE $028 + constant GPIO_OE_CLR
+  SIO_BASE $040 + constant GPIO_OE_CLR
+
+  \ High GPIO output enable atomic bit-clear register
+  SIO_BASE $044 + constant GPIO_HI_OE_CLR
   
   \ GPIO output enable atomic bit-xor register
-  SIO_BASE $02C + constant GPIO_OE_XOR
+  SIO_BASE $048 + constant GPIO_OE_XOR
+
+  \ High GPIO output enable atomic bit-xor register
+  SIO_BASE $050 + constant GPIO_HI_OE_XOR
 
   \ Get interrupt to processors, after override is applied
   : GPIO_STATUS_IRQTOPROC@ ( index -- flag )
