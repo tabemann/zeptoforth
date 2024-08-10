@@ -45,25 +45,25 @@ begin-module gpio
     : PAD ( index -- addr ) 2 lshift [ PADS_BANK0_BASE 4 + ] literal + ;
 
     \ GPIO raw interrupt registers
-    IO_BANK0_BASE $0F0 + constant INTR0
+    IO_BANK0_BASE $230 + constant INTR0
     
     \ GPIO processor 0 interrupt enable registers
-    IO_BANK0_BASE $100 + constant PROC0_INTE0
+    IO_BANK0_BASE $248 + constant PROC0_INTE0
 
     \ GPIO processor 0 interrupt force registers
-    IO_BANK0_BASE $110 + constant PROC0_INTF0
+    IO_BANK0_BASE $260 + constant PROC0_INTF0
 
     \ GPIO processor 0 interrupt status registers
-    IO_BANK0_BASE $120 + constant PROC0_INTS0
+    IO_BANK0_BASE $278 + constant PROC0_INTS0
 
     \ GPIO processor 1 interrupt enable registers
-    IO_BANK0_BASE $130 + constant PROC1_INTE0
+    IO_BANK0_BASE $290 + constant PROC1_INTE0
 
     \ GPIO processor 1 interrupt force registers
-    IO_BANK0_BASE $140 + constant PROC1_INTF0
+    IO_BANK0_BASE $2A8 + constant PROC1_INTF0
 
     \ GPIO processor 1 interrupt status registers
-    IO_BANK0_BASE $150 + constant PROC1_INTS0
+    IO_BANK0_BASE $2C0 + constant PROC1_INTS0
 
     \ Pads bank 0 voltage select register
     PADS_BANK0_BASE $00 + constant PADS_BANK0_VOLTAGE_SELECT
@@ -113,10 +113,10 @@ begin-module gpio
   3 constant DRIVE_12MA
 
   \ SWCLK index
-  30 constant PAD_SWCLK
+  48 constant PAD_SWCLK
 
   \ SWD index
-  31 constant PAD_SWD
+  49 constant PAD_SWD
 
   \ IO IRQ BANK0
   21 constant IO_IRQ_BANK0
@@ -521,6 +521,11 @@ begin-module gpio
   \ Get voltage for pads
   : PADS_BANK0_VOLTAGE_SELECT@ ( -- voltage )
     PADS_BANK0_VOLTAGE_SELECT @ 1 and
+  ;
+
+  \ Set pad isolation control
+  : PADS_BANK0_ISO! ( enable index -- )
+    8 bit swap PAD rot if bis! else bic! then
   ;
 
   \ Set output disable

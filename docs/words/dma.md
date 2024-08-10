@@ -91,12 +91,37 @@ XIP STREAM DREQ.
 ##### `DREQ_XIP_SSITX`
 ( -- dreq )
 
-XIP SSITX DREQ.
+XIP SSITX DREQ (`rp2040` only).
 
 ##### `DREQ_XIP_SSIRX`
 ( -- dreq )
 
-XIP SSIRX DREQ.
+XIP SSIRX DREQ (`rp2040` only).
+
+##### `DREQ_XIP_QMITX`
+( -- dreq )
+
+XIP QMITX DREQ (`rp2350` only).
+
+##### `DREQ_XIP_QMIRX`
+( -- dreq )
+
+XIP QMIRX DREQ (`rp2350` only).
+
+##### `DREQ_HSTX`
+( -- dreq )
+
+HSTX DREQ (`rp2350` only).
+
+##### `DREQ_CORESIGHT`
+( -- dreq )
+
+Coresight DREQ (`rp2350` only).
+
+##### `DREQ_SHA256`
+( -- dreq )
+
+SHA256 DREQ (`rp2350` only).
 
 ##### `TREQ_TIMER`
 ( timer -- treq )
@@ -107,6 +132,91 @@ DMA timer *timer*, from 0 to 3, as TREQ.
 ( -- treq )
 
 Unpaced transfer TREQ.
+
+##### `TRANS_COUNT_MODE_NORMAL`
+( count -- count' )
+
+Set a transfer count to be normal (`rp2350` only).
+
+##### `TRANS_COUNT_MODE_TRIGGER_SELF`
+( count -- count' )
+
+Set a transfer count to be trigger-self (`rp2350` only).
+
+##### `TRANS_COUNT_MODE_ENDLESS`
+( count -- count' )
+
+Set a transfer count to be endless (`rp2350` only).
+
+##### `REGISTER_READ`
+( -- mode )
+
+Register source mode
+
+##### `REGISTER_WRITE`
+( -- mode )
+
+Register destination mode
+
+##### `INCR_BUFFER_READ`
+( -- mode )
+
+Incrementing buffer source mode
+
+##### `INCR_BUFFER_WRITE`
+( -- mode )
+
+Incrementing buffer destination mode
+
+##### `DECR_BUFFER_READ`
+( -- mode )
+
+Decrementing buffer source mode (`rp2350` only)
+
+##### `DECR_BUFFER_WRITE`
+( -- mode )
+
+Decrementing buffer destination mode (`rp2350` only)
+
+##### `INCR_RING_BUFFER_READ`
+( low-ring-bits -- mode )
+
+Incrementing ring buffer source mode for a given number of low bits in an address
+
+##### `INCR_RING_BUFFER_WRITE`
+( low-ring-bits -- mode )
+
+Incrementing ring buffer destination mode for a given number of low bits in an addres
+
+##### `DECR_RING_BUFFER_READ`
+( low-ring-bits -- mode )
+
+Decrementing ring buffer source mode for a given number of low bits in an address (`rp2350` only)
+
+##### `DECR_RING_BUFFER_WRITE`
+( low-ring-bits -- mode )
+
+Decrementing ring buffer destination mode for a given number of low bits in an addres (`rp2350` only)
+
+##### `start-dma`
+( src dest src-mode dest-mode count size treq channel -- )
+
+Start transfer of *count* units of *size* bytes on DMA *channel* with starting source address *src* and starting destination address *dest* with source mode *src-mode* and destination mode *dest-mode* synchronized by DREQ/TREQ *treq*.
+
+##### `prepare-dma`
+( src dest src-mode dest-mode count size treq channel -- )
+
+Prepare transfer of *count* units of *size* bytes on DMA *channel* with starting source address *src* and starting destination address *dest* with source mode *src-mode* and destination mode *dest-mode* synchronized by DREQ/TREQ *treq*.
+
+##### `start-dma-with-chain`
+( chain-to src dest src-mode dest-mode count size treq channel -- )
+
+Start transfer of *count* units of *size* bytes on DMA *channel* with starting source address *src* and starting destination address *dest* with source mode *src-mode* and destination mode *dest-mode* synchronized by DREQ/TREQ *treq* chained to DMA channel *chain-to*.
+
+##### `prepare-dma-with-chain`
+( chain-to src dest src-mode dest-mode count size treq channel -- )
+
+Prepare transfer of *count* units of *size* bytes on DMA *channel* with starting source address *src* and starting destination address *dest* with source mode *src-mode* and destination mode *dest-mode* synchronized by DREQ/TREQ *treq* chained to DMA channel *chain-to*.
 
 ##### `start-register>register-dma`
 ( src dest count size treq channel -- )

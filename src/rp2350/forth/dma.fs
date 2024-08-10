@@ -42,7 +42,7 @@ begin-module dma
   begin-module dma-internal
 
     \ DMA channel count
-    12 constant dma-count
+    16 constant dma-count
 
     \ Transfer request count
     $40 constant treq-count
@@ -72,16 +72,31 @@ begin-module dma
     : CHAN_ABORT ( -- ) [ DMA_BASE $444 + ] literal ;
     
     \ Busy bit
-    24 bit constant CH_CTRL_TRIG_BUSY
+    26 bit constant CH_CTRL_TRIG_BUSY
 
     \ Transfer request LSB
-    15 constant CH_CTRL_TRIG_TREQ_SEL_LSB
+    17 constant CH_CTRL_TRIG_TREQ_SEL_LSB
 
     \ Chan to LSB
-    11 constant CH_CTRL_TRIG_CHAIN_TO_LSB
+    13 constant CH_CTRL_TRIG_CHAIN_TO_LSB
+
+    \ Ring select (0 for read, 1 for write)
+    12 bit constant CH_CTRL_TRIG_RING_SEL
+
+    \ Ring lower bit count LSB
+    8 bit constant CH_CTRL_TRIG_RING_SIZE_LSB
+
+    \ Ring lower bit count mask
+    $F CH_CTRL_TRIG_RING_SIZE_LSB lshift constant CH_CTRL_TRIG_RING_SIZE_MASK
+    
+    \ Decrement write bit, combine with CH_CTRL_TRIG_INCR_WRITE
+    7 bit constant CH_CTRL_TRIG_INCR_WRITE_REV
     
     \ Increment write bit
-    5 bit constant CH_CTRL_TRIG_INCR_WRITE
+    6 bit constant CH_CTRL_TRIG_INCR_WRITE
+
+    \ Decrement read bit, combine with CH_CTRL_TRIG_INCR_READ
+    5 bit constant CH_CTRL_TRIG_INCR_READ_REV
 
     \ Increment read bit
     4 bit constant CH_CTRL_TRIG_INCR_READ
@@ -100,7 +115,7 @@ begin-module dma
     
     \ DMA channel enable bit
     0 bit constant CH_CTRL_TRIG_EN
-    
+
     \ Validate DMA channel index
     : validate-dma ( channel -- )
       dma-count u< averts x-out-of-range-dma-channel
@@ -137,37 +152,46 @@ begin-module dma
   : DREQ_PIO_RX ( sm pio -- dreq ) 3 lshift + 4 + ;
 
   \ SPI TX DREQ
-  : DREQ_SPI_TX ( spi -- dreq ) 1 lshift 16 + ;
+  : DREQ_SPI_TX ( spi -- dreq ) 1 lshift 24 + ;
 
   \ SPI RX DREQ
-  : DREQ_SPI_RX ( spi -- dreq ) 1 lshift 17 + ;
+  : DREQ_SPI_RX ( spi -- dreq ) 1 lshift 25 + ;
 
   \ UART TX DREQ
-  : DREQ_UART_TX ( uart -- dreq ) 1 lshift 20 + ;
+  : DREQ_UART_TX ( uart -- dreq ) 1 lshift 28 + ;
 
   \ UART RX DREQ
-  : DREQ_UART_RX ( uart -- dreq ) 1 lshift 21 + ;
+  : DREQ_UART_RX ( uart -- dreq ) 1 lshift 29 + ;
 
   \ PWM DREQ
-  : DREQ_PWM_WRAP ( pwm -- dreq ) 24 + ;
+  : DREQ_PWM_WRAP ( pwm -- dreq ) 32 + ;
 
   \ I2C TX DREQ
-  : DREQ_I2C_TX ( i2c -- dreq ) 1 lshift 32 + ;
+  : DREQ_I2C_TX ( i2c -- dreq ) 1 lshift 44 + ;
 
   \ I2C RX DREQ
-  : DREQ_I2C_RX ( i2c -- dreq ) 1 lshift 33 + ;
+  : DREQ_I2C_RX ( i2c -- dreq ) 1 lshift 45 + ;
 
   \ ADC DREQ
-  : DREQ_ADC ( -- dreq ) 36 ;
+  : DREQ_ADC ( -- dreq ) 48 ;
 
   \ XIP STREAM DREQ
-  : DREQ_XIP_STREAM ( -- dreq ) 37 ;
+  : DREQ_XIP_STREAM ( -- dreq ) 49 ;
 
-  \ XIP SSITX DREQ
-  : DREQ_XIP_SSITX ( -- dreq ) 38 ;
+  \ XIP QMITX DREQ
+  : DREQ_XIP_QMITX ( -- dreq ) 50 ;
 
-  \ XIP SSIRX DREQ
-  : DREQ_XIP_SSIRX ( -- dreq ) 39 ;
+  \ XIP QMIRX DREQ
+  : DREQ_XIP_QMIRX ( -- dreq ) 51 ;
+
+  \ HSTX DREQ
+  : DREQ_HSTX ( -- dreq ) 52 ;
+
+  \ Coresight DREQ
+  : DREQ_CORESIGHT ( -- dreq ) 53 ;
+
+  \ SHA256 DREQ
+  : DREQ_SHA256 ( -- dreq ) 54 ;
 
   \ Timer 0-3 as TREQ
   : TREQ_TIMER ( timer -- treq ) $3B + ;
@@ -175,8 +199,62 @@ begin-module dma
   \ Unpaced transfer
   : TREQ_UNPACED ( -- treq ) $3F ;
 
-  \ Start register to register transfer
-  : start-register>register-dma { src dest count size treq channel -- }
+  \ Set a transfer count to be normal
+  : TRANS_COUNT_MODE_NORMAL ( count -- count' ) $0FFFFFFF and ;
+
+  \ Set a transfer count to be trigger-self
+  : TRANS_COUNT_MODE_TRIGGER_SELF ( count -- count' )
+    $0FFFFFFF and $10000000 or
+  ;
+
+  \ Set a transfer count to be endless
+  : TRANS_COUNT_MODE_ENDLESS ( count -- count' ) $F0000000 or ;
+
+  \ Register read
+  0 constant REGISTER_READ
+
+  \ Register write
+  0 constant REGISTER_WRITE
+
+  \ Incrementing buffer read
+  CH_CTRL_TRIG_INCR_READ constant INCR_BUFFER_READ
+
+  \ Incrementing buffer write
+  CH_CTRL_TRIG_INCR_WRITE constant INCR_BUFFER_WRITE
+
+  \ Decrementing buffer read
+  CH_CTRL_TRIG_INCR_READ CH_CTRL_TRIG_INCR_READ_REV or constant DECR_BUFFER_READ
+
+  \ Decrementing buffer write
+  CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_INCR_READ_REV or
+  constant DECR_BUFFER_WRITE
+
+  \ Incrementing ring buffer read
+  : INCR_RING_BUFFER_READ ( low-ring-bits -- mode )
+    CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
+    INCR_BUFFER_READ or
+  ;
+
+  \ Incrementing ring buffer write
+  : INCR_RING_BUFFER_READ ( low-ring-bits -- mode )
+    CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
+    [ INCR_BUFFER_WRITE CH_CTRL_TRIG_RING_SEL or ] literal or
+  ;
+
+  \ Decrementing ring buffer read
+  : DECR_RING_BUFFER_READ ( low-ring-bits -- mode )
+    CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
+    DECR_BUFFER_READ or
+  ;
+
+  \ Decrementing ring buffer write
+  : DECR_RING_BUFFER_READ ( low-ring-bits -- mode )
+    CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
+    [ DECR_BUFFER_WRITE CH_CTRL_TRIG_RING_SEL or ] literal or
+  ;
+
+  \ Start transfer
+  : start-dma { src dest src-mode dest-mode count size treq channel -- }
     channel validate-dma
     treq validate-treq
     size bits-of-transfer-size { size-bits }
@@ -185,232 +263,156 @@ begin-module dma
     count channel CH_TRANS_COUNT !
     size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
     channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
+    src-mode or
+    dest-mode or
     CH_CTRL_TRIG_EN or channel CH_CTRL_TRIG !
+  ;
+
+  \ Prepare register to register transfer
+  : prepare-dma { src dest src-mode dest-mode count size treq channel -- }
+    channel validate-dma
+    treq validate-treq
+    size bits-of-transfer-size { size-bits }
+    src channel CH_READ_ADDR !
+    dest channel CH_WRITE_ADDR !
+    count channel CH_TRANS_COUNT !
+    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
+    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
+    src-mode or
+    dest-mode or
+    channel CH_CTRL_TRIG !
+  ;
+
+  \ Start register to register transfer with chaining
+  : start-dma-with-chain
+    { chain-to src dest src-mode dest-mode count size treq channel -- }
+    channel validate-dma
+    chain-to validate-dma
+    treq validate-treq
+    size bits-of-transfer-size { size-bits }
+    src channel CH_READ_ADDR !
+    dest channel CH_WRITE_ADDR !
+    count channel CH_TRANS_COUNT !
+    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
+    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
+    src-mode or
+    dest-mode or
+    CH_CTRL_TRIG_EN or channel CH_CTRL_TRIG !
+  ;
+
+  \ Prepare register to register transfer with chaining
+  : prepare-dma-with-chain
+    { chain-to src dest src-mode dest-mode count size treq channel -- }
+    channel validate-dma
+    chain-to validate-dma
+    treq validate-treq
+    size bits-of-transfer-size { size-bits }
+    src channel CH_READ_ADDR !
+    dest channel CH_WRITE_ADDR !
+    count channel CH_TRANS_COUNT !
+    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
+    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
+    src-mode or
+    dest-mode or
+    channel CH_CTRL_TRIG !
+  ;
+
+  \ Start register to register transfer
+  : start-register>register-dma { src dest count size treq channel -- }
+    src dest REGISTER_READ REGISTER_WRITE count size treq channel start-dma
   ;
 
   \ Start register to buffer transfer
   : start-register>buffer-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    src dest REGISTER_READ INCR_BUFFER_WRITE count size treq channel start-dma
   ;
 
   \ Start buffer to register transfer
   : start-buffer>register-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_READ CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    src dest INCR_BUFFER_READ REGISTER_WRITE count size treq channel start-dma
   ;
 
   \ Start buffer to buffer transfer
   : start-buffer>buffer-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_INCR_READ or
-    CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    src dest INCR_BUFFER_READ INCR_BUFFER_WRITE count size treq channel
+    start-dma
   ;
 
   \ Prepare register to register transfer
   : prepare-register>register-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_EN or channel CH_CTRL_TRIG !
+    src dest REGISTER_READ REGISTER_WRITE count size treq channel prepare-dma
   ;
 
   \ Prepare register to buffer transfer
   : prepare-register>buffer-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_INCR_WRITE or
-    channel CH_CTRL_TRIG !
+    src dest REGISTER_READ INCR_BUFFER_WRITE count size treq channel prepare-dma
   ;
 
   \ Prepare buffer to register transfer
   : prepare-buffer>register-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_INCR_READ or
-    channel CH_CTRL_TRIG !
+    src dest INCR_BUFFER_READ REGISTER_WRITE count size treq channel prepare-dma
   ;
 
   \ Prepare buffer to buffer transfer
   : prepare-buffer>buffer-dma { src dest count size treq channel -- }
-    channel validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift
-    channel CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_INCR_READ or ] literal or
-    channel CH_CTRL_TRIG !
+    src dest INCR_BUFFER_READ INCR_BUFFER_WRITE count size treq channel
+    prepare-dma
   ;
 
   \ Start register to register transfer with chaining
   : start-register>register-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_EN or channel CH_CTRL_TRIG !
+    chain-to src dest REGISTER_READ REGISTER_WRITE count size treq channel
+    start-dma-with-chain
   ;
 
   \ Start register to buffer transfer with chaining
   : start-register>buffer-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    chain-to src dest REGISTER_READ INCR_BUFFER_WRITE count size treq channel
+    start-dma-with-chain
   ;
 
   \ Start buffer to register transfer with chaining
   : start-buffer>register-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_READ CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    chain-to src dest INCR_BUFFER_READ REGISTER_WRITE count size treq channel
+    start-dma-with-chain
   ;
 
   \ Start buffer to buffer transfer with chaining
   : start-buffer>buffer-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_INCR_READ or
-    CH_CTRL_TRIG_EN or ] literal or
-    channel CH_CTRL_TRIG !
+    chain-to src dest INCR_BUFFER_READ INCR_BUFFER_WRITE count size treq channel
+    start-dma-with-chain
   ;
 
   \ Prepare register to register transfer with chaining
   : prepare-register>register-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_EN or channel CH_CTRL_TRIG !
+    chain-to src dest REGISTER_READ REGISTER_WRITE count size treq channel
+    prepare-dma-with-chain
   ;
 
   \ Prepare register to buffer transfer with chaining
   : prepare-register>buffer-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_INCR_WRITE or
-    channel CH_CTRL_TRIG !
+    chain-to src dest REGISTER_READ INCR_BUFFER_WRITE count size treq channel
+    prepare-dma-with-chain
   ;
 
   \ Prepare buffer to register transfer with chaining
   : prepare-buffer>register-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift or
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    CH_CTRL_TRIG_INCR_READ or
-    channel CH_CTRL_TRIG !
+    chain-to src dest INCR_BUFFER_READ REGISTER_WRITE count size treq channel
+    prepare-dma-with-chain
   ;
 
   \ Prepare buffer to buffer transfer with chaining
   : prepare-buffer>buffer-dma-with-chain
     { chain-to src dest count size treq channel -- }
-    channel validate-dma
-    chain-to validate-dma
-    treq validate-treq
-    size bits-of-transfer-size { size-bits }
-    src channel CH_READ_ADDR !
-    dest channel CH_WRITE_ADDR !
-    count channel CH_TRANS_COUNT !
-    size-bits treq CH_CTRL_TRIG_TREQ_SEL_LSB lshift
-    chain-to CH_CTRL_TRIG_CHAIN_TO_LSB lshift or
-    [ CH_CTRL_TRIG_INCR_WRITE CH_CTRL_TRIG_INCR_READ or ] literal or
-    channel CH_CTRL_TRIG !
+    chain-to src dest INCR_BUFFER_READ INCR_BUFFER_WRITE count size treq channel
+    prepare-dma-with-chain
   ;
 
   \ Set DMA timer

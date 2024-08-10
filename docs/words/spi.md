@@ -64,7 +64,7 @@ Set the protocol of an SPI peripheral to TI synchronous serial. This must be don
 ##### `spi-data-size!`
 ( data-size spi -- )
 
-Set the word size of an SPI peripheral to *data-size* bits; on the RP2040, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.
+Set the word size of an SPI peripheral to *data-size* bits; on the RP2040 and RP2350, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.
 
 ##### `>spi`
 ( c spi -- )
@@ -136,7 +136,7 @@ Invalid SPI clock setting exception.
 
 Invalid SPI data size setting exception.
 
-#### RP2040 only
+#### RP2040 and RP2350 only
 
 ##### `enable-spi-loopback`
 ( spi -- )
