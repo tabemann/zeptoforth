@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Travis Bemann
+# Copyright (c) 2021-2024 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export PLATFORM=rp2040
+export PLATFORM=rp2350
 BASEDIR=../..
 ODIR=$(BASEDIR)/obj
 IDIR=$(BASEDIR)/bin/$(VERSION)/$(PLATFORM)
 OBJ=$(ODIR)/zeptoforth.$(PLATFORM).o
-BOOT_BIN_WITH_CHECKSUM=$(BASEDIR)/boot_with_checksum.$(PLATFORM).bin
+BOOT_BIN=$(BASEDIR)/boot.$(PLATFORM).bin
 ELF=$(BASEDIR)/zeptoforth.$(PLATFORM).elf
 BIN=$(BASEDIR)/zeptoforth.$(PLATFORM).bin
 UF2=$(BASEDIR)/zeptoforth.$(PLATFORM).uf2
 IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
 LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
 MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
-MINI_DICT_FILLER=$(BASEDIR)/src/rp2040/mini_dict_filler
+MINI_DICT_FILLER=$(BASEDIR)/src/rp2350/mini_dict_filler
 MAKE_UF2=./make_uf2.sh
 
 all: kernel_info $(UF2)
@@ -47,7 +47,7 @@ kernel_info:
 
 $(UF2): $(BIN)
 	$(MAKE) -C boot
-	$(MAKE_UF2) $(BOOT_BIN_WITH_CHECKSUM) $(BIN) $(MINI_DICT_FILLER) $(UF2)
+	$(MAKE_UF2) $(BOOT_BIN) $(BIN) $(MINI_DICT_FILLER) $(UF2)
 
 $(BIN): $(OBJ)
 	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -o $(ELF)

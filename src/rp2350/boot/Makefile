@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Travis Bemann
+# Copyright (c) 2021-2024 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,22 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PLATFORM=rp2040
+PLATFORM=rp2350
 BASEDIR=../../..
 ODIR=$(BASEDIR)/obj
 OBJ=$(ODIR)/boot.$(PLATFORM).o
 ELF=$(BASEDIR)/boot.$(PLATFORM).elf
-BIN_WITH_CHECKSUM=$(BASEDIR)/boot_with_checksum.$(PLATFORM).bin
 BIN=$(BASEDIR)/boot.$(PLATFORM).bin
 IHEX=$(BASEDIR)/boot.$(PLATFORM).ihex
 LIST=$(BASEDIR)/boot.$(PLATFORM).list
 MAP=$(BASEDIR)/boot.$(PLATFORM).map
 BOOT_WITH_CHECKSUM=./boot_with_checksum.py
 
-all: $(BIN_WITH_CHECKSUM)
-
-$(BIN_WITH_CHECKSUM): $(BIN)
-	$(BOOT_WITH_CHECKSUM) $(BIN) $(BIN_WITH_CHECKSUM)
+all: $(BIN)
 
 $(BIN): $(OBJ)
 	$(LD) $(OBJ) -T boot.ld --cref -Map $(MAP) -o $(ELF)
@@ -47,4 +43,4 @@ $(OBJ): boot.s
 .PHONY: clean
 
 clean:
-	rm -f $(OBJ) $(MAP) $(LIST) $(ELF) $(BIN) $(BIN_WITH_CHECKSUM) $(IHEX)
+	rm -f $(OBJ) $(MAP) $(LIST) $(ELF) $(BIN) $(IHEX)
