@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -541,12 +541,34 @@ _cortex_m7:
         bx lr
         end_inlined
 
+        @@ Whether the CMU is a Cortex-M33 CPU
+        define_word "cortex-m33?", visible_flag
+_cortex_m33:
+        push_tos
+        movs tos, #0
+        .if cortex_m33
+        mvns tos, tos
+        .endif
+        bx lr
+        end_inlined
+
         @@ Get whether the CPU is an RP2040
         define_word "rp2040?", visible_flag
 _rp2040:
         push_tos
         movs tos, #0
         .ifdef rp2040
+        mvns tos, tos
+        .endif
+        bx lr
+        end_inlined
+
+        @@ Get whether the CPU is an RP2350
+        define_word "rp2350?", visible_flag
+_rp2350:
+        push_tos
+        movs tos, #0
+        .ifdef rp2350
         mvns tos, tos
         .endif
         bx lr

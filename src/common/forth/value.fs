@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -783,7 +783,7 @@ end-module> import
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
-  [ cortex-m7? ] [if]
+  [ cortex-m7? cortex-m33? or ] [if]
     r3 1 dp ldm
     tos 1 dp ldm
   [else]
@@ -810,7 +810,7 @@ end-module> import
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
-  [ cortex-m7? ] [if]
+  [ cortex-m7? cortex-m33? or ] [if]
     r3 1 dp ldm
     tos 1 dp ldm
   [else]
