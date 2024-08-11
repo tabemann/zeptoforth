@@ -749,18 +749,6 @@ _execute_nz:
 1:	bx lr
 	end_inlined
 
-	@@ Execute a PAUSE word, if one is set
-	define_word "pause", visible_flag
-_pause:	ldr r0, =pause_enabled
-	ldr r0, [r0]
-	cmp r0, #0
-	ble 1f
-	ldr r0, =pause_hook
-	ldr r0, [r0]
-	mov pc, r0
-1:	bx lr
-	end_inlined
-	
 	@@ Do nothing
 	define_internal_word "do-nothing", visible_flag
 _do_nothing:

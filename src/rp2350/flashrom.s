@@ -43,7 +43,7 @@
 
         .equ QMI_DIRECT_CSR_OFFSET, 0x00
         .equ QMI_DIRECT_TX_OFFSET, 0x04
-        .equ QMI_DIRECT_RX_OFFSET, 0x08QQQQQ
+        .equ QMI_DIRECT_RX_OFFSET, 0x08
         .equ QMI_M0_TIMING_OFFSET, 0x0C
         .equ QMI_M0_RFMT_OFFSET, 0x10
         .equ QMI_M0_RCMD_OFFSET, 0x14
@@ -59,11 +59,11 @@
 
         .equ QMI_DIRECT_TX_NOPUSH, 1 << 20
         .equ QMI_DIRECT_TX_OE, 1 << 19
-        .equ QMI_DIRECT_DWIDTH_8_BITS, 0 << 18
-        .equ QMI_DIRECT_DWIDTH_16_BITS, 1 << 18
-        .equ QMI_DIRECT_IWIDTH_SINGLE, 0 << 16
-        .equ QMI_DIRECT_IWIDTH_DOUBLE, 1 << 16
-        .equ QMI_DIRECT_IWIDTH_QUAD, 2 << 16
+        .equ QMI_DIRECT_TX_DWIDTH_8_BITS, 0 << 18
+        .equ QMI_DIRECT_TX_DWIDTH_16_BITS, 1 << 18
+        .equ QMI_DIRECT_TX_IWIDTH_SINGLE, 0 << 16
+        .equ QMI_DIRECT_TX_IWIDTH_DOUBLE, 1 << 16
+        .equ QMI_DIRECT_TX_IWIDTH_QUAD, 2 << 16
 
         .equ QMI_M0_TIMING_COOLDOWN_LSB, 30 @ 2 bits
         .equ QMI_M0_TIMING_PAGEBREAK_LSB, 28 @ 2 bits
@@ -106,17 +106,14 @@
         .equ QMI_M0_RCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M0_RCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ CONT_XIP_QMI_M0_RFMT, \
-                (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | \
-                (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | \
-                (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | \
-                (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | \
-                (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | \
-                (QMI_M0_RFMT_SUFFIX_LEN_8_BITS) | \
-                (QMI_M0_RFMT_DUMMY_LEN_0_BITS)
+        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_0_BITS
 
-        .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_R0_RCMD_SUFFIX_LSB
+        .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB
 
+        .equ CMD_READ_DATA_FAST_QUAD_IO_W_OPTS, CMD_READ_DATA_FAST_QUAD_IO | QMI_DIRECT_TX_IWIDTH_QUAD | QMI_DIRECT_TX_OE | QMI_DIRECT_TX_NOPUSH
+
+        .equ CMD_CONT_READ_W_OPTS, CMD_CONT_READ | QMI_DIRECT_TX_IWIDTH_QUAD | QMI_DIRECT_TX_OE | QMI_DIRECT_TX_NOPUSH
+        
 	@ Commands
 	.equ CMD_WRITE_STATUS, 0x01
 	.equ CMD_READ_DATA_FAST_QUAD_IO, 0xEB @
@@ -156,17 +153,13 @@
 
         @ Initial pad SCLK configuration, 8mA drive, no slew limiting,
         @ input buffer disabled
-        .equ INIT_PAD_SCLK, (2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | \
-                            (PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS)
+        .equ INIT_PAD_SCLK, (2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | (PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS)
 
         @ Initial direct CSR configuration, 5 MHz and 150 MHz clk_sys
-        .equ INIT_DIRECT_CSR, (30 << QMI_DIRECT_CSR_CLKDIV_LSB) | \
-                              (QMI_DIRECT_CSR_EN)
+        .equ INIT_DIRECT_CSR, (30 << QMI_DIRECT_CSR_CLKDIV_LSB) | (QMI_DIRECT_CSR_EN)
 
         @ Initial M0 timing configuratiton
-        .equ INIT_M0_TIMING, (1 << QMI_M0_TIMING_COOLDOWN_LSB) | \
-                             (2 << QMI_M0_TIMING_RXDELAY_LSB) | \
-                             (4 << QMI_M0_TIMING_CLKDIV_LSB)
+        .equ INIT_M0_TIMING, (1 << QMI_M0_TIMING_COOLDOWN_LSB) | (2 << QMI_M0_TIMING_RXDELAY_LSB) | (4 << QMI_M0_TIMING_CLKDIV_LSB)
 
 	@ Erase flash up to a specified address if needed
 	define_internal_word "init-flash", visible_flag
@@ -269,7 +262,7 @@ _reset_flash:
 _force_flash_cs_high:
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
         bics r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
 	bx lr
@@ -280,9 +273,9 @@ _force_flash_cs_high:
 _force_flash_cs_low:
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, QMI_DIRECT_CSR_AUTO_CS0N
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
         bics r2, r1
-        ldr r1, QMI_DIRECT_CSR_ASSET_CS0N
+        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
         orrs r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
 	bx lr
@@ -293,9 +286,9 @@ _force_flash_cs_low:
 _force_flash_cs_normal:
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, QMI_DIRECT_CSR_AUTO_CS0N
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
         orrs r2, r1
-        ldr r1, QMI_DIRECT_CSR_ASSET_CS0N
+        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
         bics r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         bx lr
@@ -461,15 +454,9 @@ _enter_xip:
 
 	@ Prime XIP
 	ldr r0, =XIP_QMI_BASE
-	ldr r1, =(CMD_READ_DATA_FAST_QUAD_IO) | \
-                 (QMI_DIRECT_TX_IWIDTH_QUAD) | \
-                 (QMI_DIRECT_TX_OE) | \
-                 (QMI_DIRECT_TX_NOPUSH)
+	ldr r1, =CMD_READ_DATA_FAST_QUAD_IO_W_OPTS
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
-	ldr r1, =(CMD_COND_READ) | \
-                 (QMI_DIRECT_TX_IWIDTH_QUAD) | \
-                 (QMI_DIRECT_TX_OE) | \
-                 (QMI_DIRECT_TX_NOPUSH)
+	ldr r1, =CMD_CONT_READ_W_OPTS
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
 	bl _wait_qmi_busy
 

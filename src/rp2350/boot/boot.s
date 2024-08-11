@@ -29,9 +29,6 @@
 	.equ VTOR, 0xE000ED08
         .equ RSTACK_TOP, 0x20082000
 
-	@ SPI clock divider
-	.equ PICO_FLASH_SPI_CLKDIV, 4
-
 	@ Pad control constants
 	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB, 4
 	.equ PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS, 0x01
@@ -129,10 +126,6 @@ _handle_reset:
 	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
 	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
 
-	@@ Set the clock divider
-	movs r1, #PICO_FLASH_SPI_CLKDIV
-	str r1, [r0, #SSI_BAUDR_OFFSET]
-
 	@@ Copy the image from flash into RAM
 	ldr r0, =RAM_BASE
 	ldr r1, =FLASH_IMAGE_BASE
@@ -153,15 +146,3 @@ _handle_reset:
 	@ Start zeptoforth
 	ldr r1, [r0, #4]
 	bx r1
-
-	@ Wait for SSI to become ready
-_wait_ssi_busy:
-	push {r0, r1, r2, r3, lr}
-	ldr r0, =XIP_SSI_BASE + SSI_SR_OFFSET
-	movs r2, #4 @ TX FIFO empty
-1:	ldr r3, [r0]
-	tst r3, r2
-	beq 1b
-	tst r3, r5 @ BUSY
-	bne 1b
-	pop {r0, r1, r2, r3, pc}

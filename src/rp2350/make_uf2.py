@@ -60,6 +60,9 @@ MINI_DICT_SIZE = 94208
 # Minidictionary address
 MINI_DICT_ADDR = 0x1E8000
 
+# Image definition size
+IMAGE_DEF_SIZE = 5 * 4
+
 # Get the minidictionary size
 def mini_dict_size(big):
     return MINI_DICT_SIZE
@@ -88,9 +91,9 @@ def pack_boot_block(buf, boot_block, total_count):
     while (len(boot_block) % 4) != 0:
         boot_block += b'\x00';
     boot_block += struct.pack('<IIIII',
-                              0xffffded3
+                              0xFFFFDED3,
                               0x10210142,
-                              0x000001ff,
+                              0x000001FF,
                               0x00000000,
                               0xab123579)
     while len(boot_block) < 4096:
@@ -146,7 +149,7 @@ def main():
                          % (sys.argv[0], args[0]))
             boot_block = boot_block_file.read()
             boot_block_file.close()
-            if len(boot_block) < (4096 - IMAGE_DEF_SIZE):
+            if len(boot_block) > (4096 - IMAGE_DEF_SIZE):
                 sys.exit('Boot block is too big')
         try:
             image_file = open(args[-3], 'rb')

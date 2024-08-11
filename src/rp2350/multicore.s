@@ -110,7 +110,7 @@ _handle_sio:
 	cmp r0, #0
 	beq 5f
 	bl _loop_forever_fifo
-5:    	movs r3, #SIO_IRQ_BASE
+5:    	movs r3, #SIO_IRQ_FIFO
         movs r0, #1
         lsls r0, r3
         ldr r1, =NVIC_ICPR_BASE
