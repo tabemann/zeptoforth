@@ -64,19 +64,28 @@ begin-module pwm
     : CH_TOP ( index -- addr ) pwm-regs $10 + ;
 
     \ PWM multichannel enable register
-    PWM_BASE $A0 + constant EN
+    PWM_BASE $0F0 + constant EN
 
     \ PWM raw interrupts register
-    PWM_BASE $A4 + constant INTR
+    PWM_BASE $0F4 + constant INTR
 
-    \ PWM interrupt enable register
-    PWM_BASE $A8 + constant INTE
+    \ PWM interrupt 0 enable register
+    PWM_BASE $0F8 + constant IRQ0_INTE
 
-    \ PWM interrupt force register
-    PWM_BASE $AC + constant INTF
+    \ PWM interrupt 0 force register
+    PWM_BASE $0FC + constant IRQ0_INTF
 
-    \ PWM interrupt status after masking and forcing
-    PWM_BASE $B0 + constant INTS
+    \ PWM interrupt 0 status after masking and forcing
+    PWM_BASE $100 + constant IRQ0_INTS
+    
+    \ PWM interrupt 1 enable register
+    PWM_BASE $104 + constant IRQ1_INTE
+
+    \ PWM interrupt 1 force register
+    PWM_BASE $108 + constant IRQ1_INTF
+
+    \ PWM interrupt 1 status after masking and forcing
+    PWM_BASE $10C + constant IRQ1_INTS
 
     \ Free-running counting at rate dictated by fractional divider
     0 constant DIVMODE_FREE_RUNNING
@@ -143,56 +152,113 @@ begin-module pwm
     \ PWM alternate function
     4 constant pwm-alternate
 
-    \ PWM wrap IRQ
-    4 constant pwm-irq
+    \ PWM wrap IRQ 0
+    8 constant pwm-wrap-0-irq
 
-    \ PWM wrap vector
-    pwm-irq 16 + constant pwm-vector
+    \ PWM wrap IRQ 1
+    9 constant pwm-wrap-1-irq
+
+    \ PWM wrap vector 0
+    pwm-wrap-0-irq 16 + constant pwm-wrap-0-vector
+
+    \ PWM wrap vector 1
+    pwm-wrap-1-irq 16 + constant pwm-wrap-1-vector
 
     \ Initialize PWM
     : init-pwm ( -- )
       disable-int
-      [: $F INTR ! pwm-irq NVIC_ICPR_CLRPEND! ;] pwm-vector vector!
-      0 pwm-irq NVIC_IPR_IP!
-      pwm-irq NVIC_ISER_SETENA!
+      [: $F INTR ! pwm-irq NVIC_ICPR_CLRPEND! ;] pwm-wrap-0-vector vector!
+      0 pwm-wrap-0-irq NVIC_IPR_IP!
+      pwm-wrap-0-irq NVIC_ISER_SETENA!
+      [: $F INTR ! pwm-irq NVIC_ICPR_CLRPEND! ;] pwm-wrap-1-vector vector!
+      0 pwm-wrap-1-irq NVIC_IPR_IP!
+      pwm-wrap-1-irq NVIC_ISER_SETENA!
       enable-int
     ;
 
     \ Validate a PWM slice
-    : validate-pwm-index ( index -- ) 8 u< averts x-out-of-range-pwm ;
+    : validate-pwm-index ( index -- ) 12 u< averts x-out-of-range-pwm ;
 
     \ Validate a PWM mask
-    : validate-pwm-mask ( index -- ) $FF bic 0= averts x-out-of-range-pwm ;
+    : validate-pwm-mask ( index -- ) $FFF bic 0= averts x-out-of-range-pwm ;
     
   end-module> import
 
   \ Set a pin as a PWM pin
   : pwm-pin ( pin -- ) pwm-alternate swap alternate-pin ;
   
-  \ Set PWM IRQ handler
-  : pwm-vector! ( xt -- ) pwm-vector vector! ;
+  \ Set PWM wrap 0 IRQ handler
+  : pwm-wrap-0-vector! ( xt -- ) pwm-wrap-0-vector vector! ;
 
-  \ Enable any set of slices, expressed as bits from 0 to 7
+  \ Set PWM wrap 1 IRQ handler
+  : pwm-wrap-1-vector! ( xt -- ) pwm-wrap-1-vector vector! ;
+
+  \ Set PWM IRQ handler (legacy)
+  : pwm-vector! ( xt -- ) pwm-wrap-0-vector! ;
+
+  \ Enable any set of slices, expressed as bits from 0 to 11
   : enable-pwm ( bits -- ) dup validate-pwm-mask EN bis! ;
 
-  \ Disable any set of slices, expressed as bits from 0 to 7
+  \ Disable any set of slices, expressed as bits from 0 to 11
   : disable-pwm ( bits -- ) dup validate-pwm-mask EN bic! ;
 
-  \ Enable interrupts for any set of slices, expressed as bits from 0 to 7
-  : enable-pwm-int ( bits -- ) dup validate-pwm-mask INTE bis! ;
+  \ Enable interrupts for PWM_IRQ_WRAP_0 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : enable-pwm-wrap-0-int ( bits -- ) dup validate-pwm-mask IRQ0_INTE bis! ;
 
-  \ Disable interrupts for any set of slices, expressed as bits from 0 to 7
-  : disable-pwm-int ( bits -- ) dup validate-pwm-mask INTE bic! ;
+  \ Disable interrupts for PWM_IRQ_WRAP_0 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : disable-pwm-wrap-0-int ( bits -- ) dup validate-pwm-mask IRQ0_INTE bic! ;
 
-  \ Clear an interrupt for any set of slices, expressed as bits from 0 to 7
-  : clear-pwm-int ( bits -- ) dup validate-pwm-mask INTR bis! ;
+  \ Clear an interrupt for PWM_IRQ_WRAP_0 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : clear-pwm-wrap-0-int ( bits -- ) dup validate-pwm-mask IRQ0_INTR bis! ;
+
+  \ Get the interrupt state for PWM_IRQ_WRAP_0 for all slices, expressed as one
+  \ bit per slice from 0 to 11
+  : pwm-wrap-0-int@ ( -- bits ) IRQ0_INTS @ ;
+
+  \ Clear pending PWM interrupt for PWM_IRQ_WRAP_0
+  : clear-pwm-wrap-0-pending ( -- ) pwm-wrap-0-irq NVIC_ICPR_CLRPEND! ;
+  
+  \ Enable interrupts for PWM_IRQ_WRAP_1 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : enable-pwm-wrap-1-int ( bits -- ) dup validate-pwm-mask IRQ1_INTE bis! ;
+
+  \ Disable interrupts for PWM_IRQ_WRAP_1 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : disable-pwm-wrap-1-int ( bits -- ) dup validate-pwm-mask IRQ1_INTE bic! ;
+
+  \ Clear an interrupt for PWM_IRQ_WRAP_1 for any set of slices, expressed as
+  \ bits from 0 to 11
+  : clear-pwm-wrap-1-int ( bits -- ) dup validate-pwm-mask IRQ1_INTR bis! ;
+
+  \ Get the interrupt state for PWM_IRQ_WRAP_1 for all slices, expressed as one
+  \ bit per slice from 0 to 11
+  : pwm-wrap-1-int@ ( -- bits ) IRQ1_INTS @ ;
+
+  \ Clear pending PWM interrupt for PWM_IRQ_WRAP_1
+  : clear-pwm-wrap-1-pending ( -- ) pwm-wrap-1-irq NVIC_ICPR_CLRPEND! ;
+
+  \ Enable interrupts for any set of slices, expressed as bits from 0 to 11;
+  \ note that this is a legacy word that applies to PWM_IRQ_WRAP_0
+  : enable-pwm-int ( bits -- ) enable-pwm-wrap-0-int ;
+
+  \ Disable interrupts for any set of slices, expressed as bits from 0 to 11;
+  \ note that this is a legacy word that applies to PWM_IRQ_WRAP_0
+  : disable-pwm-int ( bits -- ) disable-pwm-wrap-0-int ;
+
+  \ Clear an interrupt for any set of slices, expressed as bits from 0 to 11;
+  \ note that this is a legacy word that applies to PWM_IRQ_WRAP_0
+  : clear-pwm-int ( bits -- ) clear-pwm-wrap-0-int ;
 
   \ Get the interrupt state for all slices, expressed as one bit per slice
-  \ from 0 to 7
-  : pwm-int@ ( -- bits ) INTS @ ;
+  \ from 0 to 11; note that this is a legacy word that applies to PWM_IRQ_WRAP_0
+  : pwm-int@ ( -- bits ) pwm-wrap-0-int@ ;
 
-  \ Clear pending PWM interrupt
-  : clear-pwm-pending ( -- ) pwm-irq NVIC_ICPR_CLRPEND! ;
+  \ Clear pending PWM interrupt; note that this is a legacy word that applies to
+  \ PWM_IRQ_WRAP_0
+  : clear-pwm-pending ( -- ) clear-pwm-wrap-0-pending ;
   
   \ Advance the phase of a running counter by 1 count
   : advance-pwm-phase { index -- }
