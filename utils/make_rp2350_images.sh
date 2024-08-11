@@ -1,8 +1,7 @@
 #!/bin/sh
 set -e
 
-# Copyright (c) 2020-2021 Travis Bemann
-# Copyright (c) 2023 Chris Salch
+# Copyright (c) 2024 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +22,9 @@ set -e
 # SOFTWARE.
 
 VERSION=$1
-PLATFORM=$2
-PORT=$3
-IMAGE=$4
-PROJECT=zeptoforth
+PORT=$2
+BLOCK_DEVICE=$3
+FILESYSTEM=$4
 
 # Get the directory of this script, we need this for the venv setup.
 # See: https://stackoverflow.com/a/20434740
@@ -38,24 +36,22 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 check_screen
 
 if [ ! $# -eq 4 ]; then
-  cat 2>&1 <<EOD
+    cat 2>&! <<EOF
 Usage:
-    ${0} <version> <platform> <port> <image>
-EOD
-  exit 1
+    ${0} <version> <port> <block-device> <filesystem>
+EOF
 fi
 
-TARGET="bin/${VERSION}/${PLATFORM}/zeptoforth_${IMAGE}-${VERSION}"
+RP2350_KERNEL="bin/${VERSION}/rp2350/zeptoforth_kernel-${VERSION}.uf2"
 
-codeloader ${PORT} src/$PLATFORM/forth/setup_$IMAGE.fs
+flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} mini
+issue_bootsel ${PORT}
 
-screen_download_ihex ${PORT} ${TARGET} 
-screen_download_ihex_minidict ${PORT} ${TARGET}.minidict 
+flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} full
+issue_bootsel ${PORT}
 
-if [ ${PLATFORM} = 'rp2040_big' ]; then
-    ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
-elif [ ${PLATFORM} = 'rp2040' ]; then
-    ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
-elif [ ${PLARTFORM} = `rp2350` ]; then
-    ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
-fi
+flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} full_usb
+issue_bootsel ${PORT}
