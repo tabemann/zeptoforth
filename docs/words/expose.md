@@ -157,7 +157,27 @@ Get the PENDSV-HANDLER-HOOK variable address
 
 Get the SYSTICK-HANDLER-HOOK variable address
 
-## RP2040 Word
+##### `cortex-m7?`
+( -- flag )
+
+Get whether zeptoforth is built for ARM Cortex-M7.
+
+##### `cortex-m33?`
+( -- flag )
+
+Get whether zeptoforth is built for ARM Cortex-M33.
+
+##### `rp2040?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2040.
+
+##### `rp2350?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2350.
+
+## RP2040 and RP2350 Words
 
 ### `forth`
 

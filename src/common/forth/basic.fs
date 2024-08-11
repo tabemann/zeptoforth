@@ -2579,7 +2579,7 @@ forth set-current
 : find-approx-addr-dict ( addr here-addr last-dict -- word|0 )
   begin
     dup 0<> if
-      [ rp2040? ] [if]
+      [ rp2040? rp2350? or ] [if]
         2dup < if
           nip $20008000 swap
         then
