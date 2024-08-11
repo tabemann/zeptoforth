@@ -33,7 +33,7 @@ export VERSION=1.7.5-dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
-all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big
+all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big rp2350
 
 install:
 	$(MAKE) -C src/stm32f407 install
@@ -42,6 +42,7 @@ install:
 	$(MAKE) -C src/stm32f746 install
 	$(MAKE) -C src/rp2040 install
 	$(MAKE) -C src/rp2040_big install
+	$(MAKE) -C src/rp2350 install
 
 stm32f407:
 	$(MAKE) -C src/stm32f407
@@ -61,7 +62,10 @@ rp2040:
 rp2040_big:
 	$(MAKE) -C src/rp2040_big
 
-.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big clean html epub
+rp2350:
+	$(MAKE) -C src/rp2350
+
+.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big rp2350 clean html epub
 
 html:
 	cd docs ; sphinx-build -b html . ../html
@@ -76,5 +80,6 @@ clean:
 	$(MAKE) -C src/stm32f746 clean
 	$(MAKE) -C src/rp2040 clean
 	$(MAKE) -C src/rp2040_big clean
+	$(MAKE) -C src/rp2350 clean
 	$(MAKE) -C src/common clean
 
