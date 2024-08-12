@@ -333,6 +333,12 @@ begin-module aon-timer
     POWMAN_EXT_TIME_REF @
     POWMAN_EXT_TIME_REF_SOURCE_SEL_MASK and
     POWMAN_EXT_TIME_REF_SOURCE_SEL_LSB rshift
+    case
+      POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO12 of 12 endof
+      POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO20 of 20 endof
+      POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO14 of 14 endof
+      POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO22 of 22 endof
+    endcase
   ;
 
   \ Get whether a GPIO is driving the low power clock
