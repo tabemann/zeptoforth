@@ -119,8 +119,8 @@ _handle_reset:
 	mov sp, r3
 
         @ Light up the LED to signal we got this far
-        movs r0, =SIO_BASE
-        movs r1, =GPIO25
+        ldr r0, =SIO_BASE
+        ldr r1, =GPIO25
         str r1, [r0, #GPIO_OE_SET_OFFSET]
         str r1, [r0, #GPIO_OUT_SET_OFFSET]
 
@@ -160,5 +160,5 @@ _handle_reset:
 	mov sp, r1
 
 	@ Start zeptoforth
-d	ldr r1, [r0, #4]
+	ldr r1, [r0, #4]
 	bx r1
