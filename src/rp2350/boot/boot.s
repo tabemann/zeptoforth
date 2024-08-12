@@ -22,6 +22,10 @@
 	.cpu cortex-m33
 	.thumb
 
+        .equ SIO_BASE, 0xD0000000
+        .equ GPIO_OUT_SET_OFFSET, 0x018
+        .equ GPIO_OE_SET_OFFSET, 0x038
+        .equ GPIO25, 1 << 25
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
 	.equ IMAGE_SIZE, 0x8000
@@ -114,6 +118,18 @@ _handle_reset:
 	ldr r3, =RSTACK_TOP
 	mov sp, r3
 
+        @ Light up the LED to signal we got this far
+        movs r0, =SIO_BASE
+        movs r1, =GPIO25
+        str r1, [r0, #GPIO_OE_SET_OFFSET]
+        str r1, [r0, #GPIO_OUT_SET_OFFSET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x00FFFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+        
 	@ Set up QSPI pads
 	ldr r3, =PADS_QSPI_BASE
 	movs r0, #(2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS
@@ -144,5 +160,5 @@ _handle_reset:
 	mov sp, r1
 
 	@ Start zeptoforth
-	ldr r1, [r0, #4]
+d	ldr r1, [r0, #4]
 	bx r1
