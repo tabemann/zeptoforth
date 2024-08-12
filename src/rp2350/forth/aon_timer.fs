@@ -28,7 +28,7 @@ begin-module aon-timer
   begin-module aon-timer-internal
 
     \ POWMAN base address
-    constant POWMAN_BASE
+    $40100000 constant POWMAN_BASE
 
     \ Select a GPIO to use as a time reference
     POWMAN_BASE $4C + constant POWMAN_EXT_TIME_REF
