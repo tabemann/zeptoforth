@@ -57,6 +57,7 @@
 #include src/rp2350/forth/spi.fs
 #include src/rp2350/forth/i2c.fs
 #include src/rp2350/forth/pwm.fs
+#include src/rp2350/forth/aon_timer.fs
 #include src/rp2350/forth/rtc.fs
 #include src/rp2350/forth/clocks.fs
 #include src/common/forth/full_extra.fs
