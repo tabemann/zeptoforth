@@ -47,8 +47,8 @@ begin-module st7789v-8
       \ Transmit eight bits and sidest SCK to be low
       8 SIDE_0 OUT_PINS out+,
 
-      \ No op except sideset SCK to be high
-      MOV_SRC_Y SIDE_1 MOV_OP_NONE MOV_DEST_Y mov+,
+      \ Pull and set SCK high
+      SIDE_1 PULL_BLOCK PULL_NOT_EMPTY pull+,
 
       \ Set the address to wrap to
       <wrap
@@ -234,11 +234,6 @@ begin-module st7789v-8
       \ Disable the PIO state machine
       sm bit pio sm-disable
 
-      \ Set up the PIO program
-      pio st7789v-8-pio-program p-size alloc-piomem { pio-addr }
-      sm pio st7789v-8-pio-program pio-addr setup-prog
-      pio-addr sm pio sm-addr!
-
       \ Configure the pins to be PIO output and sideset pins
       data 8 pio pins-pio-alternate
       wr-sck 1 pio pins-pio-alternate
@@ -252,7 +247,7 @@ begin-module st7789v-8
       8 sm pio sm-push-threshold!
 
       \ Set the clock divisor
-      0 sysclk @ max-clock 1- max-clock / sm pio sm-clkdiv!
+      0 sysclk @ max-clock 1- + max-clock / sm pio sm-clkdiv!
 
       \ Initialize the SCK and data pins' direction and value
       out wr-sck sm pio sm-pindir!
@@ -260,11 +255,18 @@ begin-module st7789v-8
       high wr-sck sm pio sm-pin!
       data 8 + data ?do low i sm pio sm-pin! loop
 
+      \ Set up the PIO program
+      pio st7789v-8-pio-program p-size alloc-piomem { pio-addr }
+      sm pio st7789v-8-pio-program pio-addr setup-prog
+      pio-addr sm pio sm-addr!
+
       \ Enable the PIO state machine
       sm bit pio sm-enable
-      
+
+      true self backlight!
+
       self init-st7789v-8
-      0 cols 0 rows self st7789v-8-window!
+      0 cols 1- 0 rows 1- self st7789v-8-window!
     ; define new
 
     \ Destructor
@@ -457,11 +459,11 @@ begin-module st7789v-8
     
     \ Set the ST7789V-8 window
     :noname { start-col end-col start-row end-row self -- }
-      self st7789v-8-col-offset +to start-col
-      self st7789v-8-col-offset +to end-col
-      self st7789v-8-row-offset +to start-row
-      self st7789v-8-row-offset +to end-row
-      0 0 { ^W col-values ^W row-values }
+      self st7789v-8-col-offset @ +to start-col
+      self st7789v-8-col-offset @ +to end-col
+      self st7789v-8-row-offset @ +to start-row
+      self st7789v-8-row-offset @ +to end-row
+      0 0 { W^ col-values W^ row-values }
       start-col 8 rshift col-values c!
       start-col col-values 1 + c!
       end-col 8 rshift col-values 2 + c!
@@ -470,8 +472,8 @@ begin-module st7789v-8
       start-row row-values 1 + c!
       end-row 8 rshift row-values 2 + c!
       end-row row-values 3 + c!
-      REG_CASET col-values 4 cmd-args>st7789v-8
-      REG_RASET row-values 4 cmd-args>st7789v-8
+      REG_CASET col-values 4 self cmd-args>st7789v-8
+      REG_RASET row-values 4 self cmd-args>st7789v-8
     ; define st7789v-8-window!
 
     \ Update a rectangular space on the ST7789V device
