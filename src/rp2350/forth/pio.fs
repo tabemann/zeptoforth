@@ -267,11 +267,13 @@ begin-module pio
     \ Variables to track free PIO memory
     variable pio0-freemem
     variable pio1-freemem
+    variable pio2-freemem
 
     : pio-init ( -- )
       0 (pbase) !
       0 pio0-freemem !
       0 pio1-freemem !
+      0 pio2-freemen !
     ;
     
     \ helper word to convert memory address to pio program offset
@@ -1680,7 +1682,11 @@ begin-module pio
     dup averts x-invalid-size dup 32 u<= averts x-invalid-size
     over validate-pio
     1 swap lshift 1-
-    swap PIO0 = if pio0-freemem else pio1-freemem then
+    swap case
+      PIO0 of pio0-freemem endof
+      PIO1 of pio1-freemem endof
+      PIO2 of pio2-freemem endof
+    endcase
     32 0 do
       2dup @ and 0= if
 	bis! i unloop exit
@@ -1694,11 +1700,17 @@ begin-module pio
 
   \ Release previously allocated program space
   : free-piomem ( pio base size -- )
+    2 pick validate-pio
     over 32 u< averts x-invalid-base
     dup averts x-invalid-size
     2dup + 32 u<= averts x-invalid-size
-    1 swap lshift 1- .s swap .s lshift
-    swap PIO0 = if pio0-freemem else pio1-freemem then .s bic!
+    1 swap lshift 1- swap lshift
+    swap case
+      PIO0 of pio0-freemem endof
+      PIO1 of pio1-freemem endof
+      PIO2 of pio2-freemem endof
+    endcase
+    bic!
   ;
 
   \ Set the GPIO base for a PIO
