@@ -266,7 +266,7 @@ begin-module st7789v-8
       true self backlight!
 
       self init-st7789v-8
-      0 cols 1- 0 rows 1- self st7789v-8-window!
+      0 cols 0 rows self st7789v-8-window!
     ; define new
 
     \ Destructor
@@ -408,6 +408,7 @@ begin-module st7789v-8
       low self st7789v-8-dc-pin @ pin!
       low self st7789v-8-cs-pin @ pin!
       cmd 1 self >st7789v-8
+      high self st7789v-8-dc-pin @ pin!
       addr count self >st7789v-8
       high self st7789v-8-cs-pin @ pin!
     ; define cmd-args>st7789v-8
@@ -460,9 +461,9 @@ begin-module st7789v-8
     \ Set the ST7789V-8 window
     :noname { start-col end-col start-row end-row self -- }
       self st7789v-8-col-offset @ +to start-col
-      self st7789v-8-col-offset @ +to end-col
+      self st7789v-8-col-offset @ 1- +to end-col
       self st7789v-8-row-offset @ +to start-row
-      self st7789v-8-row-offset @ +to end-row
+      self st7789v-8-row-offset @ 1- +to end-row
       0 0 { W^ col-values W^ row-values }
       start-col 8 rshift col-values c!
       start-col col-values 1 + c!
@@ -484,8 +485,8 @@ begin-module st7789v-8
       REG_RAMWR { W^ cmd }
       cmd 1 self >st7789v-8
       high self st7789v-8-dc-pin @ pin!
-      end-row 1+ start-row ?do
-        self start-col i end-col start-col - 1+ dup 1 lshift [:
+      end-row start-row ?do
+        self start-col i end-col start-col - dup 1 lshift [:
           { self start-col row cols line-buf }
           start-col row self pixel-addr line-buf cols convert-8-to-16
           line-buf cols 1 lshift self >st7789v-8
