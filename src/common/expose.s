@@ -553,12 +553,12 @@ _cortex_m33:
         end_inlined
 
         @@ Get a pair of codes indicating the CPU
-        define_word "cpu-id", visible_flag
-_cpu_id:
+        define_word "chip", visible_flag
+_chip:
         push_tos
-        ldr tos, =cpu_id1
+        ldr tos, =chip1
         push_tos
-        ldr tos, =cpu_id0
+        ldr tos, =chip0
         bx lr
         end_inlined
 

@@ -19,9 +19,9 @@
 \ SOFTWARE.
 
 : rp2040? ( -- flag )
-  cpu-id $7270 = 2040 = and
+  chip $7270 = 2040 = and
 ;
 
 : rp2350? ( -- flag )
-  cpu-id $7270 = 2350 = and
+  chip $7270 = 2350 = and
 ;

@@ -19,8 +19,8 @@
 @ SOFTWARE.
 
 	.equ thumb2, 0
-        .equ cpu_id0, 0x7270
-        .equ cpu_id1, 2040
+        .equ chip0, 0x7270
+        .equ chip1, 2040
         .equ cortex_m7, 0
         .equ cortex_m33, 0
 	.equ ram_real_start, 0x20000000
