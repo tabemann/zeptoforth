@@ -23,6 +23,7 @@
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
 \ on an RP2040 device.
 
+#include src/rp_common/forth/rp_init_basic.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/armv6m.fs

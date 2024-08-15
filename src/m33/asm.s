@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -2592,8 +2592,6 @@ _asm_sub_imm:
 	@@ Assemble instructions to pull a value from the stack
 	define_internal_word "pull,", visible_flag
 _asm_pull:
-	.ifdef cortex_m7
-
 	push {lr}
 	push_tos
 	ldr tos, =0xF857
@@ -2605,22 +2603,6 @@ _asm_pull:
 	pop {pc}
 	end_inlined
 
-	.else
-	
-	push {lr}
-	movs r0, #1
-	lsls r0, r0, tos
-	movs r1, #7 << 8
-	orrs r0, r1
-	ldr r1, =0xC800
-	orrs r0, r1
-	movs tos, r0
-	bl _current_comma_2
-	pop {pc}
-	end_inlined
-
-	.endif
-	
 	@@ Assemble instructions to push a value onto the stack
 	define_internal_word "push,", visible_flag
 _asm_push:

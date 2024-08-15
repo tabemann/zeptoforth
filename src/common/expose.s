@@ -552,25 +552,13 @@ _cortex_m33:
         bx lr
         end_inlined
 
-        @@ Get whether the CPU is an RP2040
-        define_word "rp2040?", visible_flag
-_rp2040:
+        @@ Get a pair of codes indicating the CPU
+        define_word "cpu-id", visible_flag
+_cpu_id:
         push_tos
-        movs tos, #0
-        .ifdef rp2040
-        mvns tos, tos
-        .endif
-        bx lr
-        end_inlined
-
-        @@ Get whether the CPU is an RP2350
-        define_word "rp2350?", visible_flag
-_rp2350:
+        ldr tos, =cpu_id1
         push_tos
-        movs tos, #0
-        .ifdef rp2350
-        mvns tos, tos
-        .endif
+        ldr tos, =cpu_id0
         bx lr
         end_inlined
 

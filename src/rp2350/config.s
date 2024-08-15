@@ -19,7 +19,8 @@
 @ SOFTWARE.
 
 	.equ thumb2, 1
-        .equ rp2350, 1
+        .equ cpu_id0, 0x7270
+        .equ cpu_id1, 2350
         .equ cortex_m7, 0
         .equ cortex_m33, 1
 	.equ ram_real_start, 0x20000000

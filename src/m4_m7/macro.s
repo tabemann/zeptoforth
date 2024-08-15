@@ -126,7 +126,7 @@ dp 	.req r7
 
 	@@ Pull the top of the stack into the TOS register
 	.macro pull_tos
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldr tos, [dp], #4
 	.else
 	ldmia dp!, {tos}

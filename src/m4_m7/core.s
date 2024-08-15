@@ -1964,7 +1964,7 @@ _rdrop:	adds sp, #4
 	@@ Push two values onto the return stack
 	define_word "2>r", visible_flag | inlined_flag
 _push_2r:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldr r0, [dp], #4
         ldr r1, [dp], #4
 	.else

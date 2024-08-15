@@ -83,13 +83,9 @@ _2tuck:	ldr r0, [dp]
 	@@ Test for the equality of two double words
 	define_word "d=", visible_flag
 _deq:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	eors r0, r2
 	eors tos, r1
@@ -102,13 +98,9 @@ _deq:
 	@@ Test for the inequality of two double words
 	define_word "d<>", visible_flag
 _dne:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	eors r0, r2
 	eors tos, r1
@@ -122,13 +114,9 @@ _dne:
 	@@ Unsigned double less than
 	define_word "du<", visible_flag | inlined_flag
 _dult:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r2, r0
 	sbcs r1, tos
@@ -139,13 +127,9 @@ _dult:
 	@@ Unsigned double greater than
 	define_word "du>", visible_flag | inlined_flag
 _dugt:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r0, r2
 	sbcs tos, r1
@@ -156,13 +140,9 @@ _dugt:
 	@@ Unsigned double greater than or equal
 	define_word "du>=", visible_flag | inlined_flag
 _duge:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r2, r0
 	sbcs r1, tos
@@ -174,13 +154,9 @@ _duge:
 	@@ Unsigned double less than or equal
 	define_word "du<=", visible_flag | inlined_flag
 _dule:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r0, r2
 	sbcs tos, r1
@@ -192,13 +168,9 @@ _dule:
 	@@ Signed double less than
 	define_word "d<", visible_flag
 _dlt:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r2, r0
 	sbcs r1, tos
@@ -213,13 +185,9 @@ _dlt:
 	@@ Signed double greater than
 	define_word "d>", visible_flag
 _dgt:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r0, r2
 	sbcs tos, r1
@@ -234,13 +202,9 @@ _dgt:
 	@@ Signed double greater than or equal than
 	define_word "d>=", visible_flag
 _dge:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r2, r0
 	sbcs r1, tos
@@ -255,13 +219,9 @@ _dge:
 	@@ Signed double less than or equal than
 	define_word "d<=", visible_flag
 _dle:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r0, r2
 	sbcs tos, r1
@@ -339,12 +299,8 @@ _d0ge:	adds dp, #4
 	@@ Double left shift
 	define_word "2lshift", visible_flag
 _dlshift:	
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
-	.else
-	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	.endif
 	lsls r2, r1, r6
 	str r2, [dp, #-4]!
 	lsls r2, r0, r6
@@ -360,12 +316,8 @@ _dlshift:
 	@@ Double right shift
 	define_word "2rshift", visible_flag
 _drshift:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
-	.else
-	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	.endif
 	lsrs r2, r1, r6
 	rsbs r3, r6, #32
 	lsls r3, r0, r3
@@ -381,12 +333,8 @@ _drshift:
 	@@ Double arithmetic right shift
 	define_word "2arshift", visible_flag
 _darshift:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
-	.else
-	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	.endif
 	cmp r6, #32
 	blo 1f
 	subs r3, r6, #32
@@ -416,13 +364,9 @@ _dnegate:
 	@@ Add two double words
 	define_word "d+", visible_flag | inlined_flag
 _dadd:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	adds r2, r0
 	adcs tos, r1
@@ -434,13 +378,9 @@ _dadd:
 	@@ Subtract two double words
 	define_word "d-", visible_flag | inlined_flag
 _dsub:
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 	subs r2, r0
 	sbcs r1, tos
@@ -480,13 +420,9 @@ _mmul:	ldr r0, [dp]
 	define_word "ud*", visible_flag
 _udmul:
 
-	.ifdef cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
-	.else
-	ldmia dp!, {r0, r1, r2}
-	.endif
 	
 
 	muls	tos, r2        @ High-1 * Low-2 --> tos

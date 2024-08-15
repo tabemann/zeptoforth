@@ -19,6 +19,8 @@
 @ SOFTWARE.
 
 	.equ thumb2, 1
+        .equ cpu_id0, 0x73746D
+        .equ cpu_id1, 0x6600019B
         .equ cortex_m7, 0
         .equ cortex_m33, 0
 	.equ ram_start, 0x20000000
