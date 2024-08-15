@@ -40,13 +40,23 @@ begin-module adc
     : validate-adc ( adc -- ) 0= averts x-invalid-adc ;
     
     \ Validate an ADC channel
-    : validate-adc-chan ( adc-chan -- ) 9 u< averts x-invalid-adc-chan ;
+    rp2040? [if]
+      : validate-adc-chan ( adc-chan -- ) 5 u< averts x-invalid-adc-chan ;
+    [then]
+    rp2350? [if]
+      : validate-adc-chan ( adc-chan -- ) 9 u< averts x-invalid-adc-chan ;
+    [then]
     
     \ ADC lock
     lock-size buffer: adc-lock
     
     \ ADC base address
-    $400A0000 constant ADC_BASE
+    rp2040? [if]
+      $4004C000 constant ADC_BASE
+    [then]
+    rp2350? [if]
+      $400A0000 constant ADC_BASE
+    [then]
     
     \ ADC registers
     ADC_BASE $00 + constant ADC_CS
@@ -95,23 +105,34 @@ begin-module adc
   \ Set a pin to be an ADC pin
   : adc-pin ( adc pin -- )
     dup pin-internal::validate-pin
-    dup 26 >= over 29 <= and over 40 >= rot 47 <= and or
-    averts x-pin-has-no-adc-chan
+    [ rp2040? ] [if]
+      dup 26 >= swap 29 <= and averts x-pin-has-no-adc-chan
+    [then]
+    [ rp2350? ] [if]
+      dup 26 >= over 29 <= and over 40 >= rot 47 <= and or
+      averts x-pin-has-no-adc-chan
+    [then]
     validate-adc
   ;
 
   \ Get the ADC channel for a pin
   : pin-adc-chan ( pin -- adc-chan )
     dup pin-internal::validate-pin
-    dup 26 >= over 29 <= and over 40 >= 2 pick 47 <= and or
-    averts x-pin-has-no-adc-chan
-    dup 40 < if 26 - else 40 - then
+    [ rp2040? ] [if]
+      dup 26 >= over 29 <= and averts x-pin-has-no-adc-chan
+      26 -
+    [then]
+    [ rp2350? ] [if]
+      dup 26 >= over 29 <= and over 40 >= 2 pick 47 <= and or
+      averts x-pin-has-no-adc-chan
+      dup 40 < if 26 - else 40 - then
+    [then]
   ;
 
   \ Default ADC
   0 constant default-adc
   
-  \ Internal temperature sensor ADC channel (on the RP2350A and RP2354A)
+  \ Internal temperature sensor ADC channel (on the RP2040, RP2350A and RP2354A)
   4 constant temp-adc-chan
   
   \ Minimum ADC value

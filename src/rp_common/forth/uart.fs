@@ -35,9 +35,11 @@ begin-module uart
 
   \ Invalid UART exception
   : x-invalid-uart ( -- ) ." invalid UART" cr ;
-
+  
   \ Invalid CTS/RTS pin exception
-  : x-invalid-cts/rts-pin ( -- ) ." invalid CTS/RTS pin" cr;
+  rp2350? [if]
+    : x-invalid-cts/rts-pin ( -- ) ." invalid CTS/RTS pin" cr ;
+  [then]
 
   begin-module uart-internal
 
@@ -45,9 +47,11 @@ begin-module uart
     : validate-uart ( uart -- ) 2 u< averts x-invalid-uart ;
 
     \ Validate a CTS/RTS pin
-    : validate-cts/rts-pin ( pin -- )
-      4 umod dup 2 >= swap 3 <= and averts x-invalid-cts/rts-pin
-    ;
+    rp2350? [if]
+      : validate-cts/rts-pin ( pin -- )
+        4 umod dup 2 >= swap 3 <= and averts x-invalid-cts/rts-pin
+      ;
+    [then]
 
     \ RAM variable for rx buffer read-index
     variable uart1-rx-read-index
@@ -80,7 +84,12 @@ begin-module uart
     UART0_Base $30 + constant UART0_UARTCR
     
     \ UART1
-    $40078000 constant UART1_Base
+    rp2040? [if]
+      $40038000 constant UART1_Base
+    [then]
+    rp2350? [if]
+      $40078000 constant UART1_Base
+    [then]
     UART1_Base $00 + constant UART1_UARTDR
     UART1_Base $18 + constant UART1_UARTFR
     UART1_Base $24 + constant UART1_UARTIBRD
@@ -91,10 +100,20 @@ begin-module uart
     UART1_Base $38 + constant UART1_UARTIMSC
 
     \ UART0 IRQ number
-    33 constant uart0-irq
+    rp2040? [if]
+      20 constant uart0-irq
+    [then]
+    rp2350? [if]
+      33 constant uart0-irq
+    [then]
     
     \ UART1 IRQ number
-    34 constant uart1-irq
+    rp2040? [if]
+      21 constant uart1-irq
+    [then]
+    rp2350? [if]
+      34 constant uart1-irq
+    [then]
 
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector
@@ -260,16 +279,25 @@ begin-module uart
     
   end-module> import
 
+  \ UART alternate function
+  rp2040? [if]
+    : uart-alternate ( uart -- alternate ) validate-uart 2 ;
+  [then]
+
   \ Non-CTS/RTS UART alternate function
-  : uart-non-cts/rts-alternate { pin uart -- alternate }
-    uart validate-uart
-    pin 4 umod dup 0 >= swap 1 <= and if 2 else 11 then
-  ;
+  rp2350? [if]
+    : uart-non-cts/rts-alternate { pin uart -- alternate }
+      uart validate-uart
+      pin 4 umod dup 0 >= swap 1 <= and if 2 else 11 then
+    ;
+  [then]
 
   \ UART CTS/RTS alternate function
-  : uart-cts/rts-alternate { pin uart -- alternate }
-    uart validate-uart pin validate-cts/rts-pin 2
-  ;
+  rp2350? [if]
+    : uart-cts/rts-alternate { pin uart -- alternate }
+      uart validate-uart pin validate-cts/rts-pin 2
+    ;
+  [then]
   
   \ Carry out operations on arbitrary UART's
 
@@ -293,40 +321,52 @@ begin-module uart
   ;
 
   \ Get whether CTS is enabled on a UART
-  : uart-cts-enabled? ( uart -- flag )
-    dup validate-uart
-    15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bit@
-  ;
+  rp2350? [if]
+    : uart-cts-enabled? ( uart -- flag )
+      dup validate-uart
+      15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bit@
+    ;
+  [then]
 
   \ Enable CTS on a UART
-  : enable-uart-cts ( uart -- )
-    dup validate-uart
-    15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bis!
-  ;
+  rp2350? [if]
+    : enable-uart-cts ( uart -- )
+      dup validate-uart
+      15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bis!
+    ;
+  [then]
 
   \ Disable CTS on a UART
-  : disable-uart-cts ( uart -- )
-    dup validate-uart
-    15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bic!
-  ;
+  rp2350? [if]
+    : disable-uart-cts ( uart -- )
+      dup validate-uart
+      15 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bic!
+    ;
+  [then]
 
   \ Get whether RTS is enabled on a UART
-  : uart-rts-enabled? ( uart -- flag )
-    dup validate-uart
-    14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bit@
-  ;
+  rp2350? [if]
+    : uart-rts-enabled? ( uart -- flag )
+      dup validate-uart
+      14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bit@
+    ;
+  [then]
 
   \ Enable RTS on a UART
-  : enable-uart-rts ( uart -- )
-    dup validate-uart
-    14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bis!
-  ;
+  rp2350? [if]
+    : enable-uart-rts ( uart -- )
+      dup validate-uart
+      14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bis!
+    ;
+  [then]
 
   \ Disable RTS on a UART
-  : disable-uart-rts ( uart -- )
-    dup validate-uart
-    14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bic!
-  ;
+  rp2350? [if]
+    : disable-uart-rts ( uart -- )
+      dup validate-uart
+      14 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bic!
+    ;
+  [then]
 
   \ Carry out an operation with a UART disabled
   : with-uart-disabled ( xt uart -- )
@@ -430,16 +470,23 @@ begin-module uart
   ;
 
   \ Set a pin to be a UART pin
-  : uart-pin ( uart pin -- )
-    tuck swap uart-non-cts/rts-alternate swap alternate-pin
-  ;
+  rp2040? [if]
+    : uart-pin ( uart pin -- )
+      swap uart-alternate swap alternate-pin
+    ;
+  [then]
+  rp2350? [if]
+    : uart-pin ( uart pin -- )
+      tuck swap uart-non-cts/rts-alternate swap alternate-pin
+    ;
+  [then]
 
   \ Set a pin to be a CTS/RTS pin
-  : uart-cts/rts-pin ( uart pin -- )
-    tuck swap uart-cts/rts-alternate swap alternate-pin
-  ;
-
-  \ Set a pin to be a 
+  rp2350? [if]
+    : uart-cts/rts-pin ( uart pin -- )
+      tuck swap uart-cts/rts-alternate swap alternate-pin
+    ;
+  [then]
 
   continue-module uart-internal
 

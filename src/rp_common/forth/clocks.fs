@@ -47,7 +47,12 @@ begin-module clocks
     $2000 constant MOD_SET        \ set bits
     $3000 constant MOD_CLR        \ clear bits
 
-    $40010000 constant CLOCKS_BASE
+    rp2040? [if]
+      $40008000 constant CLOCKS_BASE
+    [then]
+    rp2350? [if]
+      $40010000 constant CLOCKS_BASE
+    [then]
     CLOCKS_BASE $3c + constant CLK_SYS_CTRL
     CLOCKS_BASE $40 + constant CLK_SYS_DIV
     CLOCKS_BASE $44 + constant CLK_SYS_SELECTED
@@ -68,7 +73,12 @@ begin-module clocks
     4 5 lshift constant RTC_CLKSRC_GPIN0
     5 5 lshift constant RTC_CLKSRC_GPIN1
 
-    $40050000 constant PLL_SYS_BASE
+    rp2040? [if]
+      $40028000 constant PLL_SYS_BASE
+    [then]
+    rp2350? [if]
+      $40050000 constant PLL_SYS_BASE
+    [then]
     PLL_SYS_BASE $00 + constant PLL_SYS_CS
     PLL_SYS_BASE $04 + constant PLL_SYS_PWR
     PLL_SYS_BASE $08 + constant PLL_SYS_FBDIV_INT
@@ -78,6 +88,13 @@ begin-module clocks
     $0c constant PLL_PWR_POSTDIV_OFF
     $00 constant PLL_PWR_ON
 
+    rp2040? [if]
+      133000000 constant MAX_SYSCLK
+    [then]
+    rp2350? [if]
+      150000000 constant MAX_SYSCLK
+    [then]
+    
     \ similar to compat::within but checks a closed range
     : bounds ( test low high -- flag ) over - >r - r> u<= ;
 
@@ -121,7 +138,7 @@ begin-module clocks
       \ VCO reference frequency * fbdiv is the VCO output frequency
       fbdiv * dup 750000000 1600000000 bounds averts x-bad-vcofreq
       \ VCO output frequency / (div1 * div2) is the new SYSCLK
-      pdiv1 / pdiv2 / dup 133000000 <= averts x-bad-sysclk
+      pdiv1 / pdiv2 / dup MAX_SYSCLK <= averts x-bad-sysclk
     ;
 
   end-module> import

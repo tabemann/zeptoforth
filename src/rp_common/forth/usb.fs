@@ -46,7 +46,12 @@ begin-module usb
     : 2c, ( h -- ) dup c, 8 rshift c, ;
 
     \ USB IRQ index
-    14 constant usbctrl-irq
+    rp2040? [if]
+      5 constant usbctrl-irq
+    [then]
+    rp2350? [if]
+      14 constant usbctrl-irq
+    [then]
 
     \ USB vector
     usbctrl-irq 16 + constant usbctrl-vector
@@ -58,7 +63,12 @@ begin-module usb
     24 bit constant RESETS_USBCTRL
 
     \ Reset base
-    $40020000 constant RESETS_BASE
+    rp2040? [if]
+      $4000C000 constant RESETS_BASE
+    [then]
+    rp2350? [if]
+      $40020000 constant RESETS_BASE
+    [then]
 
     \ Set reset
     RESETS_BASE 2 12 lshift or constant RESETS_RESET_Set

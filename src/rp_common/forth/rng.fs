@@ -26,7 +26,12 @@ begin-module rng
   begin-module rng-internal
 
     \ ROSC Base
-    $400E8000 constant ROSC_Base
+    rp2040? [if]
+      $40060000 constant ROSC_Base
+    [then]
+    rp2350? [if]
+      $400E8000 constant ROSC_Base
+    [then]
 
     \ Random bit
     ROSC_Base $1C + constant RANDOMBIT

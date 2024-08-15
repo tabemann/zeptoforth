@@ -85,7 +85,12 @@ begin-module spi
     spi-size spi-count * buffer: spi-buffers
 
     \ SPI base address
-    : SPI_Base ( spi -- addr ) $8000 * $40080000 + ;
+    rp2040? [if]
+      : SPI_Base ( spi -- addr ) $4000 * $4003C000 + ;
+    [then]
+    rp2350? [if]
+      : SPI_Base ( spi -- addr ) $8000 * $40080000 + ;
+    [then]
 
     \ SPI registers
     : SPI_SSPCR0 ( spi -- addr ) SPI_Base $000 + ;
@@ -165,7 +170,12 @@ begin-module spi
     ;
 
     \ SPI IRQ
-    : spi-irq ( spi -- irq ) 31 + ;
+    rp2040? [if]
+      : spi-irq ( spi -- irq ) 18 + ;
+    [then]
+    rp2350? [if]
+      : spi-irq ( spi -- irq ) 31 + ;
+    [then]
 
     \ SPI vector
     : spi-vector ( spi -- vector ) spi-irq 16 + ;

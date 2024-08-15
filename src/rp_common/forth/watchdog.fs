@@ -28,7 +28,12 @@ begin-module watchdog
   begin-module watchdog-internal
 
     \ Resets base address
-    $40020000 constant RESETS_BASE
+    rp2040? [if]
+      $4000C000 constant RESETS_BASE
+    [then]
+    rp2350? [if]
+      $40020000 constant RESETS_BASE
+    [then]
 
     \ Watchdog peripheral reset enable register
     RESETS_BASE $4 + constant RESETS_WDSEL
@@ -37,7 +42,12 @@ begin-module watchdog
     $01FFFFFF constant RESETS_ALL
 
     \ Watchdog base register
-    $400D8000 constant WATCHDOG_BASE
+    rp2040? [if]
+      $40058000 constant WATCHDOG_BASE
+    [then]
+    rp2350? [if]
+      $400D8000 constant WATCHDOG_BASE
+    [then]
 
     \ Watchdog control register
     WATCHDOG_BASE $0 + constant WATCHDOG_CTRL

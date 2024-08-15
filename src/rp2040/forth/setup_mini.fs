@@ -32,12 +32,12 @@
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
 #include src/rp2040/forth/multicore.fs
-#include src/rp2040/forth/erase.fs
+#include src/rp_common/forth/erase.fs
 #include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
+#include src/rp_common/forth/int_io.fs
 #include src/rp2040/forth/gpio.fs
 #include src/common/forth/task.fs
-#include src/rp2040/forth/watchdog.fs
+#include src/rp_common/forth/watchdog.fs
 #include src/common/forth/save_minidict.fs
 
 mini-dict::save-flash-mini-dict

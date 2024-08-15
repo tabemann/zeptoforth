@@ -206,7 +206,12 @@ begin-module i2c
     : validate-i2c ( i2c -- ) i2c-count u< averts x-invalid-i2c ;
 
     \ I2C base address
-    : I2C_Base ( i2c -- addr ) $8000 * $40090000 + ;
+    rp2040? [if]
+      : I2C_Base ( i2c -- addr ) $4000 * $40044000 + ;
+    [then]
+    rp2350? [if]
+      : I2C_Base ( i2c -- addr ) $8000 * $40090000 + ;
+    [then]
 
     \ Select I2C structure
     : i2c-select ( i2c -- addr ) i2c-size * i2c-buffers + ;
@@ -379,7 +384,12 @@ begin-module i2c
     0 bit constant ACTIVITY_STATUS
     
     \ I2C IRQ
-    : i2c-irq ( i2c -- irq ) 36 + ;
+    rp2040? [if]
+      : i2c-irq ( i2c -- irq ) 23 + ;
+    [then]
+    rp2350? [if]
+      : i2c-irq ( i2c -- irq ) 36 + ;
+    [then]
 
     \ I2C vector
     : i2c-vector ( i2c -- vector ) i2c-irq 16 + ;

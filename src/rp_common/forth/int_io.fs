@@ -55,14 +55,24 @@ begin-module int-io
     tx-buffer-size buffer: tx-buffer
 
     \ UART0
-    $40070000 constant UART0_Base
+    rp2040? [if]
+      $40034000 constant UART0_Base
+    [then]
+    rp2350? [if]
+      $40070000 constant UART0_Base
+    [then]
     UART0_Base $00 + constant UART0_UARTDR
     UART0_Base $18 + constant UART0_UARTFR
     UART0_Base $34 + constant UART0_UARTIFLS
     UART0_Base $38 + constant UART0_UARTIMSC
 
     \ UART0 IRQ number
-    33 constant uart0-irq
+    rp2040? [if]
+      20 constant uart0-irq
+    [then]
+    rp2350? [if]
+      33 constant uart0-irq
+    [then]
 
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector
