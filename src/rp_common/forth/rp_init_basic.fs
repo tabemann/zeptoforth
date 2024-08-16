@@ -21,11 +21,11 @@
 compile-to-flash
 
 : rp2040? ( -- flag )
-  chip $7270 = 2040 = and
+  chip $7270 = swap 2040 = and
 ;
 
 : rp2350? ( -- flag )
-  chip $7270 = 2350 = and
+  chip $7270 = swap 2350 = and
 ;
 
 reboot
