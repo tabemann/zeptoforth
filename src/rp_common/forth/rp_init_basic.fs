@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 : rp2040? ( -- flag )
   chip $7270 = 2040 = and
 ;
@@ -25,3 +27,5 @@
 : rp2350? ( -- flag )
   chip $7270 = 2350 = and
 ;
+
+reboot
