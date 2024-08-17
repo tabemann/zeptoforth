@@ -155,6 +155,8 @@ begin-module send-file
       path-addr path-u my-file dir open-file
     ;] fat32-tools::current-fs@ with-root-path
     transfer-data
+    my-file close-file
+    my-file destroy
   ;
 
 end-module

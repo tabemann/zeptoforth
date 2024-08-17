@@ -168,6 +168,8 @@ begin-module recv-file
     open-or-create-file transfer-data
     my-file truncate-file
     my-file file-fs@ flush
+    my-file close-file
+    my-file destroy
   ;
 
 end-module

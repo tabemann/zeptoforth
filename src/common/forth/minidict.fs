@@ -406,27 +406,32 @@ begin-module mini-dict
     ]code
   ;
 
-  \ Write out the minidictionary to flash
-  : save-flash-mini-dict ( -- )
-    flash-latest word-flags 1+ c@ if
-      flash-end erase-qspi-sector
-      flash-mini-dict flash-mini-dict-size flash-end mass-qspi!
-      flash-latest begin
-        dup if
-          dup word-flags 1+ c@ if
-            dup flash-base >= over flash-end < and if
-              0 over word-flags 1+ cflash!
-            then
-            next-word @
-            false
-          else
-            true
+  \ Force writing out the minidictionary to flash
+  : force-save-flash-mini-dict ( -- )
+    flash-end erase-qspi-sector
+    flash-mini-dict flash-mini-dict-size flash-end mass-qspi!
+    flash-latest begin
+      dup if
+        dup word-flags 1+ c@ if
+          dup flash-base >= over flash-end < and if
+            0 over word-flags 1+ cflash!
           then
+          next-word @
+          false
         else
           true
         then
-      until
-      drop
+      else
+        true
+      then
+    until
+    drop
+  ;
+
+  \ Write out the minidictionary to flash
+  : save-flash-mini-dict ( -- )
+    flash-latest word-flags 1+ c@ if
+      force-save-flash-mini-dict
     then
   ;
 
