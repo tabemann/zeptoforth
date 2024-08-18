@@ -37,9 +37,9 @@
 .equ CLK_REF             , 12 * 4
 .equ CLK_SYS             , 12 * 5
 .equ CLK_PERI            , 12 * 6
-.equ CLK_USB             , 12 * 7
-.equ CLK_ADC             , 12 * 8
-.equ CLK_RTC             , 12 * 9
+.equ CLK_HSTX            , 12 * 7        
+.equ CLK_USB             , 12 * 8
+.equ CLK_ADC             , 12 * 9
 
 .equ CLK_GPOUT0_CTRL     , 0x00 @ Clock control, can be changed on-the-fly (except for auxsrc)
 .equ CLK_GPOUT0_DIV      , 0x04 @ Clock divisor, can be changed on-the-fly
@@ -68,40 +68,48 @@
 .equ CLK_PERI_CTRL       , 0x48 @ Clock control, can be changed on-the-fly (except for auxsrc)
 .equ CLK_PERI_SELECTED   , 0x50 @ Indicates which src is currently selected (one-hot)
 
-.equ CLK_USB_CTRL        , 0x54 @ Clock control, can be changed on-the-fly (except for auxsrc)
-.equ CLK_USB_DIV         , 0x58 @ Clock divisor, can be changed on-the-fly
-.equ CLK_USB_SELECTED    , 0x5c @ Indicates which src is currently selected (one-hot)
+.equ CLK_HSTX_CTRL       , 0x54 @ Clock control, can be changed on-the-fly (except for auxsrc)
+.equ CLK_HSTX_DIV        , 0x58 @ Clock divisor
+.equ CLK_HSTX_SELECTED   , 0x5c @ Indicates which src is currently selected (one-hot)
+ 
+.equ CLK_USB_CTRL        , 0x60 @ Clock control, can be changed on-the-fly (except for auxsrc)
+.equ CLK_USB_DIV         , 0x64 @ Clock divisor, can be changed on-the-fly
+.equ CLK_USB_SELECTED    , 0x68 @ Indicates which src is currently selected (one-hot)
 
-.equ CLK_ADC_CTRL        , 0x60 @ Clock control, can be changed on-the-fly (except for auxsrc)
-.equ CLK_ADC_DIV         , 0x64 @ Clock divisor, can be changed on-the-fly
-.equ CLK_ADC_SELECTED    , 0x68 @ Indicates which src is currently selected (one-hot)
+.equ CLK_ADC_CTRL        , 0x6C @ Clock control, can be changed on-the-fly (except for auxsrc)
+.equ CLK_ADC_DIV         , 0x70 @ Clock divisor, can be changed on-the-fly
+.equ CLK_ADC_SELECTED    , 0x74 @ Indicates which src is currently selected (one-hot)
 
-.equ CLK_RTC_CTRL        , 0x6c @ Clock control, can be changed on-the-fly (except for auxsrc)
-.equ CLK_RTC_DIV         , 0x70 @ Clock divisor, can be changed on-the-fly
-.equ CLK_RTC_SELECTED    , 0x74 @ Indicates which src is currently selected (one-hot)
+.equ CLK_HSTX_CTRL       , 0x6c @ Clock control, can be changed on-the-fly (except for auxsrc)
+.equ CLK_HSTX_DIV        , 0x70 @ Clock divisor, can be changed on-the-fly
+.equ CLK_HSTX_SELECTED   , 0x74 @ Indicates which src is currently selected (one-hot)
 
-.equ CLK_SYS_RESUS_CTRL  , 0x78
-.equ CLK_SYS_RESUS_STATUS, 0x7c
+.equ DFTCLK_XOSC_CTRL    , 0x78
+.equ DFTCLK_ROSC_CTRL    , 0x7C
+.equ DFTCLK_LPOSC_CTRL   , 0x80
 
-.equ FC0_REF_KHZ         , 0x80 @ Reference clock frequency in kHz
-.equ FC0_MIN_KHZ         , 0x84 @ Minimum pass frequency in kHz. This is optional. Set to 0 if you are not using the pass/fail flags
-.equ FC0_MAX_KHZ         , 0x88 @ Maximum pass frequency in kHz. This is optional. Set to 0x1ffffff if you are not using the pass/fail flags
-.equ FC0_DELAY           , 0x8c @ Delays the start of frequency counting to allow the mux to settle Delay is measured in multiples of the reference clock period
-.equ FC0_INTERVAL        , 0x90 @ The test interval is 0.98us * 2**interval, but let’s call it 1us * 2**interval The default gives a test interval of 250us
-.equ FC0_SRC             , 0x94 @ Clock sent to frequency counter, set to 0 when not required Writing to this register initiates the frequency count
-.equ FC0_STATUS          , 0x98 @ Frequency counter status
-.equ FC0_RESULT          , 0x9c @ Result of frequency measurement, only valid when status_done=1
+.equ CLK_SYS_RESUS_CTRL  , 0x84
+.equ CLK_SYS_RESUS_STATUS, 0x88
 
-.equ WAKE_EN0            , 0xa0 @ enable clock in wake mode
-.equ WAKE_EN1            , 0xa4 @ enable clock in wake mode
-.equ SLEEP_EN0           , 0xa8 @ enable clock in sleep mode
-.equ SLEEP_EN1           , 0xac @ enable clock in sleep mode
-.equ ENABLED0            , 0xb0 @ indicates the state of the clock enable
-.equ ENABLED1            , 0xb4 @ indicates the state of the clock enable
-.equ INTR                , 0xb8 @ Raw Interrupts
-.equ INTE                , 0xbc @ Interrupt Enable
-.equ INTF                , 0xc0 @ Interrupt Force
-.equ INTS                , 0xc4 @ Interrupt status after masking & forcing
+.equ FC0_REF_KHZ         , 0x8C @ Reference clock frequency in kHz
+.equ FC0_MIN_KHZ         , 0x90 @ Minimum pass frequency in kHz. This is optional. Set to 0 if you are not using the pass/fail flags
+.equ FC0_MAX_KHZ         , 0x94 @ Maximum pass frequency in kHz. This is optional. Set to 0x1ffffff if you are not using the pass/fail flags
+.equ FC0_DELAY           , 0x98 @ Delays the start of frequency counting to allow the mux to settle Delay is measured in multiples of the reference clock period
+.equ FC0_INTERVAL        , 0x9C @ The test interval is 0.98us * 2**interval, but let’s call it 1us * 2**interval The default gives a test interval of 250us
+.equ FC0_SRC             , 0xA0 @ Clock sent to frequency counter, set to 0 when not required Writing to this register initiates the frequency count
+.equ FC0_STATUS          , 0xA4 @ Frequency counter status
+.equ FC0_RESULT          , 0xA8 @ Result of frequency measurement, only valid when status_done=1
+
+.equ WAKE_EN0            , 0xAC @ enable clock in wake mode
+.equ WAKE_EN1            , 0xB0 @ enable clock in wake mode
+.equ SLEEP_EN0           , 0xB4 @ enable clock in sleep mode
+.equ SLEEP_EN1           , 0xB8 @ enable clock in sleep mode
+.equ ENABLED0            , 0xBC @ indicates the state of the clock enable
+.equ ENABLED1            , 0xC0 @ indicates the state of the clock enable
+.equ INTR                , 0xC4 @ Raw Interrupts
+.equ INTE                , 0xC8 @ Interrupt Enable
+.equ INTF                , 0xCC @ Interrupt Force
+.equ INTS                , 0xD0 @ Interrupt status after masking & forcing
 
 @ -----------------------------------------------------------------------------
 @ Crystal Oscillator
@@ -175,9 +183,9 @@
 
 .equ PSM_BASE       , 0x40018000
 .equ PSM_FRCE_OFF   , PSM_BASE + 0x4
-.equ PSM_FRCE_OFF_PROC1, 1 << 16	
+.equ PSM_FRCE_OFF_PROC1, 1 << 24	
 
-.equ WAKE_EN0, CLOCKS_BASE + 0x000000a0
+.equ WAKE_EN0, CLOCKS_BASE + 0x000000AC
 
 .equ GPIO_0_STATUS,  IO_BANK0_BASE + (8 *  0)
 .equ GPIO_0_CTRL,    IO_BANK0_BASE + (8 *  0) + 4
@@ -192,21 +200,21 @@
 .equ GPIO_IN        , 0x004 @ Input value for GPIO pins
 .equ GPIO_HI_IN     , 0x008 @ Input value for QSPI pins
 .equ GPIO_OUT       , 0x010 @ GPIO output value
-.equ GPIO_OUT_SET   , 0x014 @ GPIO output value set
-.equ GPIO_OUT_CLR   , 0x018 @ GPIO output value clear
-.equ GPIO_OUT_XOR   , 0x01c @ GPIO output value XOR
-.equ GPIO_OE        , 0x020 @ GPIO output enable
-.equ GPIO_OE_SET    , 0x024 @ GPIO output enable set
-.equ GPIO_OE_CLR    , 0x028 @ GPIO output enable clear
-.equ GPIO_OE_XOR    , 0x02c @ GPIO output enable XOR
-.equ GPIO_HI_OUT    , 0x030 @ QSPI output value
-.equ GPIO_HI_OUT_SET, 0x034 @ QSPI output value set
-.equ GPIO_HI_OUT_CLR, 0x038 @ QSPI output value clear
-.equ GPIO_HI_OUT_XOR, 0x03c @ QSPI output value XOR
-.equ GPIO_HI_OE     , 0x040 @ QSPI output enable
-.equ GPIO_HI_OE_SET , 0x044 @ QSPI output enable set
-.equ GPIO_HI_OE_CLR , 0x048 @ QSPI output enable clear
-.equ GPIO_HI_OE_XOR , 0x04c @ QSPI output enable XOR
+.equ GPIO_HI_OUT    , 0x014 @ GPIO output value for GPIO's > 31
+.equ GPIO_OUT_SET   , 0x018 @ GPIO output value set
+.equ GPIO_HI_OUT_SET, 0x01C @ GPIO output value set for GPIO's > 31
+.equ GPIO_OUT_CLR   , 0x020 @ GPIO output value clear
+.equ GPIO_HI_OUT_CLR, 0x024 @ GPIO output value clear for GPIO's > 31
+.equ GPIO_OUT_XOR   , 0x028 @ GPIO output value XOR
+.equ GPIO_HI_OUT_XOR, 0x02C @ GPIO output value XOR for GPIO's > 31
+.equ GPIO_OE        , 0x030 @ GPIO output enable
+.equ GPIO_HI_OE     , 0x034 @ GPIO output enable for GPIO's > 31
+.equ GPIO_OE_SET    , 0x038 @ GPIO output enable set
+.equ GPIO_HI_OE_SET , 0x03C @ GPIO output enable set for GPIO's > 31
+.equ GPIO_OE_CLR    , 0x040 @ GPIO output enable clear
+.equ GPIO_HI_OE_CLR , 0x044 @ GPIO output enable clear for GPIO's > 31
+.equ GPIO_OE_XOR    , 0x048 @ GPIO output enable XOR
+.equ GPIO_HI_OE_XOR , 0x04C @ GPIO output enable XOR for GPIO's > 31
 
 .equ RESETS_BASE, 0x40020000
 .equ RESET      , 0
@@ -218,34 +226,38 @@
 .equ ALIAS_SET, 2<<12
 .equ ALIAS_CLR, 3<<12
 
-.equ RESETS_USBCTRL   , 24
-.equ RESETS_UART1     , 23
-.equ RESETS_UART0     , 22
-.equ RESETS_TIMER     , 21
-.equ RESETS_TBMAN     , 20
-.equ RESETS_SYSINFO   , 19
-.equ RESETS_SYSCFG    , 18
-.equ RESETS_SPI1      , 17
-.equ RESETS_SPI0      , 16
-.equ RESETS_RTC       , 15
-.equ RESETS_PWM       , 14
-.equ RESETS_PLL_USB   , 13
-.equ RESETS_PLL_SYS   , 12
-.equ RESETS_PIO1      , 11
-.equ RESETS_PIO0      , 10
-.equ RESETS_PADS_QSPI ,  9
-.equ RESETS_PADS_BANK0,  8
-.equ RESETS_JTAG      ,  7
-.equ RESETS_IO_QSPI   ,  6
-.equ RESETS_IO_BANK0  ,  5
-.equ RESETS_I2C1      ,  4
-.equ RESETS_I2C0      ,  3
-.equ RESETS_DMA       ,  2
-.equ RESETS_BUSCTRL   ,  1
-.equ RESETS_ADC       ,  0
-.equ RESETS_ALL       , 0x01ffffff
+.equ RESETS_USBCTRL   , 28
+.equ RESETS_UART1     , 27
+.equ RESETS_UART0     , 26
+.equ RESETS_TRNG      , 25        
+.equ RESETS_TIMER1    , 24
+.equ RESETS_TIMER0    , 23
+.equ RESETS_TBMAN     , 22
+.equ RESETS_SYSINFO   , 21
+.equ RESETS_SYSCFG    , 20
+.equ RESETS_SPI1      , 19
+.equ RESETS_SPI0      , 18
+.equ RESETS_SHA256    , 17
+.equ RESETS_PWM       , 16
+.equ RESETS_PLL_USB   , 15
+.equ RESETS_PLL_SYS   , 14
+.equ RESETS_PIO2      , 13
+.equ RESETS_PIO1      , 12
+.equ RESETS_PIO0      , 11
+.equ RESETS_PADS_QSPI , 10
+.equ RESETS_PADS_BANK0, 9
+.equ RESETS_JTAG      , 8
+.equ RESETS_IO_QSPI   , 7
+.equ RESETS_IO_BANK0  , 6
+.equ RESETS_I2C1      , 5
+.equ RESETS_I2C0      , 4
+.equ RESETS_HSTX      , 3
+.equ RESETS_DMA       , 2
+.equ RESETS_BUSCTRL   , 1
+.equ RESETS_ADC       , 0
+.equ RESETS_ALL       , 0x1FFFFFFF
 .equ RESETS_EARLY     , RESETS_ALL & ~(1<<RESETS_IO_QSPI) & ~(1<<RESETS_PADS_QSPI) & ~(1<<RESETS_PLL_USB) & ~(1<<RESETS_PLL_SYS)
-.equ RESETS_CLK_GLMUX , RESETS_ALL & ~(1<<RESETS_ADC) & ~(1<<RESETS_RTC) & ~(1<<RESETS_SPI0) & ~(1<<RESETS_SPI1) & ~(1<<RESETS_UART0) & ~(1<<RESETS_UART1) & ~(1<<RESETS_USBCTRL)
+.equ RESETS_CLK_GLMUX , RESETS_ALL & ~(1<<RESETS_ADC) & ~(1<<RESETS_SPI0) & ~(1<<RESETS_SPI1) & ~(1<<RESETS_UART0) & ~(1<<RESETS_UART1) & ~(1<<RESETS_USBCTRL)
 .equ RESETS_PLLS      , (1<<RESETS_PLL_USB) | (1<<RESETS_PLL_SYS)
 
 .equ XOSC_MHZ         , 12
@@ -261,9 +273,6 @@
 .equ WATCHDOG_SCRATCH5, 0x20
 .equ WATCHDOG_SCRATCH6, 0x24
 .equ WATCHDOG_SCRATCH7, 0x28
-.equ WATCHDOG_TICK    , 0x2c
-.equ WATCHDOG_TICK_ENABLE, 9
-.equ WATCHDOG_START_TICK, (1<<WATCHDOG_TICK_ENABLE) | XOSC_MHZ
 
 @ -----------------------------------------------------------------------------
 _init_hardware: @ Many thanks to Jan Bramkamp
@@ -289,11 +298,6 @@ _init_hardware: @ Many thanks to Jan Bramkamp
 	mvns r2, r2
 	ands r2, r0
 	bne  1b
-
-Watchdog_Start_Tick:
-	ldr  r1, =WATCHDOG_BASE
-	ldr  r0, =WATCHDOG_START_TICK
-	str  r0, [r1, #WATCHDOG_TICK]
 
 Disable_Resus:
 	movs r0, 0
@@ -432,7 +436,7 @@ Init_Clk_USB:
 	str  r2, [r1, #CLK_USB_CTRL]
 
 	// Wait for the clock to stop
-	movs r3, #3 @ ceil(125 MHz / 48 MHz)
+	movs r3, #4 @ ceil(150 MHz / 48 MHz)
 1:	subs r3, 1
 	bne  1b
 
@@ -452,7 +456,7 @@ Init_Clk_ADC:
 	str  r2, [r1, #CLK_ADC_CTRL]
 
 	// Wait for the clock to stop
-	movs r3, #3 @ ceil(125 MHz / 48 MHz)
+	movs r3, #4 @ ceil(150 MHz / 48 MHz)
 1:	subs r3, 1
 	bne  1b
 
@@ -465,28 +469,6 @@ Init_Clk_ADC:
 	// Don't divide the ADC clock
 	lsrs r2, #11-8
 	str  r2, [r0, #CLK_ADC_DIV]
-
-Init_Clk_RTC:
-	// Stop the RTC clock
-	lsls r2, #11-8
-	str  r2, [r1, #CLK_RTC_CTRL]
-
-	// Wait for the damn clock to stop
-	ldr  r3, =2667 @ ceil(125 MHz / 46875 Hz)
-1:	subs r3, #1
-	bne  1b
-
-	// Select the XOSC as auxiliary clock source
-        movs r3, #3 << 5
-        str  r3, [r0, #CLK_RTC_CTRL]
-
-	// (Re-)start the RTC clock
-        ldr  r3, =CLOCKS_BASE|ALIAS_SET
-	str  r2, [r3, #CLK_RTC_CTRL]
-
-	// Divide the USB PLL by 256
-        ldr  r2, =256 << 8
-	str  r2, [r0, #CLK_RTC_DIV]
 
 Init_Clk_Peri:
 	ldr  r2, =1<<11
