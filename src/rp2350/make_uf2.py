@@ -48,8 +48,11 @@ FLAGS = 0x00002000
 # Base address
 BASE_ADDR = 0x10000000
 
-# RP2040 family ID
+# RP2040 ARM absolute family ID
 RP2350_ABSOLUTE_FAMILY_ID = 0xE48BFF57
+
+# RP2040 ARM executable family ID
+RP2350_ARM_S_FAMILY_ID = 0xE48BFF59
 
 # Coda count
 CODA_COUNT = 1
@@ -59,9 +62,6 @@ MINI_DICT_SIZE = 94208
 
 # Minidictionary address
 MINI_DICT_ADDR = 0x1E8000
-
-# Image definition size
-IMAGE_DEF_SIZE = 5 * 4
 
 # Get the minidictionary size
 def mini_dict_size(big):
@@ -74,28 +74,22 @@ def mini_dict_addr(big):
 # Get the block count
 def block_count(image_size, big):
     image_size = ((image_size - 1) | (BLOCK_SIZE - 1)) + 1
-    return ((image_size + mini_dict_size(big)) // BLOCK_SIZE) + CODA_COUNT
+    return ((image_size + mini_dict_size(big)) // BLOCK_SIZE)
 
 # Pack a block
-def pack_block(buf, index, total_count, addr, data, data_off, data_len):
+def pack_block(buf, index, total_count, addr, data, data_off, data_len,
+               family = RP2350_ARM_S_FAMILY_ID,
+               offset = 1):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')
-    struct.pack_into('<IIIIIIII476sI', buf, index * UF2_BLOCK_SIZE,
+    struct.pack_into('<IIIIIIII476sI', buf, (index + offset) * UF2_BLOCK_SIZE,
                      MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE,
-                     index, total_count, RP2350_ABSOLUTE_FAMILY_ID, padded_data,
+                     index, total_count, family, padded_data,
                      MAGIC_2);
 
 # Write the bootblock and padding to the output image
 def pack_boot_block(buf, boot_block, total_count):
-    while (len(boot_block) % 4) != 0:
-        boot_block += b'\x00';
-    boot_block += struct.pack('<IIIII',
-                              0xFFFFDED3,
-                              0x10210142,
-                              0x000001FF,
-                              0x00000000,
-                              0xab123579)
     while len(boot_block) < 4096:
         boot_block += b'\x00';
     for i in range(0, 16):
@@ -104,14 +98,14 @@ def pack_boot_block(buf, boot_block, total_count):
 
 # Write the image to the output image
 def pack_image(buf, image, total_count, pad_count):
-    for i in range(0, total_count - (CODA_COUNT + pad_count)):
+    for i in range(0, total_count - pad_count):
         pack_block(buf, i + pad_count, total_count,
                    (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE,
                    BLOCK_SIZE)
 
 # Write the minidictionary to the output image
 def pack_mini_dict(buf, mini_dict, total_count, big):
-    before_count = (total_count - (mini_dict_size(big) // BLOCK_SIZE)) - 1
+    before_count = (total_count - (mini_dict_size(big) // BLOCK_SIZE))
     for i in range(0, mini_dict_size(big) // BLOCK_SIZE):
         pack_block(buf, i + before_count, total_count,
                    (i * BLOCK_SIZE) + mini_dict_addr(big), mini_dict,
@@ -119,11 +113,13 @@ def pack_mini_dict(buf, mini_dict, total_count, big):
 
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count, big):
-    end_addr = (((((total_count - 1) * BLOCK_SIZE) \
+    end_addr = ((((total_count * BLOCK_SIZE) \
                   - mini_dict_size(big)) - 1) \
                 | 4095) + 1
     coda = struct.pack('<I', end_addr)
-    pack_block(buf, total_count - 1, total_count, CODA_ADDR(big), coda, 0, 4)
+    pack_block(buf, 0, 2, CODA_ADDR(big), coda, 0, 4,
+               offset = 0,
+               family = RP2350_ABSOLUTE_FAMILY_ID)
 
 # Display the usage message
 def usage():
@@ -149,7 +145,7 @@ def main():
                          % (sys.argv[0], args[0]))
             boot_block = boot_block_file.read()
             boot_block_file.close()
-            if len(boot_block) > (4096 - IMAGE_DEF_SIZE):
+            if len(boot_block) > 4096:
                 sys.exit('Boot block is too big')
         try:
             image_file = open(args[-3], 'rb')
@@ -176,13 +172,13 @@ def main():
             pad_count = 16
         else:
             total_count = block_count(len(image), big)
-        output_image = bytearray(total_count * UF2_BLOCK_SIZE)
+        output_image = bytearray((total_count + CODA_COUNT) * UF2_BLOCK_SIZE)
+        if CODA_COUNT == 1:
+            pack_coda(output_image, total_count, big)
         if boot_block != None:
             pack_boot_block(output_image, boot_block, total_count)
         pack_image(output_image, image, total_count, pad_count)
         pack_mini_dict(output_image, mini_dict, total_count, big)
-        if CODA_COUNT == 1:
-            pack_coda(output_image, total_count, big)
         output_file.write(output_image)
         output_file.close()
     else:

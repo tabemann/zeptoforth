@@ -172,8 +172,8 @@
 .equ UART_ENABLE, 1<<9|1<<8|1<<0
 .equ UART_DMA, 1<<2|1<<1
 
-.equ UART0_IBAUD, 67
-.equ UART0_FBAUD, 52
+.equ UART0_IBAUD, 81
+.equ UART0_FBAUD, 24
 
 @ -----------------------------------------------------------------------------
 

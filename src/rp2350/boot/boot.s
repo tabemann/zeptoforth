@@ -23,15 +23,77 @@
 	.thumb
 
         .equ SIO_BASE, 0xD0000000
+        .equ IO_BANK0_BASE, 0x40028000
+        .equ PADS_BANK0_BASE, 0x40038000
         .equ GPIO_OUT_SET_OFFSET, 0x018
         .equ GPIO_OE_SET_OFFSET, 0x038
         .equ GPIO25, 1 << 25
+        .equ GPIO25_CTRL, (25 << 3) + IO_BANK0_BASE + 4
+        .equ PAD_BANK0_GPIO25, (25 << 2) + PADS_BANK0_BASE + 4
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
 	.equ IMAGE_SIZE, 0x8000
 	.equ PADS_QSPI_BASE, 0x40020000
 	.equ VTOR, 0xE000ED08
         .equ RSTACK_TOP, 0x20082000
+
+        .equ RESETS_BASE, 0x40020000
+        .equ RESET      , 0
+        .equ WDSEL      , 4
+        .equ RESET_DONE , 8
+        
+        .equ ALIAS_RW , 0<<12
+        .equ ALIAS_XOR, 1<<12
+        .equ ALIAS_SET, 2<<12
+        .equ ALIAS_CLR, 3<<12
+        
+        .equ RESETS_USBCTRL   , 28
+        .equ RESETS_UART1     , 27
+        .equ RESETS_UART0     , 26
+        .equ RESETS_TRNG      , 25        
+        .equ RESETS_TIMER1    , 24
+        .equ RESETS_TIMER0    , 23
+        .equ RESETS_TBMAN     , 22
+        .equ RESETS_SYSINFO   , 21
+        .equ RESETS_SYSCFG    , 20
+        .equ RESETS_SPI1      , 19
+        .equ RESETS_SPI0      , 18
+        .equ RESETS_SHA256    , 17
+        .equ RESETS_PWM       , 16
+        .equ RESETS_PLL_USB   , 15
+        .equ RESETS_PLL_SYS   , 14
+        .equ RESETS_PIO2      , 13
+        .equ RESETS_PIO1      , 12
+        .equ RESETS_PIO0      , 11
+        .equ RESETS_PADS_QSPI , 10
+        .equ RESETS_PADS_BANK0, 9
+        .equ RESETS_JTAG      , 8
+        .equ RESETS_IO_QSPI   , 7
+        .equ RESETS_IO_BANK0  , 6
+        .equ RESETS_I2C1      , 5
+        .equ RESETS_I2C0      , 4
+        .equ RESETS_HSTX      , 3
+        .equ RESETS_DMA       , 2
+        .equ RESETS_BUSCTRL   , 1
+        .equ RESETS_ADC       , 0
+        .equ RESETS_ALL       , 0x1FFFFFFF
+        .equ RESETS_EARLY     , RESETS_ALL & ~(1<<RESETS_IO_QSPI) & ~(1<<RESETS_PADS_QSPI) & ~(1<<RESETS_PLL_USB) & ~(1<<RESETS_PLL_SYS)
+        .equ RESETS_CLK_GLMUX , RESETS_ALL & ~(1<<RESETS_ADC) & ~(1<<RESETS_SPI0) & ~(1<<RESETS_SPI1) & ~(1<<RESETS_UART0) & ~(1<<RESETS_UART1) & ~(1<<RESETS_USBCTRL)
+
+        .equ XOSC_BASE   , 0x40048000
+
+        .equ XOSC_CTRL   , 0x00 @ Crystal Oscillator Control
+        .equ XOSC_STATUS , 0x04 @ Crystal Oscillator Status
+        .equ XOSC_DORMANT, 0x08 @ Crystal Oscillator pause control
+        .equ XOSC_STARTUP, 0x0c @ Controls the startup delay
+        .equ XOSC_COUNT  , 0x1c @ A down counter running at the XOSC frequency which counts to zero and stops.
+
+        .equ XOSC_ENABLE_12MHZ, 0xfabaa0
+        .equ XOSC_DELAY       , 47 @ ceil((f_crystal * t_stable) / 256)
+
+        .equ CLOCKS_BASE         , 0x40010000
+        .equ CLK_REF_CTRL        , 0x30 @ Clock control, can be changed on-the-fly (except for auxsrc)
+        .equ CLK_PERI_CTRL       , 0x48 @ Clock control, can be changed on-the-fly (except for auxsrc)
 
 	@ Pad control constants
 	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB, 4
@@ -113,12 +175,61 @@
         .word _handle_reset+1 @ 66
         .word _handle_reset+1 @ 67
 
-_handle_reset:  
-	@ Set stack pointer to the end of SRAM5 temporarily
-	ldr r3, =RSTACK_TOP
-	mov sp, r3
+_handle_reset:
 
+@        	// Reset as much as possible.
+@	// * We have to keep the QSPI flash XIP working
+@	// * We have to leave the PLLs feeding into glitching muxes running
+@	ldr  r1, =RESETS_BASE|ALIAS_SET
+@	ldr  r0, =RESETS_EARLY
+@	str  r0, [r1, #RESET]
+@
+@	// Start everything that's clocked by clk_sys and clk_ref clocks.
+@	// These clocks contain glitchfree muxes allowing us to switch clock sources
+@	// without stopping everything clocked by them.
+@	ldr  r1, =RESETS_BASE|ALIAS_CLR
+@	ldr  r0, =RESETS_EARLY
+@	str  r0, [r1, #RESET]
+@
+@	// Wait for the peripherals to return from reset
+@	ldr  r1, =RESETS_BASE
+@1:	ldr  r2, [r1, #RESET_DONE]
+@	mvns r2, r2
+@	ands r2, r0
+@	bne  1b
+@
+@
+@
+@        ldr r6, =XOSC_BASE
+@        @ Activate XOSC
+@
+@        ldr r5, =XOSC_DELAY
+@        str  r5, [r6, #XOSC_STARTUP]
+@
+@        ldr r3, =XOSC_ENABLE_12MHZ
+@        str  r3, [r6, #XOSC_CTRL] @ r3 = XOSC_ENABLE_12MHZ
+@
+@1:      ldr  r0, [r6, #XOSC_STATUS] @ Wait for stable flag (in MSB)
+@        asrs r0, r0, 31
+@        bpl  1b
+@
+@
+@
+@
+@        @ Select XOSC as source for clk_ref, which is the clock source of everything in reset configuration
+@
+@        ldr r4, =CLOCKS_BASE
+@        movs r1, #2
+@        str  r1, [r4, #CLK_REF_CTRL] @ r1 = 2, r4 = CLOCKS_BASE
+
+        ldr r0, =RESETS_BASE
+        movs r1, #0
+        str r1, [r0, #RESET]
+        
         @ Light up the LED to signal we got this far
+        ldr r0, =GPIO25_CTRL
+        movs r1, #5 @ SIO
+        str r1, [r0]
         ldr r0, =SIO_BASE
         ldr r1, =GPIO25
         str r1, [r0, #GPIO_OE_SET_OFFSET]
@@ -126,21 +237,9 @@ _handle_reset:
 
         @ Pause so the user can see the LED
         ldr r0, =0x00FFFFFF
-1:      subs r0, #1
-        cmp r0, #0
+@1:      subs r0, #1
+1:      cmp r0, #0
         bne 1b
-        
-	@ Set up QSPI pads
-	ldr r3, =PADS_QSPI_BASE
-	movs r0, #(2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS
-	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
-	ldr r0, [r3, #PADS_QSPI_GPIO_QSPI_SD0_OFFSET]
-	movs r1, #PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS
-	bics r0, r1
-	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD0_OFFSET]
-	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD1_OFFSET]
-	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
-	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
 
 	@@ Copy the image from flash into RAM
 	ldr r0, =RAM_BASE
@@ -162,3 +261,11 @@ _handle_reset:
 	@ Start zeptoforth
 	ldr r1, [r0, #4]
 	bx r1
+
+        @ IMAGE_DEF
+        .p2align 2
+        .word 0xFFFFDED3
+        .word 0x10210142
+        .word 0x000001FF
+        .word 0x00000000
+        .word 0xAB123579
