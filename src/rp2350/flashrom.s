@@ -30,7 +30,7 @@
         
 	.equ XIP_QMI_BASE, 0x400D0000
 
-        .equ TIMER_BASE, 0x40054000
+        .equ TIMER_BASE, 0x400D0000
         .equ TIMERAWL, TIMER_BASE + 0x28
 
         .equ RESET_TIME_US, 40
@@ -165,6 +165,7 @@
 	define_internal_word "init-flash", visible_flag
 _init_flash:
 	push {lr}
+
         ldr r0, =PADS_QSPI_BASE
         ldr r1, =INIT_PAD_SCLK
         str r1, [r0, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
@@ -180,6 +181,19 @@ _init_flash:
 	push_tos
 	movs tos, r0
         push_tos
+
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+
         ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
         cpsie i
@@ -187,13 +201,53 @@ _init_flash:
         push_tos
         ldr tos, =FLASH_CODA_ADDR
         bl _erase_qspi_4k_sector
-1:	pop {pc}
+1:
+
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
+        
+        pop {pc}
 	end_inlined
 
 _reset_flash:
 	push {lr}
+
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
+
 	bl _force_core_wait
-	cpsid i
+
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+
+        cpsid i
 	dsb
 	isb
 	bl _exit_xip

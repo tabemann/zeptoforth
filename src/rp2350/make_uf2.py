@@ -79,7 +79,7 @@ def block_count(image_size, big):
 # Pack a block
 def pack_block(buf, index, total_count, addr, data, data_off, data_len,
                family = RP2350_ARM_S_FAMILY_ID,
-               offset = 1):
+               offset = CODA_COUNT):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')

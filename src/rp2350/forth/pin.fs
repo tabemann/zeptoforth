@@ -53,8 +53,10 @@ begin-module pin
   \ Set a pin to input
   : input-pin ( pin -- )
     dup validate-pin
+    true over PADS_BANK0_ISO!
     true over PADS_BANK0_IE!
     true over PADS_BANK0_OD!
+    false over PADS_BANK0_ISO!
     5 over GPIO_CTRL_FUNCSEL!
     bit GPIO_OE_CLR !
   ;
@@ -62,8 +64,10 @@ begin-module pin
   \ Set a pin to output
   : output-pin ( pin -- )
     dup validate-pin
+    true over PADS_BANK0_ISO!
     false over PADS_BANK0_IE!
     false over PADS_BANK0_OD!
+    false over PADS_BANK0_ISO!
     5 over GPIO_CTRL_FUNCSEL!
     bit GPIO_OE_SET !
   ;
@@ -72,30 +76,38 @@ begin-module pin
   : alternate-pin ( function pin -- )
     dup validate-pin
     over validate-alternate
+    true over PADS_BANK0_ISO!
     true over PADS_BANK0_IE!
     false over PADS_BANK0_OD!
+    false over PADS_BANK0_ISO!
     GPIO_CTRL_FUNCSEL!
   ;
   
   \ Set a pin to pull-up
   : pull-up-pin ( pin -- )
     dup validate-pin
+    true over PADS_BANK0_ISO!
     true over PADS_BANK0_PUE!
     false swap PADS_BANK0_PDE!
+    false over PADS_BANK0_ISO!
   ;
 
   \ Set a pin to pull-down
   : pull-down-pin ( pin -- )
     dup validate-pin
+    true over PADS_BANK0_ISO!
     true over PADS_BANK0_PDE!
     false swap PADS_BANK0_PUE!
+    false over PADS_BANK0_ISO!
   ;
 
   \ Set a pin to floating
   : floating-pin ( pin -- )
     dup validate-pin
+    true over PADS_BANK0_ISO!
     false over PADS_BANK0_PUE!
     false swap PADS_BANK0_PDE!
+    false over PADS_BANK0_ISO!
   ;
 
   \ Set a pin to have a slow slew rate

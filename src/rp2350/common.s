@@ -98,7 +98,7 @@ _init_platform_variables:
 	ldr r1, =hold_core
 	str r0, [r1]
 	str r0, [r1, #4]
-	ldr r0, =125000000
+	ldr r0, =150000000
 	ldr r1, =sysclk
 	str r0, [r1]
 	bx lr
@@ -107,12 +107,12 @@ _init_platform_variables:
 	define_internal_word "pre-reboot", visible_flag
 _pre_reboot:
 	ldr r0, =0xE000E180 @ NVIC_ICER_Base
-	ldr r1, =1 << 15 @ SIO_IRQ_PROC0
+	ldr r1, =1 << 25 @ SIO_IRQ_FIFO
 	ldr r2, [r0]
 	orrs r2, r1
 	str r2, [r0]
-	ldr r0, =0x40010004 @ PSM_FRCE_OFF
-	ldr r1, =1 << 16 @ PSM_FRCE_OFF_PROC1
+	ldr r0, =0x40018004 @ PSM_FRCE_OFF
+	ldr r1, =1 << 24 @ PSM_FRCE_OFF_PROC1
 	ldr r2, [r0]
 	orrs r2, r1
 	str r2, [r0]

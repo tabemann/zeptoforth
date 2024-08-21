@@ -255,7 +255,7 @@
 .equ RESETS_DMA       , 2
 .equ RESETS_BUSCTRL   , 1
 .equ RESETS_ADC       , 0
-.equ RESETS_ALL       , 0x1FFFFFFF
+.equ RESETS_ALL       , 0x1FFFFFFF & ~(1<<RESETS_HSTX)
 .equ RESETS_EARLY     , RESETS_ALL & ~(1<<RESETS_IO_QSPI) & ~(1<<RESETS_PADS_QSPI) & ~(1<<RESETS_PLL_USB) & ~(1<<RESETS_PLL_SYS)
 .equ RESETS_CLK_GLMUX , RESETS_ALL & ~(1<<RESETS_ADC) & ~(1<<RESETS_SPI0) & ~(1<<RESETS_SPI1) & ~(1<<RESETS_UART0) & ~(1<<RESETS_UART1) & ~(1<<RESETS_USBCTRL)
 .equ RESETS_PLLS      , (1<<RESETS_PLL_USB) | (1<<RESETS_PLL_SYS)
@@ -388,8 +388,6 @@ Init_PLLs:
 	str  r0, [r2, #PLL_PWR]
 	str  r0, [r3, #PLL_PWR]
 
-
-
 Init_Clk_Ref:
 	// Switch the glitchless mux to the XOSC source.
 	ldr  r0, =CLOCKS_BASE
@@ -479,7 +477,7 @@ Unreset_All:
         movs r3, #0
 	ldr  r1, =RESETS_BASE
 	str  r3, [r1, #RESET]
-
+        
 UART_Baudrate:
 	ldr  r0, =UART0_BASE
 	movs r1, #UART0_IBAUD
@@ -503,30 +501,35 @@ UART_Function:
 
 Enable_GPIO:
 
-  ldr  r0, =SIO_BASE
-  movs r1, #0 @ All pins inputs
-  str  r1, [r0, #GPIO_OE]
+        ldr  r0, =SIO_BASE
+        movs r1, #0 @ All pins inputs
+        str  r1, [r0, #GPIO_OE]
+        ldr  r1, =0xFFFF
+        ldr  r2, [r0, #GPIO_HI_OE]
+        bics r2, r1
+        str  r2, [r0, #GPIO_HI_OE]
 
-  ldr r0, =IO_BANK0_BASE
-  movs r1, #5 @ SIO function
-
-
-        movs r2, #15 * 8 + 4
-1:      str r1, [r0, r2]
-        subs r2, #8
-        cmp r2, #1 * 8 + 4
+        @ Turn off isolation for all GPIO's
+        ldr r0, =PADS_BANK0_BASE + 4
+        ldr r1, =(PADS_BANK0_BASE + 4) + (48 * 4)
+        ldr r2, =1 << 8
+1:      ldr r3, [r0]
+        bics r3, r2
+        str r3, [r0]
+        adds r0, #4
+        cmp r0, r1
         bne 1b
 
-  ldr r0, =IO_BANK0_BASE + 16 * 8
+        @ Set all GPIO's except 0 and 1 to SIO function (5)
+        ldr r0, =IO_BANK0_BASE + 4 + 16
+        ldr r1, =(IO_BANK0_BASE + 4) + (48 * 8)
+        movs r2, #5
+1:      str r2, [r0]
+        adds r0, #8
+        cmp r0, r1
+        bne 1b
 
-        movs r2, #(29 - 16) * 8 + 4
-2:      str r1, [r0, r2]
-        subs r2, #8
-        cmp r2, #(16 - 16) * 8 + 4
-        bne 2b
-        str r1, [r0, r2]
-
-  bx lr
+        bx lr
 
 	@@ Time multiplier
 	define_word "time-multiplier", visible_flag

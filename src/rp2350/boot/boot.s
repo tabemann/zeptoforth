@@ -107,21 +107,21 @@
 
         .text
 	.word RSTACK_TOP
-	.word _handle_reset+1 	@ 1: the reset handler
-	.word _handle_reset+1	@ 2: the NMI handler
-	.word _handle_reset+1    @ 3: the hard fault handler
-	.word _handle_reset+1  @ 4: the MPU fault handler
-	.word _handle_reset+1  @ 5: the bus fault handler
-	.word _handle_reset+1  @ 6: the usage fault handler
-	.word 0               @ 7: reserved
-	.word 0               @ 8: reserved
-	.word 0               @ 9: reserved
-	.word 0               @ 10: reserved
-	.word _handle_reset+1   @ 11: SVCall handler
-	.word _handle_reset+1   @ 12: debug handler
-	.word 0               @ 13: reserved
-	.word _handle_reset+1   @ 14: the PendSV handler
-	.word _handle_reset+1  @ 15: the Systick handler
+	.word _handle_reset+1 @ 1: the reset handler
+	.word _handle_reset+1 @ 2: the NMI handler
+	.word _handle_reset+1 @ 3: the hard fault handler
+	.word _handle_reset+1 @ 4: the MPU fault handler
+	.word _handle_reset+1 @ 5: the bus fault handler
+	.word _handle_reset+1 @ 6: the usage fault handler
+	.word _handle_reset+1 @ 7: reserved
+	.word _handle_reset+1 @ 8: reserved
+	.word _handle_reset+1 @ 9: reserved
+	.word _handle_reset+1 @ 10: reserved
+	.word _handle_reset+1 @ 11: SVCall handler
+	.word _handle_reset+1 @ 12: debug handler
+	.word _handle_reset+1 @ 13: reserved
+	.word _handle_reset+1 @ 14: the PendSV handler
+	.word _handle_reset+1 @ 15: the Systick handler
 	.word _handle_reset+1 @ 16
 	.word _handle_reset+1 @ 17
 	.word _handle_reset+1 @ 18
@@ -200,46 +200,51 @@ _handle_reset:
 @
 @
 @
-@        ldr r6, =XOSC_BASE
-@        @ Activate XOSC
-@
-@        ldr r5, =XOSC_DELAY
-@        str  r5, [r6, #XOSC_STARTUP]
-@
-@        ldr r3, =XOSC_ENABLE_12MHZ
-@        str  r3, [r6, #XOSC_CTRL] @ r3 = XOSC_ENABLE_12MHZ
-@
-@1:      ldr  r0, [r6, #XOSC_STATUS] @ Wait for stable flag (in MSB)
-@        asrs r0, r0, 31
-@        bpl  1b
-@
-@
-@
-@
-@        @ Select XOSC as source for clk_ref, which is the clock source of everything in reset configuration
-@
-@        ldr r4, =CLOCKS_BASE
-@        movs r1, #2
-@        str  r1, [r4, #CLK_REF_CTRL] @ r1 = 2, r4 = CLOCKS_BASE
 
         ldr r0, =RESETS_BASE
         movs r1, #0
         str r1, [r0, #RESET]
-        
+
+        ldr r6, =XOSC_BASE
+        @ Activate XOSC
+
+        ldr r5, =XOSC_DELAY
+        str  r5, [r6, #XOSC_STARTUP]
+
+        ldr r3, =XOSC_ENABLE_12MHZ
+        str  r3, [r6, #XOSC_CTRL] @ r3 = XOSC_ENABLE_12MHZ
+
+1:      ldr  r0, [r6, #XOSC_STATUS] @ Wait for stable flag (in MSB)
+        asrs r0, r0, 31
+        bpl  1b
+
+        @ Select XOSC as source for clk_ref, which is the clock source of everything in reset configuration
+
+        ldr r4, =CLOCKS_BASE
+        movs r1, #2
+        str  r1, [r4, #CLK_REF_CTRL] @ r1 = 2, r4 = CLOCKS_BASE
+
         @ Light up the LED to signal we got this far
-        ldr r0, =GPIO25_CTRL
-        movs r1, #5 @ SIO
+
+        ldr r0, =PAD_BANK0_GPIO25
+        ldr r1, [r0]
+        ldr r2, =1 << 8
+        bics r1, r2
         str r1, [r0]
-        ldr r0, =SIO_BASE
-        ldr r1, =GPIO25
-        str r1, [r0, #GPIO_OE_SET_OFFSET]
-        str r1, [r0, #GPIO_OUT_SET_OFFSET]
+        
+@        ldr r0, =GPIO25_CTRL
+@        movs r1, #5 @ SIO
+@        str r1, [r0]
+@        ldr r0, =SIO_BASE
+@        ldr r1, =GPIO25
+@        str r1, [r0, #GPIO_OE_SET_OFFSET]
+@        str r1, [r0, #GPIO_OUT_SET_OFFSET]
 
         @ Pause so the user can see the LED
-        ldr r0, =0x00FFFFFF
+@        ldr r0, =0x00FFFFFF
 @1:      subs r0, #1
-1:      cmp r0, #0
-        bne 1b
+@        cmp r0, #0
+@        bne 1b
 
 	@@ Copy the image from flash into RAM
 	ldr r0, =RAM_BASE
