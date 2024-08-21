@@ -24,12 +24,12 @@
         .equ cortex_m7, 0
         .equ cortex_m33, 1
 	.equ ram_real_start, 0x20000000
-	.equ ram_start, 0x20008000
+	.equ ram_start, 0x20009000
 	.equ ram_end, 0x20082000
 	.equ rstack_size, 0x0400
 	.equ rstack_top, ram_end
 	.equ stack_size, 0x0200
-	.equ vector_count, 112
+	.equ vector_count, 68
 	.equ vector_table_size, vector_count * 4 @ in bytes
 	.equ VTOR_value, vector_table
 	.equ VTOR, 0xE000ED08
@@ -41,9 +41,9 @@
 	.equ flash_buffer_size, 0
 	.equ flash_buffer_space, 0
 	.equ flash_buffer_addr, 0
-	.equ flash_min_address, 0x10009000
+	.equ flash_min_address, 0x1000A000
 	.equ flash_start, 0x10000000
-	.equ flash_dict_start, 0x10009000
+	.equ flash_dict_start, 0x1000A000
         .equ flash_main_end, 0x10200000
 	.equ flash_dict_end, flash_main_end - 98304
 	.equ flash_end, 0x10200000

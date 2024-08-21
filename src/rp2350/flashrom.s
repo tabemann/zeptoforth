@@ -20,6 +20,8 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+        .equ RT_FLAG_FUNC_ARM_SEC, 0x0004
+        
 	.equ FLASH_CODA_ADDR, flash_main_end - 256
 	
 	.equ XIP_CTRL_BASE, 0x400C8000
@@ -221,19 +223,13 @@ _init_flash:
 _reset_flash:
 	push {lr}
 
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
-
 	bl _force_core_wait
+
+        cpsid i
+	dsb
+	isb
+	bl _exit_xip
+
 
         @ Debugging LED display
         ldr r0, =SIO_BASE
@@ -247,10 +243,7 @@ _reset_flash:
         cmp r0, #0
         bne 1b
 
-        cpsid i
-	dsb
-	isb
-	bl _exit_xip
+
 	bl _enable_flash_cmd
         bl _force_flash_cs_low
         ldr r0, =XIP_QMI_BASE
@@ -308,7 +301,7 @@ _reset_flash:
 	bl _enter_xip
 	cpsie i
         bl _release_core
-	pop {pc}
+        pop {pc}
 	end_inlined
 
 	@ Force the CS pin HIGH
@@ -571,10 +564,10 @@ _wait_qmi_busy:
 	define_word "call-rom-0", visible_flag
 _call_rom_0:
 	push {lr}
-	movs r2, #0
-	movs r1, tos
+        movs r2, #0
+	movs r1, #RT_FLAG_FUNC_ARM_SEC
+	movs r0, tos
 	pull_tos
-	ldrh r0, [r2, #0x14]
 	ldrh r3, [r2, #0x18]
 	blx r3
 	blx r0

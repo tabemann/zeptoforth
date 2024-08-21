@@ -152,9 +152,6 @@ _loop_forever_fifo:
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
 _force_core_wait:
-
-        bx lr @ DEBUG
-        
 	ldr r3, =SIO_CPUID
 	ldr r3, [r3]
 	movs r1, #1
