@@ -32,7 +32,7 @@
         
 	.equ XIP_QMI_BASE, 0x400D0000
 
-        .equ TIMER_BASE, 0x400D0000
+        .equ TIMER_BASE, 0x400B0000
         .equ TIMERAWL, TIMER_BASE + 0x28
 
         .equ RESET_TIME_US, 40
@@ -108,7 +108,7 @@
         .equ QMI_M0_RCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M0_RCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_0_BITS
+        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_4_BITS
 
         .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB
 
@@ -160,6 +160,12 @@
         @ Initial direct CSR configuration, 5 MHz and 150 MHz clk_sys
         .equ INIT_DIRECT_CSR, (30 << QMI_DIRECT_CSR_CLKDIV_LSB) | (QMI_DIRECT_CSR_EN)
 
+        .equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET, 0x08
+	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET, 0x0C
+	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET, 0x10
+	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET, 0x14
+	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS, 0x02
+        
         @ Initial M0 timing configuratiton
         .equ INIT_M0_TIMING, (1 << QMI_M0_TIMING_COOLDOWN_LSB) | (2 << QMI_M0_TIMING_RXDELAY_LSB) | (4 << QMI_M0_TIMING_CLKDIV_LSB)
 
@@ -168,12 +174,26 @@
 _init_flash:
 	push {lr}
 
-        ldr r0, =PADS_QSPI_BASE
-        ldr r1, =INIT_PAD_SCLK
-        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
+@        ldr r0, =PADS_QSPI_BASE
+@        ldr r1, =INIT_PAD_SCLK
+@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
+@        ldr r0, =PADS_QSPI_BASE | ALIAS_CLR
+@        ldr r1, =PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS
+@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD0_OFFSET]
+@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD1_OFFSET]
+@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
+@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
+@        
         ldr r0, =XIP_QMI_BASE
         ldr r1, =INIT_M0_TIMING
         str r1, [r0, #QMI_M0_TIMING_OFFSET]
+
+        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, [r0]
+        dmb
+        dsb
+        isb
+
         bl _reset_flash
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
@@ -184,39 +204,15 @@ _init_flash:
 	movs tos, r0
         push_tos
 
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
-
         ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
+
         cpsie i
         bl _release_core
         push_tos
         ldr tos, =FLASH_CODA_ADDR
         bl _erase_qspi_4k_sector
 1:
-
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
-        
         pop {pc}
 	end_inlined
 
@@ -226,24 +222,10 @@ _reset_flash:
 	bl _force_core_wait
 
         cpsid i
-	dsb
-	isb
-	bl _exit_xip
+        dsb
+        isb
 
-
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
-
-
+        bl _exit_xip
 	bl _enable_flash_cmd
         bl _force_flash_cs_low
         ldr r0, =XIP_QMI_BASE
@@ -273,7 +255,7 @@ _reset_flash:
         ldr r1, [r0]
         adds r1, #RESET_TIME_US
 1:      ldr r2, [r0]
-        cmp r3, r2
+        cmp r1, r2
         bgt 1b
 	@ Read the unique ID
         bl _force_flash_cs_low
@@ -301,6 +283,19 @@ _reset_flash:
 	bl _enter_xip
 	cpsie i
         bl _release_core
+        
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
+
         pop {pc}
 	end_inlined
 
@@ -377,6 +372,19 @@ _erase_flash:
 	push {lr}
 	bl _enable_flash_cmd
 	bl _enable_flash_write
+
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+        
 	bl _write_flash_address
 	bl _wait_qmi_busy
 	ldr r0, =XIP_QMI_BASE
@@ -568,10 +576,10 @@ _call_rom_0:
 	movs r1, #RT_FLAG_FUNC_ARM_SEC
 	movs r0, tos
 	pull_tos
-	ldrh r3, [r2, #0x18]
+	ldrh r3, [r2, #0x16]
 	blx r3
 	blx r0
-	pop {pc}
+        pop {pc}
 	end_inlined
 	
 	@ Exception handler for flash writes where flash has already been

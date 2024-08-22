@@ -57,6 +57,9 @@ RP2350_ARM_S_FAMILY_ID = 0xE48BFF59
 # Coda count
 CODA_COUNT = 1
 
+# Included coda count
+INCLUDED_CODA_COUNT = 1
+
 # Minidictionary size
 MINI_DICT_SIZE = 94208
 
@@ -70,42 +73,48 @@ def mini_dict_size(big):
 # Get the minidictionary address
 def mini_dict_addr(big):
     return MINI_DICT_ADDR
-    
+
+# Get the padded image size
+def padded_image_size(image_size):
+    return ((image_size - 1) | (BLOCK_SIZE - 1)) + 1
+
 # Get the block count
 def block_count(image_size, big):
-    image_size = ((image_size - 1) | (BLOCK_SIZE - 1)) + 1
-    return ((image_size + mini_dict_size(big)) // BLOCK_SIZE)
+    image_size = padded_image_size(image_size)
+    return ((image_size + mini_dict_size(big)) // BLOCK_SIZE) \
+            + INCLUDED_CODA_COUNT
 
 # Pack a block
 def pack_block(buf, index, total_count, addr, data, data_off, data_len,
-               family = RP2350_ARM_S_FAMILY_ID,
-               offset = CODA_COUNT):
+               family = RP2350_ARM_S_FAMILY_ID):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')
-    struct.pack_into('<IIIIIIII476sI', buf, (index + offset) * UF2_BLOCK_SIZE,
+    struct.pack_into('<IIIIIIII476sI', buf, index * UF2_BLOCK_SIZE,
                      MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE,
                      index, total_count, family, padded_data,
                      MAGIC_2);
 
 # Write the bootblock and padding to the output image
 def pack_boot_block(buf, boot_block, total_count):
-    while len(boot_block) < 4096:
-        boot_block += b'\x00';
+    boot_block = boot_block.ljust(4096, b'\x00')
     for i in range(0, 16):
         pack_block(buf, i, total_count, i * BLOCK_SIZE, boot_block,
                    i * BLOCK_SIZE, BLOCK_SIZE)
 
 # Write the image to the output image
 def pack_image(buf, image, total_count, pad_count):
-    for i in range(0, total_count - pad_count):
+    image_size = padded_image_size(len(image))
+    image = image.ljust(image_size, b'\x00')
+    for i in range(0, image_size // BLOCK_SIZE):
         pack_block(buf, i + pad_count, total_count,
                    (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE,
                    BLOCK_SIZE)
 
 # Write the minidictionary to the output image
 def pack_mini_dict(buf, mini_dict, total_count, big):
-    before_count = (total_count - (mini_dict_size(big) // BLOCK_SIZE))
+    before_count = ((total_count - INCLUDED_CODA_COUNT)
+                    - (mini_dict_size(big) // BLOCK_SIZE))
     for i in range(0, mini_dict_size(big) // BLOCK_SIZE):
         pack_block(buf, i + before_count, total_count,
                    (i * BLOCK_SIZE) + mini_dict_addr(big), mini_dict,
@@ -113,13 +122,11 @@ def pack_mini_dict(buf, mini_dict, total_count, big):
 
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count, big):
-    end_addr = ((((total_count * BLOCK_SIZE) \
+    end_addr = (((((total_count - INCLUDED_CODA_COUNT) * BLOCK_SIZE) \
                   - mini_dict_size(big)) - 1) \
                 | 4095) + 1
     coda = struct.pack('<I', end_addr)
-    pack_block(buf, 0, 2, CODA_ADDR(big), coda, 0, 4,
-               offset = 0,
-               family = RP2350_ABSOLUTE_FAMILY_ID)
+    pack_block(buf, total_count - 1, total_count, CODA_ADDR(big), coda, 0, 4)
 
 # Display the usage message
 def usage():
@@ -172,13 +179,13 @@ def main():
             pad_count = 16
         else:
             total_count = block_count(len(image), big)
-        output_image = bytearray((total_count + CODA_COUNT) * UF2_BLOCK_SIZE)
-        if CODA_COUNT == 1:
-            pack_coda(output_image, total_count, big)
+        output_image = bytearray(total_count) * UF2_BLOCK_SIZE
         if boot_block != None:
             pack_boot_block(output_image, boot_block, total_count)
         pack_image(output_image, image, total_count, pad_count)
         pack_mini_dict(output_image, mini_dict, total_count, big)
+        if CODA_COUNT == 1:
+            pack_coda(output_image, total_count, big)
         output_file.write(output_image)
         output_file.close()
     else:

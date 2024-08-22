@@ -33,7 +33,7 @@
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
 	.equ IMAGE_SIZE, 0x9000
-	.equ PADS_QSPI_BASE, 0x40020000
+	.equ PADS_QSPI_BASE, 0x40040000
 	.equ VTOR, 0xE000ED08
         .equ RSTACK_TOP, 0x20082000
 
@@ -176,75 +176,6 @@
         .word _handle_reset+1 @ 67
 
 _handle_reset:
-
-@        	// Reset as much as possible.
-@	// * We have to keep the QSPI flash XIP working
-@	// * We have to leave the PLLs feeding into glitching muxes running
-@	ldr  r1, =RESETS_BASE|ALIAS_SET
-@	ldr  r0, =RESETS_EARLY
-@	str  r0, [r1, #RESET]
-@
-@	// Start everything that's clocked by clk_sys and clk_ref clocks.
-@	// These clocks contain glitchfree muxes allowing us to switch clock sources
-@	// without stopping everything clocked by them.
-@	ldr  r1, =RESETS_BASE|ALIAS_CLR
-@	ldr  r0, =RESETS_EARLY
-@	str  r0, [r1, #RESET]
-@
-@	// Wait for the peripherals to return from reset
-@	ldr  r1, =RESETS_BASE
-@1:	ldr  r2, [r1, #RESET_DONE]
-@	mvns r2, r2
-@	ands r2, r0
-@	bne  1b
-@
-@
-@
-
-        ldr r0, =RESETS_BASE
-        movs r1, #0
-        str r1, [r0, #RESET]
-
-        ldr r6, =XOSC_BASE
-        @ Activate XOSC
-
-        ldr r5, =XOSC_DELAY
-        str  r5, [r6, #XOSC_STARTUP]
-
-        ldr r3, =XOSC_ENABLE_12MHZ
-        str  r3, [r6, #XOSC_CTRL] @ r3 = XOSC_ENABLE_12MHZ
-
-1:      ldr  r0, [r6, #XOSC_STATUS] @ Wait for stable flag (in MSB)
-        asrs r0, r0, 31
-        bpl  1b
-
-        @ Select XOSC as source for clk_ref, which is the clock source of everything in reset configuration
-
-        ldr r4, =CLOCKS_BASE
-        movs r1, #2
-        str  r1, [r4, #CLK_REF_CTRL] @ r1 = 2, r4 = CLOCKS_BASE
-
-        @ Light up the LED to signal we got this far
-
-        ldr r0, =PAD_BANK0_GPIO25
-        ldr r1, [r0]
-        ldr r2, =1 << 8
-        bics r1, r2
-        str r1, [r0]
-        
-@        ldr r0, =GPIO25_CTRL
-@        movs r1, #5 @ SIO
-@        str r1, [r0]
-@        ldr r0, =SIO_BASE
-@        ldr r1, =GPIO25
-@        str r1, [r0, #GPIO_OE_SET_OFFSET]
-@        str r1, [r0, #GPIO_OUT_SET_OFFSET]
-
-        @ Pause so the user can see the LED
-@        ldr r0, =0x00FFFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
 
 	@@ Copy the image from flash into RAM
 	ldr r0, =RAM_BASE
