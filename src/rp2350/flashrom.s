@@ -108,7 +108,11 @@
         .equ QMI_M0_RCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M0_RCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_4_BITS
+        .equ INIT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
+
+        .equ INIT_XIP_QMI_M0_RCMD, (CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB) | (CMD_READ_DATA_FAST_QUAD_IO << QMI_M0_RCMD_PREFIX_LSB)
+
+        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
 
         .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB
 
@@ -195,12 +199,30 @@ _init_flash:
         isb
 
         bl _reset_flash
+
+        @ A test
+        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, [r0]
+        
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+        
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
 	ldr r0, [r0]
 	cmp r0, r1
 	beq 1f
-	push_tos
+
+        push_tos
 	movs tos, r0
         push_tos
 
@@ -213,6 +235,21 @@ _init_flash:
         ldr tos, =FLASH_CODA_ADDR
         bl _erase_qspi_4k_sector
 1:
+
+        
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+        
+
         pop {pc}
 	end_inlined
 
@@ -283,19 +320,6 @@ _reset_flash:
 	bl _enter_xip
 	cpsie i
         bl _release_core
-        
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
-
         pop {pc}
 	end_inlined
 
@@ -372,19 +396,6 @@ _erase_flash:
 	push {lr}
 	bl _enable_flash_cmd
 	bl _enable_flash_write
-
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
-        
 	bl _write_flash_address
 	bl _wait_qmi_busy
 	ldr r0, =XIP_QMI_BASE
@@ -508,13 +519,15 @@ _enter_xip:
 1:	bl _force_flash_cs_normal
 
 	@ Prime XIP
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, =CMD_READ_DATA_FAST_QUAD_IO_W_OPTS
-	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
-	ldr r1, =CMD_CONT_READ_W_OPTS
-	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
-	bl _wait_qmi_busy
+        ldr r1, =XIP_QMI_BASE
+	ldr r2, =INIT_XIP_QMI_M0_RFMT
+        str r2, [r1, #QMI_M0_RFMT_OFFSET]
+        ldr r2, =INIT_XIP_QMI_M0_RCMD
+        str r2, [r1, #QMI_M0_RCMD_OFFSET]
 
+        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, [r0]
+        
 	@ Set up continuing XIP automatically
         ldr r1, =XIP_QMI_BASE
 	ldr r2, =CONT_XIP_QMI_M0_RFMT
@@ -522,6 +535,18 @@ _enter_xip:
         ldr r2, =CONT_XIP_QMI_M0_RCMD
         str r2, [r1, #QMI_M0_RCMD_OFFSET]
 
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+        @ Pause so the user can see the LED
+        ldr r0, =0x007FFFFF
+1:      subs r0, #1
+        cmp r0, #0
+        bne 1b
+        
 	pop {pc}
 	end_inlined
 
