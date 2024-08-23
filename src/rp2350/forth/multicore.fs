@@ -54,21 +54,21 @@ begin-module multicore
   
     \ Trampoline
     : trampoline ( --  ) [ $BCC3 h, $468E h, $4687 h, ] ; \ POP {R0, R1, R6, R7}; MOV LR, R1: MOV PC, R0
-    
-    \ Power-on state machine base
-    $40018000 constant PSM_BASE
-    
-    \ Force off register
-    PSM_BASE $4 + constant PSM_FRCE_OFF
-    
-    \ Force power-off processor 1 bit
-    16 bit constant PSM_FRCE_OFF_PROC1
 
     \ Check whether a core is addressable
     : validate-addressable-core ( core -- )
       dup cpu-count u< averts x-core-out-of-range
       cpu-index <> averts x-core-not-addressable
     ;
+
+    \ Ticks constants
+    $40108000 constant TICKS_BASE
+    TICKS_BASE $0C + constant TICKS_PROC1_CTRL
+    TICKS_BASE $10 + constant TICKS_PROC1_CYCLES
+    TICKS_BASE $14 + constant TICKS_PROC1_COUNT
+    0 bit constant TICKS_CTRL_ENABLE
+    1 bit constant TICKS_CTRL_RUNNING
+    12 constant INIT_TICKS_CYCLES
   
   end-module> import
 
@@ -535,6 +535,16 @@ begin-module multicore
   \ Execute code with a core held
   : with-hold-core ( xt -- )
     hold-core try release-core ?raise
+  ;
+  
+  
+  \ Initialize core 1 ticks
+  : init-core-1-ticks ( -- )
+    TICKS_CTRL_ENABLE TICKS_PROC1_CTRL bic!
+    begin TICKS_CTRL_RUNNING TICKS_PROC1_CTRL bit@ not until
+    INIT_TICKS_CYCLES TICKS_PROC1_CYCLES !
+    TICKS_CTRL_ENABLE TICKS_PROC1_CTRL bis!
+    begin TICKS_CTRL_RUNNING TICKS_PROC1_CTRL bit@ until
   ;
   
 end-module> import

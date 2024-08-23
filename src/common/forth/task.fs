@@ -2080,9 +2080,17 @@ begin-module task
         current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
-	$FF SHPR3_PRI_14!
-	$00 SIO_IRQ_PROC1 NVIC_IPR_IP!
-	SIO_IRQ_PROC1 NVIC_ISER_SETENA!
+        $FF SHPR3_PRI_14!
+        [ rp2040? ] [if]
+          $00 SIO_IRQ_PROC1 NVIC_IPR_IP!
+          SIO_IRQ_PROC1 NVIC_ISER_SETENA!
+        [else]
+          [ rp2350? ] [if]
+            $00 SIO_IRQ_FIFO NVIC_IPR_IP!
+            SIO_IRQ_FIFO NVIC_ISER_SETENA!
+            init-core-1-ticks
+          [then]
+        [then]
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !

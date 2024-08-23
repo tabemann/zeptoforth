@@ -108,11 +108,11 @@
         .equ QMI_M0_RCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M0_RCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ INIT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
+        .equ INIT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
 
         .equ INIT_XIP_QMI_M0_RCMD, (CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB) | (CMD_READ_DATA_FAST_QUAD_IO << QMI_M0_RCMD_PREFIX_LSB)
 
-        .equ CONT_XIP_QMI_M0_RFMT, (QUAD_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
+        .equ CONT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
 
         .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB
 
@@ -178,19 +178,23 @@
 _init_flash:
 	push {lr}
 
-@        ldr r0, =PADS_QSPI_BASE
-@        ldr r1, =INIT_PAD_SCLK
-@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
-@        ldr r0, =PADS_QSPI_BASE | ALIAS_CLR
-@        ldr r1, =PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS
-@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD0_OFFSET]
-@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD1_OFFSET]
-@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
-@        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
-@        
+        ldr r0, =PADS_QSPI_BASE
+        ldr r1, =INIT_PAD_SCLK
+        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SCLK_OFFSET]
+        ldr r0, =PADS_QSPI_BASE | ALIAS_CLR
+        ldr r1, =PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS
+        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD0_OFFSET]
+        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD1_OFFSET]
+        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
+        str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
+        
         ldr r0, =XIP_QMI_BASE
         ldr r1, =INIT_M0_TIMING
         str r1, [r0, #QMI_M0_TIMING_OFFSET]
+
+        dmb
+        dsb
+        isb
 
         ldr r0, =FLASH_CODA_ADDR
         ldr r0, [r0]
@@ -200,21 +204,24 @@ _init_flash:
 
         bl _reset_flash
 
-        @ A test
+        @ Test
         ldr r0, =FLASH_CODA_ADDR
         ldr r0, [r0]
+        dmb
+        dsb
+        isb
         
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
         
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
@@ -293,7 +300,8 @@ _reset_flash:
         adds r1, #RESET_TIME_US
 1:      ldr r2, [r0]
         cmp r1, r2
-        bgt 1b
+        bgt 1b        
+
 	@ Read the unique ID
         bl _force_flash_cs_low
         ldr r0, =XIP_QMI_BASE
@@ -315,6 +323,7 @@ _reset_flash:
 	strb r1, [r2, r3]
 	adds r3, #1
 	bmi 2b
+        
         bl _force_flash_cs_high
 	bl _enable_flush_xip_cache
 	bl _enter_xip
@@ -326,37 +335,37 @@ _reset_flash:
 	@ Force the CS pin HIGH
 	define_word "force-flash-cs-high", visible_flag
 _force_flash_cs_high:
-        ldr r0, =XIP_QMI_BASE
-        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
-        bics r2, r1
-        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-	bx lr
+@        ldr r0, =XIP_QMI_BASE
+@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
+@        bics r2, r1
+@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        bx lr
 	end_inlined
 
 	@ Force the CS pin LOW
 	define_word "force-flash-cs-low", visible_flag
 _force_flash_cs_low:
-        ldr r0, =XIP_QMI_BASE
-        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
-        bics r2, r1
-        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
-        orrs r2, r1
-        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-	bx lr
+@        ldr r0, =XIP_QMI_BASE
+@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
+@        bics r2, r1
+@        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
+@        orrs r2, r1
+@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        bx lr
 	end_inlined
 
 	@ Force the CS pin NORMAL
 	define_word "force-flash-cs-normal", visible_flag
 _force_flash_cs_normal:
-        ldr r0, =XIP_QMI_BASE
-        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
-        orrs r2, r1
-        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
-        bics r2, r1
-        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+@        ldr r0, =XIP_QMI_BASE
+@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
+@        orrs r2, r1
+@        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
+@        bics r2, r1
+@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         bx lr
 	end_inlined
 
@@ -366,6 +375,7 @@ _enable_flash_cmd:
 	ldr r0, =XIP_QMI_BASE
 	ldr r1, =INIT_DIRECT_CSR
 	str r1, [r0, #QMI_DIRECT_CSR_OFFSET]
+        bl _wait_qmi_busy
 	pop {pc}
 	end_inlined
 
@@ -518,34 +528,56 @@ _enter_xip:
 	@ Actually set up XIP
 1:	bl _force_flash_cs_normal
 
+        @ Disable direct mode
+        ldr r0, =XIP_QMI_BASE
+        ldr r1, =QMI_DIRECT_CSR_EN
+        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        bics r2, r1
+        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+
 	@ Prime XIP
         ldr r1, =XIP_QMI_BASE
-	ldr r2, =INIT_XIP_QMI_M0_RFMT
+
+        ldr r2, =INIT_M0_TIMING
+        str r2, [r1, #QMI_M0_TIMING_OFFSET]
+        dmb
+        dsb
+        isb
+
+        ldr r2, =INIT_XIP_QMI_M0_RFMT
         str r2, [r1, #QMI_M0_RFMT_OFFSET]
         ldr r2, =INIT_XIP_QMI_M0_RCMD
         str r2, [r1, #QMI_M0_RCMD_OFFSET]
 
+        dmb
+        dsb
+        isb
+
         ldr r0, =FLASH_CODA_ADDR
         ldr r0, [r0]
+
+        dmb
+        dsb
+        isb
         
 	@ Set up continuing XIP automatically
         ldr r1, =XIP_QMI_BASE
-	ldr r2, =CONT_XIP_QMI_M0_RFMT
+        ldr r2, =CONT_XIP_QMI_M0_RFMT
         str r2, [r1, #QMI_M0_RFMT_OFFSET]
         ldr r2, =CONT_XIP_QMI_M0_RCMD
         str r2, [r1, #QMI_M0_RCMD_OFFSET]
 
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
         
 	pop {pc}
 	end_inlined
@@ -584,10 +616,7 @@ _enable_flush_xip_cache:
 _wait_qmi_busy:
 	ldr r0, =XIP_QMI_BASE + QMI_DIRECT_CSR_OFFSET
 	movs r1, #QMI_DIRECT_CSR_BUSY
-	ldr r2, =QMI_DIRECT_CSR_TXEMPTY
-1:	ldr r3, [r0]
-	tst r3, r2
-	beq 1b
+1:      ldr r3, [r0]
 	tst r3, r1
 	bne 1b
 	bx lr

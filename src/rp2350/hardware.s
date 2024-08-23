@@ -274,6 +274,27 @@
 .equ WATCHDOG_SCRATCH6, 0x24
 .equ WATCHDOG_SCRATCH7, 0x28
 
+        .equ TICKS_BASE,            0x40108000
+        .equ TICKS_PROC0_CTRL,      0x00
+        .equ TICKS_PROC0_CYCLES,    0x04
+        .equ TICKS_PROC0_COUNT,     0x08
+        .equ TICKS_PROC1_CTRL,      0x0C
+        .equ TICKS_PROC1_CYCLES,    0x10
+        .equ TICKS_PROC1_COUNT,     0x14
+        .equ TICKS_TIMER0_CTRL,     0x18
+        .equ TICKS_TIMER0_CYCLES,   0x1C
+        .equ TICKS_TIMER0_COUNT,    0x20
+        .equ TICKS_TIMER1_CTRL,     0x24
+        .equ TICKS_TIMER1_CYCLES,   0x28
+        .equ TICKS_TIMER1_COUNT,    0x2C
+        .equ TICKS_WATCHDOG_CTRL,   0x30
+        .equ TICKS_WATCHDOG_CYCLES, 0x34
+        .equ TICKS_WATCHDOG_COUNT,  0x38
+
+        .equ TICKS_CTRL_ENABLE,     1 << 0
+        .equ TICKS_CTRL_RUNNING,    1 << 1
+        .equ INIT_TICKS_CYCLES,     12
+        
 @ -----------------------------------------------------------------------------
 _init_hardware: @ Many thanks to Jan Bramkamp
 @ -----------------------------------------------------------------------------
@@ -477,7 +498,68 @@ Unreset_All:
         movs r3, #0
 	ldr  r1, =RESETS_BASE
 	str  r3, [r1, #RESET]
+
+enable_tick_generators:
+        ldr r0, =TICKS_BASE | ALIAS_CLR
+        ldr r1, =TICKS_CTRL_ENABLE
+        str r1, [r0, #TICKS_PROC0_CTRL]
+@        str r1, [r0, #TICKS_PROC1_CTRL]
+        str r1, [r0, #TICKS_TIMER0_CTRL]
+        str r1, [r0, #TICKS_TIMER1_CTRL]
+        str r1, [r0, #TICKS_WATCHDOG_CTRL]
         
+        ldr r0, =TICKS_BASE
+        ldr r1, =TICKS_CTRL_RUNNING
+1:      ldr r2, [r0, #TICKS_PROC0_CTRL]
+        tst r1, r2
+        bne 1b
+@        ldr r2, [r0, #TICKS_PROC1_CTRL]
+@        tst r1, r2
+@        bne 1b
+        ldr r2, [r0, #TICKS_TIMER0_CTRL]
+        tst r1, r2
+        bne 1b
+        ldr r2, [r0, #TICKS_TIMER1_CTRL]
+        tst r1, r2
+        bne 1b
+        ldr r2, [r0, #TICKS_WATCHDOG_CTRL]
+        tst r1, r2
+        bne 1b
+        
+        ldr r0, =TICKS_BASE
+        ldr r1, =INIT_TICKS_CYCLES
+        str r1, [r0, #TICKS_PROC0_CYCLES]
+@        str r1, [r0, #TICKS_PROC1_CYCLES]
+        str r1, [r0, #TICKS_TIMER0_CYCLES]
+        str r1, [r0, #TICKS_TIMER1_CYCLES]
+        str r1, [r0, #TICKS_WATCHDOG_CYCLES]
+
+        ldr r0, =TICKS_BASE | ALIAS_SET
+        ldr r1, =TICKS_CTRL_ENABLE
+        str r1, [r0, #TICKS_PROC0_CTRL]
+@        str r1, [r0, #TICKS_PROC1_CTRL]
+        str r1, [r0, #TICKS_TIMER0_CTRL]
+        str r1, [r0, #TICKS_TIMER1_CTRL]
+        str r1, [r0, #TICKS_WATCHDOG_CTRL]
+        
+        ldr r0, =TICKS_BASE
+        ldr r1, =TICKS_CTRL_RUNNING
+1:      ldr r2, [r0, #TICKS_PROC0_CTRL]
+        tst r1, r2
+        beq 1b
+@        ldr r2, [r0, #TICKS_PROC1_CTRL]
+@        tst r1, r2
+@        bne 1b
+        ldr r2, [r0, #TICKS_TIMER0_CTRL]
+        tst r1, r2
+        beq 1b
+        ldr r2, [r0, #TICKS_TIMER1_CTRL]
+        tst r1, r2
+        beq 1b
+        ldr r2, [r0, #TICKS_WATCHDOG_CTRL]
+        tst r1, r2
+        beq 1b
+
 UART_Baudrate:
 	ldr  r0, =UART0_BASE
 	movs r1, #UART0_IBAUD
