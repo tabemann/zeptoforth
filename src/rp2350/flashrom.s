@@ -211,18 +211,6 @@ _init_flash:
         dsb
         isb
         
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
-        
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
 	ldr r0, [r0]
@@ -244,17 +232,17 @@ _init_flash:
 1:
 
         
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
-        @ Pause so the user can see the LED
-        ldr r0, =0x007FFFFF
-1:      subs r0, #1
-        cmp r0, #0
-        bne 1b
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+@
+@        @ Pause so the user can see the LED
+@        ldr r0, =0x007FFFFF
+@1:      subs r0, #1
+@        cmp r0, #0
+@        bne 1b
         
 
         pop {pc}

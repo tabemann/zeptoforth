@@ -120,10 +120,11 @@
 .equ XOSC_CTRL   , 0x00 @ Crystal Oscillator Control
 .equ XOSC_STATUS , 0x04 @ Crystal Oscillator Status
 .equ XOSC_DORMANT, 0x08 @ Crystal Oscillator pause control
-.equ XOSC_STARTUP, 0x0c @ Controls the startup delay
-.equ XOSC_COUNT  , 0x1c @ A down counter running at the XOSC frequency which counts to zero and stops.
+.equ XOSC_STARTUP, 0x0C @ Controls the startup delay
+.equ XOSC_COUNT  , 0x10 @ A down counter running at the XOSC frequency which counts to zero and stops.
 
-.equ XOSC_ENABLE_12MHZ, 0xfabaa0
+.equ XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ, 0xAA0
+.equ XOSC_ENABLE_12MHZ, 0xFAB000 | XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ
 .equ XOSC_DELAY       , 47 @ ceil((f_crystal * t_stable) / 256)
 
 @ -----------------------------------------------------------------------------
@@ -329,6 +330,9 @@ Disable_Resus:
 
 XOSC_Init:
 	ldr  r1, =XOSC_BASE
+        ldr  r0, =XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ
+        str  r0, [r1, #XOSC_CTRL]
+        
 	movs r0, XOSC_DELAY
 	str  r0, [r1, #XOSC_STARTUP]
 
@@ -427,7 +431,7 @@ Init_Clk_Ref:
 	bne  1b
 
 	// Don't divide the reference clock
-	lsls r1, #6
+        ldr r1, =1 << 16
 	str  r1, [r0, #CLK_REF_DIV]
 
 Init_Clk_Sys:
@@ -448,7 +452,7 @@ Init_Clk_Sys:
 	str  r2, [r0, #CLK_SYS_CTRL]
 
 	// Don't divide the system clock
-	lsls r2, #8
+        ldr  r2, =1 << 16
 	str  r2, [r0, #CLK_SYS_DIV]
 
 Init_Clk_USB:
@@ -468,7 +472,7 @@ Init_Clk_USB:
 	str  r2, [r0, #CLK_USB_CTRL]
 
 	// Don't divide the USB clock
-	lsrs r2, #11-8
+        ldr  r2, =1 << 16
 	str  r2, [r0, #CLK_USB_DIV]
 
 Init_Clk_ADC:
@@ -488,7 +492,7 @@ Init_Clk_ADC:
 	str  r2, [r0, #CLK_ADC_CTRL]
 
 	// Don't divide the ADC clock
-	lsrs r2, #11-8
+        ldr  r2, =1 << 16
 	str  r2, [r0, #CLK_ADC_DIV]
 
 Init_Clk_Peri:
@@ -613,8 +617,8 @@ Enable_GPIO:
         cmp r0, r1
         bne 1b
 
-        string_ln "This is a test"
-        bl _serial_type
+@        string_ln "This is a test"
+@        bl _serial_type
 
         pop {pc}
 
