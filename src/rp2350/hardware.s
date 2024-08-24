@@ -298,7 +298,9 @@
 @ -----------------------------------------------------------------------------
 _init_hardware: @ Many thanks to Jan Bramkamp
 @ -----------------------------------------------------------------------------
-
+        
+        push {lr}        
+        
 	// Reset as much as possible.
 	// * We have to keep the QSPI flash XIP working
 	// * We have to leave the PLLs feeding into glitching muxes running
@@ -611,7 +613,10 @@ Enable_GPIO:
         cmp r0, r1
         bne 1b
 
-        bx lr
+        string_ln "This is a test"
+        bl _serial_type
+
+        pop {pc}
 
 	@@ Time multiplier
 	define_word "time-multiplier", visible_flag
