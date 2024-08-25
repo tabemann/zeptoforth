@@ -46,6 +46,7 @@
 	.equ flash_dict_start, 0x1000A000
         .equ flash_main_end, 0x10200000
 	.equ flash_dict_end, flash_main_end - 98304
+        .equ flash_dict_main_end, flash_main_end - 131072
 	.equ flash_end, 0x10200000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 128

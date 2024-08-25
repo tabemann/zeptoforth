@@ -108,11 +108,11 @@
         .equ QMI_M0_RCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M0_RCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ INIT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
+        .equ INIT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_16_BITS
 
         .equ INIT_XIP_QMI_M0_RCMD, (CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB) | (CMD_READ_DATA_FAST_QUAD_IO << QMI_M0_RCMD_PREFIX_LSB)
 
-        .equ CONT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_24_BITS
+        .equ CONT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_16_BITS
 
         .equ CONT_XIP_QMI_M0_RCMD, CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB
 
@@ -197,7 +197,7 @@ _init_flash:
         dsb
         isb
 
-        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, =flash_start
         ldr r0, [r0]
         dmb
         dsb
@@ -206,12 +206,12 @@ _init_flash:
         bl _reset_flash
 
         @ Test
-        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, =flash_start
         ldr r0, [r0]
         dmb
         dsb
         isb
-        
+
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
 	ldr r0, [r0]
@@ -222,14 +222,14 @@ _init_flash:
 	movs tos, r0
         push_tos
 
-        push_tos
-        movs tos, 0x0D
-        bl _emit
-        push_tos
-        movs tos, 0x0A
-        bl _emit
-        push_tos
-        bl _h_8
+@        push_tos
+@        movs tos, 0x0D
+@        bl _emit
+@        push_tos
+@        movs tos, 0x0A
+@        bl _emit
+@        push_tos
+@        bl _h_8
 
         ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
@@ -328,6 +328,8 @@ _force_flash_cs_high:
 	@ Force the CS pin LOW
 	define_word "force-flash-cs-low", visible_flag
 _force_flash_cs_low:
+        push {lr}
+        bl _wait_qmi_busy
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
@@ -335,7 +337,7 @@ _force_flash_cs_low:
         ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
         orrs r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        bx lr
+        pop {pc}
 	end_inlined
 
 	@ Force the CS pin NORMAL
@@ -394,20 +396,20 @@ _write_flash_address:
 _erase_flash:
 	push {lr}
 
-        push_tos
-        movs tos, 0x0D
-        bl _emit
-        push_tos
-        movs tos, 0x0A
-        bl _emit
-        push_tos
-        bl _h_2
-        push_tos
-        movs tos, 0x20
-        bl _emit
-        push_tos
-        ldr tos, [r7, #4]
-        bl _h_8
+@        push_tos
+@        movs tos, 0x0D
+@        bl _emit
+@        push_tos
+@        movs tos, 0x0A
+@        bl _emit
+@        push_tos
+@        bl _h_2
+@        push_tos
+@        movs tos, 0x20
+@        bl _emit
+@        push_tos
+@        ldr tos, [r7, #4]
+@        bl _h_8
         
 	bl _enable_flash_cmd
 	bl _enable_flash_write
@@ -553,7 +555,7 @@ _enter_xip:
         dsb
         isb
 
-        ldr r0, =FLASH_CODA_ADDR
+        ldr r0, =flash_start
         ldr r0, [r0]
 
         dmb
@@ -731,6 +733,9 @@ _erase_range:
 	ldr r2, =0xFFFF
 	tst r1, r2
 	bne 3f
+        ldr r2, =flash_dict_main_end - flash_start
+        cmp r1, r2
+        bhs 3f
 	push_tos
 	movs tos, r1
 	push_tos
