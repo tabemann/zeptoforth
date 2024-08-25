@@ -89,13 +89,30 @@ _serial_emit_q:
 _serial_key_q:
 	push {lr}
 	bl _pause
-	ldr r0, =UART0_BASE
+
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
+
+        ldr r0, =UART0_BASE
 	ldr r0, [r0, #UARTFR]
 	lsls r0, r0, #(31 - UARTFR_RX_FIFO_EMPTY)
 	asrs r0, r0, #31
 	push_tos
 	mvns tos, r0
-	pop {pc}
+
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_CLR]
+
+        movs r0, #-1
+        cmp tos, r0
+        bne 1f        
+1:      pop {pc}
 	end_inlined
 	
 	.ltorg

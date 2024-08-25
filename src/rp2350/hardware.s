@@ -597,12 +597,14 @@ Enable_GPIO:
         bics r2, r1
         str  r2, [r0, #GPIO_HI_OE]
 
-        @ Turn off isolation for all GPIO's
+        @ Turn off isolation and turn on input enable for all GPIO's
         ldr r0, =PADS_BANK0_BASE + 4
         ldr r1, =(PADS_BANK0_BASE + 4) + (48 * 4)
-        ldr r2, =1 << 8
 1:      ldr r3, [r0]
+        ldr r2, =1 << 8
         bics r3, r2
+        ldr r2, =1 << 6
+        orrs r3, r2
         str r3, [r0]
         adds r0, #4
         cmp r0, r1

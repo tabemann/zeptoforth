@@ -231,20 +231,6 @@ _init_flash:
         bl _erase_qspi_4k_sector
 1:
 
-        
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
-        
-
         pop {pc}
 	end_inlined
 
@@ -261,11 +247,9 @@ _reset_flash:
 	bl _enable_flash_cmd
         bl _force_flash_cs_low
         ldr r0, =XIP_QMI_BASE
-        movs r1, #CMD_ENABLE_RESET
+        ldr r1, =CMD_ENABLE_RESET | QMI_DIRECT_TX_NOPUSH
         str r1, [r0, #QMI_DIRECT_TX_OFFSET]
         bl _wait_qmi_busy
-        ldr r0, =XIP_QMI_BASE
-        ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
         bl _force_flash_cs_high
         b 1f
 1:      b 1f
@@ -277,11 +261,9 @@ _reset_flash:
 1:      b 1f
 1:      bl _force_flash_cs_low
         ldr r0, =XIP_QMI_BASE
-        movs r1, #CMD_RESET
+        ldr r1, =CMD_RESET | QMI_DIRECT_TX_NOPUSH
         str r1, [r0, #QMI_DIRECT_TX_OFFSET]
         bl _wait_qmi_busy
-        ldr r0, =XIP_QMI_BASE
-        ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
         bl _force_flash_cs_high
         ldr r0, =TIMERAWL
         ldr r1, [r0]
@@ -323,37 +305,37 @@ _reset_flash:
 	@ Force the CS pin HIGH
 	define_word "force-flash-cs-high", visible_flag
 _force_flash_cs_high:
-@        ldr r0, =XIP_QMI_BASE
-@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
-@        bics r2, r1
-@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r0, =XIP_QMI_BASE
+        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
+        bics r2, r1
+        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         bx lr
 	end_inlined
 
 	@ Force the CS pin LOW
 	define_word "force-flash-cs-low", visible_flag
 _force_flash_cs_low:
-@        ldr r0, =XIP_QMI_BASE
-@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
-@        bics r2, r1
-@        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
-@        orrs r2, r1
-@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r0, =XIP_QMI_BASE
+        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
+        bics r2, r1
+        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
+        orrs r2, r1
+        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         bx lr
 	end_inlined
 
 	@ Force the CS pin NORMAL
 	define_word "force-flash-cs-normal", visible_flag
 _force_flash_cs_normal:
-@        ldr r0, =XIP_QMI_BASE
-@        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-@        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
-@        orrs r2, r1
-@        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
-@        bics r2, r1
-@        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r0, =XIP_QMI_BASE
+        ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
+        ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
+        orrs r2, r1
+        ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
+        bics r2, r1
+        str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         bx lr
 	end_inlined
 
@@ -373,16 +355,21 @@ _write_flash_address:
 	push {lr}
 	bl _force_flash_cs_low
 	ldr r0, =XIP_QMI_BASE
+        ldr r3, =QMI_DIRECT_TX_NOPUSH
+        orrs tos, r3
 	str tos, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	lsrs r1, tos, 16
 	movs r2, #0xFF
 	ands r1, r2
+        orrs r1, r3
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
 	lsrs r1, tos, 8
 	ands r1, r2
+        orrs r1, r3
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
 	ands tos, r2
+        orrs r1, r3
 	str tos, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	pop {pc}
@@ -395,14 +382,15 @@ _erase_flash:
 	bl _enable_flash_cmd
 	bl _enable_flash_write
 	bl _write_flash_address
-	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
 	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
+
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
 	pop {pc}
 	end_inlined
 
@@ -414,11 +402,9 @@ _enable_flash_write:
 	push {lr}
 	bl _force_flash_cs_low
 	ldr r0, =XIP_QMI_BASE
-	movs r1, #CMD_WRITE_ENABLE
+	ldr r1, =CMD_WRITE_ENABLE | QMI_DIRECT_TX_NOPUSH
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
 	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
 	bl _force_flash_cs_high
 	pop {pc}
 	end_inlined
@@ -470,18 +456,14 @@ _enable_flash_qspi:
 
 	@ Enable QSPI
 	bl _force_flash_cs_low
-	movs r1, #CMD_WRITE_STATUS
+	ldr r1, =CMD_WRITE_STATUS | QMI_DIRECT_TX_NOPUSH
 	ldr r0, =XIP_QMI_BASE
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
-	movs r3, #0
-	movs r2, #QSPI_ENABLE_STATE
+	ldr r3, =0 | QMI_DIRECT_TX_NOPUSH
+	ldr r2, =QSPI_ENABLE_STATE | QMI_DIRECT_TX_NOPUSH
 	str r3, [r0, #QMI_DIRECT_TX_OFFSET]
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r3, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r3, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r3, [r0, #QMI_DIRECT_RX_OFFSET]
 	bl _force_flash_cs_high
 
 	@ Wait for writing to finish
@@ -909,19 +891,14 @@ _actually_store_mass_qspi:
 	ldrb r2, [tos]
 	adds tos, #1
 	ldr r0, =XIP_QMI_BASE
+        ldr r3, =QMI_DIRECT_TX_NOPUSH
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	push {r1}
 	bl _wait_qmi_busy
 	pop {r1}
-	ldr r0, =XIP_QMI_BASE
-	ldr r2, [r0, #QMI_DIRECT_RX_OFFSET]
 	b 1b
-2:	ldr r0, =XIP_QMI_BASE
-	ldr r2, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r2, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r2, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r2, [r0, #QMI_DIRECT_RX_OFFSET]
-	bl _force_flash_cs_high
+2:	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 	pull_tos
 	pop {pc}
@@ -1010,15 +987,11 @@ _store_qspi_1:
 	ldr r0, =XIP_QMI_BASE
 	movs r1, #0xFF
 	ands tos, r1
+        ldr r3, =QMI_DIRECT_TX_NOPUSH
+        orrs r1, r3
 	str tos, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
 	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 	bl _enable_flush_xip_cache
@@ -1053,19 +1026,15 @@ _store_qspi_2:
 	movs r1, #0xFF
 	movs r2, tos
 	ands r2, r1
+        ldr r3, =QMI_DIRECT_TX_NOPUSH
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	lsrs r2, tos, #8
 	ands r2, r1
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]	
 	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 	bl _enable_flush_xip_cache
@@ -1119,26 +1088,22 @@ _store_qspi_4:
 	movs r1, #0xFF
 	movs r2, tos
 	ands r2, r1
+        ldr r3, =QMI_DIRECT_TX_NOPUSH
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	lsrs r2, tos, #8
 	ands r2, r1
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	lsrs r2, tos, #16
 	ands r2, r1
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	lsrs r2, tos, #24
+        orrs r2, r3
 	str r2, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	bl _wait_qmi_busy
-	ldr r0, =XIP_QMI_BASE
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]	
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
-	ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]	
 	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 	bl _enable_flush_xip_cache
