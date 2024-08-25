@@ -168,6 +168,7 @@
 	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET, 0x0C
 	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET, 0x10
 	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET, 0x14
+        .equ PADS_QSPI_GPIO_QSPI_SD0_ISO_BITS, 1 << 8
 	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS, 0x02
         
         @ Initial M0 timing configuratiton
@@ -187,7 +188,7 @@ _init_flash:
         str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD1_OFFSET]
         str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD2_OFFSET]
         str r1, [r0, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
-        
+
         ldr r0, =XIP_QMI_BASE
         ldr r1, =INIT_M0_TIMING
         str r1, [r0, #QMI_M0_TIMING_OFFSET]
@@ -220,6 +221,15 @@ _init_flash:
         push_tos
 	movs tos, r0
         push_tos
+
+        push_tos
+        movs tos, 0x0D
+        bl _emit
+        push_tos
+        movs tos, 0x0A
+        bl _emit
+        push_tos
+        bl _h_8
 
         ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
@@ -305,12 +315,14 @@ _reset_flash:
 	@ Force the CS pin HIGH
 	define_word "force-flash-cs-high", visible_flag
 _force_flash_cs_high:
+        push {lr}
+        bl _wait_qmi_busy
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N | QMI_DIRECT_CSR_ASSERT_CS0N
         bics r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        bx lr
+        pop {pc}
 	end_inlined
 
 	@ Force the CS pin LOW
@@ -329,6 +341,8 @@ _force_flash_cs_low:
 	@ Force the CS pin NORMAL
 	define_word "force-flash-cs-normal", visible_flag
 _force_flash_cs_normal:
+        push {lr}
+        bl _wait_qmi_busy
         ldr r0, =XIP_QMI_BASE
         ldr r2, [r0, #QMI_DIRECT_CSR_OFFSET]
         ldr r1, =QMI_DIRECT_CSR_AUTO_CS0N
@@ -336,7 +350,7 @@ _force_flash_cs_normal:
         ldr r1, =QMI_DIRECT_CSR_ASSERT_CS0N
         bics r2, r1
         str r2, [r0, #QMI_DIRECT_CSR_OFFSET]
-        bx lr
+        pop {pc}
 	end_inlined
 
 	define_word "enable-flash-cmd", visible_flag
@@ -369,7 +383,7 @@ _write_flash_address:
         orrs r1, r3
 	str r1, [r0, #QMI_DIRECT_TX_OFFSET]
 	ands tos, r2
-        orrs r1, r3
+        orrs tos, r3
 	str tos, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	pop {pc}
@@ -379,6 +393,22 @@ _write_flash_address:
 	define_word "erase-flash", visible_flag
 _erase_flash:
 	push {lr}
+
+        push_tos
+        movs tos, 0x0D
+        bl _emit
+        push_tos
+        movs tos, 0x0A
+        bl _emit
+        push_tos
+        bl _h_2
+        push_tos
+        movs tos, 0x20
+        bl _emit
+        push_tos
+        ldr tos, [r7, #4]
+        bl _h_8
+        
 	bl _enable_flash_cmd
 	bl _enable_flash_write
 	bl _write_flash_address
@@ -536,18 +566,6 @@ _enter_xip:
         str r2, [r1, #QMI_M0_RFMT_OFFSET]
         ldr r2, =CONT_XIP_QMI_M0_RCMD
         str r2, [r1, #QMI_M0_RCMD_OFFSET]
-
-@        @ Debugging LED display
-@        ldr r0, =SIO_BASE
-@        ldr r1, =1 << 25
-@        str r1, [r0, #GPIO_OE_SET]
-@        str r1, [r0, #GPIO_OUT_SET]
-@
-@        @ Pause so the user can see the LED
-@        ldr r0, =0x007FFFFF
-@1:      subs r0, #1
-@        cmp r0, #0
-@        bne 1b
         
 	pop {pc}
 	end_inlined
@@ -584,9 +602,9 @@ _enable_flush_xip_cache:
 	@ Wait for busy to clear
 	define_word "wait-qmi-busy", visible_flag
 _wait_qmi_busy:
-	ldr r0, =XIP_QMI_BASE + QMI_DIRECT_CSR_OFFSET
+	ldr r0, =XIP_QMI_BASE
 	movs r1, #QMI_DIRECT_CSR_BUSY
-1:      ldr r3, [r0]
+1:      ldr r3, [r0, #QMI_DIRECT_CSR_OFFSET]
 	tst r3, r1
 	bne 1b
 	bx lr

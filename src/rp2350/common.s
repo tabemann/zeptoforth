@@ -135,10 +135,10 @@ _pre_reboot:
 	@ Reboot the RP2350 in BOOTSEL mode
 	define_word "bootsel", visible_flag
 _bootsel:
-	movs r2, #0
-	ldr r1, ='U | ('B << 8)
-	ldrh r0, [r2, #0x14]
-	ldrh r3, [r2, #0x18]
+        movs r2, #0
+	movs r1, #RT_FLAG_FUNC_ARM_SEC
+	ldr r0, ='U | ('B << 8)
+	ldrh r3, [r2, #0x16]
 	blx r3
 	movs r3, r0
 	movs r0, #0
@@ -162,6 +162,62 @@ _pause:	ldr r0, =SIO_BASE + 0x000
 1:	bx lr
 	end_inlined
 
+        @ Output a hexadecimal nibble
+        define_word "h.1", visible_flag
+_h_1:   push {lr}
+        movs r0, #0xF
+        ands tos, r0
+        cmp tos, #9
+        bhi 1f
+        adds tos, '0
+        b 2f
+1:      adds tos, 'A - 10
+2:      bl _emit
+        pop {pc}
+        end_inlined
+
+        @ Output a hexadecimal 8-bit value, padded with zeroes
+        define_word "h.2", visible_flag
+_h_2:   push {lr}
+        movs r0, #0xFF
+        ands tos, r0
+        push_tos
+        lsrs tos, tos, #4
+        bl _h_1
+        bl _h_1
+        pop {pc}
+        end_inlined
+
+        @ Output a hexadecimal 16-bit value, padded with zeroes
+        define_word "h.4", visible_flag
+_h_4:   push {lr}
+        ldr r0, =0xFFFF
+        ands tos, r0
+        push_tos
+        lsrs tos, tos, #8
+        bl _h_2
+        bl _h_2
+        pop {pc}
+        end_inlined
+
+        @ Output a hexadecimal 32-bit value, padded with zeroes
+        define_word "h.8", visible_flag
+_h_8:   push {lr}
+        push_tos
+        lsrs tos, tos, #16
+        bl _h_4
+        bl _h_4
+        pop {pc}
+        end_inlined
+
+        @ output a hexadecimal 64-bit value, padded with zeroes
+        define_word "h.16", visible_flag
+_h_16:  push {lr}
+        bl _h_8
+        bl _h_8
+        pop {pc}
+        end_inlined
+        
 	.ltorg
 	
 	.include "../rp2350/hardware.s"
