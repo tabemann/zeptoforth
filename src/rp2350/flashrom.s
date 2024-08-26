@@ -886,11 +886,11 @@ _init_flash_write:
         bl _wait_qmi_busy
 
         
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
+@        @ Debugging LED display
+@        ldr r0, =SIO_BASE
+@        ldr r1, =1 << 25
+@        str r1, [r0, #GPIO_OE_SET]
+@        str r1, [r0, #GPIO_OUT_SET]
 
 
 	pop {pc}
@@ -961,6 +961,7 @@ _store_mass_qspi:
 	ldr tos, =CMD_PAGE_PROGRAM
 	push {r0, r1, r2}
 	bl _write_flash_address
+	bl _wait_qmi_busy
 	pop {r0, r1, r2}
 	push {r4}
 	ldr r3, =QSPI_PAGE_SIZE - 1
