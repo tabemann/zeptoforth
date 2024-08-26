@@ -417,12 +417,6 @@ _erase_flash:
 	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 
-        @ Debugging LED display
-        ldr r0, =SIO_BASE
-        ldr r1, =1 << 25
-        str r1, [r0, #GPIO_OE_SET]
-        str r1, [r0, #GPIO_OUT_SET]
-
 	pop {pc}
 	end_inlined
 
@@ -889,6 +883,16 @@ _init_flash_write:
 	push_tos
 	ldr tos, =CMD_PAGE_PROGRAM
 	bl _write_flash_address
+        bl _wait_qmi_busy
+
+        
+        @ Debugging LED display
+        ldr r0, =SIO_BASE
+        ldr r1, =1 << 25
+        str r1, [r0, #GPIO_OE_SET]
+        str r1, [r0, #GPIO_OUT_SET]
+
+
 	pop {pc}
 	end_inlined
 
@@ -1011,7 +1015,7 @@ _store_qspi_1:
 	movs r1, #0xFF
 	ands tos, r1
         ldr r3, =QMI_DIRECT_TX_NOPUSH
-        orrs r1, r3
+        orrs tos, r3
 	str tos, [r0, #QMI_DIRECT_TX_OFFSET]
 	pull_tos
 	bl _wait_qmi_busy

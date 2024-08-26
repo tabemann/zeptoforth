@@ -131,7 +131,8 @@ begin-module multicore
       cpu-index
       spinlock-lock-counts
       code[
-      r1 r0 2 dp ldm
+      r0 1 dp ldm
+      r1 1 dp ldm
       1 r1 r1 lsls_,_,#_
       r1 r0 r0 adds_,_,_
       2 r0 r0 lsls_,_,#_
@@ -167,7 +168,8 @@ begin-module multicore
     0 tos r0 str_,[_,#_]
     1 r0 cmp_,#_
     eq bc>
-    tos r0 2 dp ldm
+    r0 1 dp ldm
+    tos 1 dp ldm
     pc 1 pop
     >mark
     tos 1 dp ldm
@@ -195,7 +197,8 @@ begin-module multicore
     0 tos r0 str_,[_,#_]
     0 r0 cmp_,#_
     eq bc>
-    tos r0 2 dp ldm
+    r0 1 dp ldm
+    tos 1 dp ldm
     pc 1 pop
     >mark
     tos 1 dp ldm
@@ -225,7 +228,8 @@ begin-module multicore
     1 r0 cmp_,#_
     eq bc>
     cpsie \ Trying this
-    tos r0 2 dp ldm
+    r0 1 dp ldm
+    tos 1 dp ldm
     pc 1 pop
     >mark
     tos 1 dp ldm
@@ -258,7 +262,8 @@ begin-module multicore
     0 tos r0 str_,[_,#_]
     0 r0 cmp_,#_
     eq bc>
-    tos r0 2 dp ldm
+    r0 1 dp ldm
+    tos 1 dp ldm
     cpsie
     pc 1 pop
     >mark
@@ -416,7 +421,8 @@ begin-module multicore
     [ test-set-spinlock SPINLOCK ] literal
     code[
     cpsid
-    r1 r0 2 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
     mark<
     0 tos r2 ldr_,[_,#_]
     0 r2 cmp_,#_
@@ -444,7 +450,8 @@ begin-module multicore
   : test-set-raw ( value addr -- set? )
     [ test-set-spinlock SPINLOCK ] literal
     code[
-    r1 r0 2 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
     mark<
     0 tos r2 ldr_,[_,#_]
     0 r2 cmp_,#_

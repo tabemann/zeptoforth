@@ -128,7 +128,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =current_compile
 	ldr tos, [tos]
-	bl _store_current_2
+	bl _store_current_1
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
@@ -158,6 +158,11 @@ _asm_finalize:
 	str r1, [r2]
 	movs r1, #0
 	str r1, [r0]
+        push_tos
+        ldr tos, =finalize_hook
+	ldr tos, [tos]
+	bl _execute_nz
+	pop {pc}
 	pop {pc}
 	end_inlined
 	
@@ -213,6 +218,10 @@ _asm_finalize_no_align:
 	str r1, [r2]
 	movs r1, #0
 	str r1, [r0]
+        push_tos
+	ldr tos, =finalize_hook
+	ldr tos, [tos]
+	bl _execute_nz
 	pop {pc}
 	end_inlined
 
