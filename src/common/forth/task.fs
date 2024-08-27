@@ -2094,7 +2094,10 @@ begin-module task
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !
-        pause try-and-display-error
+        begin current-task @ task-active h@ 16 lshift 16 arshift 0<= while
+          pause
+        repeat
+        try-and-display-error
         dup 0= if drop terminated-normally then current-task @ terminate
       ;
       
@@ -2221,7 +2224,7 @@ begin-module task
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-validate-dict validate-dict-hook !
-    [: ( int-io::enable-int-io ) init-systick-aux-core ;] core-init-hook !
+    [: init-systick-aux-core enable-int ;] core-init-hook !
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !
