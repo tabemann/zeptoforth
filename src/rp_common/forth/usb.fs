@@ -60,7 +60,12 @@ begin-module usb
     $50110000 constant USB_Base
 
     \ USBCTRL reset bit
-    24 bit constant RESETS_USBCTRL
+    rp2040? [if]
+      24 bit constant RESETS_USBCTRL
+    [then]
+    rp2350? [if]
+      28 bit constant RESETS_USBCTRL
+    [then]
 
     \ Reset base
     rp2040? [if]
