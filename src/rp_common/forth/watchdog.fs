@@ -105,7 +105,7 @@ begin-module watchdog
   \ Set the watchdog delay in microseconds
   : watchdog-delay-us! ( us -- )
     dup validate-watchdog-delay-us
-    2 lshift watchdog-reload !
+    [ rp2040? ] [if] 1 lshift [then] watchdog-reload !
     watchdog-enabled @ if
       watchdog-reload @ 0= if
         force-watchdog-reboot
@@ -174,7 +174,8 @@ begin-module watchdog
       0 WATCHDOG_SCRATCH4 ! \ Do a normal reboot on watchdog timeout
       RESETS_ALL RESETS_WDSEL !
       false watchdog-enabled !
-      watchdog-delay-us-default 2 lshift watchdog-reload !
+      watchdog-delay-us-default [ rp2040? ] [if] 1 lshift [then]
+      watchdog-reload !
       ['] update-watchdog task::watchdog-hook !
     ;
     

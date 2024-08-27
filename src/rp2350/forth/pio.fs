@@ -273,7 +273,7 @@ begin-module pio
       0 (pbase) !
       0 pio0-freemem !
       0 pio1-freemem !
-      0 pio2-freemen !
+      0 pio2-freemem !
     ;
     
     \ helper word to convert memory address to pio program offset
@@ -660,11 +660,11 @@ begin-module pio
     5 constant SM_EXECCTRL_STATUS_SEL_LSB
 
     \ Mask of MOV x, STATUS comparison
-    $7 SM_EXECTRL_STATUS_SEL_LSB lshift constant SM_EXECTRL_STATUS_SEL_MASK
+    $7 SM_EXECCTRL_STATUS_SEL_LSB lshift constant SM_EXECCTRL_STATUS_SEL_MASK
 
     \ Set/get MOV x, STATUS comparison
-    SM_EXECTRL_STATUS_SEL_MASK SM_EXECTRL_STATUS_SEL_LSB
-    make-sm-field SM_EXECCTRL SM_EXECTRL_STATUS_SEL! SM_EXECCTRL_STATUS_SEL@
+    SM_EXECCTRL_STATUS_SEL_MASK SM_EXECCTRL_STATUS_SEL_LSB
+    make-sm-field SM_EXECCTRL SM_EXECCTRL_STATUS_SEL! SM_EXECCTRL_STATUS_SEL@
     
     \ LSB of comparison level or IRQ index for MOV x, STATUS
     0 constant SM_EXECCTRL_STATUS_N_LSB
@@ -1406,7 +1406,7 @@ begin-module pio
   \ may be from 1 to 32
   : sm-in-count! ( count state-machine pio -- )
     2dup validate-sm-pio
-    2 pick dup 0 u> swap 33 u< and averts x-pins-out-of-range
+    2 pick dup 0 u> swap 33 u< and averts x-pin-out-of-range
     rot dup 32 = if drop 0 then
     -rot SM_SHIFTCTRL_IN_COUNT!
   ;

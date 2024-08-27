@@ -150,7 +150,7 @@ begin-module aon-timer
 
     \ Initialize the AON timer
     : init-aon-timer ( -- )
-      POWMAN_NONSEC_WRITE POWMAN_TIMER bis!
+      POWMAN_TIMER_NONSEC_WRITE POWMAN_TIMER bis!
       POWMAN_TIMER_RUN POWMAN_TIMER bic!
       POWMAN_TIMER_ALARM POWMAN_TIMER bis!
       POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER bic!
@@ -322,10 +322,10 @@ begin-module aon-timer
       22 of POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO22 endof
       ['] x-invalid-source-sel-gpio ?raise
     endcase
-    time-enabled? { enabled? }
-    disable-time
+    timer-enabled? { enabled? }
+    disable-timer
     POWMAN_EXT_TIME_REF_DRIVE_LPCK or POWMAN_EXT_TIME_REF !
-    enabled? if enable-time then
+    enabled? if enable-timer then
   ;
 
   \ Get the source selection GPIO

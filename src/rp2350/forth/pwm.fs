@@ -167,10 +167,12 @@ begin-module pwm
     \ Initialize PWM
     : init-pwm ( -- )
       disable-int
-      [: $F INTR ! pwm-irq NVIC_ICPR_CLRPEND! ;] pwm-wrap-0-vector vector!
+      [: $F INTR ! pwm-wrap-0-irq NVIC_ICPR_CLRPEND! ;]
+      pwm-wrap-0-vector vector!
       0 pwm-wrap-0-irq NVIC_IPR_IP!
       pwm-wrap-0-irq NVIC_ISER_SETENA!
-      [: $F INTR ! pwm-irq NVIC_ICPR_CLRPEND! ;] pwm-wrap-1-vector vector!
+      [: $F INTR ! pwm-wrap-1-irq NVIC_ICPR_CLRPEND! ;]
+      pwm-wrap-1-vector vector!
       0 pwm-wrap-1-irq NVIC_IPR_IP!
       pwm-wrap-1-irq NVIC_ISER_SETENA!
       enable-int
@@ -210,9 +212,9 @@ begin-module pwm
   \ bits from 0 to 11
   : disable-pwm-wrap-0-int ( bits -- ) dup validate-pwm-mask IRQ0_INTE bic! ;
 
-  \ Clear an interrupt for PWM_IRQ_WRAP_0 for any set of slices, expressed as
+  \ Clear an interrupt for any set of slices, expressed as
   \ bits from 0 to 11
-  : clear-pwm-wrap-0-int ( bits -- ) dup validate-pwm-mask IRQ0_INTR bis! ;
+  : clear-pwm-wrap-int ( bits -- ) dup validate-pwm-mask INTR bis! ;
 
   \ Get the interrupt state for PWM_IRQ_WRAP_0 for all slices, expressed as one
   \ bit per slice from 0 to 11
@@ -228,10 +230,6 @@ begin-module pwm
   \ Disable interrupts for PWM_IRQ_WRAP_1 for any set of slices, expressed as
   \ bits from 0 to 11
   : disable-pwm-wrap-1-int ( bits -- ) dup validate-pwm-mask IRQ1_INTE bic! ;
-
-  \ Clear an interrupt for PWM_IRQ_WRAP_1 for any set of slices, expressed as
-  \ bits from 0 to 11
-  : clear-pwm-wrap-1-int ( bits -- ) dup validate-pwm-mask IRQ1_INTR bis! ;
 
   \ Get the interrupt state for PWM_IRQ_WRAP_1 for all slices, expressed as one
   \ bit per slice from 0 to 11
@@ -250,7 +248,7 @@ begin-module pwm
 
   \ Clear an interrupt for any set of slices, expressed as bits from 0 to 11;
   \ note that this is a legacy word that applies to PWM_IRQ_WRAP_0
-  : clear-pwm-int ( bits -- ) clear-pwm-wrap-0-int ;
+  : clear-pwm-int ( bits -- ) clear-pwm-wrap-int ;
 
   \ Get the interrupt state for all slices, expressed as one bit per slice
   \ from 0 to 11; note that this is a legacy word that applies to PWM_IRQ_WRAP_0
