@@ -131,6 +131,7 @@ begin-module uart
     : UART1_UARTFR_TXFE@ 7 bit UART1_UARTFR bit@ ; \ Transmit FIFO empty
     : UART1_UARTFR_TXFF@ 5 bit UART1_UARTFR bit@ ; \ Transmit FIFO full
     : UART1_UARTFR_RXFE@ 4 bit UART1_UARTFR bit@ ; \ Receive FIFO empty
+    : UART1_UARTFR_BUSY@ 3 bit UART1_UARTFR bit@ ; \ Busy
     : UART1_UARTIMSC_RTIM! 6 bit UART1_UARTIMSC bis! ; \ Receive timeout interrupt mask
     : UART1_UARTIMSC_TXIM! 5 bit UART1_UARTIMSC bis! ; \ Transmit interrupt mask
     : UART1_UARTIMSC_RXIM! 4 bit UART1_UARTIMSC bis! ; \ Receive interrupt mask
@@ -453,7 +454,8 @@ begin-module uart
     0= if
       do-flush-console
     else
-      [: uart1-tx-empty? UART1_UARTFR_TXFE@ and ;] wait
+      [: uart1-tx-empty? UART1_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and ;]
+      wait
     then
   ;
 

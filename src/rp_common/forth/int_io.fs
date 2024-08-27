@@ -88,6 +88,7 @@ begin-module int-io
     : UART0_UARTFR_TXFE@ 7 bit UART0_UARTFR bit@ ; \ Transmit FIFO empty
     : UART0_UARTFR_TXFF@ 5 bit UART0_UARTFR bit@ ; \ Transmit FIFO full
     : UART0_UARTFR_RXFE@ 4 bit UART0_UARTFR bit@ ; \ Receive FIFO empty
+    : UART0_UARTFR_BUSY@ 3 bit UART0_UARTFR bit@ ; \ Busy
     : UART0_UARTIMSC_RTIM! 6 bit UART0_UARTIMSC bis! ; \ Receive timeout interrupt mask
     : UART0_UARTIMSC_TXIM! 5 bit UART0_UARTIMSC bis! ; \ Transmit interrupt mask
     : UART0_UARTIMSC_RXIM! 4 bit UART0_UARTIMSC bis! ; \ Receive interrupt mask
@@ -256,7 +257,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? UART0_UARTFR_TXFE@ and ;] wait
+      [: tx-empty? UART0_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and ;] wait
     ;
 
   end-module> import

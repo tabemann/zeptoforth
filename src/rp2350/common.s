@@ -132,19 +132,53 @@ _pre_reboot:
 	bx lr
 	end_inlined
 
+        @@ Reboot (note that this does not clear RAM, but it does clear the RAM
+	@@ dictionary
+	define_word "reboot", visible_flag
+_reboot:
+        push {r4, lr}
+
+        ldr r0, =WATCHDOG_BASE
+        ldr r1, =ALIAS_SET
+        orrs r0, r1
+        ldr r1, =WATCHDOG_CTRL_TRIGGER
+        ldr r2, =0
+        orrs r1, r2
+        str r1, [r0, #WATCHDOG_CTRL]
+
+1:      b 2f
+2:      b 1b
+        
+@        movs r2, #0
+@	movs r1, #RT_FLAG_FUNC_ARM_SEC
+@	ldr r0, ='R | ('B << 8)
+@	ldrh r3, [r2, #0x16]
+@	blx r3
+@	movs r4, r0
+@	ldr r0, =0x0 @ | 0x0100
+@	movs r1, #0
+@        movs r2, #0
+@        movs r3, #0
+@	blx r4
+	pop {r4, pc}
+	end_inlined
+
 	@ Reboot the RP2350 in BOOTSEL mode
 	define_word "bootsel", visible_flag
 _bootsel:
+        push {r4, lr}
         movs r2, #0
 	movs r1, #RT_FLAG_FUNC_ARM_SEC
-	ldr r0, ='U | ('B << 8)
+	ldr r0, ='R | ('B << 8)
 	ldrh r3, [r2, #0x16]
 	blx r3
-	movs r3, r0
-	movs r0, #0
+	movs r4, r0
+        ldr r0, =0x2 @ | 0x0100
 	movs r1, #0
-	blx r3
-	bx lr
+        movs r2, #0
+        movs r3, #0
+	blx r4
+        pop {r4, lr}
 	end_inlined
 
 	@@ Execute a PAUSE word, if one is set

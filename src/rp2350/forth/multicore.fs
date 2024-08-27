@@ -78,6 +78,9 @@ begin-module multicore
   \ Wait for an event
   : wfe ( -- ) [inlined] [ undefer-lit %1011111100100000 h, ] ;
 
+  \ VTOR
+  $E000ED08 constant VTOR
+  
   \ SIO FIFO IRQ
   25 constant SIO_IRQ_FIFO
 
@@ -476,7 +479,7 @@ begin-module multicore
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )
     validate-addressable-core
-    begin FIFO_ST_VLD FIFO_ST bit@ while FIFO_RD @ drop repeat sev
+    begin FIFO_ST_VLD FIFO_ST bit@ while FIFO_RD @ drop sev repeat
   ;
   
   \ Blocking FIFO push
@@ -532,6 +535,7 @@ begin-module multicore
       $B007B007 0 fifo-push-blocking
       begin again
     then
+    flush-console
   ;    
 
   \ Reset an auxiliary core
@@ -543,8 +547,7 @@ begin-module multicore
   : with-hold-core ( xt -- )
     hold-core try release-core ?raise
   ;
-  
-  
+
   \ Initialize core 1 ticks
   : init-core-1-ticks ( -- )
     TICKS_CTRL_ENABLE TICKS_PROC1_CTRL bic!

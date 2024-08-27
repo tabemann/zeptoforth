@@ -182,9 +182,13 @@
 .equ PADS_BANK0_BASE, 0x40038000
 .equ SIO_BASE       , 0xd0000000
 
-.equ PSM_BASE       , 0x40018000
-.equ PSM_FRCE_OFF   , PSM_BASE + 0x4
-.equ PSM_FRCE_OFF_PROC1, 1 << 24	
+        .equ PSM_BASE         , 0x40018000
+        .equ PSM_WDSEL_OFFSET , 0x8
+        .equ PSM_WDSEL_XOSC   , 1 << 3
+        .equ PSM_WDSEL_ROSC   , 1 << 2
+        .equ PSM_WDSEL_ALL    , 0x01FFFFFF & ~(PSM_WDSEL_XOSC) & ~(PSM_WDSEL_ROSC)
+        .equ PSM_FRCE_OFF_PROC1, 1 << 24
+        
 
 .equ WAKE_EN0, CLOCKS_BASE + 0x000000AC
 
@@ -261,19 +265,21 @@
 .equ RESETS_CLK_GLMUX , RESETS_ALL & ~(1<<RESETS_ADC) & ~(1<<RESETS_SPI0) & ~(1<<RESETS_SPI1) & ~(1<<RESETS_UART0) & ~(1<<RESETS_UART1) & ~(1<<RESETS_USBCTRL)
 .equ RESETS_PLLS      , (1<<RESETS_PLL_USB) | (1<<RESETS_PLL_SYS)
 
-.equ XOSC_MHZ         , 12
-.equ WATCHDOG_BASE    , 0x400D8000
-.equ WATCHDOG_CTRL    , 0x00
-.equ WATCHDOG_LOAD    , 0x04
-.equ WATCHDOG_REASON  , 0x08
-.equ WATCHDOG_SCRATCH0, 0x0c
-.equ WATCHDOG_SCRATCH1, 0x10
-.equ WATCHDOG_SCRATCH2, 0x14
-.equ WATCHDOG_SCRATCH3, 0x18
-.equ WATCHDOG_SCRATCH4, 0x1c
-.equ WATCHDOG_SCRATCH5, 0x20
-.equ WATCHDOG_SCRATCH6, 0x24
-.equ WATCHDOG_SCRATCH7, 0x28
+        .equ XOSC_MHZ         , 12
+        .equ WATCHDOG_BASE    , 0x400D8000
+        .equ WATCHDOG_CTRL    , 0x00
+        .equ WATCHDOG_LOAD    , 0x04
+        .equ WATCHDOG_REASON  , 0x08
+        .equ WATCHDOG_SCRATCH0, 0x0c
+        .equ WATCHDOG_SCRATCH1, 0x10
+        .equ WATCHDOG_SCRATCH2, 0x14
+        .equ WATCHDOG_SCRATCH3, 0x18
+        .equ WATCHDOG_SCRATCH4, 0x1c
+        .equ WATCHDOG_SCRATCH5, 0x20
+        .equ WATCHDOG_SCRATCH6, 0x24
+        .equ WATCHDOG_SCRATCH7, 0x28
+        
+        .equ WATCHDOG_CTRL_TRIGGER, 1 << 31
 
         .equ TICKS_BASE,            0x40108000
         .equ TICKS_PROC0_CTRL,      0x00
@@ -301,6 +307,11 @@ _init_hardware: @ Many thanks to Jan Bramkamp
 @ -----------------------------------------------------------------------------
         
         push {lr}        
+
+        @ Initialize watchdog
+        ldr r0, =PSM_BASE
+        ldr r1, =PSM_WDSEL_ALL
+        str r1, [r0, #PSM_WDSEL_OFFSET]
         
 	// Reset as much as possible.
 	// * We have to keep the QSPI flash XIP working

@@ -2087,18 +2087,6 @@ _context_switch:
 	bx lr
 	end_inlined
 
-	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
-	@@ dictionary
-	define_word "reboot", visible_flag
-_reboot:
-	ldr r0, =0xE000ED0C @ AIRCR
-	ldr r1, =0x05FA0004
-	str r1, [r0]
-	dsb
-	isb
-	bx lr
-	end_inlined
-
 	@@ Null exception handler
 	define_word "handle-null", visible_flag
 _handle_null:
