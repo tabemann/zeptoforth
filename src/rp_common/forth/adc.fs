@@ -72,8 +72,8 @@ begin-module adc
     : ADC_CS_ERR@ ( -- flag ) 9 bit ADC_CS bit@ ;
     : ADC_CS_READY@ ( -- flag ) 8 bit ADC_CS bit@ ;
     : ADC_CS_START_ONCE! ( -- flag ) 2 bit ADC_CS rot if bis! else bic! then ;
-    : ADC_CS_TS_EN! ( -- flag ) 1 bit ADC_CS rot if bis! else bic! then ;
-    : ADC_CS_EN! ( -- flag ) 0 bit ADC_CS rot if bis! else bic! then ;
+    : ADC_CS_TS_EN! ( flag -- ) 1 bit ADC_CS rot if bis! else bic! then ;
+    : ADC_CS_EN! ( flag -- ) 0 bit ADC_CS rot if bis! else bic! then ;
 
     \ Initialize the ADC's
     : init-adc ( -- )

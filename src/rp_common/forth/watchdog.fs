@@ -39,7 +39,12 @@ begin-module watchdog
     RESETS_BASE $4 + constant RESETS_WDSEL
     
     \ Reset all peripherals
-    $01FFFFFF constant RESETS_ALL
+    rp2040? [if]
+      $01FFFFFF constant RESETS_ALL
+    [then]
+    rp2350? [if]
+      $1FFFFFFF 3 bit bic constant RESETS_ALL
+    [then]
 
     \ Watchdog base register
     rp2040? [if]

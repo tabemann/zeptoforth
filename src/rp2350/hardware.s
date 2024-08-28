@@ -468,7 +468,7 @@ Init_Clk_Sys:
 
 Init_Clk_USB:
 	// Disable the USB clock
-	lsls r2, #11-8
+        ldr  r2, =1 << 11
 	str  r2, [r1, #CLK_USB_CTRL]
 
 	// Wait for the clock to stop
@@ -488,7 +488,7 @@ Init_Clk_USB:
 
 Init_Clk_ADC:
 	// Stop the ADC clock
-	lsls r2, #11-8
+        ldr  r2, =1 << 11
 	str  r2, [r1, #CLK_ADC_CTRL]
 
 	// Wait for the clock to stop
