@@ -96,7 +96,7 @@ begin-module aon-timer
     POWMAN_BASE $80 + constant POWMAN_ALARM_TIME_31TO16
 
     \ Set alarm time bits 15 to 0 register
-    POWMAN_BASE $41 + constant POWMAN_ALARM_TIME_15TO0
+    POWMAN_BASE $84 + constant POWMAN_ALARM_TIME_15TO0
 
     \ Timer register
     POWMAN_BASE $88 + constant POWMAN_TIMER
@@ -148,18 +148,38 @@ begin-module aon-timer
     \ All other registers are hardwired to be inaccessible to non-secure
     0 bit constant POWMAN_TIMER_NONSEC_WRITE
 
+    \ Password
+    $5AFE0000 constant PASSWD
+
+    \ Set with password
+    : passwd! ( x addr -- ) swap PASSWD or swap ! ;
+    
+    \ Set bits with password
+    : passwd-bis! ( bits addr -- )
+      dup @ rot or swap passwd!
+    ;
+
+    \ Clear bits with password
+    : passwd-bic! ( bits addr -- )
+      dup @ rot bic swap passwd!
+    ;
+
     \ Initialize the AON timer
     : init-aon-timer ( -- )
-      POWMAN_TIMER_NONSEC_WRITE POWMAN_TIMER bis!
-      POWMAN_TIMER_RUN POWMAN_TIMER bic!
-      POWMAN_TIMER_ALARM POWMAN_TIMER bis!
-      POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER bic!
-      $20 POWMAN_LPOSC_FREQ_KHZ_INT ! \ 32
-      $C49C POWMAN_LPOSC_FREQ_KHZ_FRAC ! \ 0.768
-      $2EE0 POWMAN_XOSC_FREQ_KHZ_INT ! \ 12000
-      $0 POWMAN_XOSC_FREQ_KHZ_FRAC ! \ 0
-      POWMAN_TIMER_USE_XOSC POWMAN_TIMER bis!
-      POWMAN_TIMER_RUN POWMAN_TIMER bis!
+      POWMAN_TIMER_NONSEC_WRITE POWMAN_TIMER passwd-bis!
+      POWMAN_TIMER_RUN POWMAN_TIMER passwd-bic!
+      POWMAN_TIMER_ALARM POWMAN_TIMER passwd-bis!
+      POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER passwd-bic!
+      $20 POWMAN_LPOSC_FREQ_KHZ_INT passwd! \ 32
+      $C49C POWMAN_LPOSC_FREQ_KHZ_FRAC passwd! \ 0.768
+      $2EE0 POWMAN_XOSC_FREQ_KHZ_INT passwd! \ 12000
+      $0 POWMAN_XOSC_FREQ_KHZ_FRAC passwd! \ 0
+      POWMAN_TIMER_USE_XOSC POWMAN_TIMER passwd-bis!
+      0 POWMAN_SET_TIME_63TO48 passwd!
+      0 POWMAN_SET_TIME_47TO32 passwd!
+      0 POWMAN_SET_TIME_31TO16 passwd!
+      0 POWMAN_SET_TIME_15TO0 passwd!
+      POWMAN_TIMER_RUN POWMAN_TIMER passwd-bis!
     ;
 
     initializer init-aon-timer
@@ -168,12 +188,12 @@ begin-module aon-timer
 
   \ Enable the timer
   : enable-timer ( -- )
-    POWMAN_TIMER_RUN POWMAN_TIMER bis!
+    POWMAN_TIMER_RUN POWMAN_TIMER passwd-bis!
   ;
 
   \ Disable the timer
   : disable-timer ( -- )
-    POWMAN_TIMER_RUN POWMAN_TIMER bic!
+    POWMAN_TIMER_RUN POWMAN_TIMER passwd-bic!
   ;
 
   \ Is the timer enabled
@@ -185,16 +205,18 @@ begin-module aon-timer
   : time! ( D: time -- )
     timer-enabled? { enabled? }
     disable-timer
-    dup 16 rshift POWMAN_SET_TIME_63TO48 !
-    $FFFF POWMAN_SET_TIME_47TO32 !
-    dup 16 rshift POWMAN_SET_TIME_31TO16 !
-    $FFFF POWMAN_SET_TIME_15TO0 !
+    dup 16 rshift POWMAN_SET_TIME_63TO48 passwd!
+    $FFFF and POWMAN_SET_TIME_47TO32 passwd!
+    dup 16 rshift POWMAN_SET_TIME_31TO16 passwd!
+    $FFFF and POWMAN_SET_TIME_15TO0 passwd!
     enabled? if enable-timer then
   ;
 
   \ Get the time
   : time@ ( -- D: time )
+    0 0
     begin
+      2drop
       POWMAN_READ_TIME_UPPER @
       POWMAN_READ_TIME_LOWER @ swap
       dup POWMAN_READ_TIME_UPPER @ =
@@ -203,17 +225,17 @@ begin-module aon-timer
 
   \ Clear the time
   : clear-time ( -- )
-    POWMAN_TIMER_CLEAR POWMAN_TIMER bis!
+    POWMAN_TIMER_CLEAR POWMAN_TIMER passwd-bis!
   ;
   
   \ Enable the alarm
   : enable-alarm ( -- )
-    POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER bis!
+    POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER passwd-bis!
   ;
 
   \ Disable the alarm
   : disable-alarm ( -- )
-    POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER bic!
+    POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER passwd-bic!
   ;
 
   \ Is the alarm enabled
@@ -225,10 +247,10 @@ begin-module aon-timer
   : alarm! ( D: time -- )
     alarm-enabled? { enabled? }
     disable-alarm
-    dup 16 rshift POWMAN_ALARM_TIME_63TO48 !
-    $FFFF POWMAN_ALARM_TIME_47TO32 !
-    dup 16 rshift POWMAN_ALARM_TIME_31TO16 !
-    $FFFF POWMAN_ALARM_TIME_15TO0 !
+    dup 16 rshift POWMAN_ALARM_TIME_63TO48 passwd!
+    $FFFF POWMAN_ALARM_TIME_47TO32 passwd!
+    dup 16 rshift POWMAN_ALARM_TIME_31TO16 passwd!
+    $FFFF POWMAN_ALARM_TIME_15TO0 passwd!
     enabled? if enable-alarm then
   ;
 
@@ -242,12 +264,12 @@ begin-module aon-timer
 
   \ Enable the alarm wake-up from low power mode
   : enable-alarm-wake-up ( -- )
-    POWMAN_TIMER_PWRUP_ON_ALARM POWMAN_TIMER bis!
+    POWMAN_TIMER_PWRUP_ON_ALARM POWMAN_TIMER passwd-bis!
   ;
 
   \ Disable the alarm wake-up from low power mode
   : disable-alarm-wake-up ( -- )
-    POWMAN_TIMER_PWRUP_ON_ALARM POWMAN_TIMER bic!
+    POWMAN_TIMER_PWRUP_ON_ALARM POWMAN_TIMER passwd-bic!
   ;
 
   \ Is the alarm wake-up from low power mode enabled enabled
@@ -257,27 +279,27 @@ begin-module aon-timer
 
   \ Switch to LPOSC as the source of the 1 kHz timer tick
   : lposc-timer ( -- )
-    POWMAN_TIMER_USE_LPOSC POWMAN_TIMER bis!
+    POWMAN_TIMER_USE_LPOSC POWMAN_TIMER passwd-bis!
   ;
 
   \ Switch to XOSC as the source of the 1 kHz timer tick
   : xosc-timer ( -- )
-    POWMAN_TIMER_USE_XOSC POWMAN_TIMER bis!
+    POWMAN_TIMER_USE_XOSC POWMAN_TIMER passwd-bis!
   ;
 
   \ Switch to a GPIO as the source of the 1 kHz timer tick
   : gpio-1khz-timer ( -- )
-    POWMAN_TIMER_USE_GPIO_1KHZ POWMAN_TIMER bis!
+    POWMAN_TIMER_USE_GPIO_1KHZ POWMAN_TIMER passwd-bis!
   ;
 
   \ Synchronize with a GPIO as the source of the second counter
   : sync-gpio-1hz-timer ( -- )
-    POWMAN_TIMER_USE_GPIO_1HZ POWMAN_TIMER bis!
+    POWMAN_TIMER_USE_GPIO_1HZ POWMAN_TIMER passwd-bis!
   ;
 
   \ Unsynchronize with a GPIO as the source of the second counter
   : unsync-gpio-1hz-timer ( -- )
-    POWMAN_TIMER_USE_GPIO_1HZ POWMAN_TIMER bic!
+    POWMAN_TIMER_USE_GPIO_1HZ POWMAN_TIMER passwd-bic!
   ;
   
   \ Get whether the timer is running from the LPOSC
@@ -310,7 +332,7 @@ begin-module aon-timer
       22 of POWMAN_EXT_TIME_REF_SOURCE_SEL_GPIO22 endof
       ['] x-invalid-source-sel-gpio ?raise
     endcase
-    POWMAN_EXT_TIME_REF !
+    POWMAN_EXT_TIME_REF passwd!
   ;
 
   \ Set a GPIO as a source selection to drive the 32 kHz low power clock
@@ -324,7 +346,7 @@ begin-module aon-timer
     endcase
     timer-enabled? { enabled? }
     disable-timer
-    POWMAN_EXT_TIME_REF_DRIVE_LPCK or POWMAN_EXT_TIME_REF !
+    POWMAN_EXT_TIME_REF_DRIVE_LPCK or POWMAN_EXT_TIME_REF passwd!
     enabled? if enable-timer then
   ;
 
