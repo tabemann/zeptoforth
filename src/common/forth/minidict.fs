@@ -420,9 +420,11 @@ begin-module mini-dict
 
   \ Force writing out the minidictionary to flash
   : force-save-flash-mini-dict ( -- )
-    flash-end erase-qspi-sector
+    [ rp2040? ] [if]
+      flash-end erase-qspi-sector
+    [then]
     [ rp2350? ] [if]
-      flash-end flash-mini-dict-size + flash-end 65536 + ?do
+      flash-end flash-mini-dict-size + flash-end ?do
         i erase-qspi-4k-sector
       4096 +loop
     [then]
