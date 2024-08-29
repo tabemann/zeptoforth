@@ -18,11 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is a stub RTC that only reports the date/time as Thu, 1 Jan 1970 00:00:00
-
 compile-to-flash
 
 begin-module rtc
+
+  multicore import
+  interrupt import
   
   \ Invalid date/time exception
   : x-invalid-date-time ( -- ) ." invalid date/time" cr ;
@@ -55,32 +56,14 @@ begin-module rtc
     \ The second; valid values are from 0 to 59
     cfield: date-time-second
 
-    \ Align the size of the date/time
-    cell align
+    \ The millisecond: valid values are from 0 to 999
+    hfield: date-time-msec
     
   end-structure
 
-  \ Check whether two date-times are equal (ignoring the day of the week)
-  : date-time-equal? { date-time0 date-time1 -- equal? }
-    date-time0 date-time-year @ date-time1 date-time-year @ =
-    date-time0 date-time-month c@ date-time1 date-time-month c@ = and
-    date-time0 date-time-day c@ date-time1 date-time-day c@ = and
-    date-time0 date-time-hour c@ date-time1 date-time-hour c@ = and
-    date-time0 date-time-minute c@ date-time1 date-time-minute c@ = and
-    date-time0 date-time-second c@ date-time1 date-time-second c@ = and
-  ;
+  \ Get date and time
+  defer date-time@ ( date-time -- )
   
-  \ Get the current date and time
-  : date-time@ { date-time -- }
-    0 date-time date-time-second c!
-    0 date-time date-time-minute c!
-    0 date-time date-time-hour c!
-    4 date-time date-time-dotw c!
-    1 date-time date-time-day c!
-    1 date-time date-time-month c!
-    1970 date-time date-time-year !
-  ;
-
   begin-module rtc-internal
   
     \ Test for a value in a range
@@ -98,23 +81,66 @@ begin-module rtc
       then
     ;
 
-    \ Number of days in a mont
+    \ Number of days in a month
     create days-in-month 0 c, 31 c, 28 c, 31 c, 30 c, 31 c, 30 c, 31 c,
     31 c, 30 c, 31 c, 30 c, 31 c,
 
     \ Get the number of seconds in a year
-    : year-secs ( year -- secs )
+    : year-secs ( year -- )
       [ 365 24 * 60 * 60 * ] literal swap leap-year? if
         [ 24 60 * 60 * ] literal +
       then
     ;
-
+    
     \ Get the number of seconds in a month
     : month-secs ( year month -- secs )
       dup days-in-month + c@ -rot
       2 = swap leap-year? and if 1+ then [ 24 60 * 60 * ] literal *
     ;
     
+    \ Validate a date/time
+    : validate-date-time ( date-time -- )
+      date-time-size [: { new-date-time old-date-time }
+        old-date-time date-time@
+        new-date-time date-time-year @ -1 <> if
+          new-date-time date-time-year @ 0 4095 test-range
+          new-date-time date-time-year @
+        else
+          old-date-time date-time-year @
+        then { test-year }
+        new-date-time date-time-month c@ $FF <> if
+          new-date-time date-time-month c@ 1 31 test-range
+          new-date-time date-time-month c@
+        else
+          old-date-time date-time-month c@
+        then { test-month }
+        new-date-time date-time-day c@ $FF <> if
+          test-month 2 <> if
+            new-date-time date-time-day c@ 1 days-in-month test-month + c@
+            test-range
+          else
+            new-date-time date-time-day c@ 1
+            test-year leap-year? if 29 else 28 then test-range
+          then
+        then
+        new-date-time date-time-dotw c@ $FF <> if
+          new-date-time date-time-dotw c@ 0 6 test-range
+        then
+        new-date-time date-time-hour c@ $FF <> if
+          new-date-time date-time-hour c@ 0 23 test-range
+        then
+        new-date-time date-time-minute c@ $FF <> if
+          new-date-time date-time-minute c@ 0 59 test-range
+        then
+        new-date-time date-time-second c@ $FF <> if
+          new-date-time date-time-second c@ 0 59 test-range
+        then
+        new-date-time date-time-msec h@ $FFFF <> if
+          new-date-time date-time-msec h@ 0 999 test-range
+        then
+      ;] with-aligned-allot
+    ;
+
     \ Validate a date/time match
     : validate-date-time-not-current { date-time -- }
       date-time date-time-year @ -1 <> if
@@ -154,10 +180,24 @@ begin-module rtc
       date-time date-time-second c@ $FF <> if
         date-time date-time-second c@ 0 59 test-range
       then
+      date-time date-time-msec h@ $FFFF <> if
+        date-time date-time-msec h@ 0 999 test-range
+      then
     ;
 
   end-module> import
 
+  \ Check whether two date-times are equal (ignoring the day of the week)
+  : date-time-equal? { date-time0 date-time1 -- equal? }
+    date-time0 date-time-year @ date-time1 date-time-year @ =
+    date-time0 date-time-month c@ date-time1 date-time-month c@ = and
+    date-time0 date-time-day c@ date-time1 date-time-day c@ = and
+    date-time0 date-time-hour c@ date-time1 date-time-hour c@ = and
+    date-time0 date-time-minute c@ date-time1 date-time-minute c@ = and
+    date-time0 date-time-second c@ date-time1 date-time-second c@ = and
+    date-time0 date-time-msec h@ date-time1 date-time-msec h@ = and
+  ;
+  
   \ Get the name of a day of the week
   : dotw-name ( dotw -- c-addr u )
     case
@@ -237,7 +277,7 @@ begin-module rtc
     create dotw-t 0 c, 3 c, 2 c, 5 c, 0 c, 3 c, 5 c, 1 c, 4 c, 6 c, 2 c, 4 c,
 
   end-module
-    
+
   \ Calculate the day of the week for a date/time
   : get-dotw { date-time -- dotw }
     date-time validate-date-time-not-current
@@ -262,7 +302,7 @@ begin-module rtc
     date-time validate-date-time-not-current
     date-time get-dotw date-time date-time-dotw c!
   ;
-    
+  
   \ Set a day-time from seconds since 1970-01-01 00:00:00 UTC
   : convert-secs-since-1970 { second date-time -- }
     1970 { year }
@@ -284,7 +324,135 @@ begin-module rtc
     hour date-time date-time-hour c!
     minute date-time date-time-minute c!
     second date-time date-time-second c!
+    0 date-time date-time-msec h!
     date-time update-dotw
+  ;
+  
+  \ Set a day-time from milliseconds since 1970-01-01 00:00:00 UTC
+  : convert-msecs-since-1970 { D: msec date-time -- }
+    msec 1000. ud/mod d>s { second } d>s { msec }
+    second date-time convert-secs-since-1970
+    msec date-time date-time-msec h!
+  ;
+
+  \ Get the current date and time
+  :noname ( date-time -- )
+    [: { date-time }
+      aon-timer::time@ date-time convert-msecs-since-1970
+    ;] rtc-spinlock critical-with-spinlock
+  ; is date-time@
+
+  \ Convert a date and time to milliseconds since 1970-01-01 00:00:00 UTC
+  : convert-to-msecs-since-1970 { date-time -- D: msec }
+    date-time validate-date-time-not-current
+    date-time date-time-msec h@ s>d { D: msec }
+    date-time date-time-second c@ s>d 1000. d* +to msec
+    date-time date-time-minute c@ s>d 60000. d* +to msec
+    date-time date-time-hour c@ s>d 3600000. d* +to msec
+    date-time date-time-day c@ 1- s>d 86400000. d* +to msec
+    date-time date-time-month c@ { month }
+    date-time date-time-year @ { year }
+    begin year 1970 = month 1 = and not while
+      month 1 = if
+        12 to month
+        -1 +to year
+        year month month-secs s>d 1000. d* +to msec
+      else
+        year month 1- month-secs s>d 1000. d* +to msec
+        -1 +to month
+      then
+    repeat
+    msec
+  ;
+  
+  continue-module rtc-internal
+
+    \ Raw set the RTC (really the AON timer)
+    : raw-date-time! { date-time -- }
+      date-time convert-to-msecs-since-1970 aon-timer::time!
+    ;
+
+  end-module
+
+  \ Set the date/time; with this -1 year and $FF other value settings do not
+  \ change the date/time fields in question
+  : date-time! ( date-time -- )
+    dup validate-date-time
+    date-time-size [: { date-time set-date-time }
+      set-date-time date-time@
+      date-time date-time-year @ -1 <> if
+        date-time date-time-year @ set-date-time date-time-year !
+      then
+      date-time date-time-month c@ $FF <> if
+        date-time date-time-month c@ set-date-time date-time-month c!
+      then
+      date-time date-time-day c@ $FF <> if
+        date-time date-time-day c@ set-date-time date-time-day c!
+      then
+      date-time date-time-dotw c@ $FF <> if
+        date-time date-time-dotw c@ set-date-time date-time-dotw c!
+      then
+      date-time date-time-hour c@ $FF <> if
+        date-time date-time-hour c@ set-date-time date-time-hour c!
+      then
+      date-time date-time-minute c@ $FF <> if
+        date-time date-time-minute c@ set-date-time date-time-minute c!
+      then
+      date-time date-time-second c@ $FF <> if
+        date-time date-time-second c@ set-date-time date-time-second c!
+      then
+      date-time date-time-msec h@ $FFFF <> if
+        date-time date-time-msec h@ set-date-time date-time-msec h!
+      then
+      set-date-time raw-date-time!
+    ;] with-allot
+  ;
+
+  \ Convenience word for setting the date/time from the stack rather than a
+  \ date-time structure; with this -1 fields (and for fields other than the
+  \ year, $FF) do not change the date/time fields in question. Also note that
+  \ the day of the week is automatically calculated.
+  : simple-date-time! ( year month day hour minute second -- )
+    date-time-size [: { year month day hour minute second date-time }
+      year -1 <> if
+        year 0 4095 test-range
+      then
+      month -1 <> month $FF <> and if
+        month 1 12 test-range
+      else
+        $FF to month
+      then
+      day -1 <> day $FF <> and if
+        day 1 31 test-range
+      else
+        $FF to day
+      then
+      hour -1 <> hour $FF <> and if
+        hour 0 23 test-range
+      else
+        $FF to hour
+      then
+      minute -1 <> minute $FF <> and if
+        minute 0 59 test-range
+      else
+        $FF to minute
+      then
+      second -1 <> second $FF <> and if
+        second 0 59 test-range
+      else
+        $FF to second
+      then
+      year date-time date-time-year !
+      month date-time date-time-month c!
+      day date-time date-time-day c!
+      $FF date-time date-time-dotw c!
+      hour date-time date-time-hour c!
+      minute date-time date-time-minute c!
+      second date-time date-time-second c!
+      0 date-time date-time-msec h!
+      date-time update-dotw
+      date-time date-time!
+    ;] with-aligned-allot
   ;
 
 end-module

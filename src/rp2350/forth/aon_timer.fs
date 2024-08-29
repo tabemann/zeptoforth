@@ -152,7 +152,7 @@ begin-module aon-timer
     $5AFE0000 constant PASSWD
 
     \ Set with password
-    : passwd! ( x addr -- ) swap PASSWD or swap ! ;
+    : passwd! ( x addr -- ) swap $FFFF and PASSWD or swap ! ;
     
     \ Set bits with password
     : passwd-bis! ( bits addr -- )
@@ -175,10 +175,10 @@ begin-module aon-timer
       $2EE0 POWMAN_XOSC_FREQ_KHZ_INT passwd! \ 12000
       $0 POWMAN_XOSC_FREQ_KHZ_FRAC passwd! \ 0
       POWMAN_TIMER_USE_XOSC POWMAN_TIMER passwd-bis!
-      0 POWMAN_SET_TIME_63TO48 passwd!
-      0 POWMAN_SET_TIME_47TO32 passwd!
-      0 POWMAN_SET_TIME_31TO16 passwd!
-      0 POWMAN_SET_TIME_15TO0 passwd!
+      \ 0 POWMAN_SET_TIME_63TO48 passwd!
+      \ 0 POWMAN_SET_TIME_47TO32 passwd!
+      \ 0 POWMAN_SET_TIME_31TO16 passwd!
+      \ 0 POWMAN_SET_TIME_15TO0 passwd!
       POWMAN_TIMER_RUN POWMAN_TIMER passwd-bis!
     ;
 

@@ -2331,6 +2331,7 @@ begin-module fat32
       time-field 5 rshift $3F and date-time date-time-minute c!
       time-field $1F and 2 *
       entry create-time-fine c@ 100 / + date-time date-time-second c!
+      0 date-time date-time-msec h!
       date-time update-dotw
     ; define create-date-time@
 
@@ -2357,6 +2358,7 @@ begin-module fat32
       time-field 11 rshift date-time date-time-hour c!
       time-field 5 rshift $3F and date-time date-time-minute c!
       time-field $1F and 2 * date-time date-time-second c!
+      0 date-time date-time-msec h!
       date-time update-dotw
     ; define modify-date-time@
     
