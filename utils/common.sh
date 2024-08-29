@@ -150,7 +150,7 @@ screen_download_ihex_minidict() (
   screen_download ${PORT} src/common/forth/ihex_minidict.fs ${TARGET}
 )
 
-flash_rp2040() {
+flash_rp() {
     IMAGE=$1
     BLOCK_DEVICE=$2
     FILESYSTEM=$3

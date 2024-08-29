@@ -44,14 +44,14 @@ fi
 
 RP2350_KERNEL="bin/${VERSION}/rp2350/zeptoforth_kernel-${VERSION}.uf2"
 
-flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} mini
 issue_bootsel ${PORT}
 
-flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} full
 issue_bootsel ${PORT}
 
-flash_rp2350 ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2350 ${PORT} full_usb
 issue_bootsel ${PORT}
