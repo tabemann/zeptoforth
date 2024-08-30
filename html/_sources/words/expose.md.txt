@@ -157,7 +157,42 @@ Get the PENDSV-HANDLER-HOOK variable address
 
 Get the SYSTICK-HANDLER-HOOK variable address
 
-## RP2040 Word
+##### `cortex-m7?`
+( -- flag )
+
+Get whether zeptoforth is built for ARM Cortex-M7.
+
+##### `cortex-m33?`
+( -- flag )
+
+Get whether zeptoforth is built for ARM Cortex-M33.
+
+##### `chip`
+( -- chip1 chip0 )
+
+Get ID codes indicating the CPU make and model.
+
+* *chip0* of `$7270` indicates Raspberry Pi Ltd.
+* *chip0* of `$73746D` indicates STMicroelectronics.
+
+* *chip1* of `2040` indicates RP2040.
+* *chip1* of `2350` indicates RP2350.
+* *chip1* of `$66000197` indicates STM32F407.
+* *chip1* of `$6600019B` indicates STM32F411.
+* *chip1* of `$660002EA` indicates STM32F746.
+* *chip1* of `$6C0001DC` indicates STM32L476.
+
+##### `rp2040?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2040. (Only available for `rp2040` and `rp2350`.)
+
+##### `rp2350?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2350. (Only available for `rp2040` and `rp2350`.)
+
+## RP2040 and RP2350 Words
 
 ### `forth`
 

@@ -37,13 +37,14 @@
             
   <section id="hardware-timers">
 <h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this heading">¶</a></h1>
-<p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
+<p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) and the RP2350 (i.e. the Raspberry Pi Pico 2) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
 <p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>
-<p>The hardware timer on the RP2040 has one shared 64-bit microsecond counter and four “alarms” which are triggered by a set value to be compared with the lower 32 bits of the microsecond counter. Alarm handlers execute at interrupt time, so they must be interrupt-safe. Alarms must be enabled for each time they are used and are disabled when they are triggered. However, the interrupt state must be disabled before leaving the alarm interrupt handler or else they will be triggered repeatedly in an infinite loop. Also note that alarm handlers always execute on core 0 even when core 1 has been booted.</p>
+<p>The hardware timer on the RP2040 has one shared 64-bit microsecond counter and four “alarms” which are triggered by a set value to be compared with the lower 32 bits of the microsecond counter. The RP2350 is like the RP2040 in this regard except that it has a second identical hardare timer. Alarm handlers execute at interrupt time, so they must be interrupt-safe. Alarms must be enabled for each time they are used and are disabled when they are triggered. However, the interrupt state must be disabled before leaving the alarm interrupt handler or else they will be triggered repeatedly in an infinite loop. Also note that alarm handlers always execute on core 0 even when core 1 has been booted.</p>
 <p>There are also busy-loop microsecond delays which wait until a given 64-bit microsecond time. Because the 64-bit microsecond counter can be reasonably treated as not wrapping, only a fixed 64-bit microsecond time is provided. On top of this, busy-loop microsecond delays which wait a given 64-bit microsecond interval are also available. This may be easier to use, but when waiting at repeated intervals maintaining a separate counter, incrementing it for each interval, and waiting until that time is likely to provide better behavior than waiting for intervals relative to the start of the wait.</p>
+<p>The RP2350 also supports setting hardware timers to use the system clock for timing rather than the microsecond tick clock.</p>
 <section id="timer">
 <h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Permalink to this heading">¶</a></h2>
-<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform:</p>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> platform:</p>
 <section id="us-counter-lsb">
 <h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Permalink to this heading">¶</a></h3>
 <p>( – us )</p>
@@ -97,7 +98,37 @@
 <section id="x-out-of-range-alarm">
 <h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this heading">¶</a></h3>
 <p>Out of range alarm index exception.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> platform also has the following words for controlling hardware clocks:</p>
 </section>
+<section id="lock-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">lock-timer</span></code><a class="headerlink" href="#lock-timer" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Lock a timer so it cannot be written to without a reset.</p>
+</section>
+<section id="timer-locked">
+<h3><code class="docutils literal notranslate"><span class="pre">timer-locked?</span></code><a class="headerlink" href="#timer-locked" title="Permalink to this heading">¶</a></h3>
+<p>( – locked? )</p>
+<p>Get whether a timer is locked.</p>
+</section>
+<section id="sysclk-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">sysclk-timer</span></code><a class="headerlink" href="#sysclk-timer" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Set a timer to use the system clock as a source.</p>
+</section>
+<section id="tick-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">tick-timer</span></code><a class="headerlink" href="#tick-timer" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Set a timer to sue the microsecond tick clock as a source.</p>
+</section>
+<section id="timer-sysclk">
+<h3><code class="docutils literal notranslate"><span class="pre">timer-sysclk?</span></code><a class="headerlink" href="#timer-sysclk" title="Permalink to this heading">¶</a></h3>
+<p>( – sysclk? )</p>
+<p>Get whether a timer is set to use the system clock as a source.</p>
+</section>
+</section>
+<section id="timer1">
+<h2><code class="docutils literal notranslate"><span class="pre">timer1</span></code><a class="headerlink" href="#timer1" title="Permalink to this heading">¶</a></h2>
+<p>This module on the <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only is identical to the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module except that it controls a second hardware timer. It contains the same words as the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module.</p>
 </section>
 </section>
 
@@ -192,6 +223,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>

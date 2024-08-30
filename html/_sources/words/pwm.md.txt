@@ -1,6 +1,6 @@
 # Pulse Width Modulation Words
 
-The RP2040 (which is in the Raspberry Pi Pico) has support for Pulse Width Modulation (PWM for short), which includes a counter capability. There are eight PWM "slices", each of which have pair of GPIO pins as outputs, pins A and B, and pin B can also be used as an input. Also, each of the PWM slices, aside from PWM slice 7, maps to four separate GPIO pins, two of which are A pins and two of which are B pins (PWM slice 7 only maps to one A pin and one B pin).
+The RP2040 (e.g. the Raspberry Pi Pico) and the RP2350 (e.g. the Raspberry Pi Pico 2) have support for Pulse Width Modulation (PWM for short), which includes a counter capability. There are eight PWM "slices" on the RP2040 and twelve PWM "slices" on the RP2350, each of which have pair of GPIO pins as outputs, pins A and B, and pin B can also be used as an input. Also, each of the PWM slices, aside from PWM slice 7, maps to four separate GPIO pins, two of which are A pins and two of which are B pins (PWM slice 7 only maps to one A pin and one B pin on the RP2040).
 
 Each PWM slice is associated with a counter value and a top value at which the counter wraps back to zero. Also, the A and B outputs each have a compare value at which their output transitions from high to low. Note that PWM slices have a "phase correct" mode which modifies this functionality so that the phase of a PWM output does not change with changes to its compare value.
 
@@ -49,43 +49,103 @@ Set a pin as a PWM pin.
 ##### `pwm-vector!`
 ( xt -- )
 
-Set PWM IRQ handler.
+Set PWM IRQ handler. On the `rp2350` this is for `PWM_IRQ_WRAP_0`.
+
+##### `pwm-wrap-0-vector!`
+( xt -- )
+
+Set PWM IRQ handler for `PWM_IRQ_WRAP_0` (`rp2350` only).
+
+##### `pwm-wrap-1-vector!`
+( xt -- )
+
+Set PWM IRQ handler for `PWM_IRQ_WRAP_1` (`rp2350` only).
 
 ##### `enable-pwm`
 ( bits -- )
 
-Enable any set of slices, expressed as bits from 0 to 7.
+Enable any set of slices, expressed as bits from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`.
 
 ##### `disable-pwm`
 ( bits -- )
 
-Disable any set of slices, expressed as bits from 0 to 7.
+Disable any set of slices, expressed as bits from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`.
 
 ##### `enable-pwm-int`
 ( bits -- )
 
-Enable interrupts for any set of slices, expressed as bits from 0 to 7.
+Enable interrupts for any set of slices, expressed as bits from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`. On `rp2350` is this for `PWM_IRQ_WRAP_0` only.
 
 ##### `disable-pwm-int`
 ( bits -- )
 
-Disable interrupts for any set of slices, expressed as bits from 0 to 7.
+Disable interrupts for any set of slices, expressed as bits from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`. On `rp2350` is this for `PWM_IRQ_WRAP_0` only.
 
 ##### `clear-pwm-int`
 ( bits -- )
 
-Clear an interrupt for any set of slices, expressed as bits from 0 to 7.
+Clear an interrupt for any set of slices, expressed as bits from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`. On `rp2350` is this for `PWM_IRQ_WRAP_0` only.
 
 ##### `pwm-int@`
 ( -- bits )
 
-Get the interrupt state for all slices, expressed as one bit per slice from 0 to 7.
+Get the interrupt state for all slices, expressed as one bit per slice from 0 to 7 on the `rp2040`, and 0 to 11 on `rp2350`. On `rp2350` is this for `PWM_IRQ_WRAP_0` only.
 
 ##### `clear-pwm-pending`
 ( -- )
 
 Clear pending PWM interrupt.
-  
+
+##### `enable-pwm-wrap-0-int`
+( bits -- )
+
+Enable interrupts for `PWM_IRQ_WRAP_0` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `disable-pwm-wrap-0-int`
+( bits -- )
+
+Disable interrupts for `PWM_IRQ_WRAP_0` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `clear-pwm-wrap-0-int`
+( bits -- )
+
+Clear an interrupt for `PWM_IRQ_WRAP_0` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `pwm-wrap-0-int@`
+( -- bits )
+
+Get the interrupt state for `PWM_IRQ_WRAP_0` for all slices, expressed as one bit per slice from 0 to 11 (`rp2350` only).
+
+##### `clear-pwm-wrap-0-pending`
+( -- )
+
+Clear pending PWM interrupt for `PWM_IRQ_WRAP_0` (`rp2350` only).
+
+##### `enable-pwm-wrap-1-int`
+( bits -- )
+
+Enable interrupts for `PWM_IRQ_WRAP_1` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `disable-pwm-wrap-1-int`
+( bits -- )
+
+Disable interrupts for `PWM_IRQ_WRAP_1` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `clear-pwm-wrap-1-int`
+( bits -- )
+
+Clear an interrupt for `PWM_IRQ_WRAP_1` for any set of slices, expressed as bits from 0 to 11 (`rp2350` only).
+
+##### `pwm-wrap-1-int@`
+( -- bits )
+
+Get the interrupt state for `PWM_IRQ_WRAP_1` for all slices, expressed as one bit per slice from 0 to 11 (`rp2350` only).
+
+##### `clear-pwm-wrap-1-pending`
+( -- )
+
+Clear pending PWM interrupt for `PWM_IRQ_WRAP_1` (`rp2350` only).
+
 ##### `advance-pwm-phase`
 ( index -- )
 

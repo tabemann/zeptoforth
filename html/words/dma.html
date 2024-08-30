@@ -125,12 +125,37 @@
 <section id="dreq-xip-ssitx">
 <h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSITX</span></code><a class="headerlink" href="#dreq-xip-ssitx" title="Permalink to this heading">¶</a></h3>
 <p>( – dreq )</p>
-<p>XIP SSITX DREQ.</p>
+<p>XIP SSITX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only).</p>
 </section>
 <section id="dreq-xip-ssirx">
 <h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSIRX</span></code><a class="headerlink" href="#dreq-xip-ssirx" title="Permalink to this heading">¶</a></h3>
 <p>( – dreq )</p>
-<p>XIP SSIRX DREQ.</p>
+<p>XIP SSIRX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only).</p>
+</section>
+<section id="dreq-xip-qmitx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMITX</span></code><a class="headerlink" href="#dreq-xip-qmitx" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>XIP QMITX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="dreq-xip-qmirx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMIRX</span></code><a class="headerlink" href="#dreq-xip-qmirx" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>XIP QMIRX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="dreq-hstx">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_HSTX</span></code><a class="headerlink" href="#dreq-hstx" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>HSTX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="dreq-coresight">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_CORESIGHT</span></code><a class="headerlink" href="#dreq-coresight" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>Coresight DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="dreq-sha256">
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SHA256</span></code><a class="headerlink" href="#dreq-sha256" title="Permalink to this heading">¶</a></h3>
+<p>( – dreq )</p>
+<p>SHA256 DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="treq-timer">
 <h3><code class="docutils literal notranslate"><span class="pre">TREQ_TIMER</span></code><a class="headerlink" href="#treq-timer" title="Permalink to this heading">¶</a></h3>
@@ -141,6 +166,91 @@
 <h3><code class="docutils literal notranslate"><span class="pre">TREQ_UNPACED</span></code><a class="headerlink" href="#treq-unpaced" title="Permalink to this heading">¶</a></h3>
 <p>( – treq )</p>
 <p>Unpaced transfer TREQ.</p>
+</section>
+<section id="trans-count-mode-normal">
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_NORMAL</span></code><a class="headerlink" href="#trans-count-mode-normal" title="Permalink to this heading">¶</a></h3>
+<p>( count – count’ )</p>
+<p>Set a transfer count to be normal (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="trans-count-mode-trigger-self">
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_TRIGGER_SELF</span></code><a class="headerlink" href="#trans-count-mode-trigger-self" title="Permalink to this heading">¶</a></h3>
+<p>( count – count’ )</p>
+<p>Set a transfer count to be trigger-self (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="trans-count-mode-endless">
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_ENDLESS</span></code><a class="headerlink" href="#trans-count-mode-endless" title="Permalink to this heading">¶</a></h3>
+<p>( count – count’ )</p>
+<p>Set a transfer count to be endless (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="register-read">
+<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_READ</span></code><a class="headerlink" href="#register-read" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Register source mode</p>
+</section>
+<section id="register-write">
+<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_WRITE</span></code><a class="headerlink" href="#register-write" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Register destination mode</p>
+</section>
+<section id="incr-buffer-read">
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_READ</span></code><a class="headerlink" href="#incr-buffer-read" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Incrementing buffer source mode</p>
+</section>
+<section id="incr-buffer-write">
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-buffer-write" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Incrementing buffer destination mode</p>
+</section>
+<section id="decr-buffer-read">
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_READ</span></code><a class="headerlink" href="#decr-buffer-read" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Decrementing buffer source mode (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
+</section>
+<section id="decr-buffer-write">
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-buffer-write" title="Permalink to this heading">¶</a></h3>
+<p>( – mode )</p>
+<p>Decrementing buffer destination mode (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
+</section>
+<section id="incr-ring-buffer-read">
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_READ</span></code><a class="headerlink" href="#incr-ring-buffer-read" title="Permalink to this heading">¶</a></h3>
+<p>( low-ring-bits – mode )</p>
+<p>Incrementing ring buffer source mode for a given number of low bits in an address</p>
+</section>
+<section id="incr-ring-buffer-write">
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-ring-buffer-write" title="Permalink to this heading">¶</a></h3>
+<p>( low-ring-bits – mode )</p>
+<p>Incrementing ring buffer destination mode for a given number of low bits in an addres</p>
+</section>
+<section id="decr-ring-buffer-read">
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_READ</span></code><a class="headerlink" href="#decr-ring-buffer-read" title="Permalink to this heading">¶</a></h3>
+<p>( low-ring-bits – mode )</p>
+<p>Decrementing ring buffer source mode for a given number of low bits in an address (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
+</section>
+<section id="decr-ring-buffer-write">
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-ring-buffer-write" title="Permalink to this heading">¶</a></h3>
+<p>( low-ring-bits – mode )</p>
+<p>Decrementing ring buffer destination mode for a given number of low bits in an addres (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
+</section>
+<section id="start-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">start-dma</span></code><a class="headerlink" href="#start-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest src-mode dest-mode count size treq channel – )</p>
+<p>Start transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="prepare-dma">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma</span></code><a class="headerlink" href="#prepare-dma" title="Permalink to this heading">¶</a></h3>
+<p>( src dest src-mode dest-mode count size treq channel – )</p>
+<p>Prepare transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
+</section>
+<section id="start-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">start-dma-with-chain</span></code><a class="headerlink" href="#start-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest src-mode dest-mode count size treq channel – )</p>
+<p>Start transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em> chained to DMA channel <em>chain-to</em>.</p>
+</section>
+<section id="prepare-dma-with-chain">
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma-with-chain</span></code><a class="headerlink" href="#prepare-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<p>( chain-to src dest src-mode dest-mode count size treq channel – )</p>
+<p>Prepare transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em> chained to DMA channel <em>chain-to</em>.</p>
 </section>
 <section id="start-register-register-dma">
 <h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma</span></code><a class="headerlink" href="#start-register-register-dma" title="Permalink to this heading">¶</a></h3>
@@ -400,6 +510,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
