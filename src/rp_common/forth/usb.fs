@@ -1238,4 +1238,7 @@ end-module> import
   usb-console
 ;
 
+\ Trap reboot to flush the USB CDC console
+: reboot ( -- ) flush-console 250 ms reboot ;
+
 compile-to-ram
