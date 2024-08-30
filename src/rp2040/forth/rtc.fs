@@ -713,7 +713,7 @@ begin-module rtc
       hour date-time date-time-hour c!
       minute date-time date-time-minute c!
       second date-time date-time-second c!
-      0 date-time date-time-msec!
+      0 date-time date-time-msec h!
       date-time update-dotw
       date-time date-time!
     ;] with-aligned-allot
