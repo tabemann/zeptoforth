@@ -167,19 +167,21 @@ begin-module aon-timer
     \ Initialize the AON timer
     : init-aon-timer ( -- )
       POWMAN_TIMER_NONSEC_WRITE POWMAN_TIMER passwd-bis!
-      POWMAN_TIMER_RUN POWMAN_TIMER passwd-bic!
-      POWMAN_TIMER_ALARM POWMAN_TIMER passwd-bis!
-      POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER passwd-bic!
-      $20 POWMAN_LPOSC_FREQ_KHZ_INT passwd! \ 32
-      $C49C POWMAN_LPOSC_FREQ_KHZ_FRAC passwd! \ 0.768
-      $2EE0 POWMAN_XOSC_FREQ_KHZ_INT passwd! \ 12000
-      $0 POWMAN_XOSC_FREQ_KHZ_FRAC passwd! \ 0
-      POWMAN_TIMER_USE_XOSC POWMAN_TIMER passwd-bis!
-      \ 0 POWMAN_SET_TIME_63TO48 passwd!
-      \ 0 POWMAN_SET_TIME_47TO32 passwd!
-      \ 0 POWMAN_SET_TIME_31TO16 passwd!
-      \ 0 POWMAN_SET_TIME_15TO0 passwd!
-      POWMAN_TIMER_RUN POWMAN_TIMER passwd-bis!
+      POWMAN_TIMER_RUN POWMAN_TIMER bit@ not if
+\      POWMAN_TIMER_RUN POWMAN_TIMER passwd-bic!
+        POWMAN_TIMER_ALARM POWMAN_TIMER passwd-bis!
+        POWMAN_TIMER_ALARM_ENAB POWMAN_TIMER passwd-bic!
+        $20 POWMAN_LPOSC_FREQ_KHZ_INT passwd! \ 32
+        $C49C POWMAN_LPOSC_FREQ_KHZ_FRAC passwd! \ 0.768
+        $2EE0 POWMAN_XOSC_FREQ_KHZ_INT passwd! \ 12000
+        $0 POWMAN_XOSC_FREQ_KHZ_FRAC passwd! \ 0
+        POWMAN_TIMER_USE_XOSC POWMAN_TIMER passwd-bis!
+        \ 0 POWMAN_SET_TIME_63TO48 passwd!
+        \ 0 POWMAN_SET_TIME_47TO32 passwd!
+        \ 0 POWMAN_SET_TIME_31TO16 passwd!
+        \ 0 POWMAN_SET_TIME_15TO0 passwd!
+        POWMAN_TIMER_RUN POWMAN_TIMER passwd-bis!
+      then
     ;
 
     initializer init-aon-timer
