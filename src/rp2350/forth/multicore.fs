@@ -535,7 +535,6 @@ begin-module multicore
       $B007B007 0 fifo-push-blocking
       begin again
     then
-    flush-console
   ;    
 
   \ Reset an auxiliary core
@@ -568,9 +567,8 @@ end-module> import
   [:
     $B007B007 = if [: prepare-reboot reboot ;] critical then
   ;] sio-hook !
+  ['] prepare-reboot reboot-hook !
 ;
 
-\ Set up reboot to reset the second core
-: reboot ( -- ) [: prepare-reboot reboot ;] critical ;
 \ Reboot
 reboot

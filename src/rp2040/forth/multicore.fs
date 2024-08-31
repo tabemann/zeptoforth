@@ -553,9 +553,6 @@ end-module> import
   [:
     $B007B007 = if [: prepare-reboot reboot ;] critical then
   ;] sio-hook !
-;
 
-\ Set up reboot to reset the second core
-: reboot ( -- ) [: prepare-reboot reboot ;] critical ;
-\ Reboot
-reboot
+  ['] prepare-reboot reboot-hook !
+;

@@ -30,6 +30,9 @@ begin-module int-io
 
   begin-module int-io-internal
 
+    \ Saved reboot hook
+    variable saved-reboot-hook
+    
     \ RAM variable for rx buffer read-index
     variable rx-read-index
 
@@ -315,6 +318,11 @@ begin-module int-io
     0 tx-read-index !
     0 tx-write-index !
     enable-int-io
+    reboot-hook @ saved-reboot-hook !
+    [:
+      in-interrupt? not if flush-console 10 ms then
+      saved-reboot-hook @ execute
+    ;] reboot-hook !
   ;
   
 end-module> import

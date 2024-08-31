@@ -217,7 +217,10 @@
 
         @@ The error hook
         allot error_hook, 4
-	
+
+        @@ The reboot hook
+        allot reboot_hook, 4
+        
 	@@ The wordlist order
 	allot order, 2 * max_order_size
 	

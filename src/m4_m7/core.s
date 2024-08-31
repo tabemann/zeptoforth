@@ -2116,12 +2116,19 @@ _context_switch:
 	@@ dictionary
 	define_word "reboot", visible_flag
 _reboot:
+        push {lr}
+
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+        
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
 	dsb
 	isb
-	bx lr
+        pop {pc}
 	end_inlined
 
 	@@ Null exception handler
@@ -2204,6 +2211,8 @@ _init_variables:
 	ldr r0, =pause_hook
 	ldr r1, =_do_nothing
 	str r1, [r0]
+        ldr r0, =reboot_hook
+        str r1, [r0]
 	ldr r0, =validate_dict_hook
 	str r1, [r0]
         ldr r0, =word_begin_hook

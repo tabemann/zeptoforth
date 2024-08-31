@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -138,6 +138,11 @@ _pre_reboot:
 _reboot:
         push {r4, lr}
 
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+
         ldr r0, =WATCHDOG_BASE
         ldr r1, =ALIAS_SET
         orrs r0, r1
@@ -156,6 +161,12 @@ _reboot:
 	define_word "bootsel", visible_flag
 _bootsel:
         push {r4, lr}
+
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+
         movs r2, #0
 	movs r1, #RT_FLAG_FUNC_ARM_SEC
 	ldr r0, ='R | ('B << 8)

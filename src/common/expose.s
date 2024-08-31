@@ -487,6 +487,14 @@ _finalize_hook:
 	bx lr
 	end_inlined
 
+        @@ The reboot hook
+        define_word "reboot-hook", visible_flag
+_reboot_hook:
+        push_tos
+        ldr tos, =reboot_hook
+        bx lr
+        end_inlined
+        
 	@@ The vector table address
 	define_word "vector-table", visible_flag
 _vector_table:

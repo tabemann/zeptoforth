@@ -2167,6 +2167,8 @@ _init_variables:
 	ldr r0, =pause_hook
 	ldr r1, =_do_nothing
 	str r1, [r0]
+        ldr r0, =reboot_hook
+        str r1, [r0]
 	ldr r0, =validate_dict_hook
 	str r1, [r0]
         ldr r0, =word_begin_hook
