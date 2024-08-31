@@ -527,6 +527,7 @@ begin-module multicore
 
   \ Prepare for rebooting the second core
   : prepare-reboot ( -- )
+    1 in-critical !
     cpu-index 0= if
       hold-core
       spinlock-count 0 ?do -1 i SPINLOCK ! loop

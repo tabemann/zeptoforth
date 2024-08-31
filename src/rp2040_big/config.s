@@ -24,7 +24,7 @@
         .equ cortex_m7, 0
         .equ cortex_m33, 0
 	.equ ram_real_start, 0x20000000
-	.equ ram_start, 0x20008000
+	.equ ram_start, 0x20009000
 	.equ ram_end, 0x20042000
 	.equ rstack_size, 0x0400
 	.equ rstack_top, ram_end

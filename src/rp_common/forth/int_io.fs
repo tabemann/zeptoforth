@@ -320,7 +320,8 @@ begin-module int-io
     enable-int-io
     reboot-hook @ saved-reboot-hook !
     [:
-      in-interrupt? not if flush-console 10 ms then
+      begin tx-empty? UART0_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and until
+\      in-interrupt? not if flush-console 10 ms then
       saved-reboot-hook @ execute
     ;] reboot-hook !
   ;

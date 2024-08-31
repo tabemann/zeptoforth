@@ -2323,7 +2323,7 @@ begin-module task
     1 pause-enabled !
     reboot-hook @ saved-reboot-hook !
     [:
-      in-interrupt? not if force-stop-all-other-tasks then
+\      in-interrupt? not if force-stop-all-other-tasks then
       saved-reboot-hook @ execute
     ;] reboot-hook !
     enable-int
