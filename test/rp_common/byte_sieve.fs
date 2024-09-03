@@ -50,7 +50,7 @@
     timer::us-counter { D: time }
     size flags byte-sieve-inner { count }
     timer::us-counter { D: end-time }
-    cr count . ."  primes"
+    cr count . ." primes"
     cr end-time time d- drop s>f 1_000_000,0 f/ ." Time: " f. ." s"
   ;] with-allot
 ;
