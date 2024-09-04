@@ -54,21 +54,30 @@
 
 \ SPI clock test
 : spi-clock-test ( -- )
+  true { first }
   false { prev-met }
+  0 0 0 { last-clock-in last-clock-125-MHz last-clock-150-MHz }
   75_000_000 2_000_000 ?do
     i 125_000_000 spi-clock { clock-125-MHz }
     i 150_000_000 spi-clock { clock-150-MHz }
     clock-125-MHz clock-150-MHz > if
       prev-met not if
-        cr i . clock-125-MHz . clock-150-MHz .
-      else
-        i 1+ 125_000_000 spi-clock i 1+ 150_000_000 spi-clock <= if
-          cr i . clock-125-MHz . clock-150-MHz .
+        first not if
+          cr ." ----"
+        else
+          false to first
         then
+        cr i . clock-125-MHz . clock-150-MHz .
       then
+      i to last-clock-in
+      clock-125-MHz to last-clock-125-MHz
+      clock-150-MHz to last-clock-150-MHz
       true to prev-met
     else
+      prev-met if
+        cr last-clock-in . last-clock-125-MHz . last-clock-150-MHz .
+      then
       false to prev-met
     then
-  10000 +loop
+  100 +loop
 ;
