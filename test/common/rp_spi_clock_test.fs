@@ -57,7 +57,7 @@
   true { first }
   false { prev-met }
   0 0 0 { last-clock-in last-clock-125-MHz last-clock-150-MHz }
-  75_000_000 2_000_000 ?do
+  62_500_001 2_000_000 ?do
     i 125_000_000 spi-clock { clock-125-MHz }
     i 150_000_000 spi-clock { clock-150-MHz }
     clock-125-MHz clock-150-MHz > if
