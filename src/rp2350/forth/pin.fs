@@ -88,8 +88,8 @@ begin-module pin
     dup validate-pin
     true over PADS_BANK0_ISO!
     true over PADS_BANK0_PUE!
-    false swap PADS_BANK0_PDE!
-    false over PADS_BANK0_ISO!
+    false over PADS_BANK0_PDE!
+    false swap PADS_BANK0_ISO!
   ;
 
   \ Set a pin to pull-down
@@ -97,8 +97,8 @@ begin-module pin
     dup validate-pin
     true over PADS_BANK0_ISO!
     true over PADS_BANK0_PDE!
-    false swap PADS_BANK0_PUE!
-    false over PADS_BANK0_ISO!
+    false over PADS_BANK0_PUE!
+    false swap PADS_BANK0_ISO!
   ;
 
   \ Set a pin to floating
@@ -106,8 +106,8 @@ begin-module pin
     dup validate-pin
     true over PADS_BANK0_ISO!
     false over PADS_BANK0_PUE!
-    false swap PADS_BANK0_PDE!
-    false over PADS_BANK0_ISO!
+    false over PADS_BANK0_PDE!
+    false swap PADS_BANK0_ISO!
   ;
 
   \ Set a pin to have a slow slew rate
