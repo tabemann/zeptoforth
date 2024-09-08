@@ -154,7 +154,6 @@ begin-module timer1
     index bit INTR !
     index timer-irq NVIC_ICPR_CLRPEND!
   ;
-
   
   \ Lock the timer
   : lock-timer ( -- )
