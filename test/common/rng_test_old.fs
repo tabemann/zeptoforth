@@ -18,12 +18,32 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module rng-test
+continue-module forth
 
+  internal import
+  systick import
+  task import
   rng import
 
-  : run-test ( -- )
-    32 0 do cr 8 0 do random h.8 space loop loop
+  \ Our task
+  variable rng-test-task
+  
+  \ Random number generator test
+  : rng-test ( -- )
+    begin
+      0 systick-counter begin
+	systick-counter over - 1000 systick-divisor * u<
+      while
+	swap 1+ swap random drop
+      repeat
+      drop cr .
+    again
+  ;
+
+  \ Initialize the test
+  : rng-test-task ( -- )
+    0 ['] rng-test 420 128 512 spawn rng-test-task !
+    rng-test-task @ run
   ;
 
 end-module

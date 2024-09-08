@@ -34,7 +34,12 @@ begin-module rng
     [then]
 
     \ Random bit
-    ROSC_Base $1C + constant RANDOMBIT
+    rp2040? [if]
+      ROSC_Base $1C + constant RANDOMBIT
+    [then]
+    rp2350? [if]
+      ROSC_Base $20 + constant RANDOMBIT
+    [then]
 
   end-module> import
 
