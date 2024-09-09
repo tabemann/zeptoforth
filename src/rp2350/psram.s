@@ -152,7 +152,7 @@ _get_psram_size:
         push_tos
         movs tos, #0
         cmp r3, #PSRAM_ID
-        bne 1f
+        bne 3f
         ldr tos, =1024 * 1024
         lsls r0, r4, #5
         cmp r4, #0x26
