@@ -268,6 +268,7 @@ _h_16:  push {lr}
 	
 	.include "../rp2350/hardware.s"
 	.include "../rp2350/flashrom.s"
+        .include "../rp2350/psram.s"
 	.include "../rp2350/console.s"
 	.include "../rp2350/expose.s"
         .include "../common/syntax.s"
