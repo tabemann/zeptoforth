@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>PSRAM words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="psram-words">
+<h1>PSRAM words</h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> platform optionally supports Quad SPI pseudo-static RAM (PSRAM for short) tied to a GPIO selected as QMI CS1n. PSRAM when enabled is transparent to the user and may be arbitrarily accessed as a block of RAM. PSRAM starts at <code class="docutils literal notranslate"><span class="pre">psram-base</span></code> and is <code class="docutils literal notranslate"><span class="pre">psram-size</span></code> bytes in size once enabled.</p>
+<p>Note that PSRAM is slower than SRAM, being external to the RP2350 and tied to the RP2350 through a Quad SPI interface, so one should use SRAM for things which are performance-critical, especially since it competes with Quad SPI flash for XIP cache space.</p>
+<p>Only certain GPIO’s may be used for the QMI CS1n pin. These are GPIO’s 0, 8, 19, and 47. Note that many boards with RP2350B chips such as the Pimoroni Pico Plus 2 use GPIO 47 for this purpose.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following words in this module pertain to PSRAM usage:</p>
+<section id="init-psram">
+<h3><code class="docutils literal notranslate"><span class="pre">init-psram</span></code></h3>
+<p>( psram-cs-pin – )</p>
+<p>Initialize PSRAM with QMI CS1n set to GPIO <em>psram-cs-pin</em>, which must be one of 0, 8, 19, or 47 or otherwise <code class="docutils literal notranslate"><span class="pre">x-invalid-qmi-cs1n-pin</span></code> will be raised. If no PSRAM is available tied to the selected GPIO, <code class="docutils literal notranslate"><span class="pre">x-no-psram</span></code> will be raised.</p>
+</section>
+<section id="psram-size">
+<h3><code class="docutils literal notranslate"><span class="pre">psram-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the number of bytes of PSRAM. This is initialized on boot to 0, and is set by <code class="docutils literal notranslate"><span class="pre">init-psram</span></code>.</p>
+</section>
+<section id="psram-base">
+<h3><code class="docutils literal notranslate"><span class="pre">psram-base</span></code></h3>
+<p>( – addr )</p>
+<p>Get the base address of PSRAM.</p>
+</section>
+<section id="x-invalid-qmi-cs1n-pin">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-qmi-cs1n-pin</span></code></h3>
+<p>( – )</p>
+<p>The exception raised if <code class="docutils literal notranslate"><span class="pre">init-psram</span></code> is called with an invalid QMI CS1n GPIO index.</p>
+</section>
+<section id="x-no-psram">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-psram</span></code></h3>
+<p>( – )</p>
+<p>The exception raised if no PSRAM is available on the selected QMI CS1n GPIO.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
