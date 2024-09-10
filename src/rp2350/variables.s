@@ -34,3 +34,6 @@
 	allot sysclk, 4
 
 	allot pico_uuid, 12
+
+        allot psram_size, 4
+        

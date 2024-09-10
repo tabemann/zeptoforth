@@ -101,6 +101,9 @@ _init_platform_variables:
 	ldr r0, =150000000
 	ldr r1, =sysclk
 	str r0, [r1]
+        ldr r0, =0
+        ldr r1, =psram_size
+        str r0, [r1]
 	bx lr
 
 	@ Prepare for rebooting

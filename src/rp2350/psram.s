@@ -54,7 +54,7 @@
 
         .equ PSRAM_ID, 0x5D
 
-        .equ PSRAM_CMD_QUAD_END_FULL, QMI_DIRECT_TX_OE | QMI_DIRECT_TX_IWIDTH_SINGLE | PSRAM_CMD_QUAD_END
+        .equ PSRAM_CMD_QUAD_END_FULL, QMI_DIRECT_TX_OE | QMI_DIRECT_TX_IWIDTH_QUAD | PSRAM_CMD_QUAD_END
 
         .equ PSRAM_M1_TIMING_PART, QMI_M1_TIMING_PAGEBREAK_1024_BYTE | (3 << QMI_M1_TIMING_SELECT_HOLD_LSB) | (1 << QMI_M1_TIMING_COOLDOWN_LSB) | (1 << QMI_M1_TIMING_RXDELAY_LSB)
 
@@ -69,9 +69,9 @@
 
         .equ INIT_QMI_M1_WFMT, (QUAD_WIDTH << QMI_M1_WFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M1_WFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M1_WFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M1_WFMT_DUMMY_WIDTH_LSB) | QMI_M1_WFMT_DUMMY_LEN_0_BITS | (QUAD_WIDTH << QMI_M1_WFMT_DATA_WIDTH_LSB) | QMI_M1_WFMT_PREFIX_LEN_8_BITS
 
-        .equ INIT_QMI_M1_RCMD, (PSRAM_CMD_QUAD_READ << QMI_M1_RCMD_PREFIX_LSB) | (0 < QMI_M1_RCMD_SUFFIX_LSB)
+        .equ INIT_QMI_M1_RCMD, (PSRAM_CMD_QUAD_READ << QMI_M1_RCMD_PREFIX_LSB) | (0 << QMI_M1_RCMD_SUFFIX_LSB)
 
-        .equ INIT_QMI_M1_WCMD, (PSRAM_CMD_QUAD_WRITE << QMI_M1_WCMD_PREFIX_LSB) | (0 < QMI_M1_WCMD_SUFFIX_LSB)
+        .equ INIT_QMI_M1_WCMD, (PSRAM_CMD_QUAD_WRITE << QMI_M1_WCMD_PREFIX_LSB) | (0 << QMI_M1_WCMD_SUFFIX_LSB)
 
         @ Disable direct CSR
         define_internal_word "disable-cs1n-direct-csr", visible_flag
@@ -93,6 +93,7 @@ _get_psram_size:
         bl _force_core_wait
         bl _enable_flash_cmd
         bl _wait_qmi_busy
+        bl _empty_qmi_rx_fifo
 
         ldr r0, =XIP_QMI_BASE
         ldr r1, [r0, #QMI_DIRECT_CSR_OFFSET]
@@ -196,7 +197,7 @@ _set_psram_timing:
         
         ldr r2, =SEC_TO_NS
         udiv r0, r2, r0
-        ldr r2, =0x1000000
+        ldr r2, =1000000
         muls r0, r0, r2 @ r0: femtoseconds per cycle
 
         ldr r2, =PSRAM_MAX_SELECT_FS64
@@ -223,12 +224,23 @@ _set_psram_timing:
         pop {pc}
         end_inlined
 
-        @ Initialize PSRAM ( psram-cs-pin -- psram-size )
-        define_internal_word "init-psram", visible_flag
+        @ Initialize PSRAM ( psram-cs-pin -- )
+        define_word "init-psram", visible_flag
 _init_psram:
         push {lr}
 
-        lsls r0, tos, #3
+        cmp tos, #0
+        beq 1f
+        cmp tos, #8
+        beq 1f
+        cmp tos, #19
+        beq 1f
+        cmp tos, #47
+        beq 1f
+        ldr tos, =_x_invalid_qmi_cs1n_pin
+        bl _raise
+
+1:      lsls r0, tos, #3
         ldr r1, =IO_BANK0_BASE + 4
         adds r0, r1
 
@@ -350,13 +362,27 @@ _init_psram:
         cpsie i
         bl _release_core
 
+        ldr r0, =psram_size
+        str tos, [r0]
+
+        pull_tos
+
         pop {pc}
         end_inlined
 
-        define_internal_word "x-no-psram", visible_flag
+        define_word "x-no-psram", visible_flag
 _x_no_psram:
         push {lr}
         string_ln "no PSRAM available"
         bl _type
         pop {pc}
         end_inlined
+
+        define_word "x-invalid-qmi-cs1n-pin", visible_flag
+_x_invalid_qmi_cs1n_pin:
+        push {lr}
+        string_ln "invalid QMI CS1n pin"
+        bl _type
+        pop {pc}
+        end_inlined
+        

@@ -69,4 +69,21 @@ _sysclk:
 	bx lr
 	end_inlined
 
+        @@ Get the PSRAM size
+        define_word "psram-size", visible_flag
+_psram_size:
+        push_tos
+        ldr tos, =psram_size
+        ldr tos, [tos]
+        bx lr
+        end_inlined
+
+        @@ PSRAM base address
+        define_word "psram-base", visible_flag
+_psram_base:
+        push_tos
+        ldr tos, =psram_base
+        bx lr
+        end_inlined
+        
 	.ltorg

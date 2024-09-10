@@ -1,6 +1,6 @@
 @ Copyright (c) 2013 Matthias Koch
 @ Copyright (c) 2019-2024 Travis Bemann
-@ Copyright (c0 2024 Paul Koning
+@ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,7 @@
         .equ QMI_M1_WCMD_OFFSET, 0x30
 
         .equ QMI_DIRECT_CSR_CLKDIV_LSB, 22
+        .equ QMI_DIRECT_CSR_RXEMPTY, 1 << 16
         .equ QMI_DIRECT_CSR_TXEMPTY, 1 << 11
         .equ QMI_DIRECT_CSR_AUTO_CS1N, 1 << 7
         .equ QMI_DIRECT_CSR_AUTO_CS0N, 1 << 6
@@ -174,28 +175,6 @@
         .equ QMI_M1_WCMD_SUFFIX_LSB, 8 @ 8 bit
         .equ QMI_M1_WCMD_PREFIX_LSB, 0 @ 8 bit
 
-        .equ QMI_M1_WFMT_DTR, 1 << 28
-        .equ QMI_M1_WFMT_DUMMY_LEN_LSB, 16
-        .equ QMI_M1_WFMT_SUFFIX_LEN_8_BITS, 2 << 14 @ unset for no suffix
-        .equ QMI_M1_WFMT_PREFIX_LEN_8_BITS, 1 << 12 @ unset for no prefix
-        .equ QMI_M1_WFMT_DATA_WIDTH_LSB, 8 @ 2 bit
-        .equ QMI_M1_WFMT_DUMMY_WIDTH_LSB, 6 @ 2 bit
-        .equ QMI_M1_WFMT_SUFFIX_WIDTH_LSB, 4 @ 2 bit
-        .equ QMI_M1_WFMT_ADDR_WIDTH_LSB, 2 @ 2 bit
-        .equ QMI_M1_WFMT_PREFIX_WIDTH_LSB, 0 @ 2 bit
-
-        .equ QMI_M1_WFMT_DUMMY_LEN_0_BITS, 0 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_4_BITS, 1 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_8_BITS, 2 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_12_BITS, 3 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_16_BITS, 4 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_20_BITS, 5 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_24_BITS, 6 << QMI_M1_WFMT_DUMMY_LEN_LSB
-        .equ QMI_M1_WFMT_DUMMY_LEN_28_BITS, 7 << QMI_M1_WFMT_DUMMY_LEN_LSB
-
-        .equ QMI_M1_WCMD_SUFFIX_LSB, 8 @ 8 bit
-        .equ QMI_M1_WCMD_PREFIX_LSB, 0 @ 8 bit
-
         .equ INIT_XIP_QMI_M0_RFMT, (SINGLE_WIDTH << QMI_M0_RFMT_PREFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_ADDR_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_SUFFIX_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DUMMY_WIDTH_LSB) | (QUAD_WIDTH << QMI_M0_RFMT_DATA_WIDTH_LSB) | QMI_M0_RFMT_PREFIX_LEN_8_BITS | QMI_M0_RFMT_SUFFIX_LEN_8_BITS | QMI_M0_RFMT_DUMMY_LEN_16_BITS
 
         .equ INIT_XIP_QMI_M0_RCMD, (CMD_CONT_READ << QMI_M0_RCMD_SUFFIX_LSB) | (CMD_READ_DATA_FAST_QUAD_IO << QMI_M0_RCMD_PREFIX_LSB)
@@ -247,10 +226,10 @@
 
         @ Initial pad SCLK configuration, 8mA drive, no slew limiting,
         @ input buffer disabled
-        .equ INIT_PAD_SCLK, (2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | (PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS)
+        .equ INIT_PAD_SCLK, (2 << PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB) | PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS
 
         @ Initial direct CSR configuration, 5 MHz and 150 MHz clk_sys
-        .equ INIT_DIRECT_CSR, (30 << QMI_DIRECT_CSR_CLKDIV_LSB) | (QMI_DIRECT_CSR_EN)
+        .equ INIT_DIRECT_CSR, (30 << QMI_DIRECT_CSR_CLKDIV_LSB) | QMI_DIRECT_CSR_EN
 
         .equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET, 0x08
 	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET, 0x0C
@@ -998,6 +977,18 @@ _wait_tx_empty:
 	tst r3, r2
 	beq 1b
 	bx lr
+	end_inlined
+
+        @ Empty the QMI RX FIFO
+_empty_qmi_rx_fifo:
+	ldr r0, =XIP_QMI_BASE
+	ldr r2, =QMI_DIRECT_CSR_RXEMPTY
+1:	ldr r3, [r0, #QMI_DIRECT_CSR_OFFSET]
+	tst r3, r2
+	bne 2f
+        ldr r1, [r0, #QMI_DIRECT_RX_OFFSET]
+        b 1b
+2:      bx lr
 	end_inlined
 
 	@ Actually mass write a buffer to QSPI flash ( data-addr bytes -- )

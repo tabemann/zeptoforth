@@ -53,3 +53,4 @@
 	.equ cpu_count, 2
 	.equ const_count, 8
         .equ syntax_stack_size, 64 @ in bytes
+        .equ psram_base, 0x11000000

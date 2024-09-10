@@ -49,6 +49,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Hardware timer support (on the RP2040 and RP2350)
 * RTC support (on the RP2040) and RTC emulation using the Always-On Timer (on the RP2350)
 * Always-On Timer support (on the RP2350)
+* PSRAM support (on the RP2350)
 * Maps, including counted string and integer-keyed maps
 * Heap allocators
 * Memory pool allocators

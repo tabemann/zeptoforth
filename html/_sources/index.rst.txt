@@ -28,6 +28,7 @@ Zeptoforth Documentation
    words/rtc
    words/timer
    words/dma
+   words/psram
    words/block_dev
    words/fat32
    words/simple_fat32
