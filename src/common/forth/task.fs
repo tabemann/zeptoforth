@@ -2255,7 +2255,7 @@ begin-module task
       begin block-all-other-tasks-cycle not until
       block-all-other-tasks-cycle not
     until
-    [ cpu-count 0 > ] [if]
+    [ cpu-count 1 > ] [if]
       core-1-launched @ if
         cpu-count 0 ?do
           i cpu-index <> if
