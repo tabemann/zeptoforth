@@ -89,8 +89,6 @@ _disable_cs1n_direct_csr:
 _get_psram_size:
         push {r4, lr}
 
-        cpsid i
-        bl _force_core_wait
         bl _enable_flash_cmd
         bl _wait_qmi_busy
         bl _empty_qmi_rx_fifo
@@ -171,8 +169,6 @@ _get_psram_size:
         ldr tos, =4 * 1024 * 1024
         
 3:      bl _disable_cs1n_direct_csr
-        cpsie i
-        bl _release_core
 
         pop {r4, pc}
         end_inlined
@@ -181,9 +177,6 @@ _get_psram_size:
         define_internal_word "set-psram-timing", visible_flag
 _set_psram_timing:
         push {lr}
-
-        cpsid i
-        bl _force_core_wait
 
         ldr r0, =sysclk
         ldr r0, [r0]
@@ -217,9 +210,6 @@ _set_psram_timing:
 
         ldr r0, =XIP_QMI_BASE
         str r1, [r0, #QMI_M1_TIMING_OFFSET]
-
-        cpsie i
-        bl _release_core
 
         pop {pc}
         end_inlined
@@ -260,17 +250,20 @@ _init_psram:
 
         pull_tos
 
+        cpsid i
+        bl _force_core_wait
+        
         bl _get_psram_size
         cmp tos, #0
         bne 1f
+        cpsie i
+        bl _release_core
         push_tos
         ldr tos, =_x_no_psram
         bl _raise
         pop {pc}
 
-1:      cpsid i
-        bl _force_core_wait
-        bl _enable_flash_cmd
+1:      bl _enable_flash_cmd
         bl _wait_qmi_busy
 
         ldr r0, =XIP_QMI_BASE
@@ -331,14 +324,9 @@ _init_psram:
         blo 1b
         
         bl _disable_cs1n_direct_csr
-        cpsie i
-        bl _release_core
 
         bl _set_psram_timing
         
-        cpsid i
-        bl _force_core_wait
-
         bl _disable_xip_cache
         
         ldr r0, =XIP_QMI_BASE
