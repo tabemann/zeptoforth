@@ -56,9 +56,6 @@ begin-module task
     \ Task guard value
     $DEADCAFE constant task-guard-value
     
-    \ Saved reboot hook
-    variable saved-reboot-hook
-    
     \ Waiting for a task to be ready
     cpu-variable cpu-waiting-for-task? waiting-for-task?
     
@@ -2219,53 +2216,6 @@ begin-module task
   ;
   
 
-  continue-module task-internal
-    
-    \ Cycle of blocking all other tasks
-    : block-all-other-tasks-cycle ( -- unblocked-found? ) 
-      false { found? }
-      cpu-count 0 ?do
-        i [: { index }
-          false { found? }
-          index cpu-first-task @ { task }
-          begin task while
-            task current-task @ <> if
-              task terminated? task task-state h@ blocked-indefinite = or not if
-                true to found?
-                task terminated? not if
-                  $80000000 task task-ready-count !
-                  blocked-indefinite task task-state h!
-                then
-              then
-            then
-            task task-next @ to task
-          repeat
-          found?
-        ;] i critical-with-other-core-spinlock
-        found? or to found?
-      loop
-      found?
-    ;
-    
-  end-module
-  
-  \ Permanently stop all other tasks
-  : force-stop-all-other-tasks ( -- )
-    begin
-      begin block-all-other-tasks-cycle not until
-      block-all-other-tasks-cycle not
-    until
-    [ cpu-count 1 > ] [if]
-      core-1-launched @ if
-        cpu-count 0 ?do
-          i cpu-index <> if
-            begin i cpu-waiting-for-task? @ until
-          then
-        loop
-      then
-    [then]
-  ;
-
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
@@ -2321,11 +2271,6 @@ begin-module task
     ;] crash-hook !
     [: 0 cpu-main-task @ task-dict-current ;] main-here-hook !
     1 pause-enabled !
-    reboot-hook @ saved-reboot-hook !
-    [:
-\      in-interrupt? not if force-stop-all-other-tasks then
-      saved-reboot-hook @ execute
-    ;] reboot-hook !
     enable-int
   ;
 
