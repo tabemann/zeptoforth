@@ -29,6 +29,7 @@ Zeptoforth Documentation
    words/timer
    words/dma
    words/psram
+   words/aon_timer
    words/block_dev
    words/fat32
    words/simple_fat32
