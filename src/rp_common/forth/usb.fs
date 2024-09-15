@@ -1071,7 +1071,7 @@ begin-module usb
     
     \ Attempt to receive data
     : usb-attempt-rx ( -- )
-      rx-count rx-buffer-size 64 - <= endpoint1-out-ready? @ and if
+      rx-count rx-buffer-size 64 - < endpoint1-out-ready? @ and if
         true usb-rx-pending-op-enabled? !
         ['] usb-partial-rx usb-rx-pending-op set-pending-op
       then
