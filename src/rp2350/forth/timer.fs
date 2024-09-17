@@ -155,6 +155,12 @@ begin-module timer
     index timer-irq NVIC_ICPR_CLRPEND!
   ;
 
+  \ Is the alarm set
+  : alarm-set? { index -- set? }
+    index validate-alarm
+    index bit ARMED bit@
+  ;
+
   \ Lock the timer
   : lock-timer ( -- )
     1 LOCKED bis!

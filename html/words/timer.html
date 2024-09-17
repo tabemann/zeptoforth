@@ -96,6 +96,11 @@
 <p>( alarm – )</p>
 <p>Clear an alarm interrupt. <em>alarm</em> is an alarm index from 0 to 3. This must be called with the approriate alarm index inside an alarm handler for a given alarm or else the alarm handler will be called in an infinite loop.</p>
 </section>
+<section id="alarm-set">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-set?</span></code><a class="headerlink" href="#alarm-set" title="Permalink to this heading">¶</a></h3>
+<p>( alarm – set? )</p>
+<p>Get whether an alarm is set.</p>
+</section>
 <section id="x-out-of-range-alarm">
 <h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this heading">¶</a></h3>
 <p>Out of range alarm index exception.</p>
@@ -176,6 +181,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>

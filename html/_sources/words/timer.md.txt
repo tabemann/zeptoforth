@@ -64,6 +64,11 @@ Clear an alarm. *alarm* is an alarm index from 0 to 3.
 
 Clear an alarm interrupt. *alarm* is an alarm index from 0 to 3. This must be called with the approriate alarm index inside an alarm handler for a given alarm or else the alarm handler will be called in an infinite loop.
 
+##### `alarm-set?`
+( alarm -- set? )
+
+Get whether an alarm is set.
+
 ##### `x-out-of-range-alarm`
 
 Out of range alarm index exception.
