@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,9 @@ begin-module task
 
     \ Task guard value
     $DEADCAFE constant task-guard-value
+    
+    \ Waiting for a task to be ready
+    cpu-variable cpu-waiting-for-task? waiting-for-task?
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -321,7 +324,7 @@ begin-module task
     ]code
     dict-base
     code[
-    cortex-m7? [if]
+    cortex-m7? cortex-m33? or [if]
       0 dp r0 ldr_,[_,#_]
       4 dp r1 ldr_,[_,#_]
       8 dp r2 ldr_,[_,#_]
@@ -346,7 +349,7 @@ begin-module task
     ]code
     dict-base
     code[
-    cortex-m7? [if]
+    cortex-m7? cortex-m33? or [if]
       0 dp r0 ldr_,[_,#_]
       4 dp r1 ldr_,[_,#_]
       8 dp r2 ldr_,[_,#_]
@@ -373,7 +376,7 @@ begin-module task
     ]code
     dict-base
     code[
-    cortex-m7? [if]
+    cortex-m7? cortex-m33? or [if]
       0 dp r0 ldr_,[_,#_]
       4 dp r1 ldr_,[_,#_]
       8 dp r2 ldr_,[_,#_]
@@ -525,7 +528,7 @@ begin-module task
       >mark
       .task-prev tos r1 str_,[_,#_]
       .task-next r1 tos str_,[_,#_]
-      cortex-m7? [if]
+      cortex-m7? cortex-m33? or [if]
         0 dp r0 ldr_,[_,#_]
         4 dp tos ldr_,[_,#_]
         8 dp adds_,#_
@@ -619,7 +622,7 @@ begin-module task
       code[
       r4 1 push
       tos r2 movs_,_
-      cortex-m7? [if]
+      cortex-m7? cortex-m33? or [if]
         0 dp r3 ldr_,[_,#_]
         4 dp tos ldr_,[_,#_]
         8 dp adds_,#_
@@ -1745,7 +1748,13 @@ begin-module task
             until
             dup current-task !
             false in-task-change !
-            0<> if true else handle-pending-ops sleep false then
+            0<> if
+              false waiting-for-task? !
+              true
+            else
+              true waiting-for-task? !
+              handle-pending-ops sleep false
+            then
           until
 
           prev-task @ current-task @ <> if
@@ -2080,13 +2089,24 @@ begin-module task
         current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
-	$FF SHPR3_PRI_14!
-	$00 SIO_IRQ_PROC1 NVIC_IPR_IP!
-	SIO_IRQ_PROC1 NVIC_ISER_SETENA!
+        $FF SHPR3_PRI_14!
+        [ rp2040? ] [if]
+          $00 SIO_IRQ_PROC1 NVIC_IPR_IP!
+          SIO_IRQ_PROC1 NVIC_ISER_SETENA!
+        [else]
+          [ rp2350? ] [if]
+            $00 SIO_IRQ_FIFO NVIC_IPR_IP!
+            SIO_IRQ_FIFO NVIC_ISER_SETENA!
+            init-core-1-ticks
+          [then]
+        [then]
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !
-        pause try-and-display-error
+        begin current-task @ task-active h@ 16 lshift 16 arshift 0<= while
+          pause
+        repeat
+        try-and-display-error
         dup 0= if drop terminated-normally then current-task @ terminate
       ;
       
@@ -2195,6 +2215,7 @@ begin-module task
     then
   ;
   
+
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
@@ -2213,8 +2234,9 @@ begin-module task
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-validate-dict validate-dict-hook !
-    [: ( int-io::enable-int-io ) init-systick-aux-core ;] core-init-hook !
+    [: init-systick-aux-core enable-int ;] core-init-hook !
     cpu-count 0 ?do
+      false i cpu-waiting-for-task? !
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !
       false i cpu-in-task-change !

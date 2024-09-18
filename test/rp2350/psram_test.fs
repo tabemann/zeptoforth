@@ -1,5 +1,5 @@
-\ Copyright (c) 2020-2023 Travis Bemann
-\
+\ Copyright (c) 2024 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,21 +18,14 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an RP2040 device.
+begin-module psram-test
 
-\ #include src/rp2040/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/armv6m.fs
-#include src/common/forth/fast_basic.fs
-#include src/common/forth/minidict.fs
-#include src/common/forth/interrupt.fs
-#include src/rp2040/forth/multicore.fs
-#include src/rp2040/forth/erase.fs
-#include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
-#include src/rp2040/forth/gpio.fs
-#include src/common/forth/task.fs
-#include src/common/forth/swdcom.fs
+  : run-test ( -- )
+    47 init-psram
+    65536 2 * 0 do i psram-base i cells + ! loop
+    65536 2 * 0 do
+      psram-base i cells + @ i <> if ." failed" unloop exit then
+    loop
+  ;
+  
+end-module

@@ -60,6 +60,12 @@ begin-module interrupt
   NVIC_Base $300 + constant NVIC_IPR_Base
 
   commit-flash
+
+  \ Get the current interrupt (0 for none)
+  : current-interrupt ( -- interrupt ) ICSR @ $1FF and ;
+
+  \ Are we in an interrupt?
+  : in-interrupt? ( -- in-interrupt? ) current-interrupt 0<> ;
   
   \ Set an interrupt vector
   : vector! ( xt vector-index -- )

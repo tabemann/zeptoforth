@@ -688,6 +688,9 @@ _erase_after:
         push_tos
         ldr tos, =flash_main_end - flash_start
 	bl _erase_range
+        ldr r0, =reboot_hook
+        ldr r1, =_do_nothing
+        str r1, [r0]
 	bl _reboot
 	pop {pc}
 	end_inlined
@@ -702,6 +705,9 @@ _erase_dict_after:
         push_tos
         ldr tos, =flash_main_end - flash_start
 	bl _erase_range
+        ldr r0, =reboot_hook
+        ldr r1, =_do_nothing
+        str r1, [r0]
 	bl _reboot
 	pop {pc}
 	end_inlined

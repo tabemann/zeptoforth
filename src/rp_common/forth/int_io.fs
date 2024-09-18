@@ -1,5 +1,5 @@
 \ Copyright (c) 2013? Matthias Koch
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,9 @@ begin-module int-io
 
   begin-module int-io-internal
 
+    \ Saved reboot hook
+    variable saved-reboot-hook
+    
     \ RAM variable for rx buffer read-index
     variable rx-read-index
 
@@ -55,14 +58,24 @@ begin-module int-io
     tx-buffer-size buffer: tx-buffer
 
     \ UART0
-    $40034000 constant UART0_Base
+    rp2040? [if]
+      $40034000 constant UART0_Base
+    [then]
+    rp2350? [if]
+      $40070000 constant UART0_Base
+    [then]
     UART0_Base $00 + constant UART0_UARTDR
     UART0_Base $18 + constant UART0_UARTFR
     UART0_Base $34 + constant UART0_UARTIFLS
     UART0_Base $38 + constant UART0_UARTIMSC
 
     \ UART0 IRQ number
-    20 constant uart0-irq
+    rp2040? [if]
+      20 constant uart0-irq
+    [then]
+    rp2350? [if]
+      33 constant uart0-irq
+    [then]
 
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector
@@ -78,6 +91,7 @@ begin-module int-io
     : UART0_UARTFR_TXFE@ 7 bit UART0_UARTFR bit@ ; \ Transmit FIFO empty
     : UART0_UARTFR_TXFF@ 5 bit UART0_UARTFR bit@ ; \ Transmit FIFO full
     : UART0_UARTFR_RXFE@ 4 bit UART0_UARTFR bit@ ; \ Receive FIFO empty
+    : UART0_UARTFR_BUSY@ 3 bit UART0_UARTFR bit@ ; \ Busy
     : UART0_UARTIMSC_RTIM! 6 bit UART0_UARTIMSC bis! ; \ Receive timeout interrupt mask
     : UART0_UARTIMSC_TXIM! 5 bit UART0_UARTIMSC bis! ; \ Transmit interrupt mask
     : UART0_UARTIMSC_RXIM! 4 bit UART0_UARTIMSC bis! ; \ Receive interrupt mask
@@ -246,7 +260,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? UART0_UARTFR_TXFE@ and ;] wait
+      [: tx-empty? UART0_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and ;] wait
     ;
 
   end-module> import
@@ -304,6 +318,12 @@ begin-module int-io
     0 tx-read-index !
     0 tx-write-index !
     enable-int-io
+    reboot-hook @ saved-reboot-hook !
+    [:
+      begin tx-empty? UART0_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and until
+\      in-interrupt? not if flush-console 10 ms then
+      saved-reboot-hook @ execute
+    ;] reboot-hook !
   ;
   
 end-module> import

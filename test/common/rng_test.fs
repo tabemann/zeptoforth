@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,32 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
+begin-module rng-test
 
-  internal import
-  systick import
-  task import
   rng import
 
-  \ Our task
-  variable rng-test-task
-  
-  \ Random number generator test
-  : rng-test ( -- )
-    begin
-      0 systick-counter begin
-	systick-counter over - 1000 systick-divisor * u<
-      while
-	swap 1+ swap random drop
-      repeat
-      drop cr .
-    again
-  ;
-
-  \ Initialize the test
-  : rng-test-task ( -- )
-    0 ['] rng-test 420 128 512 spawn rng-test-task !
-    rng-test-task @ run
+  : run-test ( -- )
+    32 0 do cr 8 0 do random h.8 space loop loop
   ;
 
 end-module

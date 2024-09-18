@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -45,8 +45,16 @@ begin-module usb
     \ Write a halfword to the dictionary without concern for endianness
     : 2c, ( h -- ) dup c, 8 rshift c, ;
 
+    \ Saved reboot hook
+    variable saved-reboot-hook
+    
     \ USB IRQ index
-    5 constant usbctrl-irq
+    rp2040? [if]
+      5 constant usbctrl-irq
+    [then]
+    rp2350? [if]
+      14 constant usbctrl-irq
+    [then]
 
     \ USB vector
     usbctrl-irq 16 + constant usbctrl-vector
@@ -55,10 +63,20 @@ begin-module usb
     $50110000 constant USB_Base
 
     \ USBCTRL reset bit
-    24 bit constant RESETS_USBCTRL
+    rp2040? [if]
+      24 bit constant RESETS_USBCTRL
+    [then]
+    rp2350? [if]
+      28 bit constant RESETS_USBCTRL
+    [then]
 
     \ Reset base
-    $4000C000 constant RESETS_BASE
+    rp2040? [if]
+      $4000C000 constant RESETS_BASE
+    [then]
+    rp2350? [if]
+      $40020000 constant RESETS_BASE
+    [then]
 
     \ Set reset
     RESETS_BASE 2 12 lshift or constant RESETS_RESET_Set
@@ -94,6 +112,12 @@ begin-module usb
     \ Buffer status register
     USB_Base $58 + constant USB_BUFF_STATUS
 
+    \ USB endpoint abort register
+    USB_Base $60 + constant USB_EP_ABORT
+
+    \ USB endpoint abort done register
+    USB_Base $64 + constant USB_EP_ABORT_DONE
+    
     \ Stall armed register
     USB_Base $68 + constant USB_EP_STALL_ARM
 
@@ -738,6 +762,38 @@ begin-module usb
       init-usb-endpoint
     ;
 
+    \ Close USB endpoint
+    : close-usb-endpoint { endpoint -- }
+      endpoint endpoint-endpoint-control @ ?dup if 0 swap ! then
+      endpoint endpoint-buffer-control @ ?dup if 0 swap ! then
+    ;
+
+    \ Send empty reply to endpoint1-in
+    : empty-endpoint-reply { endpoint -- }
+      USB_BUF_CTRL_SEL USB_BUF_CTRL_FULL or USB_BUF_CTRL_LAST or
+      endpoint endpoint-next-pid @ if
+        USB_BUF_CTRL_DATA1_PID or
+      else
+        USB_BUF_CTRL_DATA0_PID or
+      then
+      dup endpoint endpoint-buffer-control @ !
+      code[ b> >mark b> >mark b> >mark b> >mark b> >mark b> >mark ]code
+      USB_BUF_CTRL_AVAIL or endpoint endpoint-buffer-control @ !
+    ;
+
+    \ Close USB endpoints
+    : close-usb-endpoints ( -- )
+      $1F USB_EP_ABORT !
+      begin USB_EP_ABORT_DONE @ $1F and $1F = until
+      endpoint1-in-ready? @ if endpoint1-in empty-endpoint-reply then
+      endpoint1-out-ready? @ if endpoint1-out empty-endpoint-reply then
+      endpoint2-in close-usb-endpoint
+      endpoint1-out close-usb-endpoint
+      endpoint1-in close-usb-endpoint
+      endpoint0-out close-usb-endpoint
+      endpoint0-in close-usb-endpoint
+    ;
+
     \ Get console endpoint data available
     : usb-console-count { endpoint -- count }
       endpoint endpoint-tx? @ if tx-count else rx-buffer-size rx-count - then
@@ -1015,7 +1071,7 @@ begin-module usb
     
     \ Attempt to receive data
     : usb-attempt-rx ( -- )
-      rx-count rx-buffer-size 64 - <= endpoint1-out-ready? @ and if
+      rx-count rx-buffer-size 64 - < endpoint1-out-ready? @ and if
         true usb-rx-pending-op-enabled? !
         ['] usb-partial-rx usb-rx-pending-op set-pending-op
       then
@@ -1119,6 +1175,21 @@ begin-module usb
 
       [ USB_SIE_CTRL_EP0_INT_1BUF USB_SIE_CTRL_PULLUP_EN or ] literal
       USB_SIE_CTRL !
+
+      reboot-hook @ saved-reboot-hook !
+      [:
+        [:
+          [:
+            saved-reboot-hook @ execute
+            0 internal::in-critical !
+            pause
+            100000 0 do loop
+            \        in-interrupt? not if flush-console then
+            close-usb-endpoints
+            100000 0 do loop
+          ;] usb-out-core-lock with-core-lock
+        ;] usb-in-core-lock with-core-lock
+      ;] reboot-hook !
     ;
 
     \ Get whether a byte is ready to be emitted

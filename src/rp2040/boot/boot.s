@@ -1,4 +1,4 @@
-@ Copyright (c) 2021-2023 Travis Bemann
+@ Copyright (c) 2021-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
-	.equ IMAGE_SIZE, 0x8000
+	.equ IMAGE_SIZE, 0x9000
 	.equ PADS_QSPI_BASE, 0x40020000
 	.equ XIP_SSI_BASE, 0x18000000
 	.equ SSI_CTRLR0_OFFSET, 0x00

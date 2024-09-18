@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -270,7 +270,10 @@ _erase_after:
 2:	adds r0, #2
 	cmp r0, r1
 	bne 1b
-	bl _reboot
+	ldr r0, =reboot_hook
+        ldr r1, =_do_nothing
+        str r1, [r0]
+        bl _reboot
 	pop {pc}
 	end_inlined
 

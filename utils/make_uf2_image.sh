@@ -54,6 +54,8 @@ screen_download_ihex_minidict ${PORT} ${TARGET}.minidict
 
 if [ ${PLATFORM} = 'rp2040_big' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
-else
+elif [ ${PLATFORM} = 'rp2040' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2350' ]; then
+    ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 fi

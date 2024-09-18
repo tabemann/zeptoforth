@@ -2283,7 +2283,7 @@
               </ol>
             </li>
             <li>
-              <a href="words/gpio.xhtml#rp2040-words">RP2040 Words</a>
+              <a href="words/gpio.xhtml#rp2040-and-rp2350-words">RP2040 and RP2350 Words</a>
               <ol>
                 <li>
                   <a href="words/gpio.xhtml#id18">gpio</a>
@@ -2445,7 +2445,34 @@
                   <a href="words/uart.xhtml#uart-alternate">uart-alternate</a>
                 </li>
                 <li>
+                  <a href="words/uart.xhtml#uart-non-cts-rts-alternate">uart-non-cts/rts–alternate</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#uart-cts-rts-alternate">uart-cts/rts-alternate</a>
+                </li>
+                <li>
                   <a href="words/uart.xhtml#uart-pin">uart-pin</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#uart-cts-rts-pin">uart-cts/rts-pin</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#uart-cts-enabled">uart-cts-enabled?</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#enable-uart-cts">enable-uart-cts</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#disable-uart-cts">disable-uart-cts</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#uart-rts-enabled">uart-rts-enabled?</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#enable-uart-rts">enable-uart-rts</a>
+                </li>
+                <li>
+                  <a href="words/uart.xhtml#disable-uart-rts">disable-uart-rts</a>
                 </li>
                 <li>
                   <a href="words/uart.xhtml#x-invalid-uart">x-invalid-uart</a>
@@ -2492,7 +2519,7 @@
                   <a href="words/spi.xhtml#all-platforms">All platforms</a>
                 </li>
                 <li>
-                  <a href="words/spi.xhtml#rp2040-only">RP2040 only</a>
+                  <a href="words/spi.xhtml#rp2040-and-rp2350-only">RP2040 and RP2350 only</a>
                 </li>
                 <li>
                   <a href="words/spi.xhtml#stm32f407-stm32f411-stm32l476-and-stm32f746-only">STM32F407, STM32F411, STM32L476, and STM32F746 only</a>
@@ -2655,6 +2682,12 @@
                   <a href="words/pwm.xhtml#pwm-vector">pwm-vector!</a>
                 </li>
                 <li>
+                  <a href="words/pwm.xhtml#pwm-wrap-0-vector">pwm-wrap-0-vector!</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#pwm-wrap-1-vector">pwm-wrap-1-vector!</a>
+                </li>
+                <li>
                   <a href="words/pwm.xhtml#enable-pwm">enable-pwm</a>
                 </li>
                 <li>
@@ -2674,6 +2707,36 @@
                 </li>
                 <li>
                   <a href="words/pwm.xhtml#clear-pwm-pending">clear-pwm-pending</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#enable-pwm-wrap-0-int">enable-pwm-wrap-0-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#disable-pwm-wrap-0-int">disable-pwm-wrap-0-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#clear-pwm-wrap-0-int">clear-pwm-wrap-0-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#pwm-wrap-0-int">pwm-wrap-0-int@</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#clear-pwm-wrap-0-pending">clear-pwm-wrap-0-pending</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#enable-pwm-wrap-1-int">enable-pwm-wrap-1-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#disable-pwm-wrap-1-int">disable-pwm-wrap-1-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#clear-pwm-wrap-1-int">clear-pwm-wrap-1-int</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#pwm-wrap-1-int">pwm-wrap-1-int@</a>
+                </li>
+                <li>
+                  <a href="words/pwm.xhtml#clear-pwm-wrap-1-pending">clear-pwm-wrap-1-pending</a>
                 </li>
                 <li>
                   <a href="words/pwm.xhtml#advance-pwm-phase">advance-pwm-phase</a>
@@ -2755,6 +2818,9 @@
                   <a href="words/rtc.xhtml#date-time-second">date-time-second</a>
                 </li>
                 <li>
+                  <a href="words/rtc.xhtml#date-time-msec">date-time-msec</a>
+                </li>
+                <li>
                   <a href="words/rtc.xhtml#enable-rtc">enable-rtc</a>
                 </li>
                 <li>
@@ -2802,6 +2868,12 @@
                 <li>
                   <a href="words/rtc.xhtml#convert-secs-since-1970">convert-secs-since-1970</a>
                 </li>
+                <li>
+                  <a href="words/rtc.xhtml#convert-msecs-since-1970">convert-msecs-since-1970</a>
+                </li>
+                <li>
+                  <a href="words/rtc.xhtml#convert-to-msecs-since-1970">convert-to-msecs-since-1970</a>
+                </li>
               </ol>
             </li>
           </ol>
@@ -2843,9 +2915,30 @@
                   <a href="words/timer.xhtml#clear-alarm-int">clear-alarm-int</a>
                 </li>
                 <li>
+                  <a href="words/timer.xhtml#alarm-set">alarm-set?</a>
+                </li>
+                <li>
                   <a href="words/timer.xhtml#x-out-of-range-alarm">x-out-of-range-alarm</a>
                 </li>
+                <li>
+                  <a href="words/timer.xhtml#lock-timer">lock-timer</a>
+                </li>
+                <li>
+                  <a href="words/timer.xhtml#timer-locked">timer-locked?</a>
+                </li>
+                <li>
+                  <a href="words/timer.xhtml#sysclk-timer">sysclk-timer</a>
+                </li>
+                <li>
+                  <a href="words/timer.xhtml#tick-timer">tick-timer</a>
+                </li>
+                <li>
+                  <a href="words/timer.xhtml#timer-sysclk">timer-sysclk?</a>
+                </li>
               </ol>
+            </li>
+            <li>
+              <a href="words/timer.xhtml#timer1">timer1</a>
             </li>
           </ol>
         </li>
@@ -2910,10 +3003,76 @@
                   <a href="words/dma.xhtml#dreq-xip-ssirx">DREQ_XIP_SSIRX</a>
                 </li>
                 <li>
+                  <a href="words/dma.xhtml#dreq-xip-qmitx">DREQ_XIP_QMITX</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#dreq-xip-qmirx">DREQ_XIP_QMIRX</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#dreq-hstx">DREQ_HSTX</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#dreq-coresight">DREQ_CORESIGHT</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#dreq-sha256">DREQ_SHA256</a>
+                </li>
+                <li>
                   <a href="words/dma.xhtml#treq-timer">TREQ_TIMER</a>
                 </li>
                 <li>
                   <a href="words/dma.xhtml#treq-unpaced">TREQ_UNPACED</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#trans-count-mode-normal">TRANS_COUNT_MODE_NORMAL</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#trans-count-mode-trigger-self">TRANS_COUNT_MODE_TRIGGER_SELF</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#trans-count-mode-endless">TRANS_COUNT_MODE_ENDLESS</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#register-read">REGISTER_READ</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#register-write">REGISTER_WRITE</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#incr-buffer-read">INCR_BUFFER_READ</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#incr-buffer-write">INCR_BUFFER_WRITE</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#decr-buffer-read">DECR_BUFFER_READ</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#decr-buffer-write">DECR_BUFFER_WRITE</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#incr-ring-buffer-read">INCR_RING_BUFFER_READ</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#incr-ring-buffer-write">INCR_RING_BUFFER_WRITE</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#decr-ring-buffer-read">DECR_RING_BUFFER_READ</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#decr-ring-buffer-write">DECR_RING_BUFFER_WRITE</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#start-dma">start-dma</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#prepare-dma">prepare-dma</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#start-dma-with-chain">start-dma-with-chain</a>
+                </li>
+                <li>
+                  <a href="words/dma.xhtml#prepare-dma-with-chain">prepare-dma-with-chain</a>
                 </li>
                 <li>
                   <a href="words/dma.xhtml#start-register-register-dma">start-register&gt;register-dma</a>
@@ -3015,6 +3174,125 @@
                 </li>
                 <li>
                   <a href="words/dma.xhtml#free-timer">free-timer</a>
+                </li>
+              </ol>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <a href="words/psram.xhtml">PSRAM words</a>
+          <ol>
+            <li>
+              <a href="words/psram.xhtml#forth">forth</a>
+              <ol>
+                <li>
+                  <a href="words/psram.xhtml#init-psram">init-psram</a>
+                </li>
+                <li>
+                  <a href="words/psram.xhtml#psram-size">psram-size</a>
+                </li>
+                <li>
+                  <a href="words/psram.xhtml#psram-base">psram-base</a>
+                </li>
+                <li>
+                  <a href="words/psram.xhtml#x-invalid-qmi-cs1n-pin">x-invalid-qmi-cs1n-pin</a>
+                </li>
+                <li>
+                  <a href="words/psram.xhtml#x-no-psram">x-no-psram</a>
+                </li>
+              </ol>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <a href="words/aon_timer.xhtml">Always-On Timer words</a>
+          <ol>
+            <li>
+              <a href="words/aon_timer.xhtml#aon-timer">aon-timer</a>
+              <ol>
+                <li>
+                  <a href="words/aon_timer.xhtml#enable-timer">enable-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#disable-timer">disable-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#timer-enabled">timer-enabled?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#time">time!</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id1">time@</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#clear-time">clear-time</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#enable-alarm">enable-alarm</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#disable-alarm">disable-alarm</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#alarm-enabled">alarm-enabled?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#alarm">alarm!</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id2">alarm@</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#enable-alarm-wake-up">enable-alarm-wake-up</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#disable-alarm-wake-up">disable-alarm-wake-up</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#alarm-wake-up-enabled">alarm-wake-up-enabled?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#lposc-timer">lposc-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#xosc-timer">xosc-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#gpio-1khz-timer">gpio-1khz-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#sync-gpio-1hz-timer">sync-gpio-1hz-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#unsync-gpio-1hz-timer">unsync-gpio-1hz-timer</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id3">lposc-timer?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id4">xosc-timer?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id5">gpio-1khz-timer?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id6">sync-gpio-1hz-timer?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#source-sel">source-sel!</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#source-sel-drive-lpck">source-sel-drive-lpck!</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#id7">source-sel@</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#drive-lpck">drive-lpck?</a>
+                </li>
+                <li>
+                  <a href="words/aon_timer.xhtml#x-invalid-source-sel-gpio">x-invalid-source-sel-gpio</a>
                 </li>
               </ol>
             </li>
@@ -3623,6 +3901,12 @@
               <ol>
                 <li>
                   <a href="words/interrupt.xhtml#x-invalid-vector">x-invalid-vector</a>
+                </li>
+                <li>
+                  <a href="words/interrupt.xhtml#current-interrupt">current-interrupt</a>
+                </li>
+                <li>
+                  <a href="words/interrupt.xhtml#in-interrupt">in-interrupt?</a>
                 </li>
                 <li>
                   <a href="words/interrupt.xhtml#vector">vector!</a>
@@ -5532,6 +5816,9 @@
                 <li>
                   <a href="words/internal.xhtml#kernel-date">kernel-date</a>
                 </li>
+                <li>
+                  <a href="words/internal.xhtml#reboot-hook">reboot-hook</a>
+                </li>
               </ol>
             </li>
             <li>
@@ -6165,10 +6452,25 @@
                 <li>
                   <a href="words/expose.xhtml#systick-handler-hook">systick-handler-hook</a>
                 </li>
+                <li>
+                  <a href="words/expose.xhtml#cortex-m7">cortex-m7?</a>
+                </li>
+                <li>
+                  <a href="words/expose.xhtml#cortex-m33">cortex-m33?</a>
+                </li>
+                <li>
+                  <a href="words/expose.xhtml#chip">chip</a>
+                </li>
+                <li>
+                  <a href="words/expose.xhtml#rp2040">rp2040?</a>
+                </li>
+                <li>
+                  <a href="words/expose.xhtml#rp2350">rp2350?</a>
+                </li>
               </ol>
             </li>
             <li>
-              <a href="words/expose.xhtml#rp2040-word">RP2040 Word</a>
+              <a href="words/expose.xhtml#rp2040-and-rp2350-words">RP2040 and RP2350 Words</a>
               <ol>
                 <li>
                   <a href="words/expose.xhtml#id2">forth</a>

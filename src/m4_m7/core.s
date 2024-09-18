@@ -1964,7 +1964,7 @@ _rdrop:	adds sp, #4
 	@@ Push two values onto the return stack
 	define_word "2>r", visible_flag | inlined_flag
 _push_2r:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldr r0, [dp], #4
         ldr r1, [dp], #4
 	.else
@@ -2116,12 +2116,19 @@ _context_switch:
 	@@ dictionary
 	define_word "reboot", visible_flag
 _reboot:
+        push {lr}
+
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+        
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
 	dsb
 	isb
-	bx lr
+        pop {pc}
 	end_inlined
 
 	@@ Null exception handler
@@ -2204,6 +2211,8 @@ _init_variables:
 	ldr r0, =pause_hook
 	ldr r1, =_do_nothing
 	str r1, [r0]
+        ldr r0, =reboot_hook
+        str r1, [r0]
 	ldr r0, =validate_dict_hook
 	str r1, [r0]
         ldr r0, =word_begin_hook

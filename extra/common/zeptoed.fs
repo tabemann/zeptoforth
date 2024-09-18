@@ -359,11 +359,17 @@ begin-module zeptoed-internal
     \ Get the number of indentation bytes
     method cursor-line-indent-bytes ( cursor buffer -- indent-bytes )
     
+    \ Get a line's indentation to the left of the cursor
+    method cursor-left-line-indent ( cursor buffer -- indent )
+
+    \ Get the edit cursor's line's indentation to the left of the cursor
+    method edit-cursor-left-line-indent ( buffer -- indent )
+
     \ Get a line's indentation
     method cursor-line-indent ( cursor buffer -- indent )
 
     \ Get the edit cursor's line's indentation
-    method edit-cursor-line-indent ( cursor buffer -- indent )
+    method edit-cursor-line-indent ( buffer -- indent )
 
     \ Get the number of continguous space characters at a cursor
     method cursor-space-chars ( cursor buffer -- chars )
@@ -1269,6 +1275,35 @@ begin-module zeptoed-internal
       ;] with-object
     ; define cursor-line-indent-bytes
 
+    \ Get a line's indentation to the left of the cursor
+    :noname ( cursor buffer -- indent )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor cursor copy-cursor
+        [: newline = ;] cursor find-prev
+        0 { chars }
+        begin cursor offset@ orig-cursor offset@ < while
+          cursor buffer cursor-at { byte }
+          byte bl = if
+            1 +to chars
+            1 cursor adjust-offset
+          else
+            byte tab = if
+              zeptoed-tab-size chars zeptoed-tab-size umod - +to chars
+              1 cursor adjust-offset
+            else
+              chars exit
+            then
+          then
+        repeat
+        chars
+      ;] with-object
+    ; define cursor-left-line-indent
+
+    \ Get the edit cursor's line's indentation to the left of the cursor
+    :noname ( buffer -- indent )
+      dup buffer-edit-cursor swap cursor-left-line-indent
+    ; define edit-cursor-left-line-indent
+
     \ Get a line's indentation
     :noname ( cursor buffer -- indent )
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
@@ -1294,7 +1329,7 @@ begin-module zeptoed-internal
     ; define cursor-line-indent
 
     \ Get the edit cursor's line's indentation
-    :noname ( cursor buffer -- indent )
+    :noname ( buffer -- indent )
       dup buffer-edit-cursor swap cursor-line-indent
     ; define edit-cursor-line-indent
 
@@ -2412,7 +2447,7 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
-      buffer edit-cursor-line-indent { indent }
+      buffer edit-cursor-left-line-indent { indent }
       newline { W^ data }
       data 1 buffer buffer-edit-cursor insert-data
       bl data c!
@@ -2822,6 +2857,7 @@ begin-module zeptoed-internal
           { delete-count insert-count }
           [: dup tab <> swap bl <> and ;] cursor find-next
           cursor offset@ dup delete-count - tuck buffer add-insert-undo
+          buffer buffer-edit-cursor offset@ { orig-edit-offset }
           delete-count cursor delete-data
           insert-count 0 ?do
             bl { W^ data } data 1 cursor insert-data
@@ -2829,7 +2865,8 @@ begin-module zeptoed-internal
           insert-count 0> if
             insert-count cursor offset@ buffer add-delete-undo
           then
-          insert-count delete-count - buffer buffer-edit-cursor adjust-offset
+          insert-count delete-count - orig-edit-offset +
+          buffer buffer-edit-cursor go-to-offset
           buffer dirty-buffer
         ;] with-object
       then
@@ -3009,11 +3046,7 @@ begin-module zeptoed-internal
       else
         in-middle
       then { position }
-\      buffer edit-cursor-line-rows { start-rows }
       c buffer do-insert
-\      buffer edit-cursor-line-rows start-rows <> if
-\        full-width to position
-\      then
       buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
         full-width to position
       then

@@ -8,7 +8,17 @@ These words are in `interrupt`.
 ( -- )
 
 Invalid interrupt vector index exception
-  
+
+##### `current-interrupt`
+( -- interrupt )
+
+Get the current interrupt (0 for none).
+
+##### `in-interrupt?`
+( -- in-interrupt? )
+
+Get whether we are in an interrupt.
+
 ##### `vector!`
 ( xt vector-index -- )
 

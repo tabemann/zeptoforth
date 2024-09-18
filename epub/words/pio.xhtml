@@ -16,7 +16,7 @@
             
   <section id="programmable-input-output-words">
 <h1>Programmable Input/Output Words</h1>
-<p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, each of which contain four <em>state machines</em>.</p>
+<p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) and the RP2350 (i.e. the Raspberry Pi Pico 2) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz, on the RP2040, or 150 MHz, on the RP2350. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, on the RP2040, and a third PIO peripheral, <code class="docutils literal notranslate"><span class="pre">PIO2</span></code>, on the RP2350, each of which contain four <em>state machines</em>.</p>
 <p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code> or <code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
 <p>Up to four PIO state machines may be enabled, disabled, or reset at a time with <code class="docutils literal notranslate"><span class="pre">sm-enable</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-disable</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-restart</span></code> respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.</p>
 <p>Each PIO state machine has four 32-bit registers, an input shift register (ISR), an output shift register (OSR), an X register, and a Y register. They also have a 5-bit program counter (PC). These are all initialized to zero.</p>
@@ -62,6 +62,11 @@
 <p>( – pio )</p>
 <p>PIO1.</p>
 </section>
+<section id="pio2">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO2</span></code></h4>
+<p>( – pio )</p>
+<p>PIO2 (`rp2350 only).</p>
+</section>
 <section id="irq0">
 <h4><code class="docutils literal notranslate"><span class="pre">IRQ0</span></code></h4>
 <p>( – irq )</p>
@@ -91,6 +96,16 @@
 <h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ1</span></code></h4>
 <p>( – irq )</p>
 <p>PIO1 IRQ1 index.</p>
+</section>
+<section id="pio2-irq0">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO2_IRQ0</span></code></h4>
+<p>( – irq )</p>
+<p>PIO2 IRQ0 index (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="pio2-irq1">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO2_IRQ1</span></code></h4>
+<p>( – irq )</p>
+<p>PIO2 IRQ1 index (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 </section>
 <section id="pio-words">
@@ -228,6 +243,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">sm-push-threshold!</span></code></h4>
 <p>( threshold state-machine pio – )</p>
 <p>Set ISR threshold before autopush or conditional push will take place; value may be from 1 to 32.</p>
+</section>
+<section id="sm-in-count">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-in-count!</span></code></h4>
+<p>( in-count state-machine pio – )</p>
+<p>Set number of pins which are not masked to 0 when read by an IN PINS, WAIT PIN, or MOV x, PINS instruction; value may be from 1 to 32 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="sm-txf">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-txf!</span></code></h4>
@@ -416,6 +436,26 @@
 <p>( source op destination – )</p>
 <p>PIO MOV instruction. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process.</p>
 </section>
+<section id="mov-isr-rx-idx-imm">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-isr-rx-idx-imm,</span></code></h4>
+<p>( index – )</p>
+<p>PIO MOV ISR to RX instruction, with an immediate index. Transfer a value from the ISR to an immediate index in the RX FIFO.</p>
+</section>
+<section id="mov-isr-rx-idx-y">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-isr-rx-idx-y,</span></code></h4>
+<p>( – )</p>
+<p>PIO MOV ISR to RX instruction, indexed by the Y register. Transfer a value from the ISR to an index in the RX FIFO determined by the Y register.</p>
+</section>
+<section id="mov-rx-osr-idx-imm">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-rx-osr-idx-imm,</span></code></h4>
+<p>( index – )</p>
+<p>PIO MOV RX to OSR instruction, with an immediate index. Transfer a value from an immediate index in the RX FIFO to the OSR.</p>
+</section>
+<section id="mov-rx-osr-idx-y">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-rx-osr-idx-y,</span></code></h4>
+<p>( – )</p>
+<p>PIO MOV RX to OSR instruction, indexed by the Y register. Transfer a value from an index in the RX FIFO determined by the Y register to the OSR.</p>
+</section>
 <section id="irq">
 <h4><code class="docutils literal notranslate"><span class="pre">irq,</span></code></h4>
 <p>( index set/wait – )</p>
@@ -462,11 +502,31 @@
 <p>PIO MOV instruction with delay or side-set. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-isr-rx-idx-imm+,</span></code></h4>
+<p>( delay/side-set index – )</p>
+<p>PIO MOV ISR to RX instruction, with an immediate index, with delay or side-set. Transfer a value from the ISR to an immediate index in the RX FIFO.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-isr-rx-idx-y+,</span></code></h4>
+<p>( delay/side-set – )</p>
+<p>PIO MOV ISR to RX instruction, indexed by the Y register, with delay or side-set. Transfer a value from the ISR to an index in the RX FIFO determined by the Y register.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-rx-osr-idx-imm+,</span></code></h4>
+<p>( delay/side-set index – )</p>
+<p>PIO MOV RX to OSR instruction, with an immediate index, with delay or side-set. Transfer a value from an immediate index in the RX FIFO to the OSR.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">mov-rx-osr-idx-y+,</span></code></h4>
+<p>( delay/side-set – )</p>
+<p>PIO MOV RX to OSR instruction, indexed by the Y register, with delay or side-set. Transfer a value from an index in the RX FIFO determined by the Y register to the OSR.</p>
+</section>
+<section id="id14">
 <h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code></h4>
 <p>( index delay/side-set set/wait – )</p>
 <p>PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id11">
+<section id="id15">
 <h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code></h4>
 <p>( data delay/side-set destination – )</p>
 <p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
@@ -480,27 +540,27 @@
 <p>( – jmp-mark )</p>
 <p>Mark a backward destination.</p>
 </section>
-<section id="id12">
+<section id="id16">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code></h4>
 <p>( jmp-mark – )</p>
 <p>Mark a forward destination.</p>
 </section>
-<section id="id13">
+<section id="id17">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp&gt;</span></code></h4>
 <p>( condition – jmp-mark )</p>
 <p>Forward PIO JMP to next unmatched <code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code>, without delay/side-set.</p>
 </section>
-<section id="id14">
+<section id="id18">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp&lt;</span></code></h4>
 <p>( jmp-mark condition – )</p>
 <p>Backward jump to preceding unmatched <code class="docutils literal notranslate"><span class="pre">mark&lt;</span></code>, without delay or side-set.</p>
 </section>
-<section id="id15">
+<section id="id19">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp+&gt;</span></code></h4>
 <p>( delay/side-set condition – mark-add marker )</p>
 <p>Forward PIO JMP to next unmatched <code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code> with delay or side-set.</p>
 </section>
-<section id="id16">
+<section id="id20">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp+&lt;</span></code></h4>
 <p>( jmp-mark marker delay/side-set condition – )</p>
 <p>Backward jump to preceding unmatched <code class="docutils literal notranslate"><span class="pre">mark&lt;</span></code> with delay or side-set.</p>
@@ -510,7 +570,7 @@
 <p>( – )</p>
 <p>Set wrap <em>bottom</em> at this line (defaults to first instruction).</p>
 </section>
-<section id="id17">
+<section id="id21">
 <h4><code class="docutils literal notranslate"><span class="pre">&lt;wrap</span></code></h4>
 <p>( – )</p>
 <p>Set wrap <em>top</em> at preceding line (defaults to end of program).</p>
@@ -574,6 +634,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">WAIT_IRQ</span></code></h4>
 <p>( – wait )</p>
 <p>Wait for an IRQ.</p>
+</section>
+<section id="wait-jmppin">
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_JMPPIN</span></code></h4>
+<p>( – wait )</p>
+<p>Wait on the pin indexed by the PINCTRL_JMP_PIN configuration, plus an index in the range 0-3, modulo 32 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="in-pins">
 <h4><code class="docutils literal notranslate"><span class="pre">IN_PINS</span></code></h4>
@@ -700,6 +765,11 @@
 <p>( – mov-destination )</p>
 <p>Move to scratch register Y.</p>
 </section>
+<section id="mov-dest-pindirs">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PINDIRS</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to PINDIRS (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
 <section id="mov-dest-exec">
 <h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_EXEC</span></code></h4>
 <p>( – mov-destination )</p>
@@ -805,10 +875,20 @@
 <p>( – set-destination )</p>
 <p>Set PINDIRS.</p>
 </section>
+<section id="prev">
+<h4><code class="docutils literal notranslate"><span class="pre">PREV</span></code></h4>
+<p>( irq – irq-prev )</p>
+<p>Reference an IRQ in the previous-numbered PIO, wrapping around (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
 <section id="rel">
 <h4><code class="docutils literal notranslate"><span class="pre">REL</span></code></h4>
 <p>( irq – irq-rel )</p>
 <p>Add the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s.</p>
+</section>
+<section id="next">
+<h4><code class="docutils literal notranslate"><span class="pre">NEXT</span></code></h4>
+<p>( irq – irq-next )</p>
+<p>Reference an IRQ in the next-numbered PIO, wrapping around (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 </section>
 <section id="exceptions">
@@ -902,6 +982,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">x-invalid-base</span></code></h4>
 <p>( – )</p>
 <p>Invalid program base address in <code class="docutils literal notranslate"><span class="pre">setup-prog</span></code> or <code class="docutils literal notranslate"><span class="pre">free-piomem</span></code> exception.</p>
+</section>
+<section id="x-invalid-gpio-base">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-gpio-base</span></code></h4>
+<p>( – )</p>
+<p>Invalid GPIO base (i.e. not 0 or 16) exception (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 </section>
 </section>

@@ -2592,7 +2592,7 @@ _asm_sub_imm:
 	@@ Assemble instructions to pull a value from the stack
 	define_internal_word "pull,", visible_flag
 _asm_pull:
-	.ifdef cortex_m7
+	.if cortex_m7
 
 	push {lr}
 	push_tos

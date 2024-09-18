@@ -45,21 +45,21 @@ fi
 RP2040_KERNEL="bin/${VERSION}/rp2040/zeptoforth_kernel-${VERSION}.uf2"
 RP2040_BIG_KERNEL="bin/${VERSION}/rp2040_big/zeptoforth_kernel-${VERSION}.uf2"
 
-flash_rp2040 ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040 ${PORT} mini
 issue_bootsel ${PORT}
 
-flash_rp2040 ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040 ${PORT} full
 issue_bootsel ${PORT}
 
-flash_rp2040 ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040 ${PORT} full_usb
 issue_bootsel ${PORT}
 
-flash_rp2040 ${RP2040_BIG_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2040_BIG_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040_big ${PORT} full
 issue_bootsel ${PORT}
 
-flash_rp2040 ${RP2040_BIG_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+flash_rp ${RP2040_BIG_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040_big ${PORT} full_usb

@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -37,7 +38,7 @@
             
   <section id="i2c-words">
 <h1>I2C Words<a class="headerlink" href="#i2c-words" title="Permalink to this heading">¶</a></h1>
-<p>zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1. It supports clocks up to 1 MHz, as that is the limit supported by the RP2040’s I2C peripherals, and defaults to a clock of 400 kHz. Note that it does not currently support general calls or slaves sending NACK, and handling of interrupted sends when multiple masters are in use must be handled manually by the user.</p>
+<p>zeptoforth includes support for I2C peripherals on the RP2040 (e.g. the Raspberry Pi Pico) and the RP2350 (e.g.. the Raspberry Pi Pico 2). It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1. It supports clocks up to 1 MHz, as that is the limit supported by the RP2040’s I2C peripherals, and defaults to a clock of 400 kHz. Note that it does not currently support general calls or slaves sending NACK, and handling of interrupted sends when multiple masters are in use must be handled manually by the user.</p>
 <section id="i2c">
 <h2><code class="docutils literal notranslate"><span class="pre">i2c</span></code><a class="headerlink" href="#i2c" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">i2c</span></code> module contains the following words:</p>
@@ -261,6 +262,7 @@
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -310,6 +312,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -349,11 +352,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/i2c.md.txt"

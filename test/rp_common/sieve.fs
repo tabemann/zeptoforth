@@ -1,5 +1,5 @@
-\ Copyright (c) 2022-2023 Travis Bemann
-\ 
+\ Copyright (c) 2024 Travis Bemann
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,31 +18,43 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
+: sieve-inner { count buffer }
+  0 { index }
+  begin index count < while
+    index 7 and bit index 3 rshift buffer + cbit@ if
+      index 1+ { test-index }
+      begin test-index count < while
+        test-index 7 and bit { test-bit }
+        test-index 3 rshift buffer + { test-addr }
+        test-bit test-addr cbit@ if
+          test-index 2 + index 2 + umod 0= if
+            test-bit test-addr cbic!
+          then
+        then
+        1 +to test-index
+      repeat
+    then
+    1 +to index
+  repeat
+;
 
-begin-module rng
+: sieve. { count buffer }
+  0 { index }
+  begin index count < while
+    index 7 and bit index 3 rshift buffer + cbit@ if
+      index 2 + .
+    then
+    1 +to index
+  repeat
+;
 
-  begin-module rng-internal
-
-    \ ROSC Base
-    $40060000 constant ROSC_Base
-
-    \ Random bit
-    ROSC_Base $1C + constant RANDOMBIT
-
-  end-module> import
-
-  \ Read a random number
-  : random ( -- random )
-    32 0 begin over 0> while
-      swap 1- swap
-      1 lshift RANDOMBIT @ 1 and or
-    repeat
-    nip
-  ;
-
-end-module> import
-
-\ Reboot
-reboot
+: sieve ( n -- )
+  2 - dup 8 align 8 / dup [: { count byte-count buffer }
+    buffer byte-count $FF fill
+    timer::us-counter { D: time }
+    count buffer sieve-inner
+    timer::us-counter { D: end-time }
+    count buffer sieve.
+    cr end-time time d- drop s>f 1_000_000,0 f/ ." Time: " f. ." s"
+  ;] with-allot
+;

@@ -28,16 +28,31 @@ begin-module watchdog
   begin-module watchdog-internal
 
     \ Resets base address
-    $4000C000 constant RESETS_BASE
+    rp2040? [if]
+      $4000C000 constant RESETS_BASE
+    [then]
+    rp2350? [if]
+      $40020000 constant RESETS_BASE
+    [then]
 
     \ Watchdog peripheral reset enable register
     RESETS_BASE $4 + constant RESETS_WDSEL
     
     \ Reset all peripherals
-    $01FFFFFF constant RESETS_ALL
+    rp2040? [if]
+      $01FFFFFF constant RESETS_ALL
+    [then]
+    rp2350? [if]
+      $1FFFFFFF 3 bit bic constant RESETS_ALL
+    [then]
 
     \ Watchdog base register
-    $40058000 constant WATCHDOG_BASE
+    rp2040? [if]
+      $40058000 constant WATCHDOG_BASE
+    [then]
+    rp2350? [if]
+      $400D8000 constant WATCHDOG_BASE
+    [then]
 
     \ Watchdog control register
     WATCHDOG_BASE $0 + constant WATCHDOG_CTRL
@@ -95,7 +110,7 @@ begin-module watchdog
   \ Set the watchdog delay in microseconds
   : watchdog-delay-us! ( us -- )
     dup validate-watchdog-delay-us
-    2 lshift watchdog-reload !
+    [ rp2040? ] [if] 1 lshift [then] watchdog-reload !
     watchdog-enabled @ if
       watchdog-reload @ 0= if
         force-watchdog-reboot
@@ -164,7 +179,8 @@ begin-module watchdog
       0 WATCHDOG_SCRATCH4 ! \ Do a normal reboot on watchdog timeout
       RESETS_ALL RESETS_WDSEL !
       false watchdog-enabled !
-      watchdog-delay-us-default 2 lshift watchdog-reload !
+      watchdog-delay-us-default [ rp2040? ] [if] 1 lshift [then]
+      watchdog-reload !
       ['] update-watchdog task::watchdog-hook !
     ;
     

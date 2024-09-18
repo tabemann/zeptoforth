@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2024 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -487,6 +487,14 @@ _finalize_hook:
 	bx lr
 	end_inlined
 
+        @@ The reboot hook
+        define_word "reboot-hook", visible_flag
+_reboot_hook:
+        push_tos
+        ldr tos, =reboot_hook
+        bx lr
+        end_inlined
+        
 	@@ The vector table address
 	define_word "vector-table", visible_flag
 _vector_table:
@@ -541,14 +549,24 @@ _cortex_m7:
         bx lr
         end_inlined
 
-        @@ Get whether the CPU is an RP2040
-        define_word "rp2040?", visible_flag
-_rp2040:
+        @@ Whether the CMU is a Cortex-M33 CPU
+        define_word "cortex-m33?", visible_flag
+_cortex_m33:
         push_tos
         movs tos, #0
-        .ifdef rp2040
+        .if cortex_m33
         mvns tos, tos
         .endif
+        bx lr
+        end_inlined
+
+        @@ Get a pair of codes indicating the CPU
+        define_word "chip", visible_flag
+_chip:
+        push_tos
+        ldr tos, =chip1
+        push_tos
+        ldr tos, =chip0
         bx lr
         end_inlined
 
