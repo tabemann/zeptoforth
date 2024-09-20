@@ -153,12 +153,13 @@ _get_psram_size:
         cmp r3, #PSRAM_ID
         bne 3f
         ldr tos, =1024 * 1024
-        lsls r0, r4, #5
+        lsrs r0, r4, #5
         cmp r4, #0x26
-        bne 2f
+        beq 4f
         cmp r0, #2
-        bne 2f
-        ldr tos, =8 * 1024 * 1024
+        beq 4f
+        b 2f
+4:      ldr tos, =8 * 1024 * 1024
         b 3f
 2:      cmp r0, #0
         bne 2f
