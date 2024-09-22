@@ -1,15 +1,20 @@
 # Line Editor
 
-The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal `refill` mechanism. When enabled, the following keys can be used to control editing:
+The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal `refill` mechanism. It provides both input history and a clipboard that is filled by deleting/cutting text. When enabled, the following keys can be used to control editing:
 
-* Backspace: delete the character to the left of the cursor
-* Delete: delete the character under the cursor
+* Backspace: delete/cut the character to the left of the cursor
+* Delete: delete/cut the character under the cursor
 * Left / Control-B: move the cursor one character to the left
 * Right / Control-F: move the cursor one character to the right
 * Up: switch to the previous line in the history
 * Down: switch to the next line in the history
 * Control-A: move the cursor to the start of the input
 * Control-E: move the cursor to the end of the input
+* Control-L: reset the terminal
+* Control-K: delete/cut to the end of the line from the cursor
+* Control-U: delete/cut to the start of the line from the cursor
+* Control-W: delete/cut to the start of the preceding word delimited by whitespace from the cursor
+* Control-Y: paste the current clipboard at the cursor
 * F1: enter upload mode, where line editing features are turned off
 * F2: leave upload mode and re-enable line editing features; this must be entered as the first key entered on a line
 

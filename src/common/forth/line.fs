@@ -87,6 +87,7 @@ begin-module line-internal
   $05 constant ctrl-e
   $06 constant ctrl-f
   $0B constant ctrl-k
+  $0C constant ctrl-l
   $15 constant ctrl-u
   $17 constant ctrl-w
   $19 constant ctrl-y
@@ -277,6 +278,12 @@ begin-module line-internal
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     0 line @ line-offset h! 0 line @ line-count h!
     update-start-position update-terminal-size
+  ;
+
+  \ Handle resetting the terminal
+  : handle-reset ( -- )
+    reset-terminal-color reset-terminal-cursor
+    page reset-ansi-term update-start-position update-terminal-size update-line
   ;
 
   \ Get the number of character spaces in the buffer up to a given index
@@ -835,6 +842,7 @@ begin-module line-internal
           ctrl-u of handle-delete-start false endof
           ctrl-k of handle-delete-end false endof
           ctrl-y of handle-paste false endof
+          ctrl-l of handle-reset false endof
 	  escape of handle-escape endof
 	  swap false swap
 	endcase 
