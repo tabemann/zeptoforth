@@ -30,7 +30,7 @@ begin-module line-internal
   user line
 
   compress-flash
-
+  
   \ History block count
   128 constant history-block-count
 
@@ -39,6 +39,20 @@ begin-module line-internal
 
   \ Line editor is in upload mode
   0 bit constant line-upload-mode
+
+  \ Clipboard size
+  128 constant clipboard-size
+
+  \ No clipboard end
+  0 constant no-clipboard-end
+
+  \ Left clipboard end
+  1 constant left-clipboard-end
+
+  \ Right clipboard end
+  2 constant right-clipboard-end
+  
+  commit-flash
   
   \ Line structure
   begin-structure line-size
@@ -56,6 +70,9 @@ begin-module line-internal
     field: line-history-current
     field: line-flags
     field: line-edit-deferred
+    hfield: line-clipboard-count
+    hfield: line-clipboard-end
+    clipboard-size +field line-clipboard
     history-block-size history-block-count heap-size +field line-history-heap
   end-structure
   
@@ -69,7 +86,11 @@ begin-module line-internal
   $02 constant ctrl-b
   $05 constant ctrl-e
   $06 constant ctrl-f
-
+  $0B constant ctrl-k
+  $15 constant ctrl-u
+  $17 constant ctrl-w
+  $19 constant ctrl-y
+  
   commit-flash
   
   \ Get next history item
@@ -276,9 +297,87 @@ begin-module line-internal
     loop
   ;
 
+  \ Evict a character from the left-hand side of the clipboard
+  : evict-clipboard-left ( -- )
+    line @ line-clipboard-count h@ 0> if
+      0 { bytes }
+      begin
+        bytes line @ line-clipboard-count h@ < if
+          line @ line-clipboard bytes + c@ { c }
+          c unicode-start? if
+            count 0= if 1 +to bytes false else true then
+          else
+            c unicode? if 1 +to bytes false else true then
+          then
+        else
+          true
+        then
+      until
+      line @ line-clipboard bytes + line @ line-clipboard
+      line @ line-clipboard-count h@ bytes - move
+      bytes negate line @ line-clipboard-count h+!
+    then
+  ;
+
+  \ Evict a character from the right-hand side of the clipboard
+  : evict-clipboard-right ( -- )
+    line @ line-clipboard-count h@ 0> if
+      1 { bytes }
+      begin
+        bytes line @ line-clipboard-count h@ < if
+          line @ line-clipboard bytes - c@ { c }
+          c unicode? c unicode-start? not and if
+            1 +to bytes false
+          else
+            true
+          then
+        else
+          true
+        then
+      until
+      bytes negate line @ line-clipboard-count h+!
+    then
+  ;
+
+  commit-flash
+
+  \ Insert a byte on the left-hand side of the clipboard
+  : insert-clipboard-left { c -- }
+    line @ line-clipboard-end h@ left-clipboard-end = if
+      line @ line-clipboard-count h@ clipboard-size = if
+        evict-clipboard-right
+      then
+    else
+      0 line @ line-clipboard-count h!
+    then
+    left-clipboard-end line @ line-clipboard-end h!
+    line @ line-clipboard line @ line-clipboard 1+
+    line @ line-clipboard-count h@ move
+    c line @ line-clipboard c!
+    1 line @ line-clipboard-count h+!
+  ;
+
+  \ Insert a byte on the right-hand side of the clipboard
+  : insert-clipboard-right { c -- }
+    line @ line-clipboard-end h@ right-clipboard-end = if
+      line @ line-clipboard-count h@ clipboard-size = if
+        evict-clipboard-left
+      then
+    else
+      0 line @ line-clipboard-count h!
+    then
+    right-clipboard-end line @ line-clipboard-end h!
+    c line @ line-clipboard line @ line-clipboard-count h@ + c!
+    1 line @ line-clipboard-count h+!
+  ;
+
+  commit-flash
+  
   \ Delete a byte at an index
   : delete-byte ( -- )
     line @ line-index-ptr @ @ 0> if
+      line @ line-index-ptr @ @ line @ line-buffer-ptr @ + 1- c@
+      insert-clipboard-left
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + dup 1-
       line @ line-count-ptr @ @ line @ line-index-ptr @ @ - move
       -1 line @ line-index-ptr @ +!
@@ -289,14 +388,48 @@ begin-module line-internal
   \ Delete bytes forward
   : delete-byte-forward ( -- )
     line @ line-count-ptr @ @ line @ line-index-ptr @ @ > if
+      line @ line-index-ptr @ @ line @ line-buffer-ptr @ + c@
+      insert-clipboard-right
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + dup swap 1+ swap
       line @ line-count-ptr @ @ 1- line @ line-index-ptr @ @ - move
       -1 line @ line-count-ptr @ +!
     then
   ;
 
+  \ Delete bytes matching a predicate
+  : delete-bytes { xt -- }
+    begin
+      line @ line-index-ptr @ @ 0> if
+        line @ line-index-ptr @ @ line @ line-buffer-ptr @ + 1- c@
+        xt execute if delete-byte false else true then
+      else
+        true
+      then
+    until
+  ;
+
+  \ Delete until the start of the line
+  : delete-start ( -- )
+    line @ line-index-ptr @ @ 0> if
+      0 line @ line-index-ptr @ @ 1- ?do
+        line @ line-buffer-ptr @ i + c@ insert-clipboard-left
+      -1 +loop
+    then
+    line @ line-index-ptr @ @ negate line @ line-count-ptr @ +!
+    0 line @ line-index-ptr @ !
+  ;
+  
+  \ Delete until the end of the line
+  : delete-end ( -- )
+    line @ line-count-ptr @ @ line @ line-index-ptr @ @ ?do
+      line @ line-buffer-ptr @ i + c@ insert-clipboard-right
+    loop
+    line @ line-index-ptr @ @ line @ line-count-ptr @ !
+  ;
+
   \ Insert a byte at an index
   : insert-byte ( b -- success )
+    no-clipboard-end line @ line-clipboard-end h!
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + dup 1+
       line @ line-count-ptr @ @ line @ line-index-ptr @ @ - move
@@ -311,6 +444,7 @@ begin-module line-internal
 
   \ Append a byte
   : append-byte ( b -- success )
+    no-clipboard-end line @ line-clipboard-end h!
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
       1 line @ line-index-ptr @ +!
@@ -384,6 +518,33 @@ begin-module line-internal
     then
   ;
 
+  \ Handle delete word
+  : handle-delete-word ( -- )
+    line @ line-offset h@ 0> if
+      line @ line-index-ptr @ @ get-spaces-to-index { start-count }
+      [: dup bl = swap tab = or ;] delete-bytes
+      [: dup bl <> swap tab <> and ;] delete-bytes
+      line @ line-index-ptr @ @ get-spaces-to-index { end-count }
+      end-count start-count - dup line @ line-offset h+! line @ line-count h+!
+      update-line
+    then
+  ;
+
+  \ Handle deleting to the start of the line
+  : handle-delete-start ( -- )
+    delete-start
+    line @ line-offset h@ negate line @ line-count h+!
+    0 line @ line-offset h!
+    update-line
+  ;
+
+  \ Handle deleting to the end of the line
+  : handle-delete-end ( -- )
+    delete-end
+    line @ line-offset h@ line @ line-count h!
+    update-line
+  ;
+  
   \ Handle insert
   : handle-insert ( b -- )
     line @ line-index-ptr @ @ line @ line-count-ptr @ @ < if
@@ -411,6 +572,53 @@ begin-module line-internal
 	  loop
 	then
       then
+    then
+  ;
+
+  \ Determine how much clipboard can actually be pasted
+  : get-paste-count ( -- count )
+    line @ line-clipboard-count h@ { paste-count }
+    begin
+      line @ line-count-ptr @ @ paste-count + line @ line-buffer-size @ >
+      paste-count 0> and
+    while
+      line @ line-clipboard paste-count + 1- c@ { c }
+      c unicode? if
+        begin
+          paste-count 0> if
+            line @ line-clipboard paste-count + 1- c@ { c }
+            c unicode-start? if
+              -1 +to paste-count true
+            else
+              c unicode? if
+                -1 +to paste-count false
+              else
+                true
+              then
+            then
+          else
+            true
+          then
+        until
+      else
+        -1 +to paste-count
+      then
+    repeat
+    paste-count
+  ;
+  
+  \ Handle paste
+  : handle-paste ( -- )
+    line @ line-index-ptr @ @ get-spaces-to-index { start-count }
+    get-paste-count { paste-count }
+    false { pasted? }
+    paste-count 0 ?do
+      line @ line-clipboard i + c@ insert-byte pasted? or to pasted?
+    loop
+    pasted? if
+      line @ line-index-ptr @ @ get-spaces-to-index { end-count }
+      end-count start-count - dup line @ line-offset h+! line @ line-count h+!
+      update-line
     then
   ;
 
@@ -622,7 +830,11 @@ begin-module line-internal
 	  ctrl-a of handle-start false endof
 	  ctrl-e of handle-end false endof
 	  ctrl-f of handle-forward false endof
-	  ctrl-b of handle-backward false endof
+          ctrl-b of handle-backward false endof
+          ctrl-w of handle-delete-word false endof
+          ctrl-u of handle-delete-start false endof
+          ctrl-k of handle-delete-end false endof
+          ctrl-y of handle-paste false endof
 	  escape of handle-escape endof
 	  swap false swap
 	endcase 
@@ -666,6 +878,8 @@ begin-module line-internal
     0 over line-history-first !
     0 over line-history-current !
     0 over line-flags !
+    0 over line-clipboard-count h!
+    0 over line-clipboard-end h!
     ['] line-edit over line-edit-deferred !
     history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
