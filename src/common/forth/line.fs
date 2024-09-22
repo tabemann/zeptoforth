@@ -268,7 +268,7 @@ begin-module line-internal
 	dup unicode-start? if
 	  drop 1+
 	else
-	  dup $20 >= swap $80 < and if
+	  dup $20 >= swap $7F < and if
 	    1+
 	  then
 	then
@@ -323,48 +323,42 @@ begin-module line-internal
 
   \ Get the number of bytes of the character to the left of the cursor
   : left-bytes ( -- count )
-    0 line @ line-index-ptr @ @ begin
-      dup 0> if
-	swap 1+ swap 1- dup line @ line-buffer-ptr @ + c@
-	dup unicode-start? if
-	  drop true
-	else
-	  unicode? not
-	then
+    0 { bytes }
+    begin line @ line-index-ptr @ @ bytes - 0> while
+      line @ line-index-ptr @ @ bytes 1+ - line @ line-buffer-ptr @ + c@ { c }
+      c unicode-start? if
+        bytes 1+ exit
       else
-	true
+        c unicode? if
+          1 +to bytes
+        else
+          bytes 0= if 1 else bytes then exit
+        then
       then
-    until
-    drop
+    repeat
+    bytes
   ;
 
   \ Get the number of bytes of the character to the right of the cursor
   : right-bytes ( -- count )
-    line @ line-index-ptr @ @ line @ line-count-ptr @ @ < if
-      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c@
-      dup $80 u< if
-	drop 1
+    0 { bytes }
+    begin line @ line-index-ptr @ @ bytes + line @ line-count-ptr @ @ < while
+      line @ line-index-ptr @ @ bytes + line @ line-buffer-ptr @ + c@ { c }
+      c unicode-start? if
+        bytes 0= if
+          1 +to bytes
+        else
+          bytes exit
+        then
       else
-	1 line @ line-index-ptr @ @ 1+ begin
-	  dup line @ line-count-ptr @ @ u< if
-	    dup line @ line-buffer-ptr @ + c@
-	    dup unicode-start? if
-	      drop drop true
-	    else
-	      unicode? if
-		1+ swap 1+ swap false
-	      else
-		drop true
-	      then
-	    then
-	  else
-	    drop true
-	  then
-	until
+        c unicode? if
+          1 +to bytes
+        else
+          bytes 0= if 1 else bytes then exit
+        then
       then
-    else
-      0
-    then
+    repeat
+    bytes
   ;
 
   commit-flash
