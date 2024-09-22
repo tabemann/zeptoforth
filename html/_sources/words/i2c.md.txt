@@ -141,6 +141,16 @@ Constant returned by `wait-i2c-master` on accepting a receive from an I2C master
 
 Exception raised if an out of range clock is set with `i2c-clock!`.
 
+##### `x-i2c-target-noack`
+( -- )
+
+Exception raised if an I2C target address is not acknowledged.
+
+##### `x-arb-lost`
+( -- )
+
+Exception raised on arbitration lost.
+
 ##### `x-i2c-tx-error`
 ( -- )
 
