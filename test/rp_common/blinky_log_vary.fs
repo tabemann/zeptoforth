@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module blinky-vary-test
+begin-module blinky-log-vary-test
 
   variable last-fade-us
   variable last-blink-angle-us
@@ -34,7 +34,8 @@ begin-module blinky-vary-test
   4 constant pwm-slice
   
   : adjust-brightness { D: x -- y }
-    1,0 [ 1,0 exp 1,0 d- swap ] literal literal x 1,0 d+ 2,0 f/ f* 1,0 d+ ln d-
+    [ 1,0 exp 1,0 d- swap ] literal literal x 1,0 d+ 2,0 f/ f* 1,0 d+
+    1,0 dmax ln 1,0 2swap d- 0,0 dmax 1,0 dmin
   ;
   
   defer do-fade ( -- )
@@ -46,7 +47,7 @@ begin-module blinky-vary-test
       [ pi 2,0 f* swap ] literal literal d-
     then
     2dup fade-angle 2!
-    sin adjust-brightness 65535,0 f* round-half-even
+    sin adjust-brightness 65535,0 f* round-half-even 0 max 65535 min
     pwm-slice pwm::pwm-counter-compare-b!
     last-fade-us @ fade-interval + timer::us-counter-lsb -
     fade-interval 2 / > if

@@ -197,7 +197,7 @@ commit-flash
 
 \ Calculate ln(x + 1)
 : lnp1 ( f1 -- f2 )
-  0 1 d+ >r >r 0 0 begin
+  0 1 d+ 64 >r >r >r 0 0 begin
     2dup exp \ y exp(y)
     2dup 2r@ 2swap d- \ y exp(y) x-exp(y)
     2r@ 2rot d+ \ y x-exp(y) x+exp(y)
@@ -205,9 +205,9 @@ commit-flash
     2 0 d* \ y 2*(x-exp(y))/(x+exp(y))
     2over d+ \ y y+2*(x-exp(y))/(x+exp(y))
     2dup 2rot d- \ y+2*(x-exp(y))/(x+exp(y)) 2*(x-exp(y))/(x+exp(y))
-    dabs 2 0 d<
+    dabs 2 0 d< 2r> r> 1- dup >r -rot 2>r 0= or
   until
-  rdrop rdrop
+  rdrop rdrop rdrop
 ;
 
 commit-flash

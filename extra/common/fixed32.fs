@@ -243,7 +243,7 @@ begin-module fixed32
   
   \ Get the ln(x+1) of an S15.16 fixed-point number
   : f32lnp1 ( f32 -- f32' )
-    [ 1 s>f32 ] literal + >r 0 begin
+    [ 1 s>f32 ] literal + 32 >r >r 0 begin
       dup f32exp
       dup r@ swap -
       r@ rot +
@@ -251,9 +251,9 @@ begin-module fixed32
       2 *
       over +
       dup rot -
-      abs 2 <
+      abs 2 < r> r> 1- dup >r swap >r 0= or
     until
-    rdrop
+    rdrop rdrop
   ;
   
   \ Get the ln(x) of an S15.16 fixed-point number
