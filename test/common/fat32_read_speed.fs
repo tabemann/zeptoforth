@@ -40,25 +40,30 @@ begin-module fat32-read-speed
   : run-speed-test ( c-addr u -- )
     fat32-tools::current-fs@ averts fat32-tools::x-fs-not-set
     my-file -rot [: 3 pick swap open-file ;]
-    fat32-tools::current-fs@ with-root-path drop
-    0 systick-counter { bytes-read last-systick }
-    begin key? not while
-      my-buffer my-read-size my-file read-file { cur-bytes-read }
-      cur-bytes-read 0> if
-        cur-bytes-read +to bytes-read
-        bytes-read my-total-size >= if
-          my-total-size negate +to bytes-read
-          systick-counter { current-systick }
-          0 my-total-size 1024,0 f/ 
-          0 current-systick last-systick - 10000,0 f/
-          f/ cr ." KB per second: " f.
-          current-systick to last-systick
+    [:
+      fat32-tools::current-fs@ with-root-path drop
+      0 systick-counter { bytes-read last-systick }
+      begin key? not while
+        my-buffer my-read-size my-file read-file { cur-bytes-read }
+        cur-bytes-read 0> if
+          cur-bytes-read +to bytes-read
+          bytes-read my-total-size >= if
+            my-total-size negate +to bytes-read
+            systick-counter { current-systick }
+            0 my-total-size 1024,0 f/ 
+            0 current-systick last-systick - 10000,0 f/
+            f/ cr ." KB per second: " f.
+            current-systick to last-systick
+          then
+        else
+          0 seek-set my-file seek-file
         then
-      else
-        0 seek-set my-file seek-file
-      then
-    repeat
-    key drop
+      repeat
+      key drop
+    ;] try
+    my-file close-file
+    my-file destroy
+    ?raise
   ;
   
 end-module

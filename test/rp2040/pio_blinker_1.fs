@@ -26,21 +26,45 @@ continue-module forth
 
   \ The initial setup
   :pio pio-init
+    \ Set GPIO 25 to be output
     1 SET_PINDIRS set,
+
+    \ Set GPIO 25 to be low
     0 SET_PINS set,
   ;pio
   
   \ The PIO code
   :pio pio-code
+    \ Pull from the TX FIFO into the OSR register even if it is not empty,
+    \ blocking if the TX FIFO is empty
     PULL_BLOCK PULL_NOT_EMPTY pull,
+    
+    \ Move 32 bits from the OSR into the X register
     32 OUT_X out,
+
+    \ Set GPIO 25 to be high
     1 SET_PINS set,
+
+    \ A mark to jump to for the next instruction
     mark<
+
+    \ Jump to the previous mark if X is non-zero, post-decrement
     COND_X1- jmp<
+    
+    \ Pull from the TX FIFO into the OSR register even if it is not empty,
+    \ blocking if the TX FIFO is empty
     PULL_BLOCK PULL_NOT_EMPTY pull,
+    
+    \ Move 32 bits from the OSR into the X register
     32 OUT_X out,
+
+    \ Set GPIO 25 to be low
     0 SET_PINS set,
+
+    \ A mark to jump to for the next instruction
     mark<
+
+    \ Jump to the previous mark if X is non-zero, post-decrement
     COND_X1- jmp<
   ;pio
   

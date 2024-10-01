@@ -59,11 +59,12 @@
    flash-end internal::flash-mini-dict-size + flash-end do   
      i erased?
      if
-       i insert.04ea?  
-       ." :10" i h.4 ." 00"    \ Write record-intro with 4 digits
+       i flash-end - { offset }
+       offset insert.04ea?  
+       ." :10" offset h.4 ." 00"    \ Write record-intro with 4 digits
        $10                      \ Begin checksum
-       i          $FF and +      \ Sum the address bytes 
-       i 8 rshift $FF and +       \ separately into the checksum
+       offset          $FF and +      \ Sum the address bytes 
+       offset 8 rshift $FF and +       \ separately into the checksum
        i 16 + i do                 \ EOL               
 	 i c@ h.2                  \ Print data with 2 digits
 	 i c@ +                     \ Sum it up for Checksum

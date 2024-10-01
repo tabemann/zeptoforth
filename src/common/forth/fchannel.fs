@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -223,6 +223,24 @@ begin-module fchan
     then
   ;
 
+  \ Send data on a rendezvous channel if a receiver is waiting, raising
+  \ X-WOULD-BLOCK if blocking would occur
+  : send-fchan-no-block ( addr bytes fchan -- )
+    >r
+    r@ fchan-closed @ triggers x-fchan-closed
+    r@ fchan-slock claim-slock
+    r@ fchan-recv-queue pop-fchan-queue ?dup if ( addr bytes wait )
+      swap over fchan-wait-buf-size @ min ( addr wait bytes )
+      >r swap over fchan-wait-buf @ r@ ( wait addr recv-addr bytes ) move
+      r> over fchan-wait-buf-size ! ( wait )
+      fchan-wait-task @ ready ( )
+      r> fchan-slock release-slock ( )
+    else
+      r> fchan-slock release-slock
+      ['] x-would-block ?raise
+    then
+  ;
+  
   \ Receive data on a rendezvous channel
   : recv-fchan ( addr bytes fchan -- recv-bytes )
     >r
@@ -252,6 +270,24 @@ begin-module fchan
 	  fchan-wait-buf-size @ ( bytes )
 	then
       ;] with-aligned-allot
+    then
+  ;
+
+  \ Receive data on a rendezvous channel, raising X-WOULD-BLOCK if blocking
+  \ would occur
+  : recv-fchan-no-block ( addr bytes fchan -- recv-bytes )
+    >r
+    r@ fchan-closed @ triggers x-fchan-closed
+    r@ fchan-slock claim-slock
+    r@ fchan-send-queue pop-fchan-queue ?dup if ( addr bytes wait )
+      swap over fchan-wait-buf-size @ min ( addr wait bytes )
+      >r swap over fchan-wait-buf @ swap r@ ( wait send-addr addr bytes ) move
+      r> swap ( bytes wait )
+      fchan-wait-task @ ready ( bytes )
+      r> fchan-slock release-slock ( bytes )
+    else
+      r> fchan-slock release-slock
+      ['] x-would-block ?raise
     then
   ;
 

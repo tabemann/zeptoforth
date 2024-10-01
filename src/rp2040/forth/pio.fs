@@ -980,7 +980,7 @@ begin-module pio
   %10 constant IRQ_CLEAR
 
   \ Wait for an IRQ to be lowered
-  %010 constant IRQ_WAIT
+  %01 constant IRQ_WAIT
 
   \ Set PINS
   %000 constant SET_PINS
@@ -1126,7 +1126,7 @@ begin-module pio
     \ Forward PIO JMP to >mark with delay or side-set
     : jmp+> ( delay/side-set condition -- mark-add marker )
       $07 and 5 lshift swap $1F and 8 lshift or
-      16 lshift jmp-mark or here swap 0 h,
+      16 lshift jmp-mark or here swap 2 allot
     ;
 
     \ Backward jump to mark< with delay or side-set

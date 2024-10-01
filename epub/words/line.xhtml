@@ -16,16 +16,21 @@
             
   <section id="line-editor">
 <h1>Line Editor</h1>
-<p>The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal <code class="docutils literal notranslate"><span class="pre">refill</span></code> mechanism. When enabled, the following keys can be used to control editing:</p>
+<p>The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal <code class="docutils literal notranslate"><span class="pre">refill</span></code> mechanism. It provides both input history and a clipboard that is filled by deleting/cutting text. When enabled, the following keys can be used to control editing:</p>
 <ul class="simple">
-<li><p>Backspace: delete the character to the left of the cursor</p></li>
-<li><p>Delete: delete the character under the cursor</p></li>
+<li><p>Backspace: delete/cut the character to the left of the cursor</p></li>
+<li><p>Delete: delete/cut the character under the cursor</p></li>
 <li><p>Left / Control-B: move the cursor one character to the left</p></li>
 <li><p>Right / Control-F: move the cursor one character to the right</p></li>
 <li><p>Up: switch to the previous line in the history</p></li>
 <li><p>Down: switch to the next line in the history</p></li>
 <li><p>Control-A: move the cursor to the start of the input</p></li>
 <li><p>Control-E: move the cursor to the end of the input</p></li>
+<li><p>Control-L: reset the terminal</p></li>
+<li><p>Control-K: delete/cut to the end of the line from the cursor</p></li>
+<li><p>Control-U: delete/cut to the start of the line from the cursor</p></li>
+<li><p>Control-W: delete/cut to the start of the preceding word delimited by whitespace from the cursor</p></li>
+<li><p>Control-Y: paste the current clipboard at the cursor</p></li>
 <li><p>F1: enter upload mode, where line editing features are turned off</p></li>
 <li><p>F2: leave upload mode and re-enable line editing features; this must be entered as the first key entered on a line</p></li>
 </ul>

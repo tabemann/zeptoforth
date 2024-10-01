@@ -92,6 +92,16 @@ begin-module ansi-term
 
   commit-flash
   
+  \ Reset the terminal cursor
+  : reset-terminal-cursor ( -- )
+    0 show-cursor-count ! show-cursor
+  ;
+
+  \ Reset the terminal color
+  : reset-terminal-color ( -- )
+    csi 0 (dec.) [char] m emit
+  ;
+
   \ Show the cursor with a show/hide counter
   : show-cursor ( -- )
     1 show-cursor-count +! show-cursor-count @ 0 = if show-cursor then
@@ -209,8 +219,10 @@ begin-module ansi-term
   ;
 
   \ Reset terminal state
-  : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
-
+  : reset-ansi-term ( -- )
+    0 show-cursor-count ! 0 preserve-cursor-count ! 0 saved-key !
+  ;
+  
   \ Clear window in ticks
   100 constant clear-ticks
 

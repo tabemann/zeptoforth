@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -321,179 +321,6 @@ internal set-current
 
 \ Commit to flash
 commit-flash
-
-\ Get whether a word is hidden
-: hidden? ( word -- f )
-  dup word-flags h@ visible-flag and if
-    word-name count dup 2 > if
-      over c@ [char] * = if
-	+ 1- c@ [char] * =
-      else
-	2drop false
-      then
-    else
-      2drop false
-    then
-  else
-    drop true
-  then
-;
-
-\ Actually print a string in one out of four columns, taking up more than one
-\ column if necessary
-: words-column ( b-addr bytes column1 -- column2 )
-  over 0> if
-    over 20 / + 1+
-    dup 4 >= if
-      drop 0
-    then
-    >r
-    dup 0> if
-      tuck type
-      r@ 0<> if
-	20 mod 20 swap - begin dup 0> while 1- space repeat drop
-      else
-	drop
-      then
-      r@ 0= if cr then
-    else
-      2drop
-    then
-    r>
-  else
-    -rot 2drop
-  then
-;
-
-\ Print a string in one out of four columns, taking up more than one column
-\ if necessary
-: words-column-wrap ( b-addr bytes column1 -- column2 )
-  4 over - 20 * 2 pick < if
-    cr drop 0 words-column
-  else
-    words-column
-  then
-;
-
-\ Commit to flash
-commit-flash
-
-\ Display all the words in a dictionary starting at a given column, and
-\ returning the next column
-: words-dict ( dict wid column1 -- column2 )
-  swap >r
-  begin
-    over 0<>
-  while
-    over hidden? not 2 pick wordlist-id h@ r@ = and if
-      over word-name count rot words-column-wrap
-    then
-    swap next-word @ swap
-  repeat
-  nip rdrop
-;
-
-\ Display all the words in a dictionary starting at a given column and returning
-\ the next column
-: lookup-dict ( b-addr bytes dict wid column1 -- column2 )
-  swap >r
-  begin over 0<> while
-    over hidden? not 2 pick wordlist-id h@ r@ = and if
-      3 pick 3 pick 3 pick word-name count prefix? if
-	over word-name count rot words-column-wrap
-      then
-    then
-    swap next-word @ swap
-  repeat
-  nip rdrop
-;
-
-\ Find the common prefix length to a word
-: find-prefix-len ( b-addr bytes dict -- prefix-bytes )
-  0 begin over 0<> while
-    over hidden? not if
-      3 pick 3 pick 3 pick word-name count common-prefix max
-    then
-    swap next-word @ swap
-  repeat
-  nip nip nip
-;
-
-\ Commit code to flash
-commit-flash
-
-\ Set forth
-forth set-current
-
-\ Express the semantics of a word in the present compilation/interpretation
-\ state
-: apply ( ? word -- ? )
-  state @ if
-    dup word-flags h@ dup immediate-flag and if
-      drop >xt execute
-    else
-      dup inlined-flag and if
-	drop >xt inline,
-      else
-	fold-flag and if
-	  >xt fold,
-	else
-	  >xt compile,
-	then
-      then
-    then
-  else
-    dup word-flags h@ compiled-flag and triggers x-not-compiling
-    >xt execute
-  then
-;
-
-\ Lookup a word by its prefix
-: lookup ( "name" -- )
-  cr token dup 0<> averts x-token-expected
-  2dup ram-latest find-prefix-len
-  2 pick 2 pick flash-latest find-prefix-len
-  rot drop max
-  0 0 begin
-    dup order-count @ <
-  while
-    >r 2 pick 2 pick ram-latest order r@ 2* + h@ 4 roll lookup-dict
-    2 pick 2 pick flash-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
-  repeat
-  2drop 2drop cr
-;
-
-\ Lookup a word by its prefix in a wordlist
-: lookup-in ( wid "name" -- )
-  >r cr token dup 0<> averts x-token-expected
-  2dup ram-latest find-prefix-len
-  2 pick 2 pick flash-latest find-prefix-len
-  rot drop max
-  2dup ram-latest r@ 0 lookup-dict
-  flash-latest r> rot lookup-dict
-  drop cr
-;
-
-\ Display all the words as four columns
-: words ( -- )
-  cr
-  0 0 begin
-    dup order-count @ <
-  while
-    >r ram-latest order r@ 2* + h@ rot words-dict
-    flash-latest order r@ 2* + h@ rot words-dict
-    r> 1+
-  repeat
-  2drop cr
-;
-
-\ Display all the words as four columns in a wordlist
-: words-in ( wid -- )
-  cr >r ram-latest r@ 0 words-dict flash-latest r> rot words-dict drop cr
-;
-
-\ Set internal
-internal set-current
 
 \ Search for all the words that go by a certain name in a given dictionary
 : search-word-info ( b-addr bytes dict -- )
@@ -1012,6 +839,7 @@ commit-flash
 \ Allocate a user buffer
 : user-buffer: ( bytes "name" -- )
   next-user-space
+  4 align
   compiling-to-flash?
   over
   compile-to-flash
@@ -1142,6 +970,7 @@ internal set-current
 \ Allocate a buffer in RAM
 : ram-buffer: ( bytes "name" -- )
   next-ram-space
+  4 align
   compiling-to-flash?
   over
   compile-to-flash
@@ -1502,6 +1331,204 @@ commit-flash
 commit-flash
 
 \ Set the internal module
+internal set-current
+
+\ Get whether a word is hidden
+: hidden? ( word -- f )
+  dup word-flags h@ visible-flag and if
+    word-name count dup 2 > if
+      over c@ [char] * = if
+	+ 1- c@ [char] * =
+      else
+	2drop false
+      then
+    else
+      2drop false
+    then
+  else
+    drop true
+  then
+;
+
+\ Is halfword in array
+: half-in-array ( value addr count -- in-array? )
+  2* over + swap ?do dup i h@ = if drop true unloop exit then 2 +loop
+  drop false
+;
+
+\ Generate a unique wordlist order
+: unique-order ( -- addr count )
+  cell ram-align,
+  ram-here 0
+  order-count @ 0 ?do
+    2dup order i 2* + h@ -rot half-in-array not if
+      2 ram-allot 2dup 2* + order i 2* + h@ swap h! 1+
+    then
+  loop
+  cell ram-align,
+;
+
+\ Actually print a string in one out of four columns, taking up more than one
+\ column if necessary
+: words-column ( b-addr bytes column1 -- column2 )
+  over 0> if
+    over 20 / + 1+
+    dup 4 >= if
+      drop 0
+    then
+    >r
+    dup 0> if
+      tuck type
+      r@ 0<> if
+	20 mod 20 swap - begin dup 0> while 1- space repeat drop
+      else
+	drop
+      then
+      r@ 0= if cr then
+    else
+      2drop
+    then
+    r>
+  else
+    -rot 2drop
+  then
+;
+
+\ Print a string in one out of four columns, taking up more than one column
+\ if necessary
+: words-column-wrap ( b-addr bytes column1 -- column2 )
+  4 over - 20 * 2 pick < if
+    cr drop 0 words-column
+  else
+    words-column
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Display all the words in a dictionary starting at a given column, and
+\ returning the next column
+: words-dict ( dict wid column1 -- column2 )
+  swap >r
+  begin
+    over 0<>
+  while
+    over hidden? not 2 pick wordlist-id h@ r@ = and if
+      over word-name count rot words-column-wrap
+    then
+    swap next-word @ swap
+  repeat
+  nip rdrop
+;
+
+\ Display all the words in a dictionary starting at a given column and returning
+\ the next column
+: lookup-dict ( b-addr bytes dict wid column1 -- column2 )
+  swap >r
+  begin over 0<> while
+    over hidden? not 2 pick wordlist-id h@ r@ = and if
+      3 pick 3 pick 3 pick word-name count prefix? if
+	over word-name count rot words-column-wrap
+      then
+    then
+    swap next-word @ swap
+  repeat
+  nip nip nip rdrop
+;
+
+\ Find the common prefix length to a word
+: find-prefix-len ( b-addr bytes dict -- prefix-bytes )
+  0 begin over 0<> while
+    over hidden? not if
+      3 pick 3 pick 3 pick word-name count common-prefix max
+    then
+    swap next-word @ swap
+  repeat
+  nip nip nip
+;
+
+\ Commit code to flash
+commit-flash
+
+\ Inner portion of LOOKUP
+: lookup-inner ( "name" -- )
+  cr token dup 0<> averts x-token-expected
+  2dup ram-latest find-prefix-len
+  2 pick 2 pick flash-latest find-prefix-len
+  rot drop max
+  0 unique-order 2* over + swap ?do
+    2 pick 2 pick ram-latest i h@ 4 roll lookup-dict
+    2 pick 2 pick flash-latest i h@ 4 roll lookup-dict
+  2 +loop
+  2drop drop cr
+;
+
+\ Inner portion of WORDS
+: words-inner ( -- )
+  cr
+  0 unique-order 2* over + swap ?do
+    ram-latest i h@ rot words-dict
+    flash-latest i h@ rot words-dict
+  2 +loop
+  drop cr
+;
+
+\ Commit code to flash
+commit-flash
+
+\ Set forth
+forth set-current
+
+\ Express the semantics of a word in the present compilation/interpretation
+\ state
+: apply ( ? word -- ? )
+  state @ if
+    dup word-flags h@ dup immediate-flag and if
+      drop >xt execute
+    else
+      dup inlined-flag and if
+	drop >xt inline,
+      else
+	fold-flag and if
+	  >xt fold,
+	else
+	  >xt compile,
+	then
+      then
+    then
+  else
+    dup word-flags h@ compiled-flag and triggers x-not-compiling
+    >xt execute
+  then
+;
+
+\ Lookup a word by its prefix
+: lookup ( "name" -- )
+  ram-here ['] lookup-inner try swap ram-here! ?raise
+;
+
+\ Lookup a word by its prefix in a wordlist
+: lookup-in ( wid "name" -- )
+  >r cr token dup 0<> averts x-token-expected
+  2dup ram-latest find-prefix-len
+  2 pick 2 pick flash-latest find-prefix-len
+  rot drop max
+  2dup ram-latest r@ 0 lookup-dict
+  flash-latest r> rot lookup-dict
+  drop cr
+;
+
+\ Display all the words as four columns
+: words ( -- )
+  ram-here ['] words-inner try swap ram-here! ?raise
+;
+
+\ Display all the words as four columns in a wordlist
+: words-in ( wid -- )
+  cr >r ram-latest r@ 0 words-dict flash-latest r> rot words-dict drop cr
+;
+
 internal set-current
 
 \ Dump 16 bytes of ASCII
@@ -2552,7 +2579,7 @@ forth set-current
 : find-approx-addr-dict ( addr here-addr last-dict -- word|0 )
   begin
     dup 0<> if
-      [ rp2040? ] [if]
+      [ chip nip $7270 = ] [if]
         2dup < if
           nip $20008000 swap
         then
@@ -2617,6 +2644,13 @@ commit-flash
   then
 ;
 
+\ Return control to the prompt
+: return-to-prompt
+  display-red cr ." *** HARDWARE EXCEPTION, RETURNING TO PROMPT ***"
+  display-normal cr
+  abort
+;
+
 #include src/common/forth/welcome.fs
 #include src/common/forth/legal.fs
 
@@ -2633,7 +2667,7 @@ commit-flash
   task-key?-hook @
   task-emit-hook @
   task-emit?-hook @
-  next-ram-space dict-base !
+  next-ram-space cell align dict-base !
   task-emit?-hook !
   task-emit-hook !
   task-key?-hook !

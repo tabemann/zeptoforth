@@ -18,12 +18,13 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simple FAT32 Support" href="simple_fat32.html" />
-    <link rel="prev" title="SDHC/SDXC Card Support" href="sdcard.html" />
+    <link rel="prev" title="SDHC/SDXC Card and Blocks Block Device Support" href="block_dev.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -38,6 +39,7 @@
   <section id="fat32-support">
 <h1>FAT32 Support<a class="headerlink" href="#fat32-support" title="Permalink to this heading">¶</a></h1>
 <p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
+<p>Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with <code class="docutils literal notranslate"><span class="pre">close-file</span></code> and directories need to be closed with <code class="docutils literal notranslate"><span class="pre">close-dir</span></code>, followed by being destroyed with <code class="docutils literal notranslate"><span class="pre">destroy</span></code>, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.</p>
 <section id="fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code><a class="headerlink" href="#fat32" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module contains the following words:</p>
@@ -115,6 +117,21 @@
 <h3><code class="docutils literal notranslate"><span class="pre">x-invalid-path</span></code><a class="headerlink" href="#x-invalid-path" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Invalid path exception.</p>
+</section>
+<section id="x-not-open">
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-open</span></code><a class="headerlink" href="#x-not-open" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file or directory that is not open.</p>
+</section>
+<section id="x-shared-file">
+<h3><code class="docutils literal notranslate"><span class="pre">x-shared-file</span></code><a class="headerlink" href="#x-shared-file" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file where the file must only be open once (i.e. truncate a file).</p>
+</section>
+<section id="x-open">
+<h3><code class="docutils literal notranslate"><span class="pre">x-open</span></code><a class="headerlink" href="#x-open" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Attempted to carry out an operation on a file or directory that is open (i.e. remove a file or directory).</p>
 </section>
 <section id="seek-set">
 <h3><code class="docutils literal notranslate"><span class="pre">seek-set</span></code><a class="headerlink" href="#seek-set" title="Permalink to this heading">¶</a></h3>
@@ -199,13 +216,33 @@
 </section>
 <section id="with-root-path">
 <h3><code class="docutils literal notranslate"><span class="pre">with-root-path</span></code><a class="headerlink" href="#with-root-path" title="Permalink to this heading">¶</a></h3>
-<p>( c-addr u xt fs ) ( xt: c-addr’ u’ dir – )</p>
-<p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns.</p>
+<p>( c-addr u xt fs – ) ( xt: c-addr’ u’ dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="root-path-exists">
 <h3><code class="docutils literal notranslate"><span class="pre">root-path-exists?</span></code><a class="headerlink" href="#root-path-exists" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u fs – exists? )</p>
 <p>Get whether a file or directory exists at the specified path starting at the root directory of a FAT32 filesystem.</p>
+</section>
+<section id="with-create-file-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-file-at-root-path</span></code><a class="headerlink" href="#with-create-file-at-root-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt fs – ) ( xt: file – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-file-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-file-at-root-path</span></code><a class="headerlink" href="#with-open-file-at-root-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt fs – ) ( xt: file – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-create-dir-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-dir-at-root-path</span></code><a class="headerlink" href="#with-create-dir-at-root-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt fs – ) ( xt: dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-dir-at-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-dir-at-root-path</span></code><a class="headerlink" href="#with-open-dir-at-root-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt fs – ) ( xt: dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="flush">
 <h3><code class="docutils literal notranslate"><span class="pre">flush</span></code><a class="headerlink" href="#flush" title="Permalink to this heading">¶</a></h3>
@@ -234,6 +271,16 @@
 <p>( fs file – )</p>
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="close-file">
+<h3><code class="docutils literal notranslate"><span class="pre">close-file</span></code><a class="headerlink" href="#close-file" title="Permalink to this heading">¶</a></h3>
+<p>( file – )</p>
+<p>Close a file.</p>
+</section>
+<section id="file-open">
+<h3><code class="docutils literal notranslate"><span class="pre">file-open?</span></code><a class="headerlink" href="#file-open" title="Permalink to this heading">¶</a></h3>
+<p>( file – open? )</p>
+<p>Get whether a file is open.</p>
 </section>
 <section id="read-file">
 <h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Permalink to this heading">¶</a></h3>
@@ -276,6 +323,16 @@
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> class includes the following methods:</p>
 </section>
+<section id="close-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">close-dir</span></code><a class="headerlink" href="#close-dir" title="Permalink to this heading">¶</a></h3>
+<p>( dir – )</p>
+<p>Close a directory.</p>
+</section>
+<section id="dir-open">
+<h3><code class="docutils literal notranslate"><span class="pre">dir-open?</span></code><a class="headerlink" href="#dir-open" title="Permalink to this heading">¶</a></h3>
+<p>( dir – open? )</p>
+<p>Get whether a directory is open.</p>
+</section>
 <section id="with-path">
 <h3><code class="docutils literal notranslate"><span class="pre">with-path</span></code><a class="headerlink" href="#with-path" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u xt dir – ) ( xt: c-addr’ u’ dir’ – )</p>
@@ -285,6 +342,26 @@
 <h3><code class="docutils literal notranslate"><span class="pre">path-exists?</span></code><a class="headerlink" href="#path-exists" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u dir – exists? )</p>
 <p>Get whether a file or directory exist at the specified path starting at a given directory.</p>
+</section>
+<section id="with-create-file-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-file-at-path</span></code><a class="headerlink" href="#with-create-file-at-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt dir – ) ( xt: file – )</p>
+<p>Parse a path starting at a given directory, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-file-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-file-at-path</span></code><a class="headerlink" href="#with-open-file-at-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt dir – ) ( xt: file – )</p>
+<p>Parse a path starting at a given directory, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to <em>xt</em>. The passed in file object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-create-dir-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-create-dir-at-path</span></code><a class="headerlink" href="#with-create-dir-at-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt dir – ) ( xt: dir’ – )</p>
+<p>Parse a path starting at a given directory, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
+</section>
+<section id="with-open-dir-at-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-open-dir-at-path</span></code><a class="headerlink" href="#with-open-dir-at-path" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u xt dir – ) ( xt: dir’ – )</p>
+<p>Parse a path starting at a given directory, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to <em>xt</em>. The passed in directory object will be closed when the called <em>xt</em> returns.</p>
 </section>
 <section id="exists">
 <h3><code class="docutils literal notranslate"><span class="pre">exists?</span></code><a class="headerlink" href="#exists" title="Permalink to this heading">¶</a></h3>
@@ -605,7 +682,8 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -650,9 +728,11 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -664,7 +744,7 @@ bits 4-0: day (1-31)</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="sdcard.html" title="previous chapter">SDHC/SDXC Card Support</a></li>
+      <li>Previous: <a href="block_dev.html" title="previous chapter">SDHC/SDXC Card and Blocks Block Device Support</a></li>
       <li>Next: <a href="simple_fat32.html" title="next chapter">Simple FAT32 Support</a></li>
   </ul></li>
 </ul>
@@ -692,11 +772,11 @@ bits 4-0: day (1-31)</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/fat32.md.txt"

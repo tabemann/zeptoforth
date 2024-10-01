@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2024 Travis Bemann
 @ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -135,6 +135,13 @@ _pre_reboot:
 	@ Reboot the RP2040 in BOOTSEL mode
 	define_word "bootsel", visible_flag
 _bootsel:
+        push {lr}
+
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+        
 	movs r2, #0
 	ldr r1, ='U | ('B << 8)
 	ldrh r0, [r2, #0x14]
@@ -144,7 +151,7 @@ _bootsel:
 	movs r0, #0
 	movs r1, #0
 	blx r3
-	bx lr
+        pop {pc}
 	end_inlined
 
 	@@ Execute a PAUSE word, if one is set

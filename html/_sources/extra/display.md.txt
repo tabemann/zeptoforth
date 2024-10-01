@@ -18,6 +18,8 @@ The `<st7735s>` class implements a 16-bit ST7735S device interface and supports 
 
 The `<st7735s-8>` class implements a 16-bit ST7735S device interface with a 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffer and supports all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
+The `<st7735s-1>` class implements a 16-bit ST7735S device interface with fixed 16-bit foreground and background colors with a bitmap backing buffer and supports all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-1>` objects do not immediately update the display; rather the display must be manually after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+
 ### `bitmap`
 
 The `bitmap` module contains the following words:
@@ -323,12 +325,17 @@ The `<ssd1306>` class includes the following constructor:
 
 This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins *pin0* and *pin1* (it does not matter which is which), a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<bitmap>` instances), *columns* columns, *rows* rows, the I2C address *i2c-addr*, the I2C device index *i2c-device* (note that this must match the I2C device index for pins *pin0* and *pin1*), and the `<ssd1306>` instance being initialized, *ssd1306*.
 
-The `<ssd1306>` class includes the following method:
+The `<ssd1306>` class includes the following methoda:
 
 ##### `update-display`
 ( ssd1306 -- )
 
 This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `display-contrast!`
+( constrast ssd1306 -- )
+
+This sets the contrast of an SSD1306-based display to a value from 0 to 255.
 
 ### `st7735s`
 
@@ -385,3 +392,56 @@ This updates the ST7735S-based display with the current contents of its dirty re
 ( backlight st7735s -- )
 
 Set the on/off state of the ST7735S-based display's backlight.
+
+### `st7735s-1`
+
+The `st7735s-1` module contains the following words:
+
+##### `rgb16`
+( r g b -- color )
+
+Create a 16-bit color with 5 bits for red, 6 bits for green, and 5 bits for blue from a red/green/blue triplet of values from 0 to 255 each.
+
+##### `<st7735s-1>`
+( -- class )
+
+The `<st7735s-1>` class is the class for 16-bit SPI ST7735S-based displays with 5-bit red, 6-bit green, 5-bit blue foreground and background colors and bitmap backing buffers. It inherits from the `<bitmap>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<st7735s-1>` class includes the following constructor:
+
+##### `new`
+( fg-color bg-color din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s -- )
+
+This constructor initializes an SPI ST7735S display at the SPI device *spi-device*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<bitmap>` instances), *columns* columns, *rows* rows, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the backlight pin *backlight-pin*, the reset pin *reset-pin*, a 16-bit foreground color *fg-color*, a 16-bit background color *bg-color*, and the `<st7735s>` instance being initialized, *st7735s*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<st7735s>` class includes the following method:
+
+##### `update-display`
+( st7735s -- )
+
+This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight st7735s -- )
+
+Set the on/off state of the ST7735S-based display's backlight.
+
+##### `fg-color!`
+( fg-color st7735s -- )
+
+Set the foreground color of the ST7735S-based display and dirty the display.
+
+##### `bg-color!`
+( bg-color st7735s -- )
+
+Set the background color of the ST7735S-based display and dirty the display.
+
+##### `fg-color@`
+( st7735s -- fg-color )
+
+Get the foreground color of the ST7735S-based display.
+
+##### `bg-color@`
+( st7735s -- bg-color )
+
+Get the background color of the ST7735S-based display.

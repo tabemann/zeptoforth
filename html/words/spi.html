@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -40,7 +41,7 @@
 <p>There are a number of words for controlling SPI peripherals available on each of the supported microcontrollers. These are as follows:</p>
 <p>Note that <em>spi</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
-<li><p>On the RP2040 the available <em>spi</em> values are 0 and 1.</p></li>
+<li><p>On the RP2040 and RP2350 the available <em>spi</em> values are 0 and 1.</p></li>
 <li><p>On the STM32F411 the available <em>spi</em> values are 1 through 5.</p></li>
 <li><p>On the STM32F407 the available <em>spi</em> values are 1 through 3.</p></li>
 <li><p>On the STM32L476 the available <em>spi</em> values are 1 through 3.</p></li>
@@ -99,7 +100,7 @@
 <section id="spi-data-size">
 <h4><code class="docutils literal notranslate"><span class="pre">spi-data-size!</span></code><a class="headerlink" href="#spi-data-size" title="Permalink to this heading">¶</a></h4>
 <p>( data-size spi – )</p>
-<p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
+<p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040 and RP2350, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="id1">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;spi</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
@@ -172,8 +173,8 @@
 <p>Invalid SPI data size setting exception.</p>
 </section>
 </section>
-<section id="rp2040-only">
-<h3>RP2040 only<a class="headerlink" href="#rp2040-only" title="Permalink to this heading">¶</a></h3>
+<section id="rp2040-and-rp2350-only">
+<h3>RP2040 and RP2350 only<a class="headerlink" href="#rp2040-and-rp2350-only" title="Permalink to this heading">¶</a></h3>
 <section id="enable-spi-loopback">
 <h4><code class="docutils literal notranslate"><span class="pre">enable-spi-loopback</span></code><a class="headerlink" href="#enable-spi-loopback" title="Permalink to this heading">¶</a></h4>
 <p>( spi – )</p>
@@ -296,7 +297,9 @@
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -341,9 +344,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -383,11 +388,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/spi.md.txt"

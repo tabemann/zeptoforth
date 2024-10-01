@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,9 @@ begin-module rchan
   task import
   slock import
 
+  \ No receiving task is ready
+  : x-no-recv-ready ( -- ) ." no receiving task is ready" cr ;
+  
   begin-module rchan-internal
 
     \ Bidirectional channel queue structure
@@ -270,6 +273,47 @@ begin-module rchan
     then
   ;
 
+  \ Send data on a bidirectional channel, raising X-NO-RECV-READY if no
+  \ receiving task is ready
+  : send-rchan-recv-ready-only
+    ( s-addr s-bytes r-addr r-bytes rchan -- r-bytes' )
+    >r
+    r@ rchan-closed @ triggers x-rchan-closed
+    r@ rchan-slock claim-slock
+    current-task prepare-block
+    r@ rchan-reply-task @ 0= if
+      r@ rchan-recv-queue pop-rchan-queue ?dup if
+	( s-addr s-bytes r-addr r-bytes wait )
+	3 pick over rchan-wait-buf-size @ min
+	( s-addr s-bytes r-addr r-bytes wait s-bytes' )
+	>r 4 pick over rchan-wait-buf @ r@
+	( s-addr s-bytes r-addr r-bytes wait s-addr recv-addr s-bytes' )
+	move ( s-addr s-bytes r-addr r-bytes wait )
+	r> over rchan-wait-buf-size ! ( s-addr s-bytes r-addr r-bytes wait )
+	swap r@ rchan-reply-buf-size ! ( s-addr s-bytes r-addr wait )
+	swap r@ rchan-reply-buf ! ( s-addr s-bytes wait )
+	current-task r@ rchan-reply-task ! ( s-addr s-bytes wait )
+	-rot 2drop ( wait )
+	rchan-wait-task @ ready ( )
+	r@ rchan-slock release-slock-block ( )
+	r@ rchan-reply-buf-size @ ( r-bytes' )
+	r@ rchan-reply-task @ 1 bic ( r-bytes' task )
+	current-task = if 0 r@ rchan-reply-task ! then ( r-bytes' )
+	current-task check-timeout triggers x-timed-out
+	r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
+	false
+      else
+	true
+      then
+    else
+      true
+    then
+    if
+      r> rchan-slock release-slock
+      ['] x-no-recv-ready ?raise
+    then
+  ;
+
   \ Receive data on a bidirectional channel
   : recv-rchan ( addr bytes rchan -- recv-bytes )
     >r
@@ -301,6 +345,26 @@ begin-module rchan
 	  r> rchan-closed @ triggers x-rchan-closed ( bytes )
 	then
       ;] with-aligned-allot
+    then
+  ;
+  
+  \ Receive data on a bidirectional channel, raising X-WOULD-BLOCK if blocking
+  \ would occur
+  : recv-rchan-no-block ( addr bytes rchan -- recv-bytes )
+    >r
+    r@ rchan-closed @ triggers x-rchan-closed
+    r@ rchan-slock claim-slock
+    r@ rchan-send-queue pop-rchan-queue ?dup if ( addr bytes wait )
+      swap over rchan-wait-buf-size @ min ( addr wait bytes )
+      >r swap over rchan-wait-buf @ swap r@ ( wait send-addr addr bytes ) move
+      r> swap ( bytes wait )
+      dup rchan-wait-reply-buf-size @ r@ rchan-reply-buf-size ! ( bytes wait )
+      dup rchan-wait-reply-buf @ r@ rchan-reply-buf ! ( bytes wait )
+      rchan-wait-task @ r@ rchan-reply-task ! ( bytes wait )
+      r> rchan-slock release-slock ( bytes )
+    else
+      r> rchan-slock release-slock
+      ['] x-would-block ?raise
     then
   ;
 

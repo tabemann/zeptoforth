@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Always-On Timer words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="always-on-timer-words">
+<h1>Always-On Timer words</h1>
+<p>The Always-On Timer is a timer on the RP2350 which can count time in milliseconds as long as a small amount of power is applied to the MCU. It can be driven by the XOSC, the LPOSC, or an external clock source tied to a GPIO at 1 kHz. It can also be synchronized by an external clock source tied to a GPIO at 1 Hz. By convention in zeptoforth it counts the number of milliseconds since 1 Jan 1970 00:00:00.000.</p>
+<p>The Always-On Timer has the ability to trigger an alarm, which can wake up the RP2350 when it is in a low-power state.</p>
+<p>Note that on power-up the Always-On Timer is initialized to enabled using the XOSC as a time source with a time of 0, i.e. 1 Jan 1970 00:00:00.000.</p>
+<section id="aon-timer">
+<h2><code class="docutils literal notranslate"><span class="pre">aon-timer</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">aon-timer</span></code> module contains the following words:</p>
+<section id="enable-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-timer</span></code></h3>
+<p>( – )</p>
+<p>Enable the Always-On Timer.</p>
+</section>
+<section id="disable-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-timer</span></code></h3>
+<p>( – )</p>
+<p>Disable the Always-On Timer.</p>
+</section>
+<section id="timer-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">timer-enabled?</span></code></h3>
+<p>( – enabled? )</p>
+<p>Get whether the Always-On Timer is enabled. On bootup this will return <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="time">
+<h3><code class="docutils literal notranslate"><span class="pre">time!</span></code></h3>
+<p>( D: time – )</p>
+<p>Set the Always-On Timer time to a double-cell value in milliseconds, typically from 1 Jan 1970 00:00:00.000.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">time&#64;</span></code></h3>
+<p>( – D: time )</p>
+<p>Get the time in milliseconds of the Always-On Timer as a double-cell value, typically from 1 Jan 1970 00:00:00.000.</p>
+</section>
+<section id="clear-time">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-time</span></code></h3>
+<p>( – )</p>
+<p>Clear the Always-On Timer.</p>
+</section>
+<section id="enable-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-alarm</span></code></h3>
+<p>( – )</p>
+<p>Enable the Always-On Timer alarm.</p>
+</section>
+<section id="disable-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-alarm</span></code></h3>
+<p>( – )</p>
+<p>Disable the Always-On Timer alarm.</p>
+</section>
+<section id="alarm-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-enabled?</span></code></h3>
+<p>( – )</p>
+<p>Get whether the Always-On Timer alarm is enabled. On power-up this is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+</section>
+<section id="alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm!</span></code></h3>
+<p>( D: time – )</p>
+<p>Set the Always-On Timer alarm time to a double-cell value in milliseconds, typically from 1 Jan 1970 00:00:00.000.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm&#64;</span></code></h3>
+<p>( – D: time )</p>
+<p>Get the alarm time in milliseconds of the Always-On Timer as a double-cell value, typically from 1 Jan 1970 00:00:00.000.</p>
+</section>
+<section id="enable-alarm-wake-up">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-alarm-wake-up</span></code></h3>
+<p>( – )</p>
+<p>Enable the Always-On Timer alarm wake-up from low power mode.</p>
+</section>
+<section id="disable-alarm-wake-up">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-alarm-wake-up</span></code></h3>
+<p>( – )</p>
+<p>Disable the Always-On Timer alarm wake-up from low power mode.</p>
+</section>
+<section id="alarm-wake-up-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-wake-up-enabled?</span></code></h3>
+<p>( – )</p>
+<p>Get whether the Always-On Timer alarm wake-up from low power mode is enabled. On power-up this is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+</section>
+<section id="lposc-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">lposc-timer</span></code></h3>
+<p>( – )</p>
+<p>Switch to LPOSC as the source of the 1 kHz timer tick.</p>
+</section>
+<section id="xosc-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">xosc-timer</span></code></h3>
+<p>( – )</p>
+<p>Switch to XOSC as the source of the 1 kHz timer tick.</p>
+</section>
+<section id="gpio-1khz-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">gpio-1khz-timer</span></code></h3>
+<p>( – )</p>
+<p>Switch to a GPIO as the source of the 1 kHz timer tick.</p>
+</section>
+<section id="sync-gpio-1hz-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">sync-gpio-1hz-timer</span></code></h3>
+<p>( – )</p>
+<p>Synchronize with a GPIO as the source of the second counter.</p>
+</section>
+<section id="unsync-gpio-1hz-timer">
+<h3><code class="docutils literal notranslate"><span class="pre">unsync-gpio-1hz-timer</span></code></h3>
+<p>( – )</p>
+<p>Unsynchronize with a GPIO as the source of the second counter.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">lposc-timer?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether the timer is running from the LPOSC.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">xosc-timer?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether the timer is running from the XOSC.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">gpio-1khz-timer?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether the timer is running from a 1 kHz GPIO source.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">sync-gpio-1hz-timer?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether the timer is synchronized with a GPIO as the source of the second counter.</p>
+</section>
+<section id="source-sel">
+<h3><code class="docutils literal notranslate"><span class="pre">source-sel!</span></code></h3>
+<p>( gpio – )</p>
+<p>Set a GPIO as a source selection.</p>
+</section>
+<section id="source-sel-drive-lpck">
+<h3><code class="docutils literal notranslate"><span class="pre">source-sel-drive-lpck!</span></code></h3>
+<p>( gpio – )</p>
+<p>Set a GPIO as a source selection to drive the 32 kHz low power clock.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">source-sel&#64;</span></code></h3>
+<p>( – gpio )</p>
+<p>Get the source selection GPIO.</p>
+</section>
+<section id="drive-lpck">
+<h3><code class="docutils literal notranslate"><span class="pre">drive-lpck?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether a GPIO is driving the low power clock.</p>
+</section>
+<section id="x-invalid-source-sel-gpio">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-source-sel-gpio</span></code></h3>
+<p>( – )</p>
+<p>GPIO is not a valid GPIO for source selection exception</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

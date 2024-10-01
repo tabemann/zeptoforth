@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ continue-module forth
     : fill-bytes ( c-addr u c -- )
       code[
       tos r0 movs_,_
-      cortex-m7? [if]
+      cortex-m7? cortex-m33? or [if]
         0 dp r1 ldr_,[_,#_]
         4 dp r2 ldr_,[_,#_]
         8 dp tos ldr_,[_,#_]
@@ -53,7 +53,7 @@ continue-module forth
     : fill-cells ( addr u x -- )
       code[
       tos r0 movs_,_
-      cortex-m7? [if]
+      cortex-m7? cortex-m33? or [if]
         0 dp r1 ldr_,[_,#_]
         4 dp r2 ldr_,[_,#_]
         8 dp tos ldr_,[_,#_]

@@ -24,6 +24,11 @@ Get the kernel version.
 
 Get the kernel compilation date.
 
+##### `reboot-hook`
+( -- addr )
+
+Get the address of the variable containing the reboot hook.
+
 ### `internal`
 
 These words are in the `internal` module

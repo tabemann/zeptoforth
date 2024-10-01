@@ -48,20 +48,30 @@
 <p><em>sck-pin</em>, <em>tx-pin</em>, <em>rx-pin</em>, and <em>cs-pin</em> are the clock, transmit, receive, and chip select pins to use. <em>spi-device</em> is the SPI peripheral to use; it must match <em>sck-pin</em>, <em>tx-pin</em>, and <em>rx-pin</em>. <em>write-through</em> is whether to enable write-through; enabling write-through will result in greater data integrity in the case of failures, but slower performance. If write-through is not enabled, manually flushing at opportune moments is highly recommended.</p>
 <p>Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task’s RAM dictionary.</p>
 </section>
+<section id="enable-echo">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-echo</span></code></h3>
+<p>( – )</p>
+<p>Enable echoing while loading code from a file. Note that echoing is enabled by default. Also note that a given number of enables require an equal number of disables to be canceled out.</p>
+</section>
+<section id="disable-echo">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-echo</span></code></h3>
+<p>( – )</p>
+<p>Disable echoing while loading code from a file. Note that a given number of disables require an equal number of enables to be canceled out.</p>
+</section>
 <section id="load-file">
 <h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code></h3>
 <p>( file – )</p>
-<p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process.</p>
+<p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="included">
 <h3><code class="docutils literal notranslate"><span class="pre">included</span></code></h3>
 <p>( path-addr path-u – )</p>
-<p>Load code from a file with the specified path in the current include FAT32 filesystem.</p>
+<p>Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="include">
 <h3><code class="docutils literal notranslate"><span class="pre">include</span></code></h3>
 <p>( “path” – )</p>
-<p>Load code from a file with the specified path as a token in the current include FAT32 filesystem.</p>
+<p>Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="list-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">list-dir</span></code></h3>
@@ -97,6 +107,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">write-file-window</span></code></h3>
 <p>( data-addr data-u offset-u path-addr path-u – )</p>
 <p>Write data at an offset to a file at the specified path without truncating it.</p>
+</section>
+<section id="list-file">
+<h3><code class="docutils literal notranslate"><span class="pre">list-file</span></code></h3>
+<p>( path-addr path-u – )</p>
+<p>List a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
+</section>
+<section id="list-file-window">
+<h3><code class="docutils literal notranslate"><span class="pre">list-file-window</span></code></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>List a defined window in a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
 </section>
 <section id="dump-file">
 <h3><code class="docutils literal notranslate"><span class="pre">dump-file</span></code></h3>

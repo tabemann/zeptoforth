@@ -190,7 +190,7 @@ _to_upper_char:
 	define_word "equal-case-strings?", visible_flag
 _equal_case_strings:
 	movs r0, tos
-        .if cortex_m7
+        .if cortex_m7 || cortex_m33
         ldr r1, [dp], #4
         ldr r2, [dp], #4
         ldr r3, [dp], #4
@@ -1020,7 +1020,7 @@ _do_refill:
 	b 6b
 4:	ldr r2, =input_buffer
 	cmp r0, r2
-	beq 1b
+	beq 7b
 	push {r0, r1}
 	movs tos, #0x08
 	bl _emit

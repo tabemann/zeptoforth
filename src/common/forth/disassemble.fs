@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -1939,8 +1939,8 @@ begin-module disassemble-internal
     %1111100000100000 h, 0 h,
     \ ' p-strht ,
     \ ' p-strt ,
-    ' p-sub-imm-3 , %1111101111100000 h, highest h, %1111000110100000 0 h,
-    ' p-sub-imm-4 , %1111101111110000 h, highest h, %1111001010100000 0 h,
+    ' p-sub-imm-3 , %1111101111100000 h, highest h, %1111000110100000 h, 0 h,
+    ' p-sub-imm-4 , %1111101111110000 h, highest h, %1111001010100000 h, 0 h,
     ' p-sub-reg-2 , %1111111111100000 h, 0 h, %1110101110100000 h, 0 h,
     \ ' p-sub-sp-imm ,
     \ ' p-sub-sp-reg ,

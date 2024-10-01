@@ -2,6 +2,8 @@
 
 zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the `<block-dev>` class defined in the module `block-dev` (currently only the `<sd>` class defined in the module `sd`). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.
 
+Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with `close-file` and directories need to be closed with `close-dir`, followed by being destroyed with `destroy`, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.
+
 ### `fat32`
 
 The `fat32` module contains the following words:
@@ -80,6 +82,21 @@ No file or directory referred to in path within directory exception.
 ( -- )
 
 Invalid path exception.
+
+##### `x-not-open`
+( -- )
+
+Attempted to carry out an operation on a file or directory that is not open.
+
+##### `x-shared-file`
+( -- )
+
+Attempted to carry out an operation on a file where the file must only be open once (i.e. truncate a file).
+
+##### `x-open`
+( -- )
+
+Attempted to carry out an operation on a file or directory that is open (i.e. remove a file or directory).
 
 ##### `seek-set`
 ( -- whence )
@@ -166,14 +183,34 @@ The `<base-fat32-fs>` class includes the following methods, which are implemente
 Initialize a root directory of a FAT32 filesystem; the directory object need not be initialized already, but if it is no harm will result.
 
 ##### `with-root-path`
-( c-addr u xt fs ) ( xt: c-addr' u' dir -- )
+( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
 
-Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns.
+Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `root-path-exists?`
 ( c-addr u fs -- exists? )
 
 Get whether a file or directory exists at the specified path starting at the root directory of a FAT32 filesystem.
+
+##### `with-create-file-at-root-path`
+( c-addr u xt fs -- ) ( xt: file -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-open-file-at-root-path`
+( c-addr u xt fs -- ) ( xt: file -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-create-dir-at-root-path`
+( c-addr u xt fs -- ) ( xt: dir -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
+
+##### `with-open-dir-at-root-path`
+( c-addr u xt fs -- ) ( xt: dir -- )
+
+Parse a path starting at the root directory of a FAT32 filesystem, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `flush`
 ( fs -- )
@@ -205,6 +242,16 @@ The `<fat32-file>` class includes the following constructor:
 Construct an instance of `<fat32-file>` with the FAT32 filesystem *fs*.
 
 The `<fat32-file>` class includes the following methods:
+
+##### `close-file`
+( file -- )
+
+Close a file.
+
+##### `file-open?`
+( file -- open? )
+
+Get whether a file is open.
 
 ##### `read-file`
 ( c-addr u file -- bytes )
@@ -249,6 +296,16 @@ Construct an instance of `<fat32-dir>` with the FAT32 filesystem *fs*.
 
 The `<fat32-dir>` class includes the following methods:
 
+##### `close-dir`
+( dir -- )
+
+Close a directory.
+
+##### `dir-open?`
+( dir -- open? )
+
+Get whether a directory is open.
+
 ##### `with-path`
 ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
 
@@ -258,6 +315,26 @@ Parse a path starting at a given directory, and pass the leaf's name along with 
 ( c-addr u dir -- exists? )
 
 Get whether a file or directory exist at the specified path starting at a given directory.
+
+##### `with-create-file-at-path`
+( c-addr u xt dir -- ) ( xt: file -- )
+
+Parse a path starting at a given directory, and attempt to create a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-open-file-at-path`
+( c-addr u xt dir -- ) ( xt: file -- )
+
+Parse a path starting at a given directory, and attempt to open a file in the leaf directory; if successful a file object for that file is passed to *xt*. The passed in file object will be closed when the called *xt* returns.
+
+##### `with-create-dir-at-path`
+( c-addr u xt dir -- ) ( xt: dir' -- )
+
+Parse a path starting at a given directory, and attempt to create a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
+
+##### `with-open-dir-at-path`
+( c-addr u xt dir -- ) ( xt: dir' -- )
+
+Parse a path starting at a given directory, and attempt to open a directory in the leaf directory; if successful a directory object for that directory is passed to *xt*. The passed in directory object will be closed when the called *xt* returns.
 
 ##### `exists?`
 ( c-addr u dir -- exists? )

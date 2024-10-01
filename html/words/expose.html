@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -193,9 +194,44 @@ built</p>
 <h3><code class="docutils literal notranslate"><span class="pre">systick-handler-hook</span></code><a class="headerlink" href="#systick-handler-hook" title="Permalink to this heading">¶</a></h3>
 <p>Get the SYSTICK-HANDLER-HOOK variable address</p>
 </section>
+<section id="cortex-m7">
+<h3><code class="docutils literal notranslate"><span class="pre">cortex-m7?</span></code><a class="headerlink" href="#cortex-m7" title="Permalink to this heading">¶</a></h3>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for ARM Cortex-M7.</p>
 </section>
-<section id="rp2040-word">
-<h2>RP2040 Word<a class="headerlink" href="#rp2040-word" title="Permalink to this heading">¶</a></h2>
+<section id="cortex-m33">
+<h3><code class="docutils literal notranslate"><span class="pre">cortex-m33?</span></code><a class="headerlink" href="#cortex-m33" title="Permalink to this heading">¶</a></h3>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for ARM Cortex-M33.</p>
+</section>
+<section id="chip">
+<h3><code class="docutils literal notranslate"><span class="pre">chip</span></code><a class="headerlink" href="#chip" title="Permalink to this heading">¶</a></h3>
+<p>( – chip1 chip0 )</p>
+<p>Get ID codes indicating the CPU make and model.</p>
+<ul class="simple">
+<li><p><em>chip0</em> of <code class="docutils literal notranslate"><span class="pre">$7270</span></code> indicates Raspberry Pi Ltd.</p></li>
+<li><p><em>chip0</em> of <code class="docutils literal notranslate"><span class="pre">$73746D</span></code> indicates STMicroelectronics.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">2040</span></code> indicates RP2040.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">2350</span></code> indicates RP2350.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">$66000197</span></code> indicates STM32F407.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">$6600019B</span></code> indicates STM32F411.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">$660002EA</span></code> indicates STM32F746.</p></li>
+<li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">$6C0001DC</span></code> indicates STM32L476.</p></li>
+</ul>
+</section>
+<section id="rp2040">
+<h3><code class="docutils literal notranslate"><span class="pre">rp2040?</span></code><a class="headerlink" href="#rp2040" title="Permalink to this heading">¶</a></h3>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for RP2040. (Only available for <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.)</p>
+</section>
+<section id="rp2350">
+<h3><code class="docutils literal notranslate"><span class="pre">rp2350?</span></code><a class="headerlink" href="#rp2350" title="Permalink to this heading">¶</a></h3>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for RP2350. (Only available for <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.)</p>
+</section>
+</section>
+<section id="rp2040-and-rp2350-words">
+<h2>RP2040 and RP2350 Words<a class="headerlink" href="#rp2040-and-rp2350-words" title="Permalink to this heading">¶</a></h2>
 <section id="id2">
 <h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>This word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
@@ -250,7 +286,9 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -295,9 +333,11 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -337,11 +377,11 @@ built</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/expose.md.txt"

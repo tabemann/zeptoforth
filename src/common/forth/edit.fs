@@ -211,7 +211,7 @@ begin-module edit-internal
       ." +-[ "
       edit-state @ edit-current @ id@ 0 <# #s #> dup >r type
       edit-state @ edit-current @ dirty? if
-	space [char] * emit r> 1+ >r
+	space [char] * emit r> 2 + >r
       then
       space ." ]"
       buffer-width r> 2 + - 0 ?do [char] - emit loop

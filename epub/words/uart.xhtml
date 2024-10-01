@@ -19,12 +19,13 @@
 <p>There are a number of words for controlling UART’s available on each of the supported microcontrollers on top of the console <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">key</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">key?</span></code> words. These are as follows:</p>
 <p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
-<li><p>On the RP2040 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
+<li><p>On the RP2040 and RP2350 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
 <li><p>On the STM32F411 the available <em>uart</em> values are 1, 2, and 6, with 2 corresponding to the console.</p></li>
 <li><p>On the STM32F407 the available <em>uart</em> values are 1 through 6, with 2 corresponding to the console.</p></li>
 <li><p>On the STM32L476 the available <em>uart</em> values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.</p></li>
 <li><p>On the STM32F746 the available <em>uart</em> values are 1 through 8, with 1 corresponding to the console.</p></li>
 </ul>
+<p>Note that the RP2350 supports optional CTS and RTS flow control.</p>
 <section id="uart">
 <h2><code class="docutils literal notranslate"><span class="pre">uart</span></code></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
@@ -81,12 +82,57 @@
 <section id="uart-alternate">
 <h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code></h3>
 <p>( uart – )</p>
-<p>The alternate function for a given UART.</p>
+<p>The alternate function for a given UART (except for <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>).</p>
+</section>
+<section id="uart-non-cts-rts-alternate">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-non-cts/rts--alternate</span></code></h3>
+<p>( pin uart – )</p>
+<p>The alternate function for a non-CTS/RTS pin for a given UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="uart-cts-rts-alternate">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-alternate</span></code></h3>
+<p>( pin uart – )</p>
+<p>The alternate function for a CTS/RTS pin for a given UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="uart-pin">
 <h3><code class="docutils literal notranslate"><span class="pre">uart-pin</span></code></h3>
 <p>( uart pin – )</p>
 <p>Set the alternate function for <em>pin</em> to configure it for <em>uart</em>.</p>
+</section>
+<section id="uart-cts-rts-pin">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-pin</span></code></h3>
+<p>( uart pin – )</p>
+<p>Set the alternate function for <em>pin</em> to configure it as a CTS/RTS pin for <em>uart</em> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="uart-cts-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts-enabled?</span></code></h3>
+<p>( uart – flag )</p>
+<p>Get whether CTS is enabled on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="enable-uart-cts">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-cts</span></code></h3>
+<p>( uart – )</p>
+<p>Enable CTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="disable-uart-cts">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-cts</span></code></h3>
+<p>( uart – )</p>
+<p>Disable CTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="uart-rts-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-rts-enabled?</span></code></h3>
+<p>( uart – flag )</p>
+<p>Get whether RTS is enabled on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="enable-uart-rts">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-rts</span></code></h3>
+<p>( uart – )</p>
+<p>Enable RTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
+</section>
+<section id="disable-uart-rts">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-rts</span></code></h3>
+<p>( uart – )</p>
+<p>Disable RTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="x-invalid-uart">
 <h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code></h3>

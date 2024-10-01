@@ -55,8 +55,8 @@ begin-module rtc
     \ The second; valid values are from 0 to 59
     cfield: date-time-second
 
-    \ Align the size of the date/time
-    cell align
+    \ The millisecond: valid values are from 0 to 999
+    hfield: date-time-msec
     
   end-structure
 
@@ -68,6 +68,7 @@ begin-module rtc
     date-time0 date-time-hour c@ date-time1 date-time-hour c@ = and
     date-time0 date-time-minute c@ date-time1 date-time-minute c@ = and
     date-time0 date-time-second c@ date-time1 date-time-second c@ = and
+    date-time0 date-time-msec h@ date-time1 date-time-msec h@ = and
   ;
   
   \ Get the current date and time
@@ -101,12 +102,18 @@ begin-module rtc
     \ Number of days in a mont
     create days-in-month 0 c, 31 c, 28 c, 31 c, 30 c, 31 c, 30 c, 31 c,
     31 c, 30 c, 31 c, 30 c, 31 c,
-    
+
     \ Get the number of seconds in a year
-    : year-secs ( year -- )
+    : year-secs ( year -- secs )
       [ 365 24 * 60 * 60 * ] literal swap leap-year? if
         [ 24 60 * 60 * ] literal +
       then
+    ;
+
+    \ Get the number of seconds in a month
+    : month-secs ( year month -- secs )
+      dup days-in-month + c@ -rot
+      2 = swap leap-year? and if 1+ then [ 24 60 * 60 * ] literal *
     ;
     
     \ Validate a date/time match
@@ -147,6 +154,9 @@ begin-module rtc
       then
       date-time date-time-second c@ $FF <> if
         date-time date-time-second c@ 0 59 test-range
+      then
+      date-time date-time-msec h@ $FFFF <> if
+        date-time date-time-msec h@ 0 999 test-range
       then
     ;
 
@@ -256,8 +266,8 @@ begin-module rtc
     date-time validate-date-time-not-current
     date-time get-dotw date-time date-time-dotw c!
   ;
-    
-  \ Set a day-time from seconds since 1970-01-01 00:00:00 UTC
+
+    \ Set a day-time from seconds since 1970-01-01 00:00:00 UTC
   : convert-secs-since-1970 { second date-time -- }
     1970 { year }
     begin second year year-secs u>= while
@@ -265,8 +275,8 @@ begin-module rtc
       1 +to year
     repeat
     1 { month }
-    begin second days-in-month month + c@ [ 24 60 * 60 * ] literal * u>= while
-      days-in-month month + c@ [ -24 60 * 60 * ] literal * +to second
+    begin second year month month-secs u>= while
+      year month month-secs negate +to second
       1 +to month
     repeat
     second [ 24 60 * 60 * ] literal u/mod 1+ { day } to second
@@ -278,7 +288,38 @@ begin-module rtc
     hour date-time date-time-hour c!
     minute date-time date-time-minute c!
     second date-time date-time-second c!
+    0 date-time date-time-msec h!
     date-time update-dotw
+  ;
+  
+  \ Set a day-time from milliseconds since 1970-01-01 00:00:00 UTC
+  : convert-msecs-since-1970 { D: msec date-time -- }
+    msec 1000. ud/mod d>s { second } d>s { msec }
+    second date-time convert-secs-since-1970
+    msec date-time date-time-msec h!
+  ;
+  
+  \ Convert a date and time to milliseconds since 1970-01-01 00:00:00 UTC
+  : convert-to-msecs-since-1970 { date-time -- D: msec }
+    date-time validate-date-time-not-current
+    date-time date-time-msec h@ s>d { D: msec }
+    date-time date-time-second c@ s>d 1000. d* +to msec
+    date-time date-time-minute c@ s>d 60000. d* +to msec
+    date-time date-time-hour c@ s>d 3600000. d* +to msec
+    date-time date-time-day c@ 1- s>d 86400000. d* +to msec
+    date-time date-time-month c@ { month }
+    date-time date-time-year @ { year }
+    begin year 1970 = month 1 = and not while
+      month 1 = if
+        12 to month
+        -1 +to year
+        year month month-secs s>d 1000. d* +to msec
+      else
+        year month 1- month-secs s>d 1000. d* +to msec
+        -1 +to month
+      then
+    repeat
+    msec
   ;
 
 end-module

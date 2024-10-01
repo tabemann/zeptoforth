@@ -83,7 +83,7 @@ _2tuck:	ldr r0, [dp]
 	@@ Test for the equality of two double words
 	define_word "d=", visible_flag
 _deq:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -102,7 +102,7 @@ _deq:
 	@@ Test for the inequality of two double words
 	define_word "d<>", visible_flag
 _dne:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -122,7 +122,7 @@ _dne:
 	@@ Unsigned double less than
 	define_word "du<", visible_flag | inlined_flag
 _dult:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -139,7 +139,7 @@ _dult:
 	@@ Unsigned double greater than
 	define_word "du>", visible_flag | inlined_flag
 _dugt:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -156,7 +156,7 @@ _dugt:
 	@@ Unsigned double greater than or equal
 	define_word "du>=", visible_flag | inlined_flag
 _duge:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -174,7 +174,7 @@ _duge:
 	@@ Unsigned double less than or equal
 	define_word "du<=", visible_flag | inlined_flag
 _dule:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -192,7 +192,7 @@ _dule:
 	@@ Signed double less than
 	define_word "d<", visible_flag
 _dlt:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -213,7 +213,7 @@ _dlt:
 	@@ Signed double greater than
 	define_word "d>", visible_flag
 _dgt:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -234,7 +234,7 @@ _dgt:
 	@@ Signed double greater than or equal than
 	define_word "d>=", visible_flag
 _dge:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -255,7 +255,7 @@ _dge:
 	@@ Signed double less than or equal than
 	define_word "d<=", visible_flag
 _dle:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -339,7 +339,7 @@ _d0ge:	adds dp, #4
 	@@ Double left shift
 	define_word "2lshift", visible_flag
 _dlshift:	
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	.else
@@ -360,7 +360,7 @@ _dlshift:
 	@@ Double right shift
 	define_word "2rshift", visible_flag
 _drshift:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	.else
@@ -381,7 +381,7 @@ _drshift:
 	@@ Double arithmetic right shift
 	define_word "2arshift", visible_flag
 _darshift:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	.else
@@ -416,7 +416,7 @@ _dnegate:
 	@@ Add two double words
 	define_word "d+", visible_flag | inlined_flag
 _dadd:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -434,7 +434,7 @@ _dadd:
 	@@ Subtract two double words
 	define_word "d-", visible_flag | inlined_flag
 _dsub:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}
@@ -480,7 +480,7 @@ _mmul:	ldr r0, [dp]
 	define_word "ud*", visible_flag
 _udmul:
 
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldm dp!, {r0}
 	ldm dp!, {r1}
 	ldm dp!, {r2}

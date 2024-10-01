@@ -51,6 +51,8 @@
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
 #include src/common/forth/full_extra.fs
+#include src/common/forth/blocks_block_dev.fs
+#include src/common/forth/simple_blocks_fat32.fs
 #include src/common/forth/swdcom.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code

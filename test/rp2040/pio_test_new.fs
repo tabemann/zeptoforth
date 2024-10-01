@@ -27,16 +27,27 @@ continue-module forth
 
   \ Our initial PIO instructions
   create pio-init
+  \ Set GPIO 2 to be an output
   %00001 SET_PINDIRS set,
+  \ Set GPIO 2 to be low
   %00000 SET_PINS set,
 
   \ Our PIO program
   :pio pio-program
-  start>
-  wrap<
-  %00001 SET_PINS set,
-  %00000 SET_PINS set,
-  <wrap
+    \ Mark the start of the PIO program
+    start>
+
+    \ Set the address to wrap to
+    wrap<
+
+    \ Set GPIO 2 to be high
+    %00001 SET_PINS set,
+
+    \ Set GPIO 2 to be low
+    %00000 SET_PINS set,
+
+    \ Set the address to wrap from
+    <wrap
   ;pio
   
   \ Initialize our test

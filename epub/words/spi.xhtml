@@ -19,7 +19,7 @@
 <p>There are a number of words for controlling SPI peripherals available on each of the supported microcontrollers. These are as follows:</p>
 <p>Note that <em>spi</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
-<li><p>On the RP2040 the available <em>spi</em> values are 0 and 1.</p></li>
+<li><p>On the RP2040 and RP2350 the available <em>spi</em> values are 0 and 1.</p></li>
 <li><p>On the STM32F411 the available <em>spi</em> values are 1 through 5.</p></li>
 <li><p>On the STM32F407 the available <em>spi</em> values are 1 through 3.</p></li>
 <li><p>On the STM32L476 the available <em>spi</em> values are 1 through 3.</p></li>
@@ -78,7 +78,7 @@
 <section id="spi-data-size">
 <h4><code class="docutils literal notranslate"><span class="pre">spi-data-size!</span></code></h4>
 <p>( data-size spi – )</p>
-<p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
+<p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040 and RP2350, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="id1">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;spi</span></code></h4>
@@ -151,8 +151,8 @@
 <p>Invalid SPI data size setting exception.</p>
 </section>
 </section>
-<section id="rp2040-only">
-<h3>RP2040 only</h3>
+<section id="rp2040-and-rp2350-only">
+<h3>RP2040 and RP2350 only</h3>
 <section id="enable-spi-loopback">
 <h4><code class="docutils literal notranslate"><span class="pre">enable-spi-loopback</span></code></h4>
 <p>( spi – )</p>

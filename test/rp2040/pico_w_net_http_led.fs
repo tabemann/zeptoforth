@@ -731,9 +731,9 @@ begin-module pico-w-net-http-server
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
-    <tcp-echo-handler> my-tcp-echo-handler init-object
-    my-tcp-echo-handler
-    my-cyw43-net net-endpoint-process@ add-endpoint-handler
+\    <tcp-echo-handler> my-tcp-echo-handler init-object
+\    my-tcp-echo-handler
+\    my-cyw43-net net-endpoint-process@ add-endpoint-handler
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-net run-net-process
@@ -744,6 +744,9 @@ begin-module pico-w-net-http-server
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
+    <tcp-echo-handler> my-tcp-echo-handler init-object
+    my-tcp-echo-handler
+    my-cyw43-net net-endpoint-process@ add-endpoint-handler
     init-http-servers
   ;
 

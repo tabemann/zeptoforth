@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -1290,7 +1291,7 @@ otherwise passing the specified argument through.</p>
 <section id="create">
 <h3><code class="docutils literal notranslate"><span class="pre">create</span></code><a class="headerlink" href="#create" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
-<p>Create a word referring to memory after it</p>
+<p>Create a word referring to memory after it. Note that when compiling to flash this is not of use to create arrays that can be modified at runtime, as the word will point into flash and not into RAM. It is primarily recommended to use this word for creating constant arrays as a result.</p>
 </section>
 <section id="builds">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;builds</span></code><a class="headerlink" href="#builds" title="Permalink to this heading">¶</a></h3>
@@ -1405,12 +1406,12 @@ otherwise passing the specified argument through.</p>
 <section id="user-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code><a class="headerlink" href="#user-buffer" title="Permalink to this heading">¶</a></h3>
 <p>( bytes “name” – )</p>
-<p>Allocate a user buffer</p>
+<p>Allocate a cell-aligned user buffer</p>
 </section>
 <section id="user-aligned-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">user-aligned-buffer:</span></code><a class="headerlink" href="#user-aligned-buffer" title="Permalink to this heading">¶</a></h3>
 <p>( bytes “name” – )</p>
-<p>Allocate a cell-aligned user buffer</p>
+<p>Allocate a cell-aligned user buffer (note that this is absoleted by <code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code> not provided aligned user buffers)</p>
 </section>
 <section id="cvariable">
 <h3><code class="docutils literal notranslate"><span class="pre">cvariable</span></code><a class="headerlink" href="#cvariable" title="Permalink to this heading">¶</a></h3>
@@ -1435,12 +1436,12 @@ otherwise passing the specified argument through.</p>
 <section id="buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">buffer:</span></code><a class="headerlink" href="#buffer" title="Permalink to this heading">¶</a></h3>
 <p>( # “name” – )</p>
-<p>Specify a buffer of a given size</p>
+<p>Specify a cell-aligned buffer of a given size</p>
 </section>
 <section id="aligned-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">aligned-buffer:</span></code><a class="headerlink" href="#aligned-buffer" title="Permalink to this heading">¶</a></h3>
 <p>( # “name” – )</p>
-<p>Specify a cell-aligned buffer of a given size</p>
+<p>Specify a cell-aligned buffer of a given size (this is obsoleted by <code class="docutils literal notranslate"><span class="pre">buffer:</span></code> now providing cell-aligned buffers)</p>
 </section>
 <section id="flash-wordlist">
 <h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code><a class="headerlink" href="#flash-wordlist" title="Permalink to this heading">¶</a></h3>
@@ -2132,7 +2133,8 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -2177,9 +2179,11 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -2219,11 +2223,11 @@ otherwise passing the specified argument through.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/basic.md.txt"

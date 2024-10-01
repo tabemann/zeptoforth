@@ -28,7 +28,9 @@ Zeptoforth Documentation
    words/rtc
    words/timer
    words/dma
-   words/sdcard
+   words/psram
+   words/aon_timer
+   words/block_dev
    words/fat32
    words/simple_fat32
    words/fat32_tools
@@ -74,6 +76,7 @@ Zeptoforth Documentation
    extra/profile
    extra/zeptoed
    extra/display
+   extra/text_display
    extra/font
    extra/bitmap_utils
    extra/pixmap16_utils

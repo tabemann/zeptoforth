@@ -664,8 +664,14 @@ begin-module read-temp
       self temp-log-fs fat32-tools::current-fs!
     ; define new
 
+    \ Destroy the log
+    :noname { self -- }
+      self temp-log-open? @ if self temp-log-file close-file then
+    ;
+    
     \ Set the file to log to
     :noname { path-addr path-len self -- }
+      self temp-log-open? @ if self temp-log-file close-file then
       self temp-log-file path-addr path-len
       [: 3 roll swap open-file ;] fat32-tools::current-fs@ with-root-path
       0 seek-end self temp-log-file seek-file

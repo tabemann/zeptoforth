@@ -236,7 +236,7 @@ Get the alternate function for the specified pin (from 0 to 15) on the specified
 
 Get the input for the specified pin (from 0 to 15) on the specified GPIO.
 
-## RP2040 Words
+## RP2040 and RP2350 Words
 
 ### `gpio`
 
@@ -655,6 +655,11 @@ Select voltage for pads
 ( -- voltage )
 
 Get voltage for pads
+
+##### `PADS_BANK0_ISO!`
+( enable index -- )
+
+Set pad isolation control (`rp2350` only)
 
 ##### `PADS_BANK0_OD!`
 ( disable index -- )

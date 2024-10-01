@@ -40,6 +40,16 @@ Show the cursor. Note that multiple `show-cursor` and `hide-cursor` pairs can be
 
 Show the cursor. Note that multiple `show-cursor` and `hide-cursor` pairs can be nested.
 
+##### `reset-terminal-cursor`
+( -- )
+
+Force the cursor to be shown, resetting the `show-cursor`/`hide-cursor` count.
+
+##### `reset-terminal-color`
+( -- )
+
+Reset the terminal color and style attributes.
+
 ##### `save-cursor`
 ( -- )
 

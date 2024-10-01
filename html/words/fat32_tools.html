@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -69,20 +70,30 @@
 <p><em>sck-pin</em>, <em>tx-pin</em>, <em>rx-pin</em>, and <em>cs-pin</em> are the clock, transmit, receive, and chip select pins to use. <em>spi-device</em> is the SPI peripheral to use; it must match <em>sck-pin</em>, <em>tx-pin</em>, and <em>rx-pin</em>. <em>write-through</em> is whether to enable write-through; enabling write-through will result in greater data integrity in the case of failures, but slower performance. If write-through is not enabled, manually flushing at opportune moments is highly recommended.</p>
 <p>Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task’s RAM dictionary.</p>
 </section>
+<section id="enable-echo">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-echo</span></code><a class="headerlink" href="#enable-echo" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Enable echoing while loading code from a file. Note that echoing is enabled by default. Also note that a given number of enables require an equal number of disables to be canceled out.</p>
+</section>
+<section id="disable-echo">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-echo</span></code><a class="headerlink" href="#disable-echo" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Disable echoing while loading code from a file. Note that a given number of disables require an equal number of enables to be canceled out.</p>
+</section>
 <section id="load-file">
 <h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code><a class="headerlink" href="#load-file" title="Permalink to this heading">¶</a></h3>
 <p>( file – )</p>
-<p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process.</p>
+<p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="included">
 <h3><code class="docutils literal notranslate"><span class="pre">included</span></code><a class="headerlink" href="#included" title="Permalink to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
-<p>Load code from a file with the specified path in the current include FAT32 filesystem.</p>
+<p>Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="include">
 <h3><code class="docutils literal notranslate"><span class="pre">include</span></code><a class="headerlink" href="#include" title="Permalink to this heading">¶</a></h3>
 <p>( “path” – )</p>
-<p>Load code from a file with the specified path as a token in the current include FAT32 filesystem.</p>
+<p>Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="list-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">list-dir</span></code><a class="headerlink" href="#list-dir" title="Permalink to this heading">¶</a></h3>
@@ -118,6 +129,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">write-file-window</span></code><a class="headerlink" href="#write-file-window" title="Permalink to this heading">¶</a></h3>
 <p>( data-addr data-u offset-u path-addr path-u – )</p>
 <p>Write data at an offset to a file at the specified path without truncating it.</p>
+</section>
+<section id="list-file">
+<h3><code class="docutils literal notranslate"><span class="pre">list-file</span></code><a class="headerlink" href="#list-file" title="Permalink to this heading">¶</a></h3>
+<p>( path-addr path-u – )</p>
+<p>List a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
+</section>
+<section id="list-file-window">
+<h3><code class="docutils literal notranslate"><span class="pre">list-file-window</span></code><a class="headerlink" href="#list-file-window" title="Permalink to this heading">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>List a defined window in a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
 </section>
 <section id="dump-file">
 <h3><code class="docutils literal notranslate"><span class="pre">dump-file</span></code><a class="headerlink" href="#dump-file" title="Permalink to this heading">¶</a></h3>
@@ -254,7 +275,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Tools</a></li>
@@ -299,9 +321,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -341,11 +365,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/fat32_tools.md.txt"

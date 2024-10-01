@@ -17,13 +17,14 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Fonts" href="font.html" />
+    <link rel="next" title="Text Displays" href="text_display.html" />
     <link rel="prev" title="zeptoed" href="zeptoed.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -46,6 +47,7 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class implements an SSD1306 device interface and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class implements a 16-bit ST7735S device interface and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class implements a 16-bit ST7735S device interface with a 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffer and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class implements a 16-bit ST7735S device interface with fixed 16-bit foreground and background colors with a bitmap backing buffer and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> objects do not immediately update the display; rather the display must be manually after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <section id="bitmap">
 <h2><code class="docutils literal notranslate"><span class="pre">bitmap</span></code><a class="headerlink" href="#bitmap" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module contains the following words:</p>
@@ -337,12 +339,17 @@
 <h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h3>
 <p>( pin0 pin1 buffer-addr columns rows i2c-addr i2c-device ssd1306 – )</p>
 <p>This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> instance being initialized, <em>ssd1306</em>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following method:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following methoda:</p>
 </section>
 <section id="update-display">
 <h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#update-display" title="Permalink to this heading">¶</a></h3>
 <p>( ssd1306 – )</p>
 <p>This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="display-contrast">
+<h3><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#display-contrast" title="Permalink to this heading">¶</a></h3>
+<p>( constrast ssd1306 – )</p>
+<p>This sets the contrast of an SSD1306-based display to a value from 0 to 255.</p>
 </section>
 </section>
 <section id="st7735s">
@@ -397,6 +404,57 @@
 <p>Set the on/off state of the ST7735S-based display’s backlight.</p>
 </section>
 </section>
+<section id="st7735s-1">
+<h2><code class="docutils literal notranslate"><span class="pre">st7735s-1</span></code><a class="headerlink" href="#st7735s-1" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7735s-1</span></code> module contains the following words:</p>
+<section id="id31">
+<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code><a class="headerlink" href="#id31" title="Permalink to this heading">¶</a></h3>
+<p>( r g b – color )</p>
+<p>Create a 16-bit color with 5 bits for red, 6 bits for green, and 5 bits for blue from a red/green/blue triplet of values from 0 to 255 each.</p>
+</section>
+<section id="id32">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code><a class="headerlink" href="#id32" title="Permalink to this heading">¶</a></h3>
+<p>( – class )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class is the class for 16-bit SPI ST7735S-based displays with 5-bit red, 6-bit green, 5-bit blue foreground and background colors and bitmap backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id33">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id33" title="Permalink to this heading">¶</a></h3>
+<p>( fg-color bg-color din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s – )</p>
+<p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, a 16-bit foreground color <em>fg-color</em>, a 16-bit background color <em>bg-color</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following method:</p>
+</section>
+<section id="id34">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id34" title="Permalink to this heading">¶</a></h3>
+<p>( st7735s – )</p>
+<p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="id35">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id35" title="Permalink to this heading">¶</a></h3>
+<p>( backlight st7735s – )</p>
+<p>Set the on/off state of the ST7735S-based display’s backlight.</p>
+</section>
+<section id="fg-color">
+<h3><code class="docutils literal notranslate"><span class="pre">fg-color!</span></code><a class="headerlink" href="#fg-color" title="Permalink to this heading">¶</a></h3>
+<p>( fg-color st7735s – )</p>
+<p>Set the foreground color of the ST7735S-based display and dirty the display.</p>
+</section>
+<section id="bg-color">
+<h3><code class="docutils literal notranslate"><span class="pre">bg-color!</span></code><a class="headerlink" href="#bg-color" title="Permalink to this heading">¶</a></h3>
+<p>( bg-color st7735s – )</p>
+<p>Set the background color of the ST7735S-based display and dirty the display.</p>
+</section>
+<section id="id36">
+<h3><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#id36" title="Permalink to this heading">¶</a></h3>
+<p>( st7735s – fg-color )</p>
+<p>Get the foreground color of the ST7735S-based display.</p>
+</section>
+<section id="id37">
+<h3><code class="docutils literal notranslate"><span class="pre">bg-color&#64;</span></code><a class="headerlink" href="#id37" title="Permalink to this heading">¶</a></h3>
+<p>( st7735s – bg-color )</p>
+<p>Get the background color of the ST7735S-based display.</p>
+</section>
+</section>
 </section>
 
 
@@ -441,7 +499,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
@@ -486,9 +545,11 @@
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
@@ -501,7 +562,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="zeptoed.html" title="previous chapter">zeptoed</a></li>
-      <li>Next: <a href="font.html" title="next chapter">Fonts</a></li>
+      <li>Next: <a href="text_display.html" title="next chapter">Text Displays</a></li>
   </ul></li>
 </ul>
 </div>
@@ -528,11 +589,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/extra/display.md.txt"

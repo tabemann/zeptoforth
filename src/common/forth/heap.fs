@@ -457,7 +457,7 @@ begin-module heap
     ;
 
     \ Find the last block in a heap
-    debug-heap? [if]
+    false [if]
       : find-last-block ( heap -- index )
 	>r r@ heap-next-free @ begin
 	  dup r@ group-size@ 2dup + r@ heap-block-count @ >= if
@@ -636,7 +636,7 @@ begin-module heap
 
     \ Verify that no memory is allocated after the last free block
     : verify-last-block ( heap -- )
-      [ debug-heap? ] [if]
+      [ false ] [if]
 	>r r@ heap-block-count @ r@ find-last-block
 	dup -1 <> if
 	  cr ." Last block: " dup .
@@ -758,7 +758,7 @@ begin-module heap
     
   \ Get the size of a heap with a given block size and block count
   : heap-size ( block-size block-count -- heap-bytes )
-    swap cell align 3 cells max over * swap 32 align 5 rshift cells +
+    32 align swap cell align 3 cells max over * swap 5 rshift cells +
     heap-size +
   ;
 

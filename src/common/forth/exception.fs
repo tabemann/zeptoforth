@@ -204,7 +204,7 @@ begin-module exception
       HFSR @ HFSR !
       in-main? if
         display-red cr cr ." Returning main task to prompt" display-normal cr
-        ['] abort
+        ['] return-to-prompt
       else
         display-red cr cr ." Terminating task" display-normal cr
         ['] crash

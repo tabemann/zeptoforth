@@ -24,7 +24,10 @@ begin-module dyn-buffer
   heap import
   
   \ Default segment size
-  40 constant default-segment-size
+  256 constant default-segment-size
+
+  \ Find search distance
+  128 constant find-search-distance
 
   begin-module dyn-buffer-internal
     
@@ -78,6 +81,9 @@ begin-module dyn-buffer
 
       \ Request a segment before another segment
       method request-segment-before ( bytes next-segment dyn-buffer -- segment )
+
+      \ Insert a segment
+      method insert-segment ( prev-segment next-segment segment dyn-buffer -- )
       
       \ Replace a segment
       method replace-segment ( new-segment old-segment dyn-buffer -- )
@@ -182,6 +188,12 @@ begin-module dyn-buffer
     \ Read data
     method read-data ( addr bytes cursor -- bytes' )
 
+    \ Read data without moving the cursor
+    method read-data-w/o-move ( addr bytes cursor -- bytes' )
+
+    \ Read data before the cursor without moving the cursor
+    method read-data-before-w/o-move ( addr bytes cursor -- addr' bytes' )
+
     \ Find previous
     method find-prev ( xt cursor -- ) ( xt: c -- match? )
 
@@ -203,6 +215,16 @@ begin-module dyn-buffer
       0 dyn-buffer dyn-buffer-first-cursor !
       0 dyn-buffer dyn-buffer-last-cursor !
     ; define new
+
+    \ Destructor
+    :noname { dyn-buffer -- }
+      dyn-buffer dyn-buffer-first @ { current-segment }
+      begin current-segment while
+        current-segment segment-next @ { next-segment }
+        current-segment dyn-buffer dyn-buffer-heap @ free
+        next-segment to current-segment
+      repeat
+    ; define destroy
     
     \ The dynamic buffer length
     :noname ( dyn-buffer -- len )
@@ -256,6 +278,22 @@ begin-module dyn-buffer
       then
       dup next-segment segment-prev !
     ; define request-segment-before
+
+    \ Insert a segment
+    :noname { prev-segment next-segment segment dyn-buffer -- }
+      prev-segment segment segment-prev !
+      prev-segment 0= if
+        segment dyn-buffer dyn-buffer-first !
+      else
+        segment prev-segment segment-next !
+      then
+      next-segment segment segment-next !
+      next-segment 0= if
+        segment dyn-buffer dyn-buffer-last !
+      else
+        segment next-segment segment-prev !
+      then
+    ; define insert-segment
     
     \ Replace a segment
     :noname { new-segment old-segment dyn-buffer -- }
@@ -294,28 +332,28 @@ begin-module dyn-buffer
     ; define delete-segment
     
     \ Execute xt for all other cursors
-    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- ) \ ." *A* "
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *B* "
-      begin current-cursor while \ ." *C* "
-        current-cursor cursor <> if \ ." *D* "
-          current-cursor xt execute \ ." *E* "
-        then \ ." *F* "
-        current-cursor cursor-next @ to current-cursor \ ." *G* "
-      repeat \ ." *H* "
+    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- )
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
+      begin current-cursor while
+        current-cursor cursor <> if
+          current-cursor xt execute
+        then
+        current-cursor cursor-next @ to current-cursor
+      repeat
     ; define for-all-other-cursors
 
     \ Resolve invalidated cursors
-    :noname { dyn-buffer -- } \ ." *a* "
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *b* "
-      begin current-cursor while \ ." *c* "
-        current-cursor cursor-invalid @ if \ ." *d* "
-          current-cursor offset@ \ ." *e* "
-          current-cursor go-to-start \ ." *f* "
-          current-cursor go-to-offset \ ." *g* "
-          false current-cursor cursor-invalid ! \ ." *h* "
-        then \ ." *i* "
-        current-cursor cursor-next @ to current-cursor \ ." *j* "
-      repeat \ ." *k* "
+    :noname { dyn-buffer -- }
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
+      begin current-cursor while
+        current-cursor cursor-invalid @ if
+          current-cursor offset@
+          current-cursor go-to-start
+          current-cursor go-to-offset
+          false current-cursor cursor-invalid !
+        then
+        current-cursor cursor-next @ to current-cursor
+      repeat
     ; define resolve-cursors
     
   end-implement
@@ -481,27 +519,35 @@ begin-module dyn-buffer
 
     \ Insert data into segment
     :noname { addr bytes cursor -- addr' bytes' }
-      cursor cursor-dyn-buffer @ { dyn-buffer }
-      cursor cursor-segment @ { old-segment }
-      cursor cursor-offset @ { offset }
-      old-segment segment-size @ { old-size }
-      default-segment-size old-size bytes +
-      min old-size - { part-size }
-      old-size part-size + dyn-buffer request-segment { new-segment }
-      old-segment segment-header-size + { old-addr }
-      new-segment segment-header-size + { new-addr }
-      old-addr new-addr offset move
-      addr new-addr offset + part-size move
-      old-addr offset + new-addr offset + part-size +
-      old-size offset - move
-      new-segment old-segment dyn-buffer replace-segment
-      new-segment cursor cursor-segment !
-      part-size cursor cursor-offset +!
-      part-size cursor cursor-global-offset +!
-      part-size +to addr
-      part-size negate +to bytes
-      part-size dyn-buffer adjust-dyn-buffer-len
-      addr bytes
+      default-segment-size cursor cursor-segment @ segment-size @ bytes + min
+      { total-size }
+      addr bytes cursor total-size dup [:
+        { addr bytes cursor total-size temp-buffer }
+        cursor cursor-dyn-buffer @ { dyn-buffer }
+        cursor cursor-segment @ { old-segment }
+        cursor cursor-offset @ { offset }
+        old-segment segment-size @ { old-size }
+        total-size old-size - { part-size }
+        old-segment segment-prev @ { prev-segment }
+        old-segment segment-next @ { next-segment }
+        old-segment segment-header-size + { old-addr }
+        old-addr temp-buffer offset move
+        addr temp-buffer offset + part-size move
+        old-addr offset + temp-buffer offset + part-size +
+        old-size offset - move
+        old-segment dyn-buffer delete-segment
+        old-size part-size + dyn-buffer request-segment { new-segment }
+        new-segment segment-header-size + { new-addr }
+        temp-buffer new-addr old-size part-size +  move
+        prev-segment next-segment new-segment dyn-buffer insert-segment
+        new-segment cursor cursor-segment !
+        part-size cursor cursor-offset +!
+        part-size cursor cursor-global-offset +!
+        part-size +to addr
+        part-size negate +to bytes
+        part-size dyn-buffer adjust-dyn-buffer-len
+        addr bytes
+      ;] with-allot
     ; define insert-data-into-segment
 
     \ Insert data after segment
@@ -570,7 +616,7 @@ begin-module dyn-buffer
         cursor cursor-segment @ { old-segment }
         cursor cursor-offset @ { offset }
         old-segment segment-size @ { old-size }
-        old-size default-segment-size < if
+        old-size bytes + default-segment-size <= if
           addr bytes cursor insert-data-into-segment to bytes to addr
         else
           offset old-size = if
@@ -738,37 +784,99 @@ begin-module dyn-buffer
       repeat
       total-bytes
     ; define read-data
-    
-    \ Find previous
-    :noname { xt cursor -- } ( xt: c -- match? )
-      0 { W^ buffer }
-      begin cursor offset@ 0> while
-        -1 cursor adjust-offset
-        buffer 1 cursor read-data 0> if
-          buffer c@ xt execute if
-            exit
-          else
-            -1 cursor adjust-offset
-          then
+
+    \ Read data without moving the cursor
+    :noname { addr bytes cursor -- bytes' }
+      cursor cursor-segment @ { segment }
+      segment 0= if 0 exit then
+      0 { total-bytes }
+      cursor cursor-offset @ { offset }
+      begin total-bytes bytes < segment 0<> and while
+        segment segment-header-size + offset + { segment-addr }
+        segment segment-size @ offset - { remaining }
+        bytes total-bytes - remaining >= if
+          segment-addr addr remaining move
+          remaining +to addr
+          remaining +to total-bytes
+          segment segment-next @ to segment
+          0 to offset
         else
-          -1 cursor adjust-offset exit
-        then
-      repeat
-    ; define find-prev
-    
-    \ Find next
-    :noname { xt cursor -- } ( xt: c -- match? )
-      0 { W^ buffer }
-      begin cursor offset@ cursor cursor-dyn-buffer @ dyn-buffer-len @ < while
-        buffer 1 cursor read-data 0> if
-          buffer c@ xt execute if
-            -1 cursor adjust-offset
-            exit
-          then
-        else
+          segment-addr addr bytes total-bytes - move
+          bytes
           exit
         then
       repeat
+      total-bytes
+    ; define read-data-w/o-move
+
+    \ Read data before the cursor without moving the cursor
+    :noname { addr bytes cursor -- addr' bytes' }
+      bytes +to addr
+      cursor cursor-segment @ { segment }
+      segment 0= if addr 0 exit then
+      0 { total-bytes }
+      cursor cursor-offset @ { offset }
+      begin total-bytes bytes < segment 0<> and while
+        bytes total-bytes - offset min { part-bytes }
+        part-bytes negate +to addr
+        part-bytes +to total-bytes
+        segment segment-header-size + offset + part-bytes -
+        addr part-bytes move
+        part-bytes offset < if
+          addr total-bytes exit
+        else
+          segment segment-prev @ to segment
+          segment if
+            segment segment-size @ to offset
+          else
+            0 to offset
+          then
+        then
+      repeat
+      addr total-bytes
+    ; define read-data-before-w/o-move
+    
+    \ Find previous
+    :noname ( xt cursor -- ) ( xt: c -- match? )
+      find-search-distance [: { xt cursor buffer }
+        cursor offset@ { bytes }
+        begin bytes while
+          buffer find-search-distance cursor read-data-before-w/o-move
+          { buffer' count }
+          count 0> if
+            count 1+ 1 ?do
+              buffer' count + i - c@ xt execute if
+                i 1- negate cursor adjust-offset unloop exit
+              then
+            loop
+            count negate cursor adjust-offset
+            count negate +to bytes
+          else
+            exit
+          then
+        repeat
+      ;] with-allot
+    ; define find-prev
+    
+    \ Find next
+    :noname ( xt cursor -- ) ( xt: c -- match? )
+      find-search-distance [: { xt cursor buffer }
+        cursor cursor-dyn-buffer @ dyn-buffer-len @ cursor offset@ - { bytes }
+        begin bytes while
+          buffer find-search-distance cursor read-data-w/o-move { count }
+          count 0> if
+            count 0 ?do
+              buffer i + c@ xt execute if
+                i cursor adjust-offset unloop exit
+              then
+            loop
+            count cursor adjust-offset
+            count negate +to bytes
+          else
+            exit
+          then
+        repeat
+      ;] with-allot
     ; define find-next
 
   end-implement

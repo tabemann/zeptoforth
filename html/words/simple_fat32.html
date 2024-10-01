@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -37,14 +38,18 @@
             
   <section id="simple-fat32-support">
 <h1>Simple FAT32 Support<a class="headerlink" href="#simple-fat32-support" title="Permalink to this heading">¶</a></h1>
-<p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards in common use cases. Objects of this class are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in its constructor and in that writethrough is set/gotten on it directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (typically <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code>) instance.</p>
+<p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards (SD cards greater than or equal to 4 GB in size) in common use cases.</p>
+<p>zeptoforth also includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash.</p>
+<p>The easiest way to accomplish this is by loading with zeptocom.js, <code class="docutils literal notranslate"><span class="pre">utils/codeload3.sh</span></code>, or e4thcom <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code>, which initializes a master boot record and a single partition containing a FAT32 file system if an initialized master boot record does not exist, and compiles code to flash (if it has not already been compiled) which initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> instance and sets it as the current filesystem on bootup.</p>
+<p>This can also be accomplished by loading <code class="docutils literal notranslate"><span class="pre">test/common/init_fat32_test.fs</span></code> and executing <code class="docutils literal notranslate"><span class="pre">init-fat32-test::run-test</span></code>. (This example can be modified to initialize FAT32 filesystems on SDHC/SDXC cards as well.)</p>
+<p>Objects of these classes are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in their constructors and in that writethrough is set/gotten on them directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code>) instance.</p>
 <section id="simple-fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code><a class="headerlink" href="#simple-fat32" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module contains the following words:</p>
 <section id="simple-fat32-fs">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code><a class="headerlink" href="#simple-fat32-fs" title="Permalink to this heading">¶</a></h3>
 <p>( – class )</p>
-<p>This is the simple FAT32 filesystem class which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems on SDHC/SDXC cards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 <p>This class has the following constructor:</p>
 </section>
 <section id="new">
@@ -62,6 +67,32 @@
 <h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying SD card interface is set to writethrough or not.</p>
+</section>
+</section>
+<section id="simple-blocks-fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code><a class="headerlink" href="#simple-blocks-fat32" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module contains the following words:</p>
+<section id="simple-blocks-fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code><a class="headerlink" href="#simple-blocks-fat32-fs" title="Permalink to this heading">¶</a></h3>
+<p>( – class )</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI flash of RP2040 boards and STM32F746 DISCOVERY boards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This class has the following constructor:</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>( fs – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> instance Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
+<p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p>( writethrough fs – )</p>
+<p>Set the underlying blocks interface to be either writethrough, i.e. write to blocks are immediately written out to the Quad SPI flash, or not writethrough, i.e. blocks are not written out to the Quad SPI flash except when evicted to load other blocks or if explicitly flushed with <code class="docutils literal notranslate"><span class="pre">flush</span></code>.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>( fs – writethrough )</p>
+<p>Get whether the underlying blocks interface is set to writethrough or not.</p>
 </section>
 </section>
 </section>
@@ -108,7 +139,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -153,9 +185,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -195,11 +229,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/simple_fat32.md.txt"

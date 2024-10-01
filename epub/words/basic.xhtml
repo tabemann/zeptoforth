@@ -1269,7 +1269,7 @@ otherwise passing the specified argument through.</p>
 <section id="create">
 <h3><code class="docutils literal notranslate"><span class="pre">create</span></code></h3>
 <p>( “name” – )</p>
-<p>Create a word referring to memory after it</p>
+<p>Create a word referring to memory after it. Note that when compiling to flash this is not of use to create arrays that can be modified at runtime, as the word will point into flash and not into RAM. It is primarily recommended to use this word for creating constant arrays as a result.</p>
 </section>
 <section id="builds">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;builds</span></code></h3>
@@ -1384,12 +1384,12 @@ otherwise passing the specified argument through.</p>
 <section id="user-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code></h3>
 <p>( bytes “name” – )</p>
-<p>Allocate a user buffer</p>
+<p>Allocate a cell-aligned user buffer</p>
 </section>
 <section id="user-aligned-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">user-aligned-buffer:</span></code></h3>
 <p>( bytes “name” – )</p>
-<p>Allocate a cell-aligned user buffer</p>
+<p>Allocate a cell-aligned user buffer (note that this is absoleted by <code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code> not provided aligned user buffers)</p>
 </section>
 <section id="cvariable">
 <h3><code class="docutils literal notranslate"><span class="pre">cvariable</span></code></h3>
@@ -1414,12 +1414,12 @@ otherwise passing the specified argument through.</p>
 <section id="buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">buffer:</span></code></h3>
 <p>( # “name” – )</p>
-<p>Specify a buffer of a given size</p>
+<p>Specify a cell-aligned buffer of a given size</p>
 </section>
 <section id="aligned-buffer">
 <h3><code class="docutils literal notranslate"><span class="pre">aligned-buffer:</span></code></h3>
 <p>( # “name” – )</p>
-<p>Specify a cell-aligned buffer of a given size</p>
+<p>Specify a cell-aligned buffer of a given size (this is obsoleted by <code class="docutils literal notranslate"><span class="pre">buffer:</span></code> now providing cell-aligned buffers)</p>
 </section>
 <section id="flash-wordlist">
 <h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code></h3>

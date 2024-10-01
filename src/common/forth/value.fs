@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -631,7 +631,7 @@ end-module> import
   token
   dup 0= triggers x-token-expected
   compiling-to-flash? not if
-    rot here cell allot tuck ! -rot
+    rot here cell align cell allot tuck ! -rot
   then
   start-compile-no-push
   visible
@@ -646,7 +646,7 @@ end-module> import
   word-end-hook @ ?execute
   $003F h,
   compiling-to-flash? if
-    next-ram-space dup >r
+    next-ram-space cell align, dup >r
   else
     swap
   then
@@ -661,7 +661,7 @@ end-module> import
   token
   dup 0= triggers x-token-expected
   compiling-to-flash? not if
-    2swap here 2 cells allot dup >r 2! r> -rot
+    2swap here cell align 2 cells allot dup >r 2! r> -rot
   then
   start-compile-no-push
   visible
@@ -679,7 +679,7 @@ end-module> import
   word-end-hook @ ?execute
   $003F h,
   compiling-to-flash? if
-    next-ram-space dup >r
+    next-ram-space cell align dup >r
   else
     swap
   then
@@ -783,7 +783,7 @@ end-module> import
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
-  [ cortex-m7? ] [if]
+  [ cortex-m7? cortex-m33? or ] [if]
     r3 1 dp ldm
     tos 1 dp ldm
   [else]
@@ -810,7 +810,7 @@ end-module> import
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
-  [ cortex-m7? ] [if]
+  [ cortex-m7? cortex-m33? or ] [if]
     r3 1 dp ldm
     tos 1 dp ldm
   [else]

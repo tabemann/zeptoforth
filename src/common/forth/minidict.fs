@@ -161,7 +161,10 @@ begin-module mini-dict
     ( word hash flash-mini-dict flash-mini-dict-size index )
     code[
     r5 r4 2 push
-    r4 r3 r2 r1 4 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
+    r3 1 dp ldm
+    r4 1 dp ldm
     mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
@@ -208,7 +211,10 @@ begin-module mini-dict
     ( word hash flash-mini-dict flash-mini-dict-size index )
     code[
     r5 r4 2 push
-    r4 r3 r2 r1 4 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
+    r3 1 dp ldm
+    r4 1 dp ldm
     mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
@@ -250,7 +256,8 @@ begin-module mini-dict
     flash-mini-dict flash-mini-dict-size +
     flash-mini-dict
     code[
-    r1 r0 2 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
     0 r1 r2 ldr_,[_,#_]
     mark<
     r0 tos cmp_,_
@@ -302,7 +309,10 @@ begin-module mini-dict
     ( b-addr bytes wid hash flash-mini-dict flash-mini-dict-size index )
     code[
     r5 r4 2 push
-    r4 r3 r2 r1 4 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
+    r3 1 dp ldm
+    r4 1 dp ldm
     mark<
     3 tos r0 lsls_,_,#_
     r2 r0 r0 adds_,_,_
@@ -385,7 +395,9 @@ begin-module mini-dict
     order-count @ 1 lshift order + order
     code[
     tos r0 movs_,_
-    r3 r2 r1 3 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
+    r3 1 dp ldm
     mark<
     8 dp subs_,#_
     0 dp r2 str_,[_,#_]
@@ -406,27 +418,39 @@ begin-module mini-dict
     ]code
   ;
 
-  \ Write out the minidictionary to flash
-  : save-flash-mini-dict ( -- )
-    flash-latest word-flags 1+ c@ if
+  \ Force writing out the minidictionary to flash
+  : force-save-flash-mini-dict ( -- )
+    [ rp2040? ] [if]
       flash-end erase-qspi-sector
-      flash-mini-dict flash-mini-dict-size flash-end mass-qspi!
-      flash-latest begin
-        dup if
-          dup word-flags 1+ c@ if
-            dup flash-base >= over flash-end < and if
-              0 over word-flags 1+ cflash!
-            then
-            next-word @
-            false
-          else
-            true
+    [then]
+    [ rp2350? ] [if]
+      flash-end flash-mini-dict-size + flash-end ?do
+        i erase-qspi-4k-sector
+      4096 +loop
+    [then]
+    flash-mini-dict flash-mini-dict-size flash-end mass-qspi!
+    flash-latest begin
+      dup if
+        dup word-flags 1+ c@ if
+          dup flash-base >= over flash-end < and if
+            0 over word-flags 1+ cflash!
           then
+          next-word @
+          false
         else
           true
         then
-      until
-      drop
+      else
+        true
+      then
+    until
+    drop
+  ;
+
+  \ Write out the minidictionary to flash
+  : save-flash-mini-dict ( -- )
+    flash-latest word-flags 1+ c@ if
+      force-save-flash-mini-dict
     then
   ;
 
@@ -438,7 +462,8 @@ begin-module mini-dict
     code[
     r4 1 push
     1 r4 movs_,#_
-    r1 r0 2 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
     mark<
     r0 tos cmp_,_
     ne bc>

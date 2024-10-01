@@ -22,8 +22,9 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   
@@ -86,6 +87,27 @@
 <p>( module – )</p>
 <p>Import a specified module into the current module’s wordlist order; if the module does not exist <code class="docutils literal notranslate"><span class="pre">x-not-found</span></code> is raised.</p>
 </section>
+<section id="import-from">
+<h3><code class="docutils literal notranslate"><span class="pre">import-from</span></code><a class="headerlink" href="#import-from" title="Permalink to this heading">¶</a></h3>
+<p>( module “name” – )</p>
+<p>Import a specified named word from within the specified module into the current namespace; note that this word will not shadow identically named words defined in the current namespace, and will persist until the end of the current module’s definition.</p>
+</section>
+<section id="begin-imports-from">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-imports-from</span></code><a class="headerlink" href="#begin-imports-from" title="Permalink to this heading">¶</a></h3>
+<p>( module “name0” … “namen” “end-imports-from” – )</p>
+<p>Import multiple specified named words from within the specified module into the current namespace; note that these words will not shadow identically named words defined in the current namespace, and will persist untilt he end of the current module’s definition. Note that these imports can cross multiple lines of input, as in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">begin</span><span class="o">-</span><span class="n">module</span> <span class="n">foobar</span>
+  <span class="p">:</span> <span class="n">foo</span> <span class="o">.</span><span class="s2">&quot; FOO &quot;</span> <span class="p">;</span>
+  <span class="p">:</span> <span class="n">bar</span> <span class="o">.</span><span class="s2">&quot; BAR &quot;</span> <span class="p">;</span>
+  <span class="p">:</span> <span class="n">baz</span> <span class="o">.</span><span class="s2">&quot; BAZ &quot;</span> <span class="p">;</span>
+<span class="n">end</span><span class="o">-</span><span class="n">module</span>
+
+<span class="n">foobar</span> <span class="n">begin</span><span class="o">-</span><span class="n">imports</span><span class="o">-</span><span class="kn">from</span>
+  <span class="nn">foo</span> <span class="n">bar</span>
+<span class="n">end</span><span class="o">-</span><span class="n">imports</span><span class="o">-</span><span class="kn">from</span>
+</pre></div>
+</div>
+</section>
 <section id="unimport">
 <h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this heading">¶</a></h3>
 <p>( module – )</p>
@@ -141,7 +163,8 @@
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
@@ -186,9 +209,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
@@ -228,11 +253,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020-2024, Travis Bemann.
+      &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../_sources/words/module.md.txt"
