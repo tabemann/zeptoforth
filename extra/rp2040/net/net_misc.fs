@@ -42,6 +42,9 @@ begin-module net-misc
     $FE800000 \ ipv6-3
   ;
 
+  \ IPv6 address size
+  4 cells constant ipv6-addr-size
+
   \ Make an IPv6 address
   : make-ipv6-addr
     ( addr0 addr1 addr2 addr3 addr4 addr5 addr6 addr7 )
@@ -178,6 +181,7 @@ begin-module net-misc
   \ ICMPv6 options
   1 constant OPTION_SOURCE_LINK_LAYER_ADDR
   2 constant OPTION_TARGET_LINK_LAYER_ADDR
+  3 constant OPTION_PREFIX_INFO
 
   \ ICMPv6 neighbor adverisement solicited flag
   30 bit constant NEIGHBOR_SOLICITED
@@ -266,6 +270,21 @@ begin-module net-misc
 
   \ ICMPv6 router advertise "managed" bit
   $80 constant icmpv6-ra-managed
+
+  \ ICMPv6 prefix information option structure
+  begin-structure icmpv6-prefix-info-opt-size
+    cfield: icmpv6-prefix-info-type
+    cfield: icmpv6-prefix-info-len
+    cfield: icmpv6-prefix-info-prefix-len
+    cfield: icmpv6-prefix-info-flags
+    field: icmpv6-prefix-info-valid-lifetime
+    field: icmpv6-prefix-info-preferred-lifetime
+    field: icmpv6-prefix-info-reserved2
+    ipv6-addr-size +field icmpv6-prefix-info-prefix
+  end-structure
+
+  \ ICMPv6 prefix information "autononmous" bit
+  $40 constant icmpv6-prefix-info-autonomous
 
   \ DNS header structure
   begin-structure dns-header-size

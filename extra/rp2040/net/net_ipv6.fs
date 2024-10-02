@@ -52,9 +52,6 @@ begin-module net
     loop
   ;
 
-  \ IPv6 address size
-  4 cells constant ipv6-addr-size
-
   \ zeptoIP internals
   begin-module net-internal
 
@@ -2295,6 +2292,15 @@ begin-module net
       \ The IPv6 address
       ipv6-addr-size member intf-ipv6-addr
 
+      \ The IPv6 prefix
+      ipv6-addr-size member intf-ipv6-prefix
+
+      \ The IPv6 autonomous state
+      cell member intf-autonomous?
+
+      \ The discovered IPv6 address
+      ipv6-addr-size member discovered-ipv6-addr
+
       \ The DNS server
       ipv6-addr-size member dns-server-ipv6-addr
 
@@ -2310,6 +2316,9 @@ begin-module net
       \ Is a router discovered
       cell member router-discovered?
 
+      \ Are we detecting duplicates
+      cell member detecting-duplicate?
+      
       \ Are we discovering a router
       cell member router-discovery?
 
@@ -2423,6 +2432,9 @@ begin-module net
       
       \ DHCP lock
       lock-size member dhcp-lock
+
+      \ MAC address resolution lock
+      lock-size member mac-addr-resolve-lock
 
       \ Are we listening to IPv6 address
       method ipv6-addr-listen?
@@ -2688,6 +2700,10 @@ begin-module net
       \ Claim the endpoint queue lock, and if an exception occurs, restore the
       \ endpoint queue status
       method with-endpoint-queue ( xt start-ticks self -- )
+
+      \ Attempt to set interface IPv6 address, detecting duplicates
+      method detect-duplicate-and-set-intf-ipv6-addr
+      ( target-0 target-1 target-2 target-3 self -- success? )
       
     end-module
     
@@ -2697,11 +2713,23 @@ begin-module net
     \ Set the IPv6 address
     method intf-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
 
+    \ Get the IPv6 prefix
+    method intf-ipv6-prefix@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    
+    \ Set the IPv6 prefix
+    method intf-ipv6-prefix! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+
+    \ Get IPv6 autonomous state
+    method intf-autonomous@ ( self -- autonomous? )
+
+    \ Set IPv6 autonomous state
+    method intf-autonomous! ( autonomous? self -- )
+
     \ Get the IPv6 prefix length
     method intf-ipv6-prefix-len@ ( self -- length )
 
     \ Set the IPv6 prefix length
-    method intf-ipv6-previx-len! ( length self -- )
+    method intf-ipv6-prefix-len! ( length self -- )
 
     \ Get the gateway IPv6 address
     method gateway-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -2724,11 +2752,14 @@ begin-module net
     \ Set the TTL
     method intf-hop-limit! ( ttl self -- )
 
+    \ Autoconfigure link-local IPv6 address
+    method autoconfigure-link-local-ipv6-addr ( self -- success? )
+    
     \ Start router discover
     method discover-ipv6-router ( self -- )
     
     \ Start DHCP discovery
-    method discover-ipv6-addr ( self -- )
+    method discover-ipv6-addr ( self -- success? )
 
     \ Send data on a TCP endpoint
     method send-tcp-endpoint ( addr bytes endpoint self -- )
@@ -2784,8 +2815,11 @@ begin-module net
     :noname { frame-interface self -- }
       self <object>->new
       frame-interface self out-frame-interface !
-      frame-interface mac-addr@ make-link-local-ipv6-addr
-      self intf-ipv6-addr ipv6-unaligned!
+      0 0 0 0 self intf-ipv6-addr ipv6-unaligned!
+      $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
+      self intf-ipv6-prefx ipv6-unaligned!
+      true intf-autonomous !
+      0 0 0 0 self discovered-ipv6-addr ipv6-unaligned!
       128 addr iptf-ipv6-prefix-len !
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self gateway-ipv6-addr ipv6-unaligned!
@@ -2795,6 +2829,7 @@ begin-module net
       false self router-discovered? !
       false self router-discovery? !
       false self use-dhcpv6? !
+      false self detecting-duplicate? !
       0 self router-lifetime !
       0 self neighbor-reachable-time !
       0 self neighbor-retrans-time !
@@ -2823,6 +2858,7 @@ begin-module net
       self endpoint-queue-lock init-lock
       self router-discovery-lock init-lock
       self dhcp-lock init-lock
+      self mac-addr-resolve-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
@@ -2847,6 +2883,26 @@ begin-module net
       intf-ipv6-addr ipv6-unaligned!
     ; define intf-ipv6-addr!
 
+    \ Get the IPv6 prefix
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      intf-ipv6-prefix ipv6-unaligned@
+    ; define intf-ipv6-prefix@
+    
+    \ Set the IPv6 prefix
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      intf-ipv6-prefix ipv6-unaligned!
+    ; define intf-ipv6-prefix!
+
+    \ Get IPv6 autonomous state
+    :noname ( self -- autonomous? )
+      intf-autonomous? @
+    ; define intf-autonomous@
+
+    \ Set IPv6 autonomous state
+    :noname ( autonomous? self -- )
+      intf-autonomous? !
+    ; define intf-autonomous!
+    
     \ Get the IPv6 prefix length
     :noname ( self -- length )
       intf-ipv6-prefix-len @
@@ -2856,7 +2912,7 @@ begin-module net
     :noname ( length self -- )
       over 128 u<= averts x-out-of-range-prefix-len
       intf-ipv6-prefix-len !
-    ; define intf-ipv4-netmask!
+    ; define intf-ipv6-prefix-len!
 
     \ Get the gateway IPv6 address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -3552,7 +3608,8 @@ begin-module net
     :noname { target-0 target-1 target-2 target-3 self -- }
       target-0 target-1 target-2 target-3 self
       target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
-      self intf-ipv6-addr@ PROTOCOL_ICMPV6
+      self detecting-duplicate? @ if 0 0 0 0 else self intf-ipv6-addr@ then
+      PROTOCOL_ICMPV6
       [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal [:
         { target-0 target-1 target-2 target-3 self buf }
         ICMPV6_TYPE_NEIGHBOR_SOLICIT buf icmp-type c!
@@ -3678,6 +3735,36 @@ begin-module net
           rev self neighbor-reachable-time !
           addr icmpv6-ra-retrans-time unaligned@
           rev self neighbor-retrans-time !
+          addr icmpv6-ra-header-size + { cur-addr }
+          addr icmpv6-ra-header-size - { cur-size }
+          begin
+            cur-size 0> if
+              OPTION_PREFIX_INFO cur-addr cur-size find-icmpv6-opt if
+                { opt-addr opt-size }
+                opt-addr icmpv6-prefix-info-prefix-len c@ 128 u<= if
+                  opt-addr icmpv6-prefix-info-prefix-len c@
+                  self intf-ipv6-prefix-len!
+                  opt-addr icmpv6-prefix-info-prefix ipv6-unaligned@
+                  self intf-ipv6-prefix!
+                  opt-addr icmpv6-prefix-info-flags c@
+                  icmpv6-prefix-info-autonomous and 0<>
+                  dup self intf-autonomous!
+                else
+                  false
+                then
+                not if
+                  opt-addr icmpv6-prefix-info-len c@ 8 * opt-addr + to cur-addr
+                  false
+                else
+                  true
+                then
+              else
+                2drop true
+              then
+            else
+              true
+            then
+          until
           false self router-discovery? !
           true self router-discovered? !
           systick::systick-counter self router-discovered-start !
@@ -3733,35 +3820,39 @@ begin-module net
     ; define construct-and-send-ipv6-packet
 
     \ Resolve an IPv6 address's MAC address
-    :noname { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
-      self reachable-time @ 0<> if
-        self reachable-time @ self address-map age-out-mac-addrs
-      then
-      systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
-      max-neighbor-discovery-attempts { attempts }
-      begin
-        dest-0 dest-1 dest-2 dest-3
-        self address-map lookup-mac-addr-by-ipv6 not
-      while
-        2drop
-        systick::systick-counter tick - self neighbor-retrans-time @ 10 * >= if
-          attempts 0> if
-            -1 to attempts
-            dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
-            systick::systick-counter to tick
-          else
-            0. false exit
-          then
-        else
-          task::timeout @ { old-timeout }
-          tick self neighbor-retrans-time @ 10 * + systick::systick-counter -
-          self swap [: task::timeout ! neighbor-discovery-sema take ;] try
-          dup ['] task::x-timed-out = if 2drop drop 0 then
-          ?raise
-          old-timeout task::timeout !
+    :noname
+      [:
+        { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
+        self reachable-time @ 0<> if
+          self reachable-time @ self address-map age-out-mac-addrs
         then
-      repeat
-      true
+        systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
+        max-neighbor-discovery-attempts { attempts }
+        begin
+          dest-0 dest-1 dest-2 dest-3
+          self address-map lookup-mac-addr-by-ipv6 not
+        while
+          2drop
+          systick::systick-counter tick -
+          self neighbor-retrans-time @ 10 * >= if
+            attempts 0> if
+              -1 to attempts
+            dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
+              systick::systick-counter to tick
+            else
+              0. false exit
+            then
+          else
+            task::timeout @ { old-timeout }
+            tick self neighbor-retrans-time @ 10 * + systick::systick-counter -
+            self swap [: task::timeout ! neighbor-discovery-sema take ;] try
+            dup ['] task::x-timed-out = if 2drop drop 0 then
+            ?raise
+            old-timeout task::timeout !
+          then
+        repeat
+        true
+      ;] over mac-addr-resolve-lock with-lock
     ; define resolve-ipv6-addr-mac-addr
 
     \ Resolve a DNS name's IPv6 address
@@ -4389,6 +4480,24 @@ begin-module net
       self dhcp-sema broadcast
       self dhcp-sema give
     ; define apply-dhcp
+
+    \ Autoconfigure link-local IPv6 address
+    :noname { self -- success? }
+      self out-frame-interface @ mac-addr@ make-link-local-ipv6-addr
+      self detect-duplicate-and-set-intf-ipv6-addr
+    ; define autoconfigure-link-local-ipv6-addr
+
+    \ Attempt to set interface IPv6 address, detecting duplicates
+    :noname { target-0 target-1 target-2 target-3 self -- success? }
+      true self detecting-duplicate? !
+      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
+      nip nip if
+        false
+      else
+        target-0 target-1 target-2 target-3 self intf-ipv6-addr! true
+      then
+      false self detecting-duplicate? !
+    ; define detect-duplicate-and-set-intf-ipv6-addr
     
     \ Start router discovery
     :noname { self -- }
@@ -4397,16 +4506,18 @@ begin-module net
       self ['] send-icmpv6-router-solicit
       self router-discovery-lock with-lock
       self router-discovery-sema take
-    ;
+    ; define discover-ipv6-router
     
-    \ Start DHCP discovery
-    :noname { self -- }
+    \ Start IPv6 discovery
+    :noname { self -- success? }
       self use-dhcpv6? @ if
         systick::systick-counter self dhcp-discover-start !
         self ['] send-dhcp-solicit self dhcp-lock with-lock self dhcp-sema take
+        self discovered-ipv6-addr ipv6-unaligned@
       else
         \ Use SLAAC
       then
+      self detect-duplicate-and-set-intf-ipv6-addr      
     ; define discover-ipv6-addr
     
     \ Send a DHCPV6_SOLICIT message
@@ -4709,7 +4820,7 @@ begin-module net
                 valid-interval renew-interval u< if
                   valid-interval to renew-interval
                 then
-                addr'' ipv6-unaligned@ self intf-ipv6-addr ipv6-unaligned!
+                addr'' ipv6-unaligned@ self discovered-ipv6-addr ipv6-unaligned!
                 rebind-interval dhcp-renew-rebind-limit-multiplier *
                 dhcp-renew-rebind-limit-divisor u/ { limit }
                 renew-interval limit u> if limit to renew-interval then

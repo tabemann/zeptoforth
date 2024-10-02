@@ -2470,6 +2470,9 @@ begin-module net
       \ DHCP lock
       lock-size member dhcp-lock
 
+      \ MAC address resolution lock
+      lock-size member mac-addr-resolve-lock
+      
       \ Send a frame
       method send-frame ( addr bytes self -- )
 
@@ -2835,6 +2838,7 @@ begin-module net
       loop
       self endpoint-queue-lock init-lock
       self dhcp-lock init-lock
+      self mac-addr-resolve-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
@@ -3620,35 +3624,38 @@ begin-module net
     ; define construct-and-send-ipv4-packet
 
     \ Resolve an IPv4 address's MAC address
-    :noname { dest-addr self -- D: mac-addr success? }
-      dest-addr self intf-ipv4-netmask@ and
-      192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
-        self gateway-ipv4-addr@ to dest-addr
-      then
-      systick::systick-counter mac-addr-resolve-interval - { tick }
-      max-mac-addr-resolve-attempts { attempts }
-      begin
-        dest-addr self address-map lookup-mac-addr-by-ipv4 not
-      while
-        2drop
-        systick::systick-counter tick - mac-addr-resolve-interval >= if
-          attempts 0> if
-            -1 +to attempts
-            dest-addr self send-ipv4-arp-request
-            systick::systick-counter to tick
-          else
-            0. false exit
-          then
-        else
-          task::timeout @ { old-timeout }
-          tick mac-addr-resolve-interval + systick::systick-counter -
-          self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
-          dup ['] task::x-timed-out = if 2drop drop 0 then
-          ?raise
-          old-timeout task::timeout !
+    :noname
+      [:
+        { dest-addr self -- D: mac-addr success? }
+        dest-addr self intf-ipv4-netmask@ and
+        192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
+          self gateway-ipv4-addr@ to dest-addr
         then
-      repeat
-      true
+        systick::systick-counter mac-addr-resolve-interval - { tick }
+        max-mac-addr-resolve-attempts { attempts }
+        begin
+          dest-addr self address-map lookup-mac-addr-by-ipv4 not
+        while
+          2drop
+          systick::systick-counter tick - mac-addr-resolve-interval >= if
+            attempts 0> if
+              -1 +to attempts
+              dest-addr self send-ipv4-arp-request
+              systick::systick-counter to tick
+            else
+              0. false exit
+            then
+          else
+            task::timeout @ { old-timeout }
+            tick mac-addr-resolve-interval + systick::systick-counter -
+            self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
+            dup ['] task::x-timed-out = if 2drop drop 0 then
+            ?raise
+            old-timeout task::timeout !
+          then
+        repeat
+        true
+      ;] over mac-addr-resolve-lock with-lock
     ; define resolve-ipv4-addr-mac-addr
 
     \ Test for DHCP ARP
