@@ -32,6 +32,20 @@ begin-module net-misc
     swap $FF and 24 lshift or
   ;
 
+  \ Make a global unicast IPv6 address
+  : make-global-unicast-ipv6-addr
+    { mac-addr-0 mac-addr-1 prefix-0 prefix-1 prefix-2 prefix-3 prefix-bits }
+    ( -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    $FFFF_FFFF 128 prefix-bits - 0 min 32 max lshift { mask-0 }
+    $FFFF_FFFF 96 prefix-bits - 0 min 32 max lshift { mask-1 }
+    $FFFF_FFFF 64 prefix-bits - 0 min 32 max lshift { mask-2 }
+    $FFFF_FFFF 32 prefix-bits - 0 min 32 max lshift { mask-3 }
+    prefix-0 mask-0 and mac-addr-0 mask-0 bic or ( ipv6-0 )
+    prefix-1 mask-1 and mac-addr-1 $FFFF and mask-1 bic or ( ipv6-1 )
+    prefix-2 mask-2 and ( ipv6-3 )
+    prefix-3 mask-3 and ( ipv6-4 )
+  ;
+
   \ Make a link-local IPv6 address
   : make-link-local-ipv6-addr
     { mac-addr-0 mac-addr-1 -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 }

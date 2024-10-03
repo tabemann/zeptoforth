@@ -3753,7 +3753,9 @@ begin-module net
                   false
                 then
                 not if
-                  opt-addr icmpv6-prefix-info-len c@ 8 * opt-addr + to cur-addr
+                  opt-addr icmpv6-prefix-info-len c@ 8 * opt-addr +
+                  dup cur-addr - negate +to cur-size
+                  to cur-addr
                   false
                 else
                   true
@@ -3930,8 +3932,8 @@ begin-module net
       src-port dest-port bytes xt self
       mac-addr src-0 src-1 src-2 src-3
       dest-0 dest-1 dest-2 dest-3 PROTOCOL_UDP bytes udp-header-size + [:
-        { src-0 src-1 src-2 src-3
-        dest-0 dest-1 dest-2 dest-3 src-port dest-port bytes xt self buf }
+        { src-port dest-port bytes xt self buf }
+        { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
         src-port rev16 buf udp-src-port h!
         dest-port rev16 buf udp-dest-port h!
         bytes udp-header-size + rev16 buf udp-total-len h!
@@ -4515,7 +4517,13 @@ begin-module net
         self ['] send-dhcp-solicit self dhcp-lock with-lock self dhcp-sema take
         self discovered-ipv6-addr ipv6-unaligned@
       else
-        \ Use SLAAC
+        self intf-autonomous@ if
+          self intf-mac-addr@ self intf-ipv6-prefix@ self intf-ipv6-prefix-len@
+          make-global-unicast-ipv6-addr
+          true
+        else
+          false exit
+        then
       then
       self detect-duplicate-and-set-intf-ipv6-addr      
     ; define discover-ipv6-addr
