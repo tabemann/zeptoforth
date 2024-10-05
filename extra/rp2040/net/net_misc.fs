@@ -141,6 +141,7 @@ begin-module net-misc
   4 constant dhcpv6-renewing
   5 constant dhcpv6-rebinding
   6 constant dhcpv6-declined
+  7 constant dhcpv6-wait-info-reply
 
   \ DHCPv6 options
   1 constant OPTION_CLIENTID
@@ -149,6 +150,7 @@ begin-module net-misc
   5 constant OPTION_IAADDR
   6 constant OPTION_ORO
   8 constant OPTION_ELAPSED_TIME
+  23 constant OPTION_DNS_SERVERS
   82 constant OPTION_SOL_MAX_RT
   
   \ Maximumm IPv6 packet size
@@ -285,6 +287,9 @@ begin-module net-misc
   \ ICMPv6 router advertise "managed" bit
   $80 constant icmpv6-ra-managed
 
+  \ ICMPv6 router advertise "other stateful configuration" bit
+  $40 constant icmpv6-ra-other
+
   \ ICMPv6 prefix information option structure
   begin-structure icmpv6-prefix-info-opt-size
     cfield: icmpv6-prefix-info-type
@@ -408,6 +413,7 @@ begin-module net-misc
   7 constant DHCPV6_REPLY
   8 constant DHCPV6_RELEASE
   9 constant DHCPV6_DECLINE
+  11 constant DHCPV6_INFORMATION_REQUEST
 
   \ DUID_LL type
   3 constant DUID_LL
