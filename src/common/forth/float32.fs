@@ -888,7 +888,8 @@ begin-module float32
       1 +to exponent'
     then
     exponent' get-exponent-size { exponent-size }
-    bytes count - 1- exponent-size - 0 max { significand-bytes }
+    bytes count - 1- exponent-size - 0 max 7 min { significand-bytes }
+    extra-digit if -1 +to significand-bytes then
     extra-digit significance10 significand-bytes significand' find-carry
     { carry-index carry? first-9? first-0 }
     carry-index -1 = carry? and first-9? and if
