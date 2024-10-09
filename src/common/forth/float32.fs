@@ -83,22 +83,49 @@ begin-module float32
       dup v>special? swap significand-mask and 0= and
     ;
     
+    \ Enable floating point
+    : enable-float ( -- )
+      [ %1111 10 2 * lshift ] literal CPACR bis!
+    ;
+    
+    initializer enable-float
+    
   end-module> import
-  
-  \ Enable floating point
-  : enable-float ( -- )
-    [ %1111 10 2 * lshift ] literal CPACR bis!
+
+  \ Load floating point registers from stack
+  : vload ( x y z -- )
+    [inlined]
+    code[
+    tos vmsrfpscr,_
+    tos 1 dp ldm
+    tos s0 vmov.f32.cr_,_
+    tos 1 dp ldm
+    tos s1 vmov.f32.cr_,_
+    tos 1 dp ldm
+    ]code
   ;
 
-  initializer enable-float
+  \ Save floating point registers on stack
+  : vsave ( -- x y z )
+    [inlined]
+    code[
+    12 dp subs_,#_
+    8 dp tos str_,[_,#_]
+    s1 tos vmov.cr.f32_,_
+    4 dp tos str_,[_,#_]
+    s0 tos vmov.cr.f32_,_
+    0 dp tos str_,[_,#_]
+    tos vmrs_,fpscr
+    ]code
+  ;
   
   \ Get the absolute value of a single-precision floating-point value
   : vabs ( f -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     s0 s0 vabs.f32_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -106,9 +133,9 @@ begin-module float32
   : vnegate ( f -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     s0 s0 vneg.f32_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -116,9 +143,9 @@ begin-module float32
   : vsqrt ( f -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     s0 s0 vsqrt.f32_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -126,10 +153,10 @@ begin-module float32
   : v+ ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vadd.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -137,10 +164,10 @@ begin-module float32
   : v- ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vsub.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -148,10 +175,10 @@ begin-module float32
   : v* ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vmul.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -159,10 +186,10 @@ begin-module float32
   : v/ ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vdiv.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -170,10 +197,10 @@ begin-module float32
   : vmin ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vminnm.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -181,23 +208,23 @@ begin-module float32
   : vmax ( f1 f0 -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
     s0 s1 s0 vmaxnm.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
   \ Get whether a single-precision floating-point value is less
   : v< ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     ge bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -206,13 +233,13 @@ begin-module float32
   \ Get whether a single-precision floating-point value is less or equal
   : v<= ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     gt bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -221,13 +248,13 @@ begin-module float32
   \ Get whether a single-precision floating-point value is equal
   : v= ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     ne bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -236,13 +263,13 @@ begin-module float32
   \ Get whether a single-precision floating-point value is not equal
   : v<> ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     eq bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -251,13 +278,13 @@ begin-module float32
   \ Get whether a single-precision floating-point value is greater
   : v> ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     le bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -266,13 +293,13 @@ begin-module float32
   \ Get whether a single-precision floating-point value is greater or equal
   : v>= ( f1 f0 -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    s1 s1 r7 vldmia!.f32_,{_..._}
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    s1 s1 dp vldmia!.f32_,{_..._}
+    0 tos movs_,#_
     s0 s1 vcmpe.f32_,_
     apsr-nzcv vmrs_,fpscr
     lt bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -281,12 +308,12 @@ begin-module float32
   \ Get whether a single-precision floating-point value is less than zero
   : v0< ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     ge bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -296,12 +323,12 @@ begin-module float32
   \ zero
   : v0<= ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     gt bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -310,12 +337,12 @@ begin-module float32
   \ Get whether a single-precision floating-point value is equal to zero
   : v0= ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     ne bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -324,12 +351,12 @@ begin-module float32
   \ Get whether a single-precision floating-point value is not equal to zero
   : v0<> ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     eq bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -338,12 +365,12 @@ begin-module float32
   \ Get whether a single-precision floating-point value is greater than zero
   : v0> ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     le bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -353,12 +380,12 @@ begin-module float32
   \ equal to zero
   : v0>= ( f -- flag )
     code[
-    r6 s0 vmov.f32.cr_,_
-    0 r6 movs_,#_
+    tos s0 vmov.f32.cr_,_
+    0 tos movs_,#_
     s0 vcmpe.f32_,#0.0
     apsr-nzcv vmrs_,fpscr
     lt bc>
-    r6 r6 mvns_,_
+    tos tos mvns_,_
     pc 1 pop
     >mark
     ]code
@@ -368,9 +395,9 @@ begin-module float32
   : vnfract ( f -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     s0 s0 vrintn.f32_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
   
@@ -378,10 +405,10 @@ begin-module float32
   : vfract ( f -- f' )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     s0 s1 vrintn.f32_,_
     s1 s0 s0 vsub.f32_,_,_
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -390,9 +417,9 @@ begin-module float32
   : f32>v ( f32 -- f )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     16 s0 vcvt.f32.s32_,#<fbits>
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -401,9 +428,9 @@ begin-module float32
   : v>f32 ( f -- f32 )
     [inlined]
     code[
-    r6 s0 vmov.f32.cr_,_
+    tos s0 vmov.f32.cr_,_
     16 s0 vcvt.s32.f32_,#<fbits>
-    s0 r6 vmov.cr.f32_,_
+    s0 tos vmov.cr.f32_,_
     ]code
   ;
 
@@ -515,51 +542,15 @@ begin-module float32
     exponent abs 1 max s>f log10 round-zero 1+ sign-bytes +
   ;
 
-  \ Number of sequential bits for massaging numbers
-  12 constant massaging-bits
-
-  \ Clean up a number
-  : massage-number { y x -- y' x' }
-    0 { count }
-    0 { current-bit }
-    30 { start-index }
-    63 { index }
-    false { massaging }
-    begin
-      y x index 2rshift drop 1 and if
-        -1 +to index
-        false
-      else
-        true
-      then
-    until
-    index 31 min dup to start-index 1- to index
-    begin
-      y index rshift 1 and current-bit = index start-index < and if
-        1 +to count
-        count massaging-bits = if
-          y $FFFF_FFFF 31 start-index 1- - rshift bic to y
-          current-bit start-index lshift s>d y x d+ exit
-        then
-      else
-        0 to count
-        index to start-index
-        y index rshift 1 and to current-bit
-      then
-      -1 +to index
-      index -1 =
-    until
-    y x
-  ;
-
   \ Determine if there is a carry, and if so, where
   : find-carry
     { extra-digit D: significance10 significand-bytes D: significand' }
-    ( -- index carry? first-9? )
+    ( -- index carry? first-9? first-0 )
     -1 { index }
     0 { current }
     false { last-big }
-    false { first-9? } 
+    false { first-9? }
+    -1 { first-0 }
     begin
       significance10 1,0 d>= significand-bytes 0> and significand' d0<> and
     while
@@ -569,22 +560,23 @@ begin-module float32
         first-digit -10 * s>f +to significand'
         significand' nip to digit
       then
-      false to extra-digit
       significand' d0<> if
+        digit 0<> if current 1+ to first-0 then
         digit 9 <> if
           current to index
         else
-          index 0= if true to first-9? then
+          current 0= extra-digit not and if true to first-9? then
         then
         digit 4 > to last-big
       then
+      false to extra-digit
       significand' drop 0 10. d* to significand'
       -1,0 +to significance10
       -1 +to significand-bytes
       1 +to current
     repeat
     significance10 1,0 d>= significand-bytes 0> and if false to last-big then
-    index last-big first-9?
+    index last-big first-9? first-0
   ;
 
   \ Table of multipliers created with:
@@ -726,154 +718,154 @@ begin-module float32
   1,192092895507816 2,
   2,3841857910156325 2,
   4,768371582031266 2,
-  9,536743164062514 2,
-  1,9073486328125029 2,
-  3,814697265625006 2,
-  7,629394531250014 2,
-  1,5258789062500029 2,
-  3,051757812500006 2,
-  6,103515625000013 2,
-  1,2207031250000016 2,
-  2,4414062500000036 2,
-  4,882812500000008 2,
-  9,765625000000007 2,
-  1,9531250000000016 2,
-  3,906250000000004 2,
-  7,812500000000009 2,
-  1,562500000000001 2,
-  3,125000000000001 2,
-  6,250000000000003 2,
-  1,2500000000000004 2,
-  2,5000000000000004 2,
-  5,000000000000001 2,
+  9,5367431640625 2,
+  1,9073486328125 2,
+  3,814697265625 2,
+  7,62939453125 2,
+  1,52587890625 2,
+  3,0517578125 2,
+  6,103515625 2,
+  1,220703125 2,
+  2,44140625 2,
+  4,8828125 2,
+  9,765625 2,
+  1,953125 2,
+  3,90625 2,
+  7,8125 2,
+  1,5625 2,
+  3,125 2,
+  6,25 2,
+  1,25 2,
+  2,5 2,
+  5,0 2,
   1,0 2,
-  1,9999999999999998 2,
-  3,999999999999999 2,
-  7,999999999999997 2,
-  1,5999999999999992 2,
-  3,199999999999999 2,
-  6,399999999999995 2,
-  1,2799999999999987 2,
-  2,5599999999999974 2,
-  5,119999999999996 2,
-  1,0239999999999994 2,
-  2,047999999999997 2,
-  4,095999999999994 2,
-  8,19199999999999 2,
-  1,6383999999999963 2,
-  3,276799999999993 2,
-  6,553599999999987 2,
-  1,3107199999999977 2,
-  2,6214399999999958 2,
-  5,2428799999999915 2,
-  1,0485759999999986 2,
-  2,0971519999999932 2,
-  4,1943039999999865 2,
-  8,388607999999975 2,
-  1,677721599999995 2,
-  3,3554431999999905 2,
-  6,710886399999982 2,
-  1,3421772799999938 2,
-  2,684354559999988 2,
-  5,368709119999977 2,
-  1,0737418239999956 2,
-  2,1474836479999913 2,
-  4,294967295999983 2,
-  8,589934591999969 2,
-  1,7179869183999938 2,
-  3,435973836799988 2,
-  6,871947673599977 2,
-  1,3743895347199955 2,
-  2,7487790694399914 2,
-  5,497558138879984 2,
-  1,0995116277759969 2,
-  2,1990232555519853 2,
-  4,398046511103971 2,
-  8,796093022207943 2,
-  1,7592186044415887 2,
-  3,518437208883178 2,
-  7,036874417766357 2,
-  1,4073748835532716 2,
-  2,8147497671065436 2,
-  5,629499534213088 2,
-  1,1258999068426176 2,
-  2,2517998136852357 2,
-  4,503599627370472 2,
-  9,007199254740945 2,
-  1,801439850948182 2,
-  3,6028797018963643 2,
-  7,2057594037927295 2,
-  1,4411518807585462 2,
-  2,8823037615170928 2,
-  5,764607523034186 2,
-  1,1529215046068375 2,
-  2,305843009213675 2,
-  4,611686018427351 2,
-  9,223372036854704 2,
-  1,844674407370941 2,
-  3,6893488147418823 2,
-  7,378697629483765 2,
-  1,4757395258967532 2,
-  2,951479051793507 2,
-  5,9029581035870144 2,
-  1,180591620717403 2,
-  2,3611832414348064 2,
-  4,722366482869614 2,
-  9,44473296573923 2,
-  1,888946593147846 2,
-  3,7778931862956924 2,
-  7,555786372591386 2,
-  1,5111572745182773 2,
-  3,022314549036555 2,
-  6,044629098073111 2,
-  1,2089258196146224 2,
-  2,4178516392292253 2,
-  4,8357032784584515 2,
-  9,671406556916903 2,
-  1,934281311383381 2,
-  3,8685626227667624 2,
-  7,737125245533526 2,
-  1,5474250491067054 2,
-  3,0948500982134113 2,
-  6,1897001964268235 2,
-  1,2379400392853648 2,
-  2,47588007857073 2,
-  4,951760157141461 2,
-  9,903520314282924 2,
-  1,9807040628565848 2,
-  3,96140812571317 2,
-  7,922816251426341 2,
-  1,5845632502852685 2,
-  3,1691265005705374 2,
-  6,338253001141076 2,
-  1,2676506002282153 2,
-  2,535301200456431 2,
-  5,070602400912863 2,
-  1,0141204801825727 2,
-  2,0282409603651455 2,
-  4,056481920730292 2,
-  8,112963841460585 2,
-  1,6225927682921037 2,
-  3,245185536584208 2,
-  6,490371073168417 2,
-  1,2980742146336837 2,
-  2,5961484292673678 2,
-  5,1922968585347355 2,
-  1,0384593717069472 2,
-  2,076918743413895 2,
-  4,153837486827791 2,
-  8,307674973655581 2,
-  1,6615349947311167 2,
-  3,3230699894622338 2,
-  6,646139978924468 2,
-  1,3292279957848938 2,
-  2,658455991569788 2,
-  5,316911983139577 2,
-  1,0633823966279154 2,
-  2,1267647932558313 2,
-  4,253529586511663 2,
-  8,507059173023327 2,
-  1,7014118346046656 2,
+  2,0 2,
+  4,0 2,
+  8,0 2,
+  1,6 2,
+  3,2 2,
+  6,4 2,
+  1,28 2,
+  2,56 2,
+  5,12 2,
+  1,024 2,
+  2,048 2,
+  4,096 2,
+  8,192 2,
+  1,6384 2,
+  3,2768 2,
+  6,5536 2,
+  1,31072 2,
+  2,62144 2,
+  5,24288 2,
+  1,048576 2,
+  2,097152 2,
+  4,194304 2,
+  8,388608 2,
+  1,6777216 2,
+  3,3554432 2,
+  6,7108864 2,
+  1,34217728 2,
+  2,68435456 2,
+  5,36870912 2,
+  1,073741824 2,
+  2,147483648 2,
+  4,294967296 2,
+  8,589934592 2,
+  1,7179869184 2,
+  3,4359738368 2,
+  6,8719476736 2,
+  1,37438953472 2,
+  2,74877906944 2,
+  5,49755813888 2,
+  1,099511627776 2,
+  2,199023255552 2,
+  4,398046511104 2,
+  8,796093022208 2,
+  1,7592186044416 2,
+  3,5184372088832 2,
+  7,0368744177664 2,
+  1,40737488355328 2,
+  2,81474976710656 2,
+  5,62949953421312 2,
+  1,125899906842624 2,
+  2,251799813685248 2,
+  4,503599627370496 2,
+  9,007199254740993 2,
+  1,8014398509481984 2,
+  3,6028797018963967 2,
+  7,2057594037927934 2,
+  1,4411518807585588 2,
+  2,8823037615171176 2,
+  5,764607523034235 2,
+  1,152921504606847 2,
+  2,305843009213694 2,
+  4,611686018427388 2,
+  9,223372036854776 2,
+  1,8446744073709551 2,
+  3,6893488147419102 2,
+  7,3786976294838205 2,
+  1,475739525896764 2,
+  2,951479051793528 2,
+  5,902958103587056 2,
+  1,1805916207174112 2,
+  2,3611832414348224 2,
+  4,722366482869645 2,
+  9,44473296573929 2,
+  1,8889465931478582 2,
+  3,7778931862957164 2,
+  7,555786372591433 2,
+  1,5111572745182864 2,
+  3,022314549036573 2,
+  6,044629098073146 2,
+  1,2089258196146293 2,
+  2,4178516392292586 2,
+  4,835703278458517 2,
+  9,671406556917034 2,
+  1,9342813113834065 2,
+  3,868562622766813 2,
+  7,737125245533626 2,
+  1,5474250491067252 2,
+  3,0948500982134504 2,
+  6,189700196426901 2,
+  1,2379400392853803 2,
+  2,4758800785707606 2,
+  4,951760157141521 2,
+  9,903520314283043 2,
+  1,9807040628566086 2,
+  3,961408125713217 2,
+  7,922816251426434 2,
+  1,5845632502852869 2,
+  3,1691265005705738 2,
+  6,3382530011411475 2,
+  1,2676506002282293 2,
+  2,5353012004564586 2,
+  5,070602400912917 2,
+  1,0141204801825836 2,
+  2,028240960365167 2,
+  4,056481920730334 2,
+  8,112963841460669 2,
+  1,6225927682921335 2,
+  3,245185536584267 2,
+  6,490371073168534 2,
+  1,298074214633707 2,
+  2,596148429267414 2,
+  5,192296858534828 2,
+  1,0384593717069657 2,
+  2,0769187434139313 2,
+  4,153837486827863 2,
+  8,307674973655725 2,
+  1,6615349947311449 2,
+  3,3230699894622897 2,
+  6,646139978924579 2,
+  1,3292279957849158 2,
+  2,6584559915698316 2,
+  5,316911983139663 2,
+  1,0633823966279328 2,
+  2,1267647932558655 2,
+  4,253529586511731 2,
+  8,507059173023462 2,
+  1,7014118346046923 2,
   
   \ Convert a single-precision floating-point value to a string in the (-)x.yez
   \ format
@@ -883,14 +875,13 @@ begin-module float32
     f v>infinite? if
       f v>sign if s" -Infinity" else s" +Infinity" then addr bytes string> exit
     then
-    f v>significand f v>exponent normalize { significand exponent significance }
+    f v>significand f v>exponent normalize s>f 2x**log10
+    { significand exponent D: significance10 }
     significand 0= if s" 0e0" addr bytes string> exit then
     f v>sign if [char] - addr bytes count char> to count then
-    exponent s>f 2x**log10 { D: exponent10 }
-    significance s>f 2x**log10 { D: significance10 }
-    exponent10 floor { exponent' }
+    exponent s>f 2x**log10 floor { exponent' }
     exponent [ 126 23 + ] literal + 2 cells * multiplier-table + 2@
-    significand 0 1 2lshift f* swap $FFFF_FF00 and swap { D: significand' }
+    significand 0 1 2lshift f* { D: significand' }
     false { extra-digit }
     significand' nip 10 >= if
       true to extra-digit
@@ -899,8 +890,8 @@ begin-module float32
     exponent' get-exponent-size { exponent-size }
     bytes count - 1- exponent-size - 0 max { significand-bytes }
     extra-digit significance10 significand-bytes significand' find-carry
-    { carry-index carry? first-9? }
-    carry-index -1 = carry? and extra-digit not and first-9? and if
+    { carry-index carry? first-9? first-0 }
+    carry-index -1 = carry? and first-9? and if
       [char] 1 addr bytes count char> to count
       1 +to exponent'
       0. to significand'
@@ -908,7 +899,8 @@ begin-module float32
     true { first-digit }
     0 { index }
     begin
-      significance10 d0> significand-bytes 0> and significand' d0<> and
+      significance10 1,0 d>= significand-bytes 0> and significand' d0<> and
+      index first-0 <> and
     while
       significand' nip { digit }
       extra-digit if
@@ -922,6 +914,9 @@ begin-module float32
           first-digit -10 * s>f +to significand'
           significand' nip to digit
         then
+      then
+      first-0 -1 = first-0 0= or if
+        0. to significand'
       then
       extra-digit first-digit and significand' d0<> and if
         [char] . addr bytes count char> to count
@@ -937,7 +932,7 @@ begin-module float32
         then
         digit [char] 0 + addr bytes count char> to count
       then
-      first-digit significand' d0<> and if
+      first-digit significand' d0<> and index 1+ first-0 <> and if
         [char] . addr bytes count char> to count
         false to first-digit
       then
