@@ -154,7 +154,7 @@ begin-module fixed32
   ;
   
   \ Round a S15.16 fixed-point number to the nearest integer with half rounding
-  \ towards even
+  \ towards odd
   : f32round-half-odd ( f32 -- n )
     dup 16 arshift 1 and if f32round-half-down else f32round-half-up then
   ;

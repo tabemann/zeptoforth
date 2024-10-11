@@ -75,7 +75,7 @@ commit-flash
 ;
 
 \ Round a fixed-point number to the nearest integer with half rounding towards
-\ even
+\ odd
 : round-half-odd ( f -- n )
   dup 1 and if round-half-down else round-half-up then
 ;
