@@ -522,12 +522,13 @@ begin-module float32
     e -127 <> if f e [ physical-significand-size 1+ ] literal exit then
     f 0= if 0 -127 0 exit then
     0 { zero-bits }
+    -126 to e
     begin f $8000_0000 and 0= while
       f 1 lshift to f
       -1 +to e
       1 +to zero-bits
     repeat
-    physical-significand-size zero-bits -
+    f e physical-significand-size zero-bits -
   ;
 
   \ Get the logarithm of 10 of a value
@@ -535,6 +536,9 @@ begin-module float32
 
   \ Convert a 2^x exponent to a 10^x exponent
   : 2x**log10 ( D: x -- D: y ) 0,30102999566 f* ;
+
+  \ Convert a 10^x exponent to a 2^x exponent
+  : 10x**log2 ( D: x -- D: y ) 3,32192809489 f* ;
   
   \ Get the number of bytes for the exponent
   : get-exponent-size { exponent -- bytes }
@@ -878,6 +882,7 @@ begin-module float32
     f v>significand f v>exponent normalize s>f 2x**log10
     { significand exponent D: significance10 }
     significand 0= if s" 0e0" addr bytes string> exit then
+    significance10 1,0 d< if s" 0e0" addr bytes string> exit then
     f v>sign if [char] - addr bytes count char> to count then
     exponent s>f 2x**log10 floor { exponent' }
     exponent [ 126 23 + ] literal + 2 cells * multiplier-table + 2@
@@ -951,5 +956,233 @@ begin-module float32
 
   \ Print out a single-precision floating-point value with a space
   : v. ( f -- ) (v.) space ;
+
+  \ Skip initial zeroes
+  : skip-zeroes { addr bytes -- addr' bytes' zero? success? }
+    false { zero-found? }
+    begin
+      bytes 0> if
+        addr c@ [char] 0 = if
+          true to zero-found? 1 +to addr -1 +to bytes false
+        else
+          true
+        then
+      else
+        addr bytes zero-found? dup exit
+      then
+    until
+    addr bytes false true
+  ;
+
+  \ Skip digits until decimal point
+  : skip-decimal { addr bytes -- decimal? decimal-place addr' bytes' }
+    0 { decimal-place }
+    false { decimal? }
+    begin
+      bytes 0> if
+        addr c@ dup [char] . = if
+          drop 1 +to addr -1 +to bytes true to decimal? true
+        else
+          dup [char] 0 >= swap [char] 9 <= and if
+            1 +to addr -1 +to bytes 1 +to decimal-place false
+          else
+            true
+          then
+        then
+      else
+        true
+      then
+    until
+    decimal? decimal-place addr bytes
+  ;
+
+  \ Skip fraction until exponent or end
+  : skip-fraction { addr bytes -- addr' bytes' places exponent? success? }
+    false { non-zero-found? }
+    0 { places }
+    begin
+      bytes 0> if
+        addr c@ dup [char] e = over [char] E = or if
+          drop addr 1+ bytes 1- places true true exit
+        else
+          dup [char] 0 = if
+            non-zero-found? not if 1 +to places then
+          else
+            true to non-zero-found?
+          then
+          dup [char] 0 < swap [char] 9 > or if
+            addr bytes 0 false false exit
+          then
+          1 +to addr -1 +to bytes false
+        then
+      else
+        true
+      then
+    until
+    addr bytes places false true
+  ;
+
+  \ Validate the exponent
+  : validate-exponent { addr bytes -- success? }
+    bytes 0<= if false exit then
+    addr c@ dup [char] + = swap [char] - = or if
+      1 +to addr
+      -1 +to bytes
+    then
+    bytes 0<= if false exit then
+    begin
+      bytes 0> if
+        addr c@ dup [char] 0 >= swap [char] 9 <= and if
+          1 +to addr -1 +to bytes false
+        else
+          false exit
+        then
+      else
+        true
+      then
+    until
+    true
+  ;
+
+  \ Parse the exponent
+  : parse-exponent { addr bytes -- exponent success? }
+    false { exponent-sign }
+    bytes 0<= if 0 false exit then
+    addr c@ dup [char] + = swap [char] - = or if
+      addr c@ [char] - = to exponent-sign
+      1 +to addr
+      -1 +to bytes
+    then
+    bytes 0<= if 0 false exit then
+    addr bytes validate-exponent not if 2drop 0 false exit then
+    base @ { saved-base }
+    addr bytes [:
+      10 base ! parse-integer
+    ;] try saved-base base ! ?raise not if drop 0 false exit then
+    exponent-sign if -1 else 1 then *
+    true
+  ;
+
+  \ Normalize a significand
+  : normalize-significand { D: f -- f' }
+    f d0= if [: ." normalizing zero!" cr ;] ?raise then
+    begin f 1,0 d>= while f 1 2rshift to f repeat
+    f drop { f }
+    begin f $8000_0000 and 0= while f 1 lshift to f repeat
+    f
+  ;
+
+  \ Parse the significand
+  : parse-significand
+    { start-addr parse-addr decimal? -- places D: significand }
+    0. { D: significand }
+    1,0 { D:  multiplier }
+    0 { places }
+    decimal? not { non-zero-found? }
+    begin parse-addr start-addr > while
+      -1 +to parse-addr
+      parse-addr c@ { digit }
+      digit [char] 0 <> non-zero-found? or to non-zero-found?
+      digit [char] . <> if
+        non-zero-found? if
+          digit [char] 0 - s>d multiplier d* +to significand
+          significand 16_777_216,0 d>= if
+            significand 10. d/ to significand
+          else
+            multiplier 10. d* to multiplier
+            1 +to places
+          then
+        then
+      then
+    repeat
+    places 1- significand
+  ;
+
+  \ Get the number of zero bits the value is adjusted to the right at
+  : right-zero-bits { D: significand' -- bits }
+    0 { zero-bits }
+    begin significand' nip $8000_0000 and 0= while
+      significand' 1 2lshift to significand'
+      1 +to zero-bits
+    repeat
+    zero-bits
+  ;
+
+  \ \ Get the number of zero bits to the right of the decimal point
+  \ : right-zero-bits { D: significand' -- bits }
+  \   significand' floor 0> if 0 exit then
+  \   significand' drop { significand }
+  \   0 { zero-bits }
+  \   begin significand $8000_0000 and 0= while
+  \     significand 1 lshift to significand
+  \     1 +to zero-bits
+  \   repeat
+  \   zero-bits
+  \ ;
+  
+  \ Parse a single-precision floating-point value as a string
+  : parse-float32 { addr bytes -- f success? }
+    bytes 0<= if 0 false exit then
+    false { sign }
+    addr c@ dup [char] + = swap [char] - = or if
+      addr c@ [char] - = to sign
+      1 +to addr
+      -1 +to bytes
+    then
+    addr bytes skip-zeroes not if drop 2drop 0 false exit then
+    if 2drop 0 true exit then
+    to bytes to addr
+    addr { start-addr }
+    addr c@ dup [char] . = over [char] 0 >= rot [char] 9 <= and or not if
+      0 false exit
+    then
+    addr bytes skip-decimal to bytes to addr { decimal? decimal-place }
+    addr bytes skip-fraction not if 2drop 2drop 0 false exit then
+    { fraction-places exponent? } to bytes to addr
+    addr { parse-addr }
+    0 { exponent10 }
+    exponent? if
+      -1 +to parse-addr
+      addr bytes validate-exponent not if 0 false exit then
+      addr bytes parse-exponent not if  0 false exit then to exponent10
+    then
+\    decimal-place 0> if
+\      decimal-place 1- +to exponent10
+\    else
+\      fraction-places negate +to exponent10
+\    then
+    start-addr parse-addr decimal? parse-significand { places D: significand' }
+\    decimal-place 0> if places negate +to exponent10 then
+    exponent10 s>f 10x**log2 { D: exponent2 }
+
+    decimal-place 0= if
+      significand' 10,0 places 1+ fi** f/ to significand'
+    then
+    
+    significand' h.16 space \ debug
+    significand' right-zero-bits 31 - negate s>f +to exponent2
+
+\    decimal-place 0= if
+\      significand' 10,0 places 1+ fi** f/ to significand'
+\      significand' h.16 space \ debug
+\      significand' right-zero-bits 1+ negate s>f +to exponent2
+\    else
+\      significand' ln 0,6931471805599453 f/ +to exponent2
+\    then
+    exponent2 127,0 d> if
+      sign if -infinity else +infinity then true exit
+    then
+    exponent2 -149,0 d< if 0 true exit then
+    significand' normalize-significand { significand } significand h.8 space \ debug
+    exponent2 -126,0 d< if
+      significand exponent2 floor 126,0 d+ rshift to significand
+    else
+      significand 1 lshift to significand
+    then
+    sign if sign-mask else 0 then
+    exponent2 floor exponent-bias + physical-significand-size lshift or
+    significand [ 32 physical-significand-size - ] literal rshift or
+    true
+  ;
   
 end-module
