@@ -36,6 +36,12 @@ begin-module armv7m-fp
   \ Unaligned immediate exception
   : x-unaligned-imm ( -- ) ." unaligned immediate" cr ;
 
+  \ Check whether FPv5 is present
+  : fpv5? ( -- flag )
+    chip $7270 = swap 2350 = and \ RP2350
+    chip $73746D = swap $660002EA = and or \ STM32F746
+  ;
+
   begin-module armv7m-fp-mask
 
     compress-flash
@@ -263,38 +269,42 @@ begin-module armv7m-fp
     \ Single-precision floating-point compare with zero with exception silencing
     $EEB5 $0AC0 instr-sr vcmpe.f32_,#0.0
 
-    \ Convert single-precision floating point to unsigned integer rounding to
-    \ nearest with ties to away
-    $FEBC $0A40 instr-2*sr vcvta.u32.f32_,_
-
-    \ Convert single-precision floating point to signed integer rounding to
-    \ nearest with ties to away
-    $FEBC $0AC0 instr-2*sr vcvta.s32.f32_,_
-
-    \ Convert single-precision floating point to unsigned integer rounding to
-    \ nearest with ties to even
-    $FEBD $0A40 instr-2*sr vcvtn.u32.f32_,_
-
-    \ Convert single-precision floating point to signed integer rounding to
-    \ nearest with ties to even
-    $FEBD $0AC0 instr-2*sr vcvtn.s32.f32_,_    
-
-    \ Convert single-precision floating point to unsigned integer rounding
-    \ towards +Infinity
-    $FEBE $0A40 instr-2*sr vcvtp.u32.f32_,_
-
-    \ Convert single-precision floating point to signed integer rounding
-    \ towards +Infinity
-    $FEBE $0AC0 instr-2*sr vcvtp.s32.f32_,_    
+    fpv5? [if]
     
-    \ Convert single-precision floating point to unsigned integer rounding
-    \ towards -Infinity
-    $FEBF $0A40 instr-2*sr vcvtm.u32.f32_,_
+      \ Convert single-precision floating point to unsigned integer rounding to
+      \ nearest with ties to away
+      $FEBC $0A40 instr-2*sr vcvta.u32.f32_,_
+      
+      \ Convert single-precision floating point to signed integer rounding to
+      \ nearest with ties to away
+      $FEBC $0AC0 instr-2*sr vcvta.s32.f32_,_
+      
+      \ Convert single-precision floating point to unsigned integer rounding to
+      \ nearest with ties to even
+      $FEBD $0A40 instr-2*sr vcvtn.u32.f32_,_
+      
+      \ Convert single-precision floating point to signed integer rounding to
+      \ nearest with ties to even
+      $FEBD $0AC0 instr-2*sr vcvtn.s32.f32_,_    
+      
+      \ Convert single-precision floating point to unsigned integer rounding
+      \ towards +Infinity
+      $FEBE $0A40 instr-2*sr vcvtp.u32.f32_,_
+      
+      \ Convert single-precision floating point to signed integer rounding
+      \ towards +Infinity
+      $FEBE $0AC0 instr-2*sr vcvtp.s32.f32_,_    
+      
+      \ Convert single-precision floating point to unsigned integer rounding
+      \ towards -Infinity
+      $FEBF $0A40 instr-2*sr vcvtm.u32.f32_,_
+      
+      \ Convert single-precision floating point to signed integer rounding
+      \ towards -Infinity
+      $FEBF $0AC0 instr-2*sr vcvtm.s32.f32_,_
 
-    \ Convert single-precision floating point to signed integer rounding
-    \ towards -Infinity
-    $FEBF $0AC0 instr-2*sr vcvtm.s32.f32_,_
-
+    [then]
+    
     \ Convert single-precision floating point to unsigned integer rounding
     \ towards zero
     $EEBC $0AC0 instr-2*sr vcvtr.u32.f32_,_
@@ -398,12 +408,16 @@ begin-module armv7m-fp
     \ Single-precision floating-point load
     $ED10 $0A00 instr-sr-load/store-imm vldr.f32_,[_,#_]
 
-    \ Single-precision floating-point maximum number
-    $FE80 $0A00 instr-3*sr vmaxnm.f32_,_,_
+    fpv5? [if]
+      
+      \ Single-precision floating-point maximum number
+      $FE80 $0A00 instr-3*sr vmaxnm.f32_,_,_
+      
+      \ Single-precision floating-point minimum number
+      $FE80 $0A40 instr-3*sr vminnm.f32_,_,_
 
-    \ Single-precision floating-point minimum number
-    $FE80 $0A40 instr-3*sr vminnm.f32_,_,_
-
+    [then]
+    
     \ Single-precision floating-point multiply accumulate
     $EE00 $0A40 instr-3*sr vmla.f32_,_,_
 
@@ -449,47 +463,53 @@ begin-module armv7m-fp
     \ Single-precision floating-point multiply and negate
     $EE20 $0A40 instr-3*sr vnmul.f32_,_,_
 
-    \ Round a single-precision floating-point value to nearest with ties to away
-    $FEB8 $0A40 instr-2*sr vrinta.f32_,_
+    fpv5? [if]
+      
+      \ Round a single-precision floating-point value to nearest with ties to
+      \ away
+      $FEB8 $0A40 instr-2*sr vrinta.f32_,_
+      
+      \ Round a single-precision floating-point value to nearest with ties to
+      \ even
+      $FEB9 $0A40 instr-2*sr vrintn.f32_,_
 
-    \ Round a single-precision floating-point value to nearest with ties to even
-    $FEB9 $0A40 instr-2*sr vrintn.f32_,_
+      \ Round a single-precision floating-point value towards +Infinity
+      $FEBA $0A40 instr-2*sr vrintp.f32_,_
+      
+      \ Round a single-precision floating-point value towards -Infinity
+      $FEBB $0A40 instr-2*sr vrintm.f32_,_
+      
+      \ Round a single-precision floating-point value using the rounding mode
+      \ specified in the FPSCR, with zero giving a zero of equal sign, an
+      \ infinite input giving an infinite result of equal sign, NaN being
+      \ propagated, and an inexact conversion resulting in an inexact exception
+      $EEB7 $0A40 instr-2*sr vrintx.f32_,_
+      
+      \ Round a single-precision floating-point towards zero, with zero giving a
+      \ zero of equal sign, an infinite input giving an infinite result of equal
+      \ sign, and a NaN being propagated
+      $EEB6 $0AC0 instr-2*sr vrintz.f32_,_
+      
+      \ Round a single-precision floating-point value using the rounding mode
+      \ specified in the FPSCR, with zero giving a zero of equal sign, an
+      \ infinite input giving an infinite result of equal sign, and a NaN being
+      \ propagated
+      $EEB6 $0A40 instr-2*sr vrintr.f32_,_
+      
+      \ Single-precision floating-point selection based on an EQ condition code
+      $FE00 $0A00 instr-3*sr vseleq.f32_,_,_
+      
+      \ Single-precision floating-point selection based on a VS condition code
+      $FE10 $0A00 instr-3*sr vselvs.f32_,_,_
+      
+      \ Single-precision floating-point selection based on a GE condition code
+      $FE20 $0A00 instr-3*sr vselge.f32_,_,_
+      
+      \ Single-precision floating-point selection based on a GT condition code
+      $FE30 $0A00 instr-3*sr vselgt.f32_,_,_
 
-    \ Round a single-precision floating-point value towards +Infinity
-    $FEBA $0A40 instr-2*sr vrintp.f32_,_
-
-    \ Round a single-precision floating-point value towards -Infinity
-    $FEBB $0A40 instr-2*sr vrintm.f32_,_
-
-    \ Round a single-precision floating-point value using the rounding mode
-    \ specified in the FPSCR, with zero giving a zero of equal sign, an
-    \ infinite input giving an infinite result of equal sign, NaN being
-    \ propagated, and an inexact conversion resulting in an inexact exception
-    $EEB7 $0A40 instr-2*sr vrintx.f32_,_
-
-    \ Round a single-precision floating-point towards zero, with zero giving a
-    \ zero of equal sign, an infinite input giving an infinite result of equal
-    \ sign, and a NaN being propagated
-    $EEB6 $0AC0 instr-2*sr vrintz.f32_,_
-
-    \ Round a single-precision floating-point value using the rounding mode
-    \ specified in the FPSCR, with zero giving a zero of equal sign, an
-    \ infinite input giving an infinite result of equal sign, and a NaN being
-    \ propagated
-    $EEB6 $0A40 instr-2*sr vrintr.f32_,_
-
-    \ Single-precision floating-point selection based on an EQ condition code
-    $FE00 $0A00 instr-3*sr vseleq.f32_,_,_
-
-    \ Single-precision floating-point selection based on a VS condition code
-    $FE10 $0A00 instr-3*sr vselvs.f32_,_,_
-
-    \ Single-precision floating-point selection based on a GE condition code
-    $FE20 $0A00 instr-3*sr vselge.f32_,_,_
-
-    \ Single-precision floating-point selection based on a GT condition code
-    $FE30 $0A00 instr-3*sr vselgt.f32_,_,_
-
+    [then]
+    
     \ Single-precision floating-point square root
     $EEB1 $0AC0 instr-2*sr vsqrt.f32_,_
     
