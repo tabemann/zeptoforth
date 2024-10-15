@@ -265,12 +265,12 @@ commit-flash
 	f/ atan pi d-
       else
 	4dup d0= rot rot d0> and if
-	  2drop pi 2 0 d/
+          2drop 2drop pi 2 0 d/
 	else
 	  4dup d0= rot rot d0< and if
-	    2drop pi 2 0 dnegate d/
+	    2drop 2drop pi 2 0 dnegate d/
 	  else
-	    2drop 0 0
+	    2drop 2drop 0 0
 	  then
 	then
       then
@@ -283,10 +283,10 @@ commit-flash
   2dup 2 fi** 0 1 d< if
     0 1 2over 2 fi** d- sqrt f/ atan
   else
-    2dup d0> if
-      2drop pi 2 0 d/
+    d0> if
+      pi 2 0 d/
     else
-      2drop pi 2 0 negate d/
+      pi 2 0 negate d/
     then
   then
 ;

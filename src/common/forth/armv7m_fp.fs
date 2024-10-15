@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module armv7m-fp
 
   internal import
@@ -36,6 +38,8 @@ begin-module armv7m-fp
 
   begin-module armv7m-fp-mask
 
+    compress-flash
+    
     \ The instruction masks, for convenience's sake
     
     %1111_1111_0011_0000 constant instr-sr-load/store-imm-mask-0
@@ -68,6 +72,8 @@ begin-module armv7m-fp
     %1111_1111_1111_0000 constant instr-cr-fpscr-mask-0
     %0000_1111_0001_0000 constant instr-cr-fpscr-mask-1
 
+    end-compress-flash
+    
   end-module
   
   begin-module armv7m-fp-internal
@@ -96,6 +102,8 @@ begin-module armv7m-fp
     \ Validate an immediate as being aligned to a word
     : validate-imm-4align ( imm -- ) $3 and 0= averts x-unaligned-imm ;
 
+    compress-flash
+    
     \ 32-bit single-precision register load/store 4-byte-immediate instruction
     : instr-sr-load/store-imm ( h0 h1 "name" -- )
       <builds 16 lshift or , does> @ { imm rn vd instr }
@@ -190,11 +198,15 @@ begin-module armv7m-fp
       instr 16 rshift rt 12 lshift or h,
     ;
 
+    end-compress-flash
+    
   end-module> import
 
   begin-module armv7m-fp-instr
 
     armv6m::armv6m-instr import
+
+    compress-flash
     
     \ Registers
     0 constant s0
@@ -261,11 +273,11 @@ begin-module armv7m-fp
 
     \ Convert single-precision floating point to unsigned integer rounding to
     \ nearest with ties to even
-    $FEBD $0A40 instr-2*sr vcvte.u32.f32_,_
+    $FEBD $0A40 instr-2*sr vcvtn.u32.f32_,_
 
     \ Convert single-precision floating point to signed integer rounding to
     \ nearest with ties to even
-    $FEBD $0AC0 instr-2*sr vcvte.s32.f32_,_    
+    $FEBD $0AC0 instr-2*sr vcvtn.s32.f32_,_    
 
     \ Convert single-precision floating point to unsigned integer rounding
     \ towards +Infinity
@@ -496,6 +508,8 @@ begin-module armv7m-fp
 
     \ Single-precision floating-point subtraction
     $EE30 $0A40 instr-3*sr vsub.f32_,_,_
+
+    end-compress-flash
     
     \ Load multiple consecutive single-precision floating point values from the
     \ stack
@@ -522,3 +536,4 @@ begin-module armv7m-fp
   
 end-module
 
+reboot

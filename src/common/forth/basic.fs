@@ -110,14 +110,15 @@ $DEFE constant start-string
 \ ISB instruction
 : isb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F6F h, ] ;
 
-\ Add to a cell
-\ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
+\ Write four cells to an address
+: 4! ( x y z w addr -- )
+  [ 3 cells ] literal + tuck ! cell - tuck ! cell - tuck ! cell - !
+;
 
-\ Get the minimum of two numbers
-\ : min ( n1 n2 -- n3 ) over - dup 0< and + ;
-
-\ Get the maximum of two numbers
-\ : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
+\ Read four cells from an address
+: 4@ ( addr -- x y z w )
+  dup @ swap cell+ dup @ swap cell+ dup @ swap cell+ @
+;
 
 \ Rotate three cells in revese
 : -rot ( x1 x2 x3 -- x3 x1 x2 ) rot rot [inlined] ;

@@ -294,7 +294,7 @@ begin-module fixed32
   ;
   
   \ Get the angle of an x and an y S15.16 fixed-point numbers
-  : f32atan2 ( f32x f32y -- f32angle )
+  : f32atan2 ( f32y f32x -- f32angle )
     dup 0> if
       f32/ f32atan
     else
@@ -305,12 +305,12 @@ begin-module fixed32
           f32/ f32atan f32pi -
         else
           2dup 0= swap 0> and if
-            drop [ f32pi 2 / ] literal
+            2drop [ f32pi 2 / ] literal
           else
             2dup 0= swap 0< and if
-              drop [ f32pi -2 / ] literal
+              2drop [ f32pi -2 / ] literal
             else
-              drop 0
+              2drop 0
             then
           then
         then
@@ -320,13 +320,13 @@ begin-module fixed32
   
   \ Get the arcsine of an S15.16 fixed-point number
   : f32asin ( f32 -- f32' )
-    dup 2 f32i** [ 1 s>f32 ] literal <  if
+    dup 2 f32i** [ 1 s>f32 ] literal < if
       [ 1 s>f32 ] literal over 2 f32i** - f32sqrt f32/ f32atan
     else
-      dup 0> if
-        drop [ f32pi 2 / ] literal
+      0> if
+        [ f32pi 2 / ] literal
       else
-        drop [ f32pi -2 / ] literal
+        [ f32pi -2 / ] literal
       then
     then
   ;

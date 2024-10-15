@@ -18,15 +18,14 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module float32
 
   armv7m-fp import
 
   begin-module float32-internal
 
-    \ CPACR register address
-    $E000ED88 constant CPACR
-    
     \ The sign mask
     $8000_0000 constant sign-mask
 
@@ -97,6 +96,9 @@ begin-module float32
           addr bytes zero-found? dup exit
         then
       until
+      addr c@ dup [char] e = swap [char] E = or if
+        addr bytes zero-found? dup exit
+      then
       addr bytes false true
     ;
 
@@ -605,16 +607,33 @@ begin-module float32
     4,253529586511731 2,
     8,507059173023462 2,
     1,7014118346046923 2,
+
+    \ CPACR register address
+    $E000ED88 constant CPACR
+    
+    \ Enable FPU bits
+    %1111 10 2 * lshift constant CPACR_FPU_BITS
+
+    \ FPCCR register address
+    $E000EF34 constant FPCCR
+
+    \ FPCCR LSPEN and ASPEN bits
+    %11 30 lshift constant FPCCR_ASPEN_LSPEN_BITS
     
     \ Enable floating point
     : enable-float ( -- )
-      [ %1111 10 2 * lshift ] literal CPACR bis!
+      CPACR_FPU_BITS CPACR bit@ not if
+        FPCCR_ASPEN_LSPEN_BITS FPCCR bic!
+        CPACR_FPU_BITS CPACR bis!
+      then
     ;
     
     initializer enable-float
     
   end-module> import
 
+  compress-flash
+  
   \ Load floating point registers from stack
   : vload ( x y z w -- )
     [inlined]
@@ -1018,6 +1037,8 @@ begin-module float32
     ]code
   ;
 
+  end-compress-flash
+  
   \ Convert an S31.32 fixed-point value to a single-precision floating-point
   \ value
   : f64>v { D: f64 -- f }
@@ -1205,9 +1226,10 @@ begin-module float32
     exponent? if
       -1 +to parse-addr
       addr bytes validate-exponent not if 0 false exit then
-      addr bytes parse-exponent not if  0 false exit then to exponent10
+      addr bytes parse-exponent not if 0 false exit then to exponent10
     then
     start-addr parse-addr decimal? parse-significand { places D: significand' }
+    significand' d0= if 0 true exit then
     exponent10 s>f 10x**log2 { D: exponent2 }
     significand' 10,0 places 1+ decimal-place - fi** f/ to significand'
     exponent2 exponent2 round-zero s>f d- { D: fract }
@@ -1327,10 +1349,10 @@ begin-module float32
     int v+
   ;
 
-  \ Pi as a single-precision floating-point number
+  \ Pi as a single-precision floating-point value
   pi f64>v constant vpi
 
-  \ Exponentiate a single-precision floating-point number by an integer
+  \ Exponentiate a single-precision floating-point value by an integer
   : vi** ( f exponent -- f' )
     dup 0> if
       v1 begin
@@ -1352,7 +1374,7 @@ begin-module float32
     then
   ;
 
-  \ Get the (e^x)-1 of a single-precision floating-point number
+  \ Get the (e^x)-1 of a single-precision floating-point value
   : vexpm1 ( f -- f' )
     >r 0 v1 v1 begin
       swap r@ v* over v/ dup vabs 0= >r rot over v+ swap rot v1 v+ r>
@@ -1360,7 +1382,250 @@ begin-module float32
     rdrop 2drop
   ;
 
-  \ Get the e^x of a single-precision floating-point number
+  \ Get the e^x of a single-precision floating-point value
   : vexp ( f -- f' ) vexpm1 v1 v+ ;
   
+  \ Domain error exception
+  : x-domain-error ( -- ) ." domain error" cr ;
+  
+  \ Get the ln(x+1) of a single-precision floating-point value
+  : vlnp1 ( f -- f' )
+    dup v-1 v<> averts x-domain-error
+    dup vabs v1 v<= if
+      dup dup v1 v1 { n x xy** y sign }
+      begin
+        v-1 sign v* to sign
+        xy** x v* to xy**
+        v1 y v+ to y
+        xy** y v/ sign v* { w }
+        n w v+ to n
+        w v0=
+      until
+      n
+    else
+      v1 v+ 32 >r >r 0 begin
+        dup vexp
+        dup r@ swap v-
+        r@ rot v+
+        v/
+        [ 2,0 f64>v ] literal v*
+        over v+
+        dup rot v-
+        v>significand 0= r> r> 1- dup >r swap >r 0= or
+      until
+      rdrop rdrop
+    then
+  ;
+  
+  \ Get the ln(x) of a single-precision floating-point value
+  : vln ( f -- f' ) v1 v- vlnp1 ;
+
+  \ Get the sine of a single-precision floating-point value
+  : vsin ( f -- f' )
+    [ pi 2,0 f* f64>v ] literal vmod
+    dup dup >r v1 begin
+      swap r@ v* r@ v*
+      over [ 2,0 f64>v ] literal v* v/
+      over [ 2,0 f64>v ] literal v*
+      v1 v+ v/
+      dup v>significand 0= >r
+      rot
+      over
+      3 pick [ 2,0 f64>v ] literal vmod v0= if v+ else v- then
+      swap
+      rot
+      v1 v+
+      r>
+    until
+    rdrop 2drop
+  ;
+
+  \ Get the cosine of a single-precision floating-point value
+  : vcos ( f -- f' ) [ pi 2,0 f/ f64>v ] literal swap v- vsin ;
+
+  \ Get the tangent of a single-precision floating-point value
+  : vtan ( f -- f' ) dup vsin swap vcos v/ ;
+
+  continue-module float32-internal
+
+    12,595802263029547 f64>v constant RR1
+    -86,186317517509520 f64>v constant RR2
+    -1,2766919133361079 f64>v constant RR3
+    -0,083921038065840512 f64>v constant RR4
+    27,096164294378656 f64>v constant SS1
+    6,5581320451487386 f64>v constant SS2
+    2,1441643116703661 f64>v constant SS3
+    1,2676256708212610 f64>v constant SS4
+    1,7320508075688772 f64>v constant RT3
+    0,52359877559829887 f64>v constant PIBY6
+    0,57079632679489661 f64>v constant PIBY2M1
+    0,73205080756887728 f64>v constant RT3M1
+    0,26794919243112271 f64>v constant TANPIBY12
+
+  end-module
+  
+  \ Get the arctangent of a single-precision floating-point value
+  : vatan { x1 -- f }
+    0 0 { xx1 const }
+    false false { sign inv }
+    x1 v0< if true to sign x1 vnegate to xx1 else x1 to xx1 then
+    \ cr ." sign: " sign . ." xx1: " xx1 v.
+    xx1 v1 v> if v1 xx1 v/ to xx1 true to inv then
+    \ cr ." inv: " inv . ." xx1: " xx1 v.
+    xx1 TANPIBY12 v> if
+      RT3M1 xx1 v* v1 v- xx1 v+ xx1 RT3 v+ v/ to xx1
+      PIBY6 to const
+    then
+    \ cr ." const: " const v. ." xx1: " xx1 v.
+    xx1 xx1 v* { xsq }
+    \ cr ." xsq: " xsq v.
+    xsq SS4 v+ RR4 swap v/ xsq v+ SS3 v+ RR3 swap v/
+    xsq v+ SS2 v+ RR2 swap v/ xsq v+ SS1 v+ RR1 swap v/ xx1 v* to xx1
+    \ cr ." xx1: " xx1 v.
+    xx1 const v+ to xx1
+    \ cr ." xx1: " xx1 v.
+    inv if v1 xx1 v- PIBY2M1 v+ to xx1 then
+    \ cr ." xx1: " xx1 v.
+    sign if xx1 vnegate to xx1 then
+    \ cr ." xx1: " xx1 v.
+    xx1
+  ;
+
+  \ Get the angle of an x and a y single-precision floating-point values
+  : vatan2 ( fy fx -- fangle )
+    dup v0> if
+      v/ vatan
+    else
+      2dup v0< swap v0>= and if
+        v/ vatan vpi v+
+      else
+        2dup v0< swap v0< and if
+          v/ vatan vpi v-
+        else
+          2dup v0= swap v0> and if
+            2drop [ pi 2,0 f/ f64>v ] literal
+          else
+            2dup v0= swap v0< and if
+              2drop [ pi -2,0 f/ f64>v ] literal
+            else
+              2drop 0
+            then
+          then
+        then
+      then
+    then
+  ;
+
+  \ Get the arcsine of a single-precision floating-point value
+  : vasin ( f -- f' )
+    dup dup v* v1 v< if
+      v1 over dup v* v- vsqrt v/ vatan
+    else
+      v0> if
+        [ pi 2,0 f/ f64>v ] literal
+      else
+        [ pi -2,0 f/ f64>v ] literal
+      then
+    then
+  ;
+
+  \ Get the arccosine of a single-precision floating-point value
+  : vacos ( f -- f' )
+    vasin vnegate [ pi 2,0 f/ f64>v ] literal v+
+  ;
+
+  \ Exponentiate two single-precision floating-point values
+  : v** ( fb fx -- fb^fx )
+    over v0= >r dup v0= r> and triggers x-domain-error
+    dup vfract v0= over v>exponent 30 <= and if
+      dup v>n 0>= if
+        v>n vi**
+      else
+        v>n negate vi** v1 swap v/
+      then
+    else
+      over v0>= averts x-domain-error swap vln v* vexp
+    then
+  ;
+
+  \ Get the hyperbolic sine of an S15.16 fixed-point number
+  : vsinh ( f -- f' )
+    vexpm1 dup dup v1 v+ v/ v+ [ 2,0 f64>v ] literal v/
+  ;
+  
+  \ Get the hyperbolic cosine of an S15.16 fixed-point number
+  : vcosh ( f -- f' )
+    vexpm1 dup dup v1 v+ v/ v- [ 2,0 f64>v ] literal v/ v1 v+
+  ;
+
+  \ Get the hyperbolic tangent of an S15.16 fixed-point number
+  : vtanh ( f -- f' )
+    dup vsinh swap vcosh v/
+  ;
+
+  \ Get the hyperbolic arcsine of an S15.16 fixed-point number
+  : vasinh ( f -- f' )
+    dup dup v* v1 v+ vsqrt v+ vln
+  ;
+
+  \ Get the hyperbolic arccosine of an S15.16 fixed-point number
+  : vacosh ( f -- f' )
+    dup dup v* v1 v- vsqrt v+ vln
+  ;
+
+  \ Get the hyperbolic arctangent of an S15.16 fixed-point number
+  : vatanh ( f -- f' )
+    dup v1 v+ swap vnegate v1 v+ v/ vln
+    [ 2,0 f64>v ] literal v/
+  ;
+
+  continue-module float32-internal
+
+    \ Saved handle number hook
+    variable saved-handle-number-hook
+
+    \ Confirm that a value contains an exponent
+    : check-exponent ( addr bytes -- flag )
+      over + swap ?do
+        i c@ dup [char] e = swap [char] E = or if unloop true exit then
+      loop
+      false
+    ;
+    
+    \ Handle numeric literals
+    : do-handle-number ( addr bytes -- flag )
+      2dup saved-handle-number-hook @ execute if
+        state @ not if
+          rot rot
+        then
+        2drop true
+      else
+        2dup check-exponent if
+          parse-float32 if
+            state @ if
+              lit, true
+            else
+              true
+            then
+          else
+            drop false
+          then
+        else
+          2drop false
+        then
+      then
+    ;
+    
+    \ Initialize
+    : init-handle-number ( -- )
+      handle-number-hook @ saved-handle-number-hook !
+      ['] do-handle-number handle-number-hook !
+    ;
+
+    initializer init-handle-number
+
+  end-module
+  
 end-module
+
+reboot

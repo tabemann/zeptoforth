@@ -234,6 +234,12 @@ begin-module task
       \ Task termination reason
       dup constant .task-terminate-reason field: task-terminate-reason
 
+      \ Task floating point context saved?
+      dup constant .task-float32-ctx-saved? field: task-float32-ctx-saved?
+      
+      \ Task floating point context
+      dup constant .task-float32-ctx 4 cells +field task-float32-ctx
+      
       \ Task guard value
       dup constant .task-guard field: task-guard
       
@@ -1254,6 +1260,7 @@ begin-module task
       default-timeslice over task-timeslice !
       default-min-timeslice over task-min-timeslice !
       default-timeslice over task-saved-systick-counter !
+      false over task-float32-ctx-saved? !
       0 current-lock-held !
       0 over task-next !
       0 over task-prev !
@@ -1344,6 +1351,7 @@ begin-module task
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
 	default-timeslice over task-saved-systick-counter !
+        false over task-float32-ctx-saved? !
 	dup ['] task-rstack-base for-task@ over task-rstack-current !
 	next-user-space over task-dict-base @ +
 	over ['] task-ram-here for-task!
@@ -1458,6 +1466,7 @@ begin-module task
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
+    false over task-float32-ctx-saved? !
     dup ['] task-rstack-base for-task@
     over ['] task-stack-base for-task@ ['] task-entry
     init-context over task-rstack-current !
@@ -1581,13 +1590,23 @@ begin-module task
     variable pendsv-return
 
     \ Save task state
-    : save-task-state ( task -- )
-      task-systick-counter @ swap task-saved-systick-counter !
+    : save-task-state { prev-task -- }
+      task-systick-counter @ prev-task task-saved-systick-counter !
+      [ defined? float32 ] [if]
+        float32::vsave prev-task task-float32-ctx 4!
+        true prev-task task-float32-ctx-saved? !
+      [then]
     ;
 
     \ Restore task state
-    : restore-task-state ( task -- )
-      task-dict-base @ dict-base !
+    : restore-task-state { next-task -- }
+      next-task task-dict-base @ dict-base !
+      [ defined? float32 ] [if]
+        next-task task-float32-ctx-saved? @ if
+          next-task task-float32-ctx 4@ float32::vload
+          false next-task task-float32-ctx-saved? !
+        then
+      [then]
     ;
 
     \ Handle task termination
@@ -2100,7 +2119,10 @@ begin-module task
             init-core-1-ticks
           [then]
         [then]
-	1 pause-enabled !
+        1 pause-enabled !
+        [ defined? float32 ] [if]
+          float32::float32-internal::enable-float
+        [then]
         core-init-hook @ execute
         true core-1-launched !
         begin current-task @ task-active h@ 16 lshift 16 arshift 0<= while

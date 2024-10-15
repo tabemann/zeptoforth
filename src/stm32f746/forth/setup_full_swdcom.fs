@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
 #include src/stm32f746/forth/erase.fs
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
+#include src/common/forth/armv7m_fp.fs
+#include src/common/forth/float32.fs
 #include src/common/forth/systick.fs
 #include src/stm32f746/forth/int_io.fs
 #include src/stm32f746/forth/gpio.fs
