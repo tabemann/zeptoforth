@@ -1,0 +1,503 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Single-Precision Floating-Point Support Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Software Alarm Words" href="alarm.html" />
+    <link rel="prev" title="Double-Cell Words" href="double.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="single-precision-floating-point-support-words">
+<h1>Single-Precision Floating-Point Support Words<a class="headerlink" href="#single-precision-floating-point-support-words" title="Permalink to this heading">¶</a></h1>
+<p>On the RP2350, STM32F407, STM32L476, and STM32F746 hardware single-precision floating point is supported. (The STM32F411 does have such hardware functionality, but it is not supported to save what limited flash it has left after zeptoforth is loaded.)</p>
+<p>The usual suspects for mathematical functions are supported, as are conversions to and from integers, fixed-point values, and strings. Also, single-precision floating-point literals in <code class="docutils literal notranslate"><span class="pre">({+,-})x.y{e,E}({+,-})z</span></code> are supported.</p>
+<p>Note that no dedicated floating-point stack is used, unlike in some other Forths. Rather, single-precision floating-point values are cell-sized and live on the data and return stacks like any other vallues.</p>
+<section id="float32">
+<h2><code class="docutils literal notranslate"><span class="pre">float32</span></code><a class="headerlink" href="#float32" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">float32</span></code> module contains the following words:</p>
+<section id="vload-x-y-z-w">
+<h3><code class="docutils literal notranslate"><span class="pre">vload</span></code> ( x y z w – )<a class="headerlink" href="#vload-x-y-z-w" title="Permalink to this heading">¶</a></h3>
+<p>Load floating point registers from stack.</p>
+</section>
+<section id="vsave-x-y-z-w">
+<h3><code class="docutils literal notranslate"><span class="pre">vsave</span></code> ( – x y z w )<a class="headerlink" href="#vsave-x-y-z-w" title="Permalink to this heading">¶</a></h3>
+<p>Save floating point registers on stack.</p>
+</section>
+<section id="vabs-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vabs</span></code> ( f – f’ )<a class="headerlink" href="#vabs-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the absolute value of a single-precision floating-point value.</p>
+</section>
+<section id="vnegate-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vnegate</span></code> ( f – f’ )<a class="headerlink" href="#vnegate-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Negate a single-precision floating-point value.</p>
+</section>
+<section id="vsqrt-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsqrt</span></code> ( f – f’ )<a class="headerlink" href="#vsqrt-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the square root of a single-precision floating-point value.</p>
+</section>
+<section id="v-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v+</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#v-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<p>Add two single-precision floating-point values.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">v-</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>Subtract two single-precision floating-point values.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">v*</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>Multiply two single-precision floating-point values.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">v/</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p>Divide two single-precision floating-point values.</p>
+</section>
+<section id="vmin-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmin</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmin-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the minimum of two single-precision floating-point values.</p>
+</section>
+<section id="vmax-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmax</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmax-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the maximum of two single-precision floating-point values.</p>
+</section>
+<section id="v-f1-f0-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#v-f1-f0-flag" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is less.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is less or equal.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">v=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is equal.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;&gt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is not equal.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is greater.</p>
+</section>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is greater or equal.</p>
+</section>
+<section id="v0-f-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;</span></code> ( f – flag )<a class="headerlink" href="#v0-f-flag" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is less than zero.</p>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;=</span></code> ( f – flag )<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is less than or equal to zero.</p>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">v0=</span></code> ( f – flag )<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is equal to zero.</p>
+</section>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;&gt;</span></code> ( f – flag )<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is not equal to zero.</p>
+</section>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;</span></code> ( f – flag )<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is greater than zero.</p>
+</section>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;=</span></code> ( f – flag )<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a single-precision floating-point value is greater than or equal to zero.</p>
+</section>
+<section id="vnfract-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vnfract</span></code> ( f – f’ )<a class="headerlink" href="#vnfract-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the non-fractional portion of a single-precision floating-point value.</p>
+</section>
+<section id="vfract-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vfract</span></code> ( f – f’ )<a class="headerlink" href="#vfract-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the fractional portion of a single-precision floating-point value.</p>
+</section>
+<section id="vmod-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmod</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmod-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the modulus of two single-precision floating-point values.</p>
+</section>
+<section id="f32-v-f32-f">
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;v</span></code> ( f32 – f )<a class="headerlink" href="#f32-v-f32-f" title="Permalink to this heading">¶</a></h3>
+<p>Convert an S15.16 fixed-point value to a single-precision floating-point value.</p>
+</section>
+<section id="v-f32-f-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f32</span></code> ( f – f32 )<a class="headerlink" href="#v-f32-f-f32" title="Permalink to this heading">¶</a></h3>
+<p>Convert a single-precision floating-point value to an S15.16 fixed-point value.</p>
+</section>
+<section id="v-n-f-n">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;n</span></code> ( f – n )<a class="headerlink" href="#v-n-f-n" title="Permalink to this heading">¶</a></h3>
+<p>Convert a single-precision floating-point value to a signed 32-bit integer rounding towards zero.</p>
+</section>
+<section id="v-u-f-u">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;u</span></code> ( f – u )<a class="headerlink" href="#v-u-f-u" title="Permalink to this heading">¶</a></h3>
+<p>Convert a single-precision floating-point value to an unsigned 32-bit integer rounding towards zero.</p>
+</section>
+<section id="n-v-n-f">
+<h3><code class="docutils literal notranslate"><span class="pre">n&gt;v</span></code> ( n – f )<a class="headerlink" href="#n-v-n-f" title="Permalink to this heading">¶</a></h3>
+<p>Convert a signed 32-bit integer to a single-precision floating-point value.</p>
+</section>
+<section id="u-v-u-f">
+<h3><code class="docutils literal notranslate"><span class="pre">u&gt;v</span></code> ( u – f )<a class="headerlink" href="#u-v-u-f" title="Permalink to this heading">¶</a></h3>
+<p>Convert an unsigned 32-bit integer to a single-precision floating-point value.</p>
+</section>
+<section id="f64-v-d-f64-f">
+<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;v</span></code> ( D: f64 – f )<a class="headerlink" href="#f64-v-d-f64-f" title="Permalink to this heading">¶</a></h3>
+<p>Convert an S31.32 fixed-point value to a single-precision floating-point value.</p>
+</section>
+<section id="x-nan">
+<h3><code class="docutils literal notranslate"><span class="pre">x-nan</span></code><a class="headerlink" href="#x-nan" title="Permalink to this heading">¶</a></h3>
+<p>NaN exception.</p>
+</section>
+<section id="v-f64-f-f64">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f64</span></code> ( f – f64 )<a class="headerlink" href="#v-f64-f-f64" title="Permalink to this heading">¶</a></h3>
+<p>Convert a single-precision floating-point value to an S31.32 fixed-point value.</p>
+</section>
+<section id="format-float32-exponent-addr-bytes-f-addr-count">
+<h3><code class="docutils literal notranslate"><span class="pre">format-float32-exponent</span></code> ( addr bytes f – addr count )<a class="headerlink" href="#format-float32-exponent-addr-bytes-f-addr-count" title="Permalink to this heading">¶</a></h3>
+<p>Convert a single-precision floating-point value to a string in the (-)x.yez format.</p>
+</section>
+<section id="v1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v1</span></code> ( – f )<a class="headerlink" href="#v1-f" title="Permalink to this heading">¶</a></h3>
+<p>One.</p>
+</section>
+<section id="v-1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v-1</span></code> ( – f )<a class="headerlink" href="#v-1-f" title="Permalink to this heading">¶</a></h3>
+<p>Minus one.</p>
+</section>
+<section id="infinity-f">
+<h3><code class="docutils literal notranslate"><span class="pre">+infinity</span></code> ( – f )<a class="headerlink" href="#infinity-f" title="Permalink to this heading">¶</a></h3>
+<p>Positive infinity.</p>
+</section>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">-infinity</span></code> ( – f )<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<p>Negative infinity.</p>
+</section>
+<section id="v-nan-f-nan">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;nan?</span></code> ( f – nan? )<a class="headerlink" href="#v-nan-f-nan" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a floating-point value is a NaN.</p>
+</section>
+<section id="v-infinite-f-infinite">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;infinite?</span></code> ( f – infinite? )<a class="headerlink" href="#v-infinite-f-infinite" title="Permalink to this heading">¶</a></h3>
+<p>Get whether a floating-point value is infinite.</p>
+</section>
+<section id="v-f">
+<h3><code class="docutils literal notranslate"><span class="pre">(v.)</span></code> ( f – )<a class="headerlink" href="#v-f" title="Permalink to this heading">¶</a></h3>
+<p>Print out a single-precision floating-point value without a space.</p>
+</section>
+<section id="id15">
+<h3><code class="docutils literal notranslate"><span class="pre">v.</span></code> ( f – )<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<p>Print out a single-precision floating-point value with a space.</p>
+</section>
+<section id="parse-float32-addr-bytes-f-success">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-float32</span></code> ( addr bytes – f success? )<a class="headerlink" href="#parse-float32-addr-bytes-f-success" title="Permalink to this heading">¶</a></h3>
+<p>Parse a single-precision floating-point value as a string.</p>
+</section>
+<section id="vceil-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vceil</span></code> ( f – f’ )<a class="headerlink" href="#vceil-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the ceiling of a single-precision floating-point value.</p>
+</section>
+<section id="vfloor-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vfloor</span></code> ( f – f’ )<a class="headerlink" href="#vfloor-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the floor of a single-precision floating-point value.</p>
+</section>
+<section id="vround-half-up-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-up</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-up-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding up.</p>
+</section>
+<section id="vround-half-down-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-down</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-down-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a double-precision floating-point value to the nearest integer with half rounding down.</p>
+</section>
+<section id="vround-half-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards zero.</p>
+</section>
+<section id="vround-half-away-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-away-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-away-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding away from zero.</p>
+</section>
+<section id="vround-half-even-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-even</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-even-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="vround-half-odd-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-odd</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-odd-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards odd.</p>
+</section>
+<section id="vround-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value towards zero.</p>
+</section>
+<section id="vround-away-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-away-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-away-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Round a single-precision floating-point value away from zero.</p>
+</section>
+<section id="vpi-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vpi</span></code> ( – f )<a class="headerlink" href="#vpi-f" title="Permalink to this heading">¶</a></h3>
+<p>Pi as a single-precision floating-point value.</p>
+</section>
+<section id="vi-f-exponent-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vi**</span></code> ( f exponent – f’ )<a class="headerlink" href="#vi-f-exponent-f" title="Permalink to this heading">¶</a></h3>
+<p>Exponentiate a single-precision floating-point value by an integer.</p>
+</section>
+<section id="vexpm1-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vexpm1</span></code> ( f – f’ )<a class="headerlink" href="#vexpm1-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the (e^x)-1 of a single-precision floating-point value.</p>
+</section>
+<section id="vexp-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vexp</span></code> ( f – f’ )<a class="headerlink" href="#vexp-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the e^x of a single-precision floating-point value.</p>
+</section>
+<section id="x-domain-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code> ( – )<a class="headerlink" href="#x-domain-error" title="Permalink to this heading">¶</a></h3>
+<p>Domain error exception.</p>
+</section>
+<section id="vlnp1-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vlnp1</span></code> ( f – f’ )<a class="headerlink" href="#vlnp1-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the ln(x+1) of a single-precision floating-point value.</p>
+</section>
+<section id="vln-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vln</span></code> ( f – f’ )<a class="headerlink" href="#vln-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the ln(x) of a single-precision floating-point value.</p>
+</section>
+<section id="vsin-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsin</span></code> ( f – f’ )<a class="headerlink" href="#vsin-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the sine of a single-precision floating-point value.</p>
+</section>
+<section id="vcos-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vcos</span></code> ( f – f’ )<a class="headerlink" href="#vcos-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the cosine of a single-precision floating-point value.</p>
+</section>
+<section id="vtan-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vtan</span></code> ( f – f’ )<a class="headerlink" href="#vtan-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the tangent of a single-precision floating-point value.</p>
+</section>
+<section id="vatan-x1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan</span></code> ( x1 – f )<a class="headerlink" href="#vatan-x1-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the arctangent of a single-precision floating-point value.</p>
+</section>
+<section id="vatan2-fy-fx-fangle">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan2</span></code> ( fy fx – fangle )<a class="headerlink" href="#vatan2-fy-fx-fangle" title="Permalink to this heading">¶</a></h3>
+<p>Get the angle of an x and a y single-precision floating-point values.</p>
+</section>
+<section id="vasin-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vasin</span></code> ( f – f’ )<a class="headerlink" href="#vasin-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the arcsine of a single-precision floating-point value.</p>
+</section>
+<section id="vacos-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vacos</span></code> ( f – f’ )<a class="headerlink" href="#vacos-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the arccosine of a single-precision floating-point value.</p>
+</section>
+<section id="v-fb-fx-fb-fx">
+<h3><code class="docutils literal notranslate"><span class="pre">v**</span></code> ( fb fx – fb^fx )<a class="headerlink" href="#v-fb-fx-fb-fx" title="Permalink to this heading">¶</a></h3>
+<p>Exponentiate two single-precision floating-point values.</p>
+</section>
+<section id="vsinh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsinh</span></code> ( f – f’ )<a class="headerlink" href="#vsinh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic sine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vcosh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vcosh</span></code> ( f – f’ )<a class="headerlink" href="#vcosh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic cosine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vtanh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vtanh</span></code> ( f – f’ )<a class="headerlink" href="#vtanh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic tangent of an S15.16 fixed-point number.</p>
+</section>
+<section id="vasinh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vasinh</span></code> ( f – f’ )<a class="headerlink" href="#vasinh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic arcsine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vacosh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vacosh</span></code> ( f – f’ )<a class="headerlink" href="#vacosh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic arccosine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vatanh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vatanh</span></code> ( f – f’ )<a class="headerlink" href="#vatanh-f-f" title="Permalink to this heading">¶</a></h3>
+<p>Get the hyperbolic arctangent of an S15.16 fixed-point number</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="double.html" title="previous chapter">Double-Cell Words</a></li>
+      <li>Next: <a href="alarm.html" title="next chapter">Software Alarm Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2024, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/words/float32.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

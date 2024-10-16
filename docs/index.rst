@@ -13,6 +13,8 @@ Zeptoforth Documentation
    words/wordlist
    words/console
    words/task
+   words/double
+   words/float32
    words/alarm
    words/action
    words/pin
@@ -40,7 +42,6 @@ Zeptoforth Documentation
    words/dev_tools
    words/armv6m
    words/line
-   words/double
    words/value
    words/closure
    words/temp

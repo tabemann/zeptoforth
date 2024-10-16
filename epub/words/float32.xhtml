@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Single-Precision Floating-Point Support Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="single-precision-floating-point-support-words">
+<h1>Single-Precision Floating-Point Support Words</h1>
+<p>On the RP2350, STM32F407, STM32L476, and STM32F746 hardware single-precision floating point is supported. (The STM32F411 does have such hardware functionality, but it is not supported to save what limited flash it has left after zeptoforth is loaded.)</p>
+<p>The usual suspects for mathematical functions are supported, as are conversions to and from integers, fixed-point values, and strings. Also, single-precision floating-point literals in <code class="docutils literal notranslate"><span class="pre">({+,-})x.y{e,E}({+,-})z</span></code> are supported.</p>
+<p>Note that no dedicated floating-point stack is used, unlike in some other Forths. Rather, single-precision floating-point values are cell-sized and live on the data and return stacks like any other vallues.</p>
+<section id="float32">
+<h2><code class="docutils literal notranslate"><span class="pre">float32</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">float32</span></code> module contains the following words:</p>
+<section id="vload-x-y-z-w">
+<h3><code class="docutils literal notranslate"><span class="pre">vload</span></code> ( x y z w – )</h3>
+<p>Load floating point registers from stack.</p>
+</section>
+<section id="vsave-x-y-z-w">
+<h3><code class="docutils literal notranslate"><span class="pre">vsave</span></code> ( – x y z w )</h3>
+<p>Save floating point registers on stack.</p>
+</section>
+<section id="vabs-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vabs</span></code> ( f – f’ )</h3>
+<p>Get the absolute value of a single-precision floating-point value.</p>
+</section>
+<section id="vnegate-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vnegate</span></code> ( f – f’ )</h3>
+<p>Negate a single-precision floating-point value.</p>
+</section>
+<section id="vsqrt-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsqrt</span></code> ( f – f’ )</h3>
+<p>Get the square root of a single-precision floating-point value.</p>
+</section>
+<section id="v-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v+</span></code> ( f1 f0 – f’ )</h3>
+<p>Add two single-precision floating-point values.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">v-</span></code> ( f1 f0 – f’ )</h3>
+<p>Subtract two single-precision floating-point values.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">v*</span></code> ( f1 f0 – f’ )</h3>
+<p>Multiply two single-precision floating-point values.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">v/</span></code> ( f1 f0 – f’ )</h3>
+<p>Divide two single-precision floating-point values.</p>
+</section>
+<section id="vmin-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmin</span></code> ( f1 f0 – f’ )</h3>
+<p>Get the minimum of two single-precision floating-point values.</p>
+</section>
+<section id="vmax-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmax</span></code> ( f1 f0 – f’ )</h3>
+<p>Get the maximum of two single-precision floating-point values.</p>
+</section>
+<section id="v-f1-f0-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is less.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;=</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is less or equal.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">v=</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is equal.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;&gt;</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is not equal.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is greater.</p>
+</section>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;=</span></code> ( f1 f0 – flag )</h3>
+<p>Get whether a single-precision floating-point value is greater or equal.</p>
+</section>
+<section id="v0-f-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is less than zero.</p>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;=</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is less than or equal to zero.</p>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">v0=</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is equal to zero.</p>
+</section>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;&gt;</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is not equal to zero.</p>
+</section>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is greater than zero.</p>
+</section>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;=</span></code> ( f – flag )</h3>
+<p>Get whether a single-precision floating-point value is greater than or equal to zero.</p>
+</section>
+<section id="vnfract-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vnfract</span></code> ( f – f’ )</h3>
+<p>Get the non-fractional portion of a single-precision floating-point value.</p>
+</section>
+<section id="vfract-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vfract</span></code> ( f – f’ )</h3>
+<p>Get the fractional portion of a single-precision floating-point value.</p>
+</section>
+<section id="vmod-f1-f0-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vmod</span></code> ( f1 f0 – f’ )</h3>
+<p>Get the modulus of two single-precision floating-point values.</p>
+</section>
+<section id="f32-v-f32-f">
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;v</span></code> ( f32 – f )</h3>
+<p>Convert an S15.16 fixed-point value to a single-precision floating-point value.</p>
+</section>
+<section id="v-f32-f-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f32</span></code> ( f – f32 )</h3>
+<p>Convert a single-precision floating-point value to an S15.16 fixed-point value.</p>
+</section>
+<section id="v-n-f-n">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;n</span></code> ( f – n )</h3>
+<p>Convert a single-precision floating-point value to a signed 32-bit integer rounding towards zero.</p>
+</section>
+<section id="v-u-f-u">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;u</span></code> ( f – u )</h3>
+<p>Convert a single-precision floating-point value to an unsigned 32-bit integer rounding towards zero.</p>
+</section>
+<section id="n-v-n-f">
+<h3><code class="docutils literal notranslate"><span class="pre">n&gt;v</span></code> ( n – f )</h3>
+<p>Convert a signed 32-bit integer to a single-precision floating-point value.</p>
+</section>
+<section id="u-v-u-f">
+<h3><code class="docutils literal notranslate"><span class="pre">u&gt;v</span></code> ( u – f )</h3>
+<p>Convert an unsigned 32-bit integer to a single-precision floating-point value.</p>
+</section>
+<section id="f64-v-d-f64-f">
+<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;v</span></code> ( D: f64 – f )</h3>
+<p>Convert an S31.32 fixed-point value to a single-precision floating-point value.</p>
+</section>
+<section id="x-nan">
+<h3><code class="docutils literal notranslate"><span class="pre">x-nan</span></code></h3>
+<p>NaN exception.</p>
+</section>
+<section id="v-f64-f-f64">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f64</span></code> ( f – f64 )</h3>
+<p>Convert a single-precision floating-point value to an S31.32 fixed-point value.</p>
+</section>
+<section id="format-float32-exponent-addr-bytes-f-addr-count">
+<h3><code class="docutils literal notranslate"><span class="pre">format-float32-exponent</span></code> ( addr bytes f – addr count )</h3>
+<p>Convert a single-precision floating-point value to a string in the (-)x.yez format.</p>
+</section>
+<section id="v1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v1</span></code> ( – f )</h3>
+<p>One.</p>
+</section>
+<section id="v-1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">v-1</span></code> ( – f )</h3>
+<p>Minus one.</p>
+</section>
+<section id="infinity-f">
+<h3><code class="docutils literal notranslate"><span class="pre">+infinity</span></code> ( – f )</h3>
+<p>Positive infinity.</p>
+</section>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">-infinity</span></code> ( – f )</h3>
+<p>Negative infinity.</p>
+</section>
+<section id="v-nan-f-nan">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;nan?</span></code> ( f – nan? )</h3>
+<p>Get whether a floating-point value is a NaN.</p>
+</section>
+<section id="v-infinite-f-infinite">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;infinite?</span></code> ( f – infinite? )</h3>
+<p>Get whether a floating-point value is infinite.</p>
+</section>
+<section id="v-f">
+<h3><code class="docutils literal notranslate"><span class="pre">(v.)</span></code> ( f – )</h3>
+<p>Print out a single-precision floating-point value without a space.</p>
+</section>
+<section id="id15">
+<h3><code class="docutils literal notranslate"><span class="pre">v.</span></code> ( f – )</h3>
+<p>Print out a single-precision floating-point value with a space.</p>
+</section>
+<section id="parse-float32-addr-bytes-f-success">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-float32</span></code> ( addr bytes – f success? )</h3>
+<p>Parse a single-precision floating-point value as a string.</p>
+</section>
+<section id="vceil-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vceil</span></code> ( f – f’ )</h3>
+<p>Get the ceiling of a single-precision floating-point value.</p>
+</section>
+<section id="vfloor-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vfloor</span></code> ( f – f’ )</h3>
+<p>Get the floor of a single-precision floating-point value.</p>
+</section>
+<section id="vround-half-up-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-up</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding up.</p>
+</section>
+<section id="vround-half-down-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-down</span></code> ( f – f’ )</h3>
+<p>Round a double-precision floating-point value to the nearest integer with half rounding down.</p>
+</section>
+<section id="vround-half-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-zero</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards zero.</p>
+</section>
+<section id="vround-half-away-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-away-zero</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding away from zero.</p>
+</section>
+<section id="vround-half-even-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-even</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards even.</p>
+</section>
+<section id="vround-half-odd-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-odd</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value to the nearest integer with half rounding towards odd.</p>
+</section>
+<section id="vround-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-zero</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value towards zero.</p>
+</section>
+<section id="vround-away-zero-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-away-zero</span></code> ( f – f’ )</h3>
+<p>Round a single-precision floating-point value away from zero.</p>
+</section>
+<section id="vpi-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vpi</span></code> ( – f )</h3>
+<p>Pi as a single-precision floating-point value.</p>
+</section>
+<section id="vi-f-exponent-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vi**</span></code> ( f exponent – f’ )</h3>
+<p>Exponentiate a single-precision floating-point value by an integer.</p>
+</section>
+<section id="vexpm1-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vexpm1</span></code> ( f – f’ )</h3>
+<p>Get the (e^x)-1 of a single-precision floating-point value.</p>
+</section>
+<section id="vexp-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vexp</span></code> ( f – f’ )</h3>
+<p>Get the e^x of a single-precision floating-point value.</p>
+</section>
+<section id="x-domain-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code> ( – )</h3>
+<p>Domain error exception.</p>
+</section>
+<section id="vlnp1-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vlnp1</span></code> ( f – f’ )</h3>
+<p>Get the ln(x+1) of a single-precision floating-point value.</p>
+</section>
+<section id="vln-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vln</span></code> ( f – f’ )</h3>
+<p>Get the ln(x) of a single-precision floating-point value.</p>
+</section>
+<section id="vsin-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsin</span></code> ( f – f’ )</h3>
+<p>Get the sine of a single-precision floating-point value.</p>
+</section>
+<section id="vcos-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vcos</span></code> ( f – f’ )</h3>
+<p>Get the cosine of a single-precision floating-point value.</p>
+</section>
+<section id="vtan-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vtan</span></code> ( f – f’ )</h3>
+<p>Get the tangent of a single-precision floating-point value.</p>
+</section>
+<section id="vatan-x1-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan</span></code> ( x1 – f )</h3>
+<p>Get the arctangent of a single-precision floating-point value.</p>
+</section>
+<section id="vatan2-fy-fx-fangle">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan2</span></code> ( fy fx – fangle )</h3>
+<p>Get the angle of an x and a y single-precision floating-point values.</p>
+</section>
+<section id="vasin-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vasin</span></code> ( f – f’ )</h3>
+<p>Get the arcsine of a single-precision floating-point value.</p>
+</section>
+<section id="vacos-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vacos</span></code> ( f – f’ )</h3>
+<p>Get the arccosine of a single-precision floating-point value.</p>
+</section>
+<section id="v-fb-fx-fb-fx">
+<h3><code class="docutils literal notranslate"><span class="pre">v**</span></code> ( fb fx – fb^fx )</h3>
+<p>Exponentiate two single-precision floating-point values.</p>
+</section>
+<section id="vsinh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vsinh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic sine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vcosh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vcosh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic cosine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vtanh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vtanh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic tangent of an S15.16 fixed-point number.</p>
+</section>
+<section id="vasinh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vasinh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic arcsine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vacosh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vacosh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic arccosine of an S15.16 fixed-point number.</p>
+</section>
+<section id="vatanh-f-f">
+<h3><code class="docutils literal notranslate"><span class="pre">vatanh</span></code> ( f – f’ )</h3>
+<p>Get the hyperbolic arctangent of an S15.16 fixed-point number</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

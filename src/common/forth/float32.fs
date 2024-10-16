@@ -74,13 +74,17 @@ begin-module float32
       [ 31 physical-significand-size - ] literal lshift
     ;
 
-    \ Is a single-precision floating-point value a NaN?
-    : v>nan? ( f -- nan? ) dup v>special? swap significand-mask and 0<> and ;
+  end-module> import
 
-    \ Is a single-precision floating-point value infinite?
-    : v>infinite? ( f -- infinite? )
-      dup v>special? swap significand-mask and 0= and
-    ;
+  \ Is a single-precision floating-point value a NaN?
+  : v>nan? ( f -- nan? ) dup v>special? swap significand-mask and 0<> and ;
+  
+  \ Is a single-precision floating-point value infinite?
+  : v>infinite? ( f -- infinite? )
+    dup v>special? swap significand-mask and 0= and
+  ;
+
+  continue-module float32-internal
     
     \ Skip initial zeroes
     : skip-zeroes { addr bytes -- addr' bytes' zero? success? }
@@ -630,7 +634,7 @@ begin-module float32
     
     initializer enable-float
     
-  end-module> import
+  end-module
 
   compress-flash
   
@@ -1155,13 +1159,18 @@ begin-module float32
   \ Negative infinity
   255 physical-significand-size lshift sign-mask or constant -infinity
 
-  \ NaN
-  255 physical-significand-size lshift 1 or constant nan
+  continue-module float32-internal
+    
+    \ NaN
+    255 physical-significand-size lshift 1 or constant nan
+
+  end-module
   
   \ Convert a single-precision floating-point value to a string in the (-)x.yez
   \ format
   : format-float32-exponent { addr bytes f -- addr count }
     0 { count }
+    bytes 7 < if addr 0 exit then
     f v>nan? if s" NaN" addr bytes string> exit then
     f v>infinite? if
       f v>sign if s" -Infinity" else s" +Infinity" then addr bytes string> exit
