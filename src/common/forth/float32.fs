@@ -739,40 +739,54 @@ begin-module float32
     ]code
   ;
 
-  \ Get the modulus of two single-precision floating-point values
-  : vmod ( f1 f0 -- f' )
-    [inlined]
-    code[
-    tos s0 vmov.f32.cr_,_
-    s1 s1 dp vldmia!.f32_,{_..._}
-    s0 s1 s2 vdiv.f32_,_,_
-    s2 s2 vrintn.f32_,_
-    s0 s2 s2 vmul.f32_,_,_
-    s2 s1 s1 vsub.f32_,_,_
-    s1 tos vmov.cr.f32_,_
-    ]code
-  ;
-  
   \ Get the minimum of two single-precision floating-point values
   : vmin ( f1 f0 -- f' )
-    [inlined]
-    code[
-    tos s0 vmov.f32.cr_,_
-    s1 s1 dp vldmia!.f32_,{_..._}
-    s0 s1 s0 vminnm.f32_,_,_
-    s0 tos vmov.cr.f32_,_
-    ]code
+    [ fpv5? ] [if]
+      [inlined]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s1 s1 dp vldmia!.f32_,{_..._}
+      s0 s1 s0 vminnm.f32_,_,_
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [else]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s1 s1 dp vldmia!.f32_,{_..._}
+      s0 s1 vcmpe.f32_,_
+      apsr-nzcv vmrs_,fpscr
+      ge bc>
+      s1 tos vmov.cr.f32_,_
+      pc 1 pop
+      >mark
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [then]
   ;
 
   \ Get the maximum of two single-precision floating-point values
   : vmax ( f1 f0 -- f' )
-    [inlined]
-    code[
-    tos s0 vmov.f32.cr_,_
-    s1 s1 dp vldmia!.f32_,{_..._}
-    s0 s1 s0 vmaxnm.f32_,_,_
-    s0 tos vmov.cr.f32_,_
-    ]code
+    [ fpv5? ] [if]
+      [inlined]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s1 s1 dp vldmia!.f32_,{_..._}
+      s0 s1 s0 vmaxnm.f32_,_,_
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [else]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s1 s1 dp vldmia!.f32_,{_..._}
+      s0 s1 vcmpe.f32_,_
+      apsr-nzcv vmrs_,fpscr
+      lt bc>
+      s1 tos vmov.cr.f32_,_
+      pc 1 pop
+      >mark
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [then]
   ;
 
   \ Get whether a single-precision floating-point value is less
@@ -953,25 +967,56 @@ begin-module float32
 
   \ Get the non-fractional portion of a single-precision floating-point value
   : vnfract ( f -- f' )
-    [inlined]
-    code[
-    tos s0 vmov.f32.cr_,_
-    s0 s0 vrintn.f32_,_
-    s0 tos vmov.cr.f32_,_
-    ]code
+    [ fpv5? ] [if]
+      [inlined]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s0 s0 vrintz.f32_,_
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [else]
+      dup v>exponent dup 0>= if
+        23 - 0 min physical-significand-size swap +
+        significand-mask swap rshift bic
+      else
+        2drop 0
+      then
+    [then]
   ;
   
   \ Get the fractional portion of a single-precision floating-point value
   : vfract ( f -- f' )
-    [inlined]
-    code[
-    tos s0 vmov.f32.cr_,_
-    s0 s1 vrintn.f32_,_
-    s1 s0 s0 vsub.f32_,_,_
-    s0 tos vmov.cr.f32_,_
-    ]code
+    [ fpv5? ] [if]
+      [inlined]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s0 s1 vrintz.f32_,_
+      s1 s0 s0 vsub.f32_,_,_
+      s0 tos vmov.cr.f32_,_
+      ]code
+    [else]
+      dup vnfract v-
+    [then]
   ;
 
+  \ Get the modulus of two single-precision floating-point values
+  : vmod ( f1 f0 -- f' )
+    [ fpv5? ] [if]
+      [inlined]
+      code[
+      tos s0 vmov.f32.cr_,_
+      s1 s1 dp vldmia!.f32_,{_..._}
+      s0 s1 s2 vdiv.f32_,_,_
+      s2 s2 vrintn.f32_,_
+      s0 s2 s2 vmul.f32_,_,_
+      s2 s1 s1 vsub.f32_,_,_
+      s1 tos vmov.cr.f32_,_
+      ]code
+    [else]
+      2dup v/ vnfract v* v-
+    [then]
+  ;
+  
   \ Convert an S15.16 fixed-point value to a single-precision floating-point
   \ value
   : f32>v ( f32 -- f )

@@ -44,6 +44,30 @@ vpi 2e0 v* constant v2pi
   loop
 ;
 
+: do-pair-test { x y D: str xt -- }
+  cr x v. y v. str type space x y xt execute v.
+;
+
+: do-single-test { x D: str xt -- }
+  cr x v. str type space x xt execute v.
+;
+
+: do-fract-test { D: str xt -- }
+  2e0 str xt do-single-test
+  1.5e0 str xt do-single-test
+  1.25e0 str xt do-single-test
+  1e0 str xt do-single-test
+  0.5e0 str xt do-single-test
+  0.25e0 str xt do-single-test
+  0e0 str xt do-single-test
+  -2e0 str xt do-single-test
+  -1.5e0 str xt do-single-test
+  -1.25e0 str xt do-single-test
+  -1e0 str xt do-single-test
+  -0.5e0 str xt do-single-test
+  -0.25e0 str xt do-single-test
+;
+
 : assorted-float32-test
   s" vexp" ['] vexp s" vln" ['] vln do-assorted-float32-test
   s" vsin" ['] vsin s" vasin" ['] vasin do-assorted-float32-test
@@ -53,6 +77,18 @@ vpi 2e0 v* constant v2pi
   s" vcosh" ['] vcosh s" vacosh" ['] vacosh do-assorted-float32-test
   s" vtanh" ['] vtanh s" vatanh" ['] vatanh do-assorted-float32-test
   do-vatan2-test
+  1e0 s" vnegate" ['] vnegate do-single-test
+  0e0 s" vnegate" ['] vnegate do-single-test
+  -1e0 s" vnegate" ['] vnegate do-single-test
+  1e0 s" vabs" ['] vabs do-single-test
+  0e0 s" vabs" ['] vabs do-single-test
+  -1e0 s" vabs" ['] vabs do-single-test
+  0e0 1e0 s" vmax" ['] vmax do-pair-test
+  1e0 0e0 s" vmax" ['] vmax do-pair-test
+  0e0 1e0 s" vmin" ['] vmin do-pair-test
+  1e0 0e0 s" vmin" ['] vmin do-pair-test
+  s" vnfract" ['] vnfract do-fract-test
+  s" vfract" ['] vfract do-fract-test
 ;
 
 float32 unimport
