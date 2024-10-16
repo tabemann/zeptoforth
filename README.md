@@ -29,6 +29,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Action scheduler support
 * Multicore support (on the RP2040 and RP2350)
 * Double cell and S31.32 fixed-point numeric support
+* Single-precision floating-point numeric support (except on the RP2040 and STM32F411)
 * Lambda expressions
 * `value`s and block-scoped local variables
 * Closures
