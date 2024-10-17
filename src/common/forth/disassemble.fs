@@ -775,6 +775,8 @@ begin-module disassemble-internal
       rev if reg reg-sep. ." FPSCR" else ." FPSCR" reg reg. then
     ;
 
+  [then]
+  
   commit-flash
 
   thumb-2? [if]
