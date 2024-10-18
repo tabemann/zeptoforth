@@ -44,308 +44,383 @@
 <section id="float32">
 <h2><code class="docutils literal notranslate"><span class="pre">float32</span></code><a class="headerlink" href="#float32" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">float32</span></code> module contains the following words:</p>
-<section id="vload-x-y-z-w">
-<h3><code class="docutils literal notranslate"><span class="pre">vload</span></code> ( x y z w – )<a class="headerlink" href="#vload-x-y-z-w" title="Permalink to this heading">¶</a></h3>
+<section id="vload">
+<h3><code class="docutils literal notranslate"><span class="pre">vload</span></code><a class="headerlink" href="#vload" title="Permalink to this heading">¶</a></h3>
+<p>( x y z w – )</p>
 <p>Load floating point registers from stack.</p>
 </section>
-<section id="vsave-x-y-z-w">
-<h3><code class="docutils literal notranslate"><span class="pre">vsave</span></code> ( – x y z w )<a class="headerlink" href="#vsave-x-y-z-w" title="Permalink to this heading">¶</a></h3>
+<section id="vsave">
+<h3><code class="docutils literal notranslate"><span class="pre">vsave</span></code><a class="headerlink" href="#vsave" title="Permalink to this heading">¶</a></h3>
+<p>( – x y z w )</p>
 <p>Save floating point registers on stack.</p>
 </section>
-<section id="vabs-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vabs</span></code> ( f – f’ )<a class="headerlink" href="#vabs-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vabs">
+<h3><code class="docutils literal notranslate"><span class="pre">vabs</span></code><a class="headerlink" href="#vabs" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the absolute value of a single-precision floating-point value.</p>
 </section>
-<section id="vnegate-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vnegate</span></code> ( f – f’ )<a class="headerlink" href="#vnegate-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vnegate">
+<h3><code class="docutils literal notranslate"><span class="pre">vnegate</span></code><a class="headerlink" href="#vnegate" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Negate a single-precision floating-point value.</p>
 </section>
-<section id="vsqrt-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vsqrt</span></code> ( f – f’ )<a class="headerlink" href="#vsqrt-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vsqrt">
+<h3><code class="docutils literal notranslate"><span class="pre">vsqrt</span></code><a class="headerlink" href="#vsqrt" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the square root of a single-precision floating-point value.</p>
 </section>
-<section id="v-f1-f0-f">
-<h3><code class="docutils literal notranslate"><span class="pre">v+</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#v-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<section id="v">
+<h3><code class="docutils literal notranslate"><span class="pre">v+</span></code><a class="headerlink" href="#v" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Add two single-precision floating-point values.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">v-</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">v-</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Subtract two single-precision floating-point values.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">v*</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">v*</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Multiply two single-precision floating-point values.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">v/</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">v/</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Divide two single-precision floating-point values.</p>
 </section>
-<section id="vmin-f1-f0-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vmin</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmin-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<section id="vmin">
+<h3><code class="docutils literal notranslate"><span class="pre">vmin</span></code><a class="headerlink" href="#vmin" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Get the minimum of two single-precision floating-point values.</p>
 </section>
-<section id="vmax-f1-f0-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vmax</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmax-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<section id="vmax">
+<h3><code class="docutils literal notranslate"><span class="pre">vmax</span></code><a class="headerlink" href="#vmax" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Get the maximum of two single-precision floating-point values.</p>
 </section>
-<section id="v-f1-f0-flag">
-<h3><code class="docutils literal notranslate"><span class="pre">v&lt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#v-f1-f0-flag" title="Permalink to this heading">¶</a></h3>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is less.</p>
 </section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">v&lt;=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;=</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is less or equal.</p>
 </section>
-<section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">v=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">v=</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is equal.</p>
 </section>
-<section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">v&lt;&gt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">v&lt;&gt;</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is not equal.</p>
 </section>
-<section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is greater.</p>
 </section>
-<section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;=</span></code> ( f1 f0 – flag )<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;=</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – flag )</p>
 <p>Get whether a single-precision floating-point value is greater or equal.</p>
 </section>
-<section id="v0-f-flag">
-<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;</span></code> ( f – flag )<a class="headerlink" href="#v0-f-flag" title="Permalink to this heading">¶</a></h3>
+<section id="v0">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;</span></code><a class="headerlink" href="#v0" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is less than zero.</p>
 </section>
-<section id="id9">
-<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;=</span></code> ( f – flag )<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;=</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is less than or equal to zero.</p>
 </section>
-<section id="id10">
-<h3><code class="docutils literal notranslate"><span class="pre">v0=</span></code> ( f – flag )<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">v0=</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is equal to zero.</p>
 </section>
-<section id="id11">
-<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;&gt;</span></code> ( f – flag )<a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&lt;&gt;</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is not equal to zero.</p>
 </section>
-<section id="id12">
-<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;</span></code> ( f – flag )<a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is greater than zero.</p>
 </section>
-<section id="id13">
-<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;=</span></code> ( f – flag )<a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">v0&gt;=</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<p>( f – flag )</p>
 <p>Get whether a single-precision floating-point value is greater than or equal to zero.</p>
 </section>
-<section id="vnfract-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vnfract</span></code> ( f – f’ )<a class="headerlink" href="#vnfract-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vnfract">
+<h3><code class="docutils literal notranslate"><span class="pre">vnfract</span></code><a class="headerlink" href="#vnfract" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the non-fractional portion of a single-precision floating-point value.</p>
 </section>
-<section id="vfract-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vfract</span></code> ( f – f’ )<a class="headerlink" href="#vfract-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vfract">
+<h3><code class="docutils literal notranslate"><span class="pre">vfract</span></code><a class="headerlink" href="#vfract" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the fractional portion of a single-precision floating-point value.</p>
 </section>
-<section id="vmod-f1-f0-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vmod</span></code> ( f1 f0 – f’ )<a class="headerlink" href="#vmod-f1-f0-f" title="Permalink to this heading">¶</a></h3>
+<section id="vmod">
+<h3><code class="docutils literal notranslate"><span class="pre">vmod</span></code><a class="headerlink" href="#vmod" title="Permalink to this heading">¶</a></h3>
+<p>( f1 f0 – f’ )</p>
 <p>Get the modulus of two single-precision floating-point values.</p>
 </section>
-<section id="f32-v-f32-f">
-<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;v</span></code> ( f32 – f )<a class="headerlink" href="#f32-v-f32-f" title="Permalink to this heading">¶</a></h3>
+<section id="f32-v">
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;v</span></code><a class="headerlink" href="#f32-v" title="Permalink to this heading">¶</a></h3>
+<p>( f32 – f )</p>
 <p>Convert an S15.16 fixed-point value to a single-precision floating-point value.</p>
 </section>
-<section id="v-f32-f-f32">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f32</span></code> ( f – f32 )<a class="headerlink" href="#v-f32-f-f32" title="Permalink to this heading">¶</a></h3>
+<section id="v-f32">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f32</span></code><a class="headerlink" href="#v-f32" title="Permalink to this heading">¶</a></h3>
+<p>( f – f32 )</p>
 <p>Convert a single-precision floating-point value to an S15.16 fixed-point value.</p>
 </section>
-<section id="v-n-f-n">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;n</span></code> ( f – n )<a class="headerlink" href="#v-n-f-n" title="Permalink to this heading">¶</a></h3>
+<section id="v-n">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;n</span></code><a class="headerlink" href="#v-n" title="Permalink to this heading">¶</a></h3>
+<p>( f – n )</p>
 <p>Convert a single-precision floating-point value to a signed 32-bit integer rounding towards zero.</p>
 </section>
-<section id="v-u-f-u">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;u</span></code> ( f – u )<a class="headerlink" href="#v-u-f-u" title="Permalink to this heading">¶</a></h3>
+<section id="v-u">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;u</span></code><a class="headerlink" href="#v-u" title="Permalink to this heading">¶</a></h3>
+<p>( f – u )</p>
 <p>Convert a single-precision floating-point value to an unsigned 32-bit integer rounding towards zero.</p>
 </section>
-<section id="n-v-n-f">
-<h3><code class="docutils literal notranslate"><span class="pre">n&gt;v</span></code> ( n – f )<a class="headerlink" href="#n-v-n-f" title="Permalink to this heading">¶</a></h3>
+<section id="n-v">
+<h3><code class="docutils literal notranslate"><span class="pre">n&gt;v</span></code><a class="headerlink" href="#n-v" title="Permalink to this heading">¶</a></h3>
+<p>( n – f )</p>
 <p>Convert a signed 32-bit integer to a single-precision floating-point value.</p>
 </section>
-<section id="u-v-u-f">
-<h3><code class="docutils literal notranslate"><span class="pre">u&gt;v</span></code> ( u – f )<a class="headerlink" href="#u-v-u-f" title="Permalink to this heading">¶</a></h3>
+<section id="u-v">
+<h3><code class="docutils literal notranslate"><span class="pre">u&gt;v</span></code><a class="headerlink" href="#u-v" title="Permalink to this heading">¶</a></h3>
+<p>( u – f )</p>
 <p>Convert an unsigned 32-bit integer to a single-precision floating-point value.</p>
 </section>
-<section id="f64-v-d-f64-f">
-<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;v</span></code> ( D: f64 – f )<a class="headerlink" href="#f64-v-d-f64-f" title="Permalink to this heading">¶</a></h3>
+<section id="f64-v">
+<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;v</span></code><a class="headerlink" href="#f64-v" title="Permalink to this heading">¶</a></h3>
+<p>( D: f64 – f )</p>
 <p>Convert an S31.32 fixed-point value to a single-precision floating-point value.</p>
 </section>
 <section id="x-nan">
 <h3><code class="docutils literal notranslate"><span class="pre">x-nan</span></code><a class="headerlink" href="#x-nan" title="Permalink to this heading">¶</a></h3>
 <p>NaN exception.</p>
 </section>
-<section id="v-f64-f-f64">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f64</span></code> ( f – f64 )<a class="headerlink" href="#v-f64-f-f64" title="Permalink to this heading">¶</a></h3>
+<section id="v-f64">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;f64</span></code><a class="headerlink" href="#v-f64" title="Permalink to this heading">¶</a></h3>
+<p>( f – f64 )</p>
 <p>Convert a single-precision floating-point value to an S31.32 fixed-point value.</p>
 </section>
-<section id="format-float32-exponent-addr-bytes-f-addr-count">
-<h3><code class="docutils literal notranslate"><span class="pre">format-float32-exponent</span></code> ( addr bytes f – addr count )<a class="headerlink" href="#format-float32-exponent-addr-bytes-f-addr-count" title="Permalink to this heading">¶</a></h3>
+<section id="format-float32-exponent">
+<h3><code class="docutils literal notranslate"><span class="pre">format-float32-exponent</span></code><a class="headerlink" href="#format-float32-exponent" title="Permalink to this heading">¶</a></h3>
+<p>( addr bytes f – addr count )</p>
 <p>Convert a single-precision floating-point value to a string in the (-)x.yez format.</p>
 </section>
-<section id="v1-f">
-<h3><code class="docutils literal notranslate"><span class="pre">v1</span></code> ( – f )<a class="headerlink" href="#v1-f" title="Permalink to this heading">¶</a></h3>
+<section id="v1">
+<h3><code class="docutils literal notranslate"><span class="pre">v1</span></code><a class="headerlink" href="#v1" title="Permalink to this heading">¶</a></h3>
+<p>( – f )</p>
 <p>One.</p>
 </section>
-<section id="v-1-f">
-<h3><code class="docutils literal notranslate"><span class="pre">v-1</span></code> ( – f )<a class="headerlink" href="#v-1-f" title="Permalink to this heading">¶</a></h3>
+<section id="v-1">
+<h3><code class="docutils literal notranslate"><span class="pre">v-1</span></code><a class="headerlink" href="#v-1" title="Permalink to this heading">¶</a></h3>
+<p>( – f )</p>
 <p>Minus one.</p>
 </section>
-<section id="infinity-f">
-<h3><code class="docutils literal notranslate"><span class="pre">+infinity</span></code> ( – f )<a class="headerlink" href="#infinity-f" title="Permalink to this heading">¶</a></h3>
+<section id="infinity">
+<h3><code class="docutils literal notranslate"><span class="pre">+infinity</span></code><a class="headerlink" href="#infinity" title="Permalink to this heading">¶</a></h3>
+<p>( – f )</p>
 <p>Positive infinity.</p>
 </section>
-<section id="id14">
-<h3><code class="docutils literal notranslate"><span class="pre">-infinity</span></code> ( – f )<a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<section id="id15">
+<h3><code class="docutils literal notranslate"><span class="pre">-infinity</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<p>( – f )</p>
 <p>Negative infinity.</p>
 </section>
-<section id="v-nan-f-nan">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;nan?</span></code> ( f – nan? )<a class="headerlink" href="#v-nan-f-nan" title="Permalink to this heading">¶</a></h3>
+<section id="v-nan">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;nan?</span></code><a class="headerlink" href="#v-nan" title="Permalink to this heading">¶</a></h3>
+<p>( f – nan? )</p>
 <p>Get whether a floating-point value is a NaN.</p>
 </section>
-<section id="v-infinite-f-infinite">
-<h3><code class="docutils literal notranslate"><span class="pre">v&gt;infinite?</span></code> ( f – infinite? )<a class="headerlink" href="#v-infinite-f-infinite" title="Permalink to this heading">¶</a></h3>
+<section id="v-infinite">
+<h3><code class="docutils literal notranslate"><span class="pre">v&gt;infinite?</span></code><a class="headerlink" href="#v-infinite" title="Permalink to this heading">¶</a></h3>
+<p>( f – infinite? )</p>
 <p>Get whether a floating-point value is infinite.</p>
 </section>
-<section id="v-f">
-<h3><code class="docutils literal notranslate"><span class="pre">(v.)</span></code> ( f – )<a class="headerlink" href="#v-f" title="Permalink to this heading">¶</a></h3>
+<section id="id16">
+<h3><code class="docutils literal notranslate"><span class="pre">(v.)</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h3>
+<p>( f – )</p>
 <p>Print out a single-precision floating-point value without a space.</p>
 </section>
-<section id="id15">
-<h3><code class="docutils literal notranslate"><span class="pre">v.</span></code> ( f – )<a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<section id="id17">
+<h3><code class="docutils literal notranslate"><span class="pre">v.</span></code><a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h3>
+<p>( f – )</p>
 <p>Print out a single-precision floating-point value with a space.</p>
 </section>
-<section id="parse-float32-addr-bytes-f-success">
-<h3><code class="docutils literal notranslate"><span class="pre">parse-float32</span></code> ( addr bytes – f success? )<a class="headerlink" href="#parse-float32-addr-bytes-f-success" title="Permalink to this heading">¶</a></h3>
+<section id="parse-float32">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-float32</span></code><a class="headerlink" href="#parse-float32" title="Permalink to this heading">¶</a></h3>
+<p>( addr bytes – f success? )</p>
 <p>Parse a single-precision floating-point value as a string.</p>
 </section>
-<section id="vceil-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vceil</span></code> ( f – f’ )<a class="headerlink" href="#vceil-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vceil">
+<h3><code class="docutils literal notranslate"><span class="pre">vceil</span></code><a class="headerlink" href="#vceil" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the ceiling of a single-precision floating-point value.</p>
 </section>
-<section id="vfloor-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vfloor</span></code> ( f – f’ )<a class="headerlink" href="#vfloor-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vfloor">
+<h3><code class="docutils literal notranslate"><span class="pre">vfloor</span></code><a class="headerlink" href="#vfloor" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the floor of a single-precision floating-point value.</p>
 </section>
-<section id="vround-half-up-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-up</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-up-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-up">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-up</span></code><a class="headerlink" href="#vround-half-up" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value to the nearest integer with half rounding up.</p>
 </section>
-<section id="vround-half-down-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-down</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-down-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-down">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-down</span></code><a class="headerlink" href="#vround-half-down" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a double-precision floating-point value to the nearest integer with half rounding down.</p>
 </section>
-<section id="vround-half-zero-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-zero</span></code><a class="headerlink" href="#vround-half-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value to the nearest integer with half rounding towards zero.</p>
 </section>
-<section id="vround-half-away-zero-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-away-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-away-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-away-zero</span></code><a class="headerlink" href="#vround-half-away-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value to the nearest integer with half rounding away from zero.</p>
 </section>
-<section id="vround-half-even-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-even</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-even-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-even">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-even</span></code><a class="headerlink" href="#vround-half-even" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value to the nearest integer with half rounding towards even.</p>
 </section>
-<section id="vround-half-odd-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-half-odd</span></code> ( f – f’ )<a class="headerlink" href="#vround-half-odd-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-half-odd">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-half-odd</span></code><a class="headerlink" href="#vround-half-odd" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value to the nearest integer with half rounding towards odd.</p>
 </section>
-<section id="vround-zero-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-zero</span></code><a class="headerlink" href="#vround-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value towards zero.</p>
 </section>
-<section id="vround-away-zero-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vround-away-zero</span></code> ( f – f’ )<a class="headerlink" href="#vround-away-zero-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vround-away-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">vround-away-zero</span></code><a class="headerlink" href="#vround-away-zero" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Round a single-precision floating-point value away from zero.</p>
 </section>
-<section id="vpi-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vpi</span></code> ( – f )<a class="headerlink" href="#vpi-f" title="Permalink to this heading">¶</a></h3>
+<section id="vpi">
+<h3><code class="docutils literal notranslate"><span class="pre">vpi</span></code><a class="headerlink" href="#vpi" title="Permalink to this heading">¶</a></h3>
+<p>( – f )</p>
 <p>Pi as a single-precision floating-point value.</p>
 </section>
-<section id="vi-f-exponent-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vi**</span></code> ( f exponent – f’ )<a class="headerlink" href="#vi-f-exponent-f" title="Permalink to this heading">¶</a></h3>
+<section id="vi">
+<h3><code class="docutils literal notranslate"><span class="pre">vi**</span></code><a class="headerlink" href="#vi" title="Permalink to this heading">¶</a></h3>
+<p>( f exponent – f’ )</p>
 <p>Exponentiate a single-precision floating-point value by an integer.</p>
 </section>
-<section id="vexpm1-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vexpm1</span></code> ( f – f’ )<a class="headerlink" href="#vexpm1-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vexpm1">
+<h3><code class="docutils literal notranslate"><span class="pre">vexpm1</span></code><a class="headerlink" href="#vexpm1" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the (e^x)-1 of a single-precision floating-point value.</p>
 </section>
-<section id="vexp-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vexp</span></code> ( f – f’ )<a class="headerlink" href="#vexp-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vexp">
+<h3><code class="docutils literal notranslate"><span class="pre">vexp</span></code><a class="headerlink" href="#vexp" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the e^x of a single-precision floating-point value.</p>
 </section>
 <section id="x-domain-error">
-<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code> ( – )<a class="headerlink" href="#x-domain-error" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code><a class="headerlink" href="#x-domain-error" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
 <p>Domain error exception.</p>
 </section>
-<section id="vlnp1-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vlnp1</span></code> ( f – f’ )<a class="headerlink" href="#vlnp1-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vlnp1">
+<h3><code class="docutils literal notranslate"><span class="pre">vlnp1</span></code><a class="headerlink" href="#vlnp1" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the ln(x+1) of a single-precision floating-point value.</p>
 </section>
-<section id="vln-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vln</span></code> ( f – f’ )<a class="headerlink" href="#vln-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vln">
+<h3><code class="docutils literal notranslate"><span class="pre">vln</span></code><a class="headerlink" href="#vln" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the ln(x) of a single-precision floating-point value.</p>
 </section>
-<section id="vsin-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vsin</span></code> ( f – f’ )<a class="headerlink" href="#vsin-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vsin">
+<h3><code class="docutils literal notranslate"><span class="pre">vsin</span></code><a class="headerlink" href="#vsin" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the sine of a single-precision floating-point value.</p>
 </section>
-<section id="vcos-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vcos</span></code> ( f – f’ )<a class="headerlink" href="#vcos-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vcos">
+<h3><code class="docutils literal notranslate"><span class="pre">vcos</span></code><a class="headerlink" href="#vcos" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the cosine of a single-precision floating-point value.</p>
 </section>
-<section id="vtan-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vtan</span></code> ( f – f’ )<a class="headerlink" href="#vtan-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vtan">
+<h3><code class="docutils literal notranslate"><span class="pre">vtan</span></code><a class="headerlink" href="#vtan" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the tangent of a single-precision floating-point value.</p>
 </section>
-<section id="vatan-x1-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vatan</span></code> ( x1 – f )<a class="headerlink" href="#vatan-x1-f" title="Permalink to this heading">¶</a></h3>
+<section id="vatan">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan</span></code><a class="headerlink" href="#vatan" title="Permalink to this heading">¶</a></h3>
+<p>( x1 – f )</p>
 <p>Get the arctangent of a single-precision floating-point value.</p>
 </section>
-<section id="vatan2-fy-fx-fangle">
-<h3><code class="docutils literal notranslate"><span class="pre">vatan2</span></code> ( fy fx – fangle )<a class="headerlink" href="#vatan2-fy-fx-fangle" title="Permalink to this heading">¶</a></h3>
+<section id="vatan2">
+<h3><code class="docutils literal notranslate"><span class="pre">vatan2</span></code><a class="headerlink" href="#vatan2" title="Permalink to this heading">¶</a></h3>
+<p>( fy fx – fangle )</p>
 <p>Get the angle of an x and a y single-precision floating-point values.</p>
 </section>
-<section id="vasin-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vasin</span></code> ( f – f’ )<a class="headerlink" href="#vasin-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vasin">
+<h3><code class="docutils literal notranslate"><span class="pre">vasin</span></code><a class="headerlink" href="#vasin" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the arcsine of a single-precision floating-point value.</p>
 </section>
-<section id="vacos-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vacos</span></code> ( f – f’ )<a class="headerlink" href="#vacos-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vacos">
+<h3><code class="docutils literal notranslate"><span class="pre">vacos</span></code><a class="headerlink" href="#vacos" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the arccosine of a single-precision floating-point value.</p>
 </section>
-<section id="v-fb-fx-fb-fx">
-<h3><code class="docutils literal notranslate"><span class="pre">v**</span></code> ( fb fx – fb^fx )<a class="headerlink" href="#v-fb-fx-fb-fx" title="Permalink to this heading">¶</a></h3>
+<section id="id18">
+<h3><code class="docutils literal notranslate"><span class="pre">v**</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
+<p>( fb fx – fb^fx )</p>
 <p>Exponentiate two single-precision floating-point values.</p>
 </section>
-<section id="vsinh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vsinh</span></code> ( f – f’ )<a class="headerlink" href="#vsinh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vsinh">
+<h3><code class="docutils literal notranslate"><span class="pre">vsinh</span></code><a class="headerlink" href="#vsinh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic sine of an S15.16 fixed-point number.</p>
 </section>
-<section id="vcosh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vcosh</span></code> ( f – f’ )<a class="headerlink" href="#vcosh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vcosh">
+<h3><code class="docutils literal notranslate"><span class="pre">vcosh</span></code><a class="headerlink" href="#vcosh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic cosine of an S15.16 fixed-point number.</p>
 </section>
-<section id="vtanh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vtanh</span></code> ( f – f’ )<a class="headerlink" href="#vtanh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vtanh">
+<h3><code class="docutils literal notranslate"><span class="pre">vtanh</span></code><a class="headerlink" href="#vtanh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic tangent of an S15.16 fixed-point number.</p>
 </section>
-<section id="vasinh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vasinh</span></code> ( f – f’ )<a class="headerlink" href="#vasinh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vasinh">
+<h3><code class="docutils literal notranslate"><span class="pre">vasinh</span></code><a class="headerlink" href="#vasinh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic arcsine of an S15.16 fixed-point number.</p>
 </section>
-<section id="vacosh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vacosh</span></code> ( f – f’ )<a class="headerlink" href="#vacosh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vacosh">
+<h3><code class="docutils literal notranslate"><span class="pre">vacosh</span></code><a class="headerlink" href="#vacosh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic arccosine of an S15.16 fixed-point number.</p>
 </section>
-<section id="vatanh-f-f">
-<h3><code class="docutils literal notranslate"><span class="pre">vatanh</span></code> ( f – f’ )<a class="headerlink" href="#vatanh-f-f" title="Permalink to this heading">¶</a></h3>
+<section id="vatanh">
+<h3><code class="docutils literal notranslate"><span class="pre">vatanh</span></code><a class="headerlink" href="#vatanh" title="Permalink to this heading">¶</a></h3>
+<p>( f – f’ )</p>
 <p>Get the hyperbolic arctangent of an S15.16 fixed-point number</p>
 </section>
 </section>
