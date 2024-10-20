@@ -1445,7 +1445,7 @@ begin-module float32
   \ Get the ln(x+1) of a single-precision floating-point value
   : vlnp1 ( f -- f' )
     dup v-1 v<> averts x-domain-error
-    dup vabs v1 v<= if
+    dup vabs v1 v< if
       dup dup v1 v1 { n x xy** y sign }
       begin
         v-1 sign v* to sign
