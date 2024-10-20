@@ -206,15 +206,20 @@ begin-module float32
 
     \ Parse the significand
     : parse-significand
-      { start-addr parse-addr decimal? -- places D: significand }
+      { start-addr parse-addr decimal? -- zero-places places D: significand }
       0. { D: significand }
       1,0 { D:  multiplier }
       0 { places }
-      decimal? not { non-zero-found? }
+      0 { zero-places }
+      false { non-zero-found? }
       begin parse-addr start-addr > while
         -1 +to parse-addr
         parse-addr c@ { digit }
-        digit [char] 0 <> non-zero-found? or to non-zero-found?
+        digit [char] 0 = if
+          non-zero-found? not if 1 +to zero-places then
+        else
+          digit [char] . <> if true to non-zero-found? then
+        then
         digit [char] . <> if
           non-zero-found? if
             digit [char] 0 - s>d multiplier d* +to significand
@@ -227,7 +232,7 @@ begin-module float32
           then
         then
       repeat
-      places 1- significand
+      zero-places places 1- significand
     ;
 
     \ Get the number of zero bits the value is adjusted to the right at
@@ -1275,6 +1280,7 @@ begin-module float32
     addr bytes skip-decimal to bytes to addr { decimal? decimal-place }
     addr bytes skip-fraction not if 2drop 2drop 0 false exit then
     { fraction-places exponent? } to bytes to addr
+    decimal-place if 0 to fraction-places then
     addr { parse-addr }
     0 { exponent10 }
     exponent? if
@@ -1282,10 +1288,13 @@ begin-module float32
       addr bytes validate-exponent not if 0 false exit then
       addr bytes parse-exponent not if 0 false exit then to exponent10
     then
-    start-addr parse-addr decimal? parse-significand { places D: significand' }
+    start-addr parse-addr decimal? parse-significand
+    { zero-places places D: significand' }
+    fraction-places if 0 to zero-places then
     significand' d0= if 0 true exit then
-    exponent10 s>f 10x**log2 { D: exponent2 }
-    significand' 10,0 places 1+ decimal-place - fi** f/ to significand'
+    exponent10 fraction-places - zero-places + s>f 10x**log2 { D: exponent2 }
+    significand' 10,0 places 1+ decimal-place zero-places - - fraction-places -
+    fi** f/ to significand'
     exponent2 exponent2 round-zero s>f d- { D: fract }
     fract d0<> if
       significand' 2,0 fract f** f* to significand'
