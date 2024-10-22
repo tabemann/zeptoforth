@@ -26,124 +26,132 @@ begin-module complex
   : x-domain-error ." domain error" cr ;
   
   \ Create an imaginary number
-  : imag ( f -- complex ) 0e0 ;
+  : vimag ( f -- complex ) 0e0 ;
 
   \ Create a real number
-  : real ( f -- complex ) 0e0 swap ;
+  : vreal ( f -- complex ) 0e0 swap ;
   
   \ Add two complex numbers
-  : c+ { ai ar bi br -- ci cr } ai bi v+ ar br v+ ;
+  : cv+ { ai ar bi br -- ci cr } ai bi v+ ar br v+ ;
 
   \ Subtract two complex numbers
-  : c- { ai ar bi br -- ci cr } ai bi v- ar br v- ;
+  : cv- { ai ar bi br -- ci cr } ai bi v- ar br v- ;
 
   \ Multiply two complex numbers
-  : c* { ai ar bi br -- ci cr }
+  : cv* { ai ar bi br -- ci cr }
     ai br v* ar bi v* v+ ar br v* ai bi v* v-
   ;
 
   \ Divide two complex number
-  : c/ { ai ar bi br -- ci cr }
+  : cv/ { ai ar bi br -- ci cr }
     br dup v* bi dup v* v+ { den }
     ai br v* ar bi v* v- den v/ ar br v* ai bi v* v+ den v/
   ;
 
   \ Get the natural exponent of a complex number
-  : cexp { ai ar -- bi br }
+  : cvexp { ai ar -- bi br }
     ar vexp { ar-vexp } ar-vexp ai vsin v* ar-vexp ai vcos v*
   ;
 
   \ Get the absolute value of a complex number
-  : cabs { ai ar -- f } ar dup v* ai dup v* v+ vsqrt ;
+  : cvabs { ai ar -- f } ar dup v* ai dup v* v+ vsqrt ;
 
   \ Get the argument function of a complex number
-  : carg { ai ar -- f }
+  : cvarg { ai ar -- f }
     ai v0<> ar v0<> or averts x-domain-error
     ai ar vatan2
   ;
+
+  \ Get the square root of a complex number
+  : cvsqrt { D: a -- D: b }
+    a cvabs vsqrt vreal a cvarg 2e0 v/ vimag cvexp cv*
+  ;
   
   \ Get the principal value of the natural logarithm of a complex value
-  : cln { D: a -- D: b } a carg a cabs vln ;
+  : cvln { D: a -- D: b } a cvarg a cvabs vln ;
 
   \ The power function
-  : c** { D: c D: z -- D: cz** } c cln z c* cexp ;
+  : cv** { D: c D: z -- D: cz** } c cvln z cv* cvexp ;
   
   \ The generalized power function, taking a value n due to the multivariant
   \ nature of the natural logarithm
-  : cn** { D: c D: z n -- D: cz** }
-    c cln n [ 2e0 vpi v* ] literal v* imag c+ z c* cexp
+  : cvn** { D: c D: z n -- D: cz** }
+    c cvln n [ 2e0 vpi v* ] literal v* vimag cv+ z cv* cvexp
   ;
   
   \ Get the sine of a complex number
-  : csin { D: a -- D: b }
-    1e0 imag a c* { D: a' }
-    -1e0 real a' c* { D: a'' }
-    a' cexp a'' cexp c- 2e0 imag c/
+  : cvsin { D: a -- D: b }
+    1e0 vimag a cv* { D: a' }
+    -1e0 vreal a' cv* { D: a'' }
+    a' cvexp a'' cvexp cv- 2e0 vimag cv/
   ;
 
   \ Get the cosine of a complex number
-  : ccos { D: a -- D: b }
-    1e0 imag a c* { D: a' }
-    -1e0 real a' c* { D: a'' }
-    a' cexp a'' cexp c+ 2e0 real c/
+  : cvcos { D: a -- D: b }
+    1e0 vimag a cv* { D: a' }
+    -1e0 vreal a' cv* { D: a'' }
+    a' cvexp a'' cvexp cv+ 2e0 vreal cv/
   ;
 
   \ Get the tangent of a complex number
-  : ctan { D: a -- D: b }
-    1e0 imag a c* { D: a' }
-    -1e0 real a' c* { D: a'' }
-    a' cexp { D: a' }
-    a'' cexp { D: a'' }
-    a' a'' c- a' a'' c+ c/ -1e0 imag c*
+  : cvtan { D: a -- D: b }
+    1e0 vimag a cv* { D: a' }
+    -1e0 vreal a' cv* { D: a'' }
+    a' cvexp { D: a' }
+    a'' cvexp { D: a'' }
+    a' a'' cv- a' a'' cv+ cv/ -1e0 vimag cv*
   ;
 
   \ Get the principal value of the arcsine of a complex value
-  : casin { D: a -- D: b }
-    1e0 real a 2dup c* c- { D: a' }
-    a' carg 2e0 v/ vexp a' cabs 2e0 v/ v* real a 1e0 imag c* c+ cln 1e0 imag c/
+  : cvasin { D: a -- D: b }
+    1e0 vreal a 2dup cv* cv- { D: a' }
+    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a 1e0 vimag cv* cv+ cvln
+    1e0 vimag cv/
   ;
 
   \ Get the principal value of the arccosine of a complex value
-  : cacos { D: a -- D: b }
-    1e0 real a 2dup c* c- { D: a' }
-    a' carg 2e0 v/ vexp a' cabs 2e0 v/ v* real 1e0 imag c* a c+ cln 1e0 imag c/
+  : cvacos { D: a -- D: b }
+    1e0 vreal a 2dup cv* cv- { D: a' }
+    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal 1e0 vimag cv* a cv+ cvln
+    1e0 vimag cv/
   ;
 
   \ Get the principal value of the arctangent of a complex value
-  : catan { D: a -- D: b }
-    1e0 imag a c- 1e0 imag a c+ c/ cln 2e0 imag c/
+  : cvatan { D: a -- D: b }
+    1e0 vimag a cv- 1e0 vimag a cv+ cv/ cvln 2e0 vimag cv/
   ;
 
   \ Get the principal value of the hyperbolic sine of a complex value
-  : csinh { D: a -- D: b }
-    a cexp a -1e0 real c* cexp c- 2e0 real c/
+  : cvsinh { D: a -- D: b }
+    a cvexp a -1e0 vreal cv* cvexp cv- 2e0 vreal cv/
   ;
 
   \ Get the principal value of the hyperbolic cosine of a complex value
-  : ccosh { D: a -- D: b }
-    a cexp a -1e0 real c* cexp c+ 2e0 real c/
+  : cvcosh { D: a -- D: b }
+    a cvexp a -1e0 vreal cv* cvexp cv+ 2e0 vreal cv/
   ;
 
   \ Get the principal value of the hyperbolic tangent of a complex value
-  : ctanh { D: a -- D: b }
-    a cexp { D: a' } a -1e0 real c* cexp { D: a'' } a' a'' c- a' a a'' c+ c/
+  : cvtanh { D: a -- D: b }
+    a cvexp { D: a' } a -1e0 vreal cv* cvexp { D: a'' }
+    a' a'' cv- a' a a'' cv+ cv/
   ;
 
   \ Get the principal value of the hyperbolic arcsine of a complex value
-  : casinh { D: a -- D: b }
-    1e0 real a 2dup c* c+ { D: a' }
-    a' carg 2e0 v/ vexp a' cabs 2e0 v/ v* real a c+ cln
+  : cvasinh { D: a -- D: b }
+    1e0 vreal a 2dup cv* cv+ { D: a' }
+    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arccosine of a complex value
-  : cacosh { D: a -- D: b }
-    a 2dup c* 1e0 real c- { D: a' }
-    a' carg 2e0 v/ vexp a' cabs 2e0 v/ v* real a c+ cln
+  : cvacosh { D: a -- D: b }
+    a 2dup cv* 1e0 vreal cv- { D: a' }
+    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arctangent of a complex value
-  : catanh { D: a -- D: b }
-    1e0 real a c+ 1e0 real a c- c/ cln 2e0 real c/
+  : cvatanh { D: a -- D: b }
+    1e0 vreal a cv+ 1e0 vreal a cv- cv/ cvln 2e0 vreal cv/
   ;
   
 end-module
