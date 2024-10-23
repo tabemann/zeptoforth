@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module complex
+begin-module complex-float32
 
   float32 import
 
@@ -153,5 +153,94 @@ begin-module complex
   : cvatanh { D: a -- D: b }
     1e0 vreal a cv+ 1e0 vreal a cv- cv/ cvln 2e0 vreal cv/
   ;
+
+  \ Format a complex value as a string
+  : format-complex-float32-exponent { addr bytes ai ar -- addr' bytes' }
+    addr bytes ar format-float32-exponent { addr' bytes' }
+    bytes bytes' - 0> if
+      ai v0>= if [char] + addr' bytes' + c! 1 +to bytes' then
+      addr bytes' + bytes bytes' - ai format-float32-exponent { addr'' bytes'' }
+      bytes bytes' bytes'' + - 0> if
+        [char] i addr'' bytes'' + c! 1 +to bytes''
+      then
+      addr bytes' bytes'' +
+    else
+      addr bytes'
+    then
+  ;
+
+  \ Print out a complex value without a space
+  : (cv.) ( D: a -- )
+    31 [: -rot 31 swap format-complex-float32-exponent type ;] with-allot
+  ;
+
+  \ Print out a complex value with a space
+  : cv. ( D: a -- ) (cv.) space ;
+
+  \ Parse a complex value as a string
+  : parse-complex-float32 { addr bytes -- D: a success? }
+    bytes 0<= if 0e0 0e0 false exit then
+    addr bytes + 1- c@ dup [char] i = swap [char] I = or not if
+      addr bytes parse-float32 if
+        vreal true exit
+      else
+        drop 0e0 0e0 false exit
+      then
+    then
+    -1 +to bytes
+    bytes { index }
+    begin index 1 u> while
+      -1 +to index
+      addr index + c@ dup [char] + = swap [char] - = or if
+        addr index + 1- c@ dup [char] e = swap [char] E = or not if
+          addr index + bytes index - parse-float32 if
+            addr index parse-float32 if
+              true exit
+            else
+              2drop 0e0 0e0 false exit
+            then
+          else
+            drop 0e0 0e0 false exit
+          then
+        then
+      then
+    repeat
+    0e0 0e0 false
+  ;
+
+  begin-module complex-float32-internal
+
+    \ Saved handle number hook
+    variable saved-handle-number-hook
+  
+    \ Handle numeric literals
+    : do-handle-number ( addr bytes -- flag )
+      2dup saved-handle-number-hook @ execute if
+        state @ not if
+          rot rot
+        then
+        2drop true
+      else
+        parse-complex-float32 if
+          state @ if
+            swap lit, lit, true
+          else
+            true
+          then
+        else
+          2drop false
+        then
+      then
+    ;
+    
+    \ Initialize
+    : init-handle-number ( -- )
+      handle-number-hook @ saved-handle-number-hook !
+      ['] do-handle-number handle-number-hook !
+    ;
+
+    initializer init-handle-number
+
+  end-module
   
 end-module
