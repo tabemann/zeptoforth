@@ -134,7 +134,7 @@ begin-module complex-float32
   \ Get the principal value of the hyperbolic tangent of a complex value
   : cvtanh { D: a -- D: b }
     a cvexp { D: a' } a -1e0 vreal cv* cvexp { D: a'' }
-    a' a'' cv- a' a a'' cv+ cv/
+    a' a'' cv- a' a'' cv+ cv/
   ;
 
   \ Get the principal value of the hyperbolic arcsine of a complex value
