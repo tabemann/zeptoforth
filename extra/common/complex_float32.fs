@@ -104,16 +104,12 @@ begin-module complex-float32
 
   \ Get the principal value of the arcsine of a complex value
   : cvasin { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv- { D: a' }
-    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a 1e0 vimag cv* cv+ cvln
-    1e0 vimag cv/
+    1e0 vreal a 2dup cv* cv- cvsqrt a 1e0 vimag cv* cv+ cvln -1e0 vimag cv*
   ;
 
   \ Get the principal value of the arccosine of a complex value
   : cvacos { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv- { D: a' }
-    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal 1e0 vimag cv* a cv+ cvln
-    1e0 vimag cv/
+    1e0 vreal a 2dup cv* cv- cvsqrt 1e0 vimag cv* a cv+ cvln -1e0 vimag cv*
   ;
 
   \ Get the principal value of the arctangent of a complex value
@@ -139,14 +135,12 @@ begin-module complex-float32
 
   \ Get the principal value of the hyperbolic arcsine of a complex value
   : cvasinh { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv+ { D: a' }
-    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a cv+ cvln
+    1e0 vreal a 2dup cv* cv+ cvsqrt a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arccosine of a complex value
   : cvacosh { D: a -- D: b }
-    a 2dup cv* 1e0 vreal cv- { D: a' }
-    a' cvarg 2e0 v/ vexp a' cvabs 2e0 v/ v* vreal a cv+ cvln
+    a 1e0 vreal cv+ cvsqrt a 1e0 vreal cv- cvsqrt cv* a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arctangent of a complex value
