@@ -23,7 +23,7 @@ begin-module complex-float32
   float32 import
 
   \ Domain error
-  : x-domain-error ." domain error" cr ;
+  : x-domain-error ( -- ) ." domain error" cr ;
   
   \ Create an imaginary number
   : vimag ( f -- complex ) 0e0 ;
@@ -175,11 +175,7 @@ begin-module complex-float32
   : parse-complex-float32 { addr bytes -- D: a success? }
     bytes 0<= if 0e0 0e0 false exit then
     addr bytes + 1- c@ dup [char] i = swap [char] I = or not if
-      addr bytes parse-float32 if
-        vreal true exit
-      else
-        drop 0e0 0e0 false exit
-      then
+      0e0 0e0 false exit
     then
     -1 +to bytes
     bytes { index }
