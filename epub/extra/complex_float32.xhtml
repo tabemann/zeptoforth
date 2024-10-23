@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Complex Numbers Based on Single-Precision Floating-Point Values</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="complex-numbers-based-on-single-precision-floating-point-values">
+<h1>Complex Numbers Based on Single-Precision Floating-Point Values</h1>
+<p>There is optional support on platforms for which hardware single-precision floating point is supported for complex numbers. Complex numbers are implemented as pairs of cells containing single-precision floating-point values on the stack, with the real component being on the top of the stack and the imaginary componet being beneath it.</p>
+<p>An array of basic mathematical functions are implemented for complex numbers based on single-precision floating-point values. They are in the <code class="docutils literal notranslate"><span class="pre">complex-float32</span></code> module.</p>
+<p>There is also support for complex literals, which have the format of <code class="docutils literal notranslate"><span class="pre">x{+,-}yi</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are floating-point values (but where the <code class="docutils literal notranslate"><span class="pre">e</span></code> is optional).</p>
+<section id="complex-float32">
+<h2><code class="docutils literal notranslate"><span class="pre">complex-float32</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">complex-float32</span></code> module contains the following words:</p>
+<section id="x-domain-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code></h3>
+<p>( – )</p>
+<p>Domain error.</p>
+</section>
+<section id="vimag">
+<h3><code class="docutils literal notranslate"><span class="pre">vimag</span></code></h3>
+<p>( f – complex )</p>
+<p>Create an imaginary number.</p>
+</section>
+<section id="vreal">
+<h3><code class="docutils literal notranslate"><span class="pre">vreal</span></code></h3>
+<p>( f – complex )</p>
+<p>Create a real number.</p>
+</section>
+<section id="cv">
+<h3><code class="docutils literal notranslate"><span class="pre">cv+</span></code></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Add two complex numbers.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">cv-</span></code></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Subtract two complex numbers.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">cv*</span></code></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Multiply two complex numbers.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">cv/</span></code></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Divide two complex number.</p>
+</section>
+<section id="cvexp">
+<h3><code class="docutils literal notranslate"><span class="pre">cvexp</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the natural exponent of a complex number.</p>
+</section>
+<section id="cvabs">
+<h3><code class="docutils literal notranslate"><span class="pre">cvabs</span></code></h3>
+<p>( D: complex0 – f )</p>
+<p>Get the absolute value of a complex number.</p>
+</section>
+<section id="cvarg">
+<h3><code class="docutils literal notranslate"><span class="pre">cvarg</span></code></h3>
+<p>( D: complex0 – f )</p>
+<p>Get the argument function of a complex number.</p>
+</section>
+<section id="cvsqrt">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsqrt</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the square root of a complex number.</p>
+</section>
+<section id="cvln">
+<h3><code class="docutils literal notranslate"><span class="pre">cvln</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the natural logarithm of a complex value.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">cv**</span></code></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>The power function.</p>
+</section>
+<section id="cvn">
+<h3><code class="docutils literal notranslate"><span class="pre">cvn**</span></code></h3>
+<p>( D: complex0 D: complex1 n – D: complex2 )</p>
+<p>The generalized power function, taking a value n due to the multivariant
+\ nature of the natural logarithm.</p>
+</section>
+<section id="cvsin">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsin</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the sine of a complex number.</p>
+</section>
+<section id="cvcos">
+<h3><code class="docutils literal notranslate"><span class="pre">cvcos</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the cosine of a complex number.</p>
+</section>
+<section id="cvtan">
+<h3><code class="docutils literal notranslate"><span class="pre">cvtan</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the tangent of a complex number.</p>
+</section>
+<section id="cvasin">
+<h3><code class="docutils literal notranslate"><span class="pre">cvasin</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arcsine of a complex value.</p>
+</section>
+<section id="cvacos">
+<h3><code class="docutils literal notranslate"><span class="pre">cvacos</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arccosine of a complex value.</p>
+</section>
+<section id="cvatan">
+<h3><code class="docutils literal notranslate"><span class="pre">cvatan</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arctangent of a complex value.</p>
+</section>
+<section id="cvsinh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsinh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic sine of a complex value.</p>
+</section>
+<section id="cvcosh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvcosh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic cosine of a complex value.</p>
+</section>
+<section id="cvtanh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvtanh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic tangent of a complex value.</p>
+</section>
+<section id="cvasinh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvasinh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arcsine of a complex value.</p>
+</section>
+<section id="cvacosh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvacosh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arccosine of a complex value.</p>
+</section>
+<section id="cvatanh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvatanh</span></code></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arctangent of a complex value.</p>
+</section>
+<section id="format-complex-float32-exponent">
+<h3><code class="docutils literal notranslate"><span class="pre">format-complex-float32-exponent</span></code></h3>
+<p>( addr bytes D: complex – addr’ bytes’ )</p>
+<p>Format a complex value as a string.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">(cv.)</span></code></h3>
+<p>( D: complex – )</p>
+<p>Print out a complex value without a space.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">cv.</span></code></h3>
+<p>( D: complex – )</p>
+<p>Print out a complex value with a space.</p>
+</section>
+<section id="parse-complex-float32">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-complex-float32</span></code></h3>
+<p>( addr bytes – D: complex success? )</p>
+<p>Parse a complex value as a string.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
