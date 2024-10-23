@@ -171,7 +171,7 @@ begin-module complex-float32
 
   \ Print out a complex value without a space
   : (cv.) ( D: a -- )
-    31 [: -rot 31 swap format-complex-float32-exponent type ;] with-allot
+    31 [: -rot 31 -rot format-complex-float32-exponent type ;] with-allot
   ;
 
   \ Print out a complex value with a space
