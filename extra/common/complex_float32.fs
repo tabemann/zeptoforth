@@ -26,10 +26,10 @@ begin-module complex-float32
   : x-domain-error ( -- ) ." domain error" cr ;
   
   \ Create an imaginary number
-  : vimag ( f -- complex ) 0e0 ;
+  : cvimag ( f -- complex ) 0e0 ;
 
   \ Create a real number
-  : vreal ( f -- complex ) 0e0 swap ;
+  : cvreal ( f -- complex ) 0e0 swap ;
   
   \ Add two complex numbers
   : cv+ { ai ar bi br -- ci cr } ai bi v+ ar br v+ ;
@@ -48,6 +48,9 @@ begin-module complex-float32
     ai br v* ar bi v* v- den v/ ar br v* ai bi v* v+ den v/
   ;
 
+  \ Negate a complex number
+  : cvnegate { ai ar -- bi br } ai vnegate ar vnegate ;
+
   \ Get the natural exponent of a complex number
   : cvexp { ai ar -- bi br }
     ar vexp { ar-vexp } ar-vexp ai vsin v* ar-vexp ai vcos v*
@@ -64,7 +67,7 @@ begin-module complex-float32
 
   \ Get the square root of a complex number
   : cvsqrt { D: a -- D: b }
-    a cvabs vsqrt vreal a cvarg 2e0 v/ vimag cvexp cv*
+    a cvabs vsqrt cvreal a cvarg 2e0 v/ cvimag cvexp cv*
   ;
   
   \ Get the principal value of the natural logarithm of a complex value
@@ -76,76 +79,76 @@ begin-module complex-float32
   \ The generalized power function, taking a value n due to the multivariant
   \ nature of the natural logarithm
   : cvn** { D: c D: z n -- D: cz** }
-    c cvln n [ 2e0 vpi v* ] literal v* vimag cv+ z cv* cvexp
+    c cvln n [ 2e0 vpi v* ] literal v* cvimag cv+ z cv* cvexp
   ;
   
   \ Get the sine of a complex number
   : cvsin { D: a -- D: b }
-    1e0 vimag a cv* { D: a' }
-    -1e0 vreal a' cv* { D: a'' }
-    a' cvexp a'' cvexp cv- 2e0 vimag cv/
+    1e0 cvimag a cv* { D: a' }
+    -1e0 cvreal a' cv* { D: a'' }
+    a' cvexp a'' cvexp cv- 2e0 cvimag cv/
   ;
 
   \ Get the cosine of a complex number
   : cvcos { D: a -- D: b }
-    1e0 vimag a cv* { D: a' }
-    -1e0 vreal a' cv* { D: a'' }
-    a' cvexp a'' cvexp cv+ 2e0 vreal cv/
+    1e0 cvimag a cv* { D: a' }
+    -1e0 cvreal a' cv* { D: a'' }
+    a' cvexp a'' cvexp cv+ 2e0 cvreal cv/
   ;
 
   \ Get the tangent of a complex number
   : cvtan { D: a -- D: b }
-    1e0 vimag a cv* { D: a' }
-    -1e0 vreal a' cv* { D: a'' }
+    1e0 cvimag a cv* { D: a' }
+    -1e0 cvreal a' cv* { D: a'' }
     a' cvexp { D: a' }
     a'' cvexp { D: a'' }
-    a' a'' cv- a' a'' cv+ cv/ -1e0 vimag cv*
+    a' a'' cv- a' a'' cv+ cv/ -1e0 cvimag cv*
   ;
 
   \ Get the principal value of the arcsine of a complex value
   : cvasin { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv- cvsqrt a 1e0 vimag cv* cv+ cvln -1e0 vimag cv*
+    1e0 cvreal a 2dup cv* cv- cvsqrt a 1e0 cvimag cv* cv+ cvln -1e0 cvimag cv*
   ;
 
   \ Get the principal value of the arccosine of a complex value
   : cvacos { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv- cvsqrt 1e0 vimag cv* a cv+ cvln -1e0 vimag cv*
+    1e0 cvreal a 2dup cv* cv- cvsqrt 1e0 cvimag cv* a cv+ cvln -1e0 cvimag cv*
   ;
 
   \ Get the principal value of the arctangent of a complex value
   : cvatan { D: a -- D: b }
-    1e0 vimag a cv- 1e0 vimag a cv+ cv/ cvln 2e0 vimag cv/
+    1e0 cvimag a cv- 1e0 cvimag a cv+ cv/ cvln 2e0 cvimag cv/
   ;
 
   \ Get the principal value of the hyperbolic sine of a complex value
   : cvsinh { D: a -- D: b }
-    a cvexp a -1e0 vreal cv* cvexp cv- 2e0 vreal cv/
+    a cvexp a -1e0 cvreal cv* cvexp cv- 2e0 cvreal cv/
   ;
 
   \ Get the principal value of the hyperbolic cosine of a complex value
   : cvcosh { D: a -- D: b }
-    a cvexp a -1e0 vreal cv* cvexp cv+ 2e0 vreal cv/
+    a cvexp a -1e0 cvreal cv* cvexp cv+ 2e0 cvreal cv/
   ;
 
   \ Get the principal value of the hyperbolic tangent of a complex value
   : cvtanh { D: a -- D: b }
-    a cvexp { D: a' } a -1e0 vreal cv* cvexp { D: a'' }
+    a cvexp { D: a' } a -1e0 cvreal cv* cvexp { D: a'' }
     a' a'' cv- a' a'' cv+ cv/
   ;
 
   \ Get the principal value of the hyperbolic arcsine of a complex value
   : cvasinh { D: a -- D: b }
-    1e0 vreal a 2dup cv* cv+ cvsqrt a cv+ cvln
+    1e0 cvreal a 2dup cv* cv+ cvsqrt a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arccosine of a complex value
   : cvacosh { D: a -- D: b }
-    a 1e0 vreal cv+ cvsqrt a 1e0 vreal cv- cvsqrt cv* a cv+ cvln
+    a 1e0 cvreal cv+ cvsqrt a 1e0 cvreal cv- cvsqrt cv* a cv+ cvln
   ;
 
   \ Get the principal value of the hyperbolic arctangent of a complex value
   : cvatanh { D: a -- D: b }
-    1e0 vreal a cv+ 1e0 vreal a cv- cv/ cvln 2e0 vreal cv/
+    1e0 cvreal a cv+ 1e0 cvreal a cv- cv/ cvln 2e0 cvreal cv/
   ;
 
   \ Format a complex value as a string

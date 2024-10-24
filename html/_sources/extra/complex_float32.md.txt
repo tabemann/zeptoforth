@@ -15,12 +15,12 @@ The `complex-float32` module contains the following words:
 
 Domain error.
   
-##### `vimag`
+##### `cvimag`
 ( f -- complex )
 
 Create an imaginary number.
 
-##### `vreal`
+##### `cvreal`
 ( f -- complex )
 
 Create a real number.
@@ -44,6 +44,11 @@ Multiply two complex numbers.
 ( D: complex0 D: complex1 -- D: complex2 )
 
 Divide two complex number.
+
+##### `cvnegate`
+( D: complex0 -- D: complex1 )
+
+Negate a complex number.
 
 ##### `cvexp`
 ( D: complex0 -- D: complex1 )
