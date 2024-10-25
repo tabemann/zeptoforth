@@ -309,11 +309,16 @@ begin-module st7789v-raytracing
     y negate [ my-rows 2 / ] literal + s>f32 100;0 f32/
   ;
 
+  \ Color dithering table
+  create color-table
+  0;9 , 0;95 , 1;0 , 1;05 , 1;1 , 1;05 , 1;0 , 0;95 ,
+
   \ Convert a color
-  : convert-color { r g b -- color }
-    r 255;0 f32* f32round-zero 0 max 255 min
-    g 255;0 f32* f32round-zero 0 max 255 min
-    b 255;0 f32* f32round-zero 0 max 255 min rgb8
+  : convert-color { r g b x y -- color }
+    x 2 and y 2 and + cells color-table + @ { factor }
+    r 255;0 f32* factor f32* f32round-zero 0 max 255 min
+    g 255;0 f32* factor f32* f32round-zero 0 max 255 min
+    b 255;0 f32* factor f32* f32round-zero 0 max 255 min rgb8
   ;
   
   \ Draw world
@@ -326,7 +331,7 @@ begin-module st7789v-raytracing
     my-rows 0 ?do
       my-cols 0 ?do
         i j convert-coord 0;0 eye-coord vect- unit { vx vy vz }
-        eye-coord vx vy vz send-ray convert-color
+        eye-coord vx vy vz send-ray i j convert-color
         i j my-display draw-pixel-const
       loop
       my-display update-display
