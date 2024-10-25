@@ -12,7 +12,7 @@ Pending operations are scheduled operations that are executed within the multita
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
-The "attention" key combination Control-T `z` sends the exception `x-interrupt-main` to the main task. The "attention" key combination Control-T `t`, after the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all the tasks running.
+The "attention" key combination Control-T `z` sends the exception `x-interrupt-main` to the main task. The "attention" key combination Control-T `c` sends the exception `x-interrupt-other` to all tasks other than the main task and the extra task(s). The "attention" key combination Control-T `t`, after the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all the tasks running.
 
 ### `forth`
 
@@ -111,6 +111,13 @@ which readies the task and raises an exception within it, which may be caught by
 
 To force a task to call an execution token next time it is scheduled, one executes:
 
+To raise an exception in all tasks *other* than a task, one executes:
+
+##### `signal-all-other`
+( xt task -- )
+
+which readies each task other than the selected task and the extra task(s) and raises an exception within it it, which may be caught by the task in question.
+
 ##### `force-call`
 ( xt task -- )
 
@@ -146,6 +153,11 @@ This exception is raised when an out of range notification mailbox index or coun
 ( -- )
 
 This exception is sent to the main task by issuing Control-T `z` at the console.
+
+##### `x-interrupt-other`
+( -- )
+
+This exception is sent to tasks other than the main task by issuing Control-T `c` at the console.x
 
 ##### `timeout`
 ( -- addr )

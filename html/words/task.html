@@ -17,7 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Software Alarm Words" href="alarm.html" />
+    <link rel="next" title="Double-Cell Words" href="double.html" />
     <link rel="prev" title="Console Redirection Words" href="console.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -44,7 +44,7 @@
 <p>Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question. Also note that task notifications must be configured for a task <code class="docutils literal notranslate"><span class="pre">config-notify</span></code> before they may be used; the user must provide a pointer to a buffer containing a number of cells equal to the specified number of notification mailboxes.</p>
 <p>Pending operations are scheduled operations that are executed within the multitasker when <code class="docutils literal notranslate"><span class="pre">pause</span></code> or <code class="docutils literal notranslate"><span class="pre">force-pending-ops</span></code> are executed, except within a critical section, where then they are defered. Pending operations are initialized and registered with <code class="docutils literal notranslate"><span class="pre">register-pending-op</span></code>, which gives them a fixed priority. Once registered, they can be set to execute with <code class="docutils literal notranslate"><span class="pre">set-pending-op</span></code>, which assigns an execution token to execute to them; this execution token will be cleared just prior to their execution. Pending operations are always of <code class="docutils literal notranslate"><span class="pre">pending-op-size</span></code> bytes. Note that it is safe to reuse a pending operation while it is executing, but if they are set again after they have already been set prior to their execution, their previously set execution token will be overwritten.</p>
 <p>Multitasking is enabled by default once <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.</p>
-<p>The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">z</span></code> sends the exception <code class="docutils literal notranslate"><span class="pre">x-interrupt-main</span></code> to the main task. The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">t</span></code>, after the task monitor has been started with <code class="docutils literal notranslate"><span class="pre">start-monitor</span></code> in the <code class="docutils literal notranslate"><span class="pre">monitor</span></code> module, displays information on all the tasks running.</p>
+<p>The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">z</span></code> sends the exception <code class="docutils literal notranslate"><span class="pre">x-interrupt-main</span></code> to the main task. The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">c</span></code> sends the exception <code class="docutils literal notranslate"><span class="pre">x-interrupt-other</span></code> to all tasks other than the main task and the extra task(s). The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">t</span></code>, after the task monitor has been started with <code class="docutils literal notranslate"><span class="pre">start-monitor</span></code> in the <code class="docutils literal notranslate"><span class="pre">monitor</span></code> module, displays information on all the tasks running.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
 <p>This word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
@@ -128,6 +128,12 @@
 <p>( xt task – )</p>
 <p>which readies the task and raises an exception within it, which may be caught by the task in question.</p>
 <p>To force a task to call an execution token next time it is scheduled, one executes:</p>
+<p>To raise an exception in all tasks <em>other</em> than a task, one executes:</p>
+</section>
+<section id="signal-all-other">
+<h3><code class="docutils literal notranslate"><span class="pre">signal-all-other</span></code><a class="headerlink" href="#signal-all-other" title="Permalink to this heading">¶</a></h3>
+<p>( xt task – )</p>
+<p>which readies each task other than the selected task and the extra task(s) and raises an exception within it it, which may be caught by the task in question.</p>
 </section>
 <section id="force-call">
 <h3><code class="docutils literal notranslate"><span class="pre">force-call</span></code><a class="headerlink" href="#force-call" title="Permalink to this heading">¶</a></h3>
@@ -161,6 +167,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">x-interrupt-main</span></code><a class="headerlink" href="#x-interrupt-main" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This exception is sent to the main task by issuing Control-T <code class="docutils literal notranslate"><span class="pre">z</span></code> at the console.</p>
+</section>
+<section id="x-interrupt-other">
+<h3><code class="docutils literal notranslate"><span class="pre">x-interrupt-other</span></code><a class="headerlink" href="#x-interrupt-other" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This exception is sent to tasks other than the main task by issuing Control-T <code class="docutils literal notranslate"><span class="pre">c</span></code> at the console.x</p>
 </section>
 <section id="timeout">
 <h3><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#timeout" title="Permalink to this heading">¶</a></h3>
@@ -483,6 +494,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -499,6 +512,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -509,7 +523,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -541,6 +554,7 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -561,7 +575,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="console.html" title="previous chapter">Console Redirection Words</a></li>
-      <li>Next: <a href="alarm.html" title="next chapter">Software Alarm Words</a></li>
+      <li>Next: <a href="double.html" title="next chapter">Double-Cell Words</a></li>
   </ul></li>
 </ul>
 </div>

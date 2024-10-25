@@ -2222,18 +2222,49 @@ begin-module task
     then
   ;
 
+  \ Signal all other tasks to raise exceptions
+  : signal-all-other ( xt task -- )
+    over 0<> if
+      [: { xt exclude-task }
+        disable-int
+        cpu-count 0 ?do
+          i cpu-last-task @ { task }
+          begin task while
+            task exclude-task <> task i cpu-extra-task @ <> and if
+              xt task task-raise !
+              [: current-task task-raise @ 0 current-task task-raise ! ?raise ;]
+              task force-call
+              readied task task-state h!
+            then
+            task task-next @ to task
+          repeat
+        loop
+        enable-int
+      ;] critical-with-all-core-spinlock
+    then
+  ;
+
   \ Saved attention hook
   variable saved-attention-hook
 
   \ Main interrupt exception
   : x-interrupt-main ." *** INTERRUPT MAIN ***" cr ;
+
+  \ Other interrupt exception
+  : x-interrupt-other ;
   
   \ Handle attention
   : do-attention ( c -- )
     dup [char] z = if
       drop false attention? ! ['] x-interrupt-main main-task signal
     else
-      saved-attention-hook @ execute
+      dup [char] c = if
+        drop
+        display-red ." *** INTERRUPT OTHER ***" cr display-normal
+        ['] x-interrupt-other main-task signal-all-other
+      else
+        saved-attention-hook @ execute
+      then
     then
   ;
   
