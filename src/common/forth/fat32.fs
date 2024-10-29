@@ -1003,7 +1003,7 @@ begin-module fat32
 
     \ Get whether a path is from root
     : root-path? ( addr bytes -- root-path? )
-      0> if c@ [char] / = else false then
+      0> if c@ [char] / = else drop false then
     ;
     
     \ Get whether a path is root or empty
@@ -1175,7 +1175,7 @@ begin-module fat32
     :noname ( c-addr u xt fs -- ) ( xt: dir -- )
       <fat32-dir> class-size
       [: { dir }
-        4 pick 4 pick root-path? if
+        2over root-path? if
           dir swap root-dir@
         else
           dir swap current-dir@
