@@ -26,6 +26,11 @@
 <p>( – )</p>
 <p>Current filesystem not set exception.</p>
 </section>
+<section id="x-current-path-too-long">
+<h3><code class="docutils literal notranslate"><span class="pre">x-current-path-too-long</span></code></h3>
+<p>( – )</p>
+<p>Current path is too long (i.e. longer than 256 bytes)</p>
+</section>
 <section id="x-include-stack-overflow">
 <h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code></h3>
 <p>( – )</p>
@@ -40,6 +45,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">current-fs&#64;</span></code></h3>
 <p>( – fs )</p>
 <p>Get the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+</section>
+<section id="current-path">
+<h3><code class="docutils literal notranslate"><span class="pre">current-path!</span></code></h3>
+<p>( addr bytes – )</p>
+<p>Set the current path for the current FAT32 filesystem.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">current-path&#64;</span></code></h3>
+<p>( – addr bytes )</p>
+<p>Get the current path for the current FAT32 filesystem.</p>
 </section>
 <section id="init-simple-fat32">
 <h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code></h3>

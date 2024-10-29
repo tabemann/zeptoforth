@@ -4,6 +4,8 @@ zeptoforth includes FAT32 filesystem support combined with MBR partition table s
 
 Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with `close-file` and directories need to be closed with `close-dir`, followed by being destroyed with `destroy`, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.
 
+There is a concept of a current directory for a given task. By default all tasks share the same current directory, and if the current directory is changed for one of them it is changed for all of them. However, if `with-current-dir` is called the current directory is only changed within the called xt, temporarily disconnecting it from the shared current directory. (Note that if a new task is started from within that xt, it will then share a current directory with the task in which it was set until the original xt exits.) Note that for filesystems other than that for which the current directory is set or if no current directory is set the current directory is treated as being identical as the root directory
+
 ### `fat32`
 
 The `fat32` module contains the following words:
@@ -111,6 +113,11 @@ Seek from the current position in a file
 ##### `seek-end`
 ( -- whence )
 
+##### `root-path?`
+( addr bytes -- root-path? )
+
+Get whether a path is a root path.
+
 ##### `<mbr>`
 
 The master boot record class. This class is used to read a partition entry from for initializing a FAT32 filesystem.
@@ -180,7 +187,12 @@ The `<base-fat32-fs>` class includes the following methods, which are implemente
 ##### `root-dir@`
 ( dir fs -- )
 
-Initialize a root directory of a FAT32 filesystem; the directory object need not be initialized already, but if it is no harm will result.
+Initialize a root directory of a FAT32 filesystem; the directory object must not be initialized already.
+
+##### `current-dir@`
+( dir fs -- )
+
+Initialize a current directory of a FAT32 filesystem for the current task; the directory object must not be initialized already.
 
 ##### `with-root-path`
 ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
@@ -243,6 +255,11 @@ Construct an instance of `<fat32-file>` with the FAT32 filesystem *fs*.
 
 The `<fat32-file>` class includes the following methods:
 
+##### `clone-file`
+( new-file file -- )
+
+Create a new file object identical to an already open file object. Note that the new file object must not have been instantiated already.
+
 ##### `close-file`
 ( file -- )
 
@@ -283,6 +300,16 @@ Get the current offset in a file.
 
 Get the size of a file.
 
+##### `change-current-dir`
+( dir -- )
+
+Set the current directory for the current task and all tasks which share a current directory with that task
+
+##### `with-current-dir`
+( dir xt -- )
+
+Set the current directory for the current task within an xt, restoring it afterwards even if an exception is raised.
+
 ##### `<fat32-dir>`
 
 The FAT32 directory class.
@@ -295,6 +322,11 @@ The `<fat32-dir>` class includes the following constructor:
 Construct an instance of `<fat32-dir>` with the FAT32 filesystem *fs*.
 
 The `<fat32-dir>` class includes the following methods:
+
+##### `clone-dir`
+( new-dir dir -- )
+
+Create a new directory object identical to an already open directory object. Note that the new directory object must not have been instantiated already.
 
 ##### `close-dir`
 ( dir -- )
@@ -359,12 +391,12 @@ Read an entry from a directory, and return whether an entry was read.
 ##### `create-file`
 ( c-addr u new-file dir -- )
 
-Create a file. Note that *new-file* need not be initialized prior to use, but no harm is done if it is.
+Create a file. Note that *new-file* must not be initialized prior to use.
     
 ##### `open-file`
 ( c-addr u opened-file dir -- )
 
-Open a file. Note that *opened-file* need not be initialized prior to use, but no harm is done if it is.
+Open a file. Note that *opened-file* must not be initialized prior to use.
     
 ##### `remove-file`
 ( c-addr u dir -- )
@@ -374,12 +406,12 @@ Remove a file.
 ##### `create-dir`
 ( c-addr u new-dir dir -- )
 
-Create a directory. Note that *new-dir* need not be initialized prior to use, but no harm is done if it is.
+Create a directory. Note that *new-dir* must not be initialized prior to use.
     
 ##### `open-dir`
 ( c-addr u opened-dir dir -- )
 
-Open a directory. Note that *opened-dir* need not be initialized prior to use, but no harm is done if it is.
+Open a directory. Note that *opened-dir* must not be initialized prior to use.
     
 ##### `remove-dir`
 ( c-addr u dir -- )

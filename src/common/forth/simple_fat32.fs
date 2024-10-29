@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,8 @@ begin-module simple-fat32
     
     :noname ( dir fs -- ) simple-fat32-fs root-dir@ ; define root-dir@
 
+    :noname ( dir fs -- ) simple-fat32-fs current-dir@ ; define current-dir@
+    
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
       simple-fat32-fs with-root-path
     ; define with-root-path
@@ -105,6 +107,8 @@ begin-module simple-fat32
     ; define write-through@
     
     :noname ( fs -- ) simple-fat32-fs flush ; define flush
+
+    :noname ( fs -- fs' ) simple-fat32-fs ; define real-fs@
     
   end-implement
 

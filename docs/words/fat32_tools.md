@@ -13,6 +13,11 @@ The `fat32-tools` module contains the following words:
 
 Current filesystem not set exception.
 
+##### `x-current-path-too-long`
+( -- )
+
+Current path is too long (i.e. longer than 256 bytes)
+
 ##### `x-include-stack-overflow`
 ( -- )
 
@@ -27,6 +32,16 @@ Set the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-
 ( -- fs )
 
 Get the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-fs>` in the `fat32` module.
+
+##### `current-path!`
+( addr bytes -- )
+
+Set the current path for the current FAT32 filesystem.
+
+##### `current-path@`
+( -- addr bytes )
+
+Get the current path for the current FAT32 filesystem.
 
 ##### `init-simple-fat32`
 ( write-through sck-pin tx-pin rx-pin cs-pin spi-device -- )

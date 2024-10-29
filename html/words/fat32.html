@@ -40,6 +40,7 @@
 <h1>FAT32 Support<a class="headerlink" href="#fat32-support" title="Permalink to this heading">¶</a></h1>
 <p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
 <p>Note that, prior to zeptoforth 1.7.0, files and directories did not need closing; it was merely up to the user to not carry out operations such as removing them and then carrying out other operations on them afterwards. This has changed; now files need to be closed with <code class="docutils literal notranslate"><span class="pre">close-file</span></code> and directories need to be closed with <code class="docutils literal notranslate"><span class="pre">close-dir</span></code>, followed by being destroyed with <code class="docutils literal notranslate"><span class="pre">destroy</span></code>, once one is done with them. Not doing so may result in undefined behavior, particularly if the space they occupied in RAM is reused afterwards.</p>
+<p>There is a concept of a current directory for a given task. By default all tasks share the same current directory, and if the current directory is changed for one of them it is changed for all of them. However, if <code class="docutils literal notranslate"><span class="pre">with-current-dir</span></code> is called the current directory is only changed within the called xt, temporarily disconnecting it from the shared current directory. (Note that if a new task is started from within that xt, it will then share a current directory with the task in which it was set until the original xt exits.) Note that for filesystems other than that for which the current directory is set or if no current directory is set the current directory is treated as being identical as the root directory</p>
 <section id="fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code><a class="headerlink" href="#fat32" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module contains the following words:</p>
@@ -147,6 +148,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">seek-end</span></code><a class="headerlink" href="#seek-end" title="Permalink to this heading">¶</a></h3>
 <p>( – whence )</p>
 </section>
+<section id="root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">root-path?</span></code><a class="headerlink" href="#root-path" title="Permalink to this heading">¶</a></h3>
+<p>( addr bytes – root-path? )</p>
+<p>Get whether a path is a root path.</p>
+</section>
 <section id="mbr">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;mbr&gt;</span></code><a class="headerlink" href="#mbr" title="Permalink to this heading">¶</a></h3>
 <p>The master boot record class. This class is used to read a partition entry from for initializing a FAT32 filesystem.</p>
@@ -212,7 +218,12 @@
 <section id="root-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">root-dir&#64;</span></code><a class="headerlink" href="#root-dir" title="Permalink to this heading">¶</a></h3>
 <p>( dir fs – )</p>
-<p>Initialize a root directory of a FAT32 filesystem; the directory object need not be initialized already, but if it is no harm will result.</p>
+<p>Initialize a root directory of a FAT32 filesystem; the directory object must not be initialized already.</p>
+</section>
+<section id="current-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">current-dir&#64;</span></code><a class="headerlink" href="#current-dir" title="Permalink to this heading">¶</a></h3>
+<p>( dir fs – )</p>
+<p>Initialize a current directory of a FAT32 filesystem for the current task; the directory object must not be initialized already.</p>
 </section>
 <section id="with-root-path">
 <h3><code class="docutils literal notranslate"><span class="pre">with-root-path</span></code><a class="headerlink" href="#with-root-path" title="Permalink to this heading">¶</a></h3>
@@ -272,6 +283,11 @@
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> class includes the following methods:</p>
 </section>
+<section id="clone-file">
+<h3><code class="docutils literal notranslate"><span class="pre">clone-file</span></code><a class="headerlink" href="#clone-file" title="Permalink to this heading">¶</a></h3>
+<p>( new-file file – )</p>
+<p>Create a new file object identical to an already open file object. Note that the new file object must not have been instantiated already.</p>
+</section>
 <section id="close-file">
 <h3><code class="docutils literal notranslate"><span class="pre">close-file</span></code><a class="headerlink" href="#close-file" title="Permalink to this heading">¶</a></h3>
 <p>( file – )</p>
@@ -312,6 +328,16 @@
 <p>( file – bytes )</p>
 <p>Get the size of a file.</p>
 </section>
+<section id="change-current-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">change-current-dir</span></code><a class="headerlink" href="#change-current-dir" title="Permalink to this heading">¶</a></h3>
+<p>( dir – )</p>
+<p>Set the current directory for the current task and all tasks which share a current directory with that task</p>
+</section>
+<section id="with-current-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">with-current-dir</span></code><a class="headerlink" href="#with-current-dir" title="Permalink to this heading">¶</a></h3>
+<p>( dir xt – )</p>
+<p>Set the current directory for the current task within an xt, restoring it afterwards even if an exception is raised.</p>
+</section>
 <section id="fat32-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code><a class="headerlink" href="#fat32-dir" title="Permalink to this heading">¶</a></h3>
 <p>The FAT32 directory class.</p>
@@ -322,6 +348,11 @@
 <p>( fs file – )</p>
 <p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="clone-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">clone-dir</span></code><a class="headerlink" href="#clone-dir" title="Permalink to this heading">¶</a></h3>
+<p>( new-dir dir – )</p>
+<p>Create a new directory object identical to an already open directory object. Note that the new directory object must not have been instantiated already.</p>
 </section>
 <section id="close-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">close-dir</span></code><a class="headerlink" href="#close-dir" title="Permalink to this heading">¶</a></h3>
@@ -386,12 +417,12 @@
 <section id="create-file">
 <h3><code class="docutils literal notranslate"><span class="pre">create-file</span></code><a class="headerlink" href="#create-file" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u new-file dir – )</p>
-<p>Create a file. Note that <em>new-file</em> need not be initialized prior to use, but no harm is done if it is.</p>
+<p>Create a file. Note that <em>new-file</em> must not be initialized prior to use.</p>
 </section>
 <section id="open-file">
 <h3><code class="docutils literal notranslate"><span class="pre">open-file</span></code><a class="headerlink" href="#open-file" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u opened-file dir – )</p>
-<p>Open a file. Note that <em>opened-file</em> need not be initialized prior to use, but no harm is done if it is.</p>
+<p>Open a file. Note that <em>opened-file</em> must not be initialized prior to use.</p>
 </section>
 <section id="remove-file">
 <h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Permalink to this heading">¶</a></h3>
@@ -401,12 +432,12 @@
 <section id="create-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">create-dir</span></code><a class="headerlink" href="#create-dir" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u new-dir dir – )</p>
-<p>Create a directory. Note that <em>new-dir</em> need not be initialized prior to use, but no harm is done if it is.</p>
+<p>Create a directory. Note that <em>new-dir</em> must not be initialized prior to use.</p>
 </section>
 <section id="open-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">open-dir</span></code><a class="headerlink" href="#open-dir" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr u opened-dir dir – )</p>
-<p>Open a directory. Note that <em>opened-dir</em> need not be initialized prior to use, but no harm is done if it is.</p>
+<p>Open a directory. Note that <em>opened-dir</em> must not be initialized prior to use.</p>
 </section>
 <section id="remove-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">remove-dir</span></code><a class="headerlink" href="#remove-dir" title="Permalink to this heading">¶</a></h3>
@@ -727,6 +758,7 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>

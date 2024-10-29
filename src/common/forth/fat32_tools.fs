@@ -31,6 +31,9 @@ begin-module fat32-tools
   
   \ Filesystem not set exception
   : x-fs-not-set ( -- ) ." filesystem not set" cr ;
+
+  \ Current path too long
+  : x-current-path-too-long ( -- ) ." current path is too long" cr ;
   
   \ Include stack overflow exception
   : x-include-stack-overflow ( -- ) ." include stack overflow" cr ;
@@ -63,9 +66,6 @@ begin-module fat32-tools
 
     end-structure
     
-    \ The current filesystem
-    variable current-fs
-
     \ The filesystem lock
     lock-size buffer: fs-lock
     
@@ -208,40 +208,6 @@ begin-module fat32-tools
       ;] with-aligned-allot
     ;
 
-    \ List a root direcotry
-    : list-root ( -- )
-      <fat32-dir> class-size [:
-        dup { dir }
-        dup current-fs @ root-dir@ list-dir
-        dir close-dir
-        dir destroy
-      ;] with-aligned-allot
-    ;
-    
-    \ List a path directory
-    : list-path ( c-addr u -- )
-      <fat32-dir> class-size [:
-        dup { dir }
-        -rot [:
-          3 pick swap open-dir
-        ;] current-fs @ with-root-path
-        list-dir
-        dir close-dir
-        dir destroy
-      ;] with-aligned-allot
-    ;
-
-    \ Strip the leading separators from a path
-    : strip-leading-separators ( c-addr u -- c-addr' u' )
-      begin
-        dup 0<> if
-          over c@ [char] / = if swap 1+ swap 1- false else true then
-        else
-          true
-        then
-      until
-    ;
-
     \ Convert newlines in a read buffer; note that the original buffer is
     \ read-buffer-size bytes, and the data in the buffer is at most half its
     \ size
@@ -267,23 +233,84 @@ begin-module fat32-tools
         src-addr 0
       then
     ;
+
+    \ The current directory
+    <fat32-dir> class-size buffer: current-dir
+
+    \ Whether the current directory has been initialized
+    variable current-dir-inited?
+
+    \ Current path size
+    256 constant current-path-size
+
+    \ Current path
+    current-path-size buffer: current-path-buf
+
+    \ Current path length
+    variable current-path-len
     
     \ Initialize FAT32 including
     : init-fat32-tools ( -- )
       fs-lock init-lock
-      0 current-fs !
+      false current-dir-inited? !
       0 include-buffer-content-len !
       0 frame-depth !
       0 echo-enabled !
+      s" /" dup current-path-len ! current-path-buf swap move
     ;
   
   end-module> import
   
   \ Set the current filesystem
-  : current-fs! ( fs -- ) current-fs ! ;
+  : current-fs! ( fs -- )
+    current-dir-inited? @ if
+      current-dir dir-fs@ over <> if
+        current-dir close-dir
+        current-dir destroy
+        current-dir swap root-dir@
+        s" /" dup current-path-len ! current-path-buf swap move
+      else
+        drop
+      then
+    else
+      current-dir swap root-dir@
+      true current-dir-inited? !
+      s" /" dup current-path-len ! current-path-buf swap move
+    then
+  ;
   
   \ Get the current filesystem
-  : current-fs@ ( fs -- ) current-fs @ ;
+  : current-fs@ ( fs -- )
+    current-dir-inited? @ if current-dir dir-fs@ else 0 then
+  ;
+
+  \ Set the current path
+  : current-path! ( addr bytes -- )
+    [: { addr bytes }
+      current-fs@ { fs }
+      fs averts x-fs-not-set
+      bytes current-path-size < averts x-current-path-too-long
+      addr bytes [:
+        current-dir-inited? @ if
+          current-dir close-dir
+          current-dir destroy
+        then
+        current-dir swap clone-dir
+        true current-dir-inited? !
+      ;] fs with-open-dir-at-root-path
+      current-dir change-current-dir
+      addr current-path-buf bytes move
+      bytes current-path-len !
+    ;] fs-lock with-lock
+  ;
+
+  \ Get the current path
+  : current-path@ ( -- addr bytes )
+    [:
+      current-fs@ averts x-fs-not-set
+      current-path-buf current-path-len @
+    ;] fs-lock with-lock
+  ;
 
   \ Enable echo
   : enable-echo ( -- ) 1 echo-enabled +! ;
@@ -315,10 +342,10 @@ begin-module fat32-tools
   
   \ Load a file
   : load-file ( file -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     frame-depth @ max-include-depth < averts x-include-stack-overflow
     [:
-      include-stack-next@ frame-file <fat32-file> class-size move
+      include-stack-next@ frame-file swap clone-file
       include-stack-next@ frame-file tell-file include-stack-next@
       frame-offset !
       1 frame-depth +!
@@ -330,7 +357,7 @@ begin-module fat32-tools
   
   \ Include a file
   : included ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     frame-depth @ max-include-depth < averts x-include-stack-overflow
     [:
       [:
@@ -351,38 +378,37 @@ begin-module fat32-tools
 
   \ List a directory
   : list-dir ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
-    strip-leading-separators
+    current-fs@ averts x-fs-not-set
     [:
-      dup 0= if 2drop list-root else list-path then
+      ['] list-dir current-fs@ with-open-dir-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Create a file
   : create-file ( data-addr data-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         write-file drop
-        current-fs @ flush
-      ;] current-fs @ with-create-file-at-root-path
+        current-fs@ flush
+      ;] current-fs@ with-create-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Create a directory
   : create-dir ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         drop
-        current-fs @ flush
-      ;] current-fs @ with-create-dir-at-root-path
+        current-fs@ flush
+      ;] current-fs@ with-create-dir-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Copy a file
   : copy-file ( path-addr path-u new-path-addr new-path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       2swap [:
         -rot [:
@@ -395,52 +421,52 @@ begin-module fat32-tools
             then
           until
           2drop
-          current-fs @ flush
-        ;] current-fs @ with-create-file-at-root-path
-      ;] current-fs @ with-open-file-at-root-path
+          current-fs@ flush
+        ;] current-fs@ with-create-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Append to a file
   : append-file ( data-addr data-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [: { file }
         0 seek-end file seek-file
         file write-file drop
-        current-fs @ flush
-      ;] current-fs @ with-open-file-at-root-path
+        current-fs@ flush
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Write data at an offset in a file without truncating it
   : write-file-window ( data-addr data-u offset-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [: { file }
         seek-set file seek-file
         file write-file drop
-        current-fs @ flush
-      ;] current-fs @ with-open-file-at-root-path
+        current-fs@ flush
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Overwrite a file and then truncate it afterwards
   : write-file ( data-addr data-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [: { file }
         file write-file drop
-        current-fs @ flush
+        current-fs@ flush
         file truncate-file
-        current-fs @ flush
-      ;] current-fs @ with-open-file-at-root-path
+        current-fs@ flush
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ List a file with newline conversions
   : list-file ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         begin
@@ -451,13 +477,13 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
   \ List the contents of a window in a file with newline conversions
   : list-file-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -473,13 +499,13 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a file to the console as raw data
   : dump-file-raw ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         begin
@@ -490,13 +516,13 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
   \ Dump the contents of a window in a file to the console as raw data
   : dump-file-raw-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -512,13 +538,13 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a file to the console as bytes plus ASCII
   : dump-file ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         cr
@@ -532,13 +558,13 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a window in a file to the console as bytes plus ASCII
   : dump-file-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -556,13 +582,13 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a file to the console as ASCII
   : dump-file-ascii ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         cr
@@ -576,13 +602,13 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
   \ Dump the contents of a window in a file to the console as ASCII
   : dump-file-ascii-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -600,13 +626,13 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a file to the console as 16-bit values and ASCII
   : dump-file-halfs ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         cr
@@ -620,14 +646,14 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a window in a file to the console as 16-bit values
   \ and ASCII
   : dump-file-halfs-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -645,13 +671,13 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a file to the console as 32-bit values and ASCII
   : dump-file-cells ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         cr
@@ -665,14 +691,14 @@ begin-module fat32-tools
           then
         until
         drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Dump the contents of a window in  file to the console as 32-bit values
   \ and ASCII
   : dump-file-cells-window ( offset-u length-u path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
@@ -690,115 +716,115 @@ begin-module fat32-tools
           then
         until
         2drop
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Read a file, from an offset from the start of the file, to a fixed-sized
   \ buffer and return the length actually read
   : read-file ( buffer-addr buffer-u offset-u path-addr path-u -- read-u )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         { file }
         swap seek-set file seek-file
         file read-file
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Get the size of a file
   : file-size@ ( path-addr path-u -- size-u )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       [:
         file-size@
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
   \ Remove a file
   : remove-file ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
-      ['] remove-file current-fs @ with-root-path
-      current-fs @ flush
+      ['] remove-file current-fs@ with-root-path
+      current-fs@ flush
     ;] fs-lock with-lock
   ;
 
   \ Remove a directory
   : remove-dir ( path-addr path-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
-      ['] remove-dir current-fs @ with-root-path
-      current-fs @ flush
+      ['] remove-dir current-fs@ with-root-path
+      current-fs@ flush
     ;] fs-lock with-lock
   ;
 
   \ Rename a file
   : rename ( path-addr path-u new-name-addr new-name-u -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     2swap
     [:
-      ['] rename current-fs @ with-root-path
-      current-fs @ flush
+      ['] rename current-fs@ with-root-path
+      current-fs@ flush
     ;] fs-lock with-lock
   ;
 
   \ Get whether a file or directory at a given path exists
   : exists? ( path-addr path-u -- exists? )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
-      current-fs @ root-path-exists?
+      current-fs@ root-path-exists?
     ;] fs-lock with-lock
   ;
 
   \ Get whether a directory entry is a file
   : file? ( path-addr path-u -- file? )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
-      ['] file? current-fs @ with-root-path
+      ['] file? current-fs@ with-root-path
     ;] fs-lock with-lock
   ;
 
   \ Get whether a directory entry is a directory
   : dir? ( path-addr path-u -- dir? )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
-      ['] dir? current-fs @ with-root-path
+      ['] dir? current-fs@ with-root-path
     ;] fs-lock with-lock
   ;
 
   \ Set the current input to a file within an xt
   : with-file-input ( path-addr path-u xt -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       -rot
       [:
         swap with-file-input
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
   
   \ Set the current output to a file within an xt
   : with-file-output ( path-addr path-u xt -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       -rot
       [:
         swap with-file-output
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 
   \ Set the current error output to a file within an xt
   : with-file-error-output ( path-addr path-u xt -- )
-    current-fs @ averts x-fs-not-set
+    current-fs@ averts x-fs-not-set
     [:
       -rot
       [:
         swap with-file-error-output
-      ;] current-fs @ with-open-file-at-root-path
+      ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock
   ;
 

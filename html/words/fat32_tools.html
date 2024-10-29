@@ -48,6 +48,11 @@
 <p>( – )</p>
 <p>Current filesystem not set exception.</p>
 </section>
+<section id="x-current-path-too-long">
+<h3><code class="docutils literal notranslate"><span class="pre">x-current-path-too-long</span></code><a class="headerlink" href="#x-current-path-too-long" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Current path is too long (i.e. longer than 256 bytes)</p>
+</section>
 <section id="x-include-stack-overflow">
 <h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code><a class="headerlink" href="#x-include-stack-overflow" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
@@ -62,6 +67,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">current-fs&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>( – fs )</p>
 <p>Get the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+</section>
+<section id="current-path">
+<h3><code class="docutils literal notranslate"><span class="pre">current-path!</span></code><a class="headerlink" href="#current-path" title="Permalink to this heading">¶</a></h3>
+<p>( addr bytes – )</p>
+<p>Set the current path for the current FAT32 filesystem.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">current-path&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<p>( – addr bytes )</p>
+<p>Get the current path for the current FAT32 filesystem.</p>
 </section>
 <section id="init-simple-fat32">
 <h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code><a class="headerlink" href="#init-simple-fat32" title="Permalink to this heading">¶</a></h3>
@@ -320,6 +335,7 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
