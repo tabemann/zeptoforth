@@ -130,7 +130,7 @@ begin-module fat32
     : do-current-dir-init ( -- )
       0 parent-current-dir-var !
       parent-current-dir-var current-dir-ref !
-      task-init-hook @ saved-task-init-hook
+      task-init-hook @ saved-task-init-hook !
       [: { new-task }
         current-dir-ref @ new-task ['] current-dir-ref for-task!
         saved-task-init-hook ?dup if new-task swap execute then
