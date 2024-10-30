@@ -1907,10 +1907,8 @@ begin-module fat32
             swap ( c-addr' u' index c-addr'' u'' dir' dir )
             2over 2 pick exists? if ( c-addr' u' index c-addr'' u'' dir' dir )
               over { dir }
-              [: over { dir }
-                open-dir ( c-addr' u' index )
-                1+ tuck - -rot + swap dir path-exists? ( exists? )
-              ;] try
+              open-dir ( c-addr' u' index )
+              1+ tuck - -rot + swap dir ['] path-exists? try
               dir close-dir
               dir destroy
               ?raise
@@ -1929,11 +1927,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-file> class-size [: ( xt c-addr u dir' file )
           dup { file }
-          [:
-            dup { file }
-            swap create-file
-            file swap execute
-          ;] try
+          swap create-file
+          file swap try
           file close-file
           file destroy
           ?raise
@@ -1946,11 +1941,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-file> class-size [: ( xt c-addr u dir' file )
           dup { file }
-          [:
-            dup { file }
-            swap open-file
-            file swap execute
-          ;] try
+          swap open-file
+          file swap try
           file close-file
           file destroy
           ?raise
@@ -1963,11 +1955,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
           dup { dir }
-          [:
-            dup { dir }
-            swap create-dir
-            dir swap execute
-          ;] try
+          swap create-dir
+          dir swap try
           dir close-dir
           dir destroy
           ?raise
@@ -1980,11 +1969,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
           dup { dir }
-          [:
-            dup { dir }
-            swap open-dir
-            dir swap execute
-          ;] try
+          swap open-dir
+          dir swap try
           dir close-dir
           dir destroy
           ?raise
@@ -2031,7 +2017,11 @@ begin-module fat32
       dup >r
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
-      swap do-create-file
+      swap dup >r ['] do-create-file try ?dup if
+        r> destroy rdrop ?raise
+      else
+        rdrop
+      then
       r> update-dir-date-time
     ; define create-file
     
@@ -2039,7 +2029,11 @@ begin-module fat32
       dup dir-open @ averts x-not-open
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
-      swap do-open-file
+      swap dup >r ['] do-open-file try ?dup if
+        r> destroy ?raise
+      else
+        rdrop
+      then
     ; define open-file
         
     :noname ( c-addr u dir -- )
@@ -2062,7 +2056,11 @@ begin-module fat32
       dup >r
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
-      swap do-create-dir
+      swap dup >r ['] do-create-dir try ?dup if
+        r> destroy rdrop ?raise
+      else
+        rdrop
+      then
       r> update-dir-date-time
     ; define create-dir
         
@@ -2070,7 +2068,11 @@ begin-module fat32
       dup dir-open @ averts x-not-open
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
-      swap do-open-dir
+      swap dup >r ['] do-open-dir try ?dup if
+        r> destroy ?raise
+      else
+        rdrop
+      then
     ; define open-dir
         
     :noname ( c-addr u dir -- )
