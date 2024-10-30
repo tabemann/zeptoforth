@@ -1152,7 +1152,18 @@ begin-module fat32
     ; define with-root-path
 
     :noname ( c-addr u fs -- exists? )
-      ['] path-exists? swap with-op-at-root-path
+      <fat32-dir> class-size
+      [: { dir }
+        2 pick 2 pick root-path? if
+          dir swap root-dir@
+        else
+          dir swap current-dir@
+        then
+        dir ['] path-exists? try
+        dir close-dir
+        dir destroy
+        ?raise
+      ;] with-aligned-allot
     ; define root-path-exists?
     
     :noname ( c-addr u xt fs -- ) ( xt: file -- )
@@ -1870,9 +1881,10 @@ begin-module fat32
             dup { nested-dir }
             ( c-addr' u' index c-addr'' u'' dir xt dir' )
             -rot >r over >r open-dir ( c-addr' u' index )
-            1+ tuck - -rot + swap 2r> swap with-path ( )
+            1+ tuck - -rot + swap 2r> swap ['] with-path try ( )
             nested-dir close-dir
             nested-dir destroy
+            ?raise
           ;] with-aligned-allot
         then
       else ( c-addr' u' index )
