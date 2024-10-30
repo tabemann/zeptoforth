@@ -140,11 +140,6 @@ begin-module fat32
     
   end-module> import
 
-  \ Get whether a path is a root path
-  : root-path? ( addr bytes -- root-path? )
-    0> if c@ [char] / = else false then
-  ;
-    
   \ Master boot record class
   <object> begin-class <mbr>
   

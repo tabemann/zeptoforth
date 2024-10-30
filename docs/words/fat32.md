@@ -113,11 +113,6 @@ Seek from the current position in a file
 ##### `seek-end`
 ( -- whence )
 
-##### `root-path?`
-( addr bytes -- root-path? )
-
-Get whether a path is a root path.
-
 ##### `<mbr>`
 
 The master boot record class. This class is used to read a partition entry from for initializing a FAT32 filesystem.
