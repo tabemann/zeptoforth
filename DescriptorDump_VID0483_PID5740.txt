@@ -1,0 +1,191 @@
+Information for device USB\Vendor_0483_Product_5740:
+
+------------------------------
+Connection Information:
+------------------------------
+Device current bus speed: FullSpeed
+Device supports USB 1.1 specification
+Device supports USB 2.0 specification
+Device address: 0x0004
+Current configuration value: 0x01
+Number of open pipes: 3
+
+
+------------------------------
+Device Descriptor:
+------------------------------
+0x12	bLength
+0x01	bDescriptorType
+0x0200	bcdUSB
+0x02	bDeviceClass      (Communication Device Class)
+0x00	bDeviceSubClass   
+0x00	bDeviceProtocol   
+0x40	bMaxPacketSize0   (64 bytes)
+0x0483	idVendor
+0x5740	idProduct
+0x0200	bcdDevice
+0x00	iManufacturer
+0x00	iProduct     
+0x00	iSerialNumber
+0x01	bNumConfigurations
+Hex dump: 
+0x12 0x01 0x00 0x02 0x02 0x00 0x00 0x40 0x83 0x04 
+0x40 0x57 0x00 0x02 0x00 0x00 0x00 0x01 
+
+
+-------------------------
+Configuration Descriptor:
+-------------------------
+0x09	bLength
+0x02	bDescriptorType
+0x0043	wTotalLength   (67 bytes)
+0x02	bNumInterfaces
+0x01	bConfigurationValue
+0x00	iConfiguration
+0xC0	bmAttributes   (Self-powered Device)
+0x32	bMaxPower      (100 mA)
+Hex dump: 
+0x09 0x02 0x43 0x00 0x02 0x01 0x00 0xC0 0x32 
+
+Interface Descriptor:
+------------------------------
+0x09	bLength
+0x04	bDescriptorType
+0x00	bInterfaceNumber
+0x00	bAlternateSetting
+0x01	bNumEndPoints
+0x02	bInterfaceClass      (Communication Device Class)
+0x02	bInterfaceSubClass   (Abstract Control Model - ACM)
+0x00	bInterfaceProtocol   
+0x00	iInterface
+Hex dump: 
+0x09 0x04 0x00 0x00 0x01 0x02 0x02 0x00 0x00 
+
+CDC Header Functional Descriptor:
+------------------------------
+0x05	bFunctionalLength
+0x24	bDescriptorType
+0x00	bDescriptorSubtype
+0x0110	bcdCDC
+Hex dump: 
+0x05 0x24 0x00 0x10 0x01 
+
+CDC Call Management Functional Descriptor:
+------------------------------
+0x05	bFunctionalLength
+0x24	bDescriptorType
+0x01	bDescriptorSubtype
+0x00	bmCapabilities
+0x01	bDataInterface
+Hex dump: 
+0x05 0x24 0x01 0x00 0x01 
+
+CDC Abstract Control Management Functional Descriptor:
+------------------------------
+0x04	bFunctionalLength
+0x24	bDescriptorType
+0x02	bDescriptorSubtype
+0x02	bmCapabilities
+Hex dump: 
+0x04 0x24 0x02 0x02 
+
+CDC Union Functional Descriptor:
+------------------------------
+0x05	bFunctionalLength
+0x24	bDescriptorType
+0x06	bDescriptorSubtype
+0x00	bControlInterface
+0x01	bSubordinateInterface(0)
+Hex dump: 
+0x05 0x24 0x06 0x00 0x01 
+
+Endpoint Descriptor:
+------------------------------
+0x07	bLength
+0x05	bDescriptorType
+0x82	bEndpointAddress  (IN endpoint 2)
+0x03	bmAttributes      (Transfer: Interrupt / Synch: None / Usage: Data)
+0x0008	wMaxPacketSize    (1 x 8 bytes)
+0xFF	bInterval         (255 frames)
+Hex dump: 
+0x07 0x05 0x82 0x03 0x08 0x00 0xFF 
+
+Interface Descriptor:
+------------------------------
+0x09	bLength
+0x04	bDescriptorType
+0x01	bInterfaceNumber
+0x00	bAlternateSetting
+0x02	bNumEndPoints
+0x0A	bInterfaceClass      (CDC Data)
+0x00	bInterfaceSubClass   
+0x00	bInterfaceProtocol   
+0x00	iInterface
+Hex dump: 
+0x09 0x04 0x01 0x00 0x02 0x0A 0x00 0x00 0x00 
+
+Endpoint Descriptor:
+------------------------------
+0x07	bLength
+0x05	bDescriptorType
+0x01	bEndpointAddress  (OUT endpoint 1)
+0x02	bmAttributes      (Transfer: Bulk / Synch: None / Usage: Data)
+0x0040	wMaxPacketSize    (64 bytes)
+0x00	bInterval         
+Hex dump: 
+0x07 0x05 0x01 0x02 0x40 0x00 0x00 
+
+Endpoint Descriptor:
+------------------------------
+0x07	bLength
+0x05	bDescriptorType
+0x81	bEndpointAddress  (IN endpoint 1)
+0x02	bmAttributes      (Transfer: Bulk / Synch: None / Usage: Data)
+0x0040	wMaxPacketSize    (64 bytes)
+0x00	bInterval         
+Hex dump: 
+0x07 0x05 0x81 0x02 0x40 0x00 0x00 
+
+Microsoft OS Descriptor:
+------------------------------
+0x00	bLength
+0x00	bDescriptorType
+Hex dump: 
+
+
+--------------------------------
+String Descriptor Table
+--------------------------------
+Index  LANGID  String
+0x00   0x0000  
+Hex dump: 
+
+------------------------------
+
+Whole Device Descriptor as hex dump: 
+0x12, 0x01, 0x00, 0x02, 0x02, 0x00, 0x00, 0x40, 0x83, 0x04, 
+0x40, 0x57, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01
+
+Whole Configuration Descriptor as hex dump: 
+0x09, 0x02, 0x43, 0x00, 0x02, 0x01, 0x00, 0xC0, 0x32, 0x09, 
+0x04, 0x00, 0x00, 0x01, 0x02, 0x02, 0x00, 0x00, 0x05, 0x24, 
+0x00, 0x10, 0x01, 0x05, 0x24, 0x01, 0x00, 0x01, 0x04, 0x24, 
+0x02, 0x02, 0x05, 0x24, 0x06, 0x00, 0x01, 0x07, 0x05, 0x82, 
+0x03, 0x08, 0x00, 0xFF, 0x09, 0x04, 0x01, 0x00, 0x02, 0x0A, 
+0x00, 0x00, 0x00, 0x07, 0x05, 0x01, 0x02, 0x40, 0x00, 0x00, 
+0x07, 0x05, 0x81, 0x02, 0x40, 0x00, 0x00
+
+Whole unknown Descriptor as hex dump: 
+
+
+------------------------------
+
+Connection path for device: 
+Intel(R) 6 Series/C200 Series Chipset Family USB Enhanced Host Controller - 1C26
+Root Hub
+Generic USB Hub
+USB\Vendor_0483_Product_5740 Port: 1
+
+Running on: Windows 10 or greater (Build Version 19045)
+
+Brought to you by TDD v2.17.0, Feb 23 2021, 14:04:02
