@@ -32,9 +32,6 @@ begin-module fat32-tools
   \ Filesystem not set exception
   : x-fs-not-set ( -- ) ." filesystem not set" cr ;
 
-  \ Current path too long
-  : x-current-path-too-long ( -- ) ." current path is too long" cr ;
-  
   \ Include stack overflow exception
   : x-include-stack-overflow ( -- ) ." include stack overflow" cr ;
   
@@ -240,15 +237,6 @@ begin-module fat32-tools
     \ Whether the current directory has been initialized
     variable current-dir-inited?
 
-    \ Current path size
-    256 constant current-path-size
-
-    \ Current path
-    current-path-size buffer: current-path-buf
-
-    \ Current path length
-    variable current-path-len
-    
     \ Initialize FAT32 including
     : init-fat32-tools ( -- )
       fs-lock init-lock
@@ -256,7 +244,6 @@ begin-module fat32-tools
       0 include-buffer-content-len !
       0 frame-depth !
       0 echo-enabled !
-      s" /" dup current-path-len ! current-path-buf swap move
     ;
   
   end-module> import
@@ -268,14 +255,12 @@ begin-module fat32-tools
         current-dir close-dir
         current-dir destroy
         current-dir swap root-dir@
-        s" /" dup current-path-len ! current-path-buf swap move
       else
         drop
       then
     else
       current-dir swap root-dir@
       true current-dir-inited? !
-      s" /" dup current-path-len ! current-path-buf swap move
     then
   ;
   
@@ -284,12 +269,11 @@ begin-module fat32-tools
     current-dir-inited? @ if current-dir dir-fs@ else 0 then
   ;
 
-  \ Set the current path
-  : current-path! ( addr bytes -- )
+  \ Change the current directory
+  : change-current-dir ( addr bytes -- )
     [: { addr bytes }
       current-fs@ { fs }
       fs averts x-fs-not-set
-      bytes current-path-size < averts x-current-path-too-long
       addr bytes [:
         current-dir-inited? @ if
           current-dir close-dir
@@ -299,16 +283,6 @@ begin-module fat32-tools
         true current-dir-inited? !
       ;] fs with-open-dir-at-root-path
       current-dir change-current-dir
-      addr current-path-buf bytes move
-      bytes current-path-len !
-    ;] fs-lock with-lock
-  ;
-
-  \ Get the current path
-  : current-path@ ( -- addr bytes )
-    [:
-      current-fs@ averts x-fs-not-set
-      current-path-buf current-path-len @
     ;] fs-lock with-lock
   ;
 
