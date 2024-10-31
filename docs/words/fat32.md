@@ -295,12 +295,12 @@ Get the current offset in a file.
 
 Get the size of a file.
 
-##### `change-current-dir`
+##### `change-dir`
 ( dir -- )
 
 Set the current directory for the current task and all tasks which share a current directory with that task
 
-##### `with-current-dir`
+##### `with-dir`
 ( dir xt -- )
 
 Set the current directory for the current task within an xt, restoring it afterwards even if an exception is raised.

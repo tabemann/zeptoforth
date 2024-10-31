@@ -33,7 +33,7 @@ Set the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-
 
 Get the current FAT32 filesystem. This filesystem is a subclass of `<base-fat32-fs>` in the `fat32` module.
 
-##### `change-current-dir`
+##### `change-dir`
 ( addr bytes -- )
 
 Set the current path for the current FAT32 filesystem.

@@ -8278,15 +8278,15 @@
         </navPoint>
         <navPoint id="navPoint1379" playOrder="1307">
           <navLabel>
-            <text>change-current-dir</text>
+            <text>change-dir</text>
           </navLabel>
-          <content src="words/fat32.xhtml#change-current-dir" />  
+          <content src="words/fat32.xhtml#change-dir" />  
         </navPoint>
         <navPoint id="navPoint1380" playOrder="1308">
           <navLabel>
-            <text>with-current-dir</text>
+            <text>with-dir</text>
           </navLabel>
-          <content src="words/fat32.xhtml#with-current-dir" />  
+          <content src="words/fat32.xhtml#with-dir" />  
         </navPoint>
         <navPoint id="navPoint1381" playOrder="1309">
           <navLabel>
@@ -8770,9 +8770,9 @@
         </navPoint>
         <navPoint id="navPoint1461" playOrder="1384">
           <navLabel>
-            <text>change-current-dir</text>
+            <text>change-dir</text>
           </navLabel>
-          <content src="words/fat32_tools.xhtml#change-current-dir" />  
+          <content src="words/fat32_tools.xhtml#change-dir" />  
         </navPoint>
         <navPoint id="navPoint1462" playOrder="1385">
           <navLabel>

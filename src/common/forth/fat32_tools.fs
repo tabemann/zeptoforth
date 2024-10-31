@@ -270,7 +270,7 @@ begin-module fat32-tools
   ;
 
   \ Change the current directory
-  : change-current-dir ( addr bytes -- )
+  : change-dir ( addr bytes -- )
     [: { addr bytes }
       current-fs@ { fs }
       fs averts x-fs-not-set
@@ -282,7 +282,7 @@ begin-module fat32-tools
         current-dir swap clone-dir
         true current-dir-inited? !
       ;] fs with-open-dir-at-root-path
-      current-dir change-current-dir
+      current-dir change-dir
     ;] fs-lock with-lock
   ;
 

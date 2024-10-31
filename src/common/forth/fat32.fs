@@ -1013,11 +1013,11 @@ begin-module fat32
 
   \ Set the current directory for the current task and all tasks which share a
   \ current directory with that task
-  : change-current-dir ( dir -- ) current-dir-ref @ ! ;
+  : change-dir ( dir -- ) current-dir-ref @ ! ;
 
   \ Set the current directory for the current task within an xt, restoring it
   \ afterwards even if an exception is raised
-  : with-current-dir ( dir xt -- )
+  : with-dir ( dir xt -- )
     current-dir-ref @ { saved-current-dir-ref }
     swap { W^ new-current-dir-var }
     new-current-dir-var [: current-dir-ref ! execute ;] try
