@@ -27,7 +27,7 @@ begin-module simple-blocks-fat32
   blk import
   fat32 import
   
-  \ Simple FAT32 filesystem class definition
+  \ Simple blocks FAT32 filesystem class definition
   <base-fat32-fs> begin-class <simple-blocks-fat32-fs>
   
     begin-module simple-blocks-fat32-internal

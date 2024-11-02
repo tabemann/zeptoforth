@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2024 Travis Bemann
 @ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy

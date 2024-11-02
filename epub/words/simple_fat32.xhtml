@@ -17,9 +17,12 @@
   <section id="simple-fat32-support">
 <h1>Simple FAT32 Support</h1>
 <p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards (SD cards greater than or equal to 4 GB in size) in common use cases.</p>
-<p>zeptoforth also includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash.</p>
+<p>zeptoforth also includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-blocks-fat32</span></code> module to simplify the usage of FAT32 filesystems on on-board Quad SPI flash (on RP2040 boards, RP2350 boards, and the STM32F746 DISCOVERY board) in common use cases. Note that prior to initial use a FAT32 filesystem needs to be initialized in the blocks storage in Quad SPI flash.</p>
 <p>The easiest way to accomplish this is by loading with zeptocom.js, <code class="docutils literal notranslate"><span class="pre">utils/codeload3.sh</span></code>, or e4thcom <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code>, which initializes a master boot record and a single partition containing a FAT32 file system if an initialized master boot record does not exist, and compiles code to flash (if it has not already been compiled) which initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> instance and sets it as the current filesystem on bootup.</p>
 <p>This can also be accomplished by loading <code class="docutils literal notranslate"><span class="pre">test/common/init_fat32_test.fs</span></code> and executing <code class="docutils literal notranslate"><span class="pre">init-fat32-test::run-test</span></code>. (This example can be modified to initialize FAT32 filesystems on SDHC/SDXC cards as well.)</p>
+<p>For storing FAT32 filesystems in PSRAM on RP2350 boards with PSRAM, there is the optional <code class="docutils literal notranslate"><span class="pre">&lt;simple-psram-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-psram-fat32</span></code> module. This takes a single constructor parameter, a PSRAM chip select GPIO index for initializing PSRAM with.</p>
+<p>This can be added for the Pimoroni Pico Plus 2 by loading <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> with <code class="docutils literal notranslate"><span class="pre">utils/codeload3.py</span></code>, zeptocom.js, or e4thcom. This file includes a fixed PSRAM chip select GPIO of 47; for other boards this can be adapted to use a different chip select GPIO need be. This file creates a module <code class="docutils literal notranslate"><span class="pre">psram-fat32</span></code> containing a <code class="docutils literal notranslate"><span class="pre">&lt;simple-psram-fat32-fs&gt;</span></code> instance that can be gotten by calling <code class="docutils literal notranslate"><span class="pre">psram-fs&#64;</span></code>.</p>
+<p>Note that PSRAM is always uninitialized on bootup, so a FAT32 filesystem is initialized in PSRAM on each bootup once this optional code is loaded. For this purpose, <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_psram_fat32.fs</span></code> compiles <code class="docutils literal notranslate"><span class="pre">extra/common/init_fat32.fs</span></code> to flash.</p>
 <p>Objects of these classes are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in their constructors and in that writethrough is set/gotten on them directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code>) instance.</p>
 <section id="simple-fat32">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code></h2>
@@ -53,7 +56,7 @@
 <section id="simple-blocks-fat32-fs">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code></h3>
 <p>( – class )</p>
-<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI flash of RP2040 boards and STM32F746 DISCOVERY boards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI flash of RP2040 boards, RP2350 boards, and STM32F746 DISCOVERY boards which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 <p>This class has the following constructor:</p>
 </section>
 <section id="id2">
@@ -71,6 +74,33 @@
 <h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying blocks interface is set to writethrough or not.</p>
+</section>
+</section>
+<section id="simple-psram-fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-psram-fat32</span></code></h2>
+<p>This is an optional module in <code class="docutils literal notranslate"><span class="pre">extra/rp2350/simple_psram_fat32.fs</span></code>, to be manually loaded by the user. Note that usually one would actually load <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> which will load this in turn.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-psram-fat32</span></code> module contains the following words:</p>
+<section id="simple-psram-fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-psram-fat32-fs&gt;</span></code></h3>
+<p>( – class )</p>
+<p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI PSRAM of RP2350 boards such as the Pimoroni Pico Plus 2 which have PSRAM which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+<p>This class has the following constructor:</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( psram-cs-pin fs – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-psram-fat32-fs&gt;</span></code> instance using the PSRAM chip select GPIO <em>psram-cs-pin</em>. Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
+<p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code></h3>
+<p>( writethrough fs – )</p>
+<p>This is a dummy word which is a no-op.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code></h3>
+<p>( fs – writethrough )</p>
+<p>This is a dummy word which is a no-op.</p>
 </section>
 </section>
 </section>
