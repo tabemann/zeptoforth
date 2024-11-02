@@ -75,6 +75,7 @@ Zeptoforth Documentation
    words/expose
    extra/fixed32
    extra/complex_float32
+   extra/inter_fs_copy
    extra/profile
    extra/zeptoed
    extra/display

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Copying Files Between Filesystems</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="copying-files-between-filesystems">
+<h1>Copying Files Between Filesystems</h1>
+<p>An optional mechanism for copying files between filesystems is provided by <code class="docutils literal notranslate"><span class="pre">copy-file-to-fs</span></code> in the <code class="docutils literal notranslate"><span class="pre">inter-fs-copy</span></code> module that can be loaded from <code class="docutils literal notranslate"><span class="pre">extra/common/inter_fs_copy.fs</span></code>. This mechanism creates a new file in the destination filesystem and copies the contents of an existing file in the source filesystem into it. Note that the destination file must not already exist; if it does the user must delete it first.</p>
+<section id="inter-fs-copy">
+<h2><code class="docutils literal notranslate"><span class="pre">inter-fs-copy</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">inter-fs-copy</span></code> module contains the following word:</p>
+<section id="copy-file-to-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">copy-file-to-fs</span></code></h3>
+<p>( src-path-addr src-path-bytes src-fs dest-path-addr dest-path-bytes dest-fs – )</p>
+<p>Copy an existing source file at <em>src-path-addr</em>/<em>src-path-bytes</em> in the filesystem <em>src-fs</em> into a newly created destination file at <em>dest-path-addr</em>/<em>dest-path-bytes</em> in the filesystem <em>dest-fs</em>. The destination file must not already exist.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
