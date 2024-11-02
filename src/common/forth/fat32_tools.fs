@@ -443,6 +443,7 @@ begin-module fat32-tools
     current-fs@ averts x-fs-not-set
     [:
       [:
+        cr
         begin
           read-buffer read-buffer-size 2 / 2 pick read-file dup 0> if
             read-buffer swap convert-newlines type false
@@ -461,6 +462,7 @@ begin-module fat32-tools
     [:
       [:
         { file }
+        cr
         swap seek-set file seek-file
         file
         begin
