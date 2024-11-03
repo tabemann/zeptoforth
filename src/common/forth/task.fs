@@ -506,6 +506,7 @@ begin-module task
       le bc>
       pc r3 r2 r0 4 pop
       >mark
+      ne bc>
       .task-deadline tos r0 ldr_,[_,#_]
       4 r1 ldr_,[sp,#_]
       r1 r0 r0 subs_,_,_
@@ -513,6 +514,7 @@ begin-module task
       r1 r0 cmp_,_
       gt bc>
       pc r3 r2 r0 4 pop
+      >mark
       >mark
       .task-next tos tos ldr_,[_,#_]
       b<
