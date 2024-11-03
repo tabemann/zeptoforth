@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -283,7 +283,7 @@ begin-module sd
       clear-blocks
     ; define new
 
-    :noname ( sd-card -- bytes ) sector-size ; define block-size
+    :noname { sd-card -- bytes } sector-size ; define block-size
     
     :noname ( sd-card -- blocks ) max-block-count @ ; define block-count
 

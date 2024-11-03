@@ -8,6 +8,8 @@ There are a number of intertask communication and synchronization constructs ava
 
 Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question. Also note that task notifications must be configured for a task `config-notify` before they may be used; the user must provide a pointer to a buffer containing a number of cells equal to the specified number of notification mailboxes.
 
+Each task is scheduled in accordance to a number of variables, specifically their priority, their deadline, their remaining ticks, their timeslice, their minimum timeslice, and their interval. A priority is a value that determines which tasks will execute first before all other factors are taken into account; the highest priority tasks that are ready to execute will always execute first, with the exception of tasks which are scheduled "last", which is necessary to keep high priority tasks waiting in simple locks from preventing lower priority tasks holding the same simple locks from executing. A deadline is the time at which a task will ideally be scheduled next, provided there are no tasks of higher priority that are able to run. Remaining ticks are how many ticks a task has to execute before it will be forced to be rescheduled. A timeslice is the number of ticks (normally 100 us intervals) for which a task is to be normally scheduled at a time. A minimum timeslice is the minimal number of tasks for which a task is the be scheduled, after all other factors are taken into account. An interval, when non-negative, is the number of ticks a task's deadline will be incremented by each time it is rescheduled; note that the deadline is limited to the current tick minus the interval, to prevent the deadline from getting further and further into the past and eventually wrapping around. When an interval is negative, a task is rescheduled such that its deadline is always set to the current tick plus the total of all active tasks' timeslices minus that task's own timeslice.
+
 Pending operations are scheduled operations that are executed within the multitasker when `pause` or `force-pending-ops` are executed, except within a critical section, where then they are defered. Pending operations are initialized and registered with `register-pending-op`, which gives them a fixed priority. Once registered, they can be set to execute with `set-pending-op`, which assigns an execution token to execute to them; this execution token will be cleared just prior to their execution. Pending operations are always of `pending-op-size` bytes. Note that it is safe to reuse a pending operation while it is executing, but if they are set again after they have already been set prior to their execution, their previously set execution token will be overwritten.
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
@@ -318,6 +320,16 @@ Set the saved priority of a task, from -32768 to 32767, with higher numbers bein
 ( task -- priority )
 
 Get the saved priority of a task.
+
+##### `task-interval!`
+( interval task -- )
+
+Set the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally. Tasks with a non-negative interval are scheduled so that their deadline is incremented by that amount of time each time they are rescheduled normally (unless the deadline is less than the current tick minus the interval, where then the deadline is set to the current tick minus the interval).
+
+##### `task-interval@`
+( interval task -- )
+
+Get the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally.
 
 ##### `task-timeslice!`
 ( timeslice task -- )

@@ -1645,8 +1645,8 @@ begin-module task
       ]code
     ;
 
-    \ Find next task after another task
-    : find-next-task-after ( task -- task' )
+    \ Find next interval task after another task
+    : find-next-interval-task-after ( task -- task' )
       code[
       0 tos cmp_,#_
       ne bc>
@@ -1658,6 +1658,9 @@ begin-module task
       ne bc>
       pc 1 pop
       >mark
+      .task-interval tos r0 ldr_,[_,#_]
+      0 r0 cmp_,#_
+      le bc>
       tos 1 push
       ]code
       waiting-task?
@@ -1667,6 +1670,7 @@ begin-module task
       pc tos 2 pop
       >mark
       tos 1 pop
+      >mark
       b<
       ]code
     ;
@@ -1816,7 +1820,7 @@ begin-module task
     \ Limit the current task's timeslice
     : limit-timeslice ( timeslice -- timeslice' )
       current-task @ { task }
-      task find-next-task-after ?dup if
+      task find-next-interval-task-after ?dup if
         dup task-priority h@ task task-priority h@ = if
           task-deadline @ task task-deadline @ - 1 max min
         else
