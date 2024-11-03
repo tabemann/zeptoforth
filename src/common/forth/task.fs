@@ -120,6 +120,9 @@ begin-module task
     \ First pending operation
     cpu-variable cpu-first-pending-op first-pending-op
 
+    \ Total timeslice
+    cpu-variable cpu-total-timeslice total-timeslice
+
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -184,6 +187,12 @@ begin-module task
       
       \ A task's minimum timeslice
       dup constant .task-min-timeslice field: task-min-timeslice
+
+      \ A task's interval (0< means default)
+      dup constant .task-interval field: task-interval
+
+      \ A task's deadline
+      dup constant .task-deadline field: task-deadline
 
       \ The current timeout start time in ticks
       dup constant .timeout-systick-start field: timeout-systick-start
@@ -470,11 +479,15 @@ begin-module task
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
+      systick-counter swap
       code[
+      r2 1 dp ldm
+      .task-deadline tos r3 ldr_,[_,#_]
+      r2 r3 r3 subs_,_,_
       .task-priority tos r0 ldrh_,[_,#_]
       16 r0 r0 lsls_,_,#_
       16 r0 r0 asrs_,_,#_
-      r0 1 push
+      r3 r2 r0 3 push
       .task-core tos tos ldr_,[_,#_]
       ]code
       cpu-last-task
@@ -483,15 +496,23 @@ begin-module task
       mark<
       0 tos cmp_,#_
       ne bc>
-      pc r0 2 pop
+      pc r3 r2 r0 4 pop
       >mark
       0 r0 ldr_,[sp,#_]
       .task-priority tos r1 ldrh_,[_,#_]
       16 r1 r1 lsls_,_,#_
       16 r1 r1 asrs_,_,#_
       r0 r1 cmp_,_
-      lt bc>
-      pc r0 2 pop
+      le bc>
+      pc r3 r2 r0 4 pop
+      >mark
+      .task-deadline tos r0 ldr_,[_,#_]
+      4 r1 ldr_,[sp,#_]
+      r1 r0 r0 subs_,_,_
+      8 r1 ldr_,[sp,#_]
+      r1 r0 cmp_,_
+      gt bc>
+      pc r3 r2 r0 4 pop
       >mark
       .task-next tos tos ldr_,[_,#_]
       b<
@@ -727,6 +748,9 @@ begin-module task
     \ Terminate a task for any reason
     : terminate ( reason task -- )
       [:
+        dup task-active h@ 16 lshift 16 arshift 0> if
+          dup task-timeslice @ negate over task-core @ cpu-total-timeslice +!
+        then
         dup task-active h@ terminated <> over current-task @ = or if
           tuck task-terminate-reason!
           terminated over task-active h!
@@ -812,16 +836,36 @@ begin-module task
     task-saved-priority h!
   ;
 
+  \ Set task interval (0< means default)
+  : task-interval! ( interval task -- )
+    dup validate-not-terminated
+    task-interval !
+  ;
+
+  \ Get task interval (0< means default)
+  : task-interval@ ( task -- interval )
+    dup validate-not-terminated
+    task-interval @
+  ;
+
   \ Set task timeslice
   : task-timeslice! ( timeslice task -- )
-    disable-int
-    dup validate-not-terminated
-    dup current-task @ = if
+    [:
+      dup validate-not-terminated
+      dup task-active@ 0> if
+        dup task-timeslice @ negate over task-core @ cpu-total-timeslice !
+      then
+      dup current-task @ = if
       2dup task-timeslice @ - task-systick-counter @ +
-      task-systick-counter !
-    then
-    swap 0 max swap task-timeslice !
-    enable-int
+        task-systick-counter !
+      then
+      swap 0 max over task-timeslice !
+      dup task-active@ 0> if
+        dup task-timeslice @ swap task-core @ cpu-total-timeslice !
+      else
+        drop
+      then
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Get task timeslice
@@ -886,7 +930,13 @@ begin-module task
     [:
       dup start-validate-task-change
       dup task-active@ 1+
-      dup 1 = if over test-remove-task over insert-task then
+      dup 1 = if
+        over task-core @ cpu-total-timeslice @ systick-counter +
+        2 pick task-deadline !
+        over task-timeslice @ 2 pick task-core @ cpu-total-timeslice +!
+        over test-remove-task
+        over insert-task
+      then
       swap task-active h!
     ;] over task-core @ critical-with-other-core-spinlock
   ;
@@ -896,6 +946,9 @@ begin-module task
     [:
       dup start-validate-task-change
       dup task-active@ 1-
+      dup 0= if
+        over task-timeslice @ negate 2 pick task-core @ cpu-total-timeslice +!
+      then
       swap task-active h!
     ;] over task-core @ critical-with-other-core-spinlock
   ;
@@ -1260,6 +1313,8 @@ begin-module task
       default-timeslice over task-timeslice !
       default-min-timeslice over task-min-timeslice !
       default-timeslice over task-saved-systick-counter !
+      -1 over task-interval !
+      systick-counter over task-deadline !
       false over task-float32-ctx-saved? !
       0 current-lock-held !
       0 over task-next !
@@ -1350,7 +1405,9 @@ begin-module task
 	c" aux-main" over task-name !
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
-	default-timeslice over task-saved-systick-counter !
+        default-timeslice over task-saved-systick-counter !
+        -1 over task-interval !
+        systick-counter over task-deadline !
         false over task-float32-ctx-saved? !
 	dup ['] task-rstack-base for-task@ over task-rstack-current !
 	next-user-space over task-dict-base @ +
@@ -1466,6 +1523,8 @@ begin-module task
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
+    -1 over task-interval !
+    systick-counter over task-deadline !
     false over task-float32-ctx-saved? !
     dup ['] task-rstack-base for-task@
     over ['] task-stack-base for-task@ ['] task-entry
@@ -1585,6 +1644,32 @@ begin-module task
       b<
       ]code
     ;
+
+    \ Find next task after another task
+    : find-next-task-after ( task -- task' )
+      code[
+      0 tos cmp_,#_
+      ne bc>
+      pc 1 pop
+      >mark
+      mark<
+      .task-prev tos tos ldr_,[_,#_]
+      0 tos cmp_,#_
+      ne bc>
+      pc 1 pop
+      >mark
+      tos 1 push
+      ]code
+      waiting-task?
+      code[
+      0 tos cmp_,#_
+      ne bc>
+      pc tos 2 pop
+      >mark
+      tos 1 pop
+      b<
+      ]code
+    ;
     
     \ PendSV return value
     variable pendsv-return
@@ -1613,6 +1698,7 @@ begin-module task
     : handle-task-terminated ( task -- )
       >r r@ task-terminate-hook @ ?dup if
         claim-same-core-spinlock
+        r@ task-active@ 0<= if r@ task-timeslice @ total-timeslice +! then
         r@ task-terminate-reason @ swap
         r@ task-name @ swap
         r@ task-terminate-data @ swap r@ task-terminate-immed-reason @ 2 rot
@@ -1648,6 +1734,19 @@ begin-module task
       then
       release-same-core-spinlock
     ;
+    
+    \ Adjust a task's deadline
+    : adjust-deadline { task -- }
+      task task-interval @ dup 0< if
+        drop total-timeslice @ task task-timeslice @ -
+        systick-counter + task task-deadline !
+      else { interval }
+        interval task task-deadline +!
+        task task-deadline @ systick-counter - interval negate < if
+          systick-counter interval - task task-deadline !
+        then
+      then
+    ;
 
     \ Reschedule previous task
     : reschedule-task ( task -- )
@@ -1670,6 +1769,7 @@ begin-module task
           claim-same-core-spinlock
           dup remove-task
           dup task-active@ 0> if
+            dup adjust-deadline
             insert-task
           else
             dup terminated? if
@@ -1711,6 +1811,30 @@ begin-module task
       r0 1 pop
       b<
       ]code
+    ;
+
+    \ Limit the current task's timeslice
+    : limit-timeslice ( timeslice -- timeslice' )
+      current-task @ { task }
+      task find-next-task-after ?dup if
+        dup task-priority h@ task task-priority h@ = if
+          task-deadline @ task task-deadline @ - 1 max min
+        else
+          drop
+        then
+      then
+    ;
+
+    \ Adjust the current task's timeslice
+    : adjust-timeslice ( -- )
+      current-task @ { task }
+      task task-saved-systick-counter @ 0<= if
+        task task-saved-systick-counter @ task task-timeslice @ +
+        limit-timeslice task task-min-timeslice @ max
+      else
+        task task-saved-systick-counter @ limit-timeslice
+      then
+      task-systick-counter !
     ;
 
     \ Handle task-switching
@@ -1786,14 +1910,7 @@ begin-module task
             enable-int
           then
 
-          current-task @ task-saved-systick-counter @ 0<= if
-            current-task @ task-saved-systick-counter @
-            current-task @ task-timeslice @ +
-            current-task @ task-min-timeslice @ max
-            task-systick-counter !
-          else
-            current-task @ task-saved-systick-counter @ task-systick-counter !
-          then
+          adjust-timeslice
           
           terminated-task @ if
             terminated-task @ handle-task-terminated
@@ -2288,6 +2405,8 @@ begin-module task
     ['] do-wait wait-hook !
     ['] do-validate-dict validate-dict-hook !
     [: init-systick-aux-core enable-int ;] core-init-hook !
+    default-timeslice 0 cpu-total-timeslice !
+    cpu-count 1 ?do 0 i cpu-total-timeslice ! loop
     cpu-count 0 ?do
       false i cpu-waiting-for-task? !
       false i cpu-in-multitasker? !
