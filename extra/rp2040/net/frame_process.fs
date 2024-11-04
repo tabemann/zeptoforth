@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -182,7 +182,10 @@ begin-module frame-process
           then
           ?raise
         again
-      ;] 1024 256 1024 1 spawn-on-core c" frame-process" over task-name! run
+      ;] 1024 256 1024 1 spawn-on-core
+      c" frame-process" over task-name!
+      frame-process-interval over task-interval!
+      run
     ; define run-frame-process
 
   end-implement

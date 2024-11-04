@@ -789,7 +789,10 @@ begin-module cyw43-runner
             self cyw43-scratch-buf self handle-cyw43-irq
           then
         again
-      ;] 2048 512 512 1 spawn-on-core c" cyw43-runner" over task-name! run
+      ;] 2048 512 512 1 spawn-on-core
+      c" cyw43-runner" over task-name!
+      cyw43-runner-interval over task-interval!
+      run
     ; define run-cyw43
 
     \ Handle CYW43 IRQ's

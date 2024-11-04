@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -196,5 +196,8 @@ begin-module net-config
 
   \ Maximum DNS resolution attempts
   5 value max-dns-resolve-attempts
+
+  \ The interval of a frame process task
+  15 constant frame-process-interval
   
 end-module
