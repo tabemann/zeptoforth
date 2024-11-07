@@ -1754,9 +1754,38 @@ begin-module task
       then
     ;
 
+    \ Prevent deadline wraparound
+    : prevent-deadline-wrap ( -- )
+      systick-counter
+      last-task
+      code[
+      r0 1 dp ldm
+      mark<
+      0 tos cmp_,#_
+      ne bc>
+      tos 1 dp ldm
+      pc 1 pop
+      >mark
+      .task-interval tos r1 ldr_,[_,#_]
+      .task-deadline tos r2 ldr_,[_,#_]
+      r0 r2 r2 subs_,_,_
+      r1 r2 r2 adds_,_,_
+      r1 r1 mvns_,_
+      1 r1 adds_,#_
+      r2 r1 cmp_,_
+      le bc>
+      r0 r1 r1 adds_,_,_
+      .task-deadline tos r1 ldr_,[_,#_]
+      >mark
+      .task-next tos tos ldr_,[_,#_]
+      b<
+      ]code
+    ;
+
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
+      prevent-deadline-wrap
       reschedule-last? @ if
         claim-same-core-spinlock
         dup remove-task
