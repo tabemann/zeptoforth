@@ -194,6 +194,9 @@ begin-module task
       \ A task's deadline
       dup constant .task-deadline field: task-deadline
 
+      \ Has a task's deadline been set manually
+      dup constant .task-deadline-set? field: task-deadline-set?
+
       \ The current timeout start time in ticks
       dup constant .timeout-systick-start field: timeout-systick-start
       
@@ -838,16 +841,31 @@ begin-module task
     task-saved-priority h!
   ;
 
-  \ Set task interval (0< means default)
+  \ Set task interval in ticks (0< means default)
   : task-interval! ( interval task -- )
     dup validate-not-terminated
     task-interval !
   ;
 
-  \ Get task interval (0< means default)
+  \ Get task interval in ticks (0< means default)
   : task-interval@ ( task -- interval )
     dup validate-not-terminated
     task-interval @
+  ;
+
+  \ Set task deadline in ticks
+  : task-deadline! ( deadline task -- )
+    [:
+      dup validate-not-terminated
+      true over task-deadline-set? !
+      task-deadline !
+    ;] over task-core @ critical-with-other-core-spinlock
+  ;
+
+  \ Get task deadlline in ticks
+  : task-deadline@ ( task -- deadline )
+    dup validate-not-terminated
+    task-deadline @
   ;
 
   \ Set task timeslice
@@ -933,8 +951,10 @@ begin-module task
       dup start-validate-task-change
       dup task-active@ 1+
       dup 1 = if
-        over task-core @ cpu-total-timeslice @ systick-counter +
-        2 pick task-deadline !
+        over task-deadline-set? @ not if
+          over task-core @ cpu-total-timeslice @ systick-counter +
+          2 pick task-deadline !
+        then
         over task-timeslice @ 2 pick task-core @ cpu-total-timeslice +!
         over test-remove-task
         over insert-task
@@ -1317,6 +1337,7 @@ begin-module task
       default-timeslice over task-saved-systick-counter !
       -1 over task-interval !
       systick-counter over task-deadline !
+      false over task-deadline-set? !
       false over task-float32-ctx-saved? !
       0 current-lock-held !
       0 over task-next !
@@ -1410,6 +1431,7 @@ begin-module task
         default-timeslice over task-saved-systick-counter !
         -1 over task-interval !
         systick-counter over task-deadline !
+        false over task-deadline-set? !
         false over task-float32-ctx-saved? !
 	dup ['] task-rstack-base for-task@ over task-rstack-current !
 	next-user-space over task-dict-base @ +
@@ -1527,6 +1549,7 @@ begin-module task
     default-timeslice over task-saved-systick-counter !
     -1 over task-interval !
     systick-counter over task-deadline !
+    false over task-deadline-set? !
     false over task-float32-ctx-saved? !
     dup ['] task-rstack-base for-task@
     over ['] task-stack-base for-task@ ['] task-entry
@@ -1743,14 +1766,18 @@ begin-module task
     
     \ Adjust a task's deadline
     : adjust-deadline { task -- }
-      task task-interval @ dup 0< if
-        drop total-timeslice @ task task-timeslice @ -
-        systick-counter + task task-deadline !
-      else { interval }
-        interval task task-deadline +!
-        task task-deadline @ systick-counter - interval negate < if
-          systick-counter interval - task task-deadline !
+      task task-deadline-set? @ not if
+        task task-interval @ dup 0< if
+          drop total-timeslice @ task task-timeslice @ -
+          systick-counter + task task-deadline !
+        else { interval }
+          interval task task-deadline +!
+          task task-deadline @ systick-counter - interval negate < if
+            systick-counter interval - task task-deadline !
+          then
         then
+      else
+        false task task-deadline-set? !
       then
     ;
 

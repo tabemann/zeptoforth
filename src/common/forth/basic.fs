@@ -2600,6 +2600,18 @@ forth set-current
   until
 ;
 
+\ Write a string to the dictionary, writing its length as a cell first
+: string, ( addr bytes -- )
+  cell align, dup , begin ?dup while swap dup c@ c, 1+ swap 1- repeat drop
+;
+
+\ Write a string starting at an address with its length as a cell first
+: string! ( src-addr bytes dest-addr -- ) cell align 2dup ! cell+ swap move ;
+
+\ Read a string written with STRING, or STRING! at an address with its length
+\ as a cell first
+: string@ ( addr -- addr' bytes ) cell align dup @ swap cell+ swap ;
+
 \ Attention hook
 variable attention-hook
 

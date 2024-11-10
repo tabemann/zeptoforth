@@ -324,12 +324,22 @@ Get the saved priority of a task.
 ##### `task-interval!`
 ( interval task -- )
 
-Set the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally. Tasks with a non-negative interval are scheduled so that their deadline is incremented by that amount of time each time they are rescheduled normally (unless the deadline is less than the current tick minus the interval, where then the deadline is set to the current tick minus the interval).
+Set the interval, in ticks (usually 100 us increments), of a task. Tasks with a negative interval (the default is -1) are scheduled normally. Tasks with a non-negative interval are scheduled so that their deadline is incremented by that amount of time each time they are rescheduled normally (unless the deadline is less than the current tick minus the interval, where then the deadline is set to the current tick minus the interval).
 
 ##### `task-interval@`
 ( interval task -- )
 
-Get the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally.
+Get the interval, in ticks (usually 100 us increments), of a task. Tasks with a negative interval (the default is -1) are scheduled normally.
+
+##### `task-deadline!`
+( deadline task -- )
+
+Explicitly set the next deadline, in ticks (usually 100 us increments), of a task. Note that after this is called, the immediate next time the task is rescheduled the task's interval will be ignored.
+
+##### `task-deadline@`
+( task -- deadline )
+
+Get the current deadline, in ticks (usually 100 us increments), of a task. If `task-deadline!` had not been called after the last time the task was rescheduled, this is not the next deadline as it does not take the interval into account.
 
 ##### `task-timeslice!`
 ( timeslice task -- )

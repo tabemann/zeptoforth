@@ -337,20 +337,30 @@
 <section id="task-interval">
 <h3><code class="docutils literal notranslate"><span class="pre">task-interval!</span></code><a class="headerlink" href="#task-interval" title="Permalink to this heading">¶</a></h3>
 <p>( interval task – )</p>
-<p>Set the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally. Tasks with a non-negative interval are scheduled so that their deadline is incremented by that amount of time each time they are rescheduled normally (unless the deadline is less than the current tick minus the interval, where then the deadline is set to the current tick minus the interval).</p>
+<p>Set the interval, in ticks (usually 100 us increments), of a task. Tasks with a negative interval (the default is -1) are scheduled normally. Tasks with a non-negative interval are scheduled so that their deadline is incremented by that amount of time each time they are rescheduled normally (unless the deadline is less than the current tick minus the interval, where then the deadline is set to the current tick minus the interval).</p>
 </section>
 <section id="id4">
 <h3><code class="docutils literal notranslate"><span class="pre">task-interval&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
 <p>( interval task – )</p>
-<p>Get the interval, in ticks (usually 100 us increments) of a task. Tasks with a negative interval (the default is -1) are scheduled normally.</p>
+<p>Get the interval, in ticks (usually 100 us increments), of a task. Tasks with a negative interval (the default is -1) are scheduled normally.</p>
+</section>
+<section id="task-deadline">
+<h3><code class="docutils literal notranslate"><span class="pre">task-deadline!</span></code><a class="headerlink" href="#task-deadline" title="Permalink to this heading">¶</a></h3>
+<p>( deadline task – )</p>
+<p>Explicitly set the next deadline, in ticks (usually 100 us increments), of a task. Note that after this is called, the immediate next time the task is rescheduled the task’s interval will be ignored.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">task-deadline&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<p>( task – deadline )</p>
+<p>Get the current deadline, in ticks (usually 100 us increments), of a task. If <code class="docutils literal notranslate"><span class="pre">task-deadline!</span></code> had not been called after the last time the task was rescheduled, this is not the next deadline as it does not take the interval into account.</p>
 </section>
 <section id="task-timeslice">
 <h3><code class="docutils literal notranslate"><span class="pre">task-timeslice!</span></code><a class="headerlink" href="#task-timeslice" title="Permalink to this heading">¶</a></h3>
 <p>( timeslice task – )</p>
 <p>Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task’s minimum timeslice). Note that the default setting for this for a newly initialized task is 10.</p>
 </section>
-<section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
 <p>( task – timeslice )</p>
 <p>Get the timeslice, in ticks (usually 100 us increments), of a task.</p>
 </section>
@@ -370,8 +380,8 @@
 <p>( task – addr )</p>
 <p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
 </section>
-<section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">task-name!</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">task-name!</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
 <p>( addr task – )</p>
 <p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
 </section>
@@ -380,8 +390,8 @@
 <p>( xt task – )</p>
 <p>Set a task’s termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data reason – ) where <em>data</em> is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task’s termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked. <em>Reason</em> is the <em>immediate</em> task termination reason, which is overwritten with <code class="docutils literal notranslate"><span class="pre">not-terminated</span></code> due to the task being reinitialized when the task termination hook is called.</p>
 </section>
-<section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-hook&#64;</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-hook&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
 <p>( task – xt )</p>
 <p>Get a task’s termination hook.</p>
 </section>
@@ -390,8 +400,8 @@
 <p>( data task – )</p>
 <p>Set a task’s termination data, to be passed to the task’s termination hook when it is invoked.</p>
 </section>
-<section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-data&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-data&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
 <p>( task – data )</p>
 <p>Get a task’s termination data.</p>
 </section>

@@ -1016,6 +1016,21 @@ raised.</p>
 <p>( a-addr – )</p>
 <p>Set the data stack pointer</p>
 </section>
+<section id="string">
+<h3><code class="docutils literal notranslate"><span class="pre">string,</span></code></h3>
+<p>( c-addr u – )</p>
+<p>Write a string to the dictionary, writing its length as a cell first.</p>
+</section>
+<section id="id66">
+<h3><code class="docutils literal notranslate"><span class="pre">string!</span></code></h3>
+<p>( c-addr u dest-addr – )</p>
+<p>Write a string at an address with its length as a cell first.</p>
+</section>
+<section id="id67">
+<h3><code class="docutils literal notranslate"><span class="pre">string&#64;</span></code></h3>
+<p>( addr – c-addr u )</p>
+<p>Read a string written with <code class="docutils literal notranslate"><span class="pre">string,</span></code> or <code class="docutils literal notranslate"><span class="pre">string!</span></code> at an address with its length as a cell first.</p>
+</section>
 <section id="reboot">
 <h3><code class="docutils literal notranslate"><span class="pre">reboot</span></code></h3>
 <p>( – )</p>
@@ -1053,7 +1068,7 @@ raised.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">cells</span></code></h3>
 <p>( n – n )</p>
 </section>
-<section id="id66">
+<section id="id68">
 <h3><code class="docutils literal notranslate"><span class="pre">cell+</span></code></h3>
 <p>( n – n )</p>
 <p>Add a cell to a value</p>
@@ -1078,12 +1093,12 @@ raised.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">inlined-flag</span></code></h3>
 <p>( – u )</p>
 </section>
-<section id="id67">
+<section id="id69">
 <h3><code class="docutils literal notranslate"><span class="pre">nip</span></code></h3>
 <p>( x1 x2 – x2 )</p>
 <p>Drop the cell under the top of the stack</p>
 </section>
-<section id="id68">
+<section id="id70">
 <h3><code class="docutils literal notranslate"><span class="pre">tuck</span></code></h3>
 <p>( x1 x2 – x2 x1 x2 )</p>
 <p>Tuck a cell under the cell at he top of the stack</p>
@@ -1098,7 +1113,7 @@ raised.</p>
 <p>( n1 n2 – n3 )</p>
 <p>Get the maximum of two numbers</p>
 </section>
-<section id="id69">
+<section id="id71">
 <h3><code class="docutils literal notranslate"><span class="pre">-rot</span></code></h3>
 <p>( x1 x2 x3 – x3 x1 x2 )</p>
 <p>Rotate three cells in reverse</p>
@@ -1108,12 +1123,12 @@ raised.</p>
 <p>( n – u )</p>
 <p>Get the absolute value of a number</p>
 </section>
-<section id="id70">
+<section id="id72">
 <h3><code class="docutils literal notranslate"><span class="pre">align</span></code></h3>
 <p>( a power – a )</p>
 <p>Align an address to a power of two</p>
 </section>
-<section id="id71">
+<section id="id73">
 <h3><code class="docutils literal notranslate"><span class="pre">?dup</span></code></h3>
 <p>( x – x | 0 )</p>
 <p>Duplicate a cell if it is non-zero</p>
@@ -1168,12 +1183,12 @@ raised.</p>
 <p>( bits addr – )</p>
 <p>Set bits on a word</p>
 </section>
-<section id="id72">
+<section id="id74">
 <h3><code class="docutils literal notranslate"><span class="pre">bic!</span></code></h3>
 <p>( bits addr – )</p>
 <p>Clear bits on a word</p>
 </section>
-<section id="id73">
+<section id="id75">
 <h3><code class="docutils literal notranslate"><span class="pre">xor!</span></code></h3>
 <p>( bits addr – )</p>
 <p>Exclusive-or bits on a word</p>
@@ -1291,12 +1306,12 @@ otherwise passing the specified argument through.</p>
 <p>( xt “deferred-word” – )</p>
 <p>Set the deferred word named “deferred-word” to execute the execution token <em>xt</em> when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if the deferred word is in flash and <em>xt</em> is in RAM and one executes the deferred word after rebooting.</p>
 </section>
-<section id="id74">
+<section id="id76">
 <h3><code class="docutils literal notranslate"><span class="pre">defer!</span></code></h3>
 <p>( xt deferred-xt – )</p>
 <p>Set the deferred word corresponding to the execution token <em>deferred-xt</em> to execute the execution token <em>xt</em> when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if <em>deferred-xt</em> is in flash and <em>xt</em> is in RAM and one executes <em>deferred-xt</em> after rebooting.</p>
 </section>
-<section id="id75">
+<section id="id77">
 <h3><code class="docutils literal notranslate"><span class="pre">defer&#64;</span></code></h3>
 <p>( deferred-xt – xt )</p>
 <p>Get the execution token <em>xt</em> executed when the deferred word corresponding to the execution token <em>deferred-xt</em> is executed.</p>
@@ -1326,12 +1341,12 @@ otherwise passing the specified argument through.</p>
 <p>( offset “name” – offset )</p>
 <p>Create a halfword-sized field</p>
 </section>
-<section id="id76">
+<section id="id78">
 <h3><code class="docutils literal notranslate"><span class="pre">field:</span></code></h3>
 <p>( offset “name” – offset )</p>
 <p>Create a cell-sized field</p>
 </section>
-<section id="id77">
+<section id="id79">
 <h3><code class="docutils literal notranslate"><span class="pre">2field:</span></code></h3>
 <p>( offset “name” – offset )</p>
 <p>Create a double cell-sized field</p>
@@ -1351,7 +1366,7 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>End defining a jump table.</p>
 </section>
-<section id="id78">
+<section id="id80">
 <h3><code class="docutils literal notranslate"><span class="pre">=&gt;</span></code></h3>
 <p>( x “target” – )</p>
 <p>Compile a jump table entry matching a value <em>x</em> which, if matched, will branch to <em>target</em>.</p>
@@ -1376,7 +1391,7 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Allocate a user variable</p>
 </section>
-<section id="id79">
+<section id="id81">
 <h3><code class="docutils literal notranslate"><span class="pre">2user</span></code></h3>
 <p>( “name” – )</p>
 <p>Allocate a doubleword user variable</p>
@@ -1406,7 +1421,7 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Create a four-byte variable</p>
 </section>
-<section id="id80">
+<section id="id82">
 <h3><code class="docutils literal notranslate"><span class="pre">2variable</span></code></h3>
 <p>( “name” – )</p>
 <p>Create an eight-byte variable</p>
@@ -1446,12 +1461,12 @@ otherwise passing the specified argument through.</p>
 <p>( xt – )</p>
 <p>Skip characters in the evaluation buffer until a predicate is met</p>
 </section>
-<section id="id81">
+<section id="id83">
 <h3><code class="docutils literal notranslate"><span class="pre">[:</span></code></h3>
 <p>( – )</p>
 <p>Begin lambda; note that when executed in interpretation mode this is equivalent to <code class="docutils literal notranslate"><span class="pre">:noname</span></code>.</p>
 </section>
-<section id="id82">
+<section id="id84">
 <h3><code class="docutils literal notranslate"><span class="pre">;]</span></code></h3>
 <p>( – ) ( compiled: – xt )</p>
 <p>End lambda; note that when executed such that it matches a <code class="docutils literal notranslate"><span class="pre">[:</span></code> that was executed in interpretation mode this is equivalent to <code class="docutils literal notranslate"><span class="pre">;</span></code>.</p>
@@ -1481,12 +1496,12 @@ otherwise passing the specified argument through.</p>
 <p>( “token” – c-addr u )</p>
 <p>Parse a token</p>
 </section>
-<section id="id83">
+<section id="id85">
 <h3><code class="docutils literal notranslate"><span class="pre">\</span></code></h3>
 <p>( “comment&lt;NL&gt;” – )</p>
 <p>Parse a line comment</p>
 </section>
-<section id="id84">
+<section id="id86">
 <h3><code class="docutils literal notranslate"><span class="pre">(</span></code></h3>
 <p>( “comment)” – )</p>
 <p>Parse a paren coment</p>
@@ -1501,7 +1516,7 @@ otherwise passing the specified argument through.</p>
 <p>( c-addr1 u1 c-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
 </section>
-<section id="id85">
+<section id="id87">
 <h3><code class="docutils literal notranslate"><span class="pre">3dup</span></code></h3>
 <p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
 <p>Duplicate three items on the stack</p>
@@ -1626,7 +1641,7 @@ otherwise passing the specified argument through.</p>
 <p>( c base – u success? )</p>
 <p>Parse a digit</p>
 </section>
-<section id="id86">
+<section id="id88">
 <h3><code class="docutils literal notranslate"><span class="pre">:</span></code></h3>
 <p>( – )</p>
 <p>Start a colon definition</p>
@@ -1636,7 +1651,7 @@ otherwise passing the specified argument through.</p>
 <p>( – xt )</p>
 <p>Start an anonymous colon definition</p>
 </section>
-<section id="id87">
+<section id="id89">
 <h3><code class="docutils literal notranslate"><span class="pre">;</span></code></h3>
 <p>( – )</p>
 <p>End a colon definition</p>
@@ -1646,7 +1661,7 @@ otherwise passing the specified argument through.</p>
 <p>( x “name” – )</p>
 <p>Create a constant</p>
 </section>
-<section id="id88">
+<section id="id90">
 <h3><code class="docutils literal notranslate"><span class="pre">2constant</span></code></h3>
 <p>( d “name” – )</p>
 <p>Create a 2-word constant</p>
@@ -1666,17 +1681,17 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>We are currently compiling to flash</p>
 </section>
-<section id="id89">
+<section id="id91">
 <h3><code class="docutils literal notranslate"><span class="pre">[else]</span></code></h3>
 <p>( – )</p>
 <p>Implement the [else] in [if]/[else]/[then] for conditional execution/compilation</p>
 </section>
-<section id="id90">
+<section id="id92">
 <h3><code class="docutils literal notranslate"><span class="pre">[if]</span></code></h3>
 <p>( f – )</p>
 <p>Start conditional execution/compilation</p>
 </section>
-<section id="id91">
+<section id="id93">
 <h3><code class="docutils literal notranslate"><span class="pre">[then]</span></code></h3>
 <p>( – )</p>
 <p>Finish conditional execution/compilation</p>
@@ -1686,17 +1701,17 @@ otherwise passing the specified argument through.</p>
 <p>( c – )</p>
 <p>Add a character to pictured numeric output</p>
 </section>
-<section id="id92">
+<section id="id94">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code></h3>
 <p>( – )</p>
 <p>Start pictured numeric output</p>
 </section>
-<section id="id93">
+<section id="id95">
 <h3><code class="docutils literal notranslate"><span class="pre">#</span></code></h3>
 <p>( ud1 – ud2 )</p>
 <p>Add a digit to the pictured numeric output</p>
 </section>
-<section id="id94">
+<section id="id96">
 <h3><code class="docutils literal notranslate"><span class="pre">#s</span></code></h3>
 <p>( ud – 0 0 )</p>
 <p>Add one or more digits to the pictured numeric output</p>
@@ -1706,7 +1721,7 @@ otherwise passing the specified argument through.</p>
 <p>( n – )</p>
 <p>If n (a single number) is negative, append ‘-’ to the pictured numeric output</p>
 </section>
-<section id="id95">
+<section id="id97">
 <h3><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code></h3>
 <p>( xd – c-addr bytes )</p>
 <p>Finish pictured numeric output</p>
@@ -1731,12 +1746,12 @@ otherwise passing the specified argument through.</p>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number without a leading space</p>
 </section>
-<section id="id96">
+<section id="id98">
 <h3><code class="docutils literal notranslate"><span class="pre">d.</span></code></h3>
 <p>( nd – )</p>
 <p>Type a signed double-cell number with a leading space</p>
 </section>
-<section id="id97">
+<section id="id99">
 <h3><code class="docutils literal notranslate"><span class="pre">ud.</span></code></h3>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number with a leading space</p>
@@ -1761,12 +1776,12 @@ otherwise passing the specified argument through.</p>
 <p>( f places – )</p>
 <p>Type an S31.32 fixed-point number truncated to <em>places</em> to the right of the decimal point without a leading space</p>
 </section>
-<section id="id98">
+<section id="id100">
 <h3><code class="docutils literal notranslate"><span class="pre">f.</span></code></h3>
 <p>( f – )</p>
 <p>Type an S31.32 fixed-point number with a leading space</p>
 </section>
-<section id="id99">
+<section id="id101">
 <h3><code class="docutils literal notranslate"><span class="pre">f.n</span></code></h3>
 <p>( f places – )</p>
 <p>Type an S31.32 fixed-point number truncated to <em>places</em> to the right of the decimal point with a leading space</p>
@@ -1821,42 +1836,42 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Display the license notice</p>
 </section>
-<section id="id100">
+<section id="id102">
 <h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – )</p>
 <p>Compile a string to be printed.</p>
 </section>
-<section id="id101">
+<section id="id103">
 <h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr u )</p>
 <p>Compile a non-counted string</p>
 </section>
-<section id="id102">
+<section id="id104">
 <h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr )</p>
 <p>Compile a counted-string</p>
 </section>
-<section id="id103">
+<section id="id105">
 <h3><code class="docutils literal notranslate"><span class="pre">.(</span></code></h3>
 <p>( “text&lt;close-paren&gt;” – )</p>
 <p>Immediately print a string.</p>
 </section>
-<section id="id104">
+<section id="id106">
 <h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </section>
-<section id="id105">
+<section id="id107">
 <h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </section>
-<section id="id106">
+<section id="id108">
 <h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></h3>
 <p>( “text&lt;quote&gt;” – ) ( compiled: – c-addr )</p>
 <p>Compile an escaped counted-string</p>
 </section>
-<section id="id107">
+<section id="id109">
 <h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code></h3>
 <p>( “text&lt;close-paren&gt;” – )</p>
 <p>Immediately print an escaped string.</p>
@@ -1871,17 +1886,17 @@ otherwise passing the specified argument through.</p>
 <p>( “char” – c )</p>
 <p>Parse a character and put it on the stack</p>
 </section>
-<section id="id108">
+<section id="id110">
 <h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code></h3>
 <p>( “char” – ) ( compiled: – c )</p>
 <p>Parse a character and compile it</p>
 </section>
-<section id="id109">
+<section id="id111">
 <h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code></h3>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
 </section>
-<section id="id110">
+<section id="id112">
 <h3><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
@@ -1891,12 +1906,12 @@ otherwise passing the specified argument through.</p>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
 </section>
-<section id="id111">
+<section id="id113">
 <h3><code class="docutils literal notranslate"><span class="pre">.</span></code></h3>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
 </section>
-<section id="id112">
+<section id="id114">
 <h3><code class="docutils literal notranslate"><span class="pre">u.</span></code></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
@@ -2006,7 +2021,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The emit hook user variable</p>
 </section>
-<section id="id113">
+<section id="id115">
 <h3><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The emit? hook user variable</p>
@@ -2016,7 +2031,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The key hook user variable</p>
 </section>
-<section id="id114">
+<section id="id116">
 <h3><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The key? hook user variable</p>
@@ -2026,7 +2041,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The error emit hook user variable</p>
 </section>
-<section id="id115">
+<section id="id117">
 <h3><code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The error emit? hook user variable</p>
