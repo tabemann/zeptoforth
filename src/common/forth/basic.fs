@@ -650,8 +650,8 @@ commit-flash
   undefer-lit
   syntax-of verify-syntax drop-syntax
   end-block
-  rot ?dup if
-    here swap branch-back!
+  chip $73746D = swap $6C0001DC = and if \ stm32l476
+    rot ?dup if here swap branch-back! then
   then
   reserve-branch
   -rot postpone then-no-block
@@ -664,9 +664,7 @@ commit-flash
   undefer-lit
   syntax-case verify-syntax drop-syntax
   postpone drop
-  ?dup if
-    here swap branch-back!
-  then
+  begin ?dup while here swap branch-back! repeat
   end-block
 ;
 
@@ -710,9 +708,7 @@ commit-flash
   undefer-lit
   syntax-case verify-syntax drop-syntax
   postpone 2drop
-  ?dup if
-    here swap branch-back!
-  then
+  begin ?dup while here swap branch-back! repeat
   end-block
 ;
 
