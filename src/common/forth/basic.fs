@@ -650,7 +650,8 @@ commit-flash
   undefer-lit
   syntax-of verify-syntax drop-syntax
   end-block
-  chip $73746D = swap $6C0001DC = and if \ stm32l476
+  chip $73746D = swap $6C0001DC = and \ stm32l476
+  chip $7270 = swap 2040 = and or if \ rp2040
     rot ?dup if here swap branch-back! then
   then
   reserve-branch
