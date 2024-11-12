@@ -652,7 +652,7 @@ commit-flash
   end-block
   chip $73746D = swap $6C0001DC = and \ stm32l476
   chip $7270 = swap 2040 = and or if \ rp2040
-    rot ?dup if here swap branch-back! then
+    rot ?dup if here swap branch-back! else 0 -rot then
   then
   reserve-branch
   -rot postpone then-no-block
