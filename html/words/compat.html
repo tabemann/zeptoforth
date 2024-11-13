@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>ANS Forth / Forth 2012 Compatibility Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Wordlist Words" href="wordlist.html" />
@@ -37,242 +33,242 @@
           <div class="body" role="main">
             
   <section id="ans-forth-forth-2012-compatibility-words">
-<h1>ANS Forth / Forth 2012 Compatibility Words<a class="headerlink" href="#ans-forth-forth-2012-compatibility-words" title="Permalink to this heading">¶</a></h1>
+<h1>ANS Forth / Forth 2012 Compatibility Words<a class="headerlink" href="#ans-forth-forth-2012-compatibility-words" title="Link to this heading">¶</a></h1>
 <p>This is a collection of assorted words added for compatibility with ANS Forth and Forth 2012. Because there may be conflicts with existing words, particularly in the case of <code class="docutils literal notranslate"><span class="pre">find</span></code>, these words are placed in a <code class="docutils literal notranslate"><span class="pre">compat</span></code> module from which they may be imported.</p>
 <p>One important note is that when this is done within the default module, the word <code class="docutils literal notranslate"><span class="pre">find</span></code> provided by this module will be shadowed by the existing <code class="docutils literal notranslate"><span class="pre">find</span></code> word in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module; in this case one will have to either refer to it as <code class="docutils literal notranslate"><span class="pre">compat::find</span></code> or shadow the <code class="docutils literal notranslate"><span class="pre">find</span></code> in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span> <span class="n">find</span> <span class="n">compat</span><span class="p">::</span><span class="n">find</span> <span class="p">;</span>
 </pre></div>
 </div>
 <section id="compat">
-<h2><code class="docutils literal notranslate"><span class="pre">compat</span></code><a class="headerlink" href="#compat" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">compat</span></code><a class="headerlink" href="#compat" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">compat</span></code> module contains the following words:</p>
 <section id="word">
-<h3><code class="docutils literal notranslate"><span class="pre">word</span></code><a class="headerlink" href="#word" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">word</span></code><a class="headerlink" href="#word" title="Link to this heading">¶</a></h3>
 <p>( delim “&lt;delims&gt;word&lt;delim&gt;” – c-addr )</p>
 <p>Parse a toke ndelimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code <code class="docutils literal notranslate"><span class="pre">token</span></code> / <code class="docutils literal notranslate"><span class="pre">parse-name</span></code> is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.</p>
 </section>
 <section id="parse">
-<h3><code class="docutils literal notranslate"><span class="pre">parse</span></code><a class="headerlink" href="#parse" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">parse</span></code><a class="headerlink" href="#parse" title="Link to this heading">¶</a></h3>
 <p>( delim “text&lt;delim&gt;” – c-addr u )</p>
 <p>Parse text up to a given character; the the returned string is in the input buffer and thus avoids the reentrancy problems of <code class="docutils literal notranslate"><span class="pre">word</span></code>.</p>
 </section>
 <section id="find">
-<h3><code class="docutils literal notranslate"><span class="pre">find</span></code><a class="headerlink" href="#find" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">find</span></code><a class="headerlink" href="#find" title="Link to this heading">¶</a></h3>
 <p>( c-addr – c-addr 0 | xt 1 | xt -1 )</p>
 <p>Find a word’s xt using a counted string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return the name as a counted string and 0 if it is not found.</p>
 </section>
 <section id="cmove">
-<h3><code class="docutils literal notranslate"><span class="pre">cmove</span></code><a class="headerlink" href="#cmove" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cmove</span></code><a class="headerlink" href="#cmove" title="Link to this heading">¶</a></h3>
 <p>( c-addr1 c-addr2 u – )</p>
 <p>Implement the traditional Forth string copying word <code class="docutils literal notranslate"><span class="pre">cmove</span></code> - for new code using <code class="docutils literal notranslate"><span class="pre">move</span></code> is recommended.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( c-add1 c-addr2 u – )</p>
 <p>Implement the traditional Forth string copying word <code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code> - for new code using <code class="docutils literal notranslate"><span class="pre">move</span></code> is recommended.</p>
 </section>
 <section id="within">
-<h3><code class="docutils literal notranslate"><span class="pre">within</span></code><a class="headerlink" href="#within" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">within</span></code><a class="headerlink" href="#within" title="Link to this heading">¶</a></h3>
 <p>( test low high – flag )</p>
 <p>Determine whether a value is between ‘low’, inclusive, and ‘high’, exclusive.</p>
 </section>
 <section id="number">
-<h3><code class="docutils literal notranslate"><span class="pre">&gt;number</span></code><a class="headerlink" href="#number" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;number</span></code><a class="headerlink" href="#number" title="Link to this heading">¶</a></h3>
 <p>( D: acc c-addr u – acc’ c-addr’ u’ )</p>
 <p>Parse a number in a string ‘c-addr u’ with an accumulator initialized as a double-cell value ‘acc’ using the base stored in BASE</p>
 </section>
 <section id="compare">
-<h3><code class="docutils literal notranslate"><span class="pre">compare</span></code><a class="headerlink" href="#compare" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">compare</span></code><a class="headerlink" href="#compare" title="Link to this heading">¶</a></h3>
 <p>( c-addr1 u1 c-addr2 u2 – n )</p>
 <p>Compare two strings for both content and length using the numeric values of bytes compared within and shorter common length.</p>
 </section>
 <section id="erase">
-<h3><code class="docutils literal notranslate"><span class="pre">erase</span></code><a class="headerlink" href="#erase" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase</span></code><a class="headerlink" href="#erase" title="Link to this heading">¶</a></h3>
 <p>( c-addr u – )</p>
 <p>Fill a buffer with zero bytes.</p>
 </section>
 <section id="blank">
-<h3><code class="docutils literal notranslate"><span class="pre">blank</span></code><a class="headerlink" href="#blank" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">blank</span></code><a class="headerlink" href="#blank" title="Link to this heading">¶</a></h3>
 <p>( c-addr u – )</p>
 <p>Fill a buffer with spaces.</p>
 </section>
 <section id="string">
-<h3><code class="docutils literal notranslate"><span class="pre">/string</span></code><a class="headerlink" href="#string" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">/string</span></code><a class="headerlink" href="#string" title="Link to this heading">¶</a></h3>
 <p>( c-addr u n – c-addr’ u’ )</p>
 <p>Truncate the first n bytes of a string.</p>
 </section>
 <section id="trailing">
-<h3><code class="docutils literal notranslate"><span class="pre">-trailing</span></code><a class="headerlink" href="#trailing" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">-trailing</span></code><a class="headerlink" href="#trailing" title="Link to this heading">¶</a></h3>
 <p>( c-addr u – c-addr’ u’ )</p>
 <p>Remove spaces at the end of a string.</p>
 </section>
 <section id="search">
-<h3><code class="docutils literal notranslate"><span class="pre">search</span></code><a class="headerlink" href="#search" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">search</span></code><a class="headerlink" href="#search" title="Link to this heading">¶</a></h3>
 <p>( c-addr1 u1 c-addr2 u2 – c-addr3 u3 flag )</p>
 <p>Search a string from its start for a second string; if it is found, return the remainder of the first string starting from where the second string was found along with true; else return the whole first string and false.</p>
 </section>
 <section id="sliteral">
-<h3><code class="docutils literal notranslate"><span class="pre">sliteral</span></code><a class="headerlink" href="#sliteral" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sliteral</span></code><a class="headerlink" href="#sliteral" title="Link to this heading">¶</a></h3>
 <p>( compilation: c-addr1 u – ) ( runtime: – c-addr2 u )</p>
 <p>Compile a string literal.</p>
 </section>
 <section id="align">
-<h3><code class="docutils literal notranslate"><span class="pre">align</span></code><a class="headerlink" href="#align" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">align</span></code><a class="headerlink" href="#align" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Align the current <code class="docutils literal notranslate"><span class="pre">here</span></code> pointer to the next closest cell.</p>
 </section>
 <section id="aligned">
-<h3><code class="docutils literal notranslate"><span class="pre">aligned</span></code><a class="headerlink" href="#aligned" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">aligned</span></code><a class="headerlink" href="#aligned" title="Link to this heading">¶</a></h3>
 <p>( a-addr – a-addr’ )</p>
 <p>Align an address to the next closest cell.</p>
 </section>
 <section id="char">
-<h3><code class="docutils literal notranslate"><span class="pre">char+</span></code><a class="headerlink" href="#char" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">char+</span></code><a class="headerlink" href="#char" title="Link to this heading">¶</a></h3>
 <p>( c-addr – c-addr’ )</p>
 <p>Increment an address by the size of one character, i.e. one byte.</p>
 </section>
 <section id="chars">
-<h3><code class="docutils literal notranslate"><span class="pre">chars</span></code><a class="headerlink" href="#chars" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">chars</span></code><a class="headerlink" href="#chars" title="Link to this heading">¶</a></h3>
 <p>( n – n’ )</p>
 <p>Get the size of <em>n</em> characters in bytes; this is a no-op.</p>
 </section>
 <section id="parse-name">
-<h3><code class="docutils literal notranslate"><span class="pre">parse-name</span></code><a class="headerlink" href="#parse-name" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">parse-name</span></code><a class="headerlink" href="#parse-name" title="Link to this heading">¶</a></h3>
 <p>( “token” – c-addr u )</p>
 <p>Parse a single token from the input.</p>
 </section>
 <section id="r">
-<h3><code class="docutils literal notranslate"><span class="pre">.r</span></code><a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">.r</span></code><a class="headerlink" href="#r" title="Link to this heading">¶</a></h3>
 <p>( n width – )</p>
 <p>Output a right-justified signed value in a specified field width; note that if the value is wider than the specified field width the whole value will be output but no padding spaces will be added.</p>
 </section>
 <section id="u-r">
-<h3><code class="docutils literal notranslate"><span class="pre">u.r</span></code><a class="headerlink" href="#u-r" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">u.r</span></code><a class="headerlink" href="#u-r" title="Link to this heading">¶</a></h3>
 <p>( u width – )</p>
 <p>Output a right-justified unsigned value in a specified field width; note that if the value is wider than the specified field width the whole value will be output but no padding spaces will be added.</p>
 </section>
 <section id="holds">
-<h3><code class="docutils literal notranslate"><span class="pre">holds</span></code><a class="headerlink" href="#holds" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">holds</span></code><a class="headerlink" href="#holds" title="Link to this heading">¶</a></h3>
 <p>( c-addr u – )</p>
 <p>Add multiple characters to &lt;# # #&gt; numeric formatting.</p>
 </section>
 <section id="n-r">
-<h3><code class="docutils literal notranslate"><span class="pre">n&gt;r</span></code><a class="headerlink" href="#n-r" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">n&gt;r</span></code><a class="headerlink" href="#n-r" title="Link to this heading">¶</a></h3>
 <p>( xn .. x1 N – ; R: – x1 .. xn n )</p>
 <p>Transfer N items and count to the return stack.</p>
 </section>
 <section id="nr">
-<h3><code class="docutils literal notranslate"><span class="pre">nr&gt;</span></code><a class="headerlink" href="#nr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">nr&gt;</span></code><a class="headerlink" href="#nr" title="Link to this heading">¶</a></h3>
 <p>( – xn .. x1 N ; R: x1 .. xn N – )</p>
 <p>Pull N items and count off the return stack.</p>
 </section>
 <section id="x-invalid-input-spec">
-<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-input-spec</span></code><a class="headerlink" href="#x-invalid-input-spec" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-input-spec</span></code><a class="headerlink" href="#x-invalid-input-spec" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Invalid input specification exception.</p>
 </section>
 <section id="save-input">
-<h3><code class="docutils literal notranslate"><span class="pre">save-input</span></code><a class="headerlink" href="#save-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">save-input</span></code><a class="headerlink" href="#save-input" title="Link to this heading">¶</a></h3>
 <p>( – xn … x1 n )</p>
 <p>Save input specification.</p>
 </section>
 <section id="restore-input">
-<h3><code class="docutils literal notranslate"><span class="pre">restore-input</span></code><a class="headerlink" href="#restore-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">restore-input</span></code><a class="headerlink" href="#restore-input" title="Link to this heading">¶</a></h3>
 <p>( xn … x1 n – )</p>
 <p>Restore input specification.</p>
 </section>
 <section id="refill">
-<h3><code class="docutils literal notranslate"><span class="pre">refill</span></code><a class="headerlink" href="#refill" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">refill</span></code><a class="headerlink" href="#refill" title="Link to this heading">¶</a></h3>
 <p>( – flag )</p>
 <p>Refill the input buffer (and return whether EOF has not been reached)</p>
 </section>
 <section id="sm-rem">
-<h3><code class="docutils literal notranslate"><span class="pre">sm/rem</span></code><a class="headerlink" href="#sm-rem" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sm/rem</span></code><a class="headerlink" href="#sm-rem" title="Link to this heading">¶</a></h3>
 <p>( d n – rem quot )</p>
 <p>Symmetric division.</p>
 </section>
 <section id="fm-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">fm/mod</span></code><a class="headerlink" href="#fm-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fm/mod</span></code><a class="headerlink" href="#fm-mod" title="Link to this heading">¶</a></h3>
 <p>( d n – rem quot )</p>
 <p>Floored division.</p>
 </section>
 <section id="unused">
-<h3><code class="docutils literal notranslate"><span class="pre">unused</span></code><a class="headerlink" href="#unused" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">unused</span></code><a class="headerlink" href="#unused" title="Link to this heading">¶</a></h3>
 <p>( – u )</p>
 <p>Get the amount of remainign dictionary space in the current task’s RAM dictionary</p>
 </section>
 <section id="abort">
-<h3><code class="docutils literal notranslate"><span class="pre">abort</span></code><a class="headerlink" href="#abort" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">abort</span></code><a class="headerlink" href="#abort" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Raise an exception <code class="docutils literal notranslate"><span class="pre">x-abort</span></code>.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">abort&quot;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">abort&quot;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( “message” – ) ( Runtime: flag – )</p>
 <p>Raise an exception that displays a message and a following newline if the value on the stack at runtime is non-zero.</p>
 </section>
 <section id="catch">
-<h3><code class="docutils literal notranslate"><span class="pre">catch</span></code><a class="headerlink" href="#catch" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">catch</span></code><a class="headerlink" href="#catch" title="Link to this heading">¶</a></h3>
 <p>( xt – except|0 )</p>
 <p>Catch an exception; a synonym for <code class="docutils literal notranslate"><span class="pre">try</span></code>.</p>
 </section>
 <section id="throw">
-<h3><code class="docutils literal notranslate"><span class="pre">throw</span></code><a class="headerlink" href="#throw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">throw</span></code><a class="headerlink" href="#throw" title="Link to this heading">¶</a></h3>
 <p>( except – )</p>
 <p>Throw an exception, converting standard exceptions to zeptoforth exceptions. Note that -2 is not handled in a standard way because there is no fixed message buffer for <code class="docutils literal notranslate"><span class="pre">abort&quot;</span></code>.</p>
 </section>
 <section id="x-abort">
-<h3><code class="docutils literal notranslate"><span class="pre">x-abort</span></code><a class="headerlink" href="#x-abort" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-abort</span></code><a class="headerlink" href="#x-abort" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>An exception which displays a message <code class="docutils literal notranslate"><span class="pre">aborted</span></code>.</p>
 </section>
 <section id="x-unknown">
-<h3><code class="docutils literal notranslate"><span class="pre">x-unknown</span></code><a class="headerlink" href="#x-unknown" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-unknown</span></code><a class="headerlink" href="#x-unknown" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>An unknown exception, corresponding to exception numbers &lt; 0 which do not have standard meanings.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">?</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Fetch a value from an address and print it as an integer.</p>
 </section>
 <section id="also">
-<h3><code class="docutils literal notranslate"><span class="pre">also</span></code><a class="headerlink" href="#also" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">also</span></code><a class="headerlink" href="#also" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Duplicate the first entry on the search order.</p>
 </section>
 <section id="definitions">
-<h3><code class="docutils literal notranslate"><span class="pre">definitions</span></code><a class="headerlink" href="#definitions" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">definitions</span></code><a class="headerlink" href="#definitions" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Make the compilation wordlist the same as the first entry on the search order.</p>
 </section>
 <section id="forth-wordlist">
-<h3><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code><a class="headerlink" href="#forth-wordlist" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code><a class="headerlink" href="#forth-wordlist" title="Link to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>A synonym for zeptoforth FORTH.</p>
 </section>
 <section id="forth">
-<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the topmost wordlist with the FORTH wordlist.</p>
 </section>
 <section id="only">
-<h3><code class="docutils literal notranslate"><span class="pre">only</span></code><a class="headerlink" href="#only" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">only</span></code><a class="headerlink" href="#only" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the wordlist order to the minimum default wordlist order.</p>
 </section>
 <section id="order">
-<h3><code class="docutils literal notranslate"><span class="pre">order</span></code><a class="headerlink" href="#order" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">order</span></code><a class="headerlink" href="#order" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Display the searchlist order.</p>
 </section>
 <section id="previous">
-<h3><code class="docutils literal notranslate"><span class="pre">previous</span></code><a class="headerlink" href="#previous" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">previous</span></code><a class="headerlink" href="#previous" title="Link to this heading">¶</a></h3>
 <p>( – ) get-order ?dup if nip 1- set-order then ;</p>
 <p>Remove the topmost entry of the wordlist order.</p>
 </section>
 <section id="search-wordlist">
-<h3><code class="docutils literal notranslate"><span class="pre">search-wordlist</span></code><a class="headerlink" href="#search-wordlist" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">search-wordlist</span></code><a class="headerlink" href="#search-wordlist" title="Link to this heading">¶</a></h3>
 <p>( c-addr u wid – 0 | xt 1 | xt -1 )</p>
 <p>Find a word in a wordlist’s xt using a string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return 0 if it is not found. Unlike ANS FIND it does not used a counted string and does not return the string being searched for if no word is found.</p>
 </section>
@@ -284,7 +280,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -306,6 +302,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -322,6 +320,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -332,7 +331,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -364,6 +362,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -388,7 +388,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -396,7 +396,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -414,7 +414,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

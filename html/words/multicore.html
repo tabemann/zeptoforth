@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Multicore Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Watchdog Words" href="watchdog.html" />
@@ -37,303 +33,303 @@
           <div class="body" role="main">
             
   <section id="multicore-words">
-<h1>Multicore Words<a class="headerlink" href="#multicore-words" title="Permalink to this heading">¶</a></h1>
+<h1>Multicore Words<a class="headerlink" href="#multicore-words" title="Link to this heading">¶</a></h1>
 <p>Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO’s (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.</p>
 <p>Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.</p>
 <p>Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> (on platforms other than RP2040 stubbed out in <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>) and <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, with a bit of supporting functionality also in <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/erase.fs</span></code>.</p>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Link to this heading">¶</a></h2>
 <p>Built into the kernel exists:</p>
 <section id="cpu-count">
-<h3><code class="docutils literal notranslate"><span class="pre">cpu-count</span></code><a class="headerlink" href="#cpu-count" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-count</span></code><a class="headerlink" href="#cpu-count" title="Link to this heading">¶</a></h3>
 <p>( – count )</p>
 <p>Get the core count.</p>
 </section>
 <section id="cpu-index">
-<h3><code class="docutils literal notranslate"><span class="pre">cpu-index</span></code><a class="headerlink" href="#cpu-index" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-index</span></code><a class="headerlink" href="#cpu-index" title="Link to this heading">¶</a></h3>
 <p>( – index )</p>
 <p>Get the index of the core from which <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> was called.</p>
 </section>
 <section id="cpu-offset">
-<h3><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code><a class="headerlink" href="#cpu-offset" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code><a class="headerlink" href="#cpu-offset" title="Link to this heading">¶</a></h3>
 <p>( – offset )</p>
 <p>Return 4 times <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code>.</p>
 </section>
 <section id="sio-hook">
-<h3><code class="docutils literal notranslate"><span class="pre">sio-hook</span></code><a class="headerlink" href="#sio-hook" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sio-hook</span></code><a class="headerlink" href="#sio-hook" title="Link to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>Get the address of a hook for the current core which may be set to an xt ( u – ) to handle values written to that core’s FIFO by the other core; note that a value of 0 (the default value) means that values read from the core’s FIFO are discarded.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">forth</span></code>, exists:</p>
 </section>
 <section id="cpu-variable">
-<h3><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code><a class="headerlink" href="#cpu-variable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code><a class="headerlink" href="#cpu-variable" title="Link to this heading">¶</a></h3>
 <p>( “global-name” “cpu-name” – )</p>
 <p>Compile a one-cell-per-core variable into flash that has two words referring to it, a <em>global-name</em> which takes a core index when called and outputs the address for that core, and a <em>cpu-name</em> which returns its address for the current core.</p>
 </section>
 </section>
 <section id="multicore">
-<h2><code class="docutils literal notranslate"><span class="pre">multicore</span></code><a class="headerlink" href="#multicore" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">multicore</span></code><a class="headerlink" href="#multicore" title="Link to this heading">¶</a></h2>
 <p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> on all platforms, exists:</p>
 <section id="x-spinlock-out-of-range">
-<h3><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code><a class="headerlink" href="#x-spinlock-out-of-range" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code><a class="headerlink" href="#x-spinlock-out-of-range" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Spinlock out of range exception.</p>
 </section>
 <section id="x-core-out-of-range">
-<h3><code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code><a class="headerlink" href="#x-core-out-of-range" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code><a class="headerlink" href="#x-core-out-of-range" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Core out of range exception, i.e. core index not in range 0 &lt;= core &lt; cpu-count.</p>
 </section>
 <section id="x-core-not-addressable">
-<h3><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code><a class="headerlink" href="#x-core-not-addressable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code><a class="headerlink" href="#x-core-not-addressable" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform, exists:</p>
 </section>
 <section id="sev">
-<h3><code class="docutils literal notranslate"><span class="pre">sev</span></code><a class="headerlink" href="#sev" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sev</span></code><a class="headerlink" href="#sev" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Signal an event to the other core.</p>
 </section>
 <section id="wfe">
-<h3><code class="docutils literal notranslate"><span class="pre">wfe</span></code><a class="headerlink" href="#wfe" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wfe</span></code><a class="headerlink" href="#wfe" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Wait for an event.</p>
 </section>
 <section id="sio-irq-proc0">
-<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC0</span></code><a class="headerlink" href="#sio-irq-proc0" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC0</span></code><a class="headerlink" href="#sio-irq-proc0" title="Link to this heading">¶</a></h3>
 <p>( – irq )</p>
 <p>SIO processor 0 IRQ index, i.e. 15.</p>
 </section>
 <section id="sio-irq-proc1">
-<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC1</span></code><a class="headerlink" href="#sio-irq-proc1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC1</span></code><a class="headerlink" href="#sio-irq-proc1" title="Link to this heading">¶</a></h3>
 <p>( – irq )</p>
 <p>SIO processor 1 RIQ index, i.e. 16.</p>
 </section>
 <section id="fifo-st">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST</span></code><a class="headerlink" href="#fifo-st" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST</span></code><a class="headerlink" href="#fifo-st" title="Link to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>FIFO status register; note that core 0 can see the read side of the 1 -&gt; 0
 FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p>
 </section>
 <section id="fifo-st-roe">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_ROE</span></code><a class="headerlink" href="#fifo-st-roe" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_ROE</span></code><a class="headerlink" href="#fifo-st-roe" title="Link to this heading">¶</a></h3>
 <p>( – bit )</p>
 <p>Sticky flag indicating the RX FIFO was read when empty; write to clear.</p>
 </section>
 <section id="fifo-st-wof">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_WOF</span></code><a class="headerlink" href="#fifo-st-wof" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_WOF</span></code><a class="headerlink" href="#fifo-st-wof" title="Link to this heading">¶</a></h3>
 <p>( – bit )</p>
 <p>Sticky flag indicating the TX FIFO was written when full; write to clear.</p>
 </section>
 <section id="fifo-st-vld">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_VLD</span></code><a class="headerlink" href="#fifo-st-vld" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_VLD</span></code><a class="headerlink" href="#fifo-st-vld" title="Link to this heading">¶</a></h3>
 <p>( – bit )</p>
 <p>Set if this core’s RX FIFO is not empty.</p>
 </section>
 <section id="fifo-wr">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_WR</span></code><a class="headerlink" href="#fifo-wr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_WR</span></code><a class="headerlink" href="#fifo-wr" title="Link to this heading">¶</a></h3>
 <p>( – bit )</p>
 <p>Write access from this core’s TX FIFO.</p>
 </section>
 <section id="fifo-rd">
-<h3><code class="docutils literal notranslate"><span class="pre">FIFO_RD</span></code><a class="headerlink" href="#fifo-rd" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_RD</span></code><a class="headerlink" href="#fifo-rd" title="Link to this heading">¶</a></h3>
 <p>( – bit )</p>
 <p>Read access to this core’s RX FIFO.</p>
 </section>
 <section id="spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">SPINLOCK</span></code><a class="headerlink" href="#spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">SPINLOCK</span></code><a class="headerlink" href="#spinlock" title="Link to this heading">¶</a></h3>
 <p>( index – addr )</p>
 <p>Returns the address of a spinlock with a given index. Note that reading from an spinlock claims it if a value other than 0 is read (which will be the index of the spinlock), with a value of 0 indicating that the spinlock is already held, and writing to a spinlock releases it.</p>
 </section>
 <section id="spinlock-count">
-<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#spinlock-count" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#spinlock-count" title="Link to this heading">¶</a></h3>
 <p>( – count )</p>
 <p>Returns the spinlock count, i.e. 32.</p>
 </section>
 <section id="claim-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#claim-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#claim-spinlock" title="Link to this heading">¶</a></h3>
 <p>( spinlock-index – )</p>
 <p>Claim a spinlock; no validation is carried out.</p>
 </section>
 <section id="release-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#release-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#release-spinlock" title="Link to this heading">¶</a></h3>
 <p>( spinlock-index – )</p>
 <p>Release a spinlock; no validation is carried out.</p>
 </section>
 <section id="claim-same-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code><a class="headerlink" href="#claim-same-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code><a class="headerlink" href="#claim-same-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Claim a multitasker spinlock for the current core.</p>
 </section>
 <section id="release-same-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code><a class="headerlink" href="#release-same-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code><a class="headerlink" href="#release-same-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Release a multitasker spinlock for the current core.</p>
 </section>
 <section id="claim-other-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code><a class="headerlink" href="#claim-other-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code><a class="headerlink" href="#claim-other-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Claim a multitasker spinlock for the specified core.</p>
 </section>
 <section id="release-other-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code><a class="headerlink" href="#release-other-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code><a class="headerlink" href="#release-other-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Release a multitasker spinlock for the specified core.</p>
 </section>
 <section id="claim-all-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code><a class="headerlink" href="#claim-all-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code><a class="headerlink" href="#claim-all-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Claim all the multitasker spinlocks.</p>
 </section>
 <section id="release-all-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code><a class="headerlink" href="#release-all-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code><a class="headerlink" href="#release-all-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Release all the multitasker spinlocks.</p>
 </section>
 <section id="with-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code><a class="headerlink" href="#with-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code><a class="headerlink" href="#with-spinlock" title="Link to this heading">¶</a></h3>
 <p>( xt spinlock – )</p>
 <p>Claim a spinlock while executing <em>xt</em>, releasing it afterwards</p>
 </section>
 <section id="critical-with-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code><a class="headerlink" href="#critical-with-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code><a class="headerlink" href="#critical-with-spinlock" title="Link to this heading">¶</a></h3>
 <p>( xt spinlock – )</p>
 <p>Claim a spinlock, enter a critical section, execute <em>xt</em>, release the spinlock, and then exit the critical section.</p>
 </section>
 <section id="critical-with-other-core-spinlock">
-<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code><a class="headerlink" href="#critical-with-other-core-spinlock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code><a class="headerlink" href="#critical-with-other-core-spinlock" title="Link to this heading">¶</a></h3>
 <p>( xt core – )</p>
 <p>Claim a multitasker spinlock for the specified core, enter a critical section, execute <em>xt</em>, release the spinlock, and then exit the critical section.</p>
 </section>
 <section id="fifo-drain">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#fifo-drain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#fifo-drain" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Drain a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
 </section>
 <section id="fifo-push-blocking">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#fifo-push-blocking" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#fifo-push-blocking" title="Link to this heading">¶</a></h3>
 <p>( x core – )</p>
 <p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
 </section>
 <section id="fifo-pop-blocking">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#fifo-pop-blocking" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#fifo-pop-blocking" title="Link to this heading">¶</a></h3>
 <p>( core – x )</p>
 <p>Do a blocking pop from a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
 </section>
 <section id="fifo-push-confirm">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#fifo-push-confirm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#fifo-push-confirm" title="Link to this heading">¶</a></h3>
 <p>( x core – confirmed? )</p>
 <p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised. Afterwards do a blocking pop from the FIFO for receiving fromt he same core and return whether the value pushed is the same as the value popped.</p>
 </section>
 <section id="launch-aux-core">
-<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#launch-aux-core" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#launch-aux-core" title="Link to this heading">¶</a></h3>
 <p>( vector-table stack-ptr rstack-ptr entry-xt core – )</p>
 <p>Launch an auxiliary core, i.e. a core <em>core</em> other than core 0 and execute <em>entry-xt</em> on it with the return stack pointer <em>rstack-ptr</em>, the data stack pointer <em>stack-ptr</em>, and the vector table base <em>vector-table</em>. Note that it is not recommended that this be used by the user, rather the user should use <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>.</p>
 </section>
 <section id="with-hold-core">
-<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#with-hold-core" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#with-hold-core" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Hold the other core, execute the provided <em>xt</em>, release the other core even if an exception had been raised, and if an exception had been raised re-raise it.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> for all platforms other than rp2040, exists:</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( – count )</p>
 <p>Returns the spinlock count, i.e. 0.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( spinlock-index – )</p>
 <p>Drop <em>spinlock-index</em>.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( spinlock-index – )</p>
 <p>Drop <em>spinlock-index</em>.</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This is a no-op.</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This is a no-op.</p>
 </section>
 <section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Drop <em>core</em>.</p>
 </section>
 <section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Drop <em>core</em>.</p>
 </section>
 <section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This is a no-op.</p>
 </section>
 <section id="id9">
-<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This is a no-op.</p>
 </section>
 <section id="id10">
-<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <p>( xt spinlock – )</p>
 <p>Drop <em>spinlock</em> and execute <em>xt</em>.</p>
 </section>
 <section id="id11">
-<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <p>( xt spinlock – )</p>
 <p>Drop <em>spinlock</em> and execute <em>xt</em> in a critical section.</p>
 </section>
 <section id="id12">
-<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <p>( xt core – )</p>
 <p>Drop <em>core</em> and execute <em>xt</em> in a critical section.</p>
 </section>
 <section id="test-set">
-<h3><code class="docutils literal notranslate"><span class="pre">test-set</span></code><a class="headerlink" href="#test-set" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">test-set</span></code><a class="headerlink" href="#test-set" title="Link to this heading">¶</a></h3>
 <p>( value addr – set? )</p>
 <p>Atomically test a value at <em>addr</em> and set it to <em>value</em> if it was previously 0, and return whether it was previously 0.</p>
 </section>
 <section id="test-set-raw">
-<h3><code class="docutils literal notranslate"><span class="pre">test-set-raw</span></code><a class="headerlink" href="#test-set-raw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">test-set-raw</span></code><a class="headerlink" href="#test-set-raw" title="Link to this heading">¶</a></h3>
 <p>( value addr – set? )</p>
 <p>Atomically test a value at <em>addr</em> and set it to <em>value</em> if it was previously 0, and return whether it was previously 0. This is different from <code class="docutils literal notranslate"><span class="pre">test-set</span></code> in that it assumes that interrupts were already disabled, and does not enable interrupts.</p>
 </section>
 <section id="id13">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <p>( core – )</p>
 <p>Placeholder for draining a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
 <section id="id14">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <p>( x core – )</p>
 <p>Placeholder for doing a blocking push onto a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
 <section id="id15">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <p>( core – x )</p>
 <p>Placeholder for doing a blocking pop from a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
 <section id="id16">
-<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <p>( x core – confirmed? )</p>
 <p>Placeholder for attempting to send data on a FIFO and confirming that the same data is sent back; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
 <section id="id17">
-<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <p>( xt stack-ptr rstack-ptr core – )</p>
 <p>Placeholder for attempting to launch an auxiliary core; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
 </section>
 <section id="id18">
-<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-hold-core</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>This simply executes the provided <em>xt</em>.</p>
 </section>
@@ -345,7 +341,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -367,6 +363,8 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -383,6 +381,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -393,7 +392,6 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -425,6 +423,8 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -449,7 +449,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -457,7 +457,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -475,7 +475,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Multitasking Words</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -24,7 +24,43 @@
 <p>Pending operations are scheduled operations that are executed within the multitasker when <code class="docutils literal notranslate"><span class="pre">pause</span></code> or <code class="docutils literal notranslate"><span class="pre">force-pending-ops</span></code> are executed, except within a critical section, where then they are defered. Pending operations are initialized and registered with <code class="docutils literal notranslate"><span class="pre">register-pending-op</span></code>, which gives them a fixed priority. Once registered, they can be set to execute with <code class="docutils literal notranslate"><span class="pre">set-pending-op</span></code>, which assigns an execution token to execute to them; this execution token will be cleared just prior to their execution. Pending operations are always of <code class="docutils literal notranslate"><span class="pre">pending-op-size</span></code> bytes. Note that it is safe to reuse a pending operation while it is executing, but if they are set again after they have already been set prior to their execution, their previously set execution token will be overwritten.</p>
 <p>Multitasking is enabled by default once <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.</p>
 <p>The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">z</span></code> sends the exception <code class="docutils literal notranslate"><span class="pre">x-interrupt-main</span></code> to the main task. The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">c</span></code> sends the exception <code class="docutils literal notranslate"><span class="pre">x-interrupt-other</span></code> to all tasks other than the main task and the extra task(s). The “attention” key combination Control-T <code class="docutils literal notranslate"><span class="pre">t</span></code>, after the task monitor has been started with <code class="docutils literal notranslate"><span class="pre">start-monitor</span></code> in the <code class="docutils literal notranslate"><span class="pre">monitor</span></code> module, displays information on all the tasks running.</p>
-<section id="forth">
+<p>The following diagram shows the states that a task can have:</p>
+<pre  class="mermaid">
+        stateDiagram-v2
+    direction LR
+    [*] --&gt; Stopped: Initialization
+    Stopped --&gt; AwaitingExecution: Scheduling
+    Stopped --&gt; Blocked: Scheduling (Blocked)
+    Stopped --&gt; Waiting: Scheduling (Waiting)
+    Stopped --&gt; Delayed: Scheduling (Delayed)
+    Stopped --&gt; Terminated: Killing
+    AwaitingExecution: Awaiting Execution
+    AwaitingExecution --&gt; Running: Execution
+    AwaitingExecution --&gt; Blocked: Blocking
+    AwaitingExecution --&gt; Waiting: Waiting
+    AwaitingExecution --&gt; Delayed: Delaying
+    AwaitingExecution --&gt; Stopped: Descheduling
+    AwaitingExecution --&gt; Terminated: Killing
+    Running --&gt; AwaitingExecution: Rescheduling
+    Running --&gt; Blocked: Blocking
+    Running --&gt; Waiting: Waiting
+    Running --&gt; Delayed: Delaying
+    Running --&gt; Stopped: Descheduling
+    Running --&gt; Terminated: Exiting
+    Running --&gt; Terminated: Killing
+    Blocked --&gt; AwaitingExecution: Waking
+    Blocked --&gt; AwaitingExecution: Timing Out
+    Blocked --&gt; Stopped: Descheduling
+    Blocked --&gt; Terminated: Killing
+    Waiting --&gt; AwaitingExecution: Waking
+    Waiting --&gt; Stopped: Descheduling
+    Waiting --&gt; Terminated: Killing
+    Delayed --&gt; AwaitingExecution: Waking
+    Delayed --&gt; Stopped: Descheduling
+    Delayed --&gt; Terminated: Killing
+    Terminated --&gt; AwaitingExecution: Termination Handling
+    Terminated --&gt; Stopped: Reinitialization
+    </pre><section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
 <p>This word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
 <section id="pause">

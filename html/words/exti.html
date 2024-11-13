@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>EXTI Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Programmable Input/Output Words" href="pio.html" />
@@ -37,124 +33,124 @@
           <div class="body" role="main">
             
   <section id="exti-words">
-<h1>EXTI Words<a class="headerlink" href="#exti-words" title="Permalink to this heading">¶</a></h1>
+<h1>EXTI Words<a class="headerlink" href="#exti-words" title="Link to this heading">¶</a></h1>
 <p>An EXTI API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control EXTI, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
 <section id="exti">
-<h2><code class="docutils literal notranslate"><span class="pre">exti</span></code><a class="headerlink" href="#exti" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">exti</span></code><a class="headerlink" href="#exti" title="Link to this heading">¶</a></h2>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">exti</span></code>.</p>
 <section id="exti-0-through-exti-4">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_0</span></code> through <code class="docutils literal notranslate"><span class="pre">EXTI_4</span></code><a class="headerlink" href="#exti-0-through-exti-4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_0</span></code> through <code class="docutils literal notranslate"><span class="pre">EXTI_4</span></code><a class="headerlink" href="#exti-0-through-exti-4" title="Link to this heading">¶</a></h3>
 <p>These are the interrupt numbers for the EXTI line 0 through 4 interrupts.</p>
 </section>
 <section id="exti-9-5">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_9_5</span></code><a class="headerlink" href="#exti-9-5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_9_5</span></code><a class="headerlink" href="#exti-9-5" title="Link to this heading">¶</a></h3>
 <p>This is the interrupt number for the EXTI line 5 through 9 interupt.</p>
 </section>
 <section id="exti-15-10">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_15_10</span></code><a class="headerlink" href="#exti-15-10" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_15_10</span></code><a class="headerlink" href="#exti-15-10" title="Link to this heading">¶</a></h3>
 <p>This is the interrupt number for the EXTI line 10 through 15 interrupt.</p>
 </section>
 <section id="pa-through-pk">
-<h3><code class="docutils literal notranslate"><span class="pre">PA</span></code> through <code class="docutils literal notranslate"><span class="pre">PK</span></code><a class="headerlink" href="#pa-through-pk" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">PA</span></code> through <code class="docutils literal notranslate"><span class="pre">PK</span></code><a class="headerlink" href="#pa-through-pk" title="Link to this heading">¶</a></h3>
 <p>These are the indices of the ports for each of the GPIO’s, from <code class="docutils literal notranslate"><span class="pre">PA</span></code> to <code class="docutils literal notranslate"><span class="pre">PI</span></code> on the STM32F407 and STM32L476 and <code class="docutils literal notranslate"><span class="pre">PA</span></code> to <code class="docutils literal notranslate"><span class="pre">PK</span></code> on the STM32F746.</p>
 </section>
 <section id="syscfg-clock-enable">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-enable</span></code><a class="headerlink" href="#syscfg-clock-enable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-enable</span></code><a class="headerlink" href="#syscfg-clock-enable" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the SYSCFG peripheral clock.</p>
 </section>
 <section id="syscfg-lp-clock-enable">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-enable</span></code><a class="headerlink" href="#syscfg-lp-clock-enable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-enable</span></code><a class="headerlink" href="#syscfg-lp-clock-enable" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the low-power SYSCFG peripheral clock</p>
 </section>
 <section id="syscfg-clock-disable">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-disable</span></code><a class="headerlink" href="#syscfg-clock-disable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-disable</span></code><a class="headerlink" href="#syscfg-clock-disable" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the SYSCFG peripheral clock.</p>
 </section>
 <section id="syscfg-lp-clock-disable">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-disable</span></code><a class="headerlink" href="#syscfg-lp-clock-disable" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-disable</span></code><a class="headerlink" href="#syscfg-lp-clock-disable" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the low-power SYSCFG peripheral clock</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-enable?</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-clock-enable?</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( – enable )</p>
 <p>Get whether the SYSCFG peripheral clock is enabled</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-enable?</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">syscfg-lp-clock-enable?</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( – enable )</p>
 <p>Get whether the low-power SYSCFG peripheral clock is enabled</p>
 </section>
 <section id="syscfg-exticrx">
-<h3><code class="docutils literal notranslate"><span class="pre">SYSCFG_EXTICRx!</span></code><a class="headerlink" href="#syscfg-exticrx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">SYSCFG_EXTICRx!</span></code><a class="headerlink" href="#syscfg-exticrx" title="Link to this heading">¶</a></h3>
 <p>( port exti – )</p>
 <p>Set a given EXTI line (from 0 to 15) to map to a specified port.</p>
 </section>
 <section id="exti-imr">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_IMR!</span></code><a class="headerlink" href="#exti-imr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_IMR!</span></code><a class="headerlink" href="#exti-imr" title="Link to this heading">¶</a></h3>
 <p>( mask exti – )</p>
 <p>Set the interrupt mask for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="exti-emr">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_EMR!</span></code><a class="headerlink" href="#exti-emr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_EMR!</span></code><a class="headerlink" href="#exti-emr" title="Link to this heading">¶</a></h3>
 <p>( mask exti – )</p>
 <p>Set the event mask for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="exti-rtsr">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_RTSR!</span></code><a class="headerlink" href="#exti-rtsr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_RTSR!</span></code><a class="headerlink" href="#exti-rtsr" title="Link to this heading">¶</a></h3>
 <p>( setting exti – )</p>
 <p>Set whether a given EXTI line (from 0 to 15) triggers on a rising edge.</p>
 </section>
 <section id="exti-ftsr">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_FTSR!</span></code><a class="headerlink" href="#exti-ftsr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_FTSR!</span></code><a class="headerlink" href="#exti-ftsr" title="Link to this heading">¶</a></h3>
 <p>( setting exti – )</p>
 <p>Set whether a given EXTI line (from 0 to 15) triggers on a falling edge.</p>
 </section>
 <section id="exti-swier">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_SWIER!</span></code><a class="headerlink" href="#exti-swier" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_SWIER!</span></code><a class="headerlink" href="#exti-swier" title="Link to this heading">¶</a></h3>
 <p>( exti – )</p>
 <p>Trigger a software interrupt/event for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="exti-pr">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_PR!</span></code><a class="headerlink" href="#exti-pr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_PR!</span></code><a class="headerlink" href="#exti-pr" title="Link to this heading">¶</a></h3>
 <p>( exti – )</p>
 <p>Clear a pending state for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">SYSCFG_EXTICRx&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">SYSCFG_EXTICRx&#64;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( exti – port )</p>
 <p>Get the mapping of a given EXTI line (from 0 to 15) to a port.</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_IMR&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_IMR&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( exti – mask )</p>
 <p>Get the interrupt mask for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_EMR&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_EMR&#64;</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( exti – mask )</p>
 <p>Get the event mask for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_RTSR&#64;</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_RTSR&#64;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( exti – setting )</p>
 <p>Get whether a given EXTI line (from 0 to 15) triggers on a rising edge.</p>
 </section>
 <section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_FTSR&#64;</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_FTSR&#64;</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( exti – setting )</p>
 <p>Get whether a given EXTI line (from 0 to 15) triggers on a falling edge.</p>
 </section>
 <section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_SWIER&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_SWIER&#64;</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p>( exti – state )</p>
 <p>Get whether a software interrupt/event has been set for a given EXTI line (from 0 to 15).</p>
 </section>
 <section id="id9">
-<h3><code class="docutils literal notranslate"><span class="pre">EXTI_PR&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">EXTI_PR&#64;</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>( exti – state )</p>
 <p>Get whether there is a pending state for a given EXTI line (from 0 to 15).</p>
 </section>
@@ -166,7 +162,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -188,6 +184,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -204,6 +202,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -214,7 +213,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -246,6 +244,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -270,7 +270,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -278,7 +278,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -296,7 +296,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

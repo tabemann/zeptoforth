@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>UART Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Analog-Digital Converter Words" href="adc.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="uart-words">
-<h1>UART Words<a class="headerlink" href="#uart-words" title="Permalink to this heading">¶</a></h1>
+<h1>UART Words<a class="headerlink" href="#uart-words" title="Link to this heading">¶</a></h1>
 <p>There are a number of words for controlling UART’s available on each of the supported microcontrollers on top of the console <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">key</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">key?</span></code> words. These are as follows:</p>
 <p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
@@ -49,115 +45,115 @@
 </ul>
 <p>Note that the RP2350 supports optional CTS and RTS flow control.</p>
 <section id="uart">
-<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Link to this heading">¶</a></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
 <section id="uart-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-enabled?</span></code><a class="headerlink" href="#uart-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-enabled?</span></code><a class="headerlink" href="#uart-enabled" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a UART is enabled.</p>
 </section>
 <section id="enable-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-uart</span></code><a class="headerlink" href="#enable-uart" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart</span></code><a class="headerlink" href="#enable-uart" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Enable a UART.</p>
 </section>
 <section id="disable-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-uart</span></code><a class="headerlink" href="#disable-uart" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart</span></code><a class="headerlink" href="#disable-uart" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Disable a UART.</p>
 </section>
 <section id="with-uart-disabled">
-<h3><code class="docutils literal notranslate"><span class="pre">with-uart-disabled</span></code><a class="headerlink" href="#with-uart-disabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-disabled</span></code><a class="headerlink" href="#with-uart-disabled" title="Link to this heading">¶</a></h3>
 <p>( xt uart – )</p>
 <p>Execute <em>xt</em> with a UART disabled, re-enabling it afterwards if it was previously enabled.</p>
 </section>
 <section id="uart-baud">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code><a class="headerlink" href="#uart-baud" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code><a class="headerlink" href="#uart-baud" title="Link to this heading">¶</a></h3>
 <p>( baud uart – )</p>
 <p>Set the baud of a UART.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( c uart – )</p>
 <p>Emit a byte to a UART.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( uart – c )</p>
 <p>Read a byte from a UART.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a UART is ready to emit a byte.</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a byte is ready to be read from a UART.</p>
 </section>
 <section id="flush-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">flush-uart</span></code><a class="headerlink" href="#flush-uart" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">flush-uart</span></code><a class="headerlink" href="#flush-uart" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Flush a UART’s transmit buffer. This flushes both the in-RAM transmit buffer and the UART’s transmit FIFO. Note that this does not flush data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.</p>
 </section>
 <section id="uart-alternate">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code><a class="headerlink" href="#uart-alternate" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code><a class="headerlink" href="#uart-alternate" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>The alternate function for a given UART (except for <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>).</p>
 </section>
 <section id="uart-non-cts-rts-alternate">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-non-cts/rts--alternate</span></code><a class="headerlink" href="#uart-non-cts-rts-alternate" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-non-cts/rts--alternate</span></code><a class="headerlink" href="#uart-non-cts-rts-alternate" title="Link to this heading">¶</a></h3>
 <p>( pin uart – )</p>
 <p>The alternate function for a non-CTS/RTS pin for a given UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="uart-cts-rts-alternate">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-alternate</span></code><a class="headerlink" href="#uart-cts-rts-alternate" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-alternate</span></code><a class="headerlink" href="#uart-cts-rts-alternate" title="Link to this heading">¶</a></h3>
 <p>( pin uart – )</p>
 <p>The alternate function for a CTS/RTS pin for a given UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="uart-pin">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-pin</span></code><a class="headerlink" href="#uart-pin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-pin</span></code><a class="headerlink" href="#uart-pin" title="Link to this heading">¶</a></h3>
 <p>( uart pin – )</p>
 <p>Set the alternate function for <em>pin</em> to configure it for <em>uart</em>.</p>
 </section>
 <section id="uart-cts-rts-pin">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-pin</span></code><a class="headerlink" href="#uart-cts-rts-pin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts/rts-pin</span></code><a class="headerlink" href="#uart-cts-rts-pin" title="Link to this heading">¶</a></h3>
 <p>( uart pin – )</p>
 <p>Set the alternate function for <em>pin</em> to configure it as a CTS/RTS pin for <em>uart</em> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="uart-cts-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-cts-enabled?</span></code><a class="headerlink" href="#uart-cts-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-cts-enabled?</span></code><a class="headerlink" href="#uart-cts-enabled" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether CTS is enabled on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="enable-uart-cts">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-cts</span></code><a class="headerlink" href="#enable-uart-cts" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-cts</span></code><a class="headerlink" href="#enable-uart-cts" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Enable CTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="disable-uart-cts">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-cts</span></code><a class="headerlink" href="#disable-uart-cts" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-cts</span></code><a class="headerlink" href="#disable-uart-cts" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Disable CTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="uart-rts-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-rts-enabled?</span></code><a class="headerlink" href="#uart-rts-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-rts-enabled?</span></code><a class="headerlink" href="#uart-rts-enabled" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether RTS is enabled on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="enable-uart-rts">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-rts</span></code><a class="headerlink" href="#enable-uart-rts" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart-rts</span></code><a class="headerlink" href="#enable-uart-rts" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Enable RTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="disable-uart-rts">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-rts</span></code><a class="headerlink" href="#disable-uart-rts" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart-rts</span></code><a class="headerlink" href="#disable-uart-rts" title="Link to this heading">¶</a></h3>
 <p>( uart – )</p>
 <p>Disable RTS on a UART (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="x-invalid-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code><a class="headerlink" href="#x-invalid-uart" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code><a class="headerlink" href="#x-invalid-uart" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Invalid UART exception.</p>
 </section>
@@ -169,7 +165,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -251,6 +247,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -275,7 +273,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -283,7 +281,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -301,7 +299,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

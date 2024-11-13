@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Realtime Clock (RTC) Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Hardware Timers" href="timer.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="realtime-clock-rtc-words">
-<h1>Realtime Clock (RTC) Words<a class="headerlink" href="#realtime-clock-rtc-words" title="Permalink to this heading">¶</a></h1>
+<h1>Realtime Clock (RTC) Words<a class="headerlink" href="#realtime-clock-rtc-words" title="Link to this heading">¶</a></h1>
 <p>zeptoforth has support for reading and setting the realtime clock (RTC) on the RP2040 (e.g. the Raspberry Pi Pico), both for keeping track of the date and time and for triggering an alarm. It also provides a layer for interfacing with the Always-On TImer on the RP2350 (e.g. the Raspberry Pi Pico 2) for converting its time (in milliseconds since Thursday, 1 January 1970 00:00:00) to and from human-friendly dates/times.</p>
 <p>Note that the RP2040’s RTC’s value is not preserved across resets, even if power is applied, so each time it is reset the RTC’s value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.</p>
 <p>The RP2350’s Always-On Timer’s time value is preserved across resets provided power is applied. The time when power is first applied is Thursday, 1 January 1970 00:00:00.</p>
@@ -48,140 +44,140 @@
 <p>Also provided is code for formatting date/times as strings and printing them to the console, for convenience’s sake.</p>
 <p>Note that a subset of these words are provided for platforms other than the RP2040 and RP2350, specifically all of these words aside from <code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time!</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-date-time!</span></code>, <code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code>, and <code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code>. Also, <code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code>, and <code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code> are not available on the RP2350.</p>
 <section id="rtc">
-<h2><code class="docutils literal notranslate"><span class="pre">rtc</span></code><a class="headerlink" href="#rtc" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">rtc</span></code><a class="headerlink" href="#rtc" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">rtc</span></code> module:</p>
 <section id="date-time-size">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-size</span></code><a class="headerlink" href="#date-time-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-size</span></code><a class="headerlink" href="#date-time-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>This returns the size of a date/time structure in bytes.</p>
 </section>
 <section id="date-time-year">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-year</span></code><a class="headerlink" href="#date-time-year" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-year</span></code><a class="headerlink" href="#date-time-year" title="Link to this heading">¶</a></h3>
 <p>( date-time – addr )</p>
 <p>This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a year, -1</p>
 </section>
 <section id="date-time-month">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-month</span></code><a class="headerlink" href="#date-time-month" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-month</span></code><a class="headerlink" href="#date-time-month" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing a month, from 1 to 12, or when not setting a month or not matching against a month, 255</p>
 </section>
 <section id="date-time-day">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-day</span></code><a class="headerlink" href="#date-time-day" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-day</span></code><a class="headerlink" href="#date-time-day" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing a day, from 1 to any of 28, 29, 30, or 31 depending on the month and year, or when not setting a day or not matching against a day, 255</p>
 </section>
 <section id="date-time-dotw">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-dotw</span></code><a class="headerlink" href="#date-time-dotw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-dotw</span></code><a class="headerlink" href="#date-time-dotw" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing a day of the week, from 0 representing Sunday to 6 representing Saturday, or when not setting a day of the week or not matching against a day of the week, 255.</p>
 </section>
 <section id="date-time-hour">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code><a class="headerlink" href="#date-time-hour" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code><a class="headerlink" href="#date-time-hour" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing an hour, from 0 to 23, or when not setting an hour or not matching against an hour, 255.</p>
 </section>
 <section id="date-time-minute">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code><a class="headerlink" href="#date-time-minute" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code><a class="headerlink" href="#date-time-minute" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing a minute, from 0 to 59, or when not setting a minute or not matching against a minute, 255.</p>
 </section>
 <section id="date-time-second">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-second</span></code><a class="headerlink" href="#date-time-second" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-second</span></code><a class="headerlink" href="#date-time-second" title="Link to this heading">¶</a></h3>
 <p>( date-time – c-addr )</p>
 <p>This returns the address of a byte in a date/time containing a second, from 0 to 59, or when not setting a second or not matching against a second, 255.</p>
 </section>
 <section id="date-time-msec">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-msec</span></code><a class="headerlink" href="#date-time-msec" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-msec</span></code><a class="headerlink" href="#date-time-msec" title="Link to this heading">¶</a></h3>
 <p>( date-time – h-addr )</p>
 <p>This returns the address of a halfword in a date/time containing a millisecond, from 0 to 999, or when not setting a millisecond or not matching against a millisecond, 65535.</p>
 </section>
 <section id="enable-rtc">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code><a class="headerlink" href="#enable-rtc" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code><a class="headerlink" href="#enable-rtc" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the realtime clock. (Note that it is enabled by default.) (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only.)</p>
 </section>
 <section id="disable-rtc">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code><a class="headerlink" href="#disable-rtc" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code><a class="headerlink" href="#disable-rtc" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the realtime clock. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only.)</p>
 </section>
 <section id="date-time-equal">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time-equal?</span></code><a class="headerlink" href="#date-time-equal" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-equal?</span></code><a class="headerlink" href="#date-time-equal" title="Link to this heading">¶</a></h3>
 <p>( date-time0 date-time1 – equal? )</p>
 <p>Check whether two date-times are equal (ignoring the day of the week).</p>
 </section>
 <section id="date-time">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time&#64;</span></code><a class="headerlink" href="#date-time" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time&#64;</span></code><a class="headerlink" href="#date-time" title="Link to this heading">¶</a></h3>
 <p>( date-time – )</p>
 <p>Get the current date/time. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only.)</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( date-time – )</p>
 <p>Set the current date/time. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only.)</p>
 </section>
 <section id="simple-date-time">
-<h3><code class="docutils literal notranslate"><span class="pre">simple-date-time!</span></code><a class="headerlink" href="#simple-date-time" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">simple-date-time!</span></code><a class="headerlink" href="#simple-date-time" title="Link to this heading">¶</a></h3>
 <p>( year month day hour minute second – )</p>
 <p>A convenience word to the current date/time at once, automatically calculating the day of the week. The arguments have the same meanings, respectively, as the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code>, and <code class="docutils literal notranslate"><span class="pre">date-time-second</span></code> of a date/time structure except that for all of these, not just the <em>year</em>, may have values of -1 to indicate unchanged values. Also, note that if <em>year</em> is -1, <em>month</em> is -1 or 255, or <em>day</em> is -1 or 255, the day of the week is not changed. Note that milliseconds are set to 0. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only.)</p>
 </section>
 <section id="set-rtc-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code><a class="headerlink" href="#set-rtc-alarm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code><a class="headerlink" href="#set-rtc-alarm" title="Link to this heading">¶</a></h3>
 <p>( date-time xt – )</p>
 <p>Set <em>xt</em> to execute as an RTC alarm interrupt handler at <em>date-time</em>, ignoring a year field of -1 and any of the other fields of 255. Note that when <em>xt</em> is executed it must reset the RTC alarm to a new date/time or clear the RTC alarm or else it will be triggered repeatedly. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only.)</p>
 </section>
 <section id="clear-rtc-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code><a class="headerlink" href="#clear-rtc-alarm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code><a class="headerlink" href="#clear-rtc-alarm" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Clear the RTC alarm. (This is <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only.)</p>
 </section>
 <section id="dotw-name">
-<h3><code class="docutils literal notranslate"><span class="pre">dotw-name</span></code><a class="headerlink" href="#dotw-name" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dotw-name</span></code><a class="headerlink" href="#dotw-name" title="Link to this heading">¶</a></h3>
 <p>( dotw – c-addr u )</p>
 <p>Get the name of a day of the week.</p>
 </section>
 <section id="month-name">
-<h3><code class="docutils literal notranslate"><span class="pre">month-name</span></code><a class="headerlink" href="#month-name" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">month-name</span></code><a class="headerlink" href="#month-name" title="Link to this heading">¶</a></h3>
 <p>( month – c-addr u )</p>
 <p>Get the name of a month.</p>
 </section>
 <section id="max-date-time-format-size">
-<h3><code class="docutils literal notranslate"><span class="pre">max-date-time-format-size</span></code><a class="headerlink" href="#max-date-time-format-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">max-date-time-format-size</span></code><a class="headerlink" href="#max-date-time-format-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the maximum size in bytes of a date formated with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
 </section>
 <section id="format-date-time">
-<h3><code class="docutils literal notranslate"><span class="pre">format-date-time</span></code><a class="headerlink" href="#format-date-time" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">format-date-time</span></code><a class="headerlink" href="#format-date-time" title="Link to this heading">¶</a></h3>
 <p>( c-addr date-time – c-addr u )</p>
 <p>Format <em>date-time</em> as a string starting at <em>c-addr</em>, and return the resulting string as the pair <em>c-addr</em> <em>u</em>.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">date-time.</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">date-time.</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( date-time – )</p>
 <p>Print a date/time as formatted with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
 </section>
 <section id="get-dotw">
-<h3><code class="docutils literal notranslate"><span class="pre">get-dotw</span></code><a class="headerlink" href="#get-dotw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-dotw</span></code><a class="headerlink" href="#get-dotw" title="Link to this heading">¶</a></h3>
 <p>( date-time – dotw )</p>
 <p>Calculate the day of the week for a date/time, ignoring its day of the week field; 0 is Sunday and 6 is Saturday. Note that if the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code> field of <em>date-time</em> is -1, the <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code> field of <em>date-time</em> is 255, or the <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code> field of <em>date-time</em> is 255, 255 will be returned for the day of the week.</p>
 </section>
 <section id="update-dotw">
-<h3><code class="docutils literal notranslate"><span class="pre">update-dotw</span></code><a class="headerlink" href="#update-dotw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-dotw</span></code><a class="headerlink" href="#update-dotw" title="Link to this heading">¶</a></h3>
 <p>( date-time )</p>
 <p>Update the day of the week for a date/time, ignoring its preexisting day of the week field. Note that if the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code> field of <em>date-time</em> is -1, the <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code> field of <em>date-time</em> is 255, or the <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code> field of <em>date-time</em> is 255, 255 will be set for the day of the week.</p>
 </section>
 <section id="convert-secs-since-1970">
-<h3><code class="docutils literal notranslate"><span class="pre">convert-secs-since-1970</span></code><a class="headerlink" href="#convert-secs-since-1970" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">convert-secs-since-1970</span></code><a class="headerlink" href="#convert-secs-since-1970" title="Link to this heading">¶</a></h3>
 <p>( seconds date-time – )</p>
 <p>Set a date/time with seconds from 1970-01-01 00:00:00. Note that milliseconds are set to 0.</p>
 </section>
 <section id="convert-msecs-since-1970">
-<h3><code class="docutils literal notranslate"><span class="pre">convert-msecs-since-1970</span></code><a class="headerlink" href="#convert-msecs-since-1970" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">convert-msecs-since-1970</span></code><a class="headerlink" href="#convert-msecs-since-1970" title="Link to this heading">¶</a></h3>
 <p>( D: milliseconds date-time – )</p>
 <p>Set a date/time with milliseconds from 1970-01-01 00:00:00.</p>
 </section>
 <section id="convert-to-msecs-since-1970">
-<h3><code class="docutils literal notranslate"><span class="pre">convert-to-msecs-since-1970</span></code><a class="headerlink" href="#convert-to-msecs-since-1970" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">convert-to-msecs-since-1970</span></code><a class="headerlink" href="#convert-to-msecs-since-1970" title="Link to this heading">¶</a></h3>
 <p>( date-time – D: milliseconds )</p>
 <p>Convert a date/time to milliseconds from 1970-01-01 00:00:00.</p>
 </section>
@@ -193,7 +189,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -275,6 +271,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -299,7 +297,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -307,7 +305,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -325,7 +323,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

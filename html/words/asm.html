@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Compilation-specific words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Exposed Kernel Variables" href="expose.html" />
@@ -37,208 +33,208 @@
           <div class="body" role="main">
             
   <section id="compilation-specific-words">
-<h1>Compilation-specific words<a class="headerlink" href="#compilation-specific-words" title="Permalink to this heading">¶</a></h1>
+<h1>Compilation-specific words<a class="headerlink" href="#compilation-specific-words" title="Link to this heading">¶</a></h1>
 <section id="internal">
-<h2><code class="docutils literal notranslate"><span class="pre">internal</span></code><a class="headerlink" href="#internal" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">internal</span></code><a class="headerlink" href="#internal" title="Link to this heading">¶</a></h2>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">internal</span></code>.</p>
 <section id="start-compile-no-push">
-<h3><code class="docutils literal notranslate"><span class="pre">start-compile-no-push</span></code><a class="headerlink" href="#start-compile-no-push" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-compile-no-push</span></code><a class="headerlink" href="#start-compile-no-push" title="Link to this heading">¶</a></h3>
 <p>Compile the start of a word without the push {lr}</p>
 </section>
 <section id="start-compile">
-<h3><code class="docutils literal notranslate"><span class="pre">start-compile</span></code><a class="headerlink" href="#start-compile" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-compile</span></code><a class="headerlink" href="#start-compile" title="Link to this heading">¶</a></h3>
 <p>Compile the start of a word</p>
 </section>
 <section id="current-link">
-<h3><code class="docutils literal notranslate"><span class="pre">current-link,</span></code><a class="headerlink" href="#current-link" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">current-link,</span></code><a class="headerlink" href="#current-link" title="Link to this heading">¶</a></h3>
 <p>Compile a link field</p>
 </section>
 <section id="finalize">
-<h3><code class="docutils literal notranslate"><span class="pre">finalize,</span></code><a class="headerlink" href="#finalize" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">finalize,</span></code><a class="headerlink" href="#finalize" title="Link to this heading">¶</a></h3>
 <p>Finalize the compilation of a word</p>
 </section>
 <section id="finalize-no-align">
-<h3><code class="docutils literal notranslate"><span class="pre">finalize-no-align,</span></code><a class="headerlink" href="#finalize-no-align" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">finalize-no-align,</span></code><a class="headerlink" href="#finalize-no-align" title="Link to this heading">¶</a></h3>
 <p>Finalize the compilation of a word without aligning</p>
 </section>
 <section id="end-compile">
-<h3><code class="docutils literal notranslate"><span class="pre">end-compile,</span></code><a class="headerlink" href="#end-compile" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">end-compile,</span></code><a class="headerlink" href="#end-compile" title="Link to this heading">¶</a></h3>
 <p>Compile the end of a word</p>
 </section>
 <section id="mov-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">mov-imm,</span></code><a class="headerlink" href="#mov-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">mov-imm,</span></code><a class="headerlink" href="#mov-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble a move immediate instruction</p>
 </section>
 <section id="neg">
-<h3><code class="docutils literal notranslate"><span class="pre">neg,</span></code><a class="headerlink" href="#neg" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neg,</span></code><a class="headerlink" href="#neg" title="Link to this heading">¶</a></h3>
 <p>Assemble an reverse subtract immediate from zero instruction</p>
 </section>
 <section id="blx-reg">
-<h3><code class="docutils literal notranslate"><span class="pre">blx-reg,</span></code><a class="headerlink" href="#blx-reg" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">blx-reg,</span></code><a class="headerlink" href="#blx-reg" title="Link to this heading">¶</a></h3>
 <p>Compile a blx (register) instruction</p>
 </section>
 <section id="branch">
-<h3><code class="docutils literal notranslate"><span class="pre">branch,</span></code><a class="headerlink" href="#branch" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">branch,</span></code><a class="headerlink" href="#branch" title="Link to this heading">¶</a></h3>
 <p>Compile an unconditional branch</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">0branch,</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">0branch,</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>Compile a branch on equal to zero</p>
 </section>
 <section id="branch-back">
-<h3><code class="docutils literal notranslate"><span class="pre">branch-back!</span></code><a class="headerlink" href="#branch-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">branch-back!</span></code><a class="headerlink" href="#branch-back" title="Link to this heading">¶</a></h3>
 <p>Compile a back-referenced unconditional branch</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">0branch-back!</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">0branch-back!</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>Compile a back-referenced branch on equal to zero</p>
 </section>
 <section id="inline">
-<h3><code class="docutils literal notranslate"><span class="pre">inline,</span></code><a class="headerlink" href="#inline" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">inline,</span></code><a class="headerlink" href="#inline" title="Link to this heading">¶</a></h3>
 <p>Inline a word</p>
 </section>
 <section id="call">
-<h3><code class="docutils literal notranslate"><span class="pre">call,</span></code><a class="headerlink" href="#call" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">call,</span></code><a class="headerlink" href="#call" title="Link to this heading">¶</a></h3>
 <p>Call a word at an address</p>
 </section>
 <section id="bl">
-<h3><code class="docutils literal notranslate"><span class="pre">bl,</span></code><a class="headerlink" href="#bl" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bl,</span></code><a class="headerlink" href="#bl" title="Link to this heading">¶</a></h3>
 <p>Compile a bl instruction</p>
 </section>
 <section id="mov-16-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm,</span></code><a class="headerlink" href="#mov-16-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm,</span></code><a class="headerlink" href="#mov-16-imm" title="Link to this heading">¶</a></h3>
 <p>Compile a move 16-bit immediate instruction</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm!</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm!</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>Compile a move 16-bit immediate instruction</p>
 </section>
 <section id="movt-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">movt-imm,</span></code><a class="headerlink" href="#movt-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">movt-imm,</span></code><a class="headerlink" href="#movt-imm" title="Link to this heading">¶</a></h3>
 <p>Compile a move top 16-bit immediate instruction</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">movt-imm!</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">movt-imm!</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>Compile a move top 16-bit immediate instruction</p>
 </section>
 <section id="literal">
-<h3><code class="docutils literal notranslate"><span class="pre">literal,</span></code><a class="headerlink" href="#literal" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">literal,</span></code><a class="headerlink" href="#literal" title="Link to this heading">¶</a></h3>
 <p>Assemble a literal</p>
 </section>
 <section id="reserve-literal">
-<h3><code class="docutils literal notranslate"><span class="pre">reserve-literal</span></code><a class="headerlink" href="#reserve-literal" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reserve-literal</span></code><a class="headerlink" href="#reserve-literal" title="Link to this heading">¶</a></h3>
 <p>Reserve space for a literal</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">literal!</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">literal!</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>Store a literal ( x reg addr – )</p>
 </section>
 <section id="b">
-<h3><code class="docutils literal notranslate"><span class="pre">b,</span></code><a class="headerlink" href="#b" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b,</span></code><a class="headerlink" href="#b" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq">
-<h3><code class="docutils literal notranslate"><span class="pre">beq,</span></code><a class="headerlink" href="#beq" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq,</span></code><a class="headerlink" href="#beq" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="b-back">
-<h3><code class="docutils literal notranslate"><span class="pre">b-back!</span></code><a class="headerlink" href="#b-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b-back!</span></code><a class="headerlink" href="#b-back" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq-back">
-<h3><code class="docutils literal notranslate"><span class="pre">beq-back!</span></code><a class="headerlink" href="#beq-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq-back!</span></code><a class="headerlink" href="#beq-back" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="b-32">
-<h3><code class="docutils literal notranslate"><span class="pre">b-32,</span></code><a class="headerlink" href="#b-32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b-32,</span></code><a class="headerlink" href="#b-32" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq-32">
-<h3><code class="docutils literal notranslate"><span class="pre">beq-32,</span></code><a class="headerlink" href="#beq-32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq-32,</span></code><a class="headerlink" href="#beq-32" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="b-32-back">
-<h3><code class="docutils literal notranslate"><span class="pre">b-32-back!</span></code><a class="headerlink" href="#b-32-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b-32-back!</span></code><a class="headerlink" href="#b-32-back" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq-32-back">
-<h3><code class="docutils literal notranslate"><span class="pre">beq-32-back!</span></code><a class="headerlink" href="#beq-32-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq-32-back!</span></code><a class="headerlink" href="#beq-32-back" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="reserve-branch">
-<h3><code class="docutils literal notranslate"><span class="pre">reserve-branch</span></code><a class="headerlink" href="#reserve-branch" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reserve-branch</span></code><a class="headerlink" href="#reserve-branch" title="Link to this heading">¶</a></h3>
 <p>Reserve space for a branch</p>
 </section>
 <section id="out-of-range-branch">
-<h3><code class="docutils literal notranslate"><span class="pre">out-of-range-branch</span></code><a class="headerlink" href="#out-of-range-branch" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">out-of-range-branch</span></code><a class="headerlink" href="#out-of-range-branch" title="Link to this heading">¶</a></h3>
 <p>Out of range branch exception</p>
 </section>
 <section id="not-building">
-<h3><code class="docutils literal notranslate"><span class="pre">not-building</span></code><a class="headerlink" href="#not-building" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">not-building</span></code><a class="headerlink" href="#not-building" title="Link to this heading">¶</a></h3>
 <p>Not building exception</p>
 </section>
 <section id="b-16">
-<h3><code class="docutils literal notranslate"><span class="pre">b-16,</span></code><a class="headerlink" href="#b-16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b-16,</span></code><a class="headerlink" href="#b-16" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq-16">
-<h3><code class="docutils literal notranslate"><span class="pre">beq-16,</span></code><a class="headerlink" href="#beq-16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq-16,</span></code><a class="headerlink" href="#beq-16" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="b-16-back">
-<h3><code class="docutils literal notranslate"><span class="pre">b-16-back!</span></code><a class="headerlink" href="#b-16-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">b-16-back!</span></code><a class="headerlink" href="#b-16-back" title="Link to this heading">¶</a></h3>
 <p>Assemble an unconditional branch</p>
 </section>
 <section id="beq-16-back">
-<h3><code class="docutils literal notranslate"><span class="pre">beq-16-back!</span></code><a class="headerlink" href="#beq-16-back" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">beq-16-back!</span></code><a class="headerlink" href="#beq-16-back" title="Link to this heading">¶</a></h3>
 <p>Assemble a branch on equal zero instruction</p>
 </section>
 <section id="cmp-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">cmp-imm,</span></code><a class="headerlink" href="#cmp-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cmp-imm,</span></code><a class="headerlink" href="#cmp-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble a compare to immediate instruction</p>
 </section>
 <section id="lsl-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">lsl-imm,</span></code><a class="headerlink" href="#lsl-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lsl-imm,</span></code><a class="headerlink" href="#lsl-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble a logical shift left immediate instruction</p>
 </section>
 <section id="orr">
-<h3><code class="docutils literal notranslate"><span class="pre">orr,</span></code><a class="headerlink" href="#orr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">orr,</span></code><a class="headerlink" href="#orr" title="Link to this heading">¶</a></h3>
 <p>Assemble an or instruction</p>
 </section>
 <section id="ldr-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">ldr-imm,</span></code><a class="headerlink" href="#ldr-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ldr-imm,</span></code><a class="headerlink" href="#ldr-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble an str immediate instruction</p>
 </section>
 <section id="str-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">str-imm,</span></code><a class="headerlink" href="#str-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">str-imm,</span></code><a class="headerlink" href="#str-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble an str immediate instruction</p>
 </section>
 <section id="add-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">add-imm,</span></code><a class="headerlink" href="#add-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">add-imm,</span></code><a class="headerlink" href="#add-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble a subtract immediate instruction</p>
 </section>
 <section id="sub-imm">
-<h3><code class="docutils literal notranslate"><span class="pre">sub-imm,</span></code><a class="headerlink" href="#sub-imm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sub-imm,</span></code><a class="headerlink" href="#sub-imm" title="Link to this heading">¶</a></h3>
 <p>Assemble a subtract immediate instruction</p>
 </section>
 <section id="pull">
-<h3><code class="docutils literal notranslate"><span class="pre">pull,</span></code><a class="headerlink" href="#pull" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pull,</span></code><a class="headerlink" href="#pull" title="Link to this heading">¶</a></h3>
 <p>Assemble instructions to pull a value from the stack</p>
 </section>
 <section id="push">
-<h3><code class="docutils literal notranslate"><span class="pre">push,</span></code><a class="headerlink" href="#push" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">push,</span></code><a class="headerlink" href="#push" title="Link to this heading">¶</a></h3>
 <p>Assemble instructions to push a value onto the stack</p>
 </section>
 <section id="adr">
-<h3><code class="docutils literal notranslate"><span class="pre">adr,</span></code><a class="headerlink" href="#adr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">adr,</span></code><a class="headerlink" href="#adr" title="Link to this heading">¶</a></h3>
 <p>Word-align an address</p>
 </section>
 <section id="word-align">
-<h3><code class="docutils literal notranslate"><span class="pre">word-align,</span></code><a class="headerlink" href="#word-align" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">word-align,</span></code><a class="headerlink" href="#word-align" title="Link to this heading">¶</a></h3>
 <p>Assemble an instruction to generate a PC-relative address</p>
 </section>
 <section id="bx">
-<h3><code class="docutils literal notranslate"><span class="pre">bx,</span></code><a class="headerlink" href="#bx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bx,</span></code><a class="headerlink" href="#bx" title="Link to this heading">¶</a></h3>
 <p>Assemble a BX instruction</p>
 </section>
 </section>
@@ -249,7 +245,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -271,6 +267,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -287,6 +285,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -297,7 +296,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -329,6 +327,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -353,7 +353,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -361,7 +361,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -379,7 +379,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

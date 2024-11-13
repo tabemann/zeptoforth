@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Task Pool words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Action Pool words" href="action_pool.html" />
@@ -37,33 +33,33 @@
           <div class="body" role="main">
             
   <section id="task-pool-words">
-<h1>Task Pool words<a class="headerlink" href="#task-pool-words" title="Permalink to this heading">¶</a></h1>
+<h1>Task Pool words<a class="headerlink" href="#task-pool-words" title="Link to this heading">¶</a></h1>
 <p>Task pools provide a means of managing multiple tasks and dynamically creating and destroying them. Note that the total number of task that may exist at any one time is fixed, but the number of executing tasks may be of any number less than or equal to that at any point in time.</p>
 <section id="task-pool">
-<h2><code class="docutils literal notranslate"><span class="pre">task-pool</span></code><a class="headerlink" href="#task-pool" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">task-pool</span></code><a class="headerlink" href="#task-pool" title="Link to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">task-pool</span></code>:</p>
 <section id="x-no-task-available">
-<h3><code class="docutils literal notranslate"><span class="pre">x-no-task-available</span></code><a class="headerlink" href="#x-no-task-available" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-task-available</span></code><a class="headerlink" href="#x-no-task-available" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Exception raised if one attempts to spawn a task from a task pool and no tasks are available.</p>
 </section>
 <section id="spawn-from-task-pool">
-<h3><code class="docutils literal notranslate"><span class="pre">spawn-from-task-pool</span></code><a class="headerlink" href="#spawn-from-task-pool" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">spawn-from-task-pool</span></code><a class="headerlink" href="#spawn-from-task-pool" title="Link to this heading">¶</a></h3>
 <p>( xn … x0 count xt task-pool –  task )</p>
 <p>Spawn a task from a task pool, if a task is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-task-available</span></code> if no tasks are available. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed, and <em>count</em> is the number of such parameters.</p>
 </section>
 <section id="task-pool-free">
-<h3><code class="docutils literal notranslate"><span class="pre">task-pool-free</span></code><a class="headerlink" href="#task-pool-free" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">task-pool-free</span></code><a class="headerlink" href="#task-pool-free" title="Link to this heading">¶</a></h3>
 <p>( task-pool – count )</p>
 <p>Get the number of free tasks in a task pool.</p>
 </section>
 <section id="init-task-pool">
-<h3><code class="docutils literal notranslate"><span class="pre">init-task-pool</span></code><a class="headerlink" href="#init-task-pool" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-task-pool</span></code><a class="headerlink" href="#init-task-pool" title="Link to this heading">¶</a></h3>
 <p>( dict-size stack-size rstack-size count addr – )</p>
 <p>Initialize a task pool at <em>addr</em>, with <em>count</em> tasks, each with <em>stack-size</em> stack size, <em>rstack-size</em> return stack size, and <em>dict-size</em> dictionary size; note that <em>stack-size</em>, <em>rstack-size</em>, and <em>dict-size</em> are rounded up to the nearest four bytes. These tasks are terminated initially, and are free to be spawned as needed.</p>
 </section>
 <section id="task-pool-size">
-<h3><code class="docutils literal notranslate"><span class="pre">task-pool-size</span></code><a class="headerlink" href="#task-pool-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">task-pool-size</span></code><a class="headerlink" href="#task-pool-size" title="Link to this heading">¶</a></h3>
 <p>( count – bytes )</p>
 <p>Get the size (excluding the tasks themselves) taken up by a task pool with <em>count</em> tasks; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-task-pool</span></code></p>
 </section>
@@ -75,7 +71,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -97,6 +93,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -123,7 +122,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -155,6 +153,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -179,7 +179,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -187,7 +187,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -205,7 +205,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

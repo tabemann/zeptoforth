@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Task Queue Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SysTick Words" href="systick.html" />
@@ -37,48 +33,48 @@
           <div class="body" role="main">
             
   <section id="task-queue-words">
-<h1>Task Queue Words<a class="headerlink" href="#task-queue-words" title="Permalink to this heading">¶</a></h1>
+<h1>Task Queue Words<a class="headerlink" href="#task-queue-words" title="Link to this heading">¶</a></h1>
 <p>A task queue is a queue of waiting tasks, which then can be woken up, in the order of highest priority first and then the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks <em>before</em> they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).</p>
 <section id="tqueue">
-<h2><code class="docutils literal notranslate"><span class="pre">tqueue</span></code><a class="headerlink" href="#tqueue" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">tqueue</span></code><a class="headerlink" href="#tqueue" title="Link to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">tqueue</span></code>:</p>
 <section id="tqueue-size">
-<h3><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code><a class="headerlink" href="#tqueue-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code><a class="headerlink" href="#tqueue-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of a task queue in memory.</p>
 </section>
 <section id="no-tqueue-limit">
-<h3><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code><a class="headerlink" href="#no-tqueue-limit" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code><a class="headerlink" href="#no-tqueue-limit" title="Link to this heading">¶</a></h3>
 <p>( – n )</p>
 <p>Magic value indicating no task queue counter limit.</p>
 </section>
 <section id="init-tqueue">
-<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code><a class="headerlink" href="#init-tqueue" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code><a class="headerlink" href="#init-tqueue" title="Link to this heading">¶</a></h3>
 <p>( slock addr – )</p>
 <p>Initialize a task queue with simple lock <em>slock</em> starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. It will have no counter limit, and its counter will be initialized to zero.</p>
 </section>
 <section id="init-tqueue-full">
-<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code><a class="headerlink" href="#init-tqueue-full" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code><a class="headerlink" href="#init-tqueue-full" title="Link to this heading">¶</a></h3>
 <p>( limit counter slock addr – )</p>
 <p>Initialize a task queue with simple lock <em>slock</em> starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. Its counter limit will be initialized to <em>limit</em> and its counter will be initialized to <em>counter</em>.</p>
 </section>
 <section id="wait-tqueue">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code><a class="headerlink" href="#wait-tqueue" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code><a class="headerlink" href="#wait-tqueue" title="Link to this heading">¶</a></h3>
 <p>( tqueue – )</p>
 <p>Decrement the task queue’s internal wait counter. If it is negative, block the current task and place it in the task queue after the last task with a greater or equal priority. Note that the simple lock for the task queue must be held by the task which calls this; this simple lock is released if this blocks, to be claimed again when the task is readied.</p>
 </section>
 <section id="wake-tqueue">
-<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code><a class="headerlink" href="#wake-tqueue" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code><a class="headerlink" href="#wake-tqueue" title="Link to this heading">¶</a></h3>
 <p>( tqueue – )</p>
 <p>Increment the task queue’s internal wait counter. If a counter limit is set, the internal wait counter will not increase beyond it. If there is a task in the task queue, ready the task with the highest priority added first to the task queue. Note that the simple lock for the task queue must be held by the task which calls this.</p>
 </section>
 <section id="unwake-tqueue">
-<h3><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code><a class="headerlink" href="#unwake-tqueue" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code><a class="headerlink" href="#unwake-tqueue" title="Link to this heading">¶</a></h3>
 <p>( tqueue – )</p>
 <p>Decrement the task queue’s internal wait counter.</p>
 </section>
 <section id="wake-tqueue-all">
-<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code><a class="headerlink" href="#wake-tqueue-all" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code><a class="headerlink" href="#wake-tqueue-all" title="Link to this heading">¶</a></h3>
 <p>( tqueue – )</p>
 <p>Wake all the tasks waiting on a task queue.</p>
 </section>
@@ -90,7 +86,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -112,6 +108,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -128,6 +126,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -138,7 +137,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -170,6 +168,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -194,7 +194,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -202,7 +202,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -220,7 +220,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

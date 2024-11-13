@@ -16,6 +16,45 @@ Multitasking is enabled by default once `src/common/forth/task.fs` has been load
 
 The "attention" key combination Control-T `z` sends the exception `x-interrupt-main` to the main task. The "attention" key combination Control-T `c` sends the exception `x-interrupt-other` to all tasks other than the main task and the extra task(s). The "attention" key combination Control-T `t`, after the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all the tasks running.
 
+The following diagram shows the states that a task can have:
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Stopped: Initialization
+    Stopped --> AwaitingExecution: Scheduling
+    Stopped --> Blocked: Scheduling (Blocked)
+    Stopped --> Waiting: Scheduling (Waiting)
+    Stopped --> Delayed: Scheduling (Delayed)
+    Stopped --> Terminated: Killing
+    AwaitingExecution: Awaiting Execution
+    AwaitingExecution --> Running: Execution
+    AwaitingExecution --> Blocked: Blocking
+    AwaitingExecution --> Waiting: Waiting
+    AwaitingExecution --> Delayed: Delaying
+    AwaitingExecution --> Stopped: Descheduling
+    AwaitingExecution --> Terminated: Killing
+    Running --> AwaitingExecution: Rescheduling
+    Running --> Blocked: Blocking
+    Running --> Waiting: Waiting
+    Running --> Delayed: Delaying
+    Running --> Stopped: Descheduling
+    Running --> Terminated: Exiting
+    Running --> Terminated: Killing
+    Blocked --> AwaitingExecution: Waking
+    Blocked --> AwaitingExecution: Timing Out
+    Blocked --> Stopped: Descheduling
+    Blocked --> Terminated: Killing
+    Waiting --> AwaitingExecution: Waking
+    Waiting --> Stopped: Descheduling
+    Waiting --> Terminated: Killing
+    Delayed --> AwaitingExecution: Waking
+    Delayed --> Stopped: Descheduling
+    Delayed --> Terminated: Killing
+    Terminated --> AwaitingExecution: Termination Handling
+    Terminated --> Stopped: Reinitialization
+```
+
 ### `forth`
 
 This word is in `forth`:

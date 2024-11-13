@@ -1,23 +1,19 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>S15.16 Fixed Point Numbers &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Profiler Words" href="profile.html" />
+    <link rel="next" title="Complex Numbers Based on Single-Precision Floating-Point Values" href="complex_float32.html" />
     <link rel="prev" title="Exposed Kernel Variables" href="../words/expose.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -37,233 +33,233 @@
           <div class="body" role="main">
             
   <section id="s15-16-fixed-point-numbers">
-<h1>S15.16 Fixed Point Numbers<a class="headerlink" href="#s15-16-fixed-point-numbers" title="Permalink to this heading">¶</a></h1>
+<h1>S15.16 Fixed Point Numbers<a class="headerlink" href="#s15-16-fixed-point-numbers" title="Link to this heading">¶</a></h1>
 <p>32-bit, or more specifically S15.16 (15 bits before the decimal point, 16 bits after the decimal point, one bit for the sign, two’s complement) fixed-point numbers are optionally supported by zeptoforth. They are not in any builds, but are available to be loaded by the user, both into RAM and into flash.</p>
 <section id="fixed32">
-<h2><code class="docutils literal notranslate"><span class="pre">fixed32</span></code><a class="headerlink" href="#fixed32" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">fixed32</span></code><a class="headerlink" href="#fixed32" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">fixed2</span></code> module contains the following words:</p>
 <section id="f32">
-<h3><code class="docutils literal notranslate"><span class="pre">f32*</span></code><a class="headerlink" href="#f32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32*</span></code><a class="headerlink" href="#f32" title="Link to this heading">¶</a></h3>
 <p>( x y – z )</p>
 <p>Multiply two S15.16 fixed-point numbers</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">f32/</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32/</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( x y – z )</p>
 <p>Divide an S15.16 fixed-point number by another</p>
 </section>
 <section id="f32-s">
-<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;s</span></code><a class="headerlink" href="#f32-s" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;s</span></code><a class="headerlink" href="#f32-s" title="Link to this heading">¶</a></h3>
 <p>( x – y )</p>
 <p>Convert an S15.16 fixed-point number to a 16-bit integer</p>
 </section>
 <section id="s-f32">
-<h3><code class="docutils literal notranslate"><span class="pre">s&gt;f32</span></code><a class="headerlink" href="#s-f32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">s&gt;f32</span></code><a class="headerlink" href="#s-f32" title="Link to this heading">¶</a></h3>
 <p>( x – y )</p>
 <p>Convert a 16-bit integer to an S15.16 fixed-point number</p>
 </section>
 <section id="f64-f32">
-<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;f32</span></code><a class="headerlink" href="#f64-f32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f64&gt;f32</span></code><a class="headerlink" href="#f64-f32" title="Link to this heading">¶</a></h3>
 <p>( D: x – y )</p>
 <p>Convert an S31.32 fixed-point number to an S15.16 fixed-point number</p>
 </section>
 <section id="f32-f64">
-<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;f64</span></code><a class="headerlink" href="#f32-f64" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32&gt;f64</span></code><a class="headerlink" href="#f32-f64" title="Link to this heading">¶</a></h3>
 <p>( x – D: y )</p>
 <p>Convert an S15.16 fixed-point number to an S31.32 fixed-point number</p>
 </section>
 <section id="f32mod">
-<h3><code class="docutils literal notranslate"><span class="pre">f32mod</span></code><a class="headerlink" href="#f32mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32mod</span></code><a class="headerlink" href="#f32mod" title="Link to this heading">¶</a></h3>
 <p>( x y – z )</p>
 <p>Calculate the modulus of two S15.16 fixed-point numbers</p>
 </section>
 <section id="f32ceil">
-<h3><code class="docutils literal notranslate"><span class="pre">f32ceil</span></code><a class="headerlink" href="#f32ceil" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32ceil</span></code><a class="headerlink" href="#f32ceil" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Get the ceiling of an S15.16 fixed-point number as a single-cell number.</p>
 </section>
 <section id="f32floor">
-<h3><code class="docutils literal notranslate"><span class="pre">f32floor</span></code><a class="headerlink" href="#f32floor" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32floor</span></code><a class="headerlink" href="#f32floor" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Get the floor of an S15.16 fixed-point number as a single-cell number.</p>
 </section>
 <section id="f32round-half-up">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-up</span></code><a class="headerlink" href="#f32round-half-up" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-up</span></code><a class="headerlink" href="#f32round-half-up" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number up to the nearest integer with half rounding up.</p>
 </section>
 <section id="f32round-half-down">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-down</span></code><a class="headerlink" href="#f32round-half-down" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-down</span></code><a class="headerlink" href="#f32round-half-down" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number down to the nearest integer with half rounding down.</p>
 </section>
 <section id="f32round-half-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-zero</span></code><a class="headerlink" href="#f32round-half-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-zero</span></code><a class="headerlink" href="#f32round-half-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number to the nearest integer with half rounding towards zero.</p>
 </section>
 <section id="f32round-half-away-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-away-zero</span></code><a class="headerlink" href="#f32round-half-away-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-away-zero</span></code><a class="headerlink" href="#f32round-half-away-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number to the nearest integer with half rounding away from zero.</p>
 </section>
 <section id="f32round-half-even">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-even</span></code><a class="headerlink" href="#f32round-half-even" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-even</span></code><a class="headerlink" href="#f32round-half-even" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number to the nearest integer with half rounding towards even.</p>
 </section>
 <section id="f32round-half-odd">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-odd</span></code><a class="headerlink" href="#f32round-half-odd" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-half-odd</span></code><a class="headerlink" href="#f32round-half-odd" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number to the nearest integer with half rounding towards even.</p>
 </section>
 <section id="f32round-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-zero</span></code><a class="headerlink" href="#f32round-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-zero</span></code><a class="headerlink" href="#f32round-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number towards zero.</p>
 </section>
 <section id="f32round-away-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">f32round-away-zero</span></code><a class="headerlink" href="#f32round-away-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32round-away-zero</span></code><a class="headerlink" href="#f32round-away-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round an S15.16 fixed-point number away from zero.</p>
 </section>
 <section id="f32pi">
-<h3><code class="docutils literal notranslate"><span class="pre">f32pi</span></code><a class="headerlink" href="#f32pi" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32pi</span></code><a class="headerlink" href="#f32pi" title="Link to this heading">¶</a></h3>
 <p>( – pi )</p>
 <p>Pi as a S15.16 fixed-point number</p>
 </section>
 <section id="f32sqrt">
-<h3><code class="docutils literal notranslate"><span class="pre">f32sqrt</span></code><a class="headerlink" href="#f32sqrt" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32sqrt</span></code><a class="headerlink" href="#f32sqrt" title="Link to this heading">¶</a></h3>
 <p>( x – y )</p>
 <p>Get the square root of an S15.16 fixed-point number</p>
 </section>
 <section id="f32i">
-<h3><code class="docutils literal notranslate"><span class="pre">f32i**</span></code><a class="headerlink" href="#f32i" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32i**</span></code><a class="headerlink" href="#f32i" title="Link to this heading">¶</a></h3>
 <p>( f32 exponent – f32’ )</p>
 <p>Exponentiate an S15.16 fixed-point number by an integer</p>
 </section>
 <section id="f32expm1">
-<h3><code class="docutils literal notranslate"><span class="pre">f32expm1</span></code><a class="headerlink" href="#f32expm1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32expm1</span></code><a class="headerlink" href="#f32expm1" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the (e^x)-1 of an S15.16 fixed-point number</p>
 </section>
 <section id="f32exp">
-<h3><code class="docutils literal notranslate"><span class="pre">f32exp</span></code><a class="headerlink" href="#f32exp" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32exp</span></code><a class="headerlink" href="#f32exp" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the e^x of an S15.16 fixed-point number</p>
 </section>
 <section id="f32lnp1">
-<h3><code class="docutils literal notranslate"><span class="pre">f32lnp1</span></code><a class="headerlink" href="#f32lnp1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32lnp1</span></code><a class="headerlink" href="#f32lnp1" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the ln(x+1) of an S15.16 fixed-point number</p>
 </section>
 <section id="f32ln">
-<h3><code class="docutils literal notranslate"><span class="pre">f32ln</span></code><a class="headerlink" href="#f32ln" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32ln</span></code><a class="headerlink" href="#f32ln" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the ln(x) of an S15.16 fixed-point number</p>
 </section>
 <section id="f32sin">
-<h3><code class="docutils literal notranslate"><span class="pre">f32sin</span></code><a class="headerlink" href="#f32sin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32sin</span></code><a class="headerlink" href="#f32sin" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the sine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32cos">
-<h3><code class="docutils literal notranslate"><span class="pre">f32cos</span></code><a class="headerlink" href="#f32cos" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32cos</span></code><a class="headerlink" href="#f32cos" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the cosine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32tan">
-<h3><code class="docutils literal notranslate"><span class="pre">f32tan</span></code><a class="headerlink" href="#f32tan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32tan</span></code><a class="headerlink" href="#f32tan" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the tangent of an S15.16 fixed-point number</p>
 </section>
 <section id="f32atan">
-<h3><code class="docutils literal notranslate"><span class="pre">f32atan</span></code><a class="headerlink" href="#f32atan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32atan</span></code><a class="headerlink" href="#f32atan" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the arctangent of an S15.16 fixed-point number</p>
 </section>
 <section id="f32atan2">
-<h3><code class="docutils literal notranslate"><span class="pre">f32atan2</span></code><a class="headerlink" href="#f32atan2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32atan2</span></code><a class="headerlink" href="#f32atan2" title="Link to this heading">¶</a></h3>
 <p>( f32x f32y – f32angle )</p>
 <p>Get the angle of an x and an y S15.16 fixed-point numbers</p>
 </section>
 <section id="f32asin">
-<h3><code class="docutils literal notranslate"><span class="pre">f32asin</span></code><a class="headerlink" href="#f32asin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32asin</span></code><a class="headerlink" href="#f32asin" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the arcsine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32acos">
-<h3><code class="docutils literal notranslate"><span class="pre">f32acos</span></code><a class="headerlink" href="#f32acos" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32acos</span></code><a class="headerlink" href="#f32acos" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the arccosine of an S15.16 fixed-point number</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">f32**</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32**</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( f32b f32x – f32b^f32x )</p>
 <p>Exponentiate two S15.16 fixed-point numbers</p>
 </section>
 <section id="f32sinh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32sinh</span></code><a class="headerlink" href="#f32sinh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32sinh</span></code><a class="headerlink" href="#f32sinh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic sine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32cosh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32cosh</span></code><a class="headerlink" href="#f32cosh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32cosh</span></code><a class="headerlink" href="#f32cosh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic cosine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32tanh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32tanh</span></code><a class="headerlink" href="#f32tanh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32tanh</span></code><a class="headerlink" href="#f32tanh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic tangent of an S15.16 fixed-point number</p>
 </section>
 <section id="f32asinh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32asinh</span></code><a class="headerlink" href="#f32asinh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32asinh</span></code><a class="headerlink" href="#f32asinh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic arcsine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32acosh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32acosh</span></code><a class="headerlink" href="#f32acosh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32acosh</span></code><a class="headerlink" href="#f32acosh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic arccosine of an S15.16 fixed-point number</p>
 </section>
 <section id="f32atanh">
-<h3><code class="docutils literal notranslate"><span class="pre">f32atanh</span></code><a class="headerlink" href="#f32atanh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32atanh</span></code><a class="headerlink" href="#f32atanh" title="Link to this heading">¶</a></h3>
 <p>( f32 – f32’ )</p>
 <p>Get the hyperbolic arctangent of an S15.16 fixed-point number</p>
 </section>
 <section id="parse-f32">
-<h3><code class="docutils literal notranslate"><span class="pre">parse-f32</span></code><a class="headerlink" href="#parse-f32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">parse-f32</span></code><a class="headerlink" href="#parse-f32" title="Link to this heading">¶</a></h3>
 <p>( c-addr bytes – f32 success? )</p>
 <p>Parse a 32-bit fixed-point number</p>
 </section>
 <section id="format-f32">
-<h3><code class="docutils literal notranslate"><span class="pre">format-f32</span></code><a class="headerlink" href="#format-f32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">format-f32</span></code><a class="headerlink" href="#format-f32" title="Link to this heading">¶</a></h3>
 <p>( c-addr f32 – c-addr bytes )</p>
 <p>Format an S15.16 number</p>
 </section>
 <section id="format-f32-truncate">
-<h3><code class="docutils literal notranslate"><span class="pre">format-f32-truncate</span></code><a class="headerlink" href="#format-f32-truncate" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">format-f32-truncate</span></code><a class="headerlink" href="#format-f32-truncate" title="Link to this heading">¶</a></h3>
 <p>( c-addr f32 places – c-addr bytes )</p>
 <p>Format a S15,16 number truncated to <em>places</em> to the right of the decimal point</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">(f32.)</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">(f32.)</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( f32 – )</p>
 <p>Type an s15.16 fixed-point number without a following space</p>
 </section>
 <section id="f32-n">
-<h3><code class="docutils literal notranslate"><span class="pre">(f32.n)</span></code><a class="headerlink" href="#f32-n" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">(f32.n)</span></code><a class="headerlink" href="#f32-n" title="Link to this heading">¶</a></h3>
 <p>( f32 places – )</p>
 <p>Type a s15.16 fixed-point number truncated to <em>places</em> to the right of the decimal point without a following space</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">f32.</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32.</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( f32 – )</p>
 <p>Type an s15.16 fixed-point number with a following space</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">f32.n</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f32.n</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( f32 places – )</p>
 <p>Type a s15.16 fixed-point number truncated to <em>places</em> to the right of the decimal point with a following space</p>
 </section>
@@ -275,7 +271,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -297,6 +293,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
@@ -313,6 +311,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -323,7 +322,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
@@ -355,6 +353,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -375,11 +375,11 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../words/expose.html" title="previous chapter">Exposed Kernel Variables</a></li>
-      <li>Next: <a href="profile.html" title="next chapter">Profiler Words</a></li>
+      <li>Next: <a href="complex_float32.html" title="next chapter">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -387,7 +387,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -405,7 +405,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

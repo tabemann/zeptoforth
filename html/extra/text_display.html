@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Text Displays &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Fonts" href="font.html" />
@@ -37,224 +33,224 @@
           <div class="body" role="main">
             
   <section id="text-displays">
-<h1>Text Displays<a class="headerlink" href="#text-displays" title="Permalink to this heading">¶</a></h1>
+<h1>Text Displays<a class="headerlink" href="#text-displays" title="Link to this heading">¶</a></h1>
 <p>In addition to bitmap and pixmap framebuffer-based graphics, there is also optional support for pure text displays with character matrices along with inverted video character maps. Currently support exists for SSD1306, ST7735S, and SH1122-based displays with monospace bitmap fonts.</p>
 <p>Support for SSD1306-based text displays is in <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306_text.fs</span></code>. With SSD1306-based displays the user can select contrast settings from 0 to 255.</p>
 <p>Support for ST7735S-based text displays is in <code class="docutils literal notranslate"><span class="pre">extra/common/st7735s_text.fs</span></code>. With ST7735S-based displays the user can select 16-bit (5-bit red, 6-bit green, and 5-bit blue) foreground and background colors and backlight on/off.</p>
 <p>Support for SH1122-based text displays is in <code class="docutils literal notranslate"><span class="pre">extra/common/sh1122_text.fs</span></code>. With SH1122-based displays the user can select contrast settings from 0 to 255 and foreground and background grayscale values from 0 to 15.</p>
 <p>Note that these require <code class="docutils literal notranslate"><span class="pre">extra/common/clip.fs</span></code>, <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code>, <code class="docutils literal notranslate"><span class="pre">extra/common/font.fs</span></code>, and <code class="docutils literal notranslate"><span class="pre">extra/common/text_display.fs</span></code> to be loaded.</p>
 <section id="text-display">
-<h2><code class="docutils literal notranslate"><span class="pre">text-display</span></code><a class="headerlink" href="#text-display" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">text-display</span></code><a class="headerlink" href="#text-display" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">text-display</span></code> module contains the following standalone words:</p>
 <section id="text-buf-size">
-<h3><code class="docutils literal notranslate"><span class="pre">text-buf-size</span></code><a class="headerlink" href="#text-buf-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">text-buf-size</span></code><a class="headerlink" href="#text-buf-size" title="Link to this heading">¶</a></h3>
 <p>( cols rows char-cols char-rows – bytes )</p>
 <p>This word calculates a buffer size for a text display’s text buffer with <em>cols</em> columns and <em>rows</em> rows in display pixel dimensions and <em>char-cols</em> columns and <em>char-rows</em> rows in font pixel dimensions.</p>
 </section>
 <section id="invert-buf-size">
-<h3><code class="docutils literal notranslate"><span class="pre">invert-buf-size</span></code><a class="headerlink" href="#invert-buf-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">invert-buf-size</span></code><a class="headerlink" href="#invert-buf-size" title="Link to this heading">¶</a></h3>
 <p>( cols rows char-cols char-rows – bytes )</p>
 <p>This word calculates a buffer size for a text display’s inverted video buffer with <em>cols</em> columns and <em>rows</em> rows in display pixel dimensions and <em>char-cols</em> columns and <em>char-rows</em> rows in font pixel dimensions.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">text-display</span></code> module contains the following class:</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>This class has the following constructor:</p>
 <section id="new">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Link to this heading">¶</a></h4>
 <p>( text-buffer-addr invert-buffer-addr font cols rows self – )</p>
 <p>This constructs a text display with a text buffer <em>text-buffer-addr</em> with a size calculated with <code class="docutils literal notranslate"><span class="pre">text-buf-size</span></code>, an inverted video buffer <em>invert-buffer-addr</em> with a size calculated with <code class="docutils literal notranslate"><span class="pre">invert-buf-size</span></code>, a font <em>font</em>, and <em>cols</em> columns and <em>rows</em> rows in display pixel dimensions.</p>
 <p>This class has the following methods:</p>
 </section>
 <section id="clear-display">
-<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code><a class="headerlink" href="#clear-display" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code><a class="headerlink" href="#clear-display" title="Link to this heading">¶</a></h4>
 <p>( self – )</p>
 <p>This clears a display and dirties it.</p>
 </section>
 <section id="set-dirty">
-<h4><code class="docutils literal notranslate"><span class="pre">set-dirty</span></code><a class="headerlink" href="#set-dirty" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">set-dirty</span></code><a class="headerlink" href="#set-dirty" title="Link to this heading">¶</a></h4>
 <p>( self – )</p>
 <p>This dirties an entire display.</p>
 </section>
 <section id="dirty-char">
-<h4><code class="docutils literal notranslate"><span class="pre">dirty-char</span></code><a class="headerlink" href="#dirty-char" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">dirty-char</span></code><a class="headerlink" href="#dirty-char" title="Link to this heading">¶</a></h4>
 <p>( col row self – )</p>
 <p>This dirties a character at column <em>col</em> and row <em>row</em>.</p>
 </section>
 <section id="dirty">
-<h4><code class="docutils literal notranslate"><span class="pre">dirty?</span></code><a class="headerlink" href="#dirty" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">dirty?</span></code><a class="headerlink" href="#dirty" title="Link to this heading">¶</a></h4>
 <p>( self – dirty? )</p>
 <p>This gets whether a display is dirty.</p>
 </section>
 <section id="dirty-rect">
-<h4><code class="docutils literal notranslate"><span class="pre">dirty-rect&#64;</span></code><a class="headerlink" href="#dirty-rect" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">dirty-rect&#64;</span></code><a class="headerlink" href="#dirty-rect" title="Link to this heading">¶</a></h4>
 <p>( self – start-col start-row end-col end-row )</p>
 <p>This gets a display’s dirty rectangle. If the display is not dirty, <em>start-col</em> will equal <em>end-col</em> and <em>start-row</em> will equal <em>end-row</em>.</p>
 </section>
 <section id="clear-dirty">
-<h4><code class="docutils literal notranslate"><span class="pre">clear-dirty</span></code><a class="headerlink" href="#clear-dirty" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">clear-dirty</span></code><a class="headerlink" href="#clear-dirty" title="Link to this heading">¶</a></h4>
 <p>( self – )</p>
 <p>This clears a display’s dirty state.</p>
 </section>
 <section id="dim">
-<h4><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code><a class="headerlink" href="#dim" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code><a class="headerlink" href="#dim" title="Link to this heading">¶</a></h4>
 <p>( self – cols rows )</p>
 <p>This gets a display’s dimensions in characters.</p>
 </section>
 <section id="char">
-<h4><code class="docutils literal notranslate"><span class="pre">char!</span></code><a class="headerlink" href="#char" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">char!</span></code><a class="headerlink" href="#char" title="Link to this heading">¶</a></h4>
 <p>( c col row self – )</p>
 <p>This sets column <em>col</em> and row <em>row</em> of the display to character <em>c</em>, dirtying the display.</p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">char&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">char&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
 <p>( col row self – c )</p>
 <p>This gets the character at column <em>col</em> and row <em>row</em> of the display.</p>
 </section>
 <section id="string">
-<h4><code class="docutils literal notranslate"><span class="pre">string!</span></code><a class="headerlink" href="#string" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">string!</span></code><a class="headerlink" href="#string" title="Link to this heading">¶</a></h4>
 <p>( c-addr u col row self – )</p>
 <p>This sets a horizontal line of characters starting from column <em>col</em> on the left at row <em>row</em> to the string represented by the address <em>c-addr</em> and count <em>u</em>.</p>
 </section>
 <section id="invert">
-<h4><code class="docutils literal notranslate"><span class="pre">invert!</span></code><a class="headerlink" href="#invert" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">invert!</span></code><a class="headerlink" href="#invert" title="Link to this heading">¶</a></h4>
 <p>( invert? col row self – )</p>
 <p>This sets the inverted video state of column <em>col</em> and row <em>row</em> to <em>invert?</em>.</p>
 </section>
 <section id="toggle-invert">
-<h4><code class="docutils literal notranslate"><span class="pre">toggle-invert!</span></code><a class="headerlink" href="#toggle-invert" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">toggle-invert!</span></code><a class="headerlink" href="#toggle-invert" title="Link to this heading">¶</a></h4>
 <p>( col row self – )</p>
 <p>This toggles the inverted video state of column <em>col</em> and row <em>row</em>.</p>
 </section>
 <section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">invert&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">invert&#64;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
 <p>( col row self – invert? )</p>
 <p>This gets the inverted video state of column <em>col</em> and row <em>row</em>.</p>
 </section>
 <section id="pixel">
-<h4><code class="docutils literal notranslate"><span class="pre">pixel&#64;</span></code><a class="headerlink" href="#pixel" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pixel&#64;</span></code><a class="headerlink" href="#pixel" title="Link to this heading">¶</a></h4>
 <p>( pixel-col pixel-row self – pixel-set? )</p>
 <p>This gets the pixel value of a <em>pixel</em> at pixel column <em>pixel-col</em> and pixel row <em>pixel-row</em>.</p>
 </section>
 </section>
 </section>
 <section id="ssd1306-text">
-<h2><code class="docutils literal notranslate"><span class="pre">ssd1306-text</span></code><a class="headerlink" href="#ssd1306-text" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">ssd1306-text</span></code><a class="headerlink" href="#ssd1306-text" title="Link to this heading">¶</a></h2>
 <p>This module contains the following class:</p>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;ssd1306-text&gt;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ssd1306-text&gt;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>This class has the following constructor:</p>
 <section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
 <p>( pin0 pin1 text-buffer-addr invert-buffer-addr font columns rows i2c-addr i2c-device ssd1306 – )</p>
 <p>This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), a text backing buffer at <em>text-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), an inverted video backing buffer at <em>invert-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306-text&gt;</span></code> instance being initialized, <em>ssd1306</em>.</p>
 <p>This class has the following methods:</p>
 </section>
 <section id="update-display">
-<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#update-display" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#update-display" title="Link to this heading">¶</a></h4>
 <p>( ssd1306 – )</p>
 <p>This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
 <section id="display-contrast">
-<h4><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#display-contrast" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#display-contrast" title="Link to this heading">¶</a></h4>
 <p>( constrast ssd1306 – )</p>
 <p>This sets the contrast of an SSD1306-based display to a value from 0 to 255.</p>
 </section>
 </section>
 </section>
 <section id="st7735s-text">
-<h2><code class="docutils literal notranslate"><span class="pre">st7735s-text</span></code><a class="headerlink" href="#st7735s-text" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">st7735s-text</span></code><a class="headerlink" href="#st7735s-text" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7735s-text</span></code> module contains the following words:</p>
 <section id="rgb16">
-<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code><a class="headerlink" href="#rgb16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code><a class="headerlink" href="#rgb16" title="Link to this heading">¶</a></h3>
 <p>( r g b – color )</p>
 <p>Create a 16-bit color with 5 bits for red, 6 bits for green, and 5 bits for blue from a red/green/blue triplet of values from 0 to 255 each.</p>
 </section>
 <section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-text&gt;</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-text&gt;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-text&gt;</span></code> class is the class for 16-bit SPI ST7735S-based displays with 5-bit red, 6-bit green, 5-bit blue foreground and background colors and bitmap backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-text&gt;</span></code> class includes the following constructor:</p>
 </section>
 <section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( fg-color bg-color din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin text-buffer-addr invert-buffer-addr font columns rows spi-device st7735s – )</p>
 <p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a text backing buffer at <em>text-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), an inverted video backing buffer at <em>invert-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, a 16-bit foreground color <em>fg-color</em>, a 16-bit background color <em>bg-color</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following method:</p>
 </section>
 <section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p>( st7735s – )</p>
 <p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
 <section id="backlight">
-<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#backlight" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#backlight" title="Link to this heading">¶</a></h3>
 <p>( backlight st7735s – )</p>
 <p>Set the on/off state of the ST7735S-based display’s backlight.</p>
 </section>
 <section id="fg-color">
-<h3><code class="docutils literal notranslate"><span class="pre">fg-color!</span></code><a class="headerlink" href="#fg-color" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fg-color!</span></code><a class="headerlink" href="#fg-color" title="Link to this heading">¶</a></h3>
 <p>( fg-color st7735s – )</p>
 <p>Set the foreground color of the ST7735S-based display and dirty the display.</p>
 </section>
 <section id="bg-color">
-<h3><code class="docutils literal notranslate"><span class="pre">bg-color!</span></code><a class="headerlink" href="#bg-color" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bg-color!</span></code><a class="headerlink" href="#bg-color" title="Link to this heading">¶</a></h3>
 <p>( bg-color st7735s – )</p>
 <p>Set the background color of the ST7735S-based display and dirty the display.</p>
 </section>
 <section id="id9">
-<h3><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>( st7735s – fg-color )</p>
 <p>Get the foreground color of the ST7735S-based display.</p>
 </section>
 <section id="id10">
-<h3><code class="docutils literal notranslate"><span class="pre">bg-color&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bg-color&#64;</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <p>( st7735s – bg-color )</p>
 <p>Get the background color of the ST7735S-based display.</p>
 </section>
 </section>
 <section id="sh1122-text">
-<h2><code class="docutils literal notranslate"><span class="pre">sh1122-text</span></code><a class="headerlink" href="#sh1122-text" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">sh1122-text</span></code><a class="headerlink" href="#sh1122-text" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">sh1122-text</span></code> module contains the following words:</p>
 <section id="id11">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;sh1122-text&gt;</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;sh1122-text&gt;</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;sh1122-text&gt;</span></code> class is the class for grayscale SPI SH1122-based displays with 4-bit foreground and background gray levels and bitmap backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;sh1122-text&gt;</span></code> class includes the following constructor:</p>
 </section>
 <section id="id12">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <p>( fg-gray bg-gray din-pin clk-pin dc-pin cs-pin reset-pin text-buffer-addr invert-buffer-addr font columns rows spi-device sh1122 – )</p>
 <p>This constructor initializes an SPI SH1122 display at the SPI device <em>spi-device</em>, a text backing buffer at <em>text-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), an inverted video backing buffer at <em>invert-buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;text-display&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the reset pin <em>reset-pin</em>, a 4-bit foreground gray level <em>fg-gray</em>, a 4-bit background gray level <em>bg-gray</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;sh1122&gt;</span></code> instance being initialized, <em>sh1122</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;sh1122&gt;</span></code> class includes the following method:</p>
 </section>
 <section id="id13">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <p>( sh1122 – )</p>
 <p>This updates the SH1122-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
 <section id="id14">
-<h3><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <p>( constrast sh1122 – )</p>
 <p>This sets the contrast of an SH1122-based display to a value from 0 to 255.</p>
 </section>
 <section id="fg-gray">
-<h3><code class="docutils literal notranslate"><span class="pre">fg-gray!</span></code><a class="headerlink" href="#fg-gray" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fg-gray!</span></code><a class="headerlink" href="#fg-gray" title="Link to this heading">¶</a></h3>
 <p>( fg-gray sh1122 – )</p>
 <p>Set the foreground gray of the SH1122-based display and dirty the display.</p>
 </section>
 <section id="bg-gray">
-<h3><code class="docutils literal notranslate"><span class="pre">bg-gray!</span></code><a class="headerlink" href="#bg-gray" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bg-gray!</span></code><a class="headerlink" href="#bg-gray" title="Link to this heading">¶</a></h3>
 <p>( bg-gray sh1122 – )</p>
 <p>Set the background gray of the SH1122-based display and dirty the display.</p>
 </section>
 <section id="id15">
-<h3><code class="docutils literal notranslate"><span class="pre">fg-gray&#64;</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fg-gray&#64;</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <p>( sh1122 – fg-gray )</p>
 <p>Get the foreground gray of the SH1122-based display.</p>
 </section>
 <section id="id16">
-<h3><code class="docutils literal notranslate"><span class="pre">bg-gray&#64;</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bg-gray&#64;</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <p>( sh1122 – bg-gray )</p>
 <p>Get the background gray of the SH1122-based display.</p>
 </section>
@@ -266,7 +262,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -348,6 +344,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -372,7 +370,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -380,7 +378,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -398,7 +396,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

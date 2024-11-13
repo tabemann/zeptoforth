@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>DMA support &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="PSRAM words" href="psram.html" />
@@ -37,383 +33,383 @@
           <div class="body" role="main">
             
   <section id="dma-support">
-<h1>DMA support<a class="headerlink" href="#dma-support" title="Permalink to this heading">¶</a></h1>
+<h1>DMA support<a class="headerlink" href="#dma-support" title="Link to this heading">¶</a></h1>
 <p>There exists support for the DMA controller on the RP2040. There exist 12 DMA channels, 64 DREQ’s/TREQ’s, and 4 DMA timers. Register to register, buffer to register, register to buffer, and buffer to buffer transfers are supported; the main difference between registers and buffers is that buffers’ addresses are updated with each transfer while registers’ addresses are not. Transfer units of size 1 byte, 2 bytes, and 4 bytes are supported. DREQ’s and TREQ’s are used for synchronizing transfers with other peripherals.</p>
 <p>There also exists a global DMA pool to simplify dynamically allocating and freeing DMA channels. It is recommended that one use this rather than manually selecting DMA channels.</p>
 <section id="dma">
-<h2><code class="docutils literal notranslate"><span class="pre">dma</span></code><a class="headerlink" href="#dma" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">dma</span></code><a class="headerlink" href="#dma" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">dma</span></code> module contains the following words:</p>
 <section id="x-out-of-range-dma-channel">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-dma-channel</span></code><a class="headerlink" href="#x-out-of-range-dma-channel" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-dma-channel</span></code><a class="headerlink" href="#x-out-of-range-dma-channel" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range DMA index exception.</p>
 </section>
 <section id="x-out-of-range-treq">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-treq</span></code><a class="headerlink" href="#x-out-of-range-treq" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-treq</span></code><a class="headerlink" href="#x-out-of-range-treq" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range transfer request exception.</p>
 </section>
 <section id="x-out-of-range-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer</span></code><a class="headerlink" href="#x-out-of-range-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer</span></code><a class="headerlink" href="#x-out-of-range-timer" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range timer exception.</p>
 </section>
 <section id="x-invalid-transfer-size">
-<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-transfer-size</span></code><a class="headerlink" href="#x-invalid-transfer-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-transfer-size</span></code><a class="headerlink" href="#x-invalid-transfer-size" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Invalid transfer size exception.</p>
 </section>
 <section id="x-out-of-range-timer-value">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer-value</span></code><a class="headerlink" href="#x-out-of-range-timer-value" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-timer-value</span></code><a class="headerlink" href="#x-out-of-range-timer-value" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range timer dividend or divisor</p>
 </section>
 <section id="dreq-pio-tx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_TX</span></code><a class="headerlink" href="#dreq-pio-tx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_TX</span></code><a class="headerlink" href="#dreq-pio-tx" title="Link to this heading">¶</a></h3>
 <p>( sm pio – dreq )</p>
 <p>PIO TX DREQ for <em>pio</em> block state machine <em>sm</em> transmit.</p>
 </section>
 <section id="dreq-pio-rx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_RX</span></code><a class="headerlink" href="#dreq-pio-rx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_RX</span></code><a class="headerlink" href="#dreq-pio-rx" title="Link to this heading">¶</a></h3>
 <p>( sm pio – dreq )</p>
 <p>PIO RX DREQ for <em>pio</em> block state machine <em>sm</em> receive.</p>
 </section>
 <section id="dreq-spi-tx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_TX</span></code><a class="headerlink" href="#dreq-spi-tx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_TX</span></code><a class="headerlink" href="#dreq-spi-tx" title="Link to this heading">¶</a></h3>
 <p>( spi – dreq )</p>
 <p>SPI TX DREQ for <em>spi</em> peripheral transmit.</p>
 </section>
 <section id="dreq-spi-rx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_RX</span></code><a class="headerlink" href="#dreq-spi-rx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_RX</span></code><a class="headerlink" href="#dreq-spi-rx" title="Link to this heading">¶</a></h3>
 <p>( spi – dreq )</p>
 <p>SPI RX DREQ for <em>spi</em> peripheral receive.</p>
 </section>
 <section id="dreq-uart-tx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_TX</span></code><a class="headerlink" href="#dreq-uart-tx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_TX</span></code><a class="headerlink" href="#dreq-uart-tx" title="Link to this heading">¶</a></h3>
 <p>( uart – dreq )</p>
 <p>UART TX DREQ for <em>uart</em> peripheral transmit.</p>
 </section>
 <section id="dreq-uart-rx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_RX</span></code><a class="headerlink" href="#dreq-uart-rx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_UART_RX</span></code><a class="headerlink" href="#dreq-uart-rx" title="Link to this heading">¶</a></h3>
 <p>( uart – dreq )</p>
 <p>UART RX DREQ for <em>uart</em> peripheral receive.</p>
 </section>
 <section id="dreq-pwm-wrap">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PWM_WRAP</span></code><a class="headerlink" href="#dreq-pwm-wrap" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_PWM_WRAP</span></code><a class="headerlink" href="#dreq-pwm-wrap" title="Link to this heading">¶</a></h3>
 <p>( pwm – dreq )</p>
 <p>PWM DREQ for <em>pwm</em> slice.</p>
 </section>
 <section id="dreq-i2c-tx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_TX</span></code><a class="headerlink" href="#dreq-i2c-tx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_TX</span></code><a class="headerlink" href="#dreq-i2c-tx" title="Link to this heading">¶</a></h3>
 <p>( i2c – dreq )</p>
 <p>I2C TX DREQ for <em>i2c</em> peripheral transmit.</p>
 </section>
 <section id="dreq-i2c-rx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_RX</span></code><a class="headerlink" href="#dreq-i2c-rx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_I2C_RX</span></code><a class="headerlink" href="#dreq-i2c-rx" title="Link to this heading">¶</a></h3>
 <p>( i2c – dreq )</p>
 <p>I2C RX DREQ for <em>i2c</em> peripheral receive.</p>
 </section>
 <section id="dreq-adc">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_ADC</span></code><a class="headerlink" href="#dreq-adc" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_ADC</span></code><a class="headerlink" href="#dreq-adc" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>ADC DREQ.</p>
 </section>
 <section id="dreq-xip-stream">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_STREAM</span></code><a class="headerlink" href="#dreq-xip-stream" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_STREAM</span></code><a class="headerlink" href="#dreq-xip-stream" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>XIP STREAM DREQ.</p>
 </section>
 <section id="dreq-xip-ssitx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSITX</span></code><a class="headerlink" href="#dreq-xip-ssitx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSITX</span></code><a class="headerlink" href="#dreq-xip-ssitx" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>XIP SSITX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only).</p>
 </section>
 <section id="dreq-xip-ssirx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSIRX</span></code><a class="headerlink" href="#dreq-xip-ssirx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_SSIRX</span></code><a class="headerlink" href="#dreq-xip-ssirx" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>XIP SSIRX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2040</span></code> only).</p>
 </section>
 <section id="dreq-xip-qmitx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMITX</span></code><a class="headerlink" href="#dreq-xip-qmitx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMITX</span></code><a class="headerlink" href="#dreq-xip-qmitx" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>XIP QMITX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="dreq-xip-qmirx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMIRX</span></code><a class="headerlink" href="#dreq-xip-qmirx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_XIP_QMIRX</span></code><a class="headerlink" href="#dreq-xip-qmirx" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>XIP QMIRX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="dreq-hstx">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_HSTX</span></code><a class="headerlink" href="#dreq-hstx" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_HSTX</span></code><a class="headerlink" href="#dreq-hstx" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>HSTX DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="dreq-coresight">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_CORESIGHT</span></code><a class="headerlink" href="#dreq-coresight" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_CORESIGHT</span></code><a class="headerlink" href="#dreq-coresight" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>Coresight DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="dreq-sha256">
-<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SHA256</span></code><a class="headerlink" href="#dreq-sha256" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DREQ_SHA256</span></code><a class="headerlink" href="#dreq-sha256" title="Link to this heading">¶</a></h3>
 <p>( – dreq )</p>
 <p>SHA256 DREQ (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="treq-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">TREQ_TIMER</span></code><a class="headerlink" href="#treq-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_TIMER</span></code><a class="headerlink" href="#treq-timer" title="Link to this heading">¶</a></h3>
 <p>( timer – treq )</p>
 <p>DMA timer <em>timer</em>, from 0 to 3, as TREQ.</p>
 </section>
 <section id="treq-unpaced">
-<h3><code class="docutils literal notranslate"><span class="pre">TREQ_UNPACED</span></code><a class="headerlink" href="#treq-unpaced" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">TREQ_UNPACED</span></code><a class="headerlink" href="#treq-unpaced" title="Link to this heading">¶</a></h3>
 <p>( – treq )</p>
 <p>Unpaced transfer TREQ.</p>
 </section>
 <section id="trans-count-mode-normal">
-<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_NORMAL</span></code><a class="headerlink" href="#trans-count-mode-normal" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_NORMAL</span></code><a class="headerlink" href="#trans-count-mode-normal" title="Link to this heading">¶</a></h3>
 <p>( count – count’ )</p>
 <p>Set a transfer count to be normal (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="trans-count-mode-trigger-self">
-<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_TRIGGER_SELF</span></code><a class="headerlink" href="#trans-count-mode-trigger-self" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_TRIGGER_SELF</span></code><a class="headerlink" href="#trans-count-mode-trigger-self" title="Link to this heading">¶</a></h3>
 <p>( count – count’ )</p>
 <p>Set a transfer count to be trigger-self (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="trans-count-mode-endless">
-<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_ENDLESS</span></code><a class="headerlink" href="#trans-count-mode-endless" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">TRANS_COUNT_MODE_ENDLESS</span></code><a class="headerlink" href="#trans-count-mode-endless" title="Link to this heading">¶</a></h3>
 <p>( count – count’ )</p>
 <p>Set a transfer count to be endless (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="register-read">
-<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_READ</span></code><a class="headerlink" href="#register-read" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_READ</span></code><a class="headerlink" href="#register-read" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Register source mode</p>
 </section>
 <section id="register-write">
-<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_WRITE</span></code><a class="headerlink" href="#register-write" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">REGISTER_WRITE</span></code><a class="headerlink" href="#register-write" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Register destination mode</p>
 </section>
 <section id="incr-buffer-read">
-<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_READ</span></code><a class="headerlink" href="#incr-buffer-read" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_READ</span></code><a class="headerlink" href="#incr-buffer-read" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Incrementing buffer source mode</p>
 </section>
 <section id="incr-buffer-write">
-<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-buffer-write" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-buffer-write" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Incrementing buffer destination mode</p>
 </section>
 <section id="decr-buffer-read">
-<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_READ</span></code><a class="headerlink" href="#decr-buffer-read" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_READ</span></code><a class="headerlink" href="#decr-buffer-read" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Decrementing buffer source mode (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
 </section>
 <section id="decr-buffer-write">
-<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-buffer-write" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-buffer-write" title="Link to this heading">¶</a></h3>
 <p>( – mode )</p>
 <p>Decrementing buffer destination mode (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
 </section>
 <section id="incr-ring-buffer-read">
-<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_READ</span></code><a class="headerlink" href="#incr-ring-buffer-read" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_READ</span></code><a class="headerlink" href="#incr-ring-buffer-read" title="Link to this heading">¶</a></h3>
 <p>( low-ring-bits – mode )</p>
 <p>Incrementing ring buffer source mode for a given number of low bits in an address</p>
 </section>
 <section id="incr-ring-buffer-write">
-<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-ring-buffer-write" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">INCR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#incr-ring-buffer-write" title="Link to this heading">¶</a></h3>
 <p>( low-ring-bits – mode )</p>
 <p>Incrementing ring buffer destination mode for a given number of low bits in an addres</p>
 </section>
 <section id="decr-ring-buffer-read">
-<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_READ</span></code><a class="headerlink" href="#decr-ring-buffer-read" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_READ</span></code><a class="headerlink" href="#decr-ring-buffer-read" title="Link to this heading">¶</a></h3>
 <p>( low-ring-bits – mode )</p>
 <p>Decrementing ring buffer source mode for a given number of low bits in an address (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
 </section>
 <section id="decr-ring-buffer-write">
-<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-ring-buffer-write" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">DECR_RING_BUFFER_WRITE</span></code><a class="headerlink" href="#decr-ring-buffer-write" title="Link to this heading">¶</a></h3>
 <p>( low-ring-bits – mode )</p>
 <p>Decrementing ring buffer destination mode for a given number of low bits in an addres (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only)</p>
 </section>
 <section id="start-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">start-dma</span></code><a class="headerlink" href="#start-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-dma</span></code><a class="headerlink" href="#start-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest src-mode dest-mode count size treq channel – )</p>
 <p>Start transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="prepare-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma</span></code><a class="headerlink" href="#prepare-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma</span></code><a class="headerlink" href="#prepare-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest src-mode dest-mode count size treq channel – )</p>
 <p>Prepare transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="start-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">start-dma-with-chain</span></code><a class="headerlink" href="#start-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-dma-with-chain</span></code><a class="headerlink" href="#start-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest src-mode dest-mode count size treq channel – )</p>
 <p>Start transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em> chained to DMA channel <em>chain-to</em>.</p>
 </section>
 <section id="prepare-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma-with-chain</span></code><a class="headerlink" href="#prepare-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-dma-with-chain</span></code><a class="headerlink" href="#prepare-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest src-mode dest-mode count size treq channel – )</p>
 <p>Prepare transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with starting source address <em>src</em> and starting destination address <em>dest</em> with source mode <em>src-mode</em> and destination mode <em>dest-mode</em> synchronized by DREQ/TREQ <em>treq</em> chained to DMA channel <em>chain-to</em>.</p>
 </section>
 <section id="start-register-register-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma</span></code><a class="headerlink" href="#start-register-register-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma</span></code><a class="headerlink" href="#start-register-register-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Start register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="start-register-buffer-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma</span></code><a class="headerlink" href="#start-register-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma</span></code><a class="headerlink" href="#start-register-buffer-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Start register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="start-buffer-register-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma</span></code><a class="headerlink" href="#start-buffer-register-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma</span></code><a class="headerlink" href="#start-buffer-register-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Start buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="start-buffer-buffer-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#start-buffer-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#start-buffer-buffer-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="prepare-register-register-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma</span></code><a class="headerlink" href="#prepare-register-register-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma</span></code><a class="headerlink" href="#prepare-register-register-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Prepare without starting register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="prepare-register-buffer-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-register-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-register-buffer-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Prepare without starting register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="prepare-buffer-register-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma</span></code><a class="headerlink" href="#prepare-buffer-register-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma</span></code><a class="headerlink" href="#prepare-buffer-register-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Prepare without starting buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="prepare-buffer-buffer-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma" title="Link to this heading">¶</a></h3>
 <p>( src dest count size treq channel – )</p>
 <p>Prepare without starting buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em>.</p>
 </section>
 <section id="start-register-register-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-register-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-register-register-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Start register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="start-register-buffer-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-register-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-register-buffer-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Start register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="start-buffer-register-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-register-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Start buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="start-buffer-buffer-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">start-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#start-buffer-buffer-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Start buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="prepare-register-register-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-register-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Prepare without starting register to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="prepare-register-buffer-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-register&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-register-buffer-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Prepare without starting register to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="prepare-buffer-register-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-register-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;register-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-register-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Prepare without starting buffer to register transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="prepare-buffer-buffer-dma-with-chain">
-<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma-with-chain" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">prepare-buffer&gt;buffer-dma-with-chain</span></code><a class="headerlink" href="#prepare-buffer-buffer-dma-with-chain" title="Link to this heading">¶</a></h3>
 <p>( chain-to src dest count size treq channel – )</p>
 <p>Prepare without starting buffer to buffer transfer of <em>count</em> units of <em>size</em> bytes on DMA <em>channel</em> with source address <em>src</em> and destination address <em>dest</em> synchronized by DREQ/TREQ <em>treq</em> with chaining to DMA channel <em>chain-to</em>. Note that if <em>channel</em> is the same as <em>chain-to</em> no chaining will take place.</p>
 </section>
 <section id="dma-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">dma-timer!</span></code><a class="headerlink" href="#dma-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dma-timer!</span></code><a class="headerlink" href="#dma-timer" title="Link to this heading">¶</a></h3>
 <p>( dividend divisor timer – )</p>
 <p>Set DMA <em>timer</em> clock <em>dividend</em> and <em>divisor</em>.</p>
 </section>
 <section id="spin-wait-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">spin-wait-dma</span></code><a class="headerlink" href="#spin-wait-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">spin-wait-dma</span></code><a class="headerlink" href="#spin-wait-dma" title="Link to this heading">¶</a></h3>
 <p>( channel – )</p>
 <p>Spin wait for DMA <em>channel</em> completion</p>
 </section>
 <section id="wait-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-dma</span></code><a class="headerlink" href="#wait-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wait-dma</span></code><a class="headerlink" href="#wait-dma" title="Link to this heading">¶</a></h3>
 <p>( channel – )</p>
 <p>Non-busy wait for DMA <em>channel</em> completion</p>
 </section>
 <section id="halt-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">halt-dma</span></code><a class="headerlink" href="#halt-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">halt-dma</span></code><a class="headerlink" href="#halt-dma" title="Link to this heading">¶</a></h3>
 <p>( channel – )</p>
 <p>Halt DMA <em>channel</em></p>
 </section>
 <section id="abort-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">abort-dma</span></code><a class="headerlink" href="#abort-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">abort-dma</span></code><a class="headerlink" href="#abort-dma" title="Link to this heading">¶</a></h3>
 <p>( channel – )</p>
 <p>Abort DMA <em>channel</em></p>
 </section>
 <section id="dma-src-addr">
-<h3><code class="docutils literal notranslate"><span class="pre">dma-src-addr&#64;</span></code><a class="headerlink" href="#dma-src-addr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dma-src-addr&#64;</span></code><a class="headerlink" href="#dma-src-addr" title="Link to this heading">¶</a></h3>
 <p>( channel – addr )</p>
 <p>Get DMA <em>channel</em> source address</p>
 </section>
 <section id="dma-dest-addr">
-<h3><code class="docutils literal notranslate"><span class="pre">dma-dest-addr&#64;</span></code><a class="headerlink" href="#dma-dest-addr" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dma-dest-addr&#64;</span></code><a class="headerlink" href="#dma-dest-addr" title="Link to this heading">¶</a></h3>
 <p>( channel – addr )</p>
 <p>Get DMA <em>channel</em> destination address</p>
 </section>
 <section id="dma-remaining">
-<h3><code class="docutils literal notranslate"><span class="pre">dma-remaining&#64;</span></code><a class="headerlink" href="#dma-remaining" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dma-remaining&#64;</span></code><a class="headerlink" href="#dma-remaining" title="Link to this heading">¶</a></h3>
 <p>( channel – remaining )</p>
 <p>Get outstanding bytes transferred</p>
 </section>
 </section>
 <section id="dma-pool">
-<h2><code class="docutils literal notranslate"><span class="pre">dma-pool</span></code><a class="headerlink" href="#dma-pool" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">dma-pool</span></code><a class="headerlink" href="#dma-pool" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">dma-pool</span></code> module contains the following words:</p>
 <section id="x-no-dma-channels-available">
-<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-channels-available</span></code><a class="headerlink" href="#x-no-dma-channels-available" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-channels-available</span></code><a class="headerlink" href="#x-no-dma-channels-available" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>No DMA channels available exception.</p>
 </section>
 <section id="x-dma-channel-already-free">
-<h3><code class="docutils literal notranslate"><span class="pre">x-dma-channel-already-free</span></code><a class="headerlink" href="#x-dma-channel-already-free" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-dma-channel-already-free</span></code><a class="headerlink" href="#x-dma-channel-already-free" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>DMA channel is already free.</p>
 </section>
 <section id="x-no-dma-timers-available">
-<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-timers-available</span></code><a class="headerlink" href="#x-no-dma-timers-available" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-dma-timers-available</span></code><a class="headerlink" href="#x-no-dma-timers-available" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>No DMA timers available exception.</p>
 </section>
 <section id="x-dma-timer-already-free">
-<h3><code class="docutils literal notranslate"><span class="pre">x-dma-timer-already-free</span></code><a class="headerlink" href="#x-dma-timer-already-free" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-dma-timer-already-free</span></code><a class="headerlink" href="#x-dma-timer-already-free" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>DMA timer is already free.</p>
 </section>
 <section id="allocate-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">allocate-dma</span></code><a class="headerlink" href="#allocate-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-dma</span></code><a class="headerlink" href="#allocate-dma" title="Link to this heading">¶</a></h3>
 <p>( – channel )</p>
 <p>Allocate a DMA channel.</p>
 </section>
 <section id="free-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">free-dma</span></code><a class="headerlink" href="#free-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">free-dma</span></code><a class="headerlink" href="#free-dma" title="Link to this heading">¶</a></h3>
 <p>( channel – )</p>
 <p>Free a DMA channel</p>
 </section>
 <section id="allocate-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">allocate-timer</span></code><a class="headerlink" href="#allocate-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-timer</span></code><a class="headerlink" href="#allocate-timer" title="Link to this heading">¶</a></h3>
 <p>( – timer )</p>
 <p>Allocate a DMA timer.</p>
 </section>
 <section id="free-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">free-timer</span></code><a class="headerlink" href="#free-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">free-timer</span></code><a class="headerlink" href="#free-timer" title="Link to this heading">¶</a></h3>
 <p>( timer – )</p>
 <p>Free a DMA timer</p>
 </section>
@@ -425,7 +421,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -507,6 +503,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -531,7 +529,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -539,7 +537,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -557,7 +555,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

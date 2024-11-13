@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Pulse Width Modulation Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Realtime Clock (RTC) Words" href="rtc.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="pulse-width-modulation-words">
-<h1>Pulse Width Modulation Words<a class="headerlink" href="#pulse-width-modulation-words" title="Permalink to this heading">¶</a></h1>
+<h1>Pulse Width Modulation Words<a class="headerlink" href="#pulse-width-modulation-words" title="Link to this heading">¶</a></h1>
 <p>The RP2040 (e.g. the Raspberry Pi Pico) and the RP2350 (e.g. the Raspberry Pi Pico 2) have support for Pulse Width Modulation (PWM for short), which includes a counter capability. There are eight PWM “slices” on the RP2040 and twelve PWM “slices” on the RP2350, each of which have pair of GPIO pins as outputs, pins A and B, and pin B can also be used as an input. Also, each of the PWM slices, aside from PWM slice 7, maps to four separate GPIO pins, two of which are A pins and two of which are B pins (PWM slice 7 only maps to one A pin and one B pin on the RP2040).</p>
 <p>Each PWM slice is associated with a counter value and a top value at which the counter wraps back to zero. Also, the A and B outputs each have a compare value at which their output transitions from high to low. Note that PWM slices have a “phase correct” mode which modifies this functionality so that the phase of a PWM output does not change with changes to its compare value.</p>
 <p>PWM slices have a clock divider which divides the system clock by an integral value, from 1 to 255, plus a fractional value, of 0 to 15 divided by 16.</p>
@@ -45,210 +41,210 @@
 <p>When a PWM slice’s counter reaches its top value, an interrupt can be raised. All PWM slices share the same IRQ. They have separate flags indicating their interrupt status, which can be cleared independent of one another, and interrupts can be enabled and disabled independently of each of them.</p>
 <p>Last but not least, PWM slices’ A and B outputs can be inverted independent of one another.</p>
 <section id="pwm">
-<h2><code class="docutils literal notranslate"><span class="pre">pwm</span></code><a class="headerlink" href="#pwm" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">pwm</span></code><a class="headerlink" href="#pwm" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">pwm</span></code> module:</p>
 <section id="x-out-of-range-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-pwm</span></code><a class="headerlink" href="#x-out-of-range-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-pwm</span></code><a class="headerlink" href="#x-out-of-range-pwm" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range PWM index exception.</p>
 </section>
 <section id="x-out-of-range-clock-div">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-clock-div</span></code><a class="headerlink" href="#x-out-of-range-clock-div" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-clock-div</span></code><a class="headerlink" href="#x-out-of-range-clock-div" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range clock divisor exception.</p>
 </section>
 <section id="x-out-of-range-counter">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-counter</span></code><a class="headerlink" href="#x-out-of-range-counter" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-counter</span></code><a class="headerlink" href="#x-out-of-range-counter" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range counter value exception.</p>
 </section>
 <section id="x-out-of-range-compare">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-compare</span></code><a class="headerlink" href="#x-out-of-range-compare" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-compare</span></code><a class="headerlink" href="#x-out-of-range-compare" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range compare value exception.</p>
 </section>
 <section id="x-out-of-range-top">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-top</span></code><a class="headerlink" href="#x-out-of-range-top" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-top</span></code><a class="headerlink" href="#x-out-of-range-top" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range top value exception.</p>
 </section>
 <section id="pwm-pin">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-pin</span></code><a class="headerlink" href="#pwm-pin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-pin</span></code><a class="headerlink" href="#pwm-pin" title="Link to this heading">¶</a></h3>
 <p>( pin – )</p>
 <p>Set a pin as a PWM pin.</p>
 </section>
 <section id="pwm-vector">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-vector!</span></code><a class="headerlink" href="#pwm-vector" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-vector!</span></code><a class="headerlink" href="#pwm-vector" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Set PWM IRQ handler. On the <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> this is for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code>.</p>
 </section>
 <section id="pwm-wrap-0-vector">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-0-vector!</span></code><a class="headerlink" href="#pwm-wrap-0-vector" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-0-vector!</span></code><a class="headerlink" href="#pwm-wrap-0-vector" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Set PWM IRQ handler for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="pwm-wrap-1-vector">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-1-vector!</span></code><a class="headerlink" href="#pwm-wrap-1-vector" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-1-vector!</span></code><a class="headerlink" href="#pwm-wrap-1-vector" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Set PWM IRQ handler for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="enable-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm</span></code><a class="headerlink" href="#enable-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm</span></code><a class="headerlink" href="#enable-pwm" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Enable any set of slices, expressed as bits from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.</p>
 </section>
 <section id="disable-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm</span></code><a class="headerlink" href="#disable-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm</span></code><a class="headerlink" href="#disable-pwm" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Disable any set of slices, expressed as bits from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.</p>
 </section>
 <section id="enable-pwm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-int</span></code><a class="headerlink" href="#enable-pwm-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-int</span></code><a class="headerlink" href="#enable-pwm-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Enable interrupts for any set of slices, expressed as bits from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>. On <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> is this for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> only.</p>
 </section>
 <section id="disable-pwm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-int</span></code><a class="headerlink" href="#disable-pwm-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-int</span></code><a class="headerlink" href="#disable-pwm-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Disable interrupts for any set of slices, expressed as bits from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>. On <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> is this for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> only.</p>
 </section>
 <section id="clear-pwm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-int</span></code><a class="headerlink" href="#clear-pwm-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-int</span></code><a class="headerlink" href="#clear-pwm-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Clear an interrupt for any set of slices, expressed as bits from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>. On <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> is this for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> only.</p>
 </section>
 <section id="pwm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-int&#64;</span></code><a class="headerlink" href="#pwm-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-int&#64;</span></code><a class="headerlink" href="#pwm-int" title="Link to this heading">¶</a></h3>
 <p>( – bits )</p>
 <p>Get the interrupt state for all slices, expressed as one bit per slice from 0 to 7 on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code>, and 0 to 11 on <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>. On <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> is this for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> only.</p>
 </section>
 <section id="clear-pwm-pending">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-pending</span></code><a class="headerlink" href="#clear-pwm-pending" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-pending</span></code><a class="headerlink" href="#clear-pwm-pending" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Clear pending PWM interrupt.</p>
 </section>
 <section id="enable-pwm-wrap-0-int">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-wrap-0-int</span></code><a class="headerlink" href="#enable-pwm-wrap-0-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-wrap-0-int</span></code><a class="headerlink" href="#enable-pwm-wrap-0-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Enable interrupts for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="disable-pwm-wrap-0-int">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-wrap-0-int</span></code><a class="headerlink" href="#disable-pwm-wrap-0-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-wrap-0-int</span></code><a class="headerlink" href="#disable-pwm-wrap-0-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Disable interrupts for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="clear-pwm-wrap-0-int">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-0-int</span></code><a class="headerlink" href="#clear-pwm-wrap-0-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-0-int</span></code><a class="headerlink" href="#clear-pwm-wrap-0-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Clear an interrupt for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="pwm-wrap-0-int">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-0-int&#64;</span></code><a class="headerlink" href="#pwm-wrap-0-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-0-int&#64;</span></code><a class="headerlink" href="#pwm-wrap-0-int" title="Link to this heading">¶</a></h3>
 <p>( – bits )</p>
 <p>Get the interrupt state for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> for all slices, expressed as one bit per slice from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="clear-pwm-wrap-0-pending">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-0-pending</span></code><a class="headerlink" href="#clear-pwm-wrap-0-pending" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-0-pending</span></code><a class="headerlink" href="#clear-pwm-wrap-0-pending" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Clear pending PWM interrupt for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_0</span></code> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="enable-pwm-wrap-1-int">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-wrap-1-int</span></code><a class="headerlink" href="#enable-pwm-wrap-1-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-pwm-wrap-1-int</span></code><a class="headerlink" href="#enable-pwm-wrap-1-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Enable interrupts for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="disable-pwm-wrap-1-int">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-wrap-1-int</span></code><a class="headerlink" href="#disable-pwm-wrap-1-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-pwm-wrap-1-int</span></code><a class="headerlink" href="#disable-pwm-wrap-1-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Disable interrupts for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="clear-pwm-wrap-1-int">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-1-int</span></code><a class="headerlink" href="#clear-pwm-wrap-1-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-1-int</span></code><a class="headerlink" href="#clear-pwm-wrap-1-int" title="Link to this heading">¶</a></h3>
 <p>( bits – )</p>
 <p>Clear an interrupt for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> for any set of slices, expressed as bits from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="pwm-wrap-1-int">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-1-int&#64;</span></code><a class="headerlink" href="#pwm-wrap-1-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-wrap-1-int&#64;</span></code><a class="headerlink" href="#pwm-wrap-1-int" title="Link to this heading">¶</a></h3>
 <p>( – bits )</p>
 <p>Get the interrupt state for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> for all slices, expressed as one bit per slice from 0 to 11 (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="clear-pwm-wrap-1-pending">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-1-pending</span></code><a class="headerlink" href="#clear-pwm-wrap-1-pending" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pwm-wrap-1-pending</span></code><a class="headerlink" href="#clear-pwm-wrap-1-pending" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Clear pending PWM interrupt for <code class="docutils literal notranslate"><span class="pre">PWM_IRQ_WRAP_1</span></code> (<code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only).</p>
 </section>
 <section id="advance-pwm-phase">
-<h3><code class="docutils literal notranslate"><span class="pre">advance-pwm-phase</span></code><a class="headerlink" href="#advance-pwm-phase" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">advance-pwm-phase</span></code><a class="headerlink" href="#advance-pwm-phase" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Advance the phase of a running counter by 1 count.</p>
 </section>
 <section id="retard-pwm-phase">
-<h3><code class="docutils literal notranslate"><span class="pre">retard-pwm-phase</span></code><a class="headerlink" href="#retard-pwm-phase" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">retard-pwm-phase</span></code><a class="headerlink" href="#retard-pwm-phase" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Retard the phase of a running counter by 1 count.</p>
 </section>
 <section id="free-running-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">free-running-pwm</span></code><a class="headerlink" href="#free-running-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">free-running-pwm</span></code><a class="headerlink" href="#free-running-pwm" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Set a slice to be free-running.</p>
 </section>
 <section id="gated-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">gated-pwm</span></code><a class="headerlink" href="#gated-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">gated-pwm</span></code><a class="headerlink" href="#gated-pwm" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Set a slice to be gated by the PWM B pin.</p>
 </section>
 <section id="rising-edge-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">rising-edge-pwm</span></code><a class="headerlink" href="#rising-edge-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">rising-edge-pwm</span></code><a class="headerlink" href="#rising-edge-pwm" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Set a slice to advance with each rising eddge of the PWM B pin.</p>
 </section>
 <section id="falling-edge-pwm">
-<h3><code class="docutils literal notranslate"><span class="pre">falling-edge-pwm</span></code><a class="headerlink" href="#falling-edge-pwm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">falling-edge-pwm</span></code><a class="headerlink" href="#falling-edge-pwm" title="Link to this heading">¶</a></h3>
 <p>( index – )</p>
 <p>Set a slice to advance with each falling edge of the PWM B pin.</p>
 </section>
 <section id="pwm-invert-b">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-invert-b!</span></code><a class="headerlink" href="#pwm-invert-b" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-invert-b!</span></code><a class="headerlink" href="#pwm-invert-b" title="Link to this heading">¶</a></h3>
 <p>( state index – )</p>
 <p>Set invert PWM output B for a slice.</p>
 </section>
 <section id="pwm-invert-a">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-invert-a!</span></code><a class="headerlink" href="#pwm-invert-a" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-invert-a!</span></code><a class="headerlink" href="#pwm-invert-a" title="Link to this heading">¶</a></h3>
 <p>( state index – )</p>
 <p>Set invert PWM output A for a slice.</p>
 </section>
 <section id="pwm-phase-correct">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-phase-correct!</span></code><a class="headerlink" href="#pwm-phase-correct" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-phase-correct!</span></code><a class="headerlink" href="#pwm-phase-correct" title="Link to this heading">¶</a></h3>
 <p>( state index – )</p>
 <p>Set phase-correct modulation for a slice.</p>
 </section>
 <section id="pwm-clock-div">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-clock-div!</span></code><a class="headerlink" href="#pwm-clock-div" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-clock-div!</span></code><a class="headerlink" href="#pwm-clock-div" title="Link to this heading">¶</a></h3>
 <p>( fract int index – )</p>
 <p>Set clock frequency divisor; int is the integral portion from 1 to 255 and fract is the fractional portion from 0 to 15.</p>
 </section>
 <section id="pwm-counter-compare-b">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter-compare-b!</span></code><a class="headerlink" href="#pwm-counter-compare-b" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter-compare-b!</span></code><a class="headerlink" href="#pwm-counter-compare-b" title="Link to this heading">¶</a></h3>
 <p>( value index – )</p>
 <p>Set the PWM output B for a slice counter compare value.</p>
 </section>
 <section id="pwm-counter-compare-a">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter-compare-a!</span></code><a class="headerlink" href="#pwm-counter-compare-a" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter-compare-a!</span></code><a class="headerlink" href="#pwm-counter-compare-a" title="Link to this heading">¶</a></h3>
 <p>( value index – )</p>
 <p>Set the PWM output A for a slice counter compare value.</p>
 </section>
 <section id="pwm-top">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-top!</span></code><a class="headerlink" href="#pwm-top" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-top!</span></code><a class="headerlink" href="#pwm-top" title="Link to this heading">¶</a></h3>
 <p>( value index – )</p>
 <p>Set the slice counter wrap value.</p>
 </section>
 <section id="pwm-counter">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter!</span></code><a class="headerlink" href="#pwm-counter" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter!</span></code><a class="headerlink" href="#pwm-counter" title="Link to this heading">¶</a></h3>
 <p>( value index – )</p>
 <p>Set the slice counter value.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pwm-counter&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( index – value )</p>
 <p>Get the slice counter value.</p>
 </section>
@@ -260,7 +256,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -342,6 +338,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -366,7 +364,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -374,7 +372,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -392,7 +390,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
