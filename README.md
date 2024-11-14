@@ -14,7 +14,7 @@ Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2
 
 The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_usb`, and `full_swdcom` builds, includes the following:
 
-* A priority-scheduled preemptive multitasker
+* A priority-scheduled preemptive multitasker with deadline scheduling
 * Semaphores
 * Locks, with priority inversion handling
 * Message-oriented queue channels
