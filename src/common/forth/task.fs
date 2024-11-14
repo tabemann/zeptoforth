@@ -1784,7 +1784,7 @@ begin-module task
     \ Prevent deadline wraparound
     : prevent-deadline-wrap ( -- )
       systick-counter
-      last-task
+      last-task @
       code[
       r0 1 dp ldm
       mark<
