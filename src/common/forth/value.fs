@@ -361,6 +361,7 @@ continue-module internal
 
   \ Compile setting a double cell variable
   : compile-set-double-local ( u -- )
+    undefer-lit
     [ armv6m-instr import ]
     dup 128 < if
       dup 4 * tos str_,[sp,#_]

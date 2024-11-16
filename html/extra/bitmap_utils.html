@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Bitmap Utilities &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Pixmap Utilities" href="pixmap16_utils.html" />
@@ -37,43 +33,43 @@
           <div class="body" role="main">
             
   <section id="bitmap-utilities">
-<h1>Bitmap Utilities<a class="headerlink" href="#bitmap-utilities" title="Permalink to this heading">¶</a></h1>
+<h1>Bitmap Utilities<a class="headerlink" href="#bitmap-utilities" title="Link to this heading">¶</a></h1>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap_utils.fs</span></code> there is optional code for supporting additional bitmap operations, particularly line and circle-drawing.</p>
 <section id="bitmap-utils">
-<h2><code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code><a class="headerlink" href="#bitmap-utils" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code><a class="headerlink" href="#bitmap-utils" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code> module contains the following words:</p>
 <section id="draw-pixel-line">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-line</span></code><a class="headerlink" href="#draw-pixel-line" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-line</span></code><a class="headerlink" href="#draw-pixel-line" title="Link to this heading">¶</a></h3>
 <p>( constant x0 y0 x1 y1 op dst-bitmap – )</p>
 <p>This draws a pixel line with drawing operation <em>op</em> on <em>dst-bitmap</em> from (<em>x0</em>, *y0) to (<em>x1</em>, <em>y1</em>) using the <em>constant</em> value as used by <code class="docutils literal notranslate"><span class="pre">bitmap::draw-pixel-const</span></code>.</p>
 </section>
 <section id="draw-rect-line">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-line</span></code><a class="headerlink" href="#draw-rect-line" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-line</span></code><a class="headerlink" href="#draw-rect-line" title="Link to this heading">¶</a></h3>
 <p>( constant width height x0 y0 x1 y1 op dst-bitmap – )</p>
 <p>This draws a line with a rectangular pen of <em>width</em> and <em>height</em> with drawing operation <em>op</em> on <em>dst-bitmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line using the <em>constant</em> value as used by <code class="docutils literal notranslate"><span class="pre">bitmap::draw-rect-const</span></code>. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results.</p>
 </section>
 <section id="draw-bitmap-line">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-line</span></code><a class="headerlink" href="#draw-bitmap-line" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-line</span></code><a class="headerlink" href="#draw-bitmap-line" title="Link to this heading">¶</a></h3>
 <p>( src-x src-y width height x0 y0 x1 y1 op src-bitmap dst-bitmap – )</p>
 <p>This draws a line with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-bitmap</em> as a pen with drawing operation <em>op</em> on <em>dst-bitmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results. The same may be true of <code class="docutils literal notranslate"><span class="pre">op-set</span></code> in some cases as well.</p>
 </section>
 <section id="draw-pixel-circle">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-circle</span></code><a class="headerlink" href="#draw-pixel-circle" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-circle</span></code><a class="headerlink" href="#draw-pixel-circle" title="Link to this heading">¶</a></h3>
 <p>( constant x y radius op dst-bitmap – )</p>
 <p>This draws an unfilled pixel circle with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>constant</em> value as used by *bitmap::draw-pixel-const`.</p>
 </section>
 <section id="draw-rect-circle">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-circle</span></code><a class="headerlink" href="#draw-rect-circle" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-circle</span></code><a class="headerlink" href="#draw-rect-circle" title="Link to this heading">¶</a></h3>
 <p>( constant width height x y radius op dst-bitmap – )</p>
 <p>This draws an unfilled circle with a rectangular pen of <em>width</em> and <em>height</em> with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle using the <em>constant</em> value as used by <code class="docutils literal notranslate"><span class="pre">bitmap::draw-rect-const</span></code>. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results.</p>
 </section>
 <section id="draw-bitmap-circle">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-circle</span></code><a class="headerlink" href="#draw-bitmap-circle" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-circle</span></code><a class="headerlink" href="#draw-bitmap-circle" title="Link to this heading">¶</a></h3>
 <p>( src-x src-y width height x y radius op src-bitmap dst-bitmap – )</p>
 <p>This draws an unfilled circle with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-bitmap</em> as a pen with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results. The same may be true of <code class="docutils literal notranslate"><span class="pre">op-set</span></code> in some cases as well.</p>
 </section>
 <section id="draw-filled-circle">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-filled-circle</span></code><a class="headerlink" href="#draw-filled-circle" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-filled-circle</span></code><a class="headerlink" href="#draw-filled-circle" title="Link to this heading">¶</a></h3>
 <p>( constant x y radius op dst-bitmap – )</p>
 <p>This draws a filled pixel circle with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>constant</em> value as used by *bitmap::draw-pixel-const`.</p>
 </section>
@@ -85,7 +81,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -107,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
@@ -123,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -133,7 +132,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
@@ -165,6 +163,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -189,7 +189,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -197,7 +197,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -215,7 +215,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

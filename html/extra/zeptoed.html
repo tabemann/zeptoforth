@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>zeptoed &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Bitmaps and Displays" href="display.html" />
@@ -37,46 +33,46 @@
           <div class="body" role="main">
             
   <section id="zeptoed">
-<h1>zeptoed<a class="headerlink" href="#zeptoed" title="Permalink to this heading">¶</a></h1>
+<h1>zeptoed<a class="headerlink" href="#zeptoed" title="Link to this heading">¶</a></h1>
 <p>zeptoed is an optional text editor that may be loaded into RAM or compiled to flash for the purpose of editing files in FAT32 filesystems. It supports editing in multiple buffers simultaneously, copy/cut-and-paste operations, undo operations, LF/CRLF conversion, Unicode (UTF-8), and indentation and unindentation operations. It requires a fully functional ANSI terminal, and hence cannot be used under zeptocom.js.</p>
 <p>Each buffer takes up the middle portion of the screen, i.e. excluding the top and bottom lines of the screen. The top line is taken up by the path of the file corresponding to the current buffer and, if the current buffer is dirty (i.e. a modification has been made to it since has time it has been written out or reverted), an asterisk indicating the fact. The bottom line is taken up by the “minibuffer”, which displays messages and takes prompted user input.</p>
 <p>Note that zeptoed requires a FAT32 filesystem to be registered via <code class="docutils literal notranslate"><span class="pre">fat32-tools::current-fs!</span></code> or <code class="docutils literal notranslate"><span class="pre">fat32-tools::init-simple-fat32</span></code>. In most cases the latter will be the easiest approach (e.g. one is using SDHC/SDXC cards containing only one partition and one is using only one FAT32 filesystem).</p>
 <p>zeptoed lives in <code class="docutils literal notranslate"><span class="pre">extra/common/zeptoed.fs</span></code> and is dependent upon <code class="docutils literal notranslate"><span class="pre">extra/common/dyn_buffer.fs</span></code>. Both can be loaded at once by loading <code class="docutils literal notranslate"><span class="pre">extra/common/zeptoed_all.fs</span></code> with <code class="docutils literal notranslate"><span class="pre">utils/codeload3.sh</span></code>, zeptocom.js, or e4thcom.</p>
 <section id="words">
-<h2>Words<a class="headerlink" href="#words" title="Permalink to this heading">¶</a></h2>
+<h2>Words<a class="headerlink" href="#words" title="Link to this heading">¶</a></h2>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">zeptoed</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zeptoed</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-bytes – )</p>
 <p>Open the file at the path specified by <em>path-addr</em> <em>path-bytes</em> in the current FAT32 filesystem into a new buffer in zeptoed.</p>
 </section>
 <section id="zed">
-<h3><code class="docutils literal notranslate"><span class="pre">zed</span></code><a class="headerlink" href="#zed" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zed</span></code><a class="headerlink" href="#zed" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-bytes – )</p>
 <p>The same as <code class="docutils literal notranslate"><span class="pre">zeptoed</span></code> in case you feel like <code class="docutils literal notranslate"><span class="pre">zeptoed</span></code> is too long to enter.</p>
 </section>
 <section id="zeptoed-heap-size">
-<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-heap-size</span></code><a class="headerlink" href="#zeptoed-heap-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-heap-size</span></code><a class="headerlink" href="#zeptoed-heap-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>This a <code class="docutils literal notranslate"><span class="pre">value</span></code> containing the base heap size used by zeptoed while it is running. It defaults to 65536 bytes. Note that zeptoed actually uses more space for data than this, because this does not include the heap bitmap or arena-allocated structures used by zeptoed.</p>
 </section>
 <section id="zeptoed-indent-size">
-<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-indent-size</span></code><a class="headerlink" href="#zeptoed-indent-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-indent-size</span></code><a class="headerlink" href="#zeptoed-indent-size" title="Link to this heading">¶</a></h3>
 <p>( – spaces )</p>
 <p>This is a <code class="docutils literal notranslate"><span class="pre">value</span></code> containing the number of spaces taken up by a single indentation. It defaults to 2 spaces.</p>
 </section>
 <section id="zeptoed-tab-size">
-<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-tab-size</span></code><a class="headerlink" href="#zeptoed-tab-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-tab-size</span></code><a class="headerlink" href="#zeptoed-tab-size" title="Link to this heading">¶</a></h3>
 <p>( – spaces )</p>
 <p>This is a <code class="docutils literal notranslate"><span class="pre">value</span></code> containing the number of spaces that a tab character is aligned to. It defaults to 8 spaces.</p>
 </section>
 <section id="zeptoed-save-crlf-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-save-crlf-enabled</span></code><a class="headerlink" href="#zeptoed-save-crlf-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">zeptoed-save-crlf-enabled</span></code><a class="headerlink" href="#zeptoed-save-crlf-enabled" title="Link to this heading">¶</a></h3>
 <p>( – enabled? )</p>
 <p>This is a <code class="docutils literal notranslate"><span class="pre">value</span></code> containing whether files saved by zeptoed will use CRLF endlines (rather than the default of LF endlines). It defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
 </section>
 </section>
 <section id="key-mappings">
-<h2>Key mappings<a class="headerlink" href="#key-mappings" title="Permalink to this heading">¶</a></h2>
+<h2>Key mappings<a class="headerlink" href="#key-mappings" title="Link to this heading">¶</a></h2>
 <p>zeptoed has the following key mappings; all other non-control characters will be inserted at the cursor:</p>
 <ul class="simple">
 <li><p>Enter: Insert a newline with indentation to match the indentation of the preceding line, unless prompted in the minibuffer, where then the prompt is responded to, or while searching, where then searching is ended.</p></li>
@@ -120,7 +116,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -142,6 +138,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
@@ -158,6 +156,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -168,7 +167,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
@@ -200,6 +198,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -224,7 +224,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -232,7 +232,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -250,7 +250,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

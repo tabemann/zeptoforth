@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>SPI Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="I2C Words" href="i2c.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="spi-words">
-<h1>SPI Words<a class="headerlink" href="#spi-words" title="Permalink to this heading">¶</a></h1>
+<h1>SPI Words<a class="headerlink" href="#spi-words" title="Link to this heading">¶</a></h1>
 <p>There are a number of words for controlling SPI peripherals available on each of the supported microcontrollers. These are as follows:</p>
 <p>Note that <em>spi</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
@@ -48,207 +44,207 @@
 <li><p>On the STM32F746 the available <em>spi</em> values are 1 through 6.</p></li>
 </ul>
 <section id="spi">
-<h2><code class="docutils literal notranslate"><span class="pre">spi</span></code><a class="headerlink" href="#spi" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">spi</span></code><a class="headerlink" href="#spi" title="Link to this heading">¶</a></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">spi</span></code> module:</p>
 <section id="all-platforms">
-<h3>All platforms<a class="headerlink" href="#all-platforms" title="Permalink to this heading">¶</a></h3>
+<h3>All platforms<a class="headerlink" href="#all-platforms" title="Link to this heading">¶</a></h3>
 <section id="enable-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-spi</span></code><a class="headerlink" href="#enable-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi</span></code><a class="headerlink" href="#enable-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Enable an SPI peripheral.</p>
 </section>
 <section id="disable-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-spi</span></code><a class="headerlink" href="#disable-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi</span></code><a class="headerlink" href="#disable-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Disable an SPI peripheral. Note that SPI peripherals are disabled by default.</p>
 </section>
 <section id="enable-spi-tx">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-tx</span></code><a class="headerlink" href="#enable-spi-tx" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-tx</span></code><a class="headerlink" href="#enable-spi-tx" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Enable SPI peripheral transmit.</p>
 </section>
 <section id="disable-spi-tx">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-tx</span></code><a class="headerlink" href="#disable-spi-tx" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-tx</span></code><a class="headerlink" href="#disable-spi-tx" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Disable SPI peripheral transmit.</p>
 </section>
 <section id="master-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">master-spi</span></code><a class="headerlink" href="#master-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">master-spi</span></code><a class="headerlink" href="#master-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to be a master. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="slave-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">slave-spi</span></code><a class="headerlink" href="#slave-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">slave-spi</span></code><a class="headerlink" href="#slave-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to be a slave. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="spi-baud">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code><a class="headerlink" href="#spi-baud" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code><a class="headerlink" href="#spi-baud" title="Link to this heading">¶</a></h4>
 <p>( baud spi – )</p>
 <p>Set the baud of a master SPI peripheral. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="motorola-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">motorola-spi</span></code><a class="headerlink" href="#motorola-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">motorola-spi</span></code><a class="headerlink" href="#motorola-spi" title="Link to this heading">¶</a></h4>
 <p>( sph spo spi – )</p>
 <p>Set the protocol of an SPI peripheral to Motorola SPI, with SPO/CPOL set to <em>spo</em> and SPH/CPHA set to <em>sph</em>. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="ti-ss-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">ti-ss-spi</span></code><a class="headerlink" href="#ti-ss-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">ti-ss-spi</span></code><a class="headerlink" href="#ti-ss-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set the protocol of an SPI peripheral to TI synchronous serial. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="spi-data-size">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-data-size!</span></code><a class="headerlink" href="#spi-data-size" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-data-size!</span></code><a class="headerlink" href="#spi-data-size" title="Link to this heading">¶</a></h4>
 <p>( data-size spi – )</p>
 <p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040 and RP2350, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
 <p>( c spi – )</p>
 <p>Emit a word to an SPI peripheral.</p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
 <p>( spi – c )</p>
 <p>Read a word from an SPI peripheral.</p>
 </section>
 <section id="buffer-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code><a class="headerlink" href="#buffer-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code><a class="headerlink" href="#buffer-spi" title="Link to this heading">¶</a></h4>
 <p>( addr bytes spi – )</p>
 <p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave.</p>
 </section>
 <section id="spi-buffer">
-<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code><a class="headerlink" href="#spi-buffer" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code><a class="headerlink" href="#spi-buffer" title="Link to this heading">¶</a></h4>
 <p>( add bytes filler spi – )</p>
 <p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for each unit of data sent to the slave.</p>
 </section>
 <section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
 <p>( spi – flag )</p>
 <p>Get whether an SPI peripheral is ready to emit a word.</p>
 </section>
 <section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;?</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;?</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
 <p>( spi – flag )</p>
 <p>Get whether a word is ready to be read from an SPI peripheral.</p>
 </section>
 <section id="drain-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">drain-spi</span></code><a class="headerlink" href="#drain-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">drain-spi</span></code><a class="headerlink" href="#drain-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Empty an SPI peripheral’s receive buffer.</p>
 </section>
 <section id="flush-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">flush-spi</span></code><a class="headerlink" href="#flush-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">flush-spi</span></code><a class="headerlink" href="#flush-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Flush an SPI peripheral’s transmit buffer.</p>
 </section>
 <section id="spi-alternate">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-alternate</span></code><a class="headerlink" href="#spi-alternate" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-alternate</span></code><a class="headerlink" href="#spi-alternate" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>The alternate function for a given SPI peripheral. Note that using <code class="docutils literal notranslate"><span class="pre">spi-pin</span></code> is recommended as some SPI peripherals may have multiple alternate functions in practice depending on the particular pin.</p>
 </section>
 <section id="spi-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-pin</span></code><a class="headerlink" href="#spi-pin" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-pin</span></code><a class="headerlink" href="#spi-pin" title="Link to this heading">¶</a></h4>
 <p>( spi pin – )</p>
 <p>Set the alternate function for <em>pin</em> to configure it for <em>spi</em>.</p>
 </section>
 <section id="spi-rx-handler">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-rx-handler!</span></code><a class="headerlink" href="#spi-rx-handler" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-rx-handler!</span></code><a class="headerlink" href="#spi-rx-handler" title="Link to this heading">¶</a></h4>
 <p>( xt spi – )</p>
 <p>Set an SPI RX handler called when the SPI interrupt is called for RX data. Note that this may not be called if <code class="docutils literal notranslate"><span class="pre">spi&gt;</span></code> is called before the SPI interrupt has the chance to be invoked. A value of 0 indicates no handler.</p>
 </section>
 <section id="x-invalid-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi</span></code><a class="headerlink" href="#x-invalid-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi</span></code><a class="headerlink" href="#x-invalid-spi" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Invalid SPI peripheral exception.</p>
 </section>
 <section id="x-invalid-spi-clock">
-<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-clock</span></code><a class="headerlink" href="#x-invalid-spi-clock" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-clock</span></code><a class="headerlink" href="#x-invalid-spi-clock" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Invalid SPI clock setting exception.</p>
 </section>
 <section id="x-invalid-spi-data-size">
-<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-data-size</span></code><a class="headerlink" href="#x-invalid-spi-data-size" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-data-size</span></code><a class="headerlink" href="#x-invalid-spi-data-size" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Invalid SPI data size setting exception.</p>
 </section>
 </section>
 <section id="rp2040-and-rp2350-only">
-<h3>RP2040 and RP2350 only<a class="headerlink" href="#rp2040-and-rp2350-only" title="Permalink to this heading">¶</a></h3>
+<h3>RP2040 and RP2350 only<a class="headerlink" href="#rp2040-and-rp2350-only" title="Link to this heading">¶</a></h3>
 <section id="enable-spi-loopback">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-loopback</span></code><a class="headerlink" href="#enable-spi-loopback" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-loopback</span></code><a class="headerlink" href="#enable-spi-loopback" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Enable SPI loopback mode for an SPI peripheral.</p>
 </section>
 <section id="disable-spi-loopback">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-loopback</span></code><a class="headerlink" href="#disable-spi-loopback" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-loopback</span></code><a class="headerlink" href="#disable-spi-loopback" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Disable SPI loopback mdoe for an SPI peripheral.</p>
 </section>
 <section id="natl-microwire-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">natl-microwire-spi</span></code><a class="headerlink" href="#natl-microwire-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">natl-microwire-spi</span></code><a class="headerlink" href="#natl-microwire-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set the protocol of the SPI peripheral to National Semiconductor Microwire.</p>
 </section>
 </section>
 <section id="stm32f407-stm32f411-stm32l476-and-stm32f746-only">
-<h3>STM32F407, STM32F411, STM32L476, and STM32F746 only<a class="headerlink" href="#stm32f407-stm32f411-stm32l476-and-stm32f746-only" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F407, STM32F411, STM32L476, and STM32F746 only<a class="headerlink" href="#stm32f407-stm32f411-stm32l476-and-stm32f746-only" title="Link to this heading">¶</a></h3>
 <section id="msb-first-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">msb-first-spi</span></code><a class="headerlink" href="#msb-first-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">msb-first-spi</span></code><a class="headerlink" href="#msb-first-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to have MSB-first data. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="lsb-first-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">lsb-first-spi</span></code><a class="headerlink" href="#lsb-first-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">lsb-first-spi</span></code><a class="headerlink" href="#lsb-first-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to have LSB-first data. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="enable-spi-ssm">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-ssm</span></code><a class="headerlink" href="#enable-spi-ssm" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-ssm</span></code><a class="headerlink" href="#enable-spi-ssm" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Enable SPI software slave management by master SPI peripherals. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="disable-spi-ssm">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-ssm</span></code><a class="headerlink" href="#disable-spi-ssm" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-ssm</span></code><a class="headerlink" href="#disable-spi-ssm" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Disable SPI software slave management by master SPI peripherals. This must be done with the SPI peripheral disabled.</p>
 </section>
 <section id="spi-ssm">
-<h4><code class="docutils literal notranslate"><span class="pre">spi-ssm!</span></code><a class="headerlink" href="#spi-ssm" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">spi-ssm!</span></code><a class="headerlink" href="#spi-ssm" title="Link to this heading">¶</a></h4>
 <p>( ssi spi – )</p>
 <p>Set the software slave management selection for master SPI peripherals.</p>
 </section>
 <section id="line-spi">
-<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi</span></code><a class="headerlink" href="#line-spi" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi</span></code><a class="headerlink" href="#line-spi" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to one-wire mode.</p>
 </section>
 <section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">2-line-spi</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">2-line-spi</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set an SPI peripheral to two-wire mode (the default).</p>
 </section>
 <section id="line-spi-in">
-<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-in</span></code><a class="headerlink" href="#line-spi-in" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-in</span></code><a class="headerlink" href="#line-spi-in" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set the single wire in one-wire mode to be an input.</p>
 </section>
 <section id="line-spi-out">
-<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-out</span></code><a class="headerlink" href="#line-spi-out" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-out</span></code><a class="headerlink" href="#line-spi-out" title="Link to this heading">¶</a></h4>
 <p>( spi – )</p>
 <p>Set the single wire in one-wire mode to be an output.</p>
 </section>
 </section>
 </section>
 <section id="rp2040-only-words">
-<h2>RP2040-only words<a class="headerlink" href="#rp2040-only-words" title="Permalink to this heading">¶</a></h2>
+<h2>RP2040-only words<a class="headerlink" href="#rp2040-only-words" title="Link to this heading">¶</a></h2>
 <section id="buffer-spi-raw-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi-raw-dma</span></code><a class="headerlink" href="#buffer-spi-raw-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi-raw-dma</span></code><a class="headerlink" href="#buffer-spi-raw-dma" title="Link to this heading">¶</a></h3>
 <p>( addr bytes dma1 dma0 spi – last-data )</p>
 <p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>, and returns the last data read from the SPI peripheral.</p>
 </section>
 <section id="spi-buffer-raw-dma">
-<h3><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer-raw-dma</span></code><a class="headerlink" href="#spi-buffer-raw-dma" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer-raw-dma</span></code><a class="headerlink" href="#spi-buffer-raw-dma" title="Link to this heading">¶</a></h3>
 <p>( add bytes filler dma1 dma0 spi – )</p>
 <p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler for unit of data sent to the slave. This word uses the DMA channels <em>dma0</em> and <em>dma1</em>.</p>
 </section>
@@ -260,7 +256,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -282,6 +278,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -309,7 +307,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -341,6 +338,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -365,7 +364,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -373,7 +372,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -391,7 +390,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

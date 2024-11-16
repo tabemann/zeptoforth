@@ -377,6 +377,7 @@ begin-module rchan
       r@ rchan-reply-task @ 1 and triggers x-reply-pending ( addr bytes )
       r@ rchan-reply-buf @ swap ( addr r-addr bytes )
       r@ rchan-reply-buf-size @ min ( addr r-addr r-bytes )
+      dup r@ rchan-reply-buf-size !
       move ( )
       r@ rchan-reply-task @ ( r-task )
       dup 1 or r@ rchan-reply-task ! ( r-task )

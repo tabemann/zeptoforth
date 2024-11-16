@@ -25,6 +25,10 @@ begin-module disassemble-internal
 
   internal import
 
+  defined? armv7m-fp [if]
+    armv7m-fp::armv7m-fp-mask import
+  [then]
+
   \ Disassemble for gas
   variable for-gas
 
@@ -99,6 +103,15 @@ begin-module disassemble-internal
       dup ." R" (udec.)
     endcase
   ;
+
+  defined? float32 [if]
+
+    \ Type a single-precision floating-point register
+    : sreg. ( u -- )
+      ." S" (udec.)
+    ;
+    
+  [then]
 
   \ Type a value
   : val. ( u -- )
@@ -417,6 +430,13 @@ begin-module disassemble-internal
   \ Type out .W
   : .w ( -- ) ." .W " ;
 
+  defined? float32 [if]
+
+    \ Type out .F32
+    : .f32 ( -- ) ." .F32 " ;
+
+  [then]
+
   \ Type a constant at a non-sign-extended 4-aligned PC-relative address
   : nconst4. ( pc rel -- ) swap 2 + 4 align swap + @ space ." @ " h.8 ;
 
@@ -426,6 +446,13 @@ begin-module disassemble-internal
   \ Type out a register and a separator
   : reg-sep. ( reg -- ) reg. sep. ;
 
+  defined? float32 [if]
+
+    \ Type out a single-precision floating-point register and a separator
+    : sreg-sep. ( sreg -- ) sreg. sep. ;
+    
+  [then]
+  
   \ Type out a register, a separator, and an immediate marker
   : reg-sep-imm. ( reg -- ) reg. sep-imm. ;
 
@@ -440,6 +467,13 @@ begin-module disassemble-internal
 
   \ Type out the condition and a space for 32-bit words
   : c.sp ( cond low high -- low high ) rot cond. space ;
+
+  defined? float32 [if]
+
+    \ Type out the condition, ".F32", and a space for 32-bit words
+    : cf32.sp ( cond low high -- low high ) rot cond. .f32 ;
+    
+  [then]
 
   \ Type out the S, the condition, and .W for 32-bit words
   : 4sc.w ( cond low high -- low high ) over 4s?. rot cond. .w ;
@@ -489,6 +523,25 @@ begin-module disassemble-internal
   \ 0 12 bitfield
   : 0_12_bf ( data -- field ) 0 12 bitfield ;
 
+  defined? float32 [if]
+
+    \ high 12 4 : low 6 bitfield
+    : hi_12_4_lo_6_bf ( low high -- field )
+      12 4 bitfield 1 lshift swap 6 rshift 1 and or
+    ;
+
+    \ high 0 4 : high 5 bitfield
+    : hi_0_4_hi_5_bf ( low high -- field )
+      nip dup 0 4 bitfield 1 lshift swap 5 rshift 1 and or
+    ;
+
+    \ low 0 4 : high 7 bitfield
+    : lo_0_4_hi_7_bf ( low high -- field )
+      7 rshift 1 and swap 0 4 bitfield 1 lshift or
+    ;
+    
+  [then]
+  
   \ Size bitshift
   : size-bitshift ( value type -- value' )
     case
@@ -644,6 +697,87 @@ begin-module disassemble-internal
     dup 12_3_bf reg. ." , [" swap 0_3_bf reg-sep.
     0_3_bf reg. 4_2_bf ?dup if ." , LSL #" (udec.) then ." ]"
   ;
+
+  defined? float32 [if]
+
+    \ Deocde a one-argument single-precision floating-point instruction
+    : decode-instr-sr ( addr low high -- )
+      hi_12_4_lo_6_bf sreg. drop
+    ;
+    
+    \ Decode a two-argument single-precision floating-point instruction
+    : decode-instr-2*sr ( addr low high -- )
+      2dup hi_12_4_lo_6_bf sreg-sep. hi_0_4_hi_5_bf sreg. drop
+    ;
+    
+    \ Decode a three-argument single-precision floating-point instruction
+    : decode-instr-3*sr ( addr low high -- )
+      2dup hi_12_4_lo_6_bf sreg-sep. 2dup lo_0_4_hi_7_bf sreg-sep.
+      hi_0_4_hi_5_bf sreg. drop
+    ;
+
+    \ Decode a one-argument single-precision floating-point instruction
+    : decode-instr-sr-fract ( addr low high size -- )
+      -rot 2dup hi_12_4_lo_6_bf dup sreg-sep. sreg-sep.
+      hi_0_4_hi_5_bf - ." #" . drop
+    ;
+
+    \ Decode a single-precision load/store multiple instruction
+    : decode-instr-sr-load/store-multi { addr low high update -- }
+      low 0_4_bf reg. update if ." !" then ." , {"
+      low high hi_12_4_lo_6_bf { vd }
+      high 0_8_bf { count }
+      count vd + vd ?do i sreg. i count vd + 1- <> if ." , " then loop
+      ." }"
+    ;
+
+    \ Decode a single-precision floating-point load/store instruction
+    : decode-instr-sr-load/store-imm ( addr low high -- )
+      2dup hi_12_4_lo_6_bf sreg-sep. ." ["
+      over 0_4_bf reg.
+      0_8_bf swap 7 bit and 0= { imm8 sub }
+      imm8 0<> sub or if
+        sep. ." #" sub if ." -" then imm8 2 lshift (udec.)
+      then
+      ." ]" drop
+    ;
+
+    \ Decode a VMOV immediate instruction
+    : decode-instr-sr-imm ( addr low high -- )
+      2dup hi_12_4_lo_6_bf sreg-sep.
+      ." #$" swap 0_4_bf 4 lshift swap 0_4_bf or h.2 drop
+    ;
+
+    \ Decode a core register/single-precision floating point register transfer
+    \ instruction
+    : decode-instr-cr-sr { addr low high rev -- }
+      low high lo_0_4_hi_7_bf { sreg }
+      high 12_4_bf { reg }
+      rev if reg reg-sep. sreg sreg. else sreg sreg-sep. reg reg. then
+    ;
+
+    \ Decode a double core register/single-precision floating point register
+    \ transfer instruction
+    : decode-instr-2*cr-2*sr { addr low high rev -- }
+      low high hi_0_4_hi_5_bf { vm }
+      low 0_4_bf { rt2 }
+      high 12_4_bf { rt }
+      rev if
+        rt reg-sep. rt2 reg-sep. vm sreg-sep. vm 1+ sreg.
+      else
+        vm sreg-sep. vm 1+ sreg-sep. rt reg-sep. rt2 reg.
+      then
+    ;
+
+    \ Decode a core register to/from FPSCR transfer instruction
+    : decode-instr-cr-fpscr { addr low high rev -- }
+      high 12_4_bf { reg }
+      rev if reg reg-sep. ." FPSCR" else ." FPSCR" reg reg. then
+    ;
+
+  [then]
+  
+  commit-flash
 
   thumb-2? [if]
     
@@ -1494,6 +1628,387 @@ begin-module disassemble-internal
     ." STRING: " 2drop 2 + dup c@ 1+ over + 2 align data.
   ;
 
+  defined? float32 [if]
+
+    \ Parse a VABS.F32 instruction
+    : p-vabs-f32
+      ." VABS" cf32.sp decode-instr-2*sr
+    ;
+
+    \ Parse a VADD.F32 instruction
+    : p-vadd-f32
+      ." VADD" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VCMP.F32 instruction
+    : p-vcmp-f32
+      ." VCMP" cf32.sp decode-instr-2*sr
+    ;
+
+    \ Parse a VCMPE.F32 instruction
+    : p-vcmpe-f32
+      ." VCMPE" cf32.sp decode-instr-2*sr
+    ;
+
+    \ Parse a VCMP.F32 #0.0 instruction
+    : p-vcmp-f32-#0.0
+      ." VCMP" cf32.sp decode-instr-sr ." , #0.0"
+    ;
+
+    \ Parse a VCMPE.F32 #0.0 instruction
+    : p-vcmpe-f32-#0.0
+      ." VCMPE" cf32.sp decode-instr-sr ." , #0.0"
+    ;
+
+    \ Parse a VCVTA.S32.F32 instruction
+    : p-vcvta-s32-f32
+      ." VCVTA.S32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTA.U32.F32 instruction
+    : p-vcvta-u32-f32
+      ." VCVTA.U32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTN.S32.F32 instruction
+    : p-vcvtn-s32-f32
+      ." VCVTN.S32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTN.U32.F32 instruction
+    : p-vcvtn-u32-f32
+      ." VCVTN.U32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTP.S32.F32 instruction
+    : p-vcvtp-s32-f32
+      ." VCVTP.S32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTP.U32.F32 instruction
+    : p-vcvtp-u32-f32
+      ." VCVTP.U32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTM.S32.F32 instruction
+    : p-vcvtm-s32-f32
+      ." VCVTM.S32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTM.U32.F32 instruction
+    : p-vcvtm-u32-f32
+      ." VCVTM.U32.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTR.S32.F32 instruction
+    : p-vcvtr-s32-f32
+      ." VCVTR" rot cond. ." .S32.F32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVTR.U32.F32 instruction
+    : p-vcvtr-u32-f32
+      ." VCVTR" rot cond. ." .U32.F32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVT.S32.F32 instruction
+    : p-vcvt-s32-f32
+      ." VCVT" rot cond. ." .S32.F32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVT.U32.F32 instruction
+    : p-vcvt-u32-f32
+      ." VCVT" rot cond. ." .U32.F32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVT.F32.S32 instruction
+    : p-vcvt-f32-s32
+      ." VCVT" rot cond. ." .F32.S32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVT.F32.U32 instruction
+    : p-vcvt-f32-u32
+      ." VCVT" rot cond. ." .F32.U32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VCVT.U16.F32 fixed-point instruction
+    : p-vcvt-u16-f32-#
+      ." VCVT" rot cond. ." .U16.F32 " 16 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.S16.F32 fixed-point instruction
+    : p-vcvt-s16-f32-#
+      ." VCVT" rot cond. ." .U16.F32 " 16 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.U32.F32 fixed-point instruction
+    : p-vcvt-u32-f32-#
+      ." VCVT" rot cond. ." .U32.F32 " 32 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.S32.F32 fixed-point instruction
+    : p-vcvt-s32-f32-#
+      ." VCVT" rot cond. ." .U32.F32 " 32 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.F32.U16 fixed-point instruction
+    : p-vcvt-f32-u16-#
+      ." VCVT" rot cond. ." .F32.U16 " 16 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.F32.S16 fixed-point instruction
+    : p-vcvt-f32-s16-#
+      ." VCVT" rot cond. ." .F32.U16 " 16 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.F32.U32 fixed-point instruction
+    : p-vcvt-f32-u32-#
+      ." VCVT" rot cond. ." .F32.U32 " 32 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVT.F32.S32 fixed-point instruction
+    : p-vcvt-f32-s32-#
+      ." VCVT" rot cond. ." .F32.U32 " 32 decode-instr-sr-fract
+    ;
+
+    \ Parse a VCVTB.F32.F16 instruction
+    : p-vcvtb-f32-f16
+      ." VCVTB" rot cond. ." .F32.F16 " decode-instr-2*sr
+    ;
+    
+    \ Parse a VCVTT.F32.F16 instruction
+    : p-vcvtt-f32-f16
+      ." VCVTT" rot cond. ." .F32.F16 " decode-instr-2*sr
+    ;
+    
+    \ Parse a VCVTB.F16.F32 instruction
+    : p-vcvtb-f16-f32
+      ." VCVTB" rot cond. ." .F16.F32 " decode-instr-2*sr
+    ;
+    
+    \ Parse a VCVTT.F16.F32 instruction
+    : p-vcvtt-f16-f32
+      ." VCVTT" rot cond. ." .F16.F32 " decode-instr-2*sr
+    ;
+
+    \ Parse a VDIV.F32 instruction
+    : p-vdiv-f32
+      ." VDIV" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VFMA.F32 instruction
+    : p-vfma-f32
+      ." VFMA" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VFMS.F32 instruction
+    : p-vfms-f32
+      ." VFMS" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VFNMA.F32 instruction
+    : p-vfnma-f32
+      ." VFNMA" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VFNMS.F32 instruction
+    : p-vfnms-f32
+      ." VFNMS" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VLDMIA.F32 instruction without update
+    : p-vldmia-f32
+      ." VLDMIA" c.sp false decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VLDMIA.F32 instruction with update
+    : p-vldmia-f32-update
+      ." VLDMIA" c.sp true decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VLDMDB.F32 instruction with update
+    : p-vldmdb-f32-update
+      ." VLDMDB" c.sp true decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VLDR instruction
+    : p-vldr-f32
+      ." VLDR" c.sp decode-instr-sr-load/store-imm
+    ;
+
+    \ Parse a VMAXNM.F32 instruction
+    : p-vmaxnm-f32
+      ." VMAXNM.F32" rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VMINNM.F32 instruction
+    : p-vminnm-f32
+      ." VMINNM.F32" rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VMLA.F32 instruction
+    : p-vmla-f32
+      ." VMLA" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VMLS.F32 instruction
+    : p-vmls-f32
+      ." VMLS" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VMOV.F32 immediate instruction
+    : p-vmov-f32-imm
+      ." VMOV" cf32.sp decode-instr-sr-imm
+    ;
+
+    \ Parse a VMOV.F32 instruction
+    : p-vmov-f32
+      ." VMOV" cf32.sp decode-instr-2*sr
+    ;
+
+    \ Parse a VMOV single-precision floating-point move to core instruction
+    : p-vmov-cr-f32
+      ." VMOV" c.sp true decode-instr-cr-sr
+    ;
+
+    \ Parse a VMOV core to single-precision floating-point move instruction
+    : p-vmov-f32-cr
+      ." VMOV" c.sp false decode-instr-cr-sr
+    ;
+
+    \ Parse a VMOV double single-precision floating-point to core transfer
+    \ instruction
+    : p-vmov-2*cr-2*f32
+      ." VMOV" c.sp true decode-instr-2*cr-2*sr
+    ;
+
+    \ Parse a VMOV double core to single-precision floating-point transfer
+    \ instruction
+    : p-vmov-2*f32-2*cr
+      ." VMOV" c.sp false decode-instr-2*cr-2*sr
+    ;
+
+    \ Parse a VMRS instruction
+    : p-vmrs
+      ." VMRS" c.sp true decode-instr-cr-fpscr
+    ;
+
+    \ Parse a VMSR instruction
+    : p-vmsr
+      ." VMSR" c.sp false decode-instr-cr-fpscr
+    ;
+
+    \ Parse a VMUL.F32 instruction
+    : p-vmul-f32
+      ." VMUL" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VNEG instruction
+    : p-vneg-f32
+      ." VNEG" cf32.sp decode-instr-2*sr
+    ;
+
+    \ Parse a VNMLA.F32 instruction
+    : p-vnmla-f32
+      ." VNMLA" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VNMLS.F32 instruction
+    : p-vnmls-f32
+      ." VNMLS" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VNMUL.F32 instruction
+    : p-vnmul-f32
+      ." VNMUL" cf32.sp decode-instr-3*sr
+    ;
+
+    \ Parse a VRINTA.F32 instruction
+    : p-vrinta-f32
+      ." VRINTA.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTN.F32 instruction
+    : p-vrintn-f32
+      ." VRINTN.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTP.F32 instruction
+    : p-vrintp-f32
+      ." VRINTP.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTM.F32 instruction
+    : p-vrintm-f32
+      ." VRINTM.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTX.F32 instruction
+    : p-vrintx-f32
+      ." VRINTX.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTZ.F32 instruction
+    : p-vrintz-f32
+      ." VRINTZ.F32 " rot drop decode-instr-2*sr
+    ;
+
+    \ Parse a VRINTR.F32 instruction
+    : p-vrintr-f32
+      ." VRINTR.F32 " rot drop decode-instr-2*sr
+    ;
+    
+    \ Parse a VSELEQ.F32 instruction
+    : p-vseleq-f32
+      ." VSELEQ.F32 " rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VSELVS.F32 instruction
+    : p-vselvs-f32
+      ." VSELVS.F32 " rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VSELGE.F32 instruction
+    : p-vselge-f32
+      ." VSELGE.F32 " rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VSELGT.F32 instruction
+    : p-vselgt-f32
+      ." VSELGT.F32 " rot drop decode-instr-3*sr
+    ;
+
+    \ Parse a VSQRT.F32 instruction
+    : p-vsqrt-f32
+      ." VSELGT" cf32.sp decode-instr-2*sr
+    ;
+    
+    \ Parse a VSTMIA.F32 instruction without update
+    : p-vstmia-f32
+      ." VSTMIA" c.sp false decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VSTMIA.F32 instruction with update
+    : p-vstmia-f32-update
+      ." VSTMIA" c.sp true decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VSTMDB.F32 instruction with update
+    : p-vstmdb-f32-update
+      ." VSTMDB" c.sp true decode-instr-sr-load/store-multi
+    ;
+
+    \ Parse a VSTR instruction
+    : p-vstr-f32
+      ." VSTR" c.sp decode-instr-sr-load/store-imm
+    ;
+
+    \ Parse a VSUB.F32 instruction
+    : p-vsub-f32
+      ." VSUB" cf32.sp decode-instr-3*sr
+    ;
+    
+  [then]
+
   \ Commit to flash
   commit-flash
 
@@ -1998,6 +2513,135 @@ begin-module disassemble-internal
     \ ' p-wfe ,
     \ ' p-wfi-2 ,
     \ ' p-yield ,
+
+  [then]
+
+  defined? float32 [if]
+
+    ' p-vabs-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB0 h, $0AC0 h,
+    ' p-vadd-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE30 h, $0A00 h,
+    ' p-vcmp-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB4 h, $0A40 h,
+    ' p-vcmpe-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB4 h, $0AC0 h,
+    ' p-vcmp-f32-#0.0 , instr-sr-mask-0 h, instr-sr-mask-1 h, $EEB5 h, $0A40 h,
+    ' p-vcmpe-f32-#0.0 , instr-sr-mask-0 h, instr-sr-mask-1 h, $EEB5 h, $0AC0 h,
+    ' p-vcvta-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBC h, $0A40 h,
+    ' p-vcvta-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBC h, $0AC0 h,
+    ' p-vcvtn-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBD h, $0A40 h,
+    ' p-vcvtn-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBD h, $0AC0 h,
+    ' p-vcvtp-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBE h, $0A40 h,
+    ' p-vcvtp-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBE h, $0AC0 h,
+    ' p-vcvtm-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBF h, $0A40 h,
+    ' p-vcvtm-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $FEBF h, $0AC0 h,
+    ' p-vcvtr-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEBC h, $0AC0 h,
+    ' p-vcvtr-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEBD h, $0AC0 h,
+    ' p-vcvt-u32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEBC h, $0A40 h,
+    ' p-vcvt-s32-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEBD h, $0A40 h,
+    ' p-vcvt-f32-u32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB8 h, $0A40 h,
+    ' p-vcvt-f32-s32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB8 h, $0AC0 h,
+    ' p-vcvt-u16-f32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBF h, $0A40 h,
+    ' p-vcvt-s16-f32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBE h, $0A40 h,
+    ' p-vcvt-u32-f32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBF h, $0AC0 h,
+    ' p-vcvt-s32-f32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBE h, $0AC0 h,
+    ' p-vcvt-f32-u16-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBB h, $0A40 h,
+    ' p-vcvt-f32-s16-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBA h, $0A40 h,
+    ' p-vcvt-f32-u32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBB h, $0AC0 h,
+    ' p-vcvt-f32-s32-# , instr-sr-fract-mask-0 h, instr-sr-fract-mask-1 h,
+    $EEBA h, $0AC0 h,
+    ' p-vcvtb-f32-f16 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB2 h, $0A40 h,
+    ' p-vcvtt-f32-f16 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB2 h, $0AC0 h,
+    ' p-vcvtb-f16-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB3 h, $0A40 h,
+    ' p-vcvtt-f16-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h,
+    $EEB3 h, $0AC0 h,
+    ' p-vdiv-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE80 h, $0A00 h,
+    ' p-vfma-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EEA0 h, $0A00 h,
+    ' p-vfms-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EEA0 h, $0A40 h,
+    ' p-vfnma-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE90 h, $0A00 h,
+    ' p-vfnms-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE90 h, $0A40 h,
+    ' p-vldmia-f32 ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $EC90 h, $0A00 h,
+    ' p-vldmia-f32-update ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $ECB0 h, $0A00 h,
+    ' p-vldmdb-f32-update ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $ED30 h, $0A00 h,
+    ' p-vldr-f32 ,
+    instr-sr-load/store-imm-mask-0 h, instr-sr-load/store-imm-mask-1 h,
+    $ED10 h, $0A00 h,
+    ' p-vmaxnm-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE80 h, $0A00 h,
+    ' p-vminnm-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE80 h, $0A40 h,
+    ' p-vmla-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE00 h, $0A40 h,
+    ' p-vmls-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE00 h, $0A00 h,
+    ' p-vmov-f32-imm , instr-sr-imm-mask-0 h, instr-sr-imm-mask-1 h,
+    $EEB0 h, $0A00 h,
+    ' p-vmov-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB0 h, $0A40 h,
+    ' p-vmov-cr-f32 , instr-cr-sr-mask-0 h, instr-cr-sr-mask-1 h,
+    $EE10 h, $0A10 h,
+    ' p-vmov-f32-cr , instr-cr-sr-mask-0 h, instr-cr-sr-mask-1 h,
+    $EE00 h, $0A10 h,
+    ' p-vmov-2*cr-2*f32 , instr-2*cr-2*sr-mask-0 h, instr-2*cr-2*sr-mask-1 h,
+    $EE50 h, $0A10 h,
+    ' p-vmov-2*f32-2*cr , instr-2*cr-2*sr-mask-0 h, instr-2*cr-2*sr-mask-1 h,
+    $EE40 h, $0A10 h,
+    ' p-vmrs , instr-cr-fpscr-mask-0 h, instr-cr-fpscr-mask-1 h,
+    $EEF1 h, $0A10 h,
+    ' p-vmsr , instr-cr-fpscr-mask-0 h, instr-cr-fpscr-mask-1 h,
+    $EEE1 h, $0A10 h,
+    ' p-vmul-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE20 h, $0A00 h,
+    ' p-vneg-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB1 h, $0A40 h,
+    ' p-vnmla-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE10 h, $0A40 h,
+    ' p-vnmls-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE10 h, $0A00 h,
+    ' p-vnmul-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE20 h, $0A40 h,
+    ' p-vrinta-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $FEB8 h, $0A40 h,
+    ' p-vrintn-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $FEB9 h, $0A40 h,
+    ' p-vrintp-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $FEBA h, $0A40 h,
+    ' p-vrintm-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $FEBB h, $0A40 h,
+    ' p-vrintx-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB7 h, $0A40 h,
+    ' p-vrintz-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB6 h, $0AC0 h,
+    ' p-vrintr-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB6 h, $0A40 h,
+    ' p-vseleq-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE00 h, $0A00 h,
+    ' p-vselvs-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE10 h, $0A00 h,
+    ' p-vselge-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE20 h, $0A00 h,
+    ' p-vselgt-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $FE30 h, $0A00 h,
+    ' p-vsqrt-f32 , instr-2*sr-mask-0 h, instr-2*sr-mask-1 h, $EEB1 h, $0AC0 h,
+    ' p-vstmia-f32 ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $EC80 h, $0A00 h,
+    ' p-vstmia-f32-update ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $ECA0 h, $0A00 h,
+    ' p-vstmdb-f32-update ,
+    instr-sr-load/store-multi-mask-0 h, instr-sr-load/store-multi-mask-1 h,
+    $ED20 h, $0A00 h,
+    ' p-vstr-f32 ,
+    instr-sr-load/store-imm-mask-0 h, instr-sr-load/store-imm-mask-1 h,
+    $ED00 h, $0A00 h,
+    ' p-vsub-f32 , instr-3*sr-mask-0 h, instr-3*sr-mask-1 h, $EE30 h, $0A40 h,
 
   [then]
 

@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Module Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Lambda Words" href="lambda.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="module-words">
-<h1>Module Words<a class="headerlink" href="#module-words" title="Permalink to this heading">¶</a></h1>
+<h1>Module Words<a class="headerlink" href="#module-words" title="Link to this heading">¶</a></h1>
 <p>Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, but by convention they are named with <code class="docutils literal notranslate"><span class="pre">*</span></code>.</p>
 <p>At any given time once <code class="docutils literal notranslate"><span class="pre">src/forth/common/module.fs</span></code> is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the <code class="docutils literal notranslate"><span class="pre">forth</span></code> wordlist. When new entries are pushed onto the module stack, they save the state of <code class="docutils literal notranslate"><span class="pre">base</span></code> prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.</p>
 <p>A new module is defined by <code class="docutils literal notranslate"><span class="pre">begin-module</span></code>; the module named must not exist yet.  An existing module can be extended by <code class="docutils literal notranslate"><span class="pre">continue-module</span></code>; the named module must exist.  Definitions after that point are added to the module, until <code class="docutils literal notranslate"><span class="pre">end-module</span></code> or <code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code> is seen.</p>
@@ -45,55 +41,55 @@
 <p>Words inside modules or inside nested modules may be used without importing the modules in question with <em>paths</em> specified with <em>module</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em> or, mor generally, <em>module0</em><code class="docutils literal notranslate"><span class="pre">::</span></code>…<code class="docutils literal notranslate"><span class="pre">::</span></code><em>modulen</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em>. These paths can be used not simply by the outer interpreter but also by any word which looks up another word by name, such as <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">[']</span></code>, <code class="docutils literal notranslate"><span class="pre">postpone</span></code>, <code class="docutils literal notranslate"><span class="pre">averts</span></code>, and <code class="docutils literal notranslate"><span class="pre">triggers</span></code>.</p>
 <p>Note that it is recommended that once <code class="docutils literal notranslate"><span class="pre">src/common/forth/module.fs</span></code> is loaded, the user should not manually use <code class="docutils literal notranslate"><span class="pre">set-order</span></code> or <code class="docutils literal notranslate"><span class="pre">set-current</span></code>, as the module system will not know about this and thus unexpected results may occur.</p>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Link to this heading">¶</a></h2>
 <p>The following words are defined in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
 <section id="x-already-defined">
-<h3><code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code><a class="headerlink" href="#x-already-defined" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code><a class="headerlink" href="#x-already-defined" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Module already defined exception.</p>
 </section>
 <section id="x-not-found">
-<h3><code class="docutils literal notranslate"><span class="pre">x-not-found</span></code><a class="headerlink" href="#x-not-found" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-found</span></code><a class="headerlink" href="#x-not-found" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Module not found exception.</p>
 </section>
 <section id="begin-module">
-<h3><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Link to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>Begin the definition of module <em>name</em>; module <em>name</em> must not already exist or <code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code> will be raised.</p>
 </section>
 <section id="continue-module">
-<h3><code class="docutils literal notranslate"><span class="pre">continue-module</span></code><a class="headerlink" href="#continue-module" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">continue-module</span></code><a class="headerlink" href="#continue-module" title="Link to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>Continue the definition of a preexisting module <em>name</em>; if module <em>name</em> does not exist <code class="docutils literal notranslate"><span class="pre">x-not-found</span></code> will be raised.</p>
 </section>
 <section id="private-module">
-<h3><code class="docutils literal notranslate"><span class="pre">private-module</span></code><a class="headerlink" href="#private-module" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">private-module</span></code><a class="headerlink" href="#private-module" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Begin the definition of a private module, i.e a module not bound to a word.</p>
 </section>
 <section id="end-module">
-<h3><code class="docutils literal notranslate"><span class="pre">end-module</span></code><a class="headerlink" href="#end-module" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">end-module</span></code><a class="headerlink" href="#end-module" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from the wordlist order.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( –  module )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from th e wordlist order, and then push the module whose definition had ended onto the data stack.</p>
 </section>
 <section id="import">
-<h3><code class="docutils literal notranslate"><span class="pre">import</span></code><a class="headerlink" href="#import" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">import</span></code><a class="headerlink" href="#import" title="Link to this heading">¶</a></h3>
 <p>( module – )</p>
 <p>Import a specified module into the current module’s wordlist order; if the module does not exist <code class="docutils literal notranslate"><span class="pre">x-not-found</span></code> is raised.</p>
 </section>
 <section id="import-from">
-<h3><code class="docutils literal notranslate"><span class="pre">import-from</span></code><a class="headerlink" href="#import-from" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">import-from</span></code><a class="headerlink" href="#import-from" title="Link to this heading">¶</a></h3>
 <p>( module “name” – )</p>
 <p>Import a specified named word from within the specified module into the current namespace; note that this word will not shadow identically named words defined in the current namespace, and will persist until the end of the current module’s definition.</p>
 </section>
 <section id="begin-imports-from">
-<h3><code class="docutils literal notranslate"><span class="pre">begin-imports-from</span></code><a class="headerlink" href="#begin-imports-from" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">begin-imports-from</span></code><a class="headerlink" href="#begin-imports-from" title="Link to this heading">¶</a></h3>
 <p>( module “name0” … “namen” “end-imports-from” – )</p>
 <p>Import multiple specified named words from within the specified module into the current namespace; note that these words will not shadow identically named words defined in the current namespace, and will persist untilt he end of the current module’s definition. Note that these imports can cross multiple lines of input, as in:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">begin</span><span class="o">-</span><span class="n">module</span> <span class="n">foobar</span>
@@ -109,12 +105,12 @@
 </div>
 </section>
 <section id="unimport">
-<h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Link to this heading">¶</a></h3>
 <p>( module – )</p>
 <p>Remove a specified module from the current module’s wordlist order; note that it does not remove it from parent modules’ wordlist orders, so if it  had been imported within them they are still searchable.</p>
 </section>
 <section id="export">
-<h3><code class="docutils literal notranslate"><span class="pre">export</span></code><a class="headerlink" href="#export" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">export</span></code><a class="headerlink" href="#export" title="Link to this heading">¶</a></h3>
 <p>( xt “word-name” – )</p>
 <p>Export <em>xt</em> from the module currently being defined as <em>word-name</em>.</p>
 </section>
@@ -126,7 +122,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -148,6 +144,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -164,6 +162,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -174,7 +173,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -206,6 +204,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -230,7 +230,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -238,7 +238,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -256,7 +256,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

@@ -1003,6 +1003,21 @@ Get the data stack pointer
 
 Set the data stack pointer
 
+##### `string,`
+( c-addr u -- )
+
+Write a string to the dictionary, writing its length as a cell first.
+
+##### `string!`
+( c-addr u dest-addr -- )
+
+Write a string at an address with its length as a cell first.
+
+##### `string@`
+( addr -- c-addr u )
+
+Read a string written with `string,` or `string!` at an address with its length as a cell first.
+
 ##### `reboot`
 ( -- )
 

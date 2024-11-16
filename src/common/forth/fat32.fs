@@ -102,6 +102,12 @@ begin-module fat32
   
   begin-module fat32-internal
 
+    \ The parent current directory
+    variable parent-current-dir-var
+
+    \ The current directory reference
+    user current-dir-ref
+    
     \ The FAT32 lock
     lock-size buffer: fat32-lock
     
@@ -116,9 +122,24 @@ begin-module fat32
     
     \ Unaligned halfword access
     : unaligned-h@ ( addr -- h ) dup c@ swap 1+ c@ 8 lshift or ;
-  
-  end-module> import
+
+    \ The saved init task hook
+    variable saved-task-init-hook
+
+    \ Initialize the current directory and the init task hook
+    : do-current-dir-init ( -- )
+      0 parent-current-dir-var !
+      parent-current-dir-var current-dir-ref !
+      task-init-hook @ saved-task-init-hook !
+      [: { new-task }
+        current-dir-ref @ new-task ['] current-dir-ref for-task!
+        saved-task-init-hook @ ?dup if new-task swap execute then
+      ;] task-init-hook !
+    ;
+    initializer do-current-dir-init
     
+  end-module> import
+
   \ Master boot record class
   <object> begin-class <mbr>
   
@@ -162,9 +183,19 @@ begin-module fat32
   
   \ Base FAT32 filesystem class
   <object> begin-class <base-fat32-fs>
-  
+
+    continue-module fat32-internal
+
+      \ Carry out an operation with a path
+      method with-op-at-root-path ( c-addr u xt op-xt fs -- )
+      
+    end-module
+    
     \ Get the root directory for a FAT32 filesystem
     method root-dir@ ( dir fs -- )
+
+    \ Get the current directory for a FAT32 filesystem
+    method current-dir@ ( dir fs -- )
     
     \ Find a file or directory in a path from the root directory
     method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
@@ -190,7 +221,10 @@ begin-module fat32
     
     \ Flush the block device for a filesystem
     method flush ( fs -- )
-  
+
+    \ Get the actual filesystem
+    method real-fs@ ( fs -- fs' )
+    
   end-class
   
   \ Implement base FAT32 filesystem class
@@ -377,6 +411,9 @@ begin-module fat32
     
     end-module
 
+    \ Clone a file
+    method clone-file ( new-file file -- )
+    
     \ Close a file
     method close-file ( file -- )
     
@@ -476,6 +513,9 @@ begin-module fat32
       cell member dir-current-cluster-index
       
     end-module
+
+    \ Clone a directory
+    method clone-dir ( new-dir dir -- )
 
     \ Close a directory
     method close-dir ( dir -- )
@@ -955,12 +995,36 @@ begin-module fat32
       repeat
       2drop
     ;
+
+    \ Get whether a path is from root
+    : root-path? ( addr bytes -- root-path? )
+      0> if c@ [char] / = else drop false then
+    ;
+    
+    \ Get whether a path is root or empty
+    : root-or-empty? ( addr bytes -- root? )
+      over + swap ?do i c@ [char] / <> if unloop false exit then loop true
+    ;
     
     \ Initialize the FAT32 layer
     : init-fat32 ( -- ) fat32-lock init-lock ;
 
   end-module
-    
+
+  \ Set the current directory for the current task and all tasks which share a
+  \ current directory with that task
+  : change-dir ( dir -- ) current-dir-ref @ ! ;
+
+  \ Set the current directory for the current task within an xt, restoring it
+  \ afterwards even if an exception is raised
+  : with-dir ( dir xt -- )
+    current-dir-ref @ { saved-current-dir-ref }
+    swap { W^ new-current-dir-var }
+    new-current-dir-var [: current-dir-ref ! execute ;] try
+    saved-current-dir-ref current-dir-ref !
+    ?raise
+  ;
+
   \ Implement master boot record class
   <mbr> begin-implement
     :noname ( mbr-device mbr -- )
@@ -1052,69 +1116,83 @@ begin-module fat32
       0 over dir-current-cluster-index !
       register-dir
     ; define root-dir@
+
+    :noname ( dir fs -- )
+      [: { dir self -- }
+        current-dir-ref @ @ { current-dir }
+        current-dir 0= if
+          dir self root-dir@
+        else
+          current-dir dir-fs @ self <> if
+            dir self root-dir@
+          else
+            dir current-dir clone-dir
+          then
+        then
+      ;] fat32-lock with-lock
+    ; define current-dir@
     
-    :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
+    :noname ( c-addr u xt op-xt fs -- )
       <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ with-path ;] try
-        root-dir close-dir
-        root-dir destroy
+      [: { dir }
+        4 pick 4 pick root-path? if
+          dir swap root-dir@
+        else
+          dir swap current-dir@
+        then
+        dir swap try
+        dir close-dir
+        dir destroy
         ?raise
       ;] with-aligned-allot
+    ; define with-op-at-root-path
+    
+    :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
+      ['] with-path swap with-op-at-root-path
     ; define with-root-path
 
     :noname ( c-addr u fs -- exists? )
       <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ path-exists? ;] try
-        root-dir close-dir
-        root-dir destroy
+      [: { dir }
+        2 pick 2 pick root-path? if
+          dir swap root-dir@
+        else
+          dir swap current-dir@
+        then
+        dir ['] path-exists? try
+        dir close-dir
+        dir destroy
         ?raise
       ;] with-aligned-allot
     ; define root-path-exists?
     
     :noname ( c-addr u xt fs -- ) ( xt: file -- )
-      <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ with-create-file-at-path ;] try
-        root-dir close-dir
-        root-dir destroy
-        ?raise
-      ;] with-aligned-allot
+      ['] with-create-file-at-path swap with-op-at-root-path
     ; define with-create-file-at-root-path
     
     :noname ( c-addr u xt fs -- ) ( xt: file -- )
-      <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ with-open-file-at-path ;] try
-        root-dir close-dir
-        root-dir destroy
-        ?raise
-      ;] with-aligned-allot
+      ['] with-open-file-at-path swap with-op-at-root-path
     ; define with-open-file-at-root-path
 
     :noname ( c-addr u xt fs -- ) ( xt: dir -- )
-      <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ with-create-dir-at-path ;] try
-        root-dir close-dir
-        root-dir destroy
-        ?raise
-      ;] with-aligned-allot
+      ['] with-create-dir-at-path swap with-op-at-root-path
     ; define with-create-dir-at-root-path
     
     :noname ( c-addr u xt fs -- ) ( xt: dir -- )
       <fat32-dir> class-size
-      [:
-        dup { root-dir }
-        [: tuck swap root-dir@ with-open-dir-at-path ;] try
-        root-dir close-dir
-        root-dir destroy
+      [: { dir }
+        2over root-path? if
+          dir swap root-dir@
+        else
+          dir swap current-dir@
+        then
+        2 pick 2 pick root-or-empty? if
+          -rot 2drop dir swap try
+        else
+          dir ['] with-open-dir-at-path try
+        then
+        dir close-dir
+        dir destroy
         ?raise
       ;] with-aligned-allot
     ; define with-open-dir-at-root-path
@@ -1450,6 +1528,18 @@ begin-module fat32
       self file-open @ if self close-file then
       self <object>->destroy
     ; define destroy
+
+    :noname { new-file self -- }
+      self file-open @ averts x-not-open
+      self file-fs @ <fat32-file> new-file init-object
+      new-file register-file
+      self file-parent-index @ new-file file-parent-index !
+      self file-parent-cluster @ new-file file-parent-cluster !
+      self file-start-cluster @ new-file file-start-cluster !
+      self file-offset @ new-file file-offset !
+      self file-current-cluster @ new-file file-current-cluster !
+      self file-current-cluster-index @ new-file file-current-cluster-index !
+    ; define clone-file
     
     :noname { self -- }
       self file-open @ averts x-not-open
@@ -1733,6 +1823,18 @@ begin-module fat32
       self <object>->destroy
     ; define destroy
     
+    :noname { new-dir self -- }
+      self dir-open @ averts x-not-open
+      self dir-fs @ <fat32-dir> new-dir init-object
+      new-dir register-dir
+      self dir-parent-index @ new-dir dir-parent-index !
+      self dir-parent-cluster @ new-dir dir-parent-cluster !
+      self dir-start-cluster @ new-dir dir-start-cluster !
+      self dir-offset @ new-dir dir-offset !
+      self dir-current-cluster @ new-dir dir-current-cluster !
+      self dir-current-cluster-index @ new-dir dir-current-cluster-index !
+    ; define clone-dir
+
     :noname { self -- }
       self dir-open @ averts x-not-open
       self dir-prev-open @ ?dup if
@@ -1779,9 +1881,10 @@ begin-module fat32
             dup { nested-dir }
             ( c-addr' u' index c-addr'' u'' dir xt dir' )
             -rot >r over >r open-dir ( c-addr' u' index )
-            1+ tuck - -rot + swap 2r> swap with-path ( )
+            1+ tuck - -rot + swap 2r> swap ['] with-path try ( )
             nested-dir close-dir
             nested-dir destroy
+            ?raise
           ;] with-aligned-allot
         then
       else ( c-addr' u' index )
@@ -1804,10 +1907,8 @@ begin-module fat32
             swap ( c-addr' u' index c-addr'' u'' dir' dir )
             2over 2 pick exists? if ( c-addr' u' index c-addr'' u'' dir' dir )
               over { dir }
-              [: over { dir }
-                open-dir ( c-addr' u' index )
-                1+ tuck - -rot + swap dir path-exists? ( exists? )
-              ;] try
+              open-dir ( c-addr' u' index )
+              1+ tuck - -rot + swap dir ['] path-exists? try
               dir close-dir
               dir destroy
               ?raise
@@ -1826,11 +1927,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-file> class-size [: ( xt c-addr u dir' file )
           dup { file }
-          [:
-            dup { file }
-            swap create-file
-            file swap execute
-          ;] try
+          swap create-file
+          file swap try
           file close-file
           file destroy
           ?raise
@@ -1843,11 +1941,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-file> class-size [: ( xt c-addr u dir' file )
           dup { file }
-          [:
-            dup { file }
-            swap open-file
-            file swap execute
-          ;] try
+          swap open-file
+          file swap try
           file close-file
           file destroy
           ?raise
@@ -1860,11 +1955,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
           dup { dir }
-          [:
-            dup { dir }
-            swap create-dir
-            dir swap execute
-          ;] try
+          swap create-dir
+          dir swap try
           dir close-dir
           dir destroy
           ?raise
@@ -1877,11 +1969,8 @@ begin-module fat32
       [: ( xt c-addr u dir' )
         <fat32-dir> class-size [: ( xt c-addr u dir' dir'' )
           dup { dir }
-          [:
-            dup { dir }
-            swap open-dir
-            dir swap execute
-          ;] try
+          swap open-dir
+          dir swap try
           dir close-dir
           dir destroy
           ?raise
@@ -1928,7 +2017,11 @@ begin-module fat32
       dup >r
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
-      swap do-create-file
+      swap dup >r ['] do-create-file try ?dup if
+        r> destroy rdrop ?raise
+      else
+        rdrop
+      then
       r> update-dir-date-time
     ; define create-file
     
@@ -1936,7 +2029,11 @@ begin-module fat32
       dup dir-open @ averts x-not-open
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
-      swap do-open-file
+      swap dup >r ['] do-open-file try ?dup if
+        r> destroy ?raise
+      else
+        rdrop
+      then
     ; define open-file
         
     :noname ( c-addr u dir -- )
@@ -1959,7 +2056,11 @@ begin-module fat32
       dup >r
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
-      swap do-create-dir
+      swap dup >r ['] do-create-dir try ?dup if
+        r> destroy rdrop ?raise
+      else
+        rdrop
+      then
       r> update-dir-date-time
     ; define create-dir
         
@@ -1967,7 +2068,11 @@ begin-module fat32
       dup dir-open @ averts x-not-open
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
-      swap do-open-dir
+      swap dup >r ['] do-open-dir try ?dup if
+        r> destroy ?raise
+      else
+        rdrop
+      then
     ; define open-dir
         
     :noname ( c-addr u dir -- )

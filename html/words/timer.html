@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Hardware Timers &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="DMA support" href="dma.html" />
@@ -37,103 +33,103 @@
           <div class="body" role="main">
             
   <section id="hardware-timers">
-<h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this heading">¶</a></h1>
+<h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Link to this heading">¶</a></h1>
 <p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) and the RP2350 (i.e. the Raspberry Pi Pico 2) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
 <p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>
 <p>The hardware timer on the RP2040 has one shared 64-bit microsecond counter and four “alarms” which are triggered by a set value to be compared with the lower 32 bits of the microsecond counter. The RP2350 is like the RP2040 in this regard except that it has a second identical hardare timer. Alarm handlers execute at interrupt time, so they must be interrupt-safe. Alarms must be enabled for each time they are used and are disabled when they are triggered. However, the interrupt state must be disabled before leaving the alarm interrupt handler or else they will be triggered repeatedly in an infinite loop. Also note that alarm handlers always execute on core 0 even when core 1 has been booted.</p>
 <p>There are also busy-loop microsecond delays which wait until a given 64-bit microsecond time. Because the 64-bit microsecond counter can be reasonably treated as not wrapping, only a fixed 64-bit microsecond time is provided. On top of this, busy-loop microsecond delays which wait a given 64-bit microsecond interval are also available. This may be easier to use, but when waiting at repeated intervals maintaining a separate counter, incrementing it for each interval, and waiting until that time is likely to provide better behavior than waiting for intervals relative to the start of the wait.</p>
 <p>The RP2350 also supports setting hardware timers to use the system clock for timing rather than the microsecond tick clock.</p>
 <section id="timer">
-<h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> platform:</p>
 <section id="us-counter-lsb">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Link to this heading">¶</a></h3>
 <p>( – us )</p>
 <p>Get the lower 32 bits in the current time in microseconds.</p>
 </section>
 <section id="us-counter">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter</span></code><a class="headerlink" href="#us-counter" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter</span></code><a class="headerlink" href="#us-counter" title="Link to this heading">¶</a></h3>
 <p>( – us-d )</p>
 <p>Get the current time in microseconds as a 64-bit value.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Set the microsecond counter to a 64-bit value.</p>
 </section>
 <section id="pause-us">
-<h3><code class="docutils literal notranslate"><span class="pre">pause-us</span></code><a class="headerlink" href="#pause-us" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pause-us</span></code><a class="headerlink" href="#pause-us" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Pause the microsecond counter.</p>
 </section>
 <section id="unpause-us">
-<h3><code class="docutils literal notranslate"><span class="pre">unpause-us</span></code><a class="headerlink" href="#unpause-us" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">unpause-us</span></code><a class="headerlink" href="#unpause-us" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Unpause the microsecond counter.</p>
 </section>
 <section id="delay-until-us">
-<h3><code class="docutils literal notranslate"><span class="pre">delay-until-us</span></code><a class="headerlink" href="#delay-until-us" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">delay-until-us</span></code><a class="headerlink" href="#delay-until-us" title="Link to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Delay until at least a 64-bit microsecond value, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
 </section>
 <section id="delay-us">
-<h3><code class="docutils literal notranslate"><span class="pre">delay-us</span></code><a class="headerlink" href="#delay-us" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">delay-us</span></code><a class="headerlink" href="#delay-us" title="Link to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Delay a given number of microseconds, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
 </section>
 <section id="set-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code><a class="headerlink" href="#set-alarm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code><a class="headerlink" href="#set-alarm" title="Link to this heading">¶</a></h3>
 <p>( us xt alarm – )</p>
 <p>Set an alarm at a time. <em>alarm</em> is an alarm index from 0 to 3. <em>xt</em> is the execution token for the alarm handler. <em>us</em> is the lower 32 bits of the microsecond counter to trigger the alarm at.</p>
 </section>
 <section id="clear-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm</span></code><a class="headerlink" href="#clear-alarm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm</span></code><a class="headerlink" href="#clear-alarm" title="Link to this heading">¶</a></h3>
 <p>( alarm – )</p>
 <p>Clear an alarm. <em>alarm</em> is an alarm index from 0 to 3.</p>
 </section>
 <section id="clear-alarm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm-int</span></code><a class="headerlink" href="#clear-alarm-int" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm-int</span></code><a class="headerlink" href="#clear-alarm-int" title="Link to this heading">¶</a></h3>
 <p>( alarm – )</p>
 <p>Clear an alarm interrupt. <em>alarm</em> is an alarm index from 0 to 3. This must be called with the approriate alarm index inside an alarm handler for a given alarm or else the alarm handler will be called in an infinite loop.</p>
 </section>
 <section id="alarm-set">
-<h3><code class="docutils literal notranslate"><span class="pre">alarm-set?</span></code><a class="headerlink" href="#alarm-set" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-set?</span></code><a class="headerlink" href="#alarm-set" title="Link to this heading">¶</a></h3>
 <p>( alarm – set? )</p>
 <p>Get whether an alarm is set.</p>
 </section>
 <section id="x-out-of-range-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Link to this heading">¶</a></h3>
 <p>Out of range alarm index exception.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> platform also has the following words for controlling hardware clocks:</p>
 </section>
 <section id="lock-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">lock-timer</span></code><a class="headerlink" href="#lock-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lock-timer</span></code><a class="headerlink" href="#lock-timer" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Lock a timer so it cannot be written to without a reset.</p>
 </section>
 <section id="timer-locked">
-<h3><code class="docutils literal notranslate"><span class="pre">timer-locked?</span></code><a class="headerlink" href="#timer-locked" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">timer-locked?</span></code><a class="headerlink" href="#timer-locked" title="Link to this heading">¶</a></h3>
 <p>( – locked? )</p>
 <p>Get whether a timer is locked.</p>
 </section>
 <section id="sysclk-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">sysclk-timer</span></code><a class="headerlink" href="#sysclk-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sysclk-timer</span></code><a class="headerlink" href="#sysclk-timer" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set a timer to use the system clock as a source.</p>
 </section>
 <section id="tick-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">tick-timer</span></code><a class="headerlink" href="#tick-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">tick-timer</span></code><a class="headerlink" href="#tick-timer" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set a timer to sue the microsecond tick clock as a source.</p>
 </section>
 <section id="timer-sysclk">
-<h3><code class="docutils literal notranslate"><span class="pre">timer-sysclk?</span></code><a class="headerlink" href="#timer-sysclk" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">timer-sysclk?</span></code><a class="headerlink" href="#timer-sysclk" title="Link to this heading">¶</a></h3>
 <p>( – sysclk? )</p>
 <p>Get whether a timer is set to use the system clock as a source.</p>
 </section>
 </section>
 <section id="timer1">
-<h2><code class="docutils literal notranslate"><span class="pre">timer1</span></code><a class="headerlink" href="#timer1" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">timer1</span></code><a class="headerlink" href="#timer1" title="Link to this heading">¶</a></h2>
 <p>This module on the <code class="docutils literal notranslate"><span class="pre">rp2350</span></code> only is identical to the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module except that it controls a second hardware timer. It contains the same words as the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module.</p>
 </section>
 </section>
@@ -143,7 +139,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -165,6 +161,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -192,7 +190,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -224,6 +221,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -248,7 +247,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -256,7 +255,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -274,7 +273,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

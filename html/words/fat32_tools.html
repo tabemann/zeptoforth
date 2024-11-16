@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>FAT32 Tools &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Interrupt Words" href="interrupt.html" />
@@ -37,196 +33,206 @@
           <div class="body" role="main">
             
   <section id="fat32-tools">
-<h1>FAT32 Tools<a class="headerlink" href="#fat32-tools" title="Permalink to this heading">¶</a></h1>
+<h1>FAT32 Tools<a class="headerlink" href="#fat32-tools" title="Link to this heading">¶</a></h1>
 <p>zeptoforth comes with a variety of words for manipulating files and directories in FAT32 filesystems. Directories can be created, listed, removed, and renamed, and files can be created, appended, overwritten, dumped, removed, and renamed.</p>
 <p>zeptoforth includes support for including code for execution within FAT32 filesystems. This includes support for handling nested included files, up to a maximum of eight included files. Note that including code is intended to only be done from within the main task, and undefined results may occur if done from within any other task.</p>
 <section id="id1">
-<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module contains the following words:</p>
 <section id="x-fs-not-set">
-<h3><code class="docutils literal notranslate"><span class="pre">x-fs-not-set</span></code><a class="headerlink" href="#x-fs-not-set" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-fs-not-set</span></code><a class="headerlink" href="#x-fs-not-set" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Current filesystem not set exception.</p>
 </section>
+<section id="x-current-path-too-long">
+<h3><code class="docutils literal notranslate"><span class="pre">x-current-path-too-long</span></code><a class="headerlink" href="#x-current-path-too-long" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Current path is too long (i.e. longer than 256 bytes)</p>
+</section>
 <section id="x-include-stack-overflow">
-<h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code><a class="headerlink" href="#x-include-stack-overflow" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code><a class="headerlink" href="#x-include-stack-overflow" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Include stack overflow exception, raised if the number of nested includes exceeds eight includes.</p>
 </section>
 <section id="current-fs">
-<h3><code class="docutils literal notranslate"><span class="pre">current-fs!</span></code><a class="headerlink" href="#current-fs" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">current-fs!</span></code><a class="headerlink" href="#current-fs" title="Link to this heading">¶</a></h3>
 <p>( fs – )</p>
 <p>Set the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">current-fs&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">current-fs&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( – fs )</p>
 <p>Get the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 </section>
+<section id="change-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">change-dir</span></code><a class="headerlink" href="#change-dir" title="Link to this heading">¶</a></h3>
+<p>( addr bytes – )</p>
+<p>Set the current path for the current FAT32 filesystem.</p>
+</section>
 <section id="init-simple-fat32">
-<h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code><a class="headerlink" href="#init-simple-fat32" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code><a class="headerlink" href="#init-simple-fat32" title="Link to this heading">¶</a></h3>
 <p>( write-through sck-pin tx-pin rx-pin cs-pin spi-device – )</p>
 <p>Simple SDHC/SDXC FAT32 card initializer; this creates a SDHC/SDXC card interface and FAT32 filesystem and, if successful, sets it as the current filesystem.</p>
 <p><em>sck-pin</em>, <em>tx-pin</em>, <em>rx-pin</em>, and <em>cs-pin</em> are the clock, transmit, receive, and chip select pins to use. <em>spi-device</em> is the SPI peripheral to use; it must match <em>sck-pin</em>, <em>tx-pin</em>, and <em>rx-pin</em>. <em>write-through</em> is whether to enable write-through; enabling write-through will result in greater data integrity in the case of failures, but slower performance. If write-through is not enabled, manually flushing at opportune moments is highly recommended.</p>
 <p>Note that this permanently allots space for the FAT32 filesystem and its support structures in the current task’s RAM dictionary.</p>
 </section>
 <section id="enable-echo">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-echo</span></code><a class="headerlink" href="#enable-echo" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-echo</span></code><a class="headerlink" href="#enable-echo" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable echoing while loading code from a file. Note that echoing is enabled by default. Also note that a given number of enables require an equal number of disables to be canceled out.</p>
 </section>
 <section id="disable-echo">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-echo</span></code><a class="headerlink" href="#disable-echo" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-echo</span></code><a class="headerlink" href="#disable-echo" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable echoing while loading code from a file. Note that a given number of disables require an equal number of enables to be canceled out.</p>
 </section>
 <section id="load-file">
-<h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code><a class="headerlink" href="#load-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code><a class="headerlink" href="#load-file" title="Link to this heading">¶</a></h3>
 <p>( file – )</p>
 <p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="included">
-<h3><code class="docutils literal notranslate"><span class="pre">included</span></code><a class="headerlink" href="#included" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">included</span></code><a class="headerlink" href="#included" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Load code from a file with the specified path in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="include">
-<h3><code class="docutils literal notranslate"><span class="pre">include</span></code><a class="headerlink" href="#include" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">include</span></code><a class="headerlink" href="#include" title="Link to this heading">¶</a></h3>
 <p>( “path” – )</p>
 <p>Load code from a file with the specified path as a token in the current include FAT32 filesystem. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
 </section>
 <section id="list-dir">
-<h3><code class="docutils literal notranslate"><span class="pre">list-dir</span></code><a class="headerlink" href="#list-dir" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">list-dir</span></code><a class="headerlink" href="#list-dir" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>List a directory at the specified path. Display the file creation date, modification date, and size.</p>
 </section>
 <section id="create-file">
-<h3><code class="docutils literal notranslate"><span class="pre">create-file</span></code><a class="headerlink" href="#create-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">create-file</span></code><a class="headerlink" href="#create-file" title="Link to this heading">¶</a></h3>
 <p>( data-addr data-u path-addr path-u – )</p>
 <p>Create a file at the specified path and write data to it.</p>
 </section>
 <section id="create-dir">
-<h3><code class="docutils literal notranslate"><span class="pre">create-dir</span></code><a class="headerlink" href="#create-dir" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">create-dir</span></code><a class="headerlink" href="#create-dir" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Create a directory at the specified path.</p>
 </section>
 <section id="copy-file">
-<h3><code class="docutils literal notranslate"><span class="pre">copy-file</span></code><a class="headerlink" href="#copy-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">copy-file</span></code><a class="headerlink" href="#copy-file" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u new-path-addr new-path-u – )</p>
 <p>Copy a file from an existing path to a new path.</p>
 </section>
 <section id="append-file">
-<h3><code class="docutils literal notranslate"><span class="pre">append-file</span></code><a class="headerlink" href="#append-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">append-file</span></code><a class="headerlink" href="#append-file" title="Link to this heading">¶</a></h3>
 <p>( data-addr data-u path-addr path-u – )</p>
 <p>Write data to the end of a file at the specified path.</p>
 </section>
 <section id="write-file">
-<h3><code class="docutils literal notranslate"><span class="pre">write-file</span></code><a class="headerlink" href="#write-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-file</span></code><a class="headerlink" href="#write-file" title="Link to this heading">¶</a></h3>
 <p>( data-addr data-u path-addr path-u – )</p>
 <p>Overwrite a file at the specified path with data and then truncate it afterwards.</p>
 </section>
 <section id="write-file-window">
-<h3><code class="docutils literal notranslate"><span class="pre">write-file-window</span></code><a class="headerlink" href="#write-file-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-file-window</span></code><a class="headerlink" href="#write-file-window" title="Link to this heading">¶</a></h3>
 <p>( data-addr data-u offset-u path-addr path-u – )</p>
 <p>Write data at an offset to a file at the specified path without truncating it.</p>
 </section>
 <section id="list-file">
-<h3><code class="docutils literal notranslate"><span class="pre">list-file</span></code><a class="headerlink" href="#list-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">list-file</span></code><a class="headerlink" href="#list-file" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>List a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
 </section>
 <section id="list-file-window">
-<h3><code class="docutils literal notranslate"><span class="pre">list-file-window</span></code><a class="headerlink" href="#list-file-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">list-file-window</span></code><a class="headerlink" href="#list-file-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>List a defined window in a file at the specified path on the console, converting lone LF characters to CRLF pairs.</p>
 </section>
 <section id="dump-file">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file</span></code><a class="headerlink" href="#dump-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file</span></code><a class="headerlink" href="#dump-file" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Dump the contents of a file at the specified path to the console as hexadecimal bytes plus ASCII.</p>
 </section>
 <section id="dump-file-window">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-window</span></code><a class="headerlink" href="#dump-file-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-window</span></code><a class="headerlink" href="#dump-file-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal bytes plus ASCII</p>
 </section>
 <section id="dump-file-raw">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw</span></code><a class="headerlink" href="#dump-file-raw" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw</span></code><a class="headerlink" href="#dump-file-raw" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Dump the contents of a file at the specified path to the console as raw data, without processing.</p>
 </section>
 <section id="dump-file-raw-window">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw-window</span></code><a class="headerlink" href="#dump-file-raw-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw-window</span></code><a class="headerlink" href="#dump-file-raw-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>Dump the contents of a defined window in a file at the specified path to the console as raw data, without processing.</p>
 </section>
 <section id="dump-file-ascii">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii</span></code><a class="headerlink" href="#dump-file-ascii" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii</span></code><a class="headerlink" href="#dump-file-ascii" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Dump the contents of a file at the specified path to the console as ASCII.</p>
 </section>
 <section id="dump-file-ascii-window">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii-window</span></code><a class="headerlink" href="#dump-file-ascii-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii-window</span></code><a class="headerlink" href="#dump-file-ascii-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>Dump the contents of a defined window in a file at the specified path to the console as ASCII.</p>
 </section>
 <section id="dump-file-halfs">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs</span></code><a class="headerlink" href="#dump-file-halfs" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs</span></code><a class="headerlink" href="#dump-file-halfs" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Dump the contents of a file at the specified path to the console as hexadecimal halfwords plus ASCII.</p>
 </section>
 <section id="dump-file-halfs-window">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs-window</span></code><a class="headerlink" href="#dump-file-halfs-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs-window</span></code><a class="headerlink" href="#dump-file-halfs-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal halfwords plus ASCII</p>
 </section>
 <section id="dump-file-cells">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells</span></code><a class="headerlink" href="#dump-file-cells" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells</span></code><a class="headerlink" href="#dump-file-cells" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Dump the contents of a file at the specified path to the console as hexadecimal cells plus ASCII.</p>
 </section>
 <section id="dump-file-cells-window">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells-window</span></code><a class="headerlink" href="#dump-file-cells-window" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells-window</span></code><a class="headerlink" href="#dump-file-cells-window" title="Link to this heading">¶</a></h3>
 <p>( offset-u length-u path-addr path-u – )</p>
 <p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal cells plus ASCII</p>
 </section>
 <section id="read-file">
-<h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Link to this heading">¶</a></h3>
 <p>( buffer-addr buffer-u offset-u path-addr path-u – read-u )</p>
 <p>Read a file at the specified path, from an offset from the start of the file, to a fixed-sized buffer and return the length in bytes actually read.</p>
 </section>
 <section id="file-size">
-<h3><code class="docutils literal notranslate"><span class="pre">file-size&#64;</span></code><a class="headerlink" href="#file-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">file-size&#64;</span></code><a class="headerlink" href="#file-size" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – size-u )</p>
 <p>Get the size in bytes of a file at the specified path.</p>
 </section>
 <section id="exists">
-<h3><code class="docutils literal notranslate"><span class="pre">exists?</span></code><a class="headerlink" href="#exists" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">exists?</span></code><a class="headerlink" href="#exists" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – exists? )</p>
 <p>Get whether a file or directory exists at the specified path.</p>
 </section>
 <section id="remove-file">
-<h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Remove a file at the specified path.</p>
 </section>
 <section id="remove-dir">
-<h3><code class="docutils literal notranslate"><span class="pre">remove-dir</span></code><a class="headerlink" href="#remove-dir" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">remove-dir</span></code><a class="headerlink" href="#remove-dir" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – )</p>
 <p>Remove a directory at the specified path. Note that it must be empty aside from the <code class="docutils literal notranslate"><span class="pre">.</span></code> and <code class="docutils literal notranslate"><span class="pre">..</span></code> entries.</p>
 </section>
 <section id="rename">
-<h3><code class="docutils literal notranslate"><span class="pre">rename</span></code><a class="headerlink" href="#rename" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">rename</span></code><a class="headerlink" href="#rename" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u new-name-addr new-name-u – )</p>
 <p>Rename a file or directory at the specified path to a new <em>name</em> (not path). Note that files’ and directories’ parent directories cannot be changed with this word.</p>
 </section>
 <section id="file">
-<h3><code class="docutils literal notranslate"><span class="pre">file?</span></code><a class="headerlink" href="#file" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">file?</span></code><a class="headerlink" href="#file" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – file? )</p>
 <p>Get whether the entry at a specified path is a file.</p>
 </section>
 <section id="dir">
-<h3><code class="docutils literal notranslate"><span class="pre">dir?</span></code><a class="headerlink" href="#dir" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dir?</span></code><a class="headerlink" href="#dir" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u – dir? )</p>
 <p>Get whether the entry at a specified path is a directory.</p>
 </section>
@@ -238,7 +244,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -260,6 +266,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -276,6 +284,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -286,7 +295,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -318,6 +326,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -342,7 +352,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -350,7 +360,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -368,7 +378,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

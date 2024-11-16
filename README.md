@@ -14,7 +14,7 @@ Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2
 
 The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_usb`, and `full_swdcom` builds, includes the following:
 
-* A priority-scheduled preemptive multitasker
+* A priority-scheduled preemptive multitasker with deadline scheduling
 * Semaphores
 * Locks, with priority inversion handling
 * Message-oriented queue channels
@@ -29,6 +29,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Action scheduler support
 * Multicore support (on the RP2040 and RP2350)
 * Double cell and S31.32 fixed-point numeric support
+* Single-precision floating-point numeric support (except on the RP2040 and STM32F411)
 * Lambda expressions
 * `value`s and block-scoped local variables
 * Closures
@@ -63,6 +64,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Support for code loading from files in FAT32 filesystems
 * User-level FAT32 tools
 * FAT32 filesystem support on top of block storage in on-board Quad SPI flash (on the RP2040, RP2350, and STM32F746 DISCOVERY boards)
+* FAT32 filesystem support on top of PSRAM (on RP2350 boards with PSRAM)
 * Best-effort fault recovery
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the RP2040)
 * A block editor (on the STM32F746 DISCOVERY board, the RP2040, and the RP2350)
@@ -76,6 +78,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 There is also support for loadable extras not included in any builds:
 
 * Single-cell S15.16 fixed-point numeric support
+* Complex numbers built on top of single-precision hardware floating point
 * A profiler
 * An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
 * A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.

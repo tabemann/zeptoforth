@@ -4138,8 +4138,14 @@ begin-module net
             endcase
           ;] endpoint with-endpoint
           case
-            TCP_SYN_SENT of endpoint self send-ipv4-rst endof
-            TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
+            TCP_SYN_SENT of
+              endpoint self send-ipv4-rst
+              endpoint free-endpoint
+            endof
+            TCP_SYN_RECEIVED of
+              endpoint self send-ipv4-rst
+              endpoint free-endpoint
+            endof
             TCP_ESTABLISHED of
               timeout start endpoint self close-tcp-established
             endof

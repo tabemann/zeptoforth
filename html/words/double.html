@@ -1,24 +1,20 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Double-Cell Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Value and Local Variable Words" href="value.html" />
-    <link rel="prev" title="Line Editor" href="line.html" />
+    <link rel="next" title="Single-Precision Floating-Point Support Words" href="float32.html" />
+    <link rel="prev" title="Multitasking Words" href="task.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -37,407 +33,407 @@
           <div class="body" role="main">
             
   <section id="double-cell-words">
-<h1>Double-Cell Words<a class="headerlink" href="#double-cell-words" title="Permalink to this heading">¶</a></h1>
+<h1>Double-Cell Words<a class="headerlink" href="#double-cell-words" title="Link to this heading">¶</a></h1>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Link to this heading">¶</a></h2>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
 <section id="drop">
-<h3><code class="docutils literal notranslate"><span class="pre">2drop</span></code><a class="headerlink" href="#drop" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2drop</span></code><a class="headerlink" href="#drop" title="Link to this heading">¶</a></h3>
 <p>( d – )</p>
 <p>Double drop</p>
 </section>
 <section id="swap">
-<h3><code class="docutils literal notranslate"><span class="pre">2swap</span></code><a class="headerlink" href="#swap" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2swap</span></code><a class="headerlink" href="#swap" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d2 d1 )</p>
 <p>Double swap</p>
 </section>
 <section id="over">
-<h3><code class="docutils literal notranslate"><span class="pre">2over</span></code><a class="headerlink" href="#over" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2over</span></code><a class="headerlink" href="#over" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d1 d2 d1 )</p>
 <p>Double over</p>
 </section>
 <section id="dup">
-<h3><code class="docutils literal notranslate"><span class="pre">2dup</span></code><a class="headerlink" href="#dup" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2dup</span></code><a class="headerlink" href="#dup" title="Link to this heading">¶</a></h3>
 <p>( d1 – d1 d1 )</p>
 <p>Double dup</p>
 </section>
 <section id="nip">
-<h3><code class="docutils literal notranslate"><span class="pre">2nip</span></code><a class="headerlink" href="#nip" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2nip</span></code><a class="headerlink" href="#nip" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d2 )</p>
 <p>Double nip</p>
 </section>
 <section id="tuck">
-<h3><code class="docutils literal notranslate"><span class="pre">2tuck</span></code><a class="headerlink" href="#tuck" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2tuck</span></code><a class="headerlink" href="#tuck" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d2 d1 d2 )</p>
 <p>Double tuck</p>
 </section>
 <section id="rot">
-<h3><code class="docutils literal notranslate"><span class="pre">2rot</span></code><a class="headerlink" href="#rot" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2rot</span></code><a class="headerlink" href="#rot" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 d3 – d2 d3 d1 )</p>
 <p>Double rot</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">4dup</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">4dup</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d1 d2 d1 d2 )</p>
 <p>Quadruple dup</p>
 </section>
 <section id="r">
-<h3><code class="docutils literal notranslate"><span class="pre">2r&#64;</span></code><a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2r&#64;</span></code><a class="headerlink" href="#r" title="Link to this heading">¶</a></h3>
 <p>( R: d1 – d1 ) ( – d1 )</p>
 <p>Read two cells from the top of the return stack.</p>
 </section>
 <section id="d">
-<h3><code class="docutils literal notranslate"><span class="pre">d=</span></code><a class="headerlink" href="#d" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d=</span></code><a class="headerlink" href="#d" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – f )</p>
 <p>Test for the equality of two double cells</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">d&lt;&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d&lt;&gt;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – f )</p>
 <p>Test for the inequality of two double cells</p>
 </section>
 <section id="du">
-<h3><code class="docutils literal notranslate"><span class="pre">du&lt;</span></code><a class="headerlink" href="#du" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">du&lt;</span></code><a class="headerlink" href="#du" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – f )</p>
 <p>Unsigned double less than</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">du&gt;</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">du&gt;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – f )</p>
 <p>Unsigned double greater than</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">du&gt;=</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">du&gt;=</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – f )</p>
 <p>Unsigned double greater than or equal</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">du&lt;=</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">du&lt;=</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – f )</p>
 <p>Unsigned double less than or equal</p>
 </section>
 <section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">d&lt;</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d&lt;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – f )</p>
 <p>Signed double less than</p>
 </section>
 <section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">d&gt;</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d&gt;</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – f )</p>
 <p>Signed double greater than</p>
 </section>
 <section id="id8">
-<h3><code class="docutils literal notranslate"><span class="pre">d&gt;=</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d&gt;=</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – f )</p>
 <p>Signed double greater than or equal</p>
 </section>
 <section id="id9">
-<h3><code class="docutils literal notranslate"><span class="pre">d&lt;=</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d&lt;=</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – f )</p>
 <p>Signed double less than or equal</p>
 </section>
 <section id="d0">
-<h3><code class="docutils literal notranslate"><span class="pre">d0=</span></code><a class="headerlink" href="#d0" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0=</span></code><a class="headerlink" href="#d0" title="Link to this heading">¶</a></h3>
 <p>( d – f )</p>
 <p>Double equal to zero</p>
 </section>
 <section id="id10">
-<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;&gt;</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;&gt;</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <p>( d – f )</p>
 <p>Double not equal to zero</p>
 </section>
 <section id="id11">
-<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <p>( nd – f )</p>
 <p>Double less than zero</p>
 </section>
 <section id="id12">
-<h3><code class="docutils literal notranslate"><span class="pre">d0&gt;</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0&gt;</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <p>( nd – f )</p>
 <p>Double greater than zero</p>
 </section>
 <section id="id13">
-<h3><code class="docutils literal notranslate"><span class="pre">d0&gt;=</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0&gt;=</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <p>( nd – f )</p>
 <p>Double greater than or equal to zero</p>
 </section>
 <section id="id14">
-<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;=</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d0&lt;=</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <p>( nd – f )</p>
 <p>Double less than or equal to zero</p>
 </section>
 <section id="dnegate">
-<h3><code class="docutils literal notranslate"><span class="pre">dnegate</span></code><a class="headerlink" href="#dnegate" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dnegate</span></code><a class="headerlink" href="#dnegate" title="Link to this heading">¶</a></h3>
 <p>( nd1 – nd2 )</p>
 <p>Negate a double cell</p>
 </section>
 <section id="dabs">
-<h3><code class="docutils literal notranslate"><span class="pre">dabs</span></code><a class="headerlink" href="#dabs" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dabs</span></code><a class="headerlink" href="#dabs" title="Link to this heading">¶</a></h3>
 <p>( nd – ud )</p>
 <p>Double absolute value</p>
 </section>
 <section id="dmin">
-<h3><code class="docutils literal notranslate"><span class="pre">dmin</span></code><a class="headerlink" href="#dmin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dmin</span></code><a class="headerlink" href="#dmin" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – nd1|nd2 )</p>
 <p>Double minimum</p>
 </section>
 <section id="dmax">
-<h3><code class="docutils literal notranslate"><span class="pre">dmax</span></code><a class="headerlink" href="#dmax" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dmax</span></code><a class="headerlink" href="#dmax" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – nd1|nd2 )</p>
 <p>Double maximum</p>
 </section>
 <section id="id15">
-<h3><code class="docutils literal notranslate"><span class="pre">d+</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d+</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d3 )</p>
 <p>Add two double cells</p>
 </section>
 <section id="id16">
-<h3><code class="docutils literal notranslate"><span class="pre">d-</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d-</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d3 )</p>
 <p>Subtract two double cells</p>
 </section>
 <section id="um">
-<h3><code class="docutils literal notranslate"><span class="pre">um+</span></code><a class="headerlink" href="#um" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">um+</span></code><a class="headerlink" href="#um" title="Link to this heading">¶</a></h3>
 <p>( u1 u2 – u3 carry )</p>
 <p>Add with carry</p>
 </section>
 <section id="id17">
-<h3><code class="docutils literal notranslate"><span class="pre">um*</span></code><a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">um*</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <p>( u1 u2 – ud )</p>
 <p>Multiply two unsigned 32-bit values to get an unsigned 64-bit value</p>
 </section>
 <section id="m">
-<h3><code class="docutils literal notranslate"><span class="pre">m*</span></code><a class="headerlink" href="#m" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">m*</span></code><a class="headerlink" href="#m" title="Link to this heading">¶</a></h3>
 <p>( n1 n2 – d )</p>
 <p>Multiply two signed 32-bit values to get a signed 64-bit value</p>
 </section>
 <section id="ud">
-<h3><code class="docutils literal notranslate"><span class="pre">ud*</span></code><a class="headerlink" href="#ud" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ud*</span></code><a class="headerlink" href="#ud" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – ud3 )</p>
 <p>Unsigned multiply 64 * 64 = 64</p>
 </section>
 <section id="id18">
-<h3><code class="docutils literal notranslate"><span class="pre">d*</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d*</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – nd3 )</p>
 <p>Signed multiply 64 * 64 = 64</p>
 </section>
 <section id="id19">
-<h3><code class="docutils literal notranslate"><span class="pre">*/</span></code><a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">*/</span></code><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <p>( n1 n2 n3 – n4 )</p>
 <p>Multiply signed n1 and n2 to get double cell intermediate value, then divide it by n3 to get a single cell result</p>
 </section>
 <section id="mod">
-<h3><code class="docutils literal notranslate"><span class="pre">*/mod</span></code><a class="headerlink" href="#mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">*/mod</span></code><a class="headerlink" href="#mod" title="Link to this heading">¶</a></h3>
 <p>( n1 n2 n3 – n4 n5 )</p>
 <p>Multiply signed n1 and n2 to get double cell intermediate value, then divide it by n3 to get a single cell remainder n4 and quotient n5</p>
 </section>
 <section id="u">
-<h3><code class="docutils literal notranslate"><span class="pre">u*/</span></code><a class="headerlink" href="#u" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">u*/</span></code><a class="headerlink" href="#u" title="Link to this heading">¶</a></h3>
 <p>( u1 u2 u3 – u4 )</p>
 <p>Multiply unsigned u1 and u2 to get double cell intermediate value, then divide it by u3 to get a single cell result</p>
 </section>
 <section id="u-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">u*/mod</span></code><a class="headerlink" href="#u-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">u*/mod</span></code><a class="headerlink" href="#u-mod" title="Link to this heading">¶</a></h3>
 <p>( u1 u2 u3 – u4 u5 )</p>
 <p>Multiply unsigned u1 and u2 to get double cell intermediate value, then divide it by u3 to get a single cell remainder u4 and quotient u5</p>
 </section>
 <section id="um-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">um/mod</span></code><a class="headerlink" href="#um-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">um/mod</span></code><a class="headerlink" href="#um-mod" title="Link to this heading">¶</a></h3>
 <p>( ud u1 – u2 u3 )</p>
 <p>Divide unsigned ud by u1 and get a single cell remainder u2 and quotient u3</p>
 </section>
 <section id="m-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">m/mod</span></code><a class="headerlink" href="#m-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">m/mod</span></code><a class="headerlink" href="#m-mod" title="Link to this heading">¶</a></h3>
 <p>( nd n1 – n2 n3 )</p>
 <p>Divide signed nd by n1 and get a single cell remainder n2 and quotient n3</p>
 </section>
 <section id="ud-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">ud/mod</span></code><a class="headerlink" href="#ud-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ud/mod</span></code><a class="headerlink" href="#ud-mod" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – ud3 ud4 )</p>
 <p>Divide unsigned ud1 by ud2 and get double cell remainder ud3 and quotient ud4</p>
 </section>
 <section id="d-mod">
-<h3><code class="docutils literal notranslate"><span class="pre">d/mod</span></code><a class="headerlink" href="#d-mod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d/mod</span></code><a class="headerlink" href="#d-mod" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – nd3 nd4 )</p>
 <p>Divide signed nd1 by nd2 and get double cell remainder nd3 and quotient nd4</p>
 </section>
 <section id="id20">
-<h3><code class="docutils literal notranslate"><span class="pre">ud/</span></code><a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ud/</span></code><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
 <p>( ud1 ud2 – ud3 )</p>
 <p>Divide unsigned two double cells and get a double cell quotient</p>
 </section>
 <section id="id21">
-<h3><code class="docutils literal notranslate"><span class="pre">d/</span></code><a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">d/</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
 <p>( nd1 nd2 – nd3 )</p>
 <p>Divide signed two double cells and get a double cell quotient</p>
 </section>
 <section id="f">
-<h3><code class="docutils literal notranslate"><span class="pre">f*</span></code><a class="headerlink" href="#f" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f*</span></code><a class="headerlink" href="#f" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d3 )</p>
 <p>Multiply two s31.32 fixed-point numbers. Note that overflow is possible, where then the sign will be wrong.</p>
 </section>
 <section id="id22">
-<h3><code class="docutils literal notranslate"><span class="pre">f/</span></code><a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f/</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – d3 )</p>
 <p>Divide two s31.32 fixed-point numbers. Note that overflow is possible, where then the sign will be wrong.</p>
 </section>
 <section id="udm">
-<h3><code class="docutils literal notranslate"><span class="pre">udm*</span></code><a class="headerlink" href="#udm" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">udm*</span></code><a class="headerlink" href="#udm" title="Link to this heading">¶</a></h3>
 <p>( d1 d2 – dl dh )</p>
 <p>Multiply two 64-bit double-cell numbers into a single 128-bit quadruple-cell number.</p>
 </section>
 <section id="fi">
-<h3><code class="docutils literal notranslate"><span class="pre">fi**</span></code><a class="headerlink" href="#fi" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fi**</span></code><a class="headerlink" href="#fi" title="Link to this heading">¶</a></h3>
 <p>( f1 u – f2 )</p>
 <p>Exponentiation of an S31.32 fixed-point number by an unsigned integer</p>
 </section>
 <section id="fmod">
-<h3><code class="docutils literal notranslate"><span class="pre">fmod</span></code><a class="headerlink" href="#fmod" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fmod</span></code><a class="headerlink" href="#fmod" title="Link to this heading">¶</a></h3>
 <p>( f1 f2 – f3 )</p>
 <p>Compute the symmetric modulus of two S31.32 S31.32 fixed-point numbers.</p>
 </section>
 <section id="ceil">
-<h3><code class="docutils literal notranslate"><span class="pre">ceil</span></code><a class="headerlink" href="#ceil" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ceil</span></code><a class="headerlink" href="#ceil" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Get the ceiling of a fixed-point number as a single-cell number.</p>
 </section>
 <section id="floor">
-<h3><code class="docutils literal notranslate"><span class="pre">floor</span></code><a class="headerlink" href="#floor" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">floor</span></code><a class="headerlink" href="#floor" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Get the floor of a fixed-point number as a single-cell number.</p>
 </section>
 <section id="round-half-up">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-up</span></code><a class="headerlink" href="#round-half-up" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-up</span></code><a class="headerlink" href="#round-half-up" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number up to the nearest integer with half rounding up.</p>
 </section>
 <section id="round-half-down">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-down</span></code><a class="headerlink" href="#round-half-down" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-down</span></code><a class="headerlink" href="#round-half-down" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number down to the nearest integer with half rounding down.</p>
 </section>
 <section id="round-half-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-zero</span></code><a class="headerlink" href="#round-half-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-zero</span></code><a class="headerlink" href="#round-half-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number to the nearest integer with half rounding towards zero.</p>
 </section>
 <section id="round-half-away-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-away-zero</span></code><a class="headerlink" href="#round-half-away-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-away-zero</span></code><a class="headerlink" href="#round-half-away-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number to the nearest integer with half rounding away from zero.</p>
 </section>
 <section id="round-half-even">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-even</span></code><a class="headerlink" href="#round-half-even" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-even</span></code><a class="headerlink" href="#round-half-even" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
 </section>
 <section id="round-half-odd">
-<h3><code class="docutils literal notranslate"><span class="pre">round-half-odd</span></code><a class="headerlink" href="#round-half-odd" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-half-odd</span></code><a class="headerlink" href="#round-half-odd" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number to the nearest integer with half rounding towards even.</p>
 </section>
 <section id="round-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">round-zero</span></code><a class="headerlink" href="#round-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-zero</span></code><a class="headerlink" href="#round-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number towards zero.</p>
 </section>
 <section id="round-away-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">round-away-zero</span></code><a class="headerlink" href="#round-away-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">round-away-zero</span></code><a class="headerlink" href="#round-away-zero" title="Link to this heading">¶</a></h3>
 <p>( f – n )</p>
 <p>Round a fixed-point number away from zero.</p>
 </section>
 <section id="sqrt">
-<h3><code class="docutils literal notranslate"><span class="pre">sqrt</span></code><a class="headerlink" href="#sqrt" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sqrt</span></code><a class="headerlink" href="#sqrt" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Square root of an S31.32 fixed-point number</p>
 </section>
 <section id="expm1">
-<h3><code class="docutils literal notranslate"><span class="pre">expm1</span></code><a class="headerlink" href="#expm1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">expm1</span></code><a class="headerlink" href="#expm1" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate (e^x)-1 where x is an S31.32 fixed-point number</p>
 </section>
 <section id="exp">
-<h3><code class="docutils literal notranslate"><span class="pre">exp</span></code><a class="headerlink" href="#exp" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">exp</span></code><a class="headerlink" href="#exp" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate e^x where x is an S31.32 fixed-point number</p>
 </section>
 <section id="lnp1">
-<h3><code class="docutils literal notranslate"><span class="pre">lnp1</span></code><a class="headerlink" href="#lnp1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lnp1</span></code><a class="headerlink" href="#lnp1" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate ln(x + 1) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="ln">
-<h3><code class="docutils literal notranslate"><span class="pre">ln</span></code><a class="headerlink" href="#ln" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ln</span></code><a class="headerlink" href="#ln" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate ln(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="id23">
-<h3><code class="docutils literal notranslate"><span class="pre">f**</span></code><a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">f**</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
 <p>( fb fx – fb^x )</p>
 <p>Calculate b^x where b and x are S31.32 fixed-point numbers</p>
 </section>
 <section id="sin">
-<h3><code class="docutils literal notranslate"><span class="pre">sin</span></code><a class="headerlink" href="#sin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sin</span></code><a class="headerlink" href="#sin" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate sin(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="cos">
-<h3><code class="docutils literal notranslate"><span class="pre">cos</span></code><a class="headerlink" href="#cos" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cos</span></code><a class="headerlink" href="#cos" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate cos(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="tan">
-<h3><code class="docutils literal notranslate"><span class="pre">tan</span></code><a class="headerlink" href="#tan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">tan</span></code><a class="headerlink" href="#tan" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate tan(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="asin">
-<h3><code class="docutils literal notranslate"><span class="pre">asin</span></code><a class="headerlink" href="#asin" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">asin</span></code><a class="headerlink" href="#asin" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate asin(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="acos">
-<h3><code class="docutils literal notranslate"><span class="pre">acos</span></code><a class="headerlink" href="#acos" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">acos</span></code><a class="headerlink" href="#acos" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate acos(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atan">
-<h3><code class="docutils literal notranslate"><span class="pre">atan</span></code><a class="headerlink" href="#atan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">atan</span></code><a class="headerlink" href="#atan" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate atan(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atan2">
-<h3><code class="docutils literal notranslate"><span class="pre">atan2</span></code><a class="headerlink" href="#atan2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">atan2</span></code><a class="headerlink" href="#atan2" title="Link to this heading">¶</a></h3>
 <p>( fy fx – fangle )</p>
 <p>Calculate the angle of any pair of x and y coordinates where they are all S31.32 fixed-point numbers</p>
 </section>
 <section id="sinh">
-<h3><code class="docutils literal notranslate"><span class="pre">sinh</span></code><a class="headerlink" href="#sinh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">sinh</span></code><a class="headerlink" href="#sinh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate sinh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="cosh">
-<h3><code class="docutils literal notranslate"><span class="pre">cosh</span></code><a class="headerlink" href="#cosh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">cosh</span></code><a class="headerlink" href="#cosh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate cosh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="tanh">
-<h3><code class="docutils literal notranslate"><span class="pre">tanh</span></code><a class="headerlink" href="#tanh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">tanh</span></code><a class="headerlink" href="#tanh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate tanh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="asinh">
-<h3><code class="docutils literal notranslate"><span class="pre">asinh</span></code><a class="headerlink" href="#asinh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">asinh</span></code><a class="headerlink" href="#asinh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate asinh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="acosh">
-<h3><code class="docutils literal notranslate"><span class="pre">acosh</span></code><a class="headerlink" href="#acosh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">acosh</span></code><a class="headerlink" href="#acosh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate acosh(x) where x is an S31.32 fixed-point number</p>
 </section>
 <section id="atanh">
-<h3><code class="docutils literal notranslate"><span class="pre">atanh</span></code><a class="headerlink" href="#atanh" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">atanh</span></code><a class="headerlink" href="#atanh" title="Link to this heading">¶</a></h3>
 <p>( f1 – f2 )</p>
 <p>Calculate atanh(x) where x is an S31.32 fixed-point number</p>
 </section>
@@ -449,7 +445,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -471,6 +467,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -487,6 +485,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -497,7 +496,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -529,6 +527,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -548,12 +548,12 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="line.html" title="previous chapter">Line Editor</a></li>
-      <li>Next: <a href="value.html" title="next chapter">Value and Local Variable Words</a></li>
+      <li>Previous: <a href="task.html" title="previous chapter">Multitasking Words</a></li>
+      <li>Next: <a href="float32.html" title="next chapter">Single-Precision Floating-Point Support Words</a></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -561,7 +561,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -579,7 +579,7 @@
       &#169;2020-2024, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
