@@ -82,22 +82,22 @@ begin-module pixmap8
 
     \ Draw a constant rectangle on a pixmap
     method draw-rect-const
-    ( color start-dst-col cols start-dst-rows rows dst-pixmap -- )
+    ( color start-dst-col start-dst-row cols rows dst-pixmap -- )
 
     \ Draw a rectangle on a pixmap from another pixmap
     method draw-rect
-    ( start-src-col start-dst-col cols start-src-row start-dst-row )
+    ( start-src-col start-src-row start-dst-col start-dst-row cls )
     ( rows src-pixmap dst-pixmap -- )
 
     \ Draw a rectangle on a pixmap from a bitmap where 1 bits are given a color
     method draw-rect-const-mask
-    ( color start-src-col start-dst-col cols start-src-row start-dst-row )
-    ( rows src-bitmap dst-pixmap -- )
+    ( color start-mask-col start-mask-row start-dst-col start-dst-row cols )
+    ( rows mask-bitmap dst-pixmap -- )
 
     \ Draw a rectangle on a pixmap from another pixmap using a bitmap as a mask
     method draw-rect-mask
-    ( start-src-col start-dst-col cols start-src-row start-dst-row )
-    ( rows mask-bitmap src-pixmap dst-pixmap -- )
+    ( start-mask-col start-mask-row start-src-col start-src-row start-dst-col )
+    ( start-dst-row cols rows mask-bitmap src-pixmap dst-pixmap -- )
     
   end-class
 
