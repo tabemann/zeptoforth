@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2023 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -95,7 +95,7 @@ begin-module bitmap
 
     \ Draw a constant rectangle on a bitmap
     method draw-rect-const
-    ( const start-dst-col cols start-dst-row rows op dst-bitmap -- )
+    ( const start-dst-col start-dst-row cols rows op dst-bitmap -- )
 
     \ Draw a rectangle on a bitmap from another bitmap
     method draw-rect
