@@ -101,6 +101,21 @@ console import
 
     ;
 
+    : ep1-start-queue-runner-to-host ( - - )
+    
+        tx-count if
+        
+            tx-count 64 min 0 do
+
+            EP0-to-Host dpram-address @ I + read-tx !
+
+            loop
+
+            ep1-to-host I send-data-packet
+
+        then
+    ;
+
     : usb-emit { transmit-character }               \ Emit a byte towards the host
 
       begin tx-full? if while pause repeat then     \ wait (block) for queue capacity to host
@@ -111,7 +126,7 @@ console import
 
             ep1-to-host busy? @ not if              \ EP may have finished by the (short) time it takes to get here
 
-            \ start queue runner to host - to do
+            ep1-start-queue-runner-to-host
 
             then
         
@@ -135,9 +150,9 @@ console import
 
         read-rx { receive-character }               \ save character for now
 
-        ep1-to-pico queue-long? @ if                \ is queue previously marked as long ( < 64 bytes remaining ) ?
+        ep1-to-pico queue-long? @ if                \ is queue previously marked as long ( < 64 free bytes remaining ) ?
 
-        rx-count 63 > if                            \ did read-rx make 64 bytes now free ?
+        rx-count 63 > if                            \ did read-rx make 64 bytes or more free ?
 
             false ep1-to-pico queue-long? !         \ cancel queue-long
 
