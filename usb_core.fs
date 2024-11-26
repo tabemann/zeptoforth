@@ -19,7 +19,8 @@ begin-module usb-core
   usb-constants import
 
   variable IRQ_counter
-  
+
+  variable prepare-usb-device-configured?
   variable usb-device-configured?                                               \ Device configuration set
   
   : debug ( xt -- )
@@ -554,6 +555,7 @@ begin-module usb-core
     EP0-to-Pico usb-receive-zero-length-packet
 
     false EP0-to-Host ack? !
+    false EP0-to-Host busy? !
 
       ;] debug
   ;
@@ -623,8 +625,8 @@ begin-module usb-core
 
   EP3-to-Host 10 line-state-notification usb-start-transfer-to-host 
 
-  EP1-to-Pico 64 usb-receive-data-packet    \ start console reception from host
-
+  true prepare-usb-device-configured? !
+      
   usb-ack-out-request
 
       ;] debug
@@ -856,7 +858,7 @@ begin-module usb-core
     0 USB_DEVICE_ADDRESS !
    
     false usb-device-configured? !
-
+    false prepare-usb-device-configured? !
 ;
 
 : usb-update-endpoint-byte-counts { endpoint }
@@ -884,7 +886,7 @@ begin-module usb-core
 : ep0-handler-to-host
   [: ( -- )
 
-  USB_BUFFER_STATUS_EP0_TO_PICO USB_BUFFER_STATUS bis!    \ Write to Clear
+  USB_BUFFER_STATUS_EP0_TO_HOST USB_BUFFER_STATUS bis!    \ Write to Clear
 
   ." EP0 Handler to Host, Last PID = $" EP0-to-Host next-pid @ h.8 cr 
 
@@ -917,8 +919,14 @@ begin-module usb-core
 
     ." EP0 Handler to Host, Complete " cr
 
+    prepare-usb-device-configured? @ if
+      false prepare-usb-device-configured? !
+      true usb-device-configured? !
+      ." USB device configured! " cr
   then
 
+then
+  
   ;] debug
 ;
 
@@ -957,6 +965,10 @@ begin-module usb-core
 
   EP1-to-Host usb-toggle-data-pid  
 
+  false EP1-to-Host busy? !
+
+  EP1-to-Host callback-handler @ ?execute
+  
     ;] debug
 ;
 
@@ -969,7 +981,11 @@ begin-module usb-core
 
   EP1-to-Pico usb-toggle-data-pid  
 
-    ;] debug
+  false EP1-to-Pico busy? !
+  
+  EP1-to-Pico callback-handler @ ?execute
+
+  ;] debug
 ;
 
 : ep3-handler-to-host
@@ -1065,12 +1081,13 @@ begin-module usb-core
 : init-usb
   [: ( -- )                         \ Initialize USB
     
-    compile-to-ram
-
     cr debug-separator
 
     ." Initialising USB Core ... " cr
 
+    false prepare-usb-device-configured? !
+    false usb-device-configured? !
+    
     reset-usb-hardware
 
     usb-init-setup-packet
