@@ -17,14 +17,14 @@ console import
     variable rx-write-index             \ RAM variable for rx buffer write-index
     variable tx-write-index             \ RAM variable for tx buffer write-index
 
-    128 constant rx-buffer-size         \ Constant for number of bytes to buffer     
-    128 constant tx-buffer-size         \ Constant for number of bytes to buffer
+    256 constant rx-buffer-size         \ Constant for number of bytes to buffer     
+    256 constant tx-buffer-size         \ Constant for number of bytes to buffer
     
     rx-buffer-size buffer: rx-buffer    \ RX buffer to Pico
     tx-buffer-size buffer: tx-buffer    \ TX buffer to Host    
     
     : rx-full? ( -- f )                 \ Get whether the rx buffer is full
-      rx-read-index @ 1- $7F and rx-write-index @ =
+      rx-read-index @ 1- $FF and rx-write-index @ =
     ;
 
     : rx-empty? ( -- f )                \ Get whether the rx buffer is empty
@@ -44,7 +44,7 @@ console import
     : write-rx ( c -- )                  \ Write a byte to the rx buffer
       rx-full? not if
         rx-write-index @ rx-buffer + c!
-        rx-write-index @ 1+ $7F and rx-write-index !
+        rx-write-index @ 1+ $FF and rx-write-index !
       else
         drop
       then
@@ -53,14 +53,14 @@ console import
     : read-rx ( -- c )                     \ Read a byte from the rx buffer
       rx-empty? not if
         rx-read-index @ rx-buffer + c@
-        rx-read-index @ 1+ $7F and rx-read-index !
+        rx-read-index @ 1+ $FF and rx-read-index !
       else
         0
       then
     ;
 
     : tx-full? ( -- f )                     \ Get whether the tx buffer is full
-      tx-read-index @ 1- $7F and tx-write-index @ =
+      tx-read-index @ 1- $FF and tx-write-index @ =
     ;
 
     : tx-empty? ( -- f )                    \ Get whether the tx buffer is empty
@@ -80,7 +80,7 @@ console import
     : write-tx ( c -- )                      \ Write a byte to the tx buffer
       tx-full? not if
         tx-write-index @ tx-buffer + c!
-        tx-write-index @ 1+ $7F and tx-write-index !
+        tx-write-index @ 1+ $FF and tx-write-index !
       else
         drop
       then
@@ -89,7 +89,7 @@ console import
     : read-tx ( -- c )                      \ Read a byte from the tx buffer
       tx-empty? not if
         tx-read-index @ tx-buffer + c@
-        tx-read-index @ 1+ $7F and tx-read-index !
+        tx-read-index @ 1+ $FF and tx-read-index !
       else
         0
       then
