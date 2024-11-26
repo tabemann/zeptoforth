@@ -7,6 +7,8 @@
  
 compile-to-flash
 
+marker remove-usb-constants
+
 begin-module usb-constants
 
     5 constant usbctrl-irq                                          \ USB IRQ index - RP2040

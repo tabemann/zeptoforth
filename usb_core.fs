@@ -6,7 +6,7 @@
 
 compile-to-flash
 
-cornerstone remove-usb-core
+marker remove-usb-core
 
 begin-module usb-core
 

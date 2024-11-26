@@ -5,7 +5,7 @@
 
 compile-to-flash
 
-cornerstone remove-usb-console
+marker remove-usb-console
 
 begin-module usb-console
 
@@ -19,8 +19,8 @@ begin-module usb-console
     variable rx-write-index             \ RAM variable for rx buffer write-index
     variable tx-write-index             \ RAM variable for tx buffer write-index
 
-    128 constant rx-buffer-size         \ Constant for number of bytes to buffer     
-    128 constant tx-buffer-size         \ Constant for number of bytes to buffer
+    256 constant rx-buffer-size         \ Constant for number of bytes to buffer     
+    256 constant tx-buffer-size         \ Constant for number of bytes to buffer
     
     rx-buffer-size buffer: rx-buffer    \ RX buffer to Pico
     tx-buffer-size buffer: tx-buffer    \ TX buffer to Host
@@ -28,7 +28,7 @@ begin-module usb-console
     tx-buffer-size buffer: tx-straight-buffer \ TX buffer that is not circular
 
     : rx-full? ( -- f )                 \ Get whether the rx buffer is full
-      rx-read-index @ 1- $7F and rx-write-index @ =
+      rx-read-index @ 1- $FF and rx-write-index @ =
     ;
 
     : rx-empty? ( -- f )                \ Get whether the rx buffer is empty
@@ -48,7 +48,7 @@ begin-module usb-console
     : write-rx ( c -- )                  \ Write a byte to the rx buffer
       rx-full? not if
         rx-write-index @ rx-buffer + c!
-        rx-write-index @ 1+ $7F and rx-write-index !
+        rx-write-index @ 1+ $FF and rx-write-index !
       else
         drop
       then
@@ -57,14 +57,14 @@ begin-module usb-console
     : read-rx ( -- c )                     \ Read a byte from the rx buffer
       rx-empty? not if
         rx-read-index @ rx-buffer + c@
-        rx-read-index @ 1+ $7F and rx-read-index !
+        rx-read-index @ 1+ $FF and rx-read-index !
       else
         0
       then
     ;
 
     : tx-full? ( -- f )                     \ Get whether the tx buffer is full
-      tx-read-index @ 1- $7F and tx-write-index @ =
+      tx-read-index @ 1- $FF and tx-write-index @ =
     ;
 
     : tx-empty? ( -- f )                    \ Get whether the tx buffer is empty
@@ -84,7 +84,7 @@ begin-module usb-console
     : write-tx ( c -- )                      \ Write a byte to the tx buffer
       tx-full? not if
         tx-write-index @ tx-buffer + c!
-        tx-write-index @ 1+ $7F and tx-write-index !
+        tx-write-index @ 1+ $FF and tx-write-index !
       else
         drop
       then
@@ -93,7 +93,7 @@ begin-module usb-console
     : read-tx ( -- c )                      \ Read a byte from the tx buffer
       tx-empty? not if
         tx-read-index @ tx-buffer + c@
-        tx-read-index @ 1+ $7F and tx-read-index !
+        tx-read-index @ 1+ $FF and tx-read-index !
       else
         0
       then
@@ -113,7 +113,7 @@ begin-module usb-console
         real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
         EP1-to-Host real-bytes start-addr usb-build-data-packet
         EP1-to-Host real-bytes usb-send-data-packet
-        real-bytes read-index + $7F and tx-read-index !
+        real-bytes read-index + $FF and tx-read-index !
       else
         tx-buffer-size read-index - { first-bytes }
         first-bytes 64 < if
@@ -124,12 +124,12 @@ begin-module usb-console
           total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
           EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
           EP1-to-Host total-bytes usb-send-data-packet
-          total-bytes read-index + $7F and tx-read-index !
+          total-bytes read-index + $FF and tx-read-index !
         else
           64 [: ." Sending Bytes = $" h.8 cr ;] debug
           EP1-to-Host 64 start-addr usb-build-data-packet
           EP1-to-Host 64 usb-send-data-packet
-          64 read-index + $7F and tx-read-index !
+          64 read-index + $FF and tx-read-index !
         then
       then
       [: ." Done Sending Bytes " cr ;] debug
@@ -271,5 +271,3 @@ begin-module usb-console
   : with-usb-error-output ( xt -- )
     ['] usb-emit ['] usb-emit? rot ['] usb-flush-console swap with-error-output
   ;
-
-end-Module
