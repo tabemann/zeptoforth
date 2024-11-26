@@ -21,11 +21,43 @@ begin-module usb-core
   variable IRQ_counter
   
   variable usb-device-configured?                                               \ Device configuration set
-   
-  : x-usb-unknown-request ( -- ) ." Unknown USB Request ... " cr ;              \ USB unknown setup request
-  : x-usb-unknown-req-type ( -- ) ." Unknown USB Request Type... " cr ;         \ USB unknown setup request type
-  : x-usb-unknown-recipient ( -- ) ." Unknown USB Recipient ... " cr ;          \ USB unknown setup recipient
-  : x-usb-unknown-descriptor ( -- ) ." Unknown USB Descriptor Type ... " cr ;   \ USB unknown descriptor
+  
+  : debug ( xt -- )
+    emit-hook @ { saved-emit-hook }
+    emit?-hook @ { saved-emit?-hook }
+    flush-console-hook @ { saved-flush-console-hook }
+    pause-hook @ { saved-pause-hook }
+    ['] internal::serial-emit emit-hook !
+    ['] internal::serial-emit? emit?-hook !
+    [: ;] flush-console-hook !
+    [: ;] pause-hook !
+    try
+    saved-emit-hook emit-hook !
+    saved-emit?-hook emit?-hook !
+    saved-flush-console-hook flush-console-hook !
+    saved-pause-hook pause-hook !
+    ?raise
+  ;
+
+  \ USB unknown setup request
+  : x-usb-unknown-request ( -- )
+    [: ." Unknown USB Request ... " cr ;] debug
+  ;
+  
+  \ USB unknown setup request type
+  : x-usb-unknown-req-type ( -- )
+    [: ." Unknown USB Request Type... " cr ;] debug
+  ;
+  
+  \ USB unknown setup recipient
+  : x-usb-unknown-recipient ( -- )
+    [: ." Unknown USB Recipient ... " cr ;] debug
+  ;
+  
+  \ USB unknown descriptor
+  : x-usb-unknown-descriptor ( -- )
+    [: ." Unknown USB Descriptor Type ... " cr ;] debug
+  ;
                                                      
   : usb-buffer-offset ( addr -- addr' ) USB_DPRAM_Base - ;                      \ USB dual-ported RAM offset
 
@@ -92,12 +124,12 @@ begin-module usb-core
 
     begin-structure line-state-notification-descriptor
 
-      cfield: request-type
-      cfield: request
-      hfield: value
-      hfield: index
-      hfield: length
-      hfield: data
+      cfield: line-request-type
+      cfield: line-request
+      hfield: line-value
+      hfield: line-index
+      hfield: line-length
+      hfield: line-data
     
     end-structure
 
@@ -129,60 +161,60 @@ begin-module usb-core
 
     begin-structure usb-setup-command
 
-      cfield: descriptor-type
-      cfield: descriptor-index
-      cfield: request-type        \ Setup packet request type     
-      cfield: direction?          \ Setup direction ( &80 = to Host)
-      cfield: recipient           \ Setup Recipient ( device, interface, endpoint )
-      cfield: request             \ Setup packet request
-      hfield: length              \ Setup packet length
-      hfield: value               \ Setup packet value
-      hfield: index               \ Setup packet index
+      cfield: setup-descriptor-type
+      cfield: setup-descriptor-index
+      cfield: setup-request-type        \ Setup packet request type     
+      cfield: setup-direction?          \ Setup direction ( &80 = to Host)
+      cfield: setup-recipient           \ Setup Recipient ( device, interface, endpoint )
+      cfield: setup-request             \ Setup packet request
+      hfield: setup-length              \ Setup packet length
+      hfield: setup-value               \ Setup packet value
+      hfield: setup-index               \ Setup packet index
     
     end-structure
 
     begin-structure cdc-line-coding-profile
 
-      field: baud
-      cfield: parity
-      cfield: stop
-      cfield: data
+      field: cdc-line-baud
+      cfield: cdc-line-parity
+      cfield: cdc-line-stop
+      cfield: cdc-line-data
 
     end-structure
 
-    usb-setup-command aligned-buffer: usb-setup
+    usb-setup-command buffer: usb-setup
 
-    cdc-line-coding-profile aligned-buffer: cdc-line-coding
+    cdc-line-coding-profile buffer: cdc-line-coding
 
-    line-state-notification-descriptor aligned-buffer: line-state-notification
+    line-state-notification-descriptor buffer: line-state-notification
 
     : init-cdc-line-coding ( -- )
 
-      115200  cdc-line-coding baud !
-      0       cdc-line-coding parity c! 
-      0       cdc-line-coding stop c! 
-      8       cdc-line-coding data c!       
+      115200  cdc-line-coding cdc-line-baud !
+      0       cdc-line-coding cdc-line-parity c! 
+      0       cdc-line-coding cdc-line-stop c! 
+      8       cdc-line-coding cdc-line-data c!       
     
     ;
 
     : init-line-nofification ( -- )
     
-      $A1 line-state-notification request c!
-      $20 line-state-notification request-type c!
-        0 line-state-notification value h!
-        0 line-state-notification index h!
-        2 line-state-notification length h!
-        0 line-state-notification data h!
+      $A1 line-state-notification line-request c!
+      $20 line-state-notification line-request-type c!
+        0 line-state-notification line-value h!
+        0 line-state-notification line-index h!
+        2 line-state-notification line-length h!
+        0 line-state-notification line-data h!
 
       \ $A1 c, $20 c, $00 c, $00 c, $00 c, $00 c, $02 c, $00 c, $00 c, $00 c,            \ Line State Notification
     
     ;
 
-    usb-endpoint-profile aligned-buffer: EP0-to-Host    \ Default endpoint 0 to Host
-    usb-endpoint-profile aligned-buffer: EP0-to-Pico    \ Default endpoint 0 to Pico
-    usb-endpoint-profile aligned-buffer: EP1-to-Host    \ Function endpoint 1 to Host
-    usb-endpoint-profile aligned-buffer: EP1-to-Pico    \ Function endpoint 1 to Pico
-    usb-endpoint-profile aligned-buffer: EP3-to-Host    \ Function endpoint 3 to Host
+    usb-endpoint-profile buffer: EP0-to-Host    \ Default endpoint 0 to Host
+    usb-endpoint-profile buffer: EP0-to-Pico    \ Default endpoint 0 to Pico
+    usb-endpoint-profile buffer: EP1-to-Host    \ Function endpoint 1 to Host
+    usb-endpoint-profile buffer: EP1-to-Pico    \ Function endpoint 1 to Pico
+    usb-endpoint-profile buffer: EP3-to-Host    \ Function endpoint 3 to Host
  
   : debug-separator ( -- )
 
@@ -195,7 +227,8 @@ begin-module usb-core
     usb-setup usb-setup-command 0 fill
   ;
 
-  : init-ep-common { ep-max ep-tx? ep-number endpoint }
+  : init-ep-common
+    [: { ep-max ep-tx? ep-number endpoint }
 
     endpoint usb-endpoint-profile 0 fill
 
@@ -218,15 +251,17 @@ begin-module usb-core
 
     cr
 
-    ." Initialising Endpoint " ep-number . ." to " ep-tx? if ." Host " else ." Pico " then
+    ." Initialising Endpoint " ep-number h.8 ." to " ep-tx? if ." Host " else ." Pico " then
 
-    ." (common), max packet size = " ep-max . cr
+    ." (common), max packet size = $" ep-max h.8 cr
 
     ." Buffer Control Address = $" endpoint buffer-control @ h.8 cr
 
+    ;] debug
   ;
 
-   : init-usb-endpoint-0  { ep-max ep-tx? endpoint }
+  : init-usb-endpoint-0
+    [: { ep-max ep-tx? endpoint }
 
     ep-max ep-tx? 0     endpoint init-ep-common
     USB_EP0_BUFFER      endpoint dpram-address !
@@ -235,7 +270,8 @@ begin-module usb-core
     ." EP Buffer <shared> = $" USB_EP0_BUFFER h.8 cr
 
     \ there is no endpoint control register for EP0, interrupt enable for EP0 comes from SIE_CTRL
-  
+
+      ;] debug
   ;
 
   : init-ep-x-to-host { ep-type ep-number endpoint }
@@ -256,12 +292,13 @@ begin-module usb-core
 
     ep-dpram-address $5010_0000 + endpoint dpram-address !
 
-    cr ." Initialising Endpoint " ep-number . ." to Host EP Buffer = $" 
+    cr ." Initialising Endpoint " ep-number h.8 ." to Host EP Buffer = $" 
           $5010_0000 ep-dpram-address + h.8 ." , EP Control = $" ep-control h.8 cr
 
    ;
 
-   : init-ep-x-to-pico { ep-type ep-number endpoint }
+   : init-ep-x-to-pico
+     [: { ep-type ep-number endpoint }
 
     128 ep-number 1 - * { dpram-offset }
 
@@ -279,8 +316,9 @@ begin-module usb-core
 
     ep-dpram-address $5010_0000 + endpoint dpram-address !
 
-    cr ." Initialising Endpoint " ep-number . ." to Pico EP Buffer = $" 
-          $5010_0000 ep-dpram-address + h.8 ." , EP Control = $" ep-control h.8 cr
+    cr ." Initialising Endpoint " ep-number h.8 ." to Pico EP Buffer = $" 
+       $5010_0000 ep-dpram-address + h.8 ." , EP Control = $" ep-control h.8 cr
+       ;] debug
    ;
 
   : init-usb-endpoint-x { ep-max ep-tx? ep-type ep-number endpoint }
@@ -310,16 +348,18 @@ begin-module usb-core
     16 true  USB_EP_TYPE_INTERRUPT  3 EP3-to-Host init-usb-endpoint-x
   ;
 
-  : usb-toggle-data-pid { endpoint }
+  : usb-toggle-data-pid
+    [: { endpoint }
 
-   ." Toggling data packet ID, Old PID = " endpoint next-pid @ . cr
+   ." Toggling data packet ID, Old PID = $" endpoint next-pid @ h.8 cr
   
     endpoint next-pid @ if
 
     USB_BUF_CTRL_DATA0_PID else USB_BUF_CTRL_DATA1_PID then endpoint next-pid !
 
-    ." Toggling data packet ID, New PID = " endpoint next-pid @ . cr
-    
+    ." Toggling data packet ID, New PID = $" endpoint next-pid @ h.8 cr
+
+  ;] debug
   ;
 
   : show-ep0-dpram ( -- )
@@ -328,10 +368,12 @@ begin-module usb-core
   
   ;
 
-  : show-ep0-values { endpoint } 
+  : show-ep0-values
+    [: { endpoint } 
 
   ." USB Endpoint 0, dpram address = $" endpoint dpram-address @ h.8 cr
-  
+
+      ;] debug
   ;
 
   : usb-set-buffer-available { endpoint } 
@@ -350,48 +392,56 @@ begin-module usb-core
 
   ;
 
-  : usb-receive-zero-length-packet { endpoint }
+  : usb-receive-zero-length-packet
+    [: { endpoint }
 
-    ." USB Receive Zero Length Packet, PID = " endpoint next-pid @ . cr
+    ." USB Receive Zero Length Packet, PID = $" endpoint next-pid @ h.8 cr
     
     endpoint next-pid @ endpoint buffer-control @ ! 
 
     endpoint usb-set-buffer-available   
-   
+
+      ;] debug
   ;
 
-  : usb-send-zero-length-packet { endpoint }
+  : usb-send-zero-length-packet
+    [: { endpoint }
 
-   ." USB Send Zero Length Packet, PID = " endpoint next-pid @ . cr
+   ." USB Send Zero Length Packet, PID = $" endpoint next-pid @ h.8 cr
 
     endpoint next-pid @ USB_BUF_CTRL_FULL or endpoint buffer-control @ !
 
     endpoint usb-set-buffer-available  
-    
+
+      ;] debug
   ;
 
-  : usb-send-data-packet { endpoint bytes }
+  : usb-send-data-packet
+    [: { endpoint bytes }
 
     true endpoint busy? !
 
-    ." USB Send Data Packet, Endpoint = " endpoint number @ . ." , bytes = " bytes . cr
+    ." USB Send Data Packet, Endpoint = $" endpoint number @ h.8 ." , bytes = $" bytes h.8 cr
     
     endpoint next-pid @ bytes or endpoint buffer-control @ ! 
 
     endpoint usb-dispatch-buffer
 
+      ;] debug
   ;
 
- : usb-receive-data-packet { endpoint bytes }
+  : usb-receive-data-packet
+    [: { endpoint bytes }
 
     true endpoint busy? !
 
-    ." USB Receive Data Packet, Endpoint = " endpoint number @ . ." , bytes = " bytes . cr
+    ." USB Receive Data Packet, Endpoint = $" endpoint number @ h.8 ." , bytes = $" bytes h.8 cr
   
     endpoint next-pid @ bytes or endpoint buffer-control @ ! 
     
     USB_BUF_CTRL_AVAIL endpoint buffer-control @ bis!
 
+      ;] debug
  ;
 
 : usb-ack-out-request ( -- )   \ Send a USB acknowledge out request (zero length packet)
@@ -406,40 +456,45 @@ begin-module usb-core
 
 ;
 
-: usb-set-device-address ( -- )    \ Set USB hardware device address
+: usb-set-device-address
+  [: ( -- )    \ Set USB hardware device address
              
   usb-ack-out-request 
 
-  ." USB Set Pico New Device Address = " usb-setup value h@ . cr
+  ." USB Set Pico New Device Address = $" usb-setup setup-value h@ h.8 cr
 
   1 ms
 
-  usb-setup value h@ USB_DEVICE_ADDRESS !
-          
+  usb-setup setup-value h@ USB_DEVICE_ADDRESS !
+
+    ;] debug
 ;
 
-: usb-build-data-packet { endpoint bytes source-data }
+: usb-build-data-packet
+  [: { endpoint bytes source-data }
 
  debug-separator
 
   ." USB Build Data Packet, Source Address = $" source-data h.8
-  ." , Bytes = " bytes .
+  ." , Bytes = $" bytes .
   ." , Destination Address = $" endpoint dpram-address @ h.8 cr
    	  
   endpoint max-packet-size @ bytes min { packet-bytes }   \ do not exceed max packet size
 
   source-data endpoint dpram-address @ packet-bytes move
-	  
+
+    ;] debug
 ;
 
-: usb-start-transfer-to-host { host-endpoint total-data-bytes source-data-address }
+: usb-start-transfer-to-host
+  [: { host-endpoint total-data-bytes source-data-address }
 
   debug-separator
 
   ." USB Start Transfer to Host, "
   ." Endpoint Address=" host-endpoint dpram-address @ ." $" h.8
   ." , Source Address=" source-data-address ." $" h.8
-  ." , Total Bytes=" total-data-bytes . cr
+  ." , Total Bytes=" total-data-bytes h.8 cr
    
   total-data-bytes host-endpoint total-bytes !
       
@@ -451,17 +506,19 @@ begin-module usb-core
 
   host-endpoint packet-bytes usb-send-data-packet
 
+    ;] debug
 ;  
     
-: usb-start-control-transfer-to-host { total-data-bytes source-data-address }
+: usb-start-control-transfer-to-host
+  [: { total-data-bytes source-data-address }
 
   debug-separator
 
-  ." USB Start Control Transfer to Host, Pico Device Address = " usb-get-device-address . cr
+  ." USB Start Control Transfer to Host, Pico Device Address = $" usb-get-device-address h.8 cr
   ." Source Address=" source-data-address ." $" h.8
   ." , Total Bytes=" total-data-bytes .
-  ." , Setup Length=" usb-setup length h@ .
-  ." , Stack Depth=" depth . cr
+  ." , Setup Length=" usb-setup setup-length h@ .
+  ." , Stack Depth=" depth h.8 cr
 
     0 EP0-to-Host transfer-bytes !
     0 EP0-to-Host processed-bytes !
@@ -486,51 +543,59 @@ begin-module usb-core
 
   then
 
+  ;] debug
   ;
 
-  : usb-end-control-transfer-to-host ( -- ) 
+  : usb-end-control-transfer-to-host
+    [: ( -- ) 
 
    ." USB Ending Control Transfer to Host " cr
 
     EP0-to-Pico usb-receive-zero-length-packet
 
     false EP0-to-Host ack? !
-   
+
+      ;] debug
   ;
 
-  : usb-send-device-descriptor ( -- ) 
+  : usb-send-device-descriptor
+    [: ( -- ) 
 
     debug-separator
 
-    ." USB Send Device Descriptor, Length = " usb-setup length h@ . cr
+    ." USB Send Device Descriptor, Length = $" usb-setup setup-length h@ h.8 cr
 
-    usb-setup length h@ device-data-size = if
+    usb-setup setup-length h@ device-data-size = if
 
     device-data-size else 8 
     
     then device-data usb-start-control-transfer-to-host 
 
+    ;] debug
   ;
     
-  : usb-send-config-descriptor ( -- )  
+  : usb-send-config-descriptor
+    [: ( -- )  
       
     debug-separator
 
-    ." USB Send Configuration Descriptor, Length = " usb-setup length h@ . cr
+    ." USB Send Configuration Descriptor, Length = $" usb-setup setup-length h@ h.8 cr
       
-    usb-setup length h@ config-data-size = if 
+    usb-setup setup-length h@ config-data-size = if 
 
     config-data-size else 9 
     
     then config-data usb-start-control-transfer-to-host     
-      
+
+    ;] debug
   ;
 
-  : usb-send-string-descriptor ( -- ) 
+  : usb-send-string-descriptor
+    [: ( -- ) 
 
-  ." USB Send String Descriptors, <none> , Index = " usb-setup index h@ . cr
+  ." USB Send String Descriptors, <none> , Index = $" usb-setup setup-index h@ h.8 cr
 
-   usb-setup index h@ 0 = if
+   usb-setup setup-index h@ 0 = if
 
    4 string-data usb-start-control-transfer-to-host
 
@@ -540,9 +605,11 @@ begin-module usb-core
 
    then
 
+   ;] debug
   ;
 
-  : usb-set-device-configuration ( -- )     \ Set USB device configuration 1
+  : usb-set-device-configuration
+    [: ( -- )     \ Set USB device configuration 1
 
   ." USB Set Device Configuration, Initialising Function Endpoints ... " cr
 
@@ -560,20 +627,22 @@ begin-module usb-core
 
   usb-ack-out-request
 
+      ;] debug
 ;
 
-: usb-setup-type-standard-in ( -- )
+: usb-setup-type-standard-in
+  [: ( -- )
 
    debug-separator
 
-   ." USB Setup Type Standard [IN] Handler, Request = " usb-setup request c@ .
-   ." , Descriptor Type = " usb-setup descriptor-type c@ . cr
+   ." USB Setup Type Standard [IN] Handler, Request = $" usb-setup setup-request c@ .
+   ." , Descriptor Type = $" usb-setup setup-descriptor-type c@ h.8 cr
    
-    usb-setup request c@ case
+    usb-setup setup-request c@ case
 
       USB_REQUEST_GET_DESCRIPTOR of
           
-        usb-setup descriptor-type c@ case
+        usb-setup setup-descriptor-type c@ case
 
           USB_DT_DEVICE of usb-send-device-descriptor endof
           USB_DT_CONFIG of usb-send-config-descriptor endof
@@ -586,27 +655,31 @@ begin-module usb-core
 
     endcase
 
+    ;] debug
   ;
 
-  : usb-setup-type-standard-out ( -- )
+  : usb-setup-type-standard-out
+    [: ( -- )
 
    debug-separator
 
-   ." USB Setup Type Standard [OUT] Handler, Request = " usb-setup request c@ . cr
+   ." USB Setup Type Standard [OUT] Handler, Request = $" usb-setup setup-request c@ h.8 cr
 
-       usb-setup request c@ case
+       usb-setup setup-request c@ case
 
           USB_REQUEST_SET_ADDRESS of usb-set-device-address endof
           USB_REQUEST_SET_CONFIGURATION of usb-set-device-configuration endof
          \ usb-ack-out-request
         
+
         endcase
+      ;] debug
   ;
 
 
   : usb-setup-type-standard ( -- )
 
-    usb-setup direction? c@ if
+    usb-setup setup-direction? c@ if
 
     usb-setup-type-standard-in else 
     
@@ -616,37 +689,43 @@ begin-module usb-core
 
   ;
 
-  : usb-class-get-line-coding ( -- )
+  : usb-class-get-line-coding
+    [: ( -- )
 
   ." USB Setup Class, Get Line Coding " cr
 
    7 cdc-line-coding usb-start-control-transfer-to-host    
 
+      ;] debug
   ;
 
-  : usb-class-set-line-coding ( -- )
+  : usb-class-set-line-coding
+    [: ( -- )
 
    ." USB Setup Class, Set Line Coding " cr
 
     1 EP0-to-Pico callback-handler !
 
     EP0-to-Pico 7 usb-receive-data-packet 
-    
+
+      ;] debug
   ;
 
-  : usb-class-set-line-control ( -- ) 
+  : usb-class-set-line-control
+    [: ( -- ) 
   
    ." USB Setup Class, Set Line Control " cr
 
-    usb-setup value h@ line-state-notification value h!
+    usb-setup setup-value h@ line-state-notification line-value h!
 
     usb-ack-out-request
 
+      ;] debug
   ;
 
   : usb-setup-type-class ( -- )
 
-   usb-setup request c@ case
+   usb-setup setup-request c@ case
 
           CDC_CLASS_SET_LINE_CODING of usb-class-set-line-coding endof
           CDC_CLASS_GET_LINE_CODING of usb-class-get-line-coding endof
@@ -656,42 +735,46 @@ begin-module usb-core
         endcase
   ;
   
-  : usb-show-setup-packet ( -- )
+  : usb-show-setup-packet
+    [: ( -- )
 
     ." USB Setup Packet Handler, Bytes =    " 
 
     USB_SETUP_PACKET USB_SETUP_PACKET 8 + dump
 
     cr
-  
+
+      ;] debug
   ;
 
-  : usb-prepare-setup-packet ( -- )
+  : usb-prepare-setup-packet
+    [: ( -- )
 
    \ cr ." USB Preparing Setup Packet  ... "
 
-    USB_SETUP_PACKET 1 + c@ usb-setup request c!
-    USB_SETUP_PACKET 2 + c@ usb-setup descriptor-index c!
-    USB_SETUP_PACKET 3 + c@ usb-setup descriptor-type c!
+    USB_SETUP_PACKET 1 + c@ usb-setup setup-request c!
+    USB_SETUP_PACKET 2 + c@ usb-setup setup-descriptor-index c!
+    USB_SETUP_PACKET 3 + c@ usb-setup setup-descriptor-type c!
 
-    USB_SETUP_PACKET 0 + c@ $80 and usb-setup direction? c!
-    USB_SETUP_PACKET 0 + c@ $1f and usb-setup recipient c!
-    USB_SETUP_PACKET 0 + c@ $60 and usb-setup request-type c!
+    USB_SETUP_PACKET 0 + c@ $80 and usb-setup setup-direction? c!
+    USB_SETUP_PACKET 0 + c@ $1f and usb-setup setup-recipient c!
+    USB_SETUP_PACKET 0 + c@ $60 and usb-setup setup-request-type c!
 
-    USB_SETUP_PACKET 3 + c@ 8 lshift USB_SETUP_PACKET 2 + c@ or usb-setup value h!
-    USB_SETUP_PACKET 5 + c@ 8 lshift USB_SETUP_PACKET 4 + c@ or usb-setup index h!
-    USB_SETUP_PACKET 7 + c@ 8 lshift USB_SETUP_PACKET 6 + c@ or usb-setup length h!
+    USB_SETUP_PACKET 3 + c@ 8 lshift USB_SETUP_PACKET 2 + c@ or usb-setup setup-value h!
+    USB_SETUP_PACKET 5 + c@ 8 lshift USB_SETUP_PACKET 4 + c@ or usb-setup setup-index h!
+    USB_SETUP_PACKET 7 + c@ 8 lshift USB_SETUP_PACKET 6 + c@ or usb-setup setup-length h!
 
    \ debug-separator
   
-   ." USB Setup Packet, Request Type=" usb-setup request-type c@ . ." , "
-   ." Direction=" usb-setup direction? c@ . ." , "
-   ." Request=" usb-setup request c@ . ." , " cr
-   ." Recipient=" usb-setup recipient c@ . ." , "
-   ." Value=" usb-setup value h@ . ." , "
-   ." Index=" usb-setup index h@ . ." , "
-   ." Length=" usb-setup length h@ . cr
+   ." USB Setup Packet, Request Type=" usb-setup setup-request-type c@ h.8 ." , "
+   ." Direction=" usb-setup setup-direction? c@ h.8 ." , "
+   ." Request=" usb-setup setup-request c@ h.8 ." , " cr
+   ." Recipient=" usb-setup setup-recipient c@ h.8 ." , "
+   ." Value=" usb-setup setup-value h@ h.8 ." , "
+   ." Index=" usb-setup setup-index h@ h.8 ." , "
+   ." Length=" usb-setup setup-length h@ h.8 cr
 
+      ;] debug
   ;
 
   : usb-setup-packet-debug ( -- )
@@ -702,9 +785,10 @@ begin-module usb-core
   
   ;
 
-: usb-prepare-setup-direction ( -- )
+  : usb-prepare-setup-direction
+    [: ( -- )
 
-  usb-setup direction? c@ if
+  usb-setup setup-direction? c@ if
 
     USB_BUF_CTRL_AVAIL   EP0-to-Host buffer-control @ bis!
     USB_BUF_CTRL_AVAIL   EP0-to-Pico buffer-control @ bic!
@@ -719,6 +803,7 @@ begin-module usb-core
   ." EP 0 Buffer Control Address to Host = $" EP0-to-Host buffer-control @ h.8 cr
   ." EP 0 Buffer Control Address to Pico = $" EP0-to-Pico buffer-control @ h.8 cr
 
+  ;] debug
   ;
 
   : usb-handle-setup-packet ( -- )
@@ -737,7 +822,7 @@ begin-module usb-core
 
     USB_BUF_CTRL_DATA1_PID EP0-to-Pico next-pid !
 
-    usb-setup request-type c@ case 
+    usb-setup setup-request-type c@ case 
     
       USB_REQUEST_TYPE_STANDARD of usb-setup-type-standard endof
 
@@ -748,16 +833,18 @@ begin-module usb-core
     endcase
   ;
 
-  : usb-bus-reset-debug ( -- )
+  : usb-bus-reset-debug
+    [: ( -- )
 
     debug-separator
     
     ." USB Bus Reset Handler " cr
 
-    0 flush-uart
+\    0 flush-uart
 
     1 ms
 
+      ;] debug
   ;
     
   : usb-handle-bus-reset ( -- ) \ Handle bus reset
@@ -794,11 +881,12 @@ begin-module usb-core
 
 ;
 
-: ep0-handler-to-host ( -- )
+: ep0-handler-to-host
+  [: ( -- )
 
   USB_BUFFER_STATUS_EP0_TO_PICO USB_BUFFER_STATUS bis!    \ Write to Clear
 
-  ." EP0 Handler to Host, Last PID = " EP0-to-Host next-pid @ . cr 
+  ." EP0 Handler to Host, Last PID = $" EP0-to-Host next-pid @ h.8 cr 
 
   EP0-to-Host usb-toggle-data-pid 
 
@@ -806,16 +894,16 @@ begin-module usb-core
   
   EP0-to-Host usb-get-next-packet-size-to-host { next-packet-size }
 
-  ." EP0 Handler to Host, Bytes Transferred = " EP0-to-Host transfer-bytes @ . 
-  ." , Bytes Processed = " EP0-to-Host processed-bytes @ .
-  ." , Bytes Pending = " EP0-to-Host pending-bytes @ . 
-  ." , Next Packet Bytes = " next-packet-size . cr
+  ." EP0 Handler to Host, Bytes Transferred = $" EP0-to-Host transfer-bytes @ h.8 
+  ." , Bytes Processed = $" EP0-to-Host processed-bytes @ .
+  ." , Bytes Pending = $" EP0-to-Host pending-bytes @ h.8 
+  ." , Next Packet Bytes = $" next-packet-size h.8 cr
 
   next-packet-size if
 
     EP0-to-Host usb-get-continue-source-address { continue-source-address }
 
-    ." EP0 Handler to Host, Continuing Transfer, Next Packet Size = " next-packet-size . cr
+    ." EP0 Handler to Host, Continuing Transfer, Next Packet Size = $" next-packet-size h.8 cr
     ." Original source address = $" EP0-to-Host source-address @ h.8 cr
     ." Continue source address = $" continue-source-address h.8 cr
 
@@ -831,6 +919,7 @@ begin-module usb-core
 
   then
 
+  ;] debug
 ;
 
 : ep0-handler-to-pico-callback ( -- )
@@ -843,9 +932,10 @@ begin-module usb-core
 
 ;
 
-: ep0-handler-to-pico ( -- )
+: ep0-handler-to-pico
+  [: ( -- )
 
-  ." EP0 Handler to Pico, Last PID = " EP0-to-Pico next-pid @ . cr 
+  ." EP0 Handler to Pico, Last PID = $" EP0-to-Pico next-pid @ h.8 cr 
  
   USB_BUFFER_STATUS_EP0_TO_PICO USB_BUFFER_STATUS bis!     \ Write to Clear
 
@@ -855,39 +945,47 @@ begin-module usb-core
    
   then
 
+  ;] debug
 ;
 
-: ep1-handler-to-host ( -- )
+: ep1-handler-to-host
+  [: ( -- )
 
-  ." EP1 Handler to Host, Last PID = " EP1-to-Host next-pid @ . cr 
+  ." EP1 Handler to Host, Last PID = $" EP1-to-Host next-pid @ h.8 cr 
  
   USB_BUFFER_STATUS_EP1_TO_HOST USB_BUFFER_STATUS bis!     \ Write to Clear
 
   EP1-to-Host usb-toggle-data-pid  
 
+    ;] debug
 ;
 
-: ep1-handler-to-pico ( -- )
+: ep1-handler-to-pico
+  [: ( -- )
 
-  ." EP1 Handler to Pico, Last PID = " EP1-to-Pico next-pid @ . cr 
+  ." EP1 Handler to Pico, Last PID = $" EP1-to-Pico next-pid @ h.8 cr 
 
   USB_BUFFER_STATUS_EP1_TO_PICO USB_BUFFER_STATUS bis!     \ Write to Clear
 
   EP1-to-Pico usb-toggle-data-pid  
 
+    ;] debug
 ;
 
-: ep3-handler-to-host ( -- )
+: ep3-handler-to-host
+  [: ( -- )
 
-  ." EP3 Handler to Host, Last PID = " EP3-to-Host next-pid @ . cr 
+  ." EP3 Handler to Host, Last PID = $" EP3-to-Host next-pid @ h.8 cr 
     
   USB_BUFFER_STATUS_EP3_TO_HOST USB_BUFFER_STATUS bis!    \ Write to Clear
 
   EP3-to-Host usb-toggle-data-pid 
 
+    ;] debug
 ;
 
-: usb-handle-buffer-status ( -- )
+: usb-handle-buffer-status
+  [: ( -- )
 
    debug-separator
 
@@ -901,9 +999,11 @@ begin-module usb-core
    buffer-status USB_BUFFER_STATUS_EP1_TO_PICO and if ep1-handler-to-pico then 
    buffer-status USB_BUFFER_STATUS_EP3_TO_HOST and if ep3-handler-to-host then 
 
+   ;] debug
 ;
     
-: usb-irq-handler ( -- )
+: usb-irq-handler
+  [: ( -- )
 
     USB_INTS @ { ints }
     
@@ -919,11 +1019,13 @@ begin-module usb-core
 
     IRQ_counter @ 1 + IRQ_counter !
 
-    ." Interrupts after IRQ handler = $" USB_INTS @ h.8 ." , IRQ Cleared Count = " IRQ_counter @ . cr
+    ." Interrupts after IRQ handler = $" USB_INTS @ h.8 ." , IRQ Cleared Count = $" IRQ_counter @ h.8 cr
 
+    ;] debug
 ;
 
-: usb-insert-device ( -- )
+: usb-insert-device
+  [: ( -- )
 
     cr debug-separator
     
@@ -941,9 +1043,11 @@ begin-module usb-core
     ." IRQ Enabled INTS = $"    USB_INTE @ h.8 
     ." , SIE Control = $"       USB_SIE_CONTROL @ h.8 cr
 
+    ;] debug
 ;
 
-: usb-remove-device ( -- )
+: usb-remove-device
+  [: ( -- )
 
     ." Removing USB Device ... " cr
     
@@ -955,9 +1059,11 @@ begin-module usb-core
     USB_SIE_CTRL_EP0_INT_1BUF       USB_SIE_CONTROL bic! 
     USB_MAIN_CTRL_CONTROLLER_EN     USB_MAIN_CONTROL bic!
 
+    ;] debug
 ;
 
-: init-usb ( -- )                         \ Initialize USB
+: init-usb
+  [: ( -- )                         \ Initialize USB
     
     compile-to-ram
 
@@ -986,7 +1092,8 @@ begin-module usb-core
     USB_USB_PWR_VBUS_DETECT_OVERRIDE_EN   USB_USB_POWER bis!
 
     usbctrl-irq NVIC_ISER_SETENA!
-        
+
+    ;] debug
 ;
 
 end-Module
