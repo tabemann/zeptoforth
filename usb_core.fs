@@ -1181,13 +1181,13 @@ begin-module usb-core
       
       ['] usb-irq-handler usbctrl-vector vector!
       
-      USB_MAIN_CTRL_CONTROLLER_EN           USB_MAIN_CONTROL bis!
-      
       USB_USB_MUXING_TO_PHY                 USB_USB_MUXING bis!
       USB_USB_MUXING_SOFTCON                USB_USB_MUXING bis!
       
       USB_USB_PWR_VBUS_DETECT               USB_USB_POWER bis!
       USB_USB_PWR_VBUS_DETECT_OVERRIDE_EN   USB_USB_POWER bis!
+      
+      USB_MAIN_CTRL_CONTROLLER_EN           USB_MAIN_CONTROL !
       
       usbctrl-irq NVIC_ISER_SETENA!
       

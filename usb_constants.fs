@@ -27,12 +27,29 @@ begin-module usb-constants
 
   false constant debug?
 
-  \ USB IRQ index - RP2040
-  5 constant usbctrl-irq
-  \ RP2040
-  24 bit constant RESETS_USBCTRL
-  \ RP2040
-  $4000C000 constant RESETS_BASE
+  \ USB IRQ index
+  rp2040? [if]
+    5 constant usbctrl-irq
+  [then]
+  rp2350? [if]
+    14 constant usbctrl-irq
+  [then]
+
+  \ USBCTRL reset bit
+  rp2040? [if]
+    24 bit constant RESETS_USBCTRL
+  [then]
+  rp2350? [if]
+    28 bit constant RESETS_USBCTRL
+  [then]
+
+  \ Reset base
+  rp2040? [if]
+    $4000C000 constant RESETS_BASE
+  [then]
+  rp2350? [if]
+    $40020000 constant RESETS_BASE
+  [then]
 
   \ USB vector
   usbctrl-irq 16 + constant usbctrl-vector
