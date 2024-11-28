@@ -483,6 +483,13 @@ begin-module usb-core
   : usb-ack-out-request ( -- )
     EP0-to-Host usb-send-zero-length-packet
   ;
+
+  \ Send a stall on an endpoint
+  : usb-control-send-stall ( -- )
+    USB_BUF_CTRL_STALL EP0-to-Host buffer-control @ !
+    1 USB_EP_STALL_ARM !
+  ;
+  
   : usb-get-device-address ( -- )
     USB_DEVICE_ADDRESS @ $1F and 
   ;
@@ -693,10 +700,12 @@ begin-module usb-core
             USB_DT_CONFIG of usb-send-config-descriptor endof
             USB_DT_STRING of usb-send-string-descriptor endof
             \ x-usb-unknown-descriptor
-            usb-ack-out-request
+            \ usb-ack-out-request
+            usb-control-send-stall
           endcase 
         endof
-        usb-ack-out-request
+        \ usb-ack-out-request
+        usb-control-send-stall
       endcase
     ;] debug
   ;
@@ -713,7 +722,8 @@ begin-module usb-core
       usb-setup setup-request c@ case
         USB_REQUEST_SET_ADDRESS of usb-set-device-address endof
         USB_REQUEST_SET_CONFIGURATION of usb-set-device-configuration endof
-        usb-ack-out-request
+        \ usb-ack-out-request
+        usb-control-send-stall
       endcase
     ;] debug
   ;
@@ -772,7 +782,8 @@ begin-module usb-core
       CDC_CLASS_SET_LINE_CODING of usb-class-set-line-coding endof
       CDC_CLASS_GET_LINE_CODING of usb-class-get-line-coding endof
       CDC_CLASS_SET_LINE_CONTROL of usb-class-set-line-control endof
-      usb-ack-out-request
+      \ usb-ack-out-request
+      usb-control-send-stall
     endcase
   ;
   
@@ -871,7 +882,8 @@ begin-module usb-core
       USB_REQUEST_TYPE_CLASS of usb-setup-type-class endof
 
       \ x-usb-unknown-req-type
-      usb-ack-out-request
+      \ usb-ack-out-request
+      usb-control-send-stall
 
     endcase
   ;
@@ -1152,12 +1164,8 @@ begin-module usb-core
   : close-usb-endpoints ( -- )
     $1F USB_EP_ABORT !
     begin USB_EP_ABORT_DONE @ $1F and $1F = until
-    \ EP1-to-Host busy? @ not if
-    \   EP1-to-Host usb-send-zero-length-packet
-    \ then
-    \ EP1-to-Pico busy? @ not if
-    \   EP1-to-Pico usb-send-zero-length-packet
-    \ then
+    EP1-to-Host busy? @ not if EP1-to-Host usb-send-zero-length-packet then
+    EP1-to-Pico busy? @ not if EP1-to-Pico usb-send-zero-length-packet then
     EP3-to-Host close-usb-endpoint
     EP1-to-Pico close-usb-endpoint
     EP1-to-Host close-usb-endpoint
