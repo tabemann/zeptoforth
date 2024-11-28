@@ -21,8 +21,6 @@
 
 compile-to-flash
 
-marker remove-usb-constants
-
 begin-module usb-constants
 
   false constant debug?
@@ -294,3 +292,5 @@ begin-module usb-constants
   USB_DPRAM_Base $180 + constant USB_BUFFER_Base
 
 end-module
+
+compile-to-ram

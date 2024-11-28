@@ -21,8 +21,6 @@
 
 compile-to-flash
 
-marker remove-usb-core
-
 begin-module usb-core
 
   armv6m import
@@ -171,7 +169,6 @@ begin-module usb-core
       field: dpram-address        \ DPRAM address in Pico hardware
       field: next-pid             \ Endpoint next PID (0 for PID0 or 8192 for PID1)
       field: buffer-control       \ Endpoint buffer control register address
-      field: buffer-dispatch      \ Endpoint buffer dispatch used by send packet
       field: endpoint-control     \ Endpoint control register address
       field: transfer-type        \ Endpoint transfer type (Control, Bulk, Interrupt)
       field: transfer-bytes       \ Endpoint transfer bytes (To send or received)
@@ -180,8 +177,6 @@ begin-module usb-core
       field: total-bytes          \ Total transfer bytes (Multipacket)
       field: source-address       \ Source data address (Multipacket transmit)
       field: callback-handler     \ Callback handler for CDC set line coding 
-      field: queue-busy?          \ Is queue currently holding or transferring data ?
-      field: queue-long?          \ Does queue have sufficient capacity for another packet ?
 
     \ there is no endpoint control register for EP0, interrupt enable for EP0 comes from SIE_CTRL
 
@@ -1219,3 +1214,5 @@ begin-module usb-core
   ;
 
 end-module
+
+compile-to-ram

@@ -21,8 +21,6 @@
 
 compile-to-flash
 
-marker remove-usb-console
-
 begin-module usb
 
   console import
@@ -464,3 +462,5 @@ begin-module usb
   ;
 
 end-module
+
+compile-to-ram
