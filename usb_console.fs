@@ -23,398 +23,426 @@ compile-to-flash
 
 marker remove-usb-console
 
-begin-module usb-console
+begin-module usb
 
-  usb-constants import
-  usb-core import
   console import
-  core-lock import
 
-  \ Are special keys enabled for USB
-  variable usb-special-enabled
+  begin-module usb-internal
 
-  \ RAM variable for rx buffer read-index
-  variable rx-read-index
+    usb-constants import
+    usb-core import
+    core-lock import
 
-  \ RAM variable for tx buffer read-index
-  variable tx-read-index
-  
-  \ RAM variable for rx buffer write-index
-  variable rx-write-index
-  
-  \ RAM variable for tx buffer write-index
-  variable tx-write-index
+    \ Ready to send more data
+    variable next-tx-initial?
 
-  \ Constant for number of bytes to buffer
-  256 constant rx-buffer-size
-  
-  \ Constant for number of bytes to buffer
-  256 constant tx-buffer-size
-  
-  \ RX buffer to Pico
-  rx-buffer-size buffer: rx-buffer
-  
-  \ TX buffer to Host
-  tx-buffer-size buffer: tx-buffer
-
-  \ TX buffer that is not circular
-  tx-buffer-size buffer: tx-straight-buffer
-
-  \ The TX core lock
-  core-lock-size buffer: tx-core-lock
-
-  \ The RX core lock
-  core-lock-size buffer: rx-core-lock
-  
-  \ Get whether the rx buffer is full
-  : rx-full? ( -- f )
-    rx-read-index @ 1- $FF and rx-write-index @ =
-  ;
-
-  \ Get whether the rx buffer is empty
-  : rx-empty? ( -- f )
-    rx-read-index @ rx-write-index @ =
-  ;
-
-  \ Get number of bytes available in the rx buffer
-  : rx-count ( -- u )
-    rx-read-index @ { read-index }
-    rx-write-index @ { write-index }
-    read-index write-index <= if
-      write-index read-index -
-    else
-      rx-buffer-size read-index - write-index +
-    then
-  ;
-
-  \ Write a byte to the rx buffer
-  : write-rx ( c -- )
-    rx-full? not if
-      rx-write-index @ rx-buffer + c!
-      rx-write-index @ 1+ $FF and rx-write-index !
-    else
-      drop
-    then
-  ;
-
-  \ Read a byte from the rx buffer
-  : read-rx ( -- c )
-    rx-empty? not if
-      rx-read-index @ rx-buffer + c@
-      rx-read-index @ 1+ $FF and rx-read-index !
-    else
-      0
-    then
-  ;
-
-  \ Get whether the tx buffer is full
-  : tx-full? ( -- f )
-    tx-read-index @ 1- $FF and tx-write-index @ =
-  ;
-
-  \ Get whether the tx buffer is empty
-  : tx-empty? ( -- f )
-    tx-read-index @ tx-write-index @ =
-  ;
-
-  \ Get number of bytes available in the tx buffer
-  : tx-count ( -- u )
-    tx-read-index @ { read-index }
-    tx-write-index @ { write-index }
-    read-index write-index <= if
-      write-index read-index -
-    else
-      tx-buffer-size read-index - write-index +
-    then
-  ;
-
-  \ Write a byte to the tx buffer
-  : write-tx ( c -- )
-    tx-full? not if
-      tx-write-index @ tx-buffer + c!
-      tx-write-index @ 1+ $FF and tx-write-index !
-    else
-      drop
-    then
-  ;
-
-  \ Read a byte from the tx buffer
-  : read-tx ( -- c )
-    tx-empty? not if
-      tx-read-index @ tx-buffer + c@
-      tx-read-index @ 1+ $FF and tx-read-index !
-    else
-      0
-    then
-  ;
-
-  \ Handle completion of sending a packet to the host
-  : handle-ep1-to-host ( -- )
-    tx-write-index @ { write-index }
-    tx-read-index @ { read-index }
-
-    [ debug? ] [if]
-      write-index read-index
-      [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
-    [then]
+    \ Saved reboot hook
+    variable saved-reboot-hook
     
-    write-index read-index <> if 
-      tx-buffer read-index + { start-addr }
-      write-index read-index > if
-        write-index read-index - { bytes }
-        bytes 64 min { real-bytes }
+    \ Are special keys enabled for USB
+    variable usb-special-enabled
 
-        [ debug? ] [if]
-          real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
-        [then]
-        
-        EP1-to-Host real-bytes start-addr usb-build-data-packet
-        EP1-to-Host real-bytes usb-send-data-packet
-        real-bytes read-index + $FF and tx-read-index !
+    \ RAM variable for rx buffer read-index
+    variable rx-read-index
+
+    \ RAM variable for tx buffer read-index
+    variable tx-read-index
+    
+    \ RAM variable for rx buffer write-index
+    variable rx-write-index
+    
+    \ RAM variable for tx buffer write-index
+    variable tx-write-index
+
+    \ Constant for number of bytes to buffer
+    256 constant rx-buffer-size
+    
+    \ Constant for number of bytes to buffer
+    256 constant tx-buffer-size
+    
+    \ RX buffer to Pico
+    rx-buffer-size buffer: rx-buffer
+    
+    \ TX buffer to Host
+    tx-buffer-size buffer: tx-buffer
+
+    \ TX buffer that is not circular
+    tx-buffer-size buffer: tx-straight-buffer
+
+    \ The TX core lock
+    core-lock-size buffer: tx-core-lock
+
+    \ The RX core lock
+    core-lock-size buffer: rx-core-lock
+    
+    \ Get whether the rx buffer is full
+    : rx-full? ( -- f )
+      rx-read-index @ 1- $FF and rx-write-index @ =
+    ;
+
+    \ Get whether the rx buffer is empty
+    : rx-empty? ( -- f )
+      rx-read-index @ rx-write-index @ =
+    ;
+
+    \ Get number of bytes available in the rx buffer
+    : rx-count ( -- u )
+      rx-read-index @ { read-index }
+      rx-write-index @ { write-index }
+      read-index write-index <= if
+        write-index read-index -
       else
-        tx-buffer-size read-index - { first-bytes }
-        first-bytes 64 < if
-          start-addr tx-straight-buffer first-bytes move
-          write-index first-bytes + 64 min first-bytes - { second-bytes }
-          tx-buffer tx-straight-buffer first-bytes + second-bytes move
-          first-bytes second-bytes + { total-bytes }
-
-          [ debug? ] [if]
-            total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
-          [then]
-          
-          EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
-          EP1-to-Host total-bytes usb-send-data-packet
-          total-bytes read-index + $FF and tx-read-index !
-        else
-
-          [ debug? ] [if]
-            64 [: ." Sending Bytes = $" h.8 cr ;] debug
-          [then]
-          
-          EP1-to-Host 64 start-addr usb-build-data-packet
-          EP1-to-Host 64 usb-send-data-packet
-          64 read-index + $FF and tx-read-index !
-        then
+        rx-buffer-size read-index - write-index +
       then
+    ;
+
+    \ Write a byte to the rx buffer
+    : write-rx ( c -- )
+      rx-full? not if
+        rx-write-index @ rx-buffer + c!
+        rx-write-index @ 1+ $FF and rx-write-index !
+      else
+        drop
+      then
+    ;
+
+    \ Read a byte from the rx buffer
+    : read-rx ( -- c )
+      rx-empty? not if
+        rx-read-index @ rx-buffer + c@
+        rx-read-index @ 1+ $FF and rx-read-index !
+      else
+        0
+      then
+    ;
+
+    \ Get whether the tx buffer is full
+    : tx-full? ( -- f )
+      tx-read-index @ 1- $FF and tx-write-index @ =
+    ;
+
+    \ Get whether the tx buffer is empty
+    : tx-empty? ( -- f )
+      tx-read-index @ tx-write-index @ =
+    ;
+
+    \ Get number of bytes available in the tx buffer
+    : tx-count ( -- u )
+      tx-read-index @ { read-index }
+      tx-write-index @ { write-index }
+      read-index write-index <= if
+        write-index read-index -
+      else
+        tx-buffer-size read-index - write-index +
+      then
+    ;
+
+    \ Write a byte to the tx buffer
+    : write-tx ( c -- )
+      tx-full? not if
+        tx-write-index @ tx-buffer + c!
+        tx-write-index @ 1+ $FF and tx-write-index !
+      else
+        drop
+      then
+    ;
+
+    \ Read a byte from the tx buffer
+    : read-tx ( -- c )
+      tx-empty? not if
+        tx-read-index @ tx-buffer + c@
+        tx-read-index @ 1+ $FF and tx-read-index !
+      else
+        0
+      then
+    ;
+
+    \ Handle completion of sending a packet to the host
+    : handle-ep1-to-host ( -- )
+      tx-write-index @ { write-index }
+      tx-read-index @ { read-index }
 
       [ debug? ] [if]
-        [: ." Done Sending Bytes " cr ;] debug
+        write-index read-index
+        [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
+      [then]
+      
+      write-index read-index <> if 
+        tx-buffer read-index + { start-addr }
+        write-index read-index > if
+          write-index read-index - { bytes }
+          bytes 64 min { real-bytes }
+
+          [ debug? ] [if]
+            real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+          [then]
+          
+          EP1-to-Host real-bytes start-addr usb-build-data-packet
+          EP1-to-Host real-bytes usb-send-data-packet
+          real-bytes read-index + $FF and tx-read-index !
+        else
+          tx-buffer-size read-index - { first-bytes }
+          first-bytes 64 < if
+            start-addr tx-straight-buffer first-bytes move
+            write-index first-bytes + 64 min first-bytes - { second-bytes }
+            tx-buffer tx-straight-buffer first-bytes + second-bytes move
+            first-bytes second-bytes + { total-bytes }
+
+            [ debug? ] [if]
+              total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+            [then]
+            
+            EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
+            EP1-to-Host total-bytes usb-send-data-packet
+            total-bytes read-index + $FF and tx-read-index !
+          else
+
+            [ debug? ] [if]
+              64 [: ." Sending Bytes = $" h.8 cr ;] debug
+            [then]
+            
+            EP1-to-Host 64 start-addr usb-build-data-packet
+            EP1-to-Host 64 usb-send-data-packet
+            64 read-index + $FF and tx-read-index !
+          then
+        then
+
+        [ debug? ] [if]
+          [: ." Done Sending Bytes " cr ;] debug
+        [then]
+
+      else
+        false EP1-to-Host busy? !
+      then
+    ;
+
+    \ Handle completion of receiving a packet from the host
+    : handle-ep1-to-pico ( -- )
+
+      [ debug? ] [if]
+        [: ." Got EP1 Handler to Pico Callback! " cr ;] debug
       [then]
 
-    else
-      false EP1-to-Host busy? !
-    then
-  ;
+      rx-core-lock claim-core-lock
+      
+      EP1-to-Pico buffer-control @ @ USB_BUF_CTRL_LEN_MASK and { bytes }
 
-  \ Handle completion of receiving a packet from the host
-  : handle-ep1-to-pico ( -- )
-
-    [ debug? ] [if]
-      [: ." Got EP1 Handler to Pico Callback! " cr ;] debug
-    [then]
-
-    rx-core-lock claim-core-lock
-    
-    EP1-to-Pico buffer-control @ @ USB_BUF_CTRL_LEN_MASK and { bytes }
-
-    [ debug? ] [if]
-      bytes [: ." Receiving Bytes = $" h.8 cr ;] debug
-    [then]
-    
-    EP1-to-Pico dpram-address @ dup bytes + swap ?do
-      i c@
-      usb-special-enabled @ if
-        dup ctrl-c = if
-          drop reboot
-        else
-          attention? @ if
-            rx-core-lock release-core-lock
-            [: attention-hook @ execute ;] try
-            rx-core-lock claim-core-lock
-            ?raise
+      [ debug? ] [if]
+        bytes [: ." Receiving Bytes = $" h.8 cr ;] debug
+      [then]
+      
+      EP1-to-Pico dpram-address @ dup bytes + swap ?do
+        i c@
+        usb-special-enabled @ if
+          dup ctrl-c = if
+            drop reboot
           else
-            dup ctrl-t = if
+            attention? @ if
               rx-core-lock release-core-lock
-              drop [: attention-start-hook @ execute ;] try
+              [: attention-hook @ execute ;] try
               rx-core-lock claim-core-lock
               ?raise
             else
-              write-rx
+              dup ctrl-t = if
+                rx-core-lock release-core-lock
+                drop [: attention-start-hook @ execute ;] try
+                rx-core-lock claim-core-lock
+                ?raise
+              else
+                write-rx
+              then
             then
           then
+        else
+          write-rx
         then
+      loop
+      
+      rx-buffer-size 1- 64 - rx-count > if
+
+        [ debug? ] [if]
+          64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
+        [then]
+        
+        EP1-to-Pico 64 usb-receive-data-packet
+
+        [ debug? ] [if]
+          [: ." Done Receiving More Bytes " cr ;] debug
+        [then]
+        
       else
-        write-rx
+
+        false EP1-to-Pico busy? !
+        
+        [ debug? ] [if]
+          [: ." Receive Buffer Full " cr ;] debug
+        [then]
+        
       then
-    loop
+
+      rx-core-lock release-core-lock
+    ;
     
-    rx-buffer-size 1- 64 - rx-count > if
+    \ Get whether a byte is ready to be read
+    : usb-key? ( -- key? )
+      usb-device-configured? @ rx-empty? not and
+    ;
 
-      [ debug? ] [if]
-        64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
-      [then]
-      
-      EP1-to-Pico 64 usb-receive-data-packet
+    \ Get whether a byte is ready to be transmitted
+    : usb-emit? ( -- emit? )
+      usb-device-configured? @ tx-full? not and usb-dtr? and
+    ;
 
-      [ debug? ] [if]
-        [: ." Done Receiving More Bytes " cr ;] debug
-      [then]
-      
-    else
+    \ Flush the USB console
+    : usb-flush-console ( -- )
+      begin tx-empty? not EP1-to-Host busy? @ not or while pause repeat
+    ;
 
-      false EP1-to-Pico busy? !
-      
-      [ debug? ] [if]
-        [: ." Receive Buffer Full " cr ;] debug
-      [then]
-      
-    then
+    \ Emit a byte towards the host
+    : usb-emit ( c -- )
 
-    rx-core-lock release-core-lock
-  ;
-  
-  : init-usb-console ( -- )
-    true usb-special-enabled !
-    0 rx-read-index !
-    0 rx-write-index !
-    rx-core-lock init-core-lock
-    0 tx-read-index !
-    0 tx-write-index !
-    tx-core-lock init-core-lock
-  ;
-
-  initializer init-usb-console
-  
-  \ Get whether a byte is ready to be read
-  : usb-key? ( -- key? )
-    usb-device-configured? @ rx-empty? not and
-  ;
-
-  \ Get whether a byte is ready to be transmitted
-  : usb-emit? ( -- emit? )
-    usb-device-configured? @ tx-full? not and
-  ;
-
-  \ Flush the USB console
-  : usb-flush-console ( -- )
-    begin tx-empty? not while pause repeat
-  ;
-
-  \ Emit a byte towards the host
-  : usb-emit ( c -- )
-
-    \ wait (block) for queue capacity to host
-    begin
-      tx-full? if
-        pause false
-      else
-        dup [:
-          [: { W^ byte }
-            EP1-to-Host busy? @ if
-              \ add byte to already-running queue
-              tx-full? not if
-                byte c@ write-tx true
-              else
-                false
+      \ wait (block) for queue capacity to host
+      begin
+        usb-emit? not if
+          pause false
+        else
+          dup [:
+            [: { W^ byte }
+              next-tx-initial? @ if
+                100000. timer::delay-us
+                false next-tx-initial? !
               then
-            else
-              
-              [ debug? ] [if]
-                1 [: ." Sending Bytes = $" h.8 cr ;] debug
-              [then]
-              
-              \ skip queue as not already running
-              EP1-to-Host 1 byte usb-build-data-packet
-              EP1-to-Host 1 usb-send-data-packet
-              
-              [ debug? ] [if]
-                [: ." Done Sending Bytes " cr ;] debug
-              [then]
+              EP1-to-Host busy? @ if
+                \ add byte to already-running queue
+                tx-full? not if
+                  byte c@ write-tx true
+                else
+                  false
+                then
+              then
+              EP1-to-Host busy? @ not if
+                [ debug? ] [if]
+                  1 [: ." Sending Bytes = $" h.8 cr ;] debug
+                [then]
+                
+                \ skip queue as not already running
+                EP1-to-Host 1 byte usb-build-data-packet
+                EP1-to-Host 1 usb-send-data-packet
+                
+                [ debug? ] [if]
+                  [: ." Done Sending Bytes " cr ;] debug
+                [then]
 
-              true
-            then
-          ;] tx-core-lock with-core-lock
-        ;] critical
-      then
-    until
-    drop
-  ;
+                true
+              then
+            ;] tx-core-lock with-core-lock
+          ;] critical
+        then
+      until
+      drop
+    ;
 
-  : usb-key ( -- c )
-    begin
-      rx-empty? if
-        pause false
-      else
-        [:
+    : usb-key ( -- c )
+      begin
+        usb-key? not if
+          pause false
+        else
           [:
-            rx-empty? if
-              false
-            else
-              
-              \ save character for now
-              read-rx
-              
-              rx-buffer-size 1- 64 - rx-count > EP1-to-Pico busy? @ not and if
-                
-                [ debug? ] [if]
-                  64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
-                [then]
-                
-                EP1-to-Pico 64 usb-receive-data-packet
-                
-                [ debug? ] [if]
-                  [: ." Done Receiving More Bytes " cr ;] debug
-                [then]
-                
+            [:
+              usb-key? not if
+                false
               else
                 
-                [ debug? ] [if]
-                  [: ." Receive Buffer Full " cr ;] debug
-                [then]
+                \ save character for now
+                read-rx
                 
+                rx-buffer-size 1- 64 - rx-count > EP1-to-Pico busy? @ not and if
+                  
+                  [ debug? ] [if]
+                    64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
+                  [then]
+                  
+                  EP1-to-Pico 64 usb-receive-data-packet
+                  
+                  [ debug? ] [if]
+                    [: ." Done Receiving More Bytes " cr ;] debug
+                  [then]
+                  
+                else
+                  
+                  [ debug? ] [if]
+                    [: ." Receive Buffer Full " cr ;] debug
+                  [then]
+                  
+                then
+
+                true
               then
+            ;] rx-core-lock with-core-lock
+          ;] critical
+        then
+      until
+    ;
 
-              true
-            then
-          ;] rx-core-lock with-core-lock
-        ;] critical
-      then
-    until
-  ;
-  
-  \ Enable the usb console
-  : usb-console
-    ['] handle-ep1-to-host EP1-to-Host callback-handler !
-    ['] handle-ep1-to-pico EP1-to-Pico callback-handler !
-    ['] usb-key? key?-hook !
-    ['] usb-key key-hook !
-    ['] usb-emit? emit?-hook !
-    ['] usb-emit emit-hook !
-    ['] usb-emit? error-emit?-hook !
-    ['] usb-emit error-emit-hook !
-    ['] usb-flush-console flush-console-hook !
-    ['] usb-flush-console error-flush-console-hook !
-    
-    EP1-to-Pico busy? @ not if
+    \ Handle USB device configured
+    : handle-usb-device-configured ( -- )
+      true next-tx-initial? !
+      ['] handle-ep1-to-host EP1-to-Host callback-handler !
+      ['] handle-ep1-to-pico EP1-to-Pico callback-handler !
 
-      [ debug? ] [if]
-        [: ." Starting Receiving Data ... " cr ;] debug
-      [then]
-      
       \ start console reception from host
       EP1-to-Pico 64 usb-receive-data-packet
-      
-    else
+    ;
 
-      [ debug? ] [if]
-        [: ." Receiving Data is Busy ... " cr ;] debug
-      [then]
-      
-    then
-  ;
+    \ Enable the usb console
+    : usb-console
+      ['] usb-key? key?-hook !
+      ['] usb-key key-hook !
+      ['] usb-emit? emit?-hook !
+      ['] usb-emit emit-hook !
+      ['] usb-emit? error-emit?-hook !
+      ['] usb-emit error-emit-hook !
+      ['] usb-flush-console flush-console-hook !
+      ['] usb-flush-console error-flush-console-hook !
+    ;
+  
+    \ Initialize USB console
+    : init-usb-console ( -- )
+      true usb-special-enabled !
+      0 rx-read-index !
+      0 rx-write-index !
+      rx-core-lock init-core-lock
+      0 tx-read-index !
+      0 tx-write-index !
+      tx-core-lock init-core-lock
+      true next-tx-initial? !
+      init-usb
+      reboot-hook @ saved-reboot-hook !
+      [:
+        [:
+          [:
+            saved-reboot-hook @ execute
+            0 internal::in-critical !
+            pause
+            100000 0 do loop
+            close-usb-endpoints
+            100000 0 do loop
+          ;] rx-core-lock with-core-lock
+        ;] tx-core-lock with-core-lock
+      ;] reboot-hook !
+      ['] handle-usb-device-configured usb-device-configured-callback !
+      usb-insert-device
+      usb-console
+    ;
 
-  \ Set the curent input to usb within an xt
+    initializer init-usb-console
+    
+  end-module> import
+
+  \ Select the USB console
+  : usb-console ( -- ) usb-console ;
+  
+  \ Set the current input to usb within an xt
   : with-usb-input ( xt -- )
     ['] usb-key ['] usb-key? rot with-input
   ;

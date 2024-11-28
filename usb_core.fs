@@ -33,8 +33,14 @@ begin-module usb-core
 
   variable IRQ_counter
 
+  \ Device configured callback
+  variable usb-device-configured-callback
+  
+  \ Prepare to set device as configured
   variable prepare-usb-device-configured?
-  variable usb-device-configured?                                               \ Device configuration set
+
+  \ Device configuration set
+  variable usb-device-configured?
   
   : debug ( xt -- )
     emit-hook @ { saved-emit-hook }
@@ -477,7 +483,6 @@ begin-module usb-core
   : usb-ack-out-request ( -- )
     EP0-to-Host usb-send-zero-length-packet
   ;
-
   : usb-get-device-address ( -- )
     USB_DEVICE_ADDRESS @ $1F and 
   ;
@@ -532,14 +537,12 @@ begin-module usb-core
       [then]
       
       total-data-bytes host-endpoint total-bytes !
-      
       source-data-address host-endpoint source-address !
       
       \ do not exceed max packet size
       host-endpoint max-packet-size @ total-data-bytes min { packet-bytes }
       
       host-endpoint packet-bytes source-data-address usb-build-data-packet
-      
       host-endpoint packet-bytes usb-send-data-packet
       
     ;] debug
@@ -663,17 +666,11 @@ begin-module usb-core
       [then]
       
       init-usb-function-endpoints
-      
       init-line-nofification 
-      
       init-cdc-line-coding
-      
       8192 EP0-to-Host next-pid !
-      
       EP3-to-Host 10 line-state-notification usb-start-transfer-to-host 
-      
       true prepare-usb-device-configured? !
-      
       usb-ack-out-request
       
     ;] debug
@@ -690,22 +687,17 @@ begin-module usb-core
       [then]
       
       usb-setup setup-request c@ case
-        
         USB_REQUEST_GET_DESCRIPTOR of
-          
           usb-setup setup-descriptor-type c@ case
-            
             USB_DT_DEVICE of usb-send-device-descriptor endof
             USB_DT_CONFIG of usb-send-config-descriptor endof
             USB_DT_STRING of usb-send-string-descriptor endof
             \ x-usb-unknown-descriptor
-            
+            usb-ack-out-request
           endcase 
-          
         endof
-        
+        usb-ack-out-request
       endcase
-      
     ;] debug
   ;
 
@@ -719,11 +711,9 @@ begin-module usb-core
       [then]
       
       usb-setup setup-request c@ case
-        
         USB_REQUEST_SET_ADDRESS of usb-set-device-address endof
         USB_REQUEST_SET_CONFIGURATION of usb-set-device-configuration endof
-        \ usb-ack-out-request
-        
+        usb-ack-out-request
       endcase
     ;] debug
   ;
@@ -779,12 +769,10 @@ begin-module usb-core
   : usb-setup-type-class ( -- )
 
     usb-setup setup-request c@ case
-      
       CDC_CLASS_SET_LINE_CODING of usb-class-set-line-coding endof
       CDC_CLASS_GET_LINE_CODING of usb-class-get-line-coding endof
       CDC_CLASS_SET_LINE_CONTROL of usb-class-set-line-control endof
-      \ usb-ack-out-request
-      
+      usb-ack-out-request
     endcase
   ;
   
@@ -835,11 +823,10 @@ begin-module usb-core
   ;
 
   : usb-setup-packet-debug ( -- )
-
-    debug-separator
-
-    usb-show-setup-packet
-  
+    [ debug? ] [if]
+      debug-separator
+      usb-show-setup-packet
+    [then]
   ;
 
   : usb-prepare-setup-direction ( -- )
@@ -869,25 +856,22 @@ begin-module usb-core
 
     USB_SIE_STATUS_SETUP_REC USB_SIE_STATUS !
 
-    debug-separator
+    [ debug? ] [if]
+      debug-separator
+    [then]
 
     usb-prepare-setup-packet
-
     usb-prepare-setup-direction
-
     usb-setup-packet-debug
-
     USB_BUF_CTRL_DATA1_PID EP0-to-Host next-pid ! 
-
     USB_BUF_CTRL_DATA1_PID EP0-to-Pico next-pid !
 
     usb-setup setup-request-type c@ case 
-    
       USB_REQUEST_TYPE_STANDARD of usb-setup-type-standard endof
-
       USB_REQUEST_TYPE_CLASS of usb-setup-type-class endof
 
-      x-usb-unknown-req-type
+      \ x-usb-unknown-req-type
+      usb-ack-out-request
 
     endcase
   ;
@@ -980,6 +964,8 @@ begin-module usb-core
           [ debug? ] [if]
             ." USB device configured! " cr
           [then]
+
+          usb-device-configured-callback @ ?execute
         then
         
       then
@@ -1156,6 +1142,35 @@ begin-module usb-core
     ;] debug
   ;
 
+  \ Close USB endpoint
+  : close-usb-endpoint { endpoint -- }
+    endpoint endpoint-control @ ?dup if 0 swap ! then
+    endpoint buffer-control @ ?dup if 0 swap ! then
+  ;
+  
+  \ Close USB endpoints
+  : close-usb-endpoints ( -- )
+    $1F USB_EP_ABORT !
+    begin USB_EP_ABORT_DONE @ $1F and $1F = until
+    \ EP1-to-Host busy? @ not if
+    \   EP1-to-Host usb-send-zero-length-packet
+    \ then
+    \ EP1-to-Pico busy? @ not if
+    \   EP1-to-Pico usb-send-zero-length-packet
+    \ then
+    EP3-to-Host close-usb-endpoint
+    EP1-to-Pico close-usb-endpoint
+    EP1-to-Host close-usb-endpoint
+    EP0-to-Pico close-usb-endpoint
+    EP0-to-Host close-usb-endpoint
+    usb-remove-device
+  ;
+
+  \ Get DTR setting
+  : usb-dtr? ( -- dtr? )
+    line-state-notification line-value h@ 1 and 0<>
+  ;
+  
   \ Initialize USB
   : init-usb ( -- )
     [:
@@ -1165,7 +1180,8 @@ begin-module usb-core
         
         ." Initialising USB Core ... " cr
       [then]
-      
+
+      0 usb-device-configured-callback !
       false prepare-usb-device-configured? !
       false usb-device-configured? !
       
