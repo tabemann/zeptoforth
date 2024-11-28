@@ -32,6 +32,10 @@ begin-module usb
     usb-constants import
     usb-core import
     core-lock import
+    task import
+
+    \ TX pending operation
+    pending-op-size buffer: tx-pending-op
 
     \ Ready to send more data
     variable next-tx-initial?
@@ -157,63 +161,80 @@ begin-module usb
       then
     ;
 
-    \ Handle completion of sending a packet to the host
-    : handle-ep1-to-host ( -- )
-      tx-write-index @ { write-index }
-      tx-read-index @ { read-index }
-
-      [ debug? ] [if]
-        write-index read-index
-        [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
-      [then]
-      
-      write-index read-index <> if 
-        tx-buffer read-index + { start-addr }
-        write-index read-index > if
-          write-index read-index - { bytes }
-          bytes 64 min { real-bytes }
+    \ Carry out TX pending operation
+    defer do-tx-pending-op ( -- )
+    :noname ( -- )
+      [:
+        EP1-to-Host busy? @ not if
+          
+          tx-write-index @ { write-index }
+          tx-read-index @ { read-index }
 
           [ debug? ] [if]
-            real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+            write-index read-index
+            [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
           [then]
           
-          EP1-to-Host real-bytes start-addr usb-build-data-packet
-          EP1-to-Host real-bytes usb-send-data-packet
-          real-bytes read-index + $FF and tx-read-index !
-        else
-          tx-buffer-size read-index - { first-bytes }
-          first-bytes 64 < if
-            start-addr tx-straight-buffer first-bytes move
-            write-index first-bytes + 64 min first-bytes - { second-bytes }
-            tx-buffer tx-straight-buffer first-bytes + second-bytes move
-            first-bytes second-bytes + { total-bytes }
+          write-index read-index <> if 
+            tx-buffer read-index + { start-addr }
+            write-index read-index > if
+              write-index read-index - { bytes }
+              bytes 64 min { real-bytes }
+
+              [ debug? ] [if]
+                real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+              [then]
+              
+              EP1-to-Host real-bytes start-addr usb-build-data-packet
+              EP1-to-Host real-bytes usb-send-data-packet
+              real-bytes read-index + $FF and tx-read-index !
+            else
+              tx-buffer-size read-index - { first-bytes }
+              first-bytes 64 < if
+                start-addr tx-straight-buffer first-bytes move
+                write-index first-bytes + 64 min first-bytes - { second-bytes }
+                tx-buffer tx-straight-buffer first-bytes + second-bytes move
+                first-bytes second-bytes + { total-bytes }
+
+                [ debug? ] [if]
+                  total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+                [then]
+                
+                EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
+                EP1-to-Host total-bytes usb-send-data-packet
+                total-bytes read-index + $FF and tx-read-index !
+              else
+
+                [ debug? ] [if]
+                  64 [: ." Sending Bytes = $" h.8 cr ;] debug
+                [then]
+                
+                EP1-to-Host 64 start-addr usb-build-data-packet
+                EP1-to-Host 64 usb-send-data-packet
+                64 read-index + $FF and tx-read-index !
+              then
+            then
 
             [ debug? ] [if]
-              total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+              [: ." Done Sending Bytes " cr ;] debug
             [then]
-            
-            EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
-            EP1-to-Host total-bytes usb-send-data-packet
-            total-bytes read-index + $FF and tx-read-index !
-          else
 
-            [ debug? ] [if]
-              64 [: ." Sending Bytes = $" h.8 cr ;] debug
-            [then]
-            
-            EP1-to-Host 64 start-addr usb-build-data-packet
-            EP1-to-Host 64 usb-send-data-packet
-            64 read-index + $FF and tx-read-index !
           then
         then
+      ;] tx-core-lock with-core-lock
+    ; is do-tx-pending-op
 
-        [ debug? ] [if]
-          [: ." Done Sending Bytes " cr ;] debug
-        [then]
-
-      else
-        false EP1-to-Host busy? !
+    \ Enable TX
+    : enable-tx ( -- )
+      tx-write-index @ tx-read-index @ <> if 
+        ['] do-tx-pending-op tx-pending-op set-pending-op
       then
+    ;
+    
+    \ Handle completion of sending a packet to the host
+    : handle-ep1-to-host ( -- )
+      false EP1-to-Host busy? !
+      enable-tx
     ;
 
     \ Handle completion of receiving a packet from the host
@@ -312,29 +333,13 @@ begin-module usb
                 100000. timer::delay-us
                 false next-tx-initial? !
               then
-              EP1-to-Host busy? @ if
-                \ add byte to already-running queue
-                tx-full? not if
-                  byte c@ write-tx true
-                else
-                  false
-                then
+              \ add byte to already-running queue
+              tx-full? not if
+                byte c@ write-tx true
+              else
+                false
               then
-              EP1-to-Host busy? @ not if
-                [ debug? ] [if]
-                  1 [: ." Sending Bytes = $" h.8 cr ;] debug
-                [then]
-                
-                \ skip queue as not already running
-                EP1-to-Host 1 byte usb-build-data-packet
-                EP1-to-Host 1 usb-send-data-packet
-                
-                [ debug? ] [if]
-                  [: ." Done Sending Bytes " cr ;] debug
-                [then]
-
-                true
-              then
+              enable-tx
             ;] tx-core-lock with-core-lock
           ;] critical
         then
@@ -408,6 +413,7 @@ begin-module usb
   
     \ Initialize USB console
     : init-usb-console ( -- )
+      0 tx-pending-op register-pending-op
       true usb-special-enabled !
       0 rx-read-index !
       0 rx-write-index !
