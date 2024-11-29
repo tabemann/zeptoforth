@@ -377,41 +377,42 @@ begin-module usb
       drop
     ;
 
+    : start-rx ( -- )
+      disable-int
+      rx-buffer-size 1- 64 - rx-count > EP1-to-Pico busy? @ not and
+      if
+        
+        [ debug? ] [if]
+          64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
+        [then]
+                  
+        EP1-to-Pico 64 usb-receive-data-packet
+        
+        [ debug? ] [if]
+          [: ." Done Receiving More Bytes " cr ;] debug
+        [then]
+        
+      else
+        
+        [ debug? ] [if]
+          [: ." Receive Buffer Full " cr ;] debug
+        [then]
+        
+      then
+      enable-int
+    ;
+              
     : usb-key ( -- c )
       begin
         usb-key? not if
-          pause false
+          start-rx pause false
         else
           [:
             [:
               usb-key? not if
-                false
+                start-rx false
               else
-                
-                \ save character for now
-                read-rx
-                
-                rx-buffer-size 1- 64 - rx-count > EP1-to-Pico busy? @ not and if
-                  
-                  [ debug? ] [if]
-                    64 [: ." Receiving More Bytes = $" h.8 cr ;] debug
-                  [then]
-                  
-                  EP1-to-Pico 64 usb-receive-data-packet
-                  
-                  [ debug? ] [if]
-                    [: ." Done Receiving More Bytes " cr ;] debug
-                  [then]
-                  
-                else
-                  
-                  [ debug? ] [if]
-                    [: ." Receive Buffer Full " cr ;] debug
-                  [then]
-                  
-                then
-
-                true
+                read-rx start-rx true
               then
             ;] rx-core-lock with-core-lock
           ;] critical
