@@ -32,15 +32,32 @@ begin-module usb
     core-lock import
     task import
 
-    \ TX pending operation
-    pending-op-size buffer: tx-pending-op
+    \ TX interval in microseconds
+    550 constant tx-interval-us
+
+    \ TX initial delay in microseconds
+    100000 constant tx-initial-delay-us
+
+    \ TX alarm index
+    3 constant tx-alarm
+
+    \ Alarm base IRQ
+    rp2040? [if]
+      0 constant alarm-base-irq
+    [then]
+    rp2350? [if]
+      4 constant alarm-base-irq
+    [then]
+
+    \ Alarm interrupt priority
+    $FF constant alarm-priority
 
     \ Ready to send more data
     variable next-tx-initial?
 
     \ Saved reboot hook
     variable saved-reboot-hook
-    
+
     \ Are special keys enabled for USB
     variable usb-special-enabled
 
@@ -159,80 +176,97 @@ begin-module usb
       then
     ;
 
-    \ Carry out TX pending operation
-    defer do-tx-pending-op ( -- )
+    \ Handle an alarm for sending data
+    defer do-tx ( -- )
     :noname ( -- )
-      [:
-        EP1-to-Host busy? @ not if
-          
-          tx-write-index @ { write-index }
-          tx-read-index @ { read-index }
 
-          [ debug? ] [if]
-            write-index read-index
-            [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
-          [then]
+      [ rp2040? ] [if]
+        tx-alarm timer::clear-alarm-int
+        timer::us-counter-lsb
+      [then]
+      [ rp2350? ] [if]
+        tx-alarm timer1::clear-alarm-int
+        timer1::us-counter-lsb
+      [then]
+      { start-us }
+      
+      EP1-to-Host busy? @ not if
           
-          write-index read-index <> if 
-            tx-buffer read-index + { start-addr }
-            write-index read-index > if
-              write-index read-index - { bytes }
-              bytes 64 min { real-bytes }
-
+        tx-write-index @ { write-index }
+        tx-read-index @ { read-index }
+        
+        [ debug? ] [if]
+          write-index read-index
+          [: ." read-index = $" h.8 ."  write-index = $" h.8 cr ;] debug
+        [then]
+        
+        write-index read-index <> if
+          tx-buffer read-index + { start-addr }
+          write-index read-index > if
+            write-index read-index - { bytes }
+            bytes 64 min { real-bytes }
+            
+            [ debug? ] [if]
+              real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+            [then]
+            
+            EP1-to-Host real-bytes start-addr usb-build-data-packet
+            EP1-to-Host real-bytes usb-send-data-packet
+            real-bytes read-index + $FF and tx-read-index !
+          else
+            tx-buffer-size read-index - { first-bytes }
+            first-bytes 64 < if
+              start-addr tx-straight-buffer first-bytes move
+              write-index first-bytes + 64 min first-bytes - { second-bytes }
+              tx-buffer tx-straight-buffer first-bytes + second-bytes move
+              first-bytes second-bytes + { total-bytes }
+              
               [ debug? ] [if]
-                real-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
+                total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
               [then]
               
-              EP1-to-Host real-bytes start-addr usb-build-data-packet
-              EP1-to-Host real-bytes usb-send-data-packet
-              real-bytes read-index + $FF and tx-read-index !
+              EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
+              EP1-to-Host total-bytes usb-send-data-packet
+              total-bytes read-index + $FF and tx-read-index !
             else
-              tx-buffer-size read-index - { first-bytes }
-              first-bytes 64 < if
-                start-addr tx-straight-buffer first-bytes move
-                write-index first-bytes + 64 min first-bytes - { second-bytes }
-                tx-buffer tx-straight-buffer first-bytes + second-bytes move
-                first-bytes second-bytes + { total-bytes }
-
-                [ debug? ] [if]
-                  total-bytes [: ." Sending Bytes = $" h.8 cr ;] debug
-                [then]
-                
-                EP1-to-Host total-bytes tx-straight-buffer usb-build-data-packet
-                EP1-to-Host total-bytes usb-send-data-packet
-                total-bytes read-index + $FF and tx-read-index !
-              else
-
-                [ debug? ] [if]
-                  64 [: ." Sending Bytes = $" h.8 cr ;] debug
-                [then]
-                
-                EP1-to-Host 64 start-addr usb-build-data-packet
-                EP1-to-Host 64 usb-send-data-packet
-                64 read-index + $FF and tx-read-index !
-              then
+              
+              [ debug? ] [if]
+                64 [: ." Sending Bytes = $" h.8 cr ;] debug
+              [then]
+              
+              EP1-to-Host 64 start-addr usb-build-data-packet
+              EP1-to-Host 64 usb-send-data-packet
+              64 read-index + $FF and tx-read-index !
             then
-
-            [ debug? ] [if]
-              [: ." Done Sending Bytes " cr ;] debug
-            [then]
-
           then
         then
-      ;] tx-core-lock with-core-lock
-    ; is do-tx-pending-op
+        
+        [ debug? ] [if]
+          [: ." Done Sending Bytes " cr ;] debug
+        [then]
+        
+      then        
 
-    \ Enable TX
-    : enable-tx ( -- )
-      tx-write-index @ tx-read-index @ <> if 
-        ['] do-tx-pending-op tx-pending-op set-pending-op
-      then
-    ;
-    
+      [ rp2040? ] [if]
+        start-us tx-interval-us + ['] do-tx tx-alarm timer::set-alarm
+      [then]
+      [ rp2350? ] [if]
+        start-us tx-interval-us + ['] do-tx tx-alarm timer1::set-alarm
+      [then]
+
+    ; is do-tx
+
     \ Handle completion of sending a packet to the host
     : handle-ep1-to-host ( -- )
       false EP1-to-Host busy? !
-      enable-tx
+      [ rp2040? ] [if]
+        timer::us-counter-lsb
+        tx-interval-us + ['] do-tx tx-alarm timer::set-alarm
+      [then]
+      [ rp2350? ] [if]
+        timer1::us-counter-lsb
+        tx-interval-us + ['] do-tx tx-alarm timer1::set-alarm
+      [then]
     ;
 
     \ Handle completion of receiving a packet from the host
@@ -242,8 +276,6 @@ begin-module usb
         [: ." Got EP1 Handler to Pico Callback! " cr ;] debug
       [then]
 
-      rx-core-lock claim-core-lock
-      
       EP1-to-Pico buffer-control @ @ USB_BUF_CTRL_LEN_MASK and { bytes }
 
       [ debug? ] [if]
@@ -257,15 +289,11 @@ begin-module usb
             drop reboot
           else
             attention? @ if
-              rx-core-lock release-core-lock
               [: attention-hook @ execute ;] try
-              rx-core-lock claim-core-lock
               ?raise
             else
               dup ctrl-t = if
-                rx-core-lock release-core-lock
                 drop [: attention-start-hook @ execute ;] try
-                rx-core-lock claim-core-lock
                 ?raise
               else
                 write-rx
@@ -298,8 +326,6 @@ begin-module usb
         [then]
         
       then
-
-      rx-core-lock release-core-lock
     ;
     
     \ Get whether a byte is ready to be read
@@ -328,8 +354,15 @@ begin-module usb
           dup [:
             [: { W^ byte }
               next-tx-initial? @ if
-                100000. timer::delay-us
                 false next-tx-initial? !
+                [ rp2040? ] [if]
+                  timer::us-counter-lsb
+                  tx-initial-delay-us + ['] do-tx tx-alarm timer::set-alarm
+                [then]
+                [ rp2350? ] [if]
+                  timer1::us-counter-lsb
+                  tx-initial-delay-us + ['] do-tx tx-alarm timer1::set-alarm
+                [then]
               then
               \ add byte to already-running queue
               tx-full? not if
@@ -337,7 +370,6 @@ begin-module usb
               else
                 false
               then
-              enable-tx
             ;] tx-core-lock with-core-lock
           ;] critical
         then
@@ -411,7 +443,7 @@ begin-module usb
   
     \ Initialize USB console
     : init-usb-console ( -- )
-      0 tx-pending-op register-pending-op
+      alarm-priority alarm-base-irq tx-alarm + interrupt::NVIC_IPR_IP!
       true usb-special-enabled !
       0 rx-read-index !
       0 rx-write-index !

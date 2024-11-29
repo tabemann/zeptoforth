@@ -1083,7 +1083,6 @@ begin-module usb-core
   
   : usb-irq-handler ( -- )
     [:
-      
       USB_INTS @ { ints }
       
       [ debug? ] [if]
@@ -1101,7 +1100,6 @@ begin-module usb-core
       [ debug? ] [if]
         ." Interrupts after IRQ handler = $" USB_INTS @ h.8 ." , IRQ Cleared Count = $" IRQ_counter @ h.8 cr
       [then]
-     
     ;] debug
   ;
 
