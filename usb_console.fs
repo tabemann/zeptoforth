@@ -86,7 +86,7 @@ begin-module usb
     tx-buffer-size buffer: tx-buffer
 
     \ TX buffer that is not circular
-    tx-buffer-size buffer: tx-straight-buffer
+    64 buffer: tx-straight-buffer
 
     \ The TX core lock
     core-lock-size buffer: tx-core-lock
