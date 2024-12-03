@@ -1,6 +1,6 @@
-# RP2040 clock control words
+# Pico clock control words
 
-These words allow the RP2040 system clock (normally 125 MHz) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 data sheet.
+These words allow the RP2040/RP2350 system clock (normally 125 MHz on the RP2040, 150 MHz on the RP2350) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz on an RP2040.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 and RP2350 data sheets.
 
 ### `forth`
 
@@ -14,7 +14,7 @@ Returns the crystal oscillator frequency in Hz.  This is set at built time; curr
 ##### `sysclk`
 ( -- addr )
 
-Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz, and will be changed to the new value by `set-sysclk`.
+Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by `set-sysclk`.
 
 ### `clocks`
 
