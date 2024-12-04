@@ -207,21 +207,18 @@ begin-module complex-float32
     variable saved-handle-number-hook
   
     \ Handle numeric literals
-    : do-handle-number ( addr bytes -- flag )
-      2dup saved-handle-number-hook @ execute if
-        state @ not if
-          rot rot
-        then
-        2drop true
+    : do-handle-number { addr bytes -- flag }
+      addr bytes saved-handle-number-hook @ execute if
+        true
       else
-        parse-complex-float32 if
+        addr bytes parse-complex-float32 if
           state @ if
             swap lit, lit, true
           else
             true
           then
         else
-          2drop false
+          false
         then
       then
     ;

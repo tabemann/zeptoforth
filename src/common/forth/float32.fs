@@ -1656,15 +1656,12 @@ begin-module float32
     ;
     
     \ Handle numeric literals
-    : do-handle-number ( addr bytes -- flag )
-      2dup saved-handle-number-hook @ execute if
-        state @ not if
-          rot rot
-        then
-        2drop true
+    : do-handle-number { addr bytes -- flag }
+      addr bytes saved-handle-number-hook @ execute if
+        true
       else
-        2dup check-exponent if
-          parse-float32 if
+        addr bytes check-exponent if
+          addr bytes parse-float32 if
             state @ if
               lit, true
             else
@@ -1674,7 +1671,7 @@ begin-module float32
             drop false
           then
         else
-          2drop false
+          false
         then
       then
     ;
