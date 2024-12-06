@@ -437,14 +437,13 @@ begin-module fixed32
         rdrop 2drop false
       then
     ;
-    
-  end-module
 
-  continue-module internal
+    \ Saved handle-number-hook
+    variable saved-handle-number-hook
     
     \ Handle parsing numbers, extending it to S15.16 fixed-point numbers
     : do-handle-number { addr bytes -- flag }
-      addr bytes do-handle-number not if
+      addr bytes saved-handle-number-hook @ execute not if
         addr bytes
         parse-base >r
         dup 0<> if
@@ -477,7 +476,15 @@ begin-module fixed32
         true
       then
     ;
-    
+
+    \ Initialize handle-number-hook
+    : init-handle-number-hook ( -- )
+      handle-number-hook @ saved-handle-number-hook !
+      ['] do-handle-number handle-number-hook !
+    ;
+
+    initializer init-handle-number-hook
+
   end-module
 
   \ Parse a 32-bit fixed-point number
@@ -616,9 +623,3 @@ begin-module fixed32
   : f32.n ( f32 places -- ) (f32.n) space ;
   
 end-module
-
-: init-f32 ( -- )
-  ['] internal::do-handle-number handle-number-hook !
-;
-
-initializer init-f32
