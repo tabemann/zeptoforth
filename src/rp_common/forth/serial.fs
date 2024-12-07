@@ -22,13 +22,13 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module int-io
+begin-module serial
 
   internal import
   interrupt import
   multicore import
 
-  begin-module int-io-internal
+  begin-module serial-internal
 
     \ Saved reboot hook
     variable saved-reboot-hook
@@ -282,7 +282,7 @@ begin-module int-io
   ;
   
   \ Enable interrupt-driven IO
-  : enable-int-io ( -- )
+  : enable-serial-int-io ( -- )
     disable-int
     0 UART0_UARTIFLS_RXIFLSEL! \ Interrupt on receive FIFO >= 1/8 full
     0 UART0_UARTIFLS_TXIFLSEL! \ Interrupt on transmit FIFO <= 1/8 full
@@ -296,7 +296,7 @@ begin-module int-io
   ;
 
   \ Disable interrupt-driven IO
-  : disable-int-io ( -- )
+  : disable-serial-int-io ( -- )
     disable-int
     ['] serial-key key-hook !
     ['] serial-emit emit-hook !
@@ -312,26 +312,33 @@ begin-module int-io
   ;
 
   \ Initialize interrupt-driven IO
-  : init-int-io ( -- )
+  : init-serial-int-io ( -- )
     0 rx-read-index !
     0 rx-write-index !
     0 tx-read-index !
     0 tx-write-index !
-    enable-int-io
+    enable-serial-int-io
     reboot-hook @ saved-reboot-hook !
     [:
       begin tx-empty? UART0_UARTFR_TXFE@ and UART0_UARTFR_BUSY@ not and until
-\      in-interrupt? not if flush-console 10 ms then
       saved-reboot-hook @ execute
     ;] reboot-hook !
   ;
+
+  \ Old names for compatiblity's sake
+  : enable-int-io ( -- ) enable-serial-int-io ;
+  : disable-int-io ( -- ) disable-serial-int-io ;
+  : init-int-io ( -- ) init-serial-int-io ;
   
 end-module> import
+
+\ Old name for compatibility's sake
+serial constant int-io
 
 \ Init
 : init ( -- )
   init
-  init-int-io
+  init-serial-int-io
 ;
 
 \ Reboot

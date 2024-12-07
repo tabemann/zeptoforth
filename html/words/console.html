@@ -237,21 +237,33 @@
 <p>Get the variable address of the UART console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;</p>
 </section>
 </section>
-<section id="int-io">
-<h2><code class="docutils literal notranslate"><span class="pre">int-io</span></code><a class="headerlink" href="#int-io" title="Link to this heading">¶</a></h2>
-<p>These words are in the <code class="docutils literal notranslate"><span class="pre">int-io</span></code> module:</p>
+<section id="serial">
+<h2><code class="docutils literal notranslate"><span class="pre">serial</span></code><a class="headerlink" href="#serial" title="Link to this heading">¶</a></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">serial</span></code> module:</p>
 <section id="serial-console">
 <h3><code class="docutils literal notranslate"><span class="pre">serial-console</span></code><a class="headerlink" href="#serial-console" title="Link to this heading">¶</a></h3>
 <p>Set the current task’s console to use the interrupt-driven serial console.</p>
 </section>
+<section id="enable-serial-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-serial-int-io</span></code><a class="headerlink" href="#enable-serial-int-io" title="Link to this heading">¶</a></h3>
+<p>Enable interrupt-driven serial IO (enabled by default).</p>
+</section>
+<section id="disable-serail-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-serail-int-io</span></code><a class="headerlink" href="#disable-serail-int-io" title="Link to this heading">¶</a></h3>
+<p>Disable interrupt-driven serial IO.</p>
+</section>
 <section id="enable-int-io">
 <h3><code class="docutils literal notranslate"><span class="pre">enable-int-io</span></code><a class="headerlink" href="#enable-int-io" title="Link to this heading">¶</a></h3>
-<p>Enable interrupt-driven serial IO (enabled by default).</p>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">enable-serial-int-io</span></code>. This will be removed at a future date.</p>
 </section>
 <section id="disable-int-io">
 <h3><code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code><a class="headerlink" href="#disable-int-io" title="Link to this heading">¶</a></h3>
-<p>Disable interrupt-driven serial IO.</p>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">disable-serial-int-io</span></code>. This will be removed at a future date.</p>
 </section>
+</section>
+<section id="int-io">
+<h2><code class="docutils literal notranslate"><span class="pre">int-io</span></code><a class="headerlink" href="#int-io" title="Link to this heading">¶</a></h2>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">serial</span></code>. This will be removed at a future date.</p>
 </section>
 </section>
 

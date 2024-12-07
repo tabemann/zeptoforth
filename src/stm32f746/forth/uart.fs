@@ -26,8 +26,8 @@ begin-module uart
 
   internal import
   interrupt import
-  int-io import
-  int-io-internal import
+  serial import
+  serial-internal import
   pin import
   closure import
   
@@ -683,7 +683,7 @@ begin-module uart
   : enable-uart-int-io ( uart -- )
     dup validate-uart
     case
-      1 of enable-int-io endof
+      1 of enable-serial-int-io endof
       2 of enable-uart2-int-io endof
       3 of enable-uart3-int-io endof
       4 of enable-uart4-int-io endof
@@ -698,7 +698,7 @@ begin-module uart
   : disable-uart-int-io ( uart -- )
     dup validate-uart
     case
-      1 of disable-int-io endof
+      1 of disable-serial-int-io endof
       2 of disable-uart2-int-io endof
       3 of disable-uart3-int-io endof
       4 of disable-uart4-int-io endof

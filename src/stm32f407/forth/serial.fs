@@ -1,5 +1,5 @@
 \ Copyright (c) 2013? Matthias Koch
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,13 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module int-io
+begin-module serial
 
   internal import
   interrupt import
 
-  begin-module int-io-internal
-    
+  begin-module serial-internal
+
     \ RAM variable for rx buffer read-index
     cvariable rx-read-index
 
@@ -53,19 +53,17 @@ begin-module int-io
     \ Tx buffer
     tx-buffer-size buffer: tx-buffer
 
-    \ USART1
-    $40011000 constant USART1_Base
-    USART1_Base $00 + constant USART1_CR1
-    USART1_Base $1C + constant USART1_ISR
-    USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
-    USART1_Base $24 + constant USART1_RDR
-    USART1_Base $28 + constant USART1_TDR
+    \ USART2
+    $40004400 constant USART2_Base
+    USART2_Base $00 + constant USART2_SR
+    USART2_Base $04 + constant USART2_DR
+    USART2_Base $0C + constant USART2_CR1
 
-    \ USART1 IRQ number
-    37 constant usart1-irq
-    
-    \ USART1 vector index
-    usart1-irq 16 + constant usart1-vector
+    \ USART2 IRQ number
+    38 constant usart2-irq
+
+    \ USART2 vector index
+    usart2-irq 16 + constant usart2-vector
 
     \ Control-C
     $03 constant ctrl-c
@@ -74,18 +72,16 @@ begin-module int-io
     $14 constant ctrl-t
 
     $40023800 constant RCC_Base
-    RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
-    : RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-    : RCC_APB2LPENR_USART1LPEN_Clear   %1 4 lshift RCC_APB2LPENR bic! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-    : USART1_CR1_TXEIE   %1 7 lshift USART1_CR1 bis! ;  \ USART1_CR1_TXEIE    interrupt enable
-    : USART1_CR1_RXNEIE   %1 5 lshift USART1_CR1 bis! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-    : USART1_CR1_TXEIE_Clear   %1 7 lshift USART1_CR1 bic! ;  \ USART1_CR1_TXEIE    interrupt disable
-    : USART1_CR1_RXNEIE_Clear   %1 5 lshift USART1_CR1 bic! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-    : USART1_ICR_ORECF %1 3 lshift USART1_ICR bis! ; ( Overrun error clear flag )  
+    RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
+    : RCC_APB1LPENR_USART2LPEN   %1 17 lshift RCC_APB1LPENR bis! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
+    : RCC_APB1LPENR_USART2LPEN_Clear   %1 17 lshift RCC_APB1LPENR bic! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
+    : USART2_CR1_TXEIE   %1 7 lshift USART2_CR1 bis! ;  \ USART2_CR1_TXEIE    interrupt enable
+    : USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
+    : USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
+    : USART2_CR1_RXNEIE_Clear   %1 5 lshift USART2_CR1 bic! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
 
     $20 constant RXNE
     $80 constant TXE
-    $08 constant ORE
 
     \ Get whether the rx buffer is full
     : rx-full? ( -- f )
@@ -161,8 +157,8 @@ begin-module int-io
     : handle-io ( -- )
       begin
 	rx-full? not if
-	  USART1_ISR @ RXNE and if
-            USART1_RDR c@
+	  USART2_SR @ RXNE and if
+            USART2_DR c@
             uart-special-enabled @ if
               dup ctrl-c = if
                 drop reboot false
@@ -188,12 +184,12 @@ begin-module int-io
 	then
       until
       rx-full? if
-	USART1_CR1_RXNEIE_Clear
+	USART2_CR1_RXNEIE_Clear
       then
       begin
 	tx-empty? not if
-	  USART1_ISR @ TXE and if
-	    read-tx USART1_TDR c! false
+	  USART2_SR @ TXE and if
+	    read-tx USART2_DR c! false
 	  else
 	    true
 	  then
@@ -202,12 +198,9 @@ begin-module int-io
 	then
       until
       tx-empty? if
-	USART1_CR1_TXEIE_Clear
+	USART2_CR1_TXEIE_Clear
       then
-      USART1_ISR @ ORE and if
-	USART1_ICR_ORECF
-      then
-      usart1-irq NVIC_ICPR_CLRPEND!
+      usart2-irq NVIC_ICPR_CLRPEND!
       wake
     ;
 
@@ -216,11 +209,11 @@ begin-module int-io
     : do-emit ( c -- )
       [: tx-full? not ;] wait
       write-tx
-      USART1_CR1_TXEIE
+      USART2_CR1_TXEIE
     ; 
 
     : do-key ( -- c )
-      USART1_CR1_RXNEIE
+      USART2_CR1_RXNEIE
       [: rx-empty? not ;] wait
       read-rx
     ;
@@ -234,7 +227,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? TXE USART1_ISR bit@ and ;] wait
+      [: tx-empty? TXE USART2_SR bit@ and ;] wait
     ;
 
   end-module> import
@@ -256,49 +249,56 @@ begin-module int-io
   ;
   
   \ Enable interrupt-driven IO
-  : enable-int-io ( -- )
+  : enable-serial-int-io ( -- )
     disable-int
-    0 usart1-irq NVIC_IPR_IP!
-    ['] handle-io usart1-vector vector!
+    0 usart2-irq NVIC_IPR_IP!
+    ['] handle-io usart2-vector vector!
     serial-console
-    RCC_APB2LPENR_USART1LPEN
-    usart1-irq NVIC_ISER_SETENA!
-    USART1_CR1_RXNEIE
+    RCC_APB1LPENR_USART2LPEN
+    usart2-irq NVIC_ISER_SETENA!
+    USART2_CR1_RXNEIE
     enable-int
   ;
 
   \ Disable interrupt-driven IO
-  : disable-int-io ( -- )
+  : disable-serial-int-io ( -- )
     disable-int
     ['] serial-key key-hook !
     ['] serial-emit emit-hook !
     ['] serial-key? key?-hook !
     ['] serial-emit? emit?-hook !
     0 flush-console-hook !
-    ['] handle-null usart1-vector vector!
-    USART1_CR1_RXNEIE_Clear
-    USART1_CR1_TXEIE_Clear
-    usart1-irq NVIC_ICER_CLRENA!
-    RCC_APB2LPENR_USART1LPEN_Clear
+    ['] handle-null usart2-vector vector!
+    USART2_CR1_RXNEIE_Clear
+    USART2_CR1_TXEIE_Clear
+    usart2-irq NVIC_ICER_CLRENA!
+    RCC_APB1LPENR_USART2LPEN_Clear
     enable-int
   ;
 
-
   \ Initialize interrupt-driven IO
-  : init-int-io ( -- )
+  : init-serial-int-io ( -- )
     0 rx-read-index c!
     0 rx-write-index c!
     0 tx-read-index c!
     0 tx-write-index c!
-    enable-int-io
+    enable-serial-int-io
   ;
   
+  \ Old names for compatiblity's sake
+  : enable-int-io ( -- ) enable-serial-int-io ;
+  : disable-int-io ( -- ) disable-serial-int-io ;
+  : init-int-io ( -- ) init-serial-int-io ;
+  
 end-module> import
+
+\ Old name for compatibility's sake
+serial constant int-io
 
 \ Init
 : init ( -- )
   init
-  init-int-io
+  init-serial-int-io
 ;
 
 \ Reboot

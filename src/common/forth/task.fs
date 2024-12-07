@@ -27,7 +27,7 @@ begin-module task
   interrupt import
   multicore import
   systick import
-  int-io import
+  serial import
   armv6m import
   
   begin-module task-internal

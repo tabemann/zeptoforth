@@ -217,26 +217,26 @@ begin-module console
 
   \ Set the curent input to serial within an xt
   : with-serial-input ( xt -- )
-    ['] int-io::int-io-internal::do-key
-    ['] int-io::int-io-internal::do-key?
+    ['] serial::serial-internal::do-key
+    ['] serial::serial-internal::do-key?
     rot with-input
   ;
 
   \ Set the current output to serial within an xt
   : with-serial-output ( xt -- )
-    ['] int-io::int-io-internal::do-emit
-    ['] int-io::int-io-internal::do-emit?
+    ['] serial::serial-internal::do-emit
+    ['] serial::serial-internal::do-emit?
     rot
-    ['] int-io::int-io-internal::do-flush-console
+    ['] serial::serial-internal::do-flush-console
     swap with-output
   ;
 
   \ Set the current error output to serial within an xt
   : with-serial-error-output ( xt -- )
-    ['] int-io::int-io-internal::do-emit
-    ['] int-io::int-io-internal::do-emit?
+    ['] serial::serial-internal::do-emit
+    ['] serial::serial-internal::do-emit?
     rot
-    ['] int-io::int-io-internal::do-flush-console
+    ['] serial::serial-internal::do-flush-console
     swap with-error-output
   ;
 

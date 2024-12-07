@@ -206,18 +206,30 @@ These words are in the `forth` module:
 
 Get the variable address of the UART console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;
 
-### `int-io`
+### `serial`
 
-These words are in the `int-io` module:
+These words are in the `serial` module:
 
 ##### `serial-console`
 
 Set the current task's console to use the interrupt-driven serial console.
 
-##### `enable-int-io`
+##### `enable-serial-int-io`
 
 Enable interrupt-driven serial IO (enabled by default).
 
-##### `disable-int-io`
+##### `disable-serail-int-io`
 
 Disable interrupt-driven serial IO.
+
+##### `enable-int-io`
+
+A deprecated name retained for compatibility's sake for `enable-serial-int-io`. This will be removed at a future date.
+
+##### `disable-int-io`
+
+A deprecated name retained for compatibility's sake for `disable-serial-int-io`. This will be removed at a future date.
+
+### `int-io`
+
+A deprecated name retained for compatibility's sake for `serial`. This will be removed at a future date.

@@ -39,7 +39,7 @@
 #include src/common/forth/armv7m_fp.fs
 #include src/common/forth/float32.fs
 #include src/common/forth/systick.fs
-#include src/rp_common/forth/int_io.fs
+#include src/rp_common/forth/serial.fs
 #include src/rp2350/forth/gpio.fs
 #include src/rp2350/forth/pin.fs
 #include src/rp2350/forth/pio.fs

@@ -37,7 +37,7 @@
 #include src/common/forth/armv7m_fp.fs
 #include src/common/forth/float32.fs
 #include src/common/forth/systick.fs
-#include src/stm32l476/forth/int_io.fs
+#include src/stm32l476/forth/serial.fs
 #include src/stm32l476/forth/gpio.fs
 #include src/stm32l476/forth/pin.fs
 #include src/stm32l476/forth/exti.fs
