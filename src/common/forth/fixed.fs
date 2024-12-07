@@ -460,11 +460,14 @@ continue-module internal
     then
   ;
 
+  \ Saved handle-number-hook
+  variable saved-handle-number-hook
+  
   commit-flash
 
   \ Handle numeric literals
   : do-handle-number ( b-addr bytes -- flag )
-    2dup do-handle-number if
+    2dup saved-handle-number-hook @ execute if
       state @ not if
         rot rot
       then
@@ -561,6 +564,7 @@ commit-flash
 \ Initialize
 : init ( -- )
   init
+  handle-number-hook @ saved-handle-number-hook !
   ['] do-handle-number handle-number-hook !
 ;
 
