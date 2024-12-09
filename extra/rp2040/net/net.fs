@@ -3622,8 +3622,11 @@ begin-module net
     \ Resolve an IPv4 address's MAC address
     :noname { dest-addr self -- D: mac-addr success? }
       dest-addr self intf-ipv4-netmask@ and
-      192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
+      self gateway-ipv4-addr@ self intf-ipv4-netmask@ and <> if
         self gateway-ipv4-addr@ to dest-addr
+      then
+      dest-addr self intf-ipv4-broadcast@ = if
+	$FFFFFFFFFFFF. true exit
       then
       systick::systick-counter mac-addr-resolve-interval - { tick }
       max-mac-addr-resolve-attempts { attempts }
@@ -3654,7 +3657,7 @@ begin-module net
     \ Test for DHCP ARP
     :noname { dest-addr self -- success? }
       dest-addr self intf-ipv4-netmask@ and
-      192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
+      self gateway-ipv4-addr@ self intf-ipv4-netmask@ and <> if
         self gateway-ipv4-addr@ to dest-addr
       then
       systick::systick-counter dhcp-arp-interval - { tick }
