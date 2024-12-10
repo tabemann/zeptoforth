@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>RP2040 clock control words</title>
+    <title>Pico clock control words</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
   </head><body>
@@ -14,9 +14,9 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section id="rp2040-clock-control-words">
-<h1>RP2040 clock control words</h1>
-<p>These words allow the RP2040 system clock (normally 125 MHz) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 data sheet.</p>
+  <section id="pico-clock-control-words">
+<h1>Pico clock control words</h1>
+<p>These words allow the RP2040/RP2350 system clock (normally 125 MHz on the RP2040, 150 MHz on the RP2350) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz on an RP2040.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 and RP2350 data sheets.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
 <p>The following words are built into the kernel:</p>
@@ -28,7 +28,7 @@
 <section id="sysclk">
 <h3><code class="docutils literal notranslate"><span class="pre">sysclk</span></code></h3>
 <p>( – addr )</p>
-<p>Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz, and will be changed to the new value by <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code>.</p>
+<p>Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code>.</p>
 </section>
 </section>
 <section id="clocks">

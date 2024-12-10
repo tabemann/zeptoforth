@@ -11922,12 +11922,12 @@
     </navPoint>
     <navPoint id="navPoint1986" playOrder="1844">
       <navLabel>
-        <text>RP2040 clock control words</text>
+        <text>Pico clock control words</text>
       </navLabel>
       <content src="words/clocks.xhtml" />  
       <navPoint id="navPoint1987" playOrder="1844">
         <navLabel>
-          <text>RP2040 clock control words</text>
+          <text>Pico clock control words</text>
         </navLabel>
         <content src="words/clocks.xhtml" />  
       </navPoint>
