@@ -1,25 +1,25 @@
 # Building and Using zeptoIP
 
-zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W. It is designed to enable communication by zeptoforth via WiFi. Note that it is currently IPv4-only, but with sufficient demand an IPv6 port may appear in the future. Also, while it is originally implemented specifically for the Raspberry Pi Pico W, it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
+zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W. It is designed to enable communication by zeptoforth via WiFi. Note that it is currently IPv4-only, but with sufficient demand an IPv6 port may appear in the future. Also, while it is originally implemented specifically for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W, it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
 
-zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space.
+zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space. This is not an issue on the Raspberry Pi Pico 2 W, where a standard `rp2350` platform build will do.
 
-Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040, so it is a good idea to leave these cores be and run one's user code on core 0.
+Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040 and RP2350, so it is a good idea to leave these cores be and run one's user code on core 0.
 
 For examples of demos involving zeptoIP, there are:
 
-* `test/rp2040/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
-* `test/rp2040/pico_w_net_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp2040/pico_w_net_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
-* `test/rp2040/pico_w_net_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
-* `test/rp2040/pico_w_net_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
-* `test/rp2040/pico_w_net_udp.fs`, a tiny UDP echo server
-* `test/rp2040/pico_w_net_uart.fs`, a TCP-UART interface server
+* `test/rp_common/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
+* `test/rp_common/pico_w_net_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
+* `test/rp_common/pico_w_net_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
+* `test/rp_common/pico_w_net_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
+* `test/rp_common/pico_w_net_udp.fs`, a tiny UDP echo server
+* `test/rp_common/pico_w_net_uart.fs`, a TCP-UART interface server
 
 Directions for use of the individual demos are included therein.
 
 ## Uploading the CYW43439 firmware
 
-The CYW43439 firmware is not in the zeptoforth Git repository for intellectual property reasons, i.e. to avoid unnecessarily mixing free with non-free code. Hence if one wishes to install the CYW43439 driver (and zeptoIP, most likely) on a Raspberry Pi Pico W, after flashing it with an `rp2040_big` platform `full` (for serial console) or `full_usb` (for USB console) build, one must manually upload the CYW43439 firmware prior to building the CYW43439 driver and zeptoIP. The recommended approach is to execute the following command:
+The CYW43439 firmware is not in the zeptoforth Git repository for intellectual property reasons, i.e. to avoid unnecessarily mixing free with non-free code. Hence if one wishes to install the CYW43439 driver (and zeptoIP, most likely) on a Raspberry Pi Pico W, after flashing it with an `rp2040_big` platform `full` (for serial console) or `full_usb` (for USB console) build, or on a Raspberry Pi Pico 2 W, after flashing it with a `rp2350` platform `full` or `full_usb` build, one must manually upload the CYW43439 firmware prior to building the CYW43439 driver and zeptoIP. The recommended approach is to execute the following command:
 
 ```
 utils/load_cyw43_fw.sh <your console tty device> <your 43439A0.bin path> <your 43439A0_clm.bin path>
@@ -34,7 +34,7 @@ Note that this will be faster if one uses a USB CDC console device rather than a
 Once one has uploaded the CYW43439 firmware, both the CYW43439 driver and zeptoIP may be built together by executing:
 
 ```
-utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp2040/pico_w_net_all.fs
+utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/pico_w_net_all.fs
 ```
 
 Note that once this is complete one must reboot the board prior to using zeptoIP or the CYW43439 driver. On the first reboot there likely will be a noticeable delay before the board responds, as it will be generating new entries in the flash dictionary index, which is stored in flash.
@@ -80,7 +80,7 @@ specifies the default country settings, but under some circumstances one might t
 s" GB" s" GB" 0 my-cyw43-net cyw43-net-country!
 ```
 
-For a list of abbreviations and codes (which are normally identical) and revisions see `extra/rp2040/cyw43/COUNTRIES.md`.
+For a list of abbreviations and codes (which are normally identical) and revisions see `extra/rp_common/cyw43/COUNTRIES.md`.
 
 Afterwards, we will probably want to connect to an access point (AP), typically an WPA2 AP:
 
