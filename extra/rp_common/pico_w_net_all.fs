@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@ compile-to-flash
 
 marker erase-net
 
-#include extra/rp2040/cyw43_net_all.fs
-#include extra/rp2040/pico_w_cyw43_net.fs
+#include extra/rp_common/cyw43_net_all.fs
+#include extra/rp_common/pico_w_cyw43_net.fs
 
 compile-to-ram

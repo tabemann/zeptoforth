@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp2040/net/net_consts.fs
-#include extra/rp2040/net/net_config.fs
-#include extra/rp2040/net/net_misc.fs
-#include extra/rp2040/net/frame_process.fs
-#include extra/rp2040/net/net.fs
-#include extra/rp2040/net/net_diagnostic.fs
-#include extra/rp2040/net/endpoint_process.fs
+#include extra/rp_common/net/net_consts.fs
+#include extra/rp_common/net/net_config.fs
+#include extra/rp_common/net/net_misc.fs
+#include extra/rp_common/net/frame_process.fs
+#include extra/rp_common/net/net.fs
+#include extra/rp_common/net/net_diagnostic.fs
+#include extra/rp_common/net/endpoint_process.fs

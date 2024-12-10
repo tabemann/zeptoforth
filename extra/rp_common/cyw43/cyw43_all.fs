@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,14 +18,14 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp2040/cyw43/cyw43_consts.fs
-#include extra/rp2040/cyw43/cyw43_structs.fs
-#include extra/rp2040/cyw43/cyw43_events.fs
-#include extra/rp2040/cyw43/cyw43_nvram.fs
-#include extra/rp2040/cyw43/cyw43_spi.fs
-#include extra/rp2040/cyw43/cyw43_bus.fs
-#include extra/rp2040/cyw43/cyw43_ioctl.fs
-#include extra/rp2040/net/frame_interface.fs
-#include extra/rp2040/cyw43/cyw43_runner.fs
-#include extra/rp2040/cyw43/cyw43_control.fs
+#include extra/rp_common/cyw43/cyw43_consts.fs
+#include extra/rp_common/cyw43/cyw43_structs.fs
+#include extra/rp_common/cyw43/cyw43_events.fs
+#include extra/rp_common/cyw43/cyw43_nvram.fs
+#include extra/rp_common/cyw43/cyw43_spi.fs
+#include extra/rp_common/cyw43/cyw43_bus.fs
+#include extra/rp_common/cyw43/cyw43_ioctl.fs
+#include extra/rp_common/net/frame_interface.fs
+#include extra/rp_common/cyw43/cyw43_runner.fs
+#include extra/rp_common/cyw43/cyw43_control.fs
 
