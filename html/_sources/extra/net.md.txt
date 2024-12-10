@@ -1,6 +1,6 @@
 # zeptoIP Words
 
-zeptoIP is an Internet Protocol stack for zeptoforth. Currently it supports the Raspberry Pi Pico W's CYW43439 WiFi chip. By design it can be extended to any WiFi or Ethernet interface which exposes receiving and sending Ethernet frames. It expressly does not support WiFi interfaces such as the ESP8285 on the Wio RP2040 which operate by using their own protocols such as the "AT" protocol. Note that currently zeptoIP only supports IPv4.
+zeptoIP is an Internet Protocol stack for zeptoforth. Currently it supports the Raspberry Pi Pico W and Raspberry Pi Pico 2 W's CYW43439 WiFi chip. By design it can be extended to any WiFi or Ethernet interface which exposes receiving and sending Ethernet frames. It expressly does not support WiFi interfaces such as the ESP8285 on the Wio RP2040 which operate by using their own protocols such as the "AT" protocol. Note that currently zeptoIP only supports IPv4.
 
 zeptoIP is centered around one or more _interfaces_, instances of `net::<interface>`each of which has its own IP address, netmask, gateway IP address, and DNS server IP address. With interfaces sources of incoming (and in the case of TCP data, outgoing) data, known as _endpoints_, instances of `net::<endpoint>` may be created, endpoints with ready data or state changes can be fetched, UDP packets may be sent, IP addresses of hostnames can be resolved via DNS, and IP addresses may be acquired via DHCP.
 
