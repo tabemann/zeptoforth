@@ -2285,7 +2285,7 @@ begin-module task
 	wait-current-core
         NVIC_ICPR_CLRPEND_All!
         current-task @ task-dict-base @ dict-base !
-	$7F SHPR3_PRI_15!
+	$00 SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
         $FF SHPR3_PRI_14!
         [ rp2040? ] [if]
