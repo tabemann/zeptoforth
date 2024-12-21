@@ -129,10 +129,10 @@ begin-module simple-cyw43-net
       <interface> self my-interface init-object
       self my-cyw43-control cyw43-frame-interface@
       <frame-process> self my-frame-process init-object
-      self my-interface <arp-handler> self my-arp-handler init-object
       self my-interface <ip-handler> self my-ip-handler init-object
-      self my-arp-handler self my-frame-process add-frame-handler
+      self my-interface <arp-handler> self my-arp-handler init-object
       self my-ip-handler self my-frame-process add-frame-handler
+      self my-arp-handler self my-frame-process add-frame-handler
     ; define init-cyw43-net-no-handler
 
     \ Set a GPIO on the CYW43439
