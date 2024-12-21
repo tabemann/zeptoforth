@@ -301,31 +301,59 @@ begin-module net-misc
   ;
 
   \ Do an alignment-safe 32-bit load
-  : unaligned@ { addr -- x }
-    addr c@
-    addr 1+ c@ 8 lshift or
-    addr 2 + c@ 16 lshift or
-    addr 3 + c@ 24 lshift or
+  : unaligned@ ( addr -- x )
+    [inlined]
+    code[
+    3 tos r0 ldrb_,[_,#_]
+    2 tos r1 ldrb_,[_,#_]
+    8 r0 r0 lsls_,_,#_
+    r1 r0 orrs_,_
+    1 tos r1 ldrb_,[_,#_]
+    8 r0 r0 lsls_,_,#_
+    r1 r0 orrs_,_
+    0 tos r1 ldrb_,[_,#_]
+    8 r0 tos lsls_,_,#_
+    r1 tos orrs_,_
+    ]code
   ;
 
   \ Do an alignment-safe 32-bit store
-  : unaligned! { x addr -- }
-    x addr c!
-    x 8 rshift addr 1+ c!
-    x 16 rshift addr 2 + c!
-    x 24 rshift addr 3 + c!
+  : unaligned! ( x addr -- )
+    [inlined]
+    code[
+    tos r0 movs_,_
+    tos r1 2 dp ldm
+    0 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    1 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    2 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    3 r0 r1 strb_,[_,#_]
+    ]code
   ;
 
   \ Do an alignment-safe 16-bit load
-  : hunaligned@ { addr -- h }
-    addr c@
-    addr 1+ c@ 8 lshift or
+  : hunaligned@ ( addr -- h )
+    [inlined]
+    code[
+    1 tos r0 ldrb_,[_,#_]
+    0 tos r1 ldrb_,[_,#_]
+    8 r0 tos lsls_,_,#_
+    r1 tos orrs_,_
+    ]code
   ;
 
   \ Do an alignment-safe 16-bit store
-  : hunaligned! { h addr -- }
-    h addr c!
-    h 8 rshift addr 1+ c!
+  : hunaligned! ( h addr -- )
+    [inlined]
+    code[
+    tos r0 movs_,_
+    tos r1 2 dp ldm
+    0 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    1 r0 r1 strb_,[_,#_]
+    ]code
   ;
 
   \ Print a MAC address
