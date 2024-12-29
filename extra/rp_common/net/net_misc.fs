@@ -300,63 +300,101 @@ begin-module net-misc
     addr0 5 + c@ addr1 5 + c@ = and
   ;
 
-  \ Do an alignment-safe 32-bit load
-  : unaligned@ ( addr -- x )
-    [inlined]
-    code[
-    3 tos r0 ldrb_,[_,#_]
-    2 tos r1 ldrb_,[_,#_]
-    8 r0 r0 lsls_,_,#_
-    r1 r0 orrs_,_
-    1 tos r1 ldrb_,[_,#_]
-    8 r0 r0 lsls_,_,#_
-    r1 r0 orrs_,_
-    0 tos r1 ldrb_,[_,#_]
-    8 r0 tos lsls_,_,#_
-    r1 tos orrs_,_
-    ]code
-  ;
+    \ Do an alignment-safe 32-bit load
+  thumb-2? not [if]
+    : unaligned@ ( addr -- x )
+      [inlined]
+      code[
+      3 tos r0 ldrb_,[_,#_]
+      2 tos r1 ldrb_,[_,#_]
+      8 r0 r0 lsls_,_,#_
+      r1 r0 orrs_,_
+      1 tos r1 ldrb_,[_,#_]
+      8 r0 r0 lsls_,_,#_
+      r1 r0 orrs_,_
+      0 tos r1 ldrb_,[_,#_]
+      8 r0 tos lsls_,_,#_
+      r1 tos orrs_,_
+      ]code
+    ;
+  [else]
+    : unaligned@ ( addr -- x )
+      [inlined]
+      code[
+      0 tos tos ldr_,[_,#_]
+      ]code
+    ;
+  [then]
 
   \ Do an alignment-safe 32-bit store
-  : unaligned! ( x addr -- )
-    [inlined]
-    code[
-    tos r0 movs_,_
-    r1 1 dp ldm
-    tos 1 dp ldm
-    0 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    1 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    2 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    3 r0 r1 strb_,[_,#_]
-    ]code
-  ;
+  thumb-2? not [if]
+    : unaligned! ( x addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      1 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      2 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      3 tos r1 strb_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [else]
+    : unaligned! ( x addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 str_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [then]
 
   \ Do an alignment-safe 16-bit load
-  : hunaligned@ ( addr -- h )
-    [inlined]
-    code[
-    1 tos r0 ldrb_,[_,#_]
-    0 tos r1 ldrb_,[_,#_]
-    8 r0 tos lsls_,_,#_
-    r1 tos orrs_,_
-    ]code
-  ;
+  thumb-2? not [if]
+    : hunaligned@ ( addr -- h )
+      [inlined]
+      code[
+      1 tos r0 ldrb_,[_,#_]
+      0 tos r1 ldrb_,[_,#_]
+      8 r0 tos lsls_,_,#_
+      r1 tos orrs_,_
+      ]code
+    ;
+  [else]
+    : hunaligned@ ( addr -- h )
+      [inlined]
+      code[
+      0 tos tos ldrh_,[_,#_]
+      ]code
+    ;
+  [then]
 
   \ Do an alignment-safe 16-bit store
-  : hunaligned! ( h addr -- )
-    [inlined]
-    code[
-    tos r0 movs_,_
-    r1 1 dp ldm
-    tos 1 dp ldm
-    0 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    1 r0 r1 strb_,[_,#_]
-    ]code
-  ;
+  thumb-2? not [if]
+    : hunaligned! ( h addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      1 tos r1 strb_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [else]
+    : hunaligned! ( h addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 strh_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [then]
 
   \ Print a MAC address
   : mac. { D: addr -- }

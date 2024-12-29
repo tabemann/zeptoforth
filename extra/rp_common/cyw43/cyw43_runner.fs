@@ -63,38 +63,57 @@ begin-module cyw43-runner
   : rev ( -- ) [inlined] code[ r6 r6 rev_,_ ]code ;
 
   \ Do an alignment-safe 32-bit load
-  : unaligned@ ( addr -- x )
-    [inlined]
-    code[
-    3 tos r0 ldrb_,[_,#_]
-    2 tos r1 ldrb_,[_,#_]
-    8 r0 r0 lsls_,_,#_
-    r1 r0 orrs_,_
-    1 tos r1 ldrb_,[_,#_]
-    8 r0 r0 lsls_,_,#_
-    r1 r0 orrs_,_
-    0 tos r1 ldrb_,[_,#_]
-    8 r0 tos lsls_,_,#_
-    r1 tos orrs_,_
-    ]code
-  ;
+  thumb-2? not [if]
+    : unaligned@ ( addr -- x )
+      [inlined]
+      code[
+      3 tos r0 ldrb_,[_,#_]
+      2 tos r1 ldrb_,[_,#_]
+      8 r0 r0 lsls_,_,#_
+      r1 r0 orrs_,_
+      1 tos r1 ldrb_,[_,#_]
+      8 r0 r0 lsls_,_,#_
+      r1 r0 orrs_,_
+      0 tos r1 ldrb_,[_,#_]
+      8 r0 tos lsls_,_,#_
+      r1 tos orrs_,_
+      ]code
+    ;
+  [else]
+    : unaligned@ ( addr -- x )
+      [inlined]
+      code[
+      0 tos tos ldr_,[_,#_]
+      ]code
+    ;
+  [then]
 
   \ Do an alignment-safe 32-bit store
-  : unaligned! ( x addr -- )
-    [inlined]
-    code[
-    tos r0 movs_,_
-    r1 1 dp ldm
-    tos 1 dp ldm
-    0 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    1 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    2 r0 r1 strb_,[_,#_]
-    8 r1 r1 lsrs_,_,#_
-    3 r0 r1 strb_,[_,#_]
-    ]code
-  ;
+  thumb-2? not [if]
+    : unaligned! ( x addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      1 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      2 tos r1 strb_,[_,#_]
+      8 r1 r1 lsrs_,_,#_
+      3 tos r1 strb_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [else]
+    : unaligned! ( x addr -- )
+      [inlined]
+      code[
+      r1 1 dp ldm
+      0 tos r1 str_,[_,#_]
+      tos 1 dp ldm
+      ]code
+    ;
+  [then]
   
   \ CYW43 log class
   <object> begin-class <cyw43-log>
