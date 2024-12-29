@@ -22,9 +22,6 @@ begin-module cyw43-consts
 
   \ Are we debugging?
   false constant debug?
-
-  \ The interval of a CYW43 runner task
-  5 constant cyw43-runner-interval
   
   \ MTU size
   1500 constant mtu-size

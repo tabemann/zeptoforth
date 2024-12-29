@@ -186,7 +186,6 @@ begin-module frame-process
         again
       ;] 1024 256 1024 1 spawn-on-core
       c" frame-process" over task-name!
-      frame-process-interval over task-interval!
       run
     ; define run-frame-process
 
