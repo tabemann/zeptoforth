@@ -135,10 +135,10 @@ begin-module frame-process
     ; define add-frame-handler
 
     \ Process a frame
-    :noname { bytes self -- }
+    :noname { addr bytes self -- }
       self first-frame-handler @ { current }
       begin current while
-        self mtu-buf bytes current handle-frame
+        addr bytes current handle-frame
         current next-frame-handler@ to current
       repeat
     ; define process-frame
@@ -158,21 +158,23 @@ begin-module frame-process
         begin
           self [: { self }
             refresh-interval task::timeout !
-            self mtu-buf mtu-size self in-frame-interface @
-            get-rx-frame
+            self in-frame-interface @ get-rx-frame { frame-addr frame-bytes }
             no-timeout task::timeout !
-            dup ethernet-header-size >= if
-
-              [ debug? ] [if]
-                self mtu-buf over [: cr ." INCOMING: " over + dump ;]
-                usb::with-usb-output
-              [then]
-              
-              self process-frame
-              self process-refresh
-            else
-              drop
-            then
+            frame-addr frame-bytes self [:
+              { frame-addr frame-bytes self }
+              frame-bytes ethernet-header-size >= if
+                
+                [ debug? ] [if]
+                  frame-addr frame-bytes [: cr ." INCOMING: " over + dump ;]
+                  debug-hook execute
+                [then]
+                
+                frame-addr frame-bytes self process-frame
+                self process-refresh
+              then
+            ;] try
+            frame-addr self in-frame-interface @ retire-rx-frame
+            ?raise
           ;] try
           dup ['] task::x-timed-out = if
             2drop

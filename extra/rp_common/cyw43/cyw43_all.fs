@@ -25,6 +25,7 @@
 #include extra/rp_common/cyw43/cyw43_spi.fs
 #include extra/rp_common/cyw43/cyw43_bus.fs
 #include extra/rp_common/cyw43/cyw43_ioctl.fs
+#include extra/rp_common/net/buffer_queue.fs
 #include extra/rp_common/net/frame_interface.fs
 #include extra/rp_common/cyw43/cyw43_runner.fs
 #include extra/rp_common/cyw43/cyw43_control.fs

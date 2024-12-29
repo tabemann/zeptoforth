@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -33,23 +33,41 @@ begin-module frame-interface
     \ Set the MAC address
     method mac-addr! ( D: mac-addr self -- )
 
+    \ Reserve a received frame
+    method reserve-rx-frame ( self -- addr )
+
+    \ Non-blockingly reserve a received frame
+    method poll-reserve-rx-frame ( self -- addr found? )
+    
     \ Put a received frame
     method put-rx-frame ( addr bytes self -- )
 
     \ Get a received frame
-    method get-rx-frame ( addr bytes self -- bytes' )
+    method get-rx-frame ( self -- addr bytes )
 
     \ Poll a received frame
-    method poll-rx-frame ( addr bytes self -- bytes' found? )
+    method poll-rx-frame ( self -- addr bytes found? )
+
+    \ Retire a received frame
+    method retire-rx-frame ( addr self -- )
+
+    \ Reserve a frame to transmit
+    method reserve-tx-frame ( self -- addr )
+
+    \ Non-blockingly reserve a frame to transmit
+    method poll-reserve-tx-frame ( self -- addr found? )
 
     \ Put a frame to transmit
     method put-tx-frame ( addr bytes self -- )
 
     \ Get a frame to transmit
-    method get-tx-frame ( addr bytes self -- bytes' )
+    method get-tx-frame ( self -- addr bytes )
 
     \ Poll a frame to transmit
-    method poll-tx-frame ( addr bytes self -- bytes' found? )
+    method poll-tx-frame ( self -- addr bytes found? )
+
+    \ Retire a frame to transmit
+    method retire-tx-frame ( addr self -- )
 
     \ Frame receiving is full?
     method rx-full? ( self -- full? )

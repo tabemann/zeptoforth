@@ -27,6 +27,7 @@ begin-module cyw43-runner
   cyw43-bus import
   cyw43-ioctl import
   cyw43-nvram import
+  buffer-queue import
   frame-interface import
   chan import
   lock import
@@ -62,19 +63,37 @@ begin-module cyw43-runner
   : rev ( -- ) [inlined] code[ r6 r6 rev_,_ ]code ;
 
   \ Do an alignment-safe 32-bit load
-  : unaligned@ { addr -- x }
-    addr c@
-    addr 1+ c@ 8 lshift or
-    addr 2 + c@ 16 lshift or
-    addr 3 + c@ 24 lshift or
+  : unaligned@ ( addr -- x )
+    [inlined]
+    code[
+    3 tos r0 ldrb_,[_,#_]
+    2 tos r1 ldrb_,[_,#_]
+    8 r0 r0 lsls_,_,#_
+    r1 r0 orrs_,_
+    1 tos r1 ldrb_,[_,#_]
+    8 r0 r0 lsls_,_,#_
+    r1 r0 orrs_,_
+    0 tos r1 ldrb_,[_,#_]
+    8 r0 tos lsls_,_,#_
+    r1 tos orrs_,_
+    ]code
   ;
 
   \ Do an alignment-safe 32-bit store
-  : unaligned! { x addr -- }
-    x addr c!
-    x 8 rshift addr 1+ c!
-    x 16 rshift addr 2 + c!
-    x 24 rshift addr 3 + c!
+  : unaligned! ( x addr -- )
+    [inlined]
+    code[
+    tos r0 movs_,_
+    r1 1 dp ldm
+    tos 1 dp ldm
+    0 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    1 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    2 r0 r1 strb_,[_,#_]
+    8 r1 r1 lsrs_,_,#_
+    3 r0 r1 strb_,[_,#_]
+    ]code
   ;
   
   \ CYW43 log class
@@ -127,47 +146,17 @@ begin-module cyw43-runner
   \ The CYW43 frame interface
   <frame-interface> begin-class <cyw43-frame-interface>
 
-    \ Receive lock
-    lock-size member cyw43-rx-lock
+    \ Receive buffer queue data
+    mtu-size rx-mtu-count buffer-queue-size member cyw43-rx-queue-data
 
-    \ Transmit lock
-    lock-size member cyw43-tx-lock
+    \ Transmit buffer queue data
+    mtu-size tx-mtu-count buffer-queue-size member cyw43-tx-queue-data
 
-    \ Receive MTU channel
-    mtu-size rx-mtu-count * cell align member cyw43-rx-buf
+    \ Receive buffer queue
+    <buffer-queue> class-size member cyw43-rx-queue
 
-    \ Receive size channel
-    rx-mtu-count cells member cyw43-rx-sizes
-
-    \ Receive semaphore
-    sema-size member cyw43-rx-sema
-
-    \ Receive read index
-    cell member cyw43-rx-get-index
-
-    \ Receive write index
-    cell member cyw43-rx-put-index
-
-    \ Receive count
-    cell member cyw43-rx-count
-
-    \ Transmit MTU channel
-    mtu-size tx-mtu-count * cell align member cyw43-tx-buf
-
-    \ Transmit size channel
-    tx-mtu-count cells member cyw43-tx-sizes
-
-    \ Transmit semaphore
-    sema-size member cyw43-tx-sema
-
-    \ Transmit read index
-    cell member cyw43-tx-get-index
-
-    \ Transmit write index
-    cell member cyw43-tx-put-index
-
-    \ Transmit count
-    cell member cyw43-tx-count
+    \ Transmit buffer queue
+    <buffer-queue> class-size member cyw43-tx-queue
 
     \ The MAC address
     2 cells member cyw43-mac-addr
@@ -181,24 +170,14 @@ begin-module cyw43-runner
     :noname { self -- }
       self <frame-interface>->new
 
-      \ Initialize the receive lock
-      self cyw43-rx-lock init-lock
+      \ Initialize the receive buffer queue
+      self cyw43-rx-queue-data mtu-size rx-mtu-count <buffer-queue>
+      self cyw43-rx-queue init-object
 
-      \ Initialize the transmit lock
-      self cyw43-tx-lock init-lock
-
-      \ Initialize the receive circular buffer
-      no-sema-limit 0 self cyw43-rx-sema init-sema
-      0 self cyw43-rx-get-index !
-      0 self cyw43-rx-put-index !
-      0 self cyw43-rx-count !
-
-      \ Initialize the transmit circular buffer
-      no-sema-limit 0 self cyw43-tx-sema init-sema
-      0 self cyw43-tx-get-index !
-      0 self cyw43-tx-put-index !
-      0 self cyw43-tx-count !
-
+      \ Initialize the transmit buffer queue
+      self cyw43-tx-queue-data mtu-size tx-mtu-count <buffer-queue>
+      self cyw43-tx-queue init-object
+      
       \ Initialize the MAC address
       0. self cyw43-mac-addr 2!
     ; define new
@@ -218,153 +197,103 @@ begin-module cyw43-runner
       cyw43-mac-addr 2!
     ; define mac-addr!
 
-    \ true constant debug? \ DEBUG
+    \ Reserve a received frame
+    :noname ( self -- addr )
+      [ debug? ] [if] cr ." BEGIN reserve-rx-frame" [then]
+      cyw43-rx-queue reserve-buffer
+      [ debug? ] [if] cr ." END reserve-rx-frame" [then]
+    ; define reserve-rx-frame
 
+    \ Non-blockingly reserve a received frame
+    :noname ( self -- addr found? )
+      [ debug? ] [if] cr ." BEGIN poll-reserve-rx-frame" [then]
+      cyw43-rx-queue poll-reserve-buffer
+      [ debug? ] [if] cr ." END poll-reserve-rx-frame" [then]
+    ; define poll-reserve-rx-frame
+    
     \ Put a received frame
     :noname ( addr bytes self -- )
-      [: { self }
-        [ debug? ] [if] [: cr ." ### BEGIN put-rx-frame" ;] usb::with-usb-output [then]
-        self [: { addr bytes self }
-          self cyw43-rx-count @ rx-mtu-count < if
-            addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
-            move
-            bytes self cyw43-rx-sizes self cyw43-rx-put-index @ cells + !
-            self cyw43-rx-put-index @ 1+ rx-mtu-count umod
-            self cyw43-rx-put-index !
-            1 self cyw43-rx-count +! true
-          else
-            [ debug? ] [if] bytes [: cr ." DROPPED RX PACKET: " . ;] usb::with-usb-output [then]
-            false
-          then
-        ;] self cyw43-rx-lock with-lock
-        if self cyw43-rx-sema give then
-        [ debug? ] [if] [: cr ." ### END put-rx-frame" ;] usb::with-usb-output [then]
-      ;] no-timeout with-timeout
+      [ debug? ] [if] cr ." BEGIN put-rx-frame" [then]
+      cyw43-rx-queue put-buffer
+      [ debug? ] [if] cr ." END put-rx-frame" [then]
     ; define put-rx-frame
 
     \ Get a received frame
-    :noname ( addr bytes self -- bytes' ) 
-      [ debug? ] [if] [: cr ." ### BEGIN get-rx-frame" ;] usb::with-usb-output [then]
-      dup cyw43-rx-sema take
-      [:
-        [: { addr bytes self }
-          self cyw43-rx-count @ 0> if
-            self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
-            self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
-            move
-            self cyw43-rx-get-index @ 1+ rx-mtu-count umod
-            self cyw43-rx-get-index !
-            -1 self cyw43-rx-count +!
-            actual
-          else
-            [ debug? ] [if] [: cr ." MISSING RX PACKET" ;] usb::with-usb-output [then]
-            0
-          then
-        ;] over cyw43-rx-lock with-lock
-        [ debug? ] [if] [: cr ." ### END get-rx-frame" ;] usb::with-usb-output [then]
-      ;] no-timeout with-timeout
+    :noname ( self -- addr bytes )
+      [ debug? ] [if] cr ." BEGIN get-rx-frame" [then]
+      cyw43-rx-queue get-buffer
+      [ debug? ] [if] cr ." END get-rx-frame" [then]
     ; define get-rx-frame
 
     \ Poll a received frame
-    :noname ( addr bytes self -- bytes' found? )
-      [: { self }
-        self [: { addr bytes self }
-          self cyw43-rx-count @ 0> if
-            [ debug? ] [if] [: cr ." ### BEGIN poll-rx-frame" ;] usb::with-usb-output [then]
-            self cyw43-rx-sema take
-            self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
-            self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
-            move
-            self cyw43-rx-get-index @ 1+ rx-mtu-count umod
-            self cyw43-rx-get-index !
-            -1 self cyw43-rx-count +!
-            actual true
-            [ debug? ] [if] [: cr ." ### END poll-rx-frame" ;] usb::with-usb-output [then]
-          else
-            0 false
-          then
-        ;] self cyw43-rx-lock with-lock
-      ;] no-timeout with-timeout
+    :noname ( self -- addr bytes found? )
+      [ debug? ] [if] cr ." BEGIN poll-rx-frame" [then]
+      cyw43-rx-queue poll-buffer
+      [ debug? ] [if] cr ." END poll-rx-frame" [then]
     ; define poll-rx-frame
+
+    \ Retire a received frame
+    :noname ( addr self -- )
+      [ debug? ] [if] cr ." BEGIN retire-rx-frame" [then]
+      cyw43-rx-queue retire-buffer
+      [ debug? ] [if] cr ." END retire-rx-frame" [then]
+    ; define retire-rx-frame
+
+    \ Reserve a frame to transmit
+    :noname ( self -- addr )
+      [ debug? ] [if] cr ." BEGIN reserve-tx-frame" [then]
+      cyw43-tx-queue reserve-buffer
+      [ debug? ] [if] cr ." END reserve-tx-frame" [then]
+    ; define reserve-tx-frame
+
+    \ Non-blockingly reserve a frame to transmit
+    :noname ( self -- addr found? )
+      [ debug? ] [if] cr ." BEGIN poll-reserve-tx-frame" [then]
+      cyw43-tx-queue poll-reserve-buffer
+      [ debug? ] [if] cr ." END poll-reserve-tx-frame" [then]
+    ; define poll-reserve-tx-frame
 
     \ Put a frame to transmit
     :noname ( addr bytes self -- )
-      [: { self }
-        [ debug? ] [if] [: cr ." ### BEGIN put-tx-frame" ;] usb::with-usb-output [then]
-        self [: { addr bytes self }
-          self cyw43-tx-count @ tx-mtu-count < if
-            addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
-            move
-            bytes self cyw43-tx-sizes self cyw43-tx-put-index @ cells + !
-            self cyw43-tx-put-index @ 1+ tx-mtu-count umod
-            self cyw43-tx-put-index !
-            1 self cyw43-tx-count +! true
-          else
-            [ debug? ] [if] bytes [: cr ." DROPPED TX PACKET: " . ;] usb::with-usb-output [then]
-            false
-          then
-        ;] self cyw43-tx-lock with-lock
-        if self cyw43-tx-sema give then
-        [ debug? ] [if] [: cr ." ### END put-tx-frame" ;] usb::with-usb-output [then]
-      ;] no-timeout with-timeout
+      [ debug? ] [if] cr ." BEGIN put-tx-frame" [then]
+      cyw43-tx-queue put-buffer
+      [ debug? ] [if] cr ." END put-tx-frame" [then]
     ; define put-tx-frame
 
     \ Get a frame to transmit
-    :noname ( addr bytes self -- bytes' )
-      [ debug? ] [if] [: cr ." ### BEGIN get-tx-frame" ;] usb::with-usb-output [then]
-      dup cyw43-tx-sema take
-      [:
-        [: { addr bytes self }
-          self cyw43-tx-count @ 0> if
-            self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
-            self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
-            move
-            self cyw43-tx-get-index @ 1+ tx-mtu-count umod
-            self cyw43-tx-get-index !
-            -1 self cyw43-tx-count +!
-            actual
-          else
-            [ debug? ] [if] [: cr ." MISSING TX PACKET" ;] usb::with-usb-output [then]
-            0
-          then
-        ;] over cyw43-tx-lock with-lock
-        [ debug? ] [if] [: cr ." ### END get-tx-frame" ;] usb::with-usb-output [then]
-      ;] no-timeout with-timeout
+    :noname ( self -- addr bytes )
+      [ debug? ] [if] cr ." BEGIN get-tx-frame" [then]
+      cyw43-tx-queue get-buffer
+      [ debug? ] [if] cr ." END get-tx-frame" [then]
     ; define get-tx-frame
 
     \ Poll a frame to transmit
-    :noname ( addr bytes self -- bytes' found? )
-      [: { self }
-        self [: { addr bytes self }
-          self cyw43-tx-count @ 0> if
-            [ debug? ] [if] [: cr ." ### BEGIN poll-tx-frame" ;] usb::with-usb-output [then]
-            self cyw43-tx-sema take
-            self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
-            self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
-            move
-            self cyw43-tx-get-index @ 1+ tx-mtu-count umod
-            self cyw43-tx-get-index !
-            -1 self cyw43-tx-count +!
-            actual true
-            [ debug? ] [if] [: cr ." ### END poll-tx-frame" ;] usb::with-usb-output [then]
-          else
-            0 false
-          then
-        ;] self cyw43-tx-lock with-lock
-      ;] no-timeout with-timeout
+    :noname ( self -- addr bytes found? )
+      [ debug? ] [if] cr ." BEGIN poll-tx-frame" [then]
+      cyw43-tx-queue poll-buffer
+      [ debug? ] [if] cr ." END poll-tx-frame" [then]
     ; define poll-tx-frame
+
+    \ Retire a frame to transmit
+    :noname ( addr self -- )
+      [ debug? ] [if] cr ." BEGIN retire-tx-frame" [then]
+      cyw43-tx-queue retire-buffer
+      [ debug? ] [if] cr ." END retire-tx-frame" [then]
+    ; define retire-tx-frame
 
     \ Frame receiving is full?
     :noname ( self -- full? )
-      cyw43-rx-count @ rx-mtu-count =
+      [ debug? ] [if] cr ." BEGIN rx-full?" [then]
+      cyw43-rx-queue buffers-full?
+      [ debug? ] [if] cr ." END rx-full?" [then]
     ; define rx-full?
     
     \ Frame transmission is full?
     :noname ( self -- full? )
-      cyw43-tx-count @ tx-mtu-count =
+      [ debug? ] [if] cr ." BEGIN tx-full?" [then]
+      cyw43-tx-queue buffers-full?
+      [ debug? ] [if] cr ." END tx-full?" [then]
     ; define tx-full?
-
-    \ false constant debug? \ DEBUG
     
   end-implement
 
@@ -736,10 +665,9 @@ begin-module cyw43-runner
               self cyw43-scratch-buf self check-cyw43-status
               
             else
-              self cyw43-scratch-buf mtu-size
               self cyw43-frame-interface poll-tx-frame if
 
-                { packet-bytes }
+                { data-addr packet-bytes }
 
                 \ Handle a packet to transmit
 
@@ -752,7 +680,10 @@ begin-module cyw43-runner
                 \ First move the packet data in-buffer to avoid needing another
                 \ buffer
                 self cyw43-scratch-buf { buf }
-                buf dup total-len + packet-bytes - packet-bytes move
+                data-addr buf total-len + packet-bytes - packet-bytes move
+
+                \ Retire the buffer
+                data-addr self cyw43-frame-interface retire-tx-frame
 
                 \ Fill the sdpcm header data
                 total-len buf sdpcmh-len h!
@@ -781,7 +712,7 @@ begin-module cyw43-runner
                 buf self check-cyw43-status
                 
               else
-                drop self cyw43-scratch-buf self handle-cyw43-irq
+                2drop self cyw43-scratch-buf self handle-cyw43-irq
               then
             then
           else
@@ -962,8 +893,13 @@ begin-module cyw43-runner
     :noname { addr bytes self -- }
       bytes bdc-header-size < if exit then
       addr bdch-data-offset c@ cells bdc-header-size + { data-offset }
-      addr data-offset + bytes data-offset -
-      self cyw43-frame-interface put-rx-frame
+      self cyw43-frame-interface poll-reserve-rx-frame if { data-buffer }
+        bytes data-offset - { data-bytes }
+        addr data-offset + data-buffer data-bytes move
+        data-buffer data-bytes self cyw43-frame-interface put-rx-frame
+      else
+        drop
+      then
     ; define handle-cyw43-data-pkt
 
     \ Update credit

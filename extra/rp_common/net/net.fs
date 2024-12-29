@@ -2470,9 +2470,6 @@ begin-module net
       \ DHCP lock
       lock-size member dhcp-lock
 
-      \ Send a frame
-      method send-frame ( addr bytes self -- )
-
       \ Process a MAC address for an IPv4 address
       method process-ipv4-mac-addr ( D: mac-addr ipv4-addr self -- )
       
@@ -2911,16 +2908,6 @@ begin-module net
       ttl 255 min 1 max self intf-ttl !
     ; define intf-ttl!
     
-    \ Send a frame
-    :noname { addr bytes self -- }
-      bytes mtu-size u<= averts x-oversized-frame
-      [ debug? ] [if]
-        cr ." SENT: "
-        addr addr bytes + dump
-      [then]
-      addr bytes self out-frame-interface @ put-tx-frame
-    ; define send-frame
-    
     \ Process a MAC address for an IPv4 address
     :noname { D: mac-addr ipv4-addr self -- }
       mac-addr ipv4-addr self address-map save-mac-addr-by-ipv4
@@ -3072,7 +3059,7 @@ begin-module net
       endpoint endpoint-ack@
       0
       TCP_RST
-      endpoint endpoint-remote-mac-addr @
+      endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
@@ -3569,16 +3556,47 @@ begin-module net
     
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
+\      [: cr ." BEGIN construct-and-send-frame: " depth . ;] debug-hook execute
       [:
-        [: { bytes xt self }
-          bytes mtu-size u<= averts x-oversized-frame
-          self outgoing-buf xt execute if
-            self outgoing-buf bytes self send-frame true
+\        [: cr ." IN construct-and-send-frame 1: " depth . ;] debug-hook execute
+        dup { self }
+        2 pick mtu-size u<= averts x-oversized-frame
+\        [: cr ." IN construct-and-send-frame 2: " depth . ;] debug-hook execute
+        dup out-frame-interface @ reserve-tx-frame dup { data-buffer }
+\        [: cr ." IN construct-and-send-frame 3: " depth . ;] debug-hook execute
+        [: { bytes xt self data-buffer }
+\          [: cr ." IN construct-and-send-frame 4: " depth . ;] debug-hook execute
+          data-buffer xt execute if
+\            [ debug? ] [if]
+\              [: cr ." BEFORE SEND depth: " depth . ;] debug-hook execute
+\            [then]
+            [ debug? ] [if]
+              data-buffer dup bytes +
+              [: cr ." SENT: " dump ;] debug-hook execute
+            [then]
+            data-buffer bytes self out-frame-interface @ put-tx-frame
+            true
+\            [ debug? ] [if]
+\              [: cr ." AFTER SEND depth: " depth . ;] debug-hook execute
+\            [then]
           else
+\            [: cr ." IN construct-and-send-frame 5: " depth . ;] debug-hook execute
+            data-buffer self out-frame-interface @ retire-tx-frame
             false
+\            [: cr ." IN construct-and-send-frame 6: " depth . ;] debug-hook execute
           then
-        ;] over outgoing-buf-lock with-lock
+\          [: cr ." IN construct-and-send-frame 7: " depth . ;] debug-hook execute
+        ;] try
+\        [: cr ." IN construct-and-send-frame 8: " depth . ;] debug-hook execute
+        dup if
+\          [: cr ." IN construct-and-send-frame 9: " depth . ;] debug-hook execute
+          data-buffer self out-frame-interface @ retire-tx-frame
+        then
+\        [: cr ." IN construct-and-send-frame 10: " depth . ;] debug-hook execute
+        ?raise
+\        [: cr ." IN construct-and-send-frame 11: " depth . ;] debug-hook execute
       ;] task::no-timeout task::with-timeout
+\      [: cr ." END construct-and-send-frame: " depth . ;] debug-hook execute
     ; define construct-and-send-frame
 
     \ Construct and send a IPv4 packet with a specified source IPv4 address
@@ -4137,6 +4155,7 @@ begin-module net
               TCP_LISTEN of
                 TCP_CLOSED endpoint endpoint-tcp-state!
                 endpoint free-endpoint
+                drop 0
               endof
             endcase
           ;] endpoint with-endpoint

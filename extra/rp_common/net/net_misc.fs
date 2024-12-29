@@ -322,7 +322,8 @@ begin-module net-misc
     [inlined]
     code[
     tos r0 movs_,_
-    tos r1 2 dp ldm
+    r1 1 dp ldm
+    tos 1 dp ldm
     0 r0 r1 strb_,[_,#_]
     8 r1 r1 lsrs_,_,#_
     1 r0 r1 strb_,[_,#_]
@@ -349,7 +350,8 @@ begin-module net-misc
     [inlined]
     code[
     tos r0 movs_,_
-    tos r1 2 dp ldm
+    r1 1 dp ldm
+    tos 1 dp ldm
     0 r0 r1 strb_,[_,#_]
     8 r1 r1 lsrs_,_,#_
     1 r0 r1 strb_,[_,#_]

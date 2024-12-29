@@ -236,7 +236,7 @@ begin-module chan
 
   \ Receive data from a channel without blocking (raise x-would-block if
   \ blocking would normally occur)
-  : recv-chan-no-block ( addr bytes chan -- addr recv-bytes )
+  : recv-chan-no-block ( addr bytes chan -- recv-bytes )
     [:
       dup chan-empty? triggers x-would-block
       >r 2dup 0 fill
@@ -252,7 +252,7 @@ begin-module chan
   
   \ Peek data from a channel without blocking (raise x-would-block if blocking
   \ would normally occur)
-  : peek-chan-no-block ( addr bytes chan -- addr peek-bytes )
+  : peek-chan-no-block ( addr bytes chan -- peek-bytes )
     [:
       dup chan-empty? triggers x-would-block
       >r 2dup 0 fill

@@ -21,7 +21,8 @@
 begin-module net-config
 
   \ Debugging print hook
-  ' console::with-serial-output value debug-hook
+  :noname [: execute flush-console ;] console::with-serial-output ;
+  value debug-hook
 
   \ Are we debugging?
   false constant debug?
