@@ -31,7 +31,7 @@ begin-module swd
       use-sleep @ if
 	wait
       else
-	begin dup execute not while pause repeat
+	begin dup execute not while task::pause-reschedule-last repeat
 	drop
       then
     ;

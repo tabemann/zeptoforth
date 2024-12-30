@@ -1214,7 +1214,9 @@ begin-module usb
             then
           ;] critical
         ;] usb-in-core-lock with-core-lock
-        dup not if begin endpoint1-in-refill? @ not while pause repeat then
+        dup not if
+          begin endpoint1-in-refill? @ not while pause-reschedule-last repeat
+        then
       until
     ;
 
@@ -1240,7 +1242,7 @@ begin-module usb
             then
           ;] critical
         ;] usb-out-core-lock with-core-lock
-        dup not if pause then
+        dup not if pause-reschedule-last then
       until
     ;
 
@@ -1250,7 +1252,7 @@ begin-module usb
         tx-empty? endpoint1-in-ready? @ and
         dup not if
           usb-dtr? @ usb-device-configd? @ and if usb-attempt-tx then
-          pause
+          pause-reschedule-last
         then
       until
       true endpoint1-in-refill? !

@@ -1046,7 +1046,7 @@ begin-module task
     dup validate-not-terminated
     tuck task-wake-after !
     blocked-wait over task-state h!
-    current-task @ = if pause-wo-reschedule then
+    current-task @ = if pause-reschedule-last then
   ;
   
   \ Mark a task as blocked indefinitely
