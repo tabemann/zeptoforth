@@ -2504,6 +2504,33 @@ commit-flash
 \ Hook for getting top of main task RAM dictionary
 variable main-here-hook
 
+\ The ACCEPT hook
+variable accept-hook
+
+\ Implement ACCEPT when not using the line editor
+: do-accept ( addr bytes -- bytes' )
+  over
+  begin
+    key
+    dup $0A = over $0D = or if
+      drop nip swap - exit
+    else
+      dup $08 = over $7F = or if
+        drop
+        2 pick over u< if
+          $08 emit space $08 emit 1-
+        then
+      else
+        2over + 2 pick u> if
+          dup emit over c! 1+
+        else
+          drop
+        then
+      then
+    then
+  again
+;
+
 \ Set forth
 forth set-current
 
@@ -2654,6 +2681,10 @@ commit-flash
   then
 ;
 
+\ Accept a line of text from the console into a buffer up to a specified number
+\ of bytes; the actual number of bytes entered is returned
+: accept ( addr bytes -- bytes' ) accept-hook @ execute ;
+
 \ Return control to the prompt
 : return-to-prompt
   display-red cr ." *** HARDWARE EXCEPTION, RETURNING TO PROMPT ***"
@@ -2708,6 +2739,7 @@ commit-flash
   [: true attention? ! ;] attention-start-hook !
   false attention? !
   [: begin pause again ;] crash-hook !
+  ['] do-accept accept-hook !
 ;
 
 \ Finish compressing the code

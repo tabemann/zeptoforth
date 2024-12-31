@@ -91,6 +91,12 @@ begin-module line-internal
   $15 constant ctrl-u
   $17 constant ctrl-w
   $19 constant ctrl-y
+
+  \ The saved REFILL hook
+  variable saved-refill-hook
+
+  \ The saved ACCEPT hook
+  variable saved-accept-hook
   
   commit-flash
   
@@ -825,7 +831,11 @@ begin-module line-internal
   commit-flash
   
   \ The line editor
-  : line-edit ( -- )
+  : line-edit ( index-ptr count-ptr buffer-ptr buffer-size -- )
+    line @ line-buffer-size !
+    line @ line-buffer-ptr !
+    line @ line-count-ptr !
+    line @ line-index-ptr !
     xon ack reset-line
     begin
       get-key
@@ -891,10 +901,26 @@ begin-module line-internal
     ['] line-edit over line-edit-deferred !
     history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
+    0 saved-refill-hook !
+    0 saved-accept-hook !
+  ;
+
+  \ Edit a line for refill
+  : refill-edit ( -- )
+    >in input# input input-size 255 min line-edit
+  ;
+
+  \ Edit a line for accept
+  : accept-edit { addr bytes -- bytes' }
+    0 0 { W^ index W^ count }
+    index count addr bytes line-edit
+    count @
   ;
   
   \ Initialize for refill
-  : init-line-refill ( -- ) >in input# input input-size init-line ;
+  : init-line-refill ( -- )
+    >in input# input input-size init-line
+  ;
 
 end-module> import
 
@@ -909,13 +935,21 @@ internal import
 commit-flash
 
 \ Enable line editor
-: enable-line ( -- ) ['] line-edit refill-hook ! ;
+: enable-line ( -- )
+  refill-hook @ saved-refill-hook !
+  accept-hook @ saved-accept-hook !
+  ['] refill-edit refill-hook !
+  ['] accept-edit accept-hook !
+;
 
 \ Disable line editor
-: disable-line ( -- ) ['] do-refill refill-hook ! ;
+: disable-line ( -- )
+  ['] refill-edit refill-hook @ = if saved-refill-hook @ refill-hook ! then
+  ['] accept-edit accept-hook @ = if saved-accept-hook @ accept-hook ! then
+;
 
 \ Get whether the line editor is enabled
-: line-enabled? ( -- ) refill-hook @ ['] line-edit = ;
+: line-enabled? ( -- ) refill-hook @ ['] refill-edit = ;
 
 end-compress-flash
 
