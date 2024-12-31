@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2024 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -68,8 +68,11 @@ begin-module systick
     $00FFFFFF constant SYST_CALIB_TENMS
     
     \ SysTick counter
-    variable systick-counter
+    variable raw-systick-counter
 
+    \ SysTick counter override hook
+    variable systick-override-hook
+    
     compress-flash
 
   end-module> import
@@ -81,7 +84,7 @@ begin-module systick
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
       cpu-index 0= if
-	1 systick-counter +!
+	1 raw-systick-counter +!
       then
       wake
     then
@@ -89,6 +92,16 @@ begin-module systick
 
   commit-flash
 
+  \ Set systick override hook; 0 disables overriding systick
+  : systick-override-hook! ( xt -- ) \ xt: ( -- ticks )
+    systick-override-hook !
+  ;
+
+  \ Get systick override hook; 0 means no systick override
+  : systick-override-hook@ ( -- xt ) \ xt: ( -- ticks )
+    systick-override-hook @
+  ;
+  
   \ Turn on systick
   : enable-systick ( -- )
     SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dmb dsb isb
@@ -101,11 +114,12 @@ begin-module systick
 
   \ Initialize SysTick
   : init-systick ( -- )
+    0 systick-override-hook !
     ['] systick-handler systick-vector vector!
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
-    0 systick-counter !
+    0 raw-systick-counter !
     enable-systick
   ;
 
@@ -121,7 +135,9 @@ begin-module systick
   : systick-divisor ( -- ) systick-divisor ;
   
   \ Make systick-counter read-only
-  : systick-counter ( -- u ) systick-counter @ ;
+  : systick-counter ( -- u )
+    systick-override-hook @ ?dup if execute else raw-systick-counter @ then
+  ;
 
 end-module> import
 

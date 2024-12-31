@@ -33,3 +33,13 @@ To enable SysTicks again, execute:
 ( -- )
 
 SysTicks are enabled by default once `sys/common/forth/systick.fs` has been loaded and the MCU has been rebooted.
+
+##### `systick-override-hook!`
+( xt -- ) xt: ( -- ticks )
+
+Set a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.
+
+##### `systick-override-hook@`
+( -- xt ) xt: ( -- ticks )
+
+Get a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.

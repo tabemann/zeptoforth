@@ -46,6 +46,16 @@
 <p>( – )</p>
 <p>SysTicks are enabled by default once <code class="docutils literal notranslate"><span class="pre">sys/common/forth/systick.fs</span></code> has been loaded and the MCU has been rebooted.</p>
 </section>
+<section id="systick-override-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-override-hook!</span></code></h3>
+<p>( xt – ) xt: ( – ticks )</p>
+<p>Set a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-override-hook&#64;</span></code></h3>
+<p>( – xt ) xt: ( – ticks )</p>
+<p>Get a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.</p>
+</section>
 </section>
 </section>
 

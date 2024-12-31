@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -155,9 +155,24 @@ begin-module timer
     index bit ARMED bit@
   ;
 
+  continue-module timer-internal
+
+    \ Initialize the systick override using TIMER0
+    : init-systick-override ( -- )
+      [: ( -- ticks )
+        us-counter 100. ud/ d>s
+      ;] systick-override-hook!
+    ;
+    
+  end-module
+  
 end-module
 
 \ Initialize
-: init init timer::timer-internal::init-timer ;
+: init
+  init
+  timer::timer-internal::init-timer
+  timer::timer-internal::init-systick-override
+;
 
 reboot

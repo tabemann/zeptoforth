@@ -13,7 +13,7 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="RP2040 clock control words" href="clocks.html" />
+    <link rel="next" title="Pico clock control words" href="clocks.html" />
     <link rel="prev" title="Task Queue Words" href="tqueue.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -63,6 +63,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">enable-systick</span></code><a class="headerlink" href="#enable-systick" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SysTicks are enabled by default once <code class="docutils literal notranslate"><span class="pre">sys/common/forth/systick.fs</span></code> has been loaded and the MCU has been rebooted.</p>
+</section>
+<section id="systick-override-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-override-hook!</span></code><a class="headerlink" href="#systick-override-hook" title="Link to this heading">¶</a></h3>
+<p>( xt – ) xt: ( – ticks )</p>
+<p>Set a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-override-hook&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>( – xt ) xt: ( – ticks )</p>
+<p>Get a SysTick override hook, which returns a number of ticks since booting in lieu of using the hardware SysTick for timing. A value of 0 specifies to use the hardware SysTick for timing.</p>
 </section>
 </section>
 </section>
@@ -143,7 +153,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -176,7 +186,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="tqueue.html" title="previous chapter">Task Queue Words</a></li>
-      <li>Next: <a href="clocks.html" title="next chapter">RP2040 clock control words</a></li>
+      <li>Next: <a href="clocks.html" title="next chapter">Pico clock control words</a></li>
   </ul></li>
 </ul>
 </div>
