@@ -2521,10 +2521,14 @@ variable accept-hook
           $08 emit space $08 emit 1-
         then
       else
-        2over + 2 pick u> if
-          dup emit over c! 1+
-        else
+        dup $1B = if
           drop
+        else
+          2over + 2 pick u> if
+            dup emit over c! 1+
+          else
+            drop
+          then
         then
       then
     then
