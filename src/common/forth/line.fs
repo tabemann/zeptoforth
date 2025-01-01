@@ -210,6 +210,21 @@ begin-module line-internal
     then
   ;
 
+  \ Check for new line(s)
+  : check-new-line { scroll? -- }
+    line @ line-count @ 0> if
+      line @ line-start-column h@ line @ line-count h@ + { full-columns }
+      full-columns line @ line-terminal-columns h@ u/ { full-rows }
+      line @ line-start-row h@ full-rows + { end-row }
+      end-row line @ line-terminal-rows h@ >= if
+        line @ line-start-row h@
+        end-row 1+ line @ line-terminal-rows h@ -
+        scroll? if dup scroll-up then
+        - 0 max line @ line-start-row h!
+      then
+    then
+  ;
+
   \ Get the start position
   : start-position ( -- row column )
     line @ line-start-row h@ line @ line-start-column h@
@@ -565,7 +580,7 @@ begin-module line-internal
       insert-byte if
 	line @ line-index-ptr @ @ get-spaces-to-index swap -
 	dup line @ line-offset h+! line @ line-count h+!
-	update-line
+        true check-new-line update-line
       else
 	drop
       then
@@ -575,13 +590,15 @@ begin-module line-internal
 	append-byte if
 	  line @ line-index-ptr @ @ get-spaces-to-index swap -
 	  dup line @ line-offset h+! line @ line-count h+!
-	  line @ line-buffer-ptr @ line @ line-index-ptr @ @ + 1- c@ emit
+          line @ line-buffer-ptr @ line @ line-index-ptr @ @ + 1- c@ emit
+          false check-new-line
 	then
       else
 	append-byte if
 	  line @ line-index-ptr @ @ get-spaces-to-index swap - 0 ?do
 	    1 line @ line-offset h+! 1 line @ line-count h+!
-	    $20 emit
+            $20 emit
+            false check-new-line
 	  loop
 	then
       then
@@ -631,7 +648,7 @@ begin-module line-internal
     pasted? if
       line @ line-index-ptr @ @ get-spaces-to-index { end-count }
       end-count start-count - dup line @ line-offset h+! line @ line-count h+!
-      update-line
+      true check-new-line update-line
     then
   ;
 
