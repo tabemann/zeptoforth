@@ -16062,7 +16062,7 @@
           <navLabel>
             <text>&lt;frame-process&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id14" />  
+          <content src="extra/net.xhtml#id17" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2677" playOrder="2467">
@@ -16080,7 +16080,7 @@
           <navLabel>
             <text>&lt;frame-interface&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id16" />  
+          <content src="extra/net.xhtml#id19" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2680" playOrder="2469">
@@ -16104,7 +16104,7 @@
           <navLabel>
             <text>&lt;simple-cyw43-net&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id18" />  
+          <content src="extra/net.xhtml#id21" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2684" playOrder="2472">
@@ -16122,7 +16122,7 @@
           <navLabel>
             <text>&lt;pico-w-cyw43-net&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id20" />  
+          <content src="extra/net.xhtml#id23" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2687" playOrder="2474">

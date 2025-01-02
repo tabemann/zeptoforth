@@ -335,6 +335,36 @@ Add a endpoint handler.
 
 This starts the task for processing endpoints on the chosen interface.
 
+##### `endpoint-process-priority!`
+( priority self -- )
+
+Set the endpoint processor priority. The default endpoint processor priority is  0. This method can be called before `run-endpoint-process` to set the priority of the endpoint processor when it is started.
+
+##### `endpoint-process-priority@`
+( self -- priority )
+
+Get the endpoint processor priority. The default endpoint processor priority is 0.
+
+##### `endpoint-process-interval!`
+( interval self -- )
+
+Set the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value. This method can be called before `run-endpoint-process` to set the interval of the endpoint processor when it is started with.
+
+##### `endpoint-process-interval@`
+( self -- interval )
+
+Get the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value.
+
+##### `endpoint-process-deadline!`
+( deadline self -- )
+
+Set the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being `systick::systick-counter`. Note that this raises `x-endpoint-process-not-started` if called before `run-endpoint-process` has been called.
+
+##### `endpoint-process-deadline@`
+( self -- deadline )
+
+Get the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being `systick::systick-counter`. Note that this raises `x-endpoint-process-not-started` if called before `run-endpoint-process` has been called.
+
 ### `frame-process`
 
 The `frame-process` module contains the following classes:

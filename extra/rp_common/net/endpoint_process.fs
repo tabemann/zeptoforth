@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -88,45 +88,80 @@ begin-module endpoint-process
     ; define handler-timeout@
     
   end-implement
+
+  \ Endpoint processor has not been started exception
+  : x-endpoint-process-not-started ( -- )
+    ." endpoint processor not started" cr
+  ;
   
-  \ endpoint processor class
+  \ Endpoint processor class
   <object> begin-class <endpoint-process>
 
     continue-module endpoint-process-internal
       
       \ The CYW43 driver control
-      cell member interface
+      cell member endpoint-interface
       
       \ The first endpoint handler
       cell member first-endpoint-handler
       
+      \ The endpoint processor task
+      cell member endpoint-process-task
+
+      \ The endpoint process priority
+      cell member endpoint-process-priority
+
+      \ The endpoint process interval
+      cell member endpoint-process-interval
+      
       \ Process a endpoint
       method process-endpoint ( endpoint self -- )
-
+      
       \ Get the current timeout
       method get-handler-timeout ( self -- timeout )
-
+      
       \ Handle a timeout
       method do-handler-timeouts ( start-systick self -- )
       
     end-module
-
+    
     \ Add a endpoint handler
     method add-endpoint-handler ( handler self -- )
-      
+    
     \ Run endpoint processor
     method run-endpoint-process ( self -- )
     
+    \ Set the endpoint processor priority
+    method endpoint-process-priority! ( priority self -- )
+    
+    \ Get the endpoint processor priority
+    method endpoint-process-priority@ ( self -- priority )
+    
+    \ Set the endpoint processor interval
+    method endpoint-process-interval! ( interval self -- )
+    
+    \ Get the endpoint processor interval
+    method endpoint-process-interval@ ( self -- interval )
+    
+    \ Set the endpoint processor deadline
+    method endpoint-process-deadline! ( deadline self -- )
+    
+    \ Get the endpoint processor deadline
+    method endpoint-process-deadline@ ( self -- deadline )
+    
   end-class
-
+  
   \ Implement the endpoint processor class
   <endpoint-process> begin-implement
-
+    
     \ Constructor
     :noname { control self -- }
       self <object>->new
-      control self interface !
+      control self endpoint-interface !
       0 self first-endpoint-handler !
+      0 self endpoint-process-task !
+      0 self endpoint-process-priority !
+      -1 self endpoint-process-interval !
     ; define new
 
     \ Add a endpoint handler
@@ -192,12 +227,12 @@ begin-module endpoint-process
         begin
           self get-handler-timeout { current-timeout }
           current-timeout no-timeout = if
-            self interface @ get-ready-endpoint self process-endpoint
+            self endpoint-interface @ get-ready-endpoint self process-endpoint
           else
             systick-counter { start-systick }
             current-timeout start-systick self [:
               { current-timeout start-systick self }
-              self [: interface @ get-ready-endpoint ;]
+              self [: endpoint-interface @ get-ready-endpoint ;]
               current-timeout start-systick with-timeout-from-start
             ;] try dup ['] x-timed-out = if
               2drop 2drop false 0
@@ -212,8 +247,60 @@ begin-module endpoint-process
             then
           then
         again
-      ;] 1024 256 1024 spawn c" endpoint-process" over task-name! run
+      ;] 1024 256 1024 spawn dup { process-task } self endpoint-process-task !
+      c" endpoint-process" process-task task-name!
+      self endpoint-process-priority @ process-task task-priority!
+      self endpoint-process-interval @ process-task task-interval!
+      process-task run
     ; define run-endpoint-process
+
+    \ Set the endpoint processor priority
+    :noname { priority self -- }
+      self endpoint-process-task @ ?dup if
+        priority swap task-priority!
+      else
+        priority self endpoint-process-priority !
+      then
+    ; define endpoint-process-priority!
+    
+    \ Get the endpoint processor priority
+    :noname { self -- priority }
+      self endpoint-process-task @ ?dup if
+        task-priority@
+      else
+        self endpoint-process-priority @
+      then
+    ; define endpoint-process-priority@
+    
+    \ Set the endpoint processor interval
+    :noname { interval self -- }
+      self endpoint-process-task @ ?dup if
+        interval swap task-interval!
+      else
+        interval self endpoint-process-interval !
+      then
+    ; define endpoint-process-interval!
+    
+    \ Get the endpoint processor interval
+    :noname { self -- interval }
+      self endpoint-process-task @ ?dup if
+        task-interval@
+      else
+        self endpoint-process-interval @
+      then
+    ; define endpoint-process-interval@
+    
+    \ Set the endpoint processor deadline
+    :noname { deadline self -- }
+      self endpoint-process-task @ dup averts x-endpoint-process-not-started
+      deadline swap task-deadline!
+    ; define endpoint-process-deadline!
+    
+    \ Get the endpoint processor deadline
+    :noname { self -- deadline }
+      self endpoint-process-task @ dup averts x-endpoint-process-not-started
+      task-deadline@
+    ; define endpoint-process-deadline@
 
   end-implement
   

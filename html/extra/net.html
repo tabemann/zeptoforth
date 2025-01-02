@@ -372,6 +372,36 @@
 <p>( process – )</p>
 <p>This starts the task for processing endpoints on the chosen interface.</p>
 </section>
+<section id="endpoint-process-priority">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-priority!</span></code><a class="headerlink" href="#endpoint-process-priority" title="Link to this heading">¶</a></h4>
+<p>( priority self – )</p>
+<p>Set the endpoint processor priority. The default endpoint processor priority is  0. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the priority of the endpoint processor when it is started.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-priority&#64;</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<p>( self – priority )</p>
+<p>Get the endpoint processor priority. The default endpoint processor priority is 0.</p>
+</section>
+<section id="endpoint-process-interval">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-interval!</span></code><a class="headerlink" href="#endpoint-process-interval" title="Link to this heading">¶</a></h4>
+<p>( interval self – )</p>
+<p>Set the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the interval of the endpoint processor when it is started with.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-interval&#64;</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<p>( self – interval )</p>
+<p>Get the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value.</p>
+</section>
+<section id="endpoint-process-deadline">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-deadline!</span></code><a class="headerlink" href="#endpoint-process-deadline" title="Link to this heading">¶</a></h4>
+<p>( deadline self – )</p>
+<p>Set the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-deadline&#64;</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<p>( self – deadline )</p>
+<p>Get the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
+</section>
 </section>
 </section>
 <section id="frame-process">
@@ -381,23 +411,23 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code><a class="headerlink" href="#frame-handler" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-frame</span></code> and <code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code> methods.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class contains the following method:</p>
-<section id="id12">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
 <p>( addr bytes process – )</p>
 <p>Handle a frame of <em>bytes</em> at <em>addr</em>.</p>
 </section>
-<section id="id13">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
 <p>( process – )</p>
 <p>Carry out periodic housekeeeping activities.</p>
 </section>
 </section>
-<section id="id14">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<section id="id17">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class encapsulates receiving frames from a frame interface and handling periodic housekeeping activties.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following constructor:</p>
-<section id="id15">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
 <p>( frame-interface process – )</p>
 <p>This constructor sets the frame interface for the frame processor to <em>frame-interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following methods:</p>
@@ -418,8 +448,8 @@
 <h2><code class="docutils literal notranslate"><span class="pre">frame-interface</span></code><a class="headerlink" href="#frame-interface" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module encapsulates the interface between a network and zeptoIP, by providing a means of receiving and sending frames.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module contains the following class:</p>
-<section id="id16">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<section id="id19">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class is meant to be subclassed by implementors of interfaces to external networks.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class contains the following abstract methods:</p>
 <section id="mtu-size">
@@ -432,8 +462,8 @@
 <p>( frame-interface – D: mac-addr )</p>
 <p>Get the MAC address.</p>
 </section>
-<section id="id17">
-<h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
+<section id="id20">
+<h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
 <p>( D: mac-addr frame-interface – )</p>
 <p>Set the MAC address.</p>
 </section>
@@ -478,12 +508,12 @@
 <p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance for which the endpoint process has not been started.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
 </section>
-<section id="id18">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<section id="id21">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id19">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
@@ -533,23 +563,23 @@
 <section id="pico-w-cyw43-net">
 <h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code><a class="headerlink" href="#pico-w-cyw43-net" title="Link to this heading">¶</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code> class has the following class:</p>
-<section id="id20">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<section id="id23">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
-<section id="id21">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h4>
+<section id="id24">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
 <p>( pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id22">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
+<section id="id25">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance.</p>
 </section>
-<section id="id23">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
+<section id="id26">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
@@ -558,8 +588,8 @@
 <p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W to <em>state</em>.</p>
 </section>
-<section id="id24">
-<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
+<section id="id27">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
 <p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W.</p>
 </section>
@@ -725,7 +755,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
