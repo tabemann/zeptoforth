@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2024 Travis Bemann
+\ Copyright (c) 2020-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -1025,18 +1025,22 @@ begin-module task
       dup current-task @ validate-notify
       swap current-task @ task-systick-start !
       swap current-task @ task-systick-delay !
+      disable-int
       begin dup bit current-task @ task-notified-bitmap bit@ not while
 	dup current-task @ task-current-notify !
         blocked-timeout current-task @ task-state h!
+        enable-int
 	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
         cpu-index begin-critical-with-other-core-spinlock
         current-task @ check-timeout if
           -1 current-task @ task-current-notify !
           ['] x-timed-out ?raise
         then
+        disable-int
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
+      enable-int
       -1 current-task @ task-current-notify !
     ;] cpu-index critical-with-other-core-spinlock
   ;
@@ -1096,15 +1100,19 @@ begin-module task
   : wait-notify-indefinite ( notify-index -- x )
     [:
       dup current-task @ validate-notify
+      disable-int
       begin dup bit current-task @ task-notified-bitmap bit@ not while
         dup current-task @ task-current-notify !
         blocked-indefinite current-task @ task-state h!
+        enable-int
 	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
         cpu-index begin-critical-with-other-core-spinlock
+        disable-int
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
       -1 current-task @ task-current-notify !
+      enable-int
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
@@ -1139,12 +1147,14 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
+      disable-int
       2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
 	readied swap task-state h! true
       else
 	drop false
       then
+      enable-int
     ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
@@ -1156,12 +1166,14 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       dup task-notify-area @ 2 pick cells + >r rot r> !
+      disable-int
       2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
 	readied swap task-state h! true
       else
 	drop false
       then
+      enable-int
     ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
@@ -1174,13 +1186,16 @@ begin-module task
       2dup validate-notify
       rot >r ( index task )
       dup task-notify-area @ 2 pick cells + ( index task addr )
-      r> rot >r rot >r swap dup >r @ swap execute r> ! ( )
+      r> rot >r rot >r swap dup >r
+      disable-int
+      @ swap execute r> ! ( )
       r> r> 2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
         readied swap task-state h! true
       else
 	drop false
       then
+      enable-int
     ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
