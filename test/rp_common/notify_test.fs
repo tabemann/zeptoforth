@@ -22,6 +22,7 @@ begin-module notify-test
 
   task import
   timer import
+  rng import
   
   \ Task notified
   variable notified-task
@@ -54,7 +55,7 @@ begin-module notify-test
     1 alarm-0-counter +!
     alarm-0-counter @ 0 notified-task @ notify-set
     alarm-0-interval alarm-0-time +!
-    alarm-0-time @ ['] handle-alarm-0 0 set-alarm
+    alarm-0-time @ random 16 umod + ['] handle-alarm-0 0 set-alarm
   ; is handle-alarm-0
 
   \ Handle a timer alarm 1 interrupt
@@ -64,7 +65,7 @@ begin-module notify-test
     1 alarm-1-counter +!
     alarm-1-counter @ 1 notified-task @ notify-set
     alarm-1-interval alarm-1-time +!
-    alarm-1-time @ ['] handle-alarm-1 1 set-alarm
+    alarm-1-time @ random 16 umod + ['] handle-alarm-1 1 set-alarm
   ; is handle-alarm-1
 
   \ Check for notifications
