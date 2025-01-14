@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -33,11 +33,8 @@ begin-module frame-interface
     \ Set the MAC address
     method mac-addr! ( D: mac-addr self -- )
 
-    \ Reserve a received frame
-    method reserve-rx-frame ( self -- addr )
-
-    \ Non-blockingly reserve a received frame
-    method poll-reserve-rx-frame ( self -- addr found? )
+    \ Attempt to put a received frame
+    method poll-put-rx-frame ( addr bytes self -- success? )
     
     \ Put a received frame
     method put-rx-frame ( addr bytes self -- )
@@ -49,14 +46,11 @@ begin-module frame-interface
     method poll-rx-frame ( self -- addr bytes found? )
 
     \ Retire a received frame
-    method retire-rx-frame ( addr self -- )
+    method retire-rx-frame ( self -- )
 
-    \ Reserve a frame to transmit
-    method reserve-tx-frame ( self -- addr )
-
-    \ Non-blockingly reserve a frame to transmit
-    method poll-reserve-tx-frame ( self -- addr found? )
-
+    \ Attempt to put a frame to transmit
+    method poll-put-tx-frame ( addr bytes self -- success? )
+    
     \ Put a frame to transmit
     method put-tx-frame ( addr bytes self -- )
 
@@ -67,13 +61,7 @@ begin-module frame-interface
     method poll-tx-frame ( self -- addr bytes found? )
 
     \ Retire a frame to transmit
-    method retire-tx-frame ( addr self -- )
-
-    \ Frame receiving is full?
-    method rx-full? ( self -- full? )
-    
-    \ Frame transmission is full?
-    method tx-full? ( self -- full? )
+    method retire-tx-frame ( self -- )
 
   end-class
 

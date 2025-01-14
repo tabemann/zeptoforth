@@ -76,14 +76,14 @@ begin-module notify-test
         cr ." alarm-0-value does not match; wait-notify: " dup .
         ." alarm-0-value: " alarm-0-value .
       else
-        \ cr ." alarm-0-value matches; both: " dup .
+        cr ." alarm-0-value matches; both: " dup .
       then
       1+ to alarm-0-value
       1 wait-notify dup alarm-1-value <> if
         cr ." alarm-1-value does not match; wait-notify: " dup .
         ." alarm-1-value: " alarm-1-value .
       else
-        \ cr ." alarm-1-value matches; both: " dup .
+        cr ." alarm-1-value matches; both: " dup .
       then
       1+ to alarm-1-value
     again

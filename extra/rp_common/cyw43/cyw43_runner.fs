@@ -166,10 +166,10 @@ begin-module cyw43-runner
   <frame-interface> begin-class <cyw43-frame-interface>
 
     \ Receive buffer queue data
-    mtu-size rx-mtu-count buffer-queue-size member cyw43-rx-queue-data
+    mtu-size cell+ rx-mtu-count * cell align member cyw43-rx-queue-data
 
     \ Transmit buffer queue data
-    mtu-size tx-mtu-count buffer-queue-size member cyw43-tx-queue-data
+    mtu-size cell+ tx-mtu-count * cell align member cyw43-tx-queue-data
 
     \ Receive buffer queue
     <buffer-queue> class-size member cyw43-rx-queue
@@ -190,12 +190,14 @@ begin-module cyw43-runner
       self <frame-interface>->new
 
       \ Initialize the receive buffer queue
-      self cyw43-rx-queue-data mtu-size rx-mtu-count <buffer-queue>
-      self cyw43-rx-queue init-object
+      self cyw43-rx-queue-data
+      mtu-size cell+ rx-mtu-count * cell align
+      <buffer-queue> self cyw43-rx-queue init-object
 
       \ Initialize the transmit buffer queue
-      self cyw43-tx-queue-data mtu-size tx-mtu-count <buffer-queue>
-      self cyw43-tx-queue init-object
+      self cyw43-tx-queue-data
+      mtu-size cell+ tx-mtu-count * cell align
+      <buffer-queue> self cyw43-tx-queue init-object
       
       \ Initialize the MAC address
       0. self cyw43-mac-addr 2!
@@ -216,20 +218,13 @@ begin-module cyw43-runner
       cyw43-mac-addr 2!
     ; define mac-addr!
 
-    \ Reserve a received frame
-    :noname ( self -- addr )
-      [ debug? ] [if] cr ." BEGIN reserve-rx-frame" [then]
-      cyw43-rx-queue reserve-buffer
-      [ debug? ] [if] cr ." END reserve-rx-frame" [then]
-    ; define reserve-rx-frame
+    \ Attempt to put a received frame
+    :noname ( addr bytes self -- success? )
+      [ debug? ] [if] cr ." BEGIN poll-put-rx-frame" [then]
+      cyw43-rx-queue poll-put-buffer
+      [ debug? ] [if] cr ." END poll-put-rx-frame" [then]
+    ; define poll-put-rx-frame
 
-    \ Non-blockingly reserve a received frame
-    :noname ( self -- addr found? )
-      [ debug? ] [if] cr ." BEGIN poll-reserve-rx-frame" [then]
-      cyw43-rx-queue poll-reserve-buffer
-      [ debug? ] [if] cr ." END poll-reserve-rx-frame" [then]
-    ; define poll-reserve-rx-frame
-    
     \ Put a received frame
     :noname ( addr bytes self -- )
       [ debug? ] [if] cr ." BEGIN put-rx-frame" [then]
@@ -252,25 +247,18 @@ begin-module cyw43-runner
     ; define poll-rx-frame
 
     \ Retire a received frame
-    :noname ( addr self -- )
+    :noname ( self -- )
       [ debug? ] [if] cr ." BEGIN retire-rx-frame" [then]
       cyw43-rx-queue retire-buffer
       [ debug? ] [if] cr ." END retire-rx-frame" [then]
     ; define retire-rx-frame
 
-    \ Reserve a frame to transmit
-    :noname ( self -- addr )
-      [ debug? ] [if] cr ." BEGIN reserve-tx-frame" [then]
-      cyw43-tx-queue reserve-buffer
-      [ debug? ] [if] cr ." END reserve-tx-frame" [then]
-    ; define reserve-tx-frame
-
-    \ Non-blockingly reserve a frame to transmit
-    :noname ( self -- addr found? )
-      [ debug? ] [if] cr ." BEGIN poll-reserve-tx-frame" [then]
-      cyw43-tx-queue poll-reserve-buffer
-      [ debug? ] [if] cr ." END poll-reserve-tx-frame" [then]
-    ; define poll-reserve-tx-frame
+    \ Attempt to put a frame to transmit
+    :noname ( addr bytes self -- success? )
+      [ debug? ] [if] cr ." BEGIN poll-put-tx-frame" [then]
+      cyw43-tx-queue poll-put-buffer
+      [ debug? ] [if] cr ." END poll-put-tx-frame" [then]
+    ; define poll-put-tx-frame
 
     \ Put a frame to transmit
     :noname ( addr bytes self -- )
@@ -294,25 +282,11 @@ begin-module cyw43-runner
     ; define poll-tx-frame
 
     \ Retire a frame to transmit
-    :noname ( addr self -- )
+    :noname ( self -- )
       [ debug? ] [if] cr ." BEGIN retire-tx-frame" [then]
       cyw43-tx-queue retire-buffer
       [ debug? ] [if] cr ." END retire-tx-frame" [then]
     ; define retire-tx-frame
-
-    \ Frame receiving is full?
-    :noname ( self -- full? )
-      [ debug? ] [if] cr ." BEGIN rx-full?" [then]
-      cyw43-rx-queue buffers-full?
-      [ debug? ] [if] cr ." END rx-full?" [then]
-    ; define rx-full?
-    
-    \ Frame transmission is full?
-    :noname ( self -- full? )
-      [ debug? ] [if] cr ." BEGIN tx-full?" [then]
-      cyw43-tx-queue buffers-full?
-      [ debug? ] [if] cr ." END tx-full?" [then]
-    ; define tx-full?
     
   end-implement
 
@@ -702,7 +676,7 @@ begin-module cyw43-runner
                 data-addr buf total-len + packet-bytes - packet-bytes move
 
                 \ Retire the buffer
-                data-addr self cyw43-frame-interface retire-tx-frame
+                self cyw43-frame-interface retire-tx-frame
 
                 \ Fill the sdpcm header data
                 total-len buf sdpcmh-len h!
@@ -911,13 +885,8 @@ begin-module cyw43-runner
     :noname { addr bytes self -- }
       bytes bdc-header-size < if exit then
       addr bdch-data-offset c@ cells bdc-header-size + { data-offset }
-      self cyw43-frame-interface poll-reserve-rx-frame if { data-buffer }
-        bytes data-offset - { data-bytes }
-        addr data-offset + data-buffer data-bytes move
-        data-buffer data-bytes self cyw43-frame-interface put-rx-frame
-      else
-        drop
-      then
+      addr data-offset + bytes data-offset -
+      self cyw43-frame-interface poll-put-rx-frame drop
     ; define handle-cyw43-data-pkt
 
     \ Update credit

@@ -3556,47 +3556,28 @@ begin-module net
     
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
-\      [: cr ." BEGIN construct-and-send-frame: " depth . ;] debug-hook execute
       [:
-\        [: cr ." IN construct-and-send-frame 1: " depth . ;] debug-hook execute
         dup { self }
         2 pick mtu-size u<= averts x-oversized-frame
-\        [: cr ." IN construct-and-send-frame 2: " depth . ;] debug-hook execute
-        dup out-frame-interface @ reserve-tx-frame dup { data-buffer }
-\        [: cr ." IN construct-and-send-frame 3: " depth . ;] debug-hook execute
-        [: { bytes xt self data-buffer }
-\          [: cr ." IN construct-and-send-frame 4: " depth . ;] debug-hook execute
-          data-buffer xt execute if
+        [: { bytes xt self }
+          self outgoing-buf xt execute if
 \            [ debug? ] [if]
 \              [: cr ." BEFORE SEND depth: " depth . ;] debug-hook execute
 \            [then]
             [ debug? ] [if]
-              data-buffer dup bytes +
+              self outgoing-buf dup bytes +
               [: cr ." SENT: " dump ;] debug-hook execute
             [then]
-            data-buffer bytes self out-frame-interface @ put-tx-frame
+            self outgoing-buf bytes self out-frame-interface @ put-tx-frame
             true
 \            [ debug? ] [if]
 \              [: cr ." AFTER SEND depth: " depth . ;] debug-hook execute
 \            [then]
           else
-\            [: cr ." IN construct-and-send-frame 5: " depth . ;] debug-hook execute
-            data-buffer self out-frame-interface @ retire-tx-frame
             false
-\            [: cr ." IN construct-and-send-frame 6: " depth . ;] debug-hook execute
           then
-\          [: cr ." IN construct-and-send-frame 7: " depth . ;] debug-hook execute
-        ;] try
-\        [: cr ." IN construct-and-send-frame 8: " depth . ;] debug-hook execute
-        dup if
-\          [: cr ." IN construct-and-send-frame 9: " depth . ;] debug-hook execute
-          data-buffer self out-frame-interface @ retire-tx-frame
-        then
-\        [: cr ." IN construct-and-send-frame 10: " depth . ;] debug-hook execute
-        ?raise
-\        [: cr ." IN construct-and-send-frame 11: " depth . ;] debug-hook execute
+        ;] self outgoing-buf-lock with-lock
       ;] task::no-timeout task::with-timeout
-\      [: cr ." END construct-and-send-frame: " depth . ;] debug-hook execute
     ; define construct-and-send-frame
 
     \ Construct and send a IPv4 packet with a specified source IPv4 address
@@ -4283,15 +4264,11 @@ begin-module net
                     else
                       endpoint start-endpoint-timeout
                     then
-                    endpoint endpoint-send-ready?
-                    self out-frame-interface @ tx-full? not and
-                    self out-frame-interface @ rx-full? not and if
+                    endpoint endpoint-send-ready? if
                       endpoint get-endpoint-send-packet
                       endpoint endpoint-send-last?
                       endpoint self send-data-ack
-                      endpoint endpoint-send-ready? not
-                      self out-frame-interface @ tx-full? or
-                      self out-frame-interface @ rx-full? or true
+                      endpoint endpoint-send-ready? not true
                     else
                       true true
                     then

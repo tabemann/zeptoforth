@@ -173,7 +173,7 @@ begin-module frame-process
                 self process-refresh
               then
             ;] try
-            frame-addr self in-frame-interface @ retire-rx-frame
+            self in-frame-interface @ retire-rx-frame
             ?raise
           ;] try
           dup ['] task::x-timed-out = if
