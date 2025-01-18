@@ -23,6 +23,7 @@ compile-to-flash
 begin-module timer
 
   interrupt import
+  systick import
 
   \ Out of range alarm index
   : x-out-of-range-alarm ." out of range alarm" cr ;
