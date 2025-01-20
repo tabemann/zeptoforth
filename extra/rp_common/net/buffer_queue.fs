@@ -88,7 +88,7 @@ begin-module buffer-queue
     ; define new
 
     \ Attempt to put a buffer
-    :noname ( addr bytes self -- success? )
+    : _poll-put-buffer ( addr bytes self -- success? )
       [: { addr bytes self }
         bytes cell align cell+ { bytes' }
         self get-offset @ { get-offset' }
@@ -112,27 +112,29 @@ begin-module buffer-queue
             true
           then
         else
-          get-offset' put-offset' <= next-offset get-offset' < and if
-\            ." #"
-            self data-addr @ start-offset + { start-addr }
-            bytes start-addr !
-            addr start-addr cell+ bytes move
-            end-offset' next-offset self [: { end-offset' next-offset self }
+          get-offset' put-offset' end-offset' start-offset next-offset
+          addr bytes self [:
+            { addr bytes self }
+            { get-offset' put-offset' end-offset' start-offset next-offset }
+            get-offset' put-offset' <= next-offset get-offset' < and if
+              \            ." #"
+              self data-addr @ start-offset + { start-addr }
+              bytes start-addr !
+              addr start-addr cell+ bytes move
               next-offset self put-offset !
               end-offset' self end-offset !
-              end-offset' self get-offset @ = if 0 self get-offset ! then
-            ;] self end-slock with-slock
-            true
-          else
-\            ." $"
-            false
-          then
+              true
+            else
+              \            ." $"
+              false
+            then
+          ;] self end-slock with-slock
         then
       ;] over put-slock with-slock
-    ; define poll-put-buffer
+    ; ' _poll-put-buffer define poll-put-buffer
 
     \ Put a buffer
-    :noname ( addr bytes self -- )
+    : _put-buffer ( addr bytes self -- )
       timeout @ no-timeout = if
         begin
           3dup poll-put-buffer not if
@@ -152,10 +154,10 @@ begin-module buffer-queue
           then
         until
       then
-    ; define put-buffer
+    ; ' _put-buffer define put-buffer
     
     \ Get a buffer
-    :noname { self -- addr bytes }
+    : _get-buffer { self -- addr bytes }
       timeout @ no-timeout = if
         begin
           self poll-buffer not if
@@ -176,36 +178,38 @@ begin-module buffer-queue
         until
       then
 \      dup cr ." Got " . ." bytes"
-    ; define get-buffer
+    ; ' _get-buffer define get-buffer
 
     \ Poll a buffer
-    :noname { self -- addr bytes found? }
-      self put-offset self end-offset self get-offset [:
-        @ swap @ rot @
+    : _poll-buffer { self -- addr bytes found? }
+      self [: { self }
+        self get-offset @ self end-offset @ self put-offset @
+        { get-offset' end-offset' put-offset' }
+        end-offset' 0<> get-offset' end-offset' = and if
+          0 self get-offset !
+          0 self end-offset !
+          0 to get-offset'
+        then
+        get-offset' end-offset' put-offset'
       ;] self end-slock with-slock
       { get-offset' end-offset' put-offset' }
-      end-offset' 0<> get-offset' end-offset' = and if
-        0 self get-offset !
-        0 self end-offset !
-        0 to get-offset'
-      then
       put-offset' get-offset' <> if
         self data-addr @ get-offset' + { get-addr }
         get-addr cell+ get-addr @ true
       else
         0 0 false
       then
-    ; define poll-buffer
+    ; ' _poll-buffer define poll-buffer
 
     \ Retire a buffer
-    :noname { self -- }
-      self get-offset @ { get-offset' }
-      self data-addr @ get-offset' + @ cell align cell+ get-offset' +
-      self [: { self }
+    : _retire-buffer ( self -- )
+      [: { self }
+        self get-offset @ { get-offset' }
+        self data-addr @ get-offset' + @ cell align cell+ get-offset' +
         dup self end-offset @ = if drop 0 0 self end-offset ! then
-      ;] self end-slock with-slock
-      self get-offset !
-    ; define retire-buffer
+        self get-offset !
+      ;] over end-slock with-slock
+    ; ' _retire-buffer define retire-buffer
 
   end-implement
   
