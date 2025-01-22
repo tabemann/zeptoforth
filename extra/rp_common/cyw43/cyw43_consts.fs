@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,9 @@ begin-module cyw43-consts
   
   \ MTU size
   1500 constant mtu-size
+
+  \ Ethernet frame size
+  mtu-size 22 + constant ethernet-frame-size
 
   \ HPNA, wlan link local tunnel, according to linux if_ether.h
   $886C constant ETH_P_LINK_CTL

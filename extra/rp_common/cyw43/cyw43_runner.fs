@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -44,11 +44,11 @@ begin-module cyw43-runner
   \ CYW43 log shared memory size
   1024 constant cyw43-log-shm-size
 
-  \ Receive MTU count
-  24 constant rx-mtu-count
+  \ Receive frame count
+  24 constant rx-frame-count
 
-  \ Transmit MTU count
-  16 constant tx-mtu-count
+  \ Transmit frame count
+  16 constant tx-frame-count
 
   \ Event message count
   2 constant event-count
@@ -166,10 +166,12 @@ begin-module cyw43-runner
   <frame-interface> begin-class <cyw43-frame-interface>
 
     \ Receive buffer queue data
-    mtu-size cell+ rx-mtu-count * cell align member cyw43-rx-queue-data
+    ethernet-frame-size cell align cell+ rx-frame-count *
+    member cyw43-rx-queue-data
 
     \ Transmit buffer queue data
-    mtu-size cell+ tx-mtu-count * cell align member cyw43-tx-queue-data
+    ethernet-frame-size cell align cell+ tx-frame-count *
+    member cyw43-tx-queue-data
 
     \ Receive buffer queue
     <buffer-queue> class-size member cyw43-rx-queue
@@ -191,12 +193,12 @@ begin-module cyw43-runner
 
       \ Initialize the receive buffer queue
       self cyw43-rx-queue-data
-      mtu-size cell+ rx-mtu-count * cell align
+      ethernet-frame-size cell align cell+ rx-frame-count *
       <buffer-queue> self cyw43-rx-queue init-object
 
       \ Initialize the transmit buffer queue
       self cyw43-tx-queue-data
-      mtu-size cell+ tx-mtu-count * cell align
+      ethernet-frame-size cell align cell+ tx-frame-count *
       <buffer-queue> self cyw43-tx-queue init-object
       
       \ Initialize the MAC address

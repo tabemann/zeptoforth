@@ -33,6 +33,9 @@ begin-module net-config
   \ The MTU size
   1500 constant mtu-size
 
+  \ The Ethernet frame size
+  mtu-size 22 + constant ethernet-frame-size
+
   \ The maximum fragment buffer size
   1500 constant fragment-buf-size
 

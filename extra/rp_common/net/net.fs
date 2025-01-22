@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -274,7 +274,7 @@ begin-module net
       dup out-packet-bytes @ over out-packet-offset @ - over
       out-packet-window @ small-send-bytes max min
       swap out-packet-mss @ min
-      [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
+      [ mtu-size ipv4-header-size - tcp-header-size - ]
       literal min
       [ debug? ] [if]
         [: cr ." === next-packet-size: " dup . ;] debug-hook execute
@@ -2438,7 +2438,7 @@ begin-module net
       lock-size member outgoing-buf-lock
 
       \ The outgoing frame buffer
-      mtu-size cell align member outgoing-buf
+      ethernet-frame-size cell align member outgoing-buf
 
       \ Endpoint queue lock
       lock-size member endpoint-queue-lock
@@ -3015,8 +3015,7 @@ begin-module net
       rng::random endpoint endpoint-init-local-seq!
       addr tcp-seq-no unaligned@ rev 1+
       addr bytes tcp-mss@ not if
-        drop [ mtu-size ethernet-header-size - ipv4-header-size -
-        tcp-header-size - ] literal
+        drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
       then
       addr tcp-window-size hunaligned@ rev16
       endpoint init-tcp-stream
@@ -3108,7 +3107,7 @@ begin-module net
         window rev16 buf tcp-window-size hunaligned!
         0 buf tcp-urgent-ptr hunaligned!
         [ TCP_OPT_MSS 24 lshift 4 16 lshift or
-        mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - or
+        mtu-size ipv4-header-size - tcp-header-size - or
         rev ] literal
         buf tcp-header-size + unaligned!
         [ $01010100 rev ] literal buf tcp-header-size + 4 + unaligned!
@@ -3137,8 +3136,7 @@ begin-module net
           endpoint endpoint-init-local-seq@ <> if exit then
           addr tcp-seq-no unaligned@ rev 1+
           addr bytes tcp-mss@ not if
-            drop [ mtu-size ethernet-header-size - ipv4-header-size -
-            tcp-header-size - ] literal
+            drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
           then
           addr tcp-window-size hunaligned@ rev16
           endpoint init-tcp-stream
@@ -3258,8 +3256,7 @@ begin-module net
       [: { addr bytes endpoint self }
         addr tcp-seq-no unaligned@ rev 1+
         addr bytes tcp-mss@ not if
-          drop [ mtu-size ethernet-header-size - ipv4-header-size -
-          tcp-header-size - ] literal
+          drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
         then
         addr tcp-window-size hunaligned@ rev16
         endpoint init-tcp-stream
@@ -3558,7 +3555,7 @@ begin-module net
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
       [:
         dup { self }
-        2 pick mtu-size u<= averts x-oversized-frame
+        2 pick ethernet-frame-size u<= averts x-oversized-frame
         [: { bytes xt self }
           self outgoing-buf xt execute if
 \            [ debug? ] [if]
@@ -4987,8 +4984,7 @@ begin-module net
                 endpoint endpoint-init-local-seq!
                 endpoint endpoint-local-seq@ 1-
                 0
-                [ mtu-size ethernet-header-size -
-                ipv4-header-size - tcp-header-size - ] literal
+                [ mtu-size ipv4-header-size - tcp-header-size - ] literal
                 TCP_SYN
                 endpoint endpoint-remote-mac-addr@
                 self send-ipv4-basic-tcp
