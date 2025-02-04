@@ -114,15 +114,14 @@ begin-module lcd1602
       10 ms
     ;
 
-    \ Activate I2C for this device
-    : activate-i2c ( -- ) I2C_ADDR v-i2c-device @ i2c-target-addr! ;
-    
   end-module> import
   
+  \ Activate I2C for this device
+  : activate-lcd-i2c ( -- ) I2C_ADDR v-i2c-device @ i2c-target-addr! ;
+    
   \ Send string to i2c device 
   \ !! String must be started with @ !!
   : send-text ( c-addr bytes i2c -- u' )
-    activate-i2c
     over 1+ [: { c-addr bytes i2c-device buf }
       [char] @ buf c!
       c-addr buf 1+ bytes move
@@ -141,7 +140,6 @@ begin-module lcd1602
   \ Clear lcd display
   : clear-display ( -- )
     lcd-buffer-size [: { lcd-buffer }
-      activate-i2c
       $80 clear-display lcd-buffer 2 cr-buffer
       lcd-buffer swap v-i2c-device @
       send-data
@@ -151,7 +149,6 @@ begin-module lcd1602
   \ Set cursor to row col position 
   : set-cursor ( row col -- )
     lcd-buffer-size [: { lcd-buffer }
-      activate-i2c
       $80 rot rot
       (set-cursor) lcd-buffer 2 cr-buffer
       lcd-buffer swap v-i2c-device @ send-data
@@ -172,6 +169,7 @@ begin-module lcd1602
     100000 i2c-device i2c-clock!
     i2c-device pin1 i2c-pin
     i2c-device pin2 i2c-pin
+    activate-lcd-i2c
     i2c-device enable-i2c
   ;
 
