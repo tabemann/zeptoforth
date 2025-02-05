@@ -86,6 +86,7 @@ Zeptoforth Documentation
    extra/pixmap8_utils
    extra/turtle
    extra/neopixel
+   extra/lcd1602
    extra/net
    extra/ntp
    extra/cyw43

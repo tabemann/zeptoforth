@@ -114,29 +114,38 @@ begin-module lcd1602
       10 ms
     ;
 
+    \ Send string to i2c device 
+    \ !! String must be started with @ !!
+    : send-text ( c-addr bytes i2c -- u' )
+      over 1+ [: { c-addr bytes i2c-device buf }
+        [char] @ buf c!
+        c-addr buf 1+ bytes move
+        buf bytes 1+ i2c-device
+        need-reset? if
+          >i2c-restart-stop
+        else
+          >i2c-stop
+        then
+        true need-reset!
+        drop
+        10 ms
+      ;] with-allot
+    ;
+
+    \ Set cursor to row col position 
+    : set-cursor ( row col -- )
+      lcd-buffer-size [: { lcd-buffer }
+        $80 rot rot
+        (set-cursor) lcd-buffer 2 cr-buffer
+        lcd-buffer swap v-i2c-device @ send-data
+      ;] with-allot
+    ;
+
   end-module> import
   
   \ Activate I2C for this device
   : activate-lcd-i2c ( -- ) I2C_ADDR v-i2c-device @ i2c-target-addr! ;
     
-  \ Send string to i2c device 
-  \ !! String must be started with @ !!
-  : send-text ( c-addr bytes i2c -- u' )
-    over 1+ [: { c-addr bytes i2c-device buf }
-      [char] @ buf c!
-      c-addr buf 1+ bytes move
-      buf bytes 1+ i2c-device
-      need-reset? if
-        >i2c-restart-stop
-      else
-        >i2c-stop
-      then
-      true need-reset!
-      drop
-      10 ms
-    ;] with-allot
-  ;
-
   \ Clear lcd display
   : clear-display ( -- )
     lcd-buffer-size [: { lcd-buffer }
@@ -146,24 +155,18 @@ begin-module lcd1602
     ;] with-allot
   ;
 
-  \ Set cursor to row col position 
-  : set-cursor ( row col -- )
-    lcd-buffer-size [: { lcd-buffer }
-      $80 rot rot
-      (set-cursor) lcd-buffer 2 cr-buffer
-      lcd-buffer swap v-i2c-device @ send-data
-    ;] with-allot
-  ;
-
   \ Put string at row col position
   : put-text { row col c-addr bytes -- }
     row col set-cursor
     c-addr bytes v-i2c-device @ send-text 
   ;
 
+  \ Set the I2C device
+  : lcd-i2c-device! ( i2c-device -- ) v-i2c-device ! ;
+  
   \ Init I2C device
   : init-lcd-i2c { pin1 pin2 i2c-device -- }
-    i2c-device v-i2c-device !
+    i2c-device lcd-i2c-device!
     i2c-device master-i2c
     i2c-device 7-bit-i2c-addr
     100000 i2c-device i2c-clock!

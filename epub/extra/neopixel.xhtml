@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Neopixels on the RP2040</title>
+    <title>Neopixels on the RP2040 and RP2350</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
   </head><body>
@@ -14,9 +14,9 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section id="neopixels-on-the-rp2040">
-<h1>Neopixels on the RP2040</h1>
-<p>There is optional support for Neopixels and Neopixel strips on the RP2040 using a PIO block to drive the Neopixel protocol.</p>
+  <section id="neopixels-on-the-rp2040-and-rp2350">
+<h1>Neopixels on the RP2040 and RP2350</h1>
+<p>There is optional support for Neopixels and Neopixel strips on the RP2040 and RP2350 using a PIO block to drive the Neopixel protocol.</p>
 <p>Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, <code class="docutils literal notranslate"><span class="pre">neopixel!</span></code> can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code>.</p>
 <p>Note that in some setups, such as the SeeedStudio XIAO RP2040, a separate GPIO pin may need to be set high to enable a Neopixel (e.g. GPIO pin 11 on the SeeedStudio XIAO RP2040, in addition to the data GPIO pin 12). Use the <code class="docutils literal notranslate"><span class="pre">pin!</span></code> word in the <code class="docutils literal notranslate"><span class="pre">pin</span></code> module for this.</p>
 <p>Neopixel support is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/neopixel.fs</span></code>, which can be compiled either to RAM or to flash as needed.</p>

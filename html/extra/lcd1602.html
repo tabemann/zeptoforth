@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Neopixels on the RP2040 and RP2350 &#8212; zeptoforth  documentation</title>
+    <title>LCD1602 Support &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
@@ -13,8 +13,8 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="LCD1602 Support" href="lcd1602.html" />
-    <link rel="prev" title="Turtle graphics" href="turtle.html" />
+    <link rel="next" title="zeptoIP Words" href="net.html" />
+    <link rel="prev" title="Neopixels on the RP2040 and RP2350" href="neopixel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -32,54 +32,43 @@
 
           <div class="body" role="main">
             
-  <section id="neopixels-on-the-rp2040-and-rp2350">
-<h1>Neopixels on the RP2040 and RP2350<a class="headerlink" href="#neopixels-on-the-rp2040-and-rp2350" title="Link to this heading">¶</a></h1>
-<p>There is optional support for Neopixels and Neopixel strips on the RP2040 and RP2350 using a PIO block to drive the Neopixel protocol.</p>
-<p>Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, <code class="docutils literal notranslate"><span class="pre">neopixel!</span></code> can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code>.</p>
-<p>Note that in some setups, such as the SeeedStudio XIAO RP2040, a separate GPIO pin may need to be set high to enable a Neopixel (e.g. GPIO pin 11 on the SeeedStudio XIAO RP2040, in addition to the data GPIO pin 12). Use the <code class="docutils literal notranslate"><span class="pre">pin!</span></code> word in the <code class="docutils literal notranslate"><span class="pre">pin</span></code> module for this.</p>
-<p>Neopixel support is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/neopixel.fs</span></code>, which can be compiled either to RAM or to flash as needed.</p>
-<section id="neopixel">
-<h2><code class="docutils literal notranslate"><span class="pre">neopixel</span></code><a class="headerlink" href="#neopixel" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">neopixel</span></code> module contains the following words:</p>
-<section id="init-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">init-neopixel</span></code><a class="headerlink" href="#init-neopixel" title="Link to this heading">¶</a></h3>
-<p>( state-machine pio count pin addr – )</p>
-<p>Initialize a Neopixel structure at <em>addr</em> for <em>count</em> Neopixels, data GPIO pin <em>pin</em>, PIO block <em>pio</em> (<code class="docutils literal notranslate"><span class="pre">PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">PIO1</span></code> from the <code class="docutils literal notranslate"><span class="pre">pio</span></code> module), and state machine <em>state-machine</em> (from 0 to 3). This does not take into account any power GPIO pin that may need to be configured. It reprograms the specified PIO block and assumes that it has full control over said block. Note that it is safe to use if one wishes to use multiple state machines that are all controlling Neopixels in one PIO block, because it will only overwrite the PIO program with the very same PIO program.</p>
+  <section id="lcd1602-support">
+<h1>LCD1602 Support<a class="headerlink" href="#lcd1602-support" title="Link to this heading">¶</a></h1>
+<p>There is an optional driver for I2C LCD1602 displays. The LCD1602 is a 2 row by 16 character text LCD display.</p>
+<p>Configuring the LCD1602 is in the form of two steps. The first step is configuring the I2C bus, for which a convenience word <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> is provided; if the user manually configures the I2C bus or previously has used it to access another device, the user must manually call <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to set the I2C bus to use with the LCD1602 and then <code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code>. The second step is initializing the LCD1602 device, which is done through calling <code class="docutils literal notranslate"><span class="pre">init-lcd</span></code>. These steps must be carried out before using the LCD1602 device.</p>
+<p>LCD1602 support is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_demo.fs</span></code>.</p>
+<section id="lcd1602">
+<h2><code class="docutils literal notranslate"><span class="pre">lcd1602</span></code><a class="headerlink" href="#lcd1602" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">lcd1602</span></code> module contains the following words:</p>
+<section id="init-lcd-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code><a class="headerlink" href="#init-lcd-i2c" title="Link to this heading">¶</a></h3>
+<p>( pin1 pin2 i2c-device – )</p>
+<p>Configure the I2C bus <em>i2c-device</em> to use GPIO’s <em>pin1</em> and <em>pin2</em> and set it up to communicate with the LCD1602 device on that bus.</p>
 </section>
-<section id="clear-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-neopixel</span></code><a class="headerlink" href="#clear-neopixel" title="Link to this heading">¶</a></h3>
-<p>( neopixel – )</p>
-<p>Clear all the Neopixel states in Neopixel structure <em>neopixel</em>.</p>
-</section>
-<section id="update-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code><a class="headerlink" href="#update-neopixel" title="Link to this heading">¶</a></h3>
-<p>( neopixel – )</p>
-<p>Transmit all the stored Neopixel color data for the Neopixels in Neopixel structure <em>neopixel</em>.</p>
-</section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
-<p>( red green blue index neopixel – )</p>
-<p>Specify the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255. Note that this does <em>not</em> transmit the color data to the Neopixel in question; rather one must call <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code> to do so.</p>
-</section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
-<p>( index neopixel – red green blue )</p>
-<p>Get the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255.</p>
-</section>
-<section id="neopixel-size">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel-size</span></code><a class="headerlink" href="#neopixel-size" title="Link to this heading">¶</a></h3>
-<p>( count – bytes )</p>
-<p>Get the size of a Neopixel structure in bytes with <em>count</em> Neopixels.</p>
-</section>
-<section id="x-out-of-range-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-neopixel</span></code><a class="headerlink" href="#x-out-of-range-neopixel" title="Link to this heading">¶</a></h3>
+<section id="init-lcd">
+<h3><code class="docutils literal notranslate"><span class="pre">init-lcd</span></code><a class="headerlink" href="#init-lcd" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
-<p>Out of range Neopixel index exception.</p>
+<p>Initialize the LCD1602 device. The I2C bus must be set up to communicate with the LCD1602 device first.</p>
 </section>
-<section id="x-out-of-range-color">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-color</span></code><a class="headerlink" href="#x-out-of-range-color" title="Link to this heading">¶</a></h3>
+<section id="lcd-i2c-device">
+<h3><code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code><a class="headerlink" href="#lcd-i2c-device" title="Link to this heading">¶</a></h3>
+<p>( i2c-device – )</p>
+<p>Manually set the I2C bus <em>i2c-device</em> to use with the LCD1602 without initializing the I2C bus itself.</p>
+</section>
+<section id="activate-lcd-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code><a class="headerlink" href="#activate-lcd-i2c" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
-<p>Out of range color component exception.</p>
+<p>Manually set the I2C bus configured with <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> or <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to communicate with the LCD1602 device. This is necessary if the I2C bus has been configured manually or if another device has been previously used on the I2C bus.</p>
+</section>
+<section id="clear-display">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-display</span></code><a class="headerlink" href="#clear-display" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Clear the LCD1602 display.</p>
+</section>
+<section id="put-text">
+<h3><code class="docutils literal notranslate"><span class="pre">put-text</span></code><a class="headerlink" href="#put-text" title="Link to this heading">¶</a></h3>
+<p>( row col c-addr bytes – )</p>
+<p>Write the specified string to the LCD1602 display at the specified row and column.</p>
 </section>
 </section>
 </section>
@@ -182,8 +171,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Neopixels on the RP2040 and RP2350</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
@@ -193,8 +182,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="turtle.html" title="previous chapter">Turtle graphics</a></li>
-      <li>Next: <a href="lcd1602.html" title="next chapter">LCD1602 Support</a></li>
+      <li>Previous: <a href="neopixel.html" title="previous chapter">Neopixels on the RP2040 and RP2350</a></li>
+      <li>Next: <a href="net.html" title="next chapter">zeptoIP Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -228,7 +217,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
-      <a href="../_sources/extra/neopixel.md.txt"
+      <a href="../_sources/extra/lcd1602.md.txt"
           rel="nofollow">Page source</a>
     </div>
 
