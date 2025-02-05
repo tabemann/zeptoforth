@@ -26,44 +26,17 @@ begin-module simple-cyw43-net
   frame-process import
   net import
   endpoint-process import
-
-  \ Endpoint process has not been started exception
-  : x-endpoint-process-not-started ( -- ) ." endpoint process not started" cr ;
+  simple-net import
   
   \ A simple CYW43439 networking and interface class
-  <object> begin-class <simple-cyw43-net>
+  <simple-net> begin-class <simple-cyw43-net>
 
     begin-module simple-cyw43-net-internal
 
       \ The CYW43 controller
       <cyw43-control> class-size member my-cyw43-control
 
-      \ The IP stack interface
-      <interface> class-size member my-interface
-
-      \ The frame processor
-      <frame-process> class-size member my-frame-process
-
-      \ The ARP frame handler
-      <arp-handler> class-size member my-arp-handler
-
-      \ The IP frame handler
-      <ip-handler> class-size member my-ip-handler
-
-      \ The endpoint processor
-      <endpoint-process> class-size member my-endpoint-process
-
-      \ Has the endpoint process been started?
-      cell member endpoint-process-started?
-      
     end-module> import
-
-    \ Initialize a CYW43439 networking and interface class instance
-    method init-cyw43-net ( self -- )
-
-    \ Initialize the CYW43439 network and interface object without starting
-    \ the endpoint process
-    method init-cyw43-net-no-handler ( self -- )
 
     \ Set country - must be set prior to executing init-cyw43-net, and if not
     \ set defaults to an abbreviation and code of XX\x00\x00 and a revision of
@@ -76,16 +49,12 @@ begin-module simple-cyw43-net
 
     \ Get the CYW43439 controller
     method cyw43-control@ ( self -- control )
-    
-    \ Get the zeptoIP interface
-    method net-interface@ ( self -- interface )
 
-    \ Get the zeptoIP endpoint processor
-    method net-endpoint-process@ ( self -- endpoint-processor )
-    
-    \ Run network interface processors
-    method run-net-process ( self -- )
-    
+    \ These just aliases, but they are sometimes invoked as
+    \ <simple-cyw43-net>->init-cyw43-net etc. so the need to be methods
+    method init-cyw43-net ( self -- )
+    method init-cyw43-net-no-handler ( self -- )
+
   end-class
 
   \ Implement the CYW43439 networking and interface class
@@ -96,15 +65,19 @@ begin-module simple-cyw43-net
     \ (pio::PIO0 or pio::PIO1)
     :noname
       { pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- }
-      self <object>->new
+      self <simple-net>->new
 
       default-mac-addr
       cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
       pwr-pin clk-pin dio-pin cs-pin
       pio-addr sm-index pio-instance
       <cyw43-control> self my-cyw43-control init-object
-      false self endpoint-process-started? !
     ; define new
+
+    \ Supply the method for finding the frame interface
+    :noname ( self -- frame-interface )
+      my-cyw43-control cyw43-frame-interface@
+    ; define device-frame-interface@
 
     \ Set country - must be set prior to executing init-cyw43-net, and if not
     \ set defaults to an abbreviation and code of XX\x00\x00 and a revision of
@@ -115,26 +88,23 @@ begin-module simple-cyw43-net
     ; define cyw43-net-country!
 
     \ Initialize the CYW43439 network and interface object
-    :noname { self -- }
-      self init-cyw43-net-no-handler
-      self my-interface <endpoint-process> self my-endpoint-process init-object
-      true self endpoint-process-started? !
+    \ Alias for the old name - nothing else needed
+    :noname ( self -- )
+      init-net
     ; define init-cyw43-net
-
+ 
     \ Initialize the CYW43439 network and interface object without starting
     \ the endpoint process
     :noname { self -- }
       self my-cyw43-control init-cyw43
-      self my-cyw43-control cyw43-frame-interface@
-      <interface> self my-interface init-object
-      self my-cyw43-control cyw43-frame-interface@
-      <frame-process> self my-frame-process init-object
-      self my-interface <ip-handler> self my-ip-handler init-object
-      self my-interface <arp-handler> self my-arp-handler init-object
-      self my-ip-handler self my-frame-process add-frame-handler
-      self my-arp-handler self my-frame-process add-frame-handler
-    ; define init-cyw43-net-no-handler
+      self <simple-net>->init-net-no-handler
+    ; define init-net-no-handler
 
+    \ Alias for the old name
+    :noname ( self -- )
+      init-net-no-handler
+    ; define init-cyw43-net-no-handler
+    
     \ Set a GPIO on the CYW43439
     :noname ( state gpio self -- )
       my-cyw43-control <cyw43-control>->cyw43-gpio!
@@ -144,26 +114,7 @@ begin-module simple-cyw43-net
     :noname ( self -- control )
       my-cyw43-control
     ; define cyw43-control@
-    
-    \ Get the zeptoIP interface
-    :noname ( self -- interface )
-      my-interface
-    ; define net-interface@
 
-    \ Get the endpoint processor
-    :noname ( self -- endpoint-processor )
-      dup endpoint-process-started? @ averts x-endpoint-process-not-started
-      my-endpoint-process
-    ; define net-endpoint-process@
-
-    \ Run network interface processors
-    :noname ( self -- )
-      dup endpoint-process-started? @ if
-        dup my-endpoint-process run-endpoint-process
-      then
-      my-frame-process run-frame-process
-    ; define run-net-process
-    
   end-implement
   
 end-module

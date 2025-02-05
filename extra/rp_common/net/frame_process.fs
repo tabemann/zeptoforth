@@ -103,8 +103,11 @@ begin-module frame-process
 
     end-module
     
-    \ Add a frame handler
+    \ Add a frame handler to the end of the handler list
     method add-frame-handler ( handler self -- )
+
+    \ Add a frame handler as the first handler in the handler list
+    method add-first-frame-handler ( handler self -- )
 
     \ Run frame processor
     method run-frame-process ( self -- )
@@ -121,7 +124,7 @@ begin-module frame-process
       0 self first-frame-handler !
     ; define new
 
-    \ Add a frame handler
+    \ Add a frame handler to the end of the handler list
     :noname { handler self -- }
       self first-frame-handler @ { current }
       current 0= if
@@ -133,6 +136,12 @@ begin-module frame-process
         handler current next-frame-handler!
       then
     ; define add-frame-handler
+
+    \ Add a frame handler as the first entry of the handler list
+    :noname { handler self -- }
+      self first-frame-handler @ handler next-frame-handler!
+      handler self first-frame-handler !
+    ; define add-first-frame-handler
 
     \ Process a frame
     :noname { addr bytes self -- }
