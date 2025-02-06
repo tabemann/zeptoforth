@@ -1,4 +1,5 @@
-\ Copyright (c) 2020-2024 Travis Bemann, Paul Koning
+\ Copyright (c) 2020-2025 Travis Bemann
+\ Copyright (c) 2025 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal

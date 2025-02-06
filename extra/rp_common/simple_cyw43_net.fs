@@ -1,4 +1,5 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2025 Travis Bemann
+\ Copyright (c) 2025 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -116,5 +117,26 @@ begin-module simple-cyw43-net
     ; define cyw43-control@
 
   end-implement
+
+  \ Re-exporting <simple-net> methods for the sake of compatibility
+
+  \ Initialize a networking and interface class instance
+  : init-net ( self -- ) init-net ;
+  
+  \ Initialize the network and interface object without starting
+  \ the endpoint process
+  : init-net-no-handler ( self -- ) init-net-no-handler ;
+  
+  \ Get the zeptoIP interface
+  : net-interface@ ( self -- interface ) net-interface@ ;
+  
+  \ Get the interface frame processor
+  : net-frame-process@ ( self -- frame-processor ) net-frame-process@ ;
+  
+  \ Get the zeptoIP endpoint processor
+  : net-endpoint-process@ ( self -- endpoint-processor ) net-endpoint-process@ ;
+  
+  \ Run network interface processors
+  : run-net-process ( self -- ) run-net-process ;
   
 end-module

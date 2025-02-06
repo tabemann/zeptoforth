@@ -25,7 +25,7 @@
   cr ." Copyright (c) 2021 Jan Bramkamp"
   cr ." Copyright (c) 2023 Rob Probin"
   cr ." Copyright (c) 2023 Chris Salch"
-  cr ." Copyright (c) 2024 Paul Koning"
+  cr ." Copyright (c) 2024-2025 Paul Koning"
   cr ." Copyright (c) 2024-2025 Serialcomms (GitHub)"
   cr
   cr ." Permission is hereby granted, free of charge, to any person obtaining a copy"
