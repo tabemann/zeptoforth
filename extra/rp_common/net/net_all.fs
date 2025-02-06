@@ -25,3 +25,4 @@
 #include extra/rp_common/net/net.fs
 #include extra/rp_common/net/net_diagnostic.fs
 #include extra/rp_common/net/endpoint_process.fs
+#include extra/rp_common/net/simple_net.fs
