@@ -121,17 +121,14 @@ begin-module simple-cyw43-net
   \ Re-exporting <simple-net> methods for the sake of compatibility
 
   \ Initialize a networking and interface class instance
-  : init-net ( self -- ) init-net ;
+  : init-cyw43-net ( self -- ) init-net ;
   
   \ Initialize the network and interface object without starting
   \ the endpoint process
-  : init-net-no-handler ( self -- ) init-net-no-handler ;
+  : init-cyw43-net-no-handler ( self -- ) init-net-no-handler ;
   
   \ Get the zeptoIP interface
   : net-interface@ ( self -- interface ) net-interface@ ;
-  
-  \ Get the interface frame processor
-  : net-frame-process@ ( self -- frame-processor ) net-frame-process@ ;
   
   \ Get the zeptoIP endpoint processor
   : net-endpoint-process@ ( self -- endpoint-processor ) net-endpoint-process@ ;

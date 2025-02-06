@@ -481,20 +481,70 @@
 </section>
 </section>
 </section>
-<section id="simple-cyw43-net">
-<h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following word:</p>
+<section id="simple-net">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-net</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-net</span></code> module contains the following word:</p>
 <section id="x-endpoint-process-not-started">
 <h3><code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code></h3>
 <p>( – )</p>
-<p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance for which the endpoint process has not been started.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
+<p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> instance for which the endpoint process has not been started.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-net</span></code> module contains the following class:</p>
 </section>
 <section id="id21">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.</p>
+<p>It has the following constructor:</p>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( driver – )</p>
+<p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> base class.</p>
+<p>It has the following methods:</p>
+</section>
+<section id="init-net">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net</span></code></h4>
+<p>( driver – )</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> instance.</p>
+</section>
+<section id="init-net-no-handler">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code></h4>
+<p>( driver – )</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simpl-net&gt;</span></code> instance without starting an endpoint processing task.</p>
+</section>
+<section id="device-frame-interface">
+<h4><code class="docutils literal notranslate"><span class="pre">device-frame-interface&#64;</span></code></h4>
+<p>( driver – frame-interface )</p>
+<p>This gets the network interface driver’s frame interface instance.</p>
+</section>
+<section id="net-interface">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
+<p>( driver – interface )</p>
+<p>This gets the zeptoIP interface instance.</p>
+</section>
+<section id="net-frame-process">
+<h4><code class="docutils literal notranslate"><span class="pre">net-frame-process&#64;</span></code></h4>
+<p>( driver – frame-processor )</p>
+<p>This gets the zeptoIP frame processor instance.</p>
+</section>
+<section id="net-endpoint-process">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
+<p>( driver – endpoint-processor )</p>
+<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code> has been called instead).</p>
+</section>
+<section id="run-net-process">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
+<p>( driver – )</p>
+<p>This starts the zeptoIP frame and endpoint processors.</p>
+</section>
+</section>
+</section>
+<section id="simple-cyw43-net">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
+<section id="id23">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id22">
+<section id="id24">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
@@ -503,12 +553,12 @@
 <section id="init-cyw43-net">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
 <p>( driver – )</p>
-<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::init-net</span></code>.</p>
 </section>
 <section id="init-cyw43-net-no-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code></h4>
 <p>( driver – )</p>
-<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::init-net-no-handler</span></code>.</p>
 </section>
 <section id="cyw43-net-country">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code></h4>
@@ -525,42 +575,42 @@
 <p>( driver – control )</p>
 <p>This gets the CYW43xxx controller instance.</p>
 </section>
-<section id="net-interface">
+<section id="id25">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
 <p>( driver – interface )</p>
-<p>This gets the zeptoIP interface instance.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::net-interface&#64;</span></code>.</p>
 </section>
-<section id="net-endpoint-process">
+<section id="id26">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
 <p>( driver – endpoint-processor )</p>
-<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code> has been called instead).</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::net-endpoint-process&#64;</span></code>.</p>
 </section>
-<section id="run-net-process">
+<section id="id27">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
 <p>( driver – )</p>
-<p>This starts the zeptoIP frame and endpoint processors.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::run-net-process</span></code>.</p>
 </section>
 </section>
 </section>
 <section id="pico-w-cyw43-net">
 <h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code> class has the following class:</p>
-<section id="id23">
+<section id="id28">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
-<section id="id24">
+<section id="id29">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id25">
+<section id="id30">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance.</p>
 </section>
-<section id="id26">
+<section id="id31">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
@@ -570,7 +620,7 @@
 <p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W to <em>state</em>.</p>
 </section>
-<section id="id27">
+<section id="id32">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code></h4>
 <p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W.</p>

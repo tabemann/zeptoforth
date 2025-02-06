@@ -465,14 +465,66 @@ Get a frame to transmit.
 
 Poll a frame to transmit.
 
-### `simple-cyw43-net`
+### `simple-net`
 
-The `simple-cyw43-net` module contains the following word:
+The `simple-net` module contains the following word:
 
 ##### `x-endpoint-process-not-started`
 ( -- )
 
-This exception is raised if one attempts to obtain the endpoint process from a `<simple-cyw43-net>` or `<pico-w-cyw43-net>` instance for which the endpoint process has not been started.
+This exception is raised if one attempts to obtain the endpoint process from a `<simple-net>` instance for which the endpoint process has not been started.
+
+The `simple-net` module contains the following class:
+
+#### `<simple-net>`
+
+The `<simple-net>` class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.
+
+It has the following constructor:
+
+##### `new`
+( driver -- )
+
+This is a basic constructor that initializes the state of the `<simple-net>` base class.
+
+It has the following methods:
+
+##### `init-net`
+( driver -- )
+
+This initializes a `<simple-net>` instance.
+
+##### `init-net-no-handler`
+( driver -- )
+
+This initalizes a `<simpl-net>` instance without starting an endpoint processing task.
+
+##### `device-frame-interface@`
+( driver -- frame-interface )
+
+This gets the network interface driver's frame interface instance.
+
+##### `net-interface@`
+( driver -- interface )
+
+This gets the zeptoIP interface instance.
+
+##### `net-frame-process@`
+( driver -- frame-processor )
+
+This gets the zeptoIP frame processor instance.
+
+##### `net-endpoint-process@`
+( driver -- endpoint-processor )
+
+This gets the zeptoIP endpoint processor instance. This raises `x-endpoint-process-not-started` if `init-cyw43-net` has not been called (e.g. if `init-cyw43-net-no-handler` has been called instead).
+
+##### `run-net-process`
+( driver -- )
+
+This starts the zeptoIP frame and endpoint processors.
+
+### `simple-cyw43-net`
 
 The `simple-cyw43-net` module contains the following class:
 
@@ -492,12 +544,12 @@ It has the following methods:
 ##### `init-cyw43-net`
 ( driver -- )
 
-This initializes a `<simple-cyw43-net>` instance.
+This method is an alias for `simple-net::init-net`.
 
 ##### `init-cyw43-net-no-handler`
 ( driver -- )
 
-This initalizes a `<simple-cyw43-net>` instance without starting an endpoint processing task.
+This method is an alias for `simple-net::init-net-no-handler`.
 
 ##### `cyw43-net-country!`
 ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
@@ -517,17 +569,17 @@ This gets the CYW43xxx controller instance.
 ##### `net-interface@`
 ( driver -- interface )
 
-This gets the zeptoIP interface instance.
+This method is an alias for `simple-net::net-interface@`.
 
 ##### `net-endpoint-process@`
 ( driver -- endpoint-processor )
 
-This gets the zeptoIP endpoint processor instance. This raises `x-endpoint-process-not-started` if `init-cyw43-net` has not been called (e.g. if `init-cyw43-net-no-handler` has been called instead).
+This method is an alias for `simple-net::net-endpoint-process@`.
 
 ##### `run-net-process`
 ( driver -- )
 
-This starts the zeptoIP frame and endpoint processors.
+This method is an alias for `simple-net::run-net-process`.
 
 ### `pico-w-cyw43-net`
 

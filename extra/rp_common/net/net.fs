@@ -2437,8 +2437,11 @@ begin-module net
       \ Outgoing buffer lock
       lock-size member outgoing-buf-lock
 
+      \ This is to force outgoing-buf to be offset by two bytes
+      2 member outgoing-buf-offset
+      
       \ The outgoing frame buffer
-      ethernet-frame-size cell align member outgoing-buf
+      ethernet-frame-size cell align 2 + member outgoing-buf
 
       \ Endpoint queue lock
       lock-size member endpoint-queue-lock
@@ -2962,8 +2965,8 @@ begin-module net
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-addr
-        addr tcp-src-port hunaligned@ rev16
-        addr tcp-dest-port hunaligned@ rev16
+        addr tcp-src-port h@ rev16
+        addr tcp-dest-port h@ rev16
         src-addr self address-map lookup-mac-addr-by-ipv4 if
           endpoint try-ipv4-accept-endpoint if
             endpoint self put-ready-endpoint
@@ -2981,8 +2984,8 @@ begin-module net
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-addr
-        addr tcp-src-port hunaligned@ rev16
-        addr tcp-dest-port hunaligned@ rev16
+        addr tcp-src-port h@ rev16
+        addr tcp-dest-port h@ rev16
         endpoint match-ipv4-connect? if endpoint true unloop exit then
       loop
       0 false
@@ -3013,11 +3016,11 @@ begin-module net
     \ Send an IPv4 TCP SYN+ACK packet
     :noname { src-addr addr bytes endpoint self -- }
       rng::random endpoint endpoint-init-local-seq!
-      addr tcp-seq-no unaligned@ rev 1+
+      addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
         drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
       then
-      addr tcp-window-size hunaligned@ rev16
+      addr tcp-window-size h@ rev16
       endpoint init-tcp-stream
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
@@ -3037,10 +3040,10 @@ begin-module net
     :noname ( src-addr addr bytes self -- ) { self }
       drop
       over { src-addr }
-      dup tcp-src-port hunaligned@ rev16 swap
-      dup tcp-dest-port hunaligned@ rev16 swap
+      dup tcp-src-port h@ rev16 swap
+      dup tcp-dest-port h@ rev16 swap
       rng::random swap
-      tcp-seq-no unaligned@ rev
+      tcp-seq-no @ rev
       0
       TCP_RST
       src-addr self address-map lookup-mac-addr-by-ipv4 if
@@ -3072,16 +3075,16 @@ begin-module net
       -rot 9 pick PROTOCOL_TCP tcp-header-size
       ( self D: mac-addr remote-addr protocol bytes )
       [: { remote-addr remote-port local-port seq ack window flags self buf }
-        local-port rev16 buf tcp-src-port hunaligned!
-        remote-port rev16 buf tcp-dest-port hunaligned!
-        seq rev buf tcp-seq-no unaligned!
-        ack rev buf tcp-ack-no unaligned!
+        local-port rev16 buf tcp-src-port h!
+        remote-port rev16 buf tcp-dest-port h!
+        seq rev buf tcp-seq-no !
+        ack rev buf tcp-ack-no !
         [ 5 4 lshift ] literal buf tcp-data-offset c!
         flags buf tcp-flags c!
-        window rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        window rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
-        compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3098,21 +3101,21 @@ begin-module net
       -rot 9 pick PROTOCOL_TCP tcp-header-size 8 +
       ( self D: mac-addr remote-addr protocol bytes )
       [: { remote-addr remote-port local-port seq ack window flags self buf }
-        local-port rev16 buf tcp-src-port hunaligned!
-        remote-port rev16 buf tcp-dest-port hunaligned!
-        seq rev buf tcp-seq-no unaligned!
-        ack rev buf tcp-ack-no unaligned!
+        local-port rev16 buf tcp-src-port h!
+        remote-port rev16 buf tcp-dest-port h!
+        seq rev buf tcp-seq-no !
+        ack rev buf tcp-ack-no !
         [ 7 4 lshift ] literal buf tcp-data-offset c!
         flags buf tcp-flags c!
-        window rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        window rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         [ TCP_OPT_MSS 24 lshift 4 16 lshift or
         mtu-size ipv4-header-size - tcp-header-size - or
         rev ] literal
-        buf tcp-header-size + unaligned!
-        [ $01010100 rev ] literal buf tcp-header-size + 4 + unaligned!
+        buf tcp-header-size + !
+        [ $01010100 rev ] literal buf tcp-header-size + 4 + !
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 8 + 0 tcp-checksum
-        compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3128,17 +3131,17 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ TCP_SYN_SENT = if
-          addr tcp-ack-no unaligned@ rev
+          addr tcp-ack-no @ rev
           endpoint endpoint-init-local-seq@ <> if exit then
-          addr tcp-seq-no unaligned@ rev 1+
+          addr tcp-seq-no @ rev 1+
           addr bytes tcp-mss@ not if
             drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
           then
-          addr tcp-window-size hunaligned@ rev16
+          addr tcp-window-size h@ rev16
           endpoint init-tcp-stream
         then
         endpoint endpoint-ipv4-remote@
@@ -3161,7 +3164,7 @@ begin-module net
         2drop 2drop drop exit
       then
       [: { src-addr addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ { state }
@@ -3206,7 +3209,7 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ { state }
@@ -3232,10 +3235,10 @@ begin-module net
       addr full-tcp-header-size { header-size }
       addr header-size + bytes header-size -
       addr tcp-flags c@ TCP_PSH and 0<>
-      addr tcp-seq-no unaligned@ rev
+      addr tcp-seq-no @ rev
       endpoint add-endpoint-tcp-data
-      addr tcp-window-size hunaligned@ rev16
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-window-size h@ rev16
+      addr tcp-ack-no @ rev
       endpoint endpoint-ack-in
       endpoint endpoint-send-ack? if
         endpoint endpoint-ipv4-remote@
@@ -3254,11 +3257,11 @@ begin-module net
     \ Process an IPv4 ACK packet in TCP_SYN_SENT state
     :noname ( addr bytes endpoint self -- )
       [: { addr bytes endpoint self }
-        addr tcp-seq-no unaligned@ rev 1+
+        addr tcp-seq-no @ rev 1+
         addr bytes tcp-mss@ not if
           drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
         then
-        addr tcp-window-size hunaligned@ rev16
+        addr tcp-window-size h@ rev16
         endpoint init-tcp-stream
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
@@ -3288,7 +3291,7 @@ begin-module net
     
     \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ 1+ = if
         TCP_FIN_WAIT_2 endpoint endpoint-tcp-state!
       else
@@ -3309,7 +3312,7 @@ begin-module net
     \ Process an IPv4 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self process-ipv4-basic-ack
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
         endpoint self put-ready-endpoint
@@ -3330,7 +3333,7 @@ begin-module net
     \     drop send-ipv4-rst-for-packet exit
     \   then
     \   [: { src-addr addr bytes self endpoint }
-    \     addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+    \     addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
     \       exit
     \     then
     \     addr bytes endpoint self
@@ -3359,7 +3362,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-1
 
@@ -3367,7 +3370,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-2
 
@@ -3375,7 +3378,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-unexpected-fin
 
@@ -3384,7 +3387,7 @@ begin-module net
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1+
-      addr tcp-seq-no unaligned@ rev 1+
+      addr tcp-seq-no @ rev 1+
       endpoint endpoint-local-window@
       TCP_ACK
 \      [ TCP_FIN TCP_ACK or ] literal
@@ -3396,7 +3399,7 @@ begin-module net
     :noname ( src-addr addr bytes self -- )
       2over 2over find-connect-ipv4-endpoint if
         [: { src-addr addr bytes self endpoint }
-          addr tcp-dest-port hunaligned@ rev16
+          addr tcp-dest-port h@ rev16
           endpoint endpoint-local-port@ <> if
             exit
           then
@@ -3593,8 +3596,8 @@ begin-module net
         [ DF 13 lshift rev16 ] literal ip-buf ipv4-flags-fragment-offset h!
         self intf-ttl c@ ip-buf ipv4-ttl c!
         protocol ip-buf ipv4-protocol c!
-        src-addr rev ip-buf ipv4-src-addr unaligned!
-        dest-addr rev ip-buf ipv4-dest-addr unaligned!
+        src-addr rev ip-buf ipv4-src-addr !
+        dest-addr rev ip-buf ipv4-dest-addr !
         ip-buf ipv4-header-size 0 ipv4-header-checksum compute-inet-checksum
         rev16 ip-buf ipv4-header-checksum h!
         ip-buf ipv4-header-size + xt execute
@@ -4307,20 +4310,20 @@ begin-module net
       7 pick tcp-header-size +
       ( addr bytes push? endpoint self D: mac-addr remote-addr protocol bytes )
       [: { addr bytes push? endpoint self buf }
-        endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned!
-        endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port hunaligned!
-        endpoint endpoint-local-seq@ rev buf tcp-seq-no unaligned!
-        endpoint endpoint-ack@ rev buf tcp-ack-no unaligned!
+        endpoint endpoint-local-port@ rev16 buf tcp-src-port h!
+        endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port h!
+        endpoint endpoint-local-seq@ rev buf tcp-seq-no !
+        endpoint endpoint-ack@ rev buf tcp-ack-no !
         [ 5 4 lshift ] literal buf tcp-data-offset c!
         push? if [ TCP_ACK TCP_PSH or ] literal else TCP_ACK then
         buf tcp-flags c!
-        endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        endpoint endpoint-local-window@ rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         addr buf tcp-header-size + bytes move
         self intf-ipv4-addr@
         endpoint endpoint-ipv4-remote@ drop
         buf tcp-header-size bytes + 0 tcp-checksum
-        compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-tcp-checksum rev16 buf tcp-checksum h!
         [ debug? ] [if]
           buf bytes
           [: { buf bytes }
@@ -5032,13 +5035,13 @@ begin-module net
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
         bytes ipv4-header-size >= if
-          src-mac-addr addr ipv4-src-addr unaligned@ rev
+          src-mac-addr addr ipv4-src-addr @ rev
           self ip-interface @
           process-ipv4-mac-addr
           bytes addr ipv4-total-len h@ rev16 min to bytes
           addr ipv4-version-ihl c@ $F and dup { ihl } 5 >=
           ihl 4 * bytes <= and if
-            addr ipv4-dest-addr unaligned@ rev
+            addr ipv4-dest-addr @ rev
             dup self ip-interface @ intf-ipv4-addr@ =
             over self ip-interface @ intf-ipv4-broadcast@ = or
             over $FFFFFFFF = or
@@ -5048,7 +5051,7 @@ begin-module net
               addr ipv4-fragment? if
                 addr bytes self ip-interface @ process-fragment
               else
-                addr ipv4-src-addr unaligned@ rev
+                addr ipv4-src-addr @ rev
                 addr ipv4-protocol c@
                 addr ihl cells + bytes ihl cells -
                 self ip-interface @ process-ipv4-packet
