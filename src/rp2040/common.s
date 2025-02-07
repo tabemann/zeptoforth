@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -103,35 +103,31 @@ _init_platform_variables:
 	str r0, [r1]
 	bx lr
 
-	@ Prepare for rebooting
-	define_internal_word "pre-reboot", visible_flag
-_pre_reboot:
-	ldr r0, =0xE000E180 @ NVIC_ICER_Base
-	ldr r1, =1 << 15 @ SIO_IRQ_PROC0
-	ldr r2, [r0]
-	orrs r2, r1
-	str r2, [r0]
-	ldr r0, =0x40010004 @ PSM_FRCE_OFF
-	ldr r1, =1 << 16 @ PSM_FRCE_OFF_PROC1
-	ldr r2, [r0]
-	orrs r2, r1
-	str r2, [r0]
-1:	ldr r2, [r0]
-	tst r2, r1
-	beq 1b
-	ldr r2, [r0]
-	bics r2, r1
-	str r2, [r0]
-	ldr r0, =FIFO_ST
-	ldr r1, =FIFO_ST_VLD
-2:	ldr r2, [r0]
-	tst r2, r1
-	beq 2b
-	ldr r0, =FIFO_RD
-	ldr r0, [r0]
-	bx lr
-	end_inlined
+        @@ Reboot (note that this does not clear RAM, but it does clear the RAM
+	@@ dictionary
+	define_word "reboot", visible_flag
+_reboot:
+        push {r4, lr}
 
+        push_tos
+        ldr tos, =reboot_hook
+        ldr tos, [tos]
+        bl _execute
+
+        ldr r0, =WATCHDOG_BASE
+        ldr r1, =ALIAS_SET
+        orrs r0, r1
+        ldr r1, =WATCHDOG_CTRL_TRIGGER
+        ldr r2, =0
+        orrs r1, r2
+        str r1, [r0, #WATCHDOG_CTRL]
+
+1:      b 2f
+2:      b 1b
+
+	pop {r4, pc}
+	end_inlined
+        
 	@ Reboot the RP2040 in BOOTSEL mode
 	define_word "bootsel", visible_flag
 _bootsel:

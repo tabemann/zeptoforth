@@ -1,4 +1,4 @@
-@ Copyright (c) 2021-2023 Travis Bemann
+@ Copyright (c) 2021-2025 Travis Bemann
 @ Copyright (c) 2021 Jan Bramkamp
 @ Copyright (c) 2024 Paul Koning
 @
@@ -263,6 +263,7 @@
 .equ WATCHDOG_TICK    , 0x2c
 .equ WATCHDOG_TICK_ENABLE, 9
 .equ WATCHDOG_START_TICK, (1<<WATCHDOG_TICK_ENABLE) | XOSC_MHZ
+.equ WATCHDOG_CTRL_TRIGGER, (1<<31)
 
 @ -----------------------------------------------------------------------------
 _init_hardware: @ Many thanks to Jan Bramkamp

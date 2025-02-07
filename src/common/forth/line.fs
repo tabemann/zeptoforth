@@ -212,7 +212,7 @@ begin-module line-internal
 
   \ Check for new line(s)
   : check-new-line { scroll? -- }
-    line @ line-count @ 0> if
+    line @ line-count h@ 0> if
       line @ line-start-column h@ line @ line-count h@ + { full-columns }
       full-columns line @ line-terminal-columns h@ u/ { full-rows }
       line @ line-start-row h@ full-rows + { end-row }
@@ -899,7 +899,7 @@ begin-module line-internal
 
   \ Initialize line editing for the current task
   : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
-    4 align, here line-size allot
+    4 ram-align, ram-here line-size ram-allot
     swap 255 min swap tuck line-buffer-size !
     tuck line-buffer-ptr !
     tuck line-count-ptr !
