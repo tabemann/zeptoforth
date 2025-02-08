@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2024 Travis Bemann
+# Copyright (c) 2019-2025 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ export DUMP=arm-none-eabi-objdump
 export ASFLAGS=-g
 export PREFIX=/usr/local
 export PLATFORM=stm32f407
-export VERSION=1.9.2-dev
+export VERSION=1.10.1-dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
