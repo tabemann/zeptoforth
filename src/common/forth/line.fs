@@ -95,6 +95,8 @@ begin-module line-internal
   \ The saved REFILL hook
   variable saved-refill-hook
 
+  commit-flash
+  
   \ The saved ACCEPT hook
   variable saved-accept-hook
   
