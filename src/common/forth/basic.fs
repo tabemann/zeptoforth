@@ -2504,6 +2504,9 @@ commit-flash
 \ Hook for getting top of main task RAM dictionary
 variable main-here-hook
 
+\ Commit to flash
+commit-flash
+
 \ The ACCEPT hook
 variable accept-hook
 
