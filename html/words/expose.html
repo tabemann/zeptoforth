@@ -111,11 +111,13 @@
 </section>
 <section id="parse">
 <h3><code class="docutils literal notranslate"><span class="pre">&gt;parse</span></code><a class="headerlink" href="#parse" title="Link to this heading">¶</a></h3>
-<p>The parse index</p>
+<p>( – parse-index-addr )</p>
+<p>The parse index; note that the address of the parse index is returned and not the parse index itself, and it may be modified by the user (it must remain in the range from 0 to the size of the parse buffer returned by <code class="docutils literal notranslate"><span class="pre">source</span></code> - 1, and reducing its value is not recommended).</p>
 </section>
 <section id="source">
 <h3><code class="docutils literal notranslate"><span class="pre">source</span></code><a class="headerlink" href="#source" title="Link to this heading">¶</a></h3>
-<p>The source info</p>
+<p>( – parse-buffer-addr parse-buffer-size )</p>
+<p>The current string in the parse buffer, as defined by its starting address and its size in bytes.</p>
 </section>
 <section id="build-target">
 <h3><code class="docutils literal notranslate"><span class="pre">build-target</span></code><a class="headerlink" href="#build-target" title="Link to this heading">¶</a></h3>
@@ -338,7 +340,8 @@ built</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

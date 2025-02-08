@@ -77,12 +77,14 @@ Get the current returns stack end variable address
 Get the current exception handler variable address
 
 ##### `>parse`
+( -- parse-index-addr )
 
-The parse index
+The parse index; note that the address of the parse index is returned and not the parse index itself, and it may be modified by the user (it must remain in the range from 0 to the size of the parse buffer returned by `source` - 1, and reducing its value is not recommended).
 
 ##### `source`
+( -- parse-buffer-addr parse-buffer-size )
 
-The source info
+The current string in the parse buffer, as defined by its starting address and its size in bytes.
 
 ##### `build-target`
 
