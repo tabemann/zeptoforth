@@ -899,6 +899,11 @@ begin-module line-internal
     xoff
   ;
 
+  \ Edit a line for refill
+  : refill-edit ( -- )
+    >in input# input input-size 255 min line-edit
+  ;
+
   \ Initialize line editing for the current task
   : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
     4 ram-align, ram-here line-size ram-allot
@@ -917,16 +922,11 @@ begin-module line-internal
     0 over line-flags !
     0 over line-clipboard-count h!
     0 over line-clipboard-end h!
-    ['] line-edit over line-edit-deferred !
+    ['] refill-edit over line-edit-deferred !
     history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
     0 saved-refill-hook !
     0 saved-accept-hook !
-  ;
-
-  \ Edit a line for refill
-  : refill-edit ( -- )
-    >in input# input input-size 255 min line-edit
   ;
 
   \ Edit a line for accept
