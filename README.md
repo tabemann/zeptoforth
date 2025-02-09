@@ -92,6 +92,7 @@ There is also support for loadable extras not included in any builds:
 * A simple monospace, bitmap ASCII font (in `extra/common/simple_font.fs`)
 * Turtle graphics for ST7735S displays (in `extra/rp2040/turtle.fs`)
 * Neopixel support (in `extra/rp2040/neopixel.fs`, for the RP2040)
+* I2C LCD1602 16x2 character LCD displays (in `extra/rp_common/lcd1602.fs`)
 
 ## Loading
 
