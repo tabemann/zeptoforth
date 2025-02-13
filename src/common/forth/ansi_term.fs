@@ -42,13 +42,47 @@ begin-module ansi-term
 
   \ Character constants
   $1B constant escape
-    
+
+  00 constant NONE
+
+  \ Font constants
+  01 constant BOLD
+  21 constant BOLD-OFF \ not works
+  02 constant DIM
+  22 constant DIM-OFF
+  04 constant UNDERLINE
+  24 constant UNDERLINE-OFF
+
+  \ Color constants
+  30 constant BLACK
+  31 constant RED
+  32 constant GREEN
+  33 constant YELLOW
+  34 constant BLUE
+  35 constant MAGENTA
+  36 constant CYAN
+  37 constant WHITE
+  90 constant B-BLACK
+  91 constant B-RED
+  92 constant B-GREEN
+  93 constant B-YELLOW
+  94 constant B-BLUE
+  95 constant B-MAGENTA
+  96 constant B-CYAN
+  97 constant B-WHITE
+
+
   \ Type a decimal integer
   : (dec.) ( n -- ) base @ 10 base ! swap (.) base ! ;
 
   \ Type the CSI sequence
   : csi ( -- )
      $1B emit [char] [ emit
+  ;
+
+  \ Type the end of CSI sequence
+  : csi$ ( -- )
+    [char] m emit 
   ;
 
   commit-flash
@@ -244,7 +278,24 @@ begin-module ansi-term
     until
     drop
   ;
-  
+ 
+  \ Reset colors and font effects
+  : reset-term ( -- )
+   csi [char] 0 emit csi$
+  ;
+
+  \ Set background and foreground color
+  : color! ( bg-color fg-color -- )
+      dup NONE <> if csi (dec.) csi$ else drop then
+      dup NONE <> if csi 10 + (dec.) csi$ else drop then 
+  ;
+
+  \ Set font's effect, also works with foreground and background color
+  : effect! ( effect -- )
+    csi (dec.) csi$
+  ;
+
+ 
 end-module
 
 commit-flash
