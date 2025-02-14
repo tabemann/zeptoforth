@@ -1,4 +1,5 @@
 \ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2025 tmsgthb (GitHub)
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +43,47 @@ begin-module ansi-term
 
   \ Character constants
   $1B constant escape
-    
+
+  00 constant none
+
+  \ Font constants
+  01 constant bold
+  21 constant bold-off \ not works
+  02 constant dim
+  22 constant dim-off
+  04 constant underline
+  24 constant underline-off
+
+  \ Color constants
+  30 constant black
+  31 constant red
+  32 constant green
+  33 constant yellow
+  34 constant blue
+  35 constant magenta
+  36 constant cyan
+  37 constant white
+  90 constant b-black
+  91 constant b-red
+  92 constant b-green
+  93 constant b-yellow
+  94 constant b-blue
+  95 constant b-magenta
+  96 constant b-cyan
+  97 constant b-white
+
+
   \ Type a decimal integer
   : (dec.) ( n -- ) base @ 10 base ! swap (.) base ! ;
 
   \ Type the CSI sequence
   : csi ( -- )
      $1B emit [char] [ emit
+  ;
+
+  \ End of color and font efectType the end of CSI sequence
+  : end-color-effect ( -- )
+    [char] m emit 
   ;
 
   commit-flash
@@ -244,7 +279,24 @@ begin-module ansi-term
     until
     drop
   ;
-  
+ 
+  \ Reset colors and font effects
+  : reset-color-effect ( -- )
+    csi [char] 0 emit end-color-effect
+  ;
+
+  \ Set background and foreground color
+  : color! ( bg-color fg-color -- )
+    dup none <> if csi (dec.) end-color-effect else drop then
+    dup none <> if csi 10 + (dec.) end-color-effect else drop then 
+  ;
+
+  \ Set font's effect, also works with foreground and background color
+  : effect! ( effect -- )
+    csi (dec.) end-color-effect
+  ;
+
+ 
 end-module
 
 commit-flash
