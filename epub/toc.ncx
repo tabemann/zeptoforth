@@ -8734,13 +8734,13 @@
         </navPoint>
         <navPoint id="navPoint1455" playOrder="1381">
           <navLabel>
-            <text>writethrough!</text>
+            <text>write-through!</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#writethrough" />  
+          <content src="words/simple_fat32.xhtml#write-through" />  
         </navPoint>
         <navPoint id="navPoint1456" playOrder="1382">
           <navLabel>
-            <text>writethrough@</text>
+            <text>write-through@</text>
           </navLabel>
           <content src="words/simple_fat32.xhtml#id1" />  
         </navPoint>
@@ -8772,13 +8772,13 @@
           <navLabel>
             <text>writethrough!</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#id3" />  
+          <content src="words/simple_fat32.xhtml#writethrough" />  
         </navPoint>
         <navPoint id="navPoint1462" playOrder="1387">
           <navLabel>
             <text>writethrough@</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#id4" />  
+          <content src="words/simple_fat32.xhtml#id3" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint1463" playOrder="1388">
@@ -8802,19 +8802,19 @@
           <navLabel>
             <text>new</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#id5" />  
+          <content src="words/simple_fat32.xhtml#id4" />  
         </navPoint>
         <navPoint id="navPoint1467" playOrder="1391">
           <navLabel>
             <text>writethrough!</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#id6" />  
+          <content src="words/simple_fat32.xhtml#id5" />  
         </navPoint>
         <navPoint id="navPoint1468" playOrder="1392">
           <navLabel>
             <text>writethrough@</text>
           </navLabel>
-          <content src="words/simple_fat32.xhtml#id7" />  
+          <content src="words/simple_fat32.xhtml#id6" />  
         </navPoint>
       </navPoint>
     </navPoint>

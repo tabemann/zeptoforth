@@ -57,13 +57,13 @@
 <p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> instance with the specified SCK (clock) pin <em>sck-pin</em>, TX (transmit) pin <em>tx-pin</em>, RX (receive) pin <em>rx-pin</em>, and CS (chip select) pin <em>cs-pin</em> on the SPI device <em>spi-device</em>. All of these will be configured for the user and require no prior initialization. Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
 <p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
 </section>
-<section id="writethrough">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#writethrough" title="Link to this heading">¶</a></h3>
+<section id="write-through">
+<h3><code class="docutils literal notranslate"><span class="pre">write-through!</span></code><a class="headerlink" href="#write-through" title="Link to this heading">¶</a></h3>
 <p>( writethrough fs – )</p>
 <p>Set the underlying SD card interface to be either writethrough, i.e. write to blocks are immediately written out to the SDHC/SDXC card, or not writethrough, i.e. blocks are not written out to the SDHC/SDXC card except when evicted to load other blocks or if explicitly flushed with <code class="docutils literal notranslate"><span class="pre">flush</span></code>.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-through&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying SD card interface is set to writethrough or not.</p>
 </section>
@@ -83,13 +83,13 @@
 <p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-blocks-fat32-fs&gt;</span></code> instance Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
 <p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
 </section>
-<section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="writethrough">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#writethrough" title="Link to this heading">¶</a></h3>
 <p>( writethrough fs – )</p>
 <p>Set the underlying blocks interface to be either writethrough, i.e. write to blocks are immediately written out to the Quad SPI flash, or not writethrough, i.e. blocks are not written out to the Quad SPI flash except when evicted to load other blocks or if explicitly flushed with <code class="docutils literal notranslate"><span class="pre">flush</span></code>.</p>
 </section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying blocks interface is set to writethrough or not.</p>
 </section>
@@ -104,19 +104,19 @@
 <p>This is the simple FAT32 filesystem class for accessing FAT32 filesystems in the on-board Quad SPI PSRAM of RP2350 boards such as the Pimoroni Pico Plus 2 which have PSRAM which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 <p>This class has the following constructor:</p>
 </section>
-<section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( psram-cs-pin fs – )</p>
 <p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-psram-fat32-fs&gt;</span></code> instance using the PSRAM chip select GPIO <em>psram-cs-pin</em>. Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
 <p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
 </section>
-<section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( writethrough fs – )</p>
 <p>This is a dummy word which is a no-op.</p>
 </section>
-<section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( fs – writethrough )</p>
 <p>This is a dummy word which is a no-op.</p>
 </section>
@@ -221,7 +221,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
