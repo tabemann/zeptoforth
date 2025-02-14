@@ -254,10 +254,30 @@ window.addEventListener("load", () => mermaid.run());
 <p>( delay start notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
+<section id="wait-notify-set-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-set-timeout</span></code><a class="headerlink" href="#wait-notify-set-timeout" title="Link to this heading">¶</a></h3>
+<p>( x’ delay start notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to <em>x’</em>, and the previous contents of the notification mailbox is returned.</p>
+</section>
+<section id="wait-notify-update-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-update-timeout</span></code><a class="headerlink" href="#wait-notify-update-timeout" title="Link to this heading">¶</a></h3>
+<p>( xt delay start notify-index – x ) xt: ( x – x’ )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to <em>xt</em>, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.</p>
+</section>
 <section id="wait-notify-indefinite">
 <h3><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code><a class="headerlink" href="#wait-notify-indefinite" title="Link to this heading">¶</a></h3>
 <p>( notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
+</section>
+<section id="wait-notify-set-indefinite">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-set-indefinite</span></code><a class="headerlink" href="#wait-notify-set-indefinite" title="Link to this heading">¶</a></h3>
+<p>( x’ notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to <em>x’</em>, and the previous contents of the notification mailbox is returned.</p>
+</section>
+<section id="wait-notify-update-indefinite">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-update-indefinite</span></code><a class="headerlink" href="#wait-notify-update-indefinite" title="Link to this heading">¶</a></h3>
+<p>( xt notify-index – x ) xt: ( x – x’ )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to <em>xt</em>, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.</p>
 </section>
 <section id="ready">
 <h3><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Link to this heading">¶</a></h3>
@@ -272,12 +292,12 @@ window.addEventListener("load", () => mermaid.run());
 <section id="notify-set">
 <h3><code class="docutils literal notranslate"><span class="pre">notify-set</span></code><a class="headerlink" href="#notify-set" title="Link to this heading">¶</a></h3>
 <p>( x notify-index task – )</p>
-<p>Notify a task on a specified notification index <em>notify-index</em>, setting the value of its notification mailbox at <em>notify-index</em> to <em>x</em>, readying the task if it is currently waiting on that notification.</p>
+<p>Notify a task on a specified notification index <em>notify-index</em>, atomically setting the value of its notification mailbox at <em>notify-index</em> to <em>x</em>, readying the task if it is currently waiting on that notification.</p>
 </section>
 <section id="notify-update">
 <h3><code class="docutils literal notranslate"><span class="pre">notify-update</span></code><a class="headerlink" href="#notify-update" title="Link to this heading">¶</a></h3>
 <p>( xt notify-index task – )</p>
-<p>Notify a task on a specified notification index <em>notify-index</em>, updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below <em>xt</em> on it when <code class="docutils literal notranslate"><span class="pre">notify-update</span></code> was executed.</p>
+<p>Notify a task on a specified notification index <em>notify-index</em>, atomically updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it with the task locked and interrupts disabled, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below <em>xt</em> on it when <code class="docutils literal notranslate"><span class="pre">notify-update</span></code> was executed.</p>
 </section>
 <section id="clear-notify">
 <h3><code class="docutils literal notranslate"><span class="pre">clear-notify</span></code><a class="headerlink" href="#clear-notify" title="Link to this heading">¶</a></h3>
@@ -303,6 +323,16 @@ window.addEventListener("load", () => mermaid.run());
 <h3><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#wait-notify" title="Link to this heading">¶</a></h3>
 <p>( notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
+</section>
+<section id="wait-notify-set">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-set</span></code><a class="headerlink" href="#wait-notify-set" title="Link to this heading">¶</a></h3>
+<p>( x’ notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to <em>x’</em>, and the previous contents of the notification mailbox is returned.</p>
+</section>
+<section id="wait-notify-update">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-update</span></code><a class="headerlink" href="#wait-notify-update" title="Link to this heading">¶</a></h3>
+<p>( xt notify-index – x ) xt: ( x – x’ )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to <em>xt</em>, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.</p>
 </section>
 <section id="prepare-block">
 <h3><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code><a class="headerlink" href="#prepare-block" title="Link to this heading">¶</a></h3>
@@ -626,7 +656,8 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

@@ -240,10 +240,30 @@ Block a task indefinitely until the task is readied.
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
+##### `wait-notify-set-timeout`
+( x' delay start notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to *x'*, and the previous contents of the notification mailbox is returned.
+
+##### `wait-notify-update-timeout`
+( xt delay start notify-index -- x ) xt: ( x -- x' )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to *xt*, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.
+
 ##### `wait-notify-indefinite`
 ( notify-index -- x )
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-set-indefinite`
+( x' notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to *x'*, and the previous contents of the notification mailbox is returned.
+
+##### `wait-notify-update-indefinite`
+( xt notify-index -- x ) xt: ( x -- x' )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to *xt*, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.
 
 ##### `ready`
 ( task -- )
@@ -258,12 +278,12 @@ Notify a task on a specified notification index *notify-index* without changing 
 ##### `notify-set`
 ( x notify-index task -- )
 
-Notify a task on a specified notification index *notify-index*, setting the value of its notification mailbox at *notify-index* to *x*, readying the task if it is currently waiting on that notification.
+Notify a task on a specified notification index *notify-index*, atomically setting the value of its notification mailbox at *notify-index* to *x*, readying the task if it is currently waiting on that notification.
 
 ##### `notify-update`
 ( xt notify-index task -- )
 
-Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below *xt* on it when `notify-update` was executed.
+Notify a task on a specified notification index *notify-index*, atomically updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it with the task locked and interrupts disabled, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below *xt* on it when `notify-update` was executed.
 
 ##### `clear-notify`
 ( notify-index task -- )
@@ -289,6 +309,16 @@ Set the value for a mailbox at notification index *notify-index* for task *task*
 ( notify-index -- x )
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-set`
+( x' notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared, the contents of the notification mailbox in question is atomically set to *x'*, and the previous contents of the notification mailbox is returned.
+
+##### `wait-notify-update`
+( xt notify-index -- x ) xt: ( x -- x' )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared, the previous contents of the notification mailbox in question is passed to *xt*, which is executed with the task locked and interrupts disabled, and the contents of the notification mailbox is atomically set to its returned value, and the previous contents of the notification mailbox is returned.
 
 ##### `prepare-block`
 ( task -- )

@@ -1045,6 +1045,73 @@ begin-module task
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
+  \ Wait until a timeout on the specified notification index and return the
+  \ value for that notification index once notified, unless already notified,
+  \ where then that value will be returned and the notified state will be
+  \ cleared immediately; after fetching the value of the mailbox, atomically
+  \ set the mailbox to the specified value. x-timed-out is raised if the
+  \ timeout is reached.
+  : wait-notify-set-timeout ( x' ticks-delay ticks-start notify-index -- x )
+    [:
+      dup current-task @ validate-notify
+      swap current-task @ task-systick-start !
+      swap current-task @ task-systick-delay !
+      disable-int
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+	dup current-task @ task-current-notify !
+        blocked-timeout current-task @ task-state h!
+        enable-int
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
+        current-task @ check-timeout if
+          -1 current-task @ task-current-notify !
+          ['] x-timed-out ?raise
+        then
+        disable-int
+      repeat
+      current-task @ task-notify-area @ over cells + dup >r @
+      rot r> !
+      swap bit current-task @ task-notified-bitmap bic!
+      enable-int
+      -1 current-task @ task-current-notify !
+    ;] cpu-index critical-with-other-core-spinlock
+  ;
+
+  \ Wait until a timeout on the specified notification index and return the
+  \ value for that notification index once notified, unless already notified,
+  \ where then that value will be returned and the notified state will be
+  \ cleared immediately; after fetching the value of the mailbox, pass the
+  \ current value of the mailbox to the passed-in execution token, which is
+  \ executed with the current task locked and interrupts disabled, and then
+  \ atomically set the mailbox to the returned value. x-timed-out is raised if
+  \ the timeout is reached.
+  : wait-notify-update-timeout ( xt ticks-delay ticks-start notify-index -- x )
+    \ xt: ( x -- x' )
+    [:
+      dup current-task @ validate-notify
+      swap current-task @ task-systick-start !
+      swap current-task @ task-systick-delay !
+      disable-int
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+	dup current-task @ task-current-notify !
+        blocked-timeout current-task @ task-state h!
+        enable-int
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
+        current-task @ check-timeout if
+          -1 current-task @ task-current-notify !
+          ['] x-timed-out ?raise
+        then
+        disable-int
+      repeat
+      current-task @ task-notify-area @ over cells + dup >r @
+      dup -rot 2>r swap execute 2r> rot r> !
+      swap bit current-task @ task-notified-bitmap bic!
+      enable-int
+      -1 current-task @ task-current-notify !
+    ;] cpu-index critical-with-other-core-spinlock
+  ;
+
   \ Mark a task as waiting
   : block-wait ( wake-count task -- )
     dup validate-not-terminated
@@ -1116,6 +1183,58 @@ begin-module task
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
+  \ Wait indefinitely on the specified notification index and return the value
+  \ for that notification index once notified, unless already notified, where
+  \ then that value will be returned and the notified state will be cleared
+  \ immediately; after fetching the value of the mailbox, atomically set the
+  \ mailbox to the specified value.
+  : wait-notify-set-indefinite ( x' notify-index -- x )
+    [:
+      dup current-task @ validate-notify
+      disable-int
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+        dup current-task @ task-current-notify !
+        blocked-indefinite current-task @ task-state h!
+        enable-int
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
+        disable-int
+      repeat
+      current-task @ task-notify-area @ over cells + dup >r @
+      rot r> !
+      swap bit current-task @ task-notified-bitmap bic!
+      -1 current-task @ task-current-notify !
+      enable-int
+    ;] cpu-index critical-with-other-core-spinlock
+  ;
+
+  \ Wait indefinitely on the specified notification index and return the value
+  \ for that notification index once notified, unless already notified, where
+  \ then that value will be returned and the notified state will be cleared
+  \ immediately; after fetching the value of the mailbox, pass the current
+  \ value of the mailbox to the passed-in execution token, which is executed
+  \ with the current task locked and interrupts disabled, and then atomically
+  \ set the mailbox to the returned value.
+  : wait-notify-update-indefinite ( xt notify-index -- x ) \ xt: ( x -- x' )
+    [:
+      dup current-task @ validate-notify
+      disable-int
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+        dup current-task @ task-current-notify !
+        blocked-indefinite current-task @ task-state h!
+        enable-int
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
+        disable-int
+      repeat
+      current-task @ task-notify-area @ over cells + dup >r @
+      dup -rot 2>r swap execute 2r> rot r> !
+      swap bit current-task @ task-notified-bitmap bic!
+      -1 current-task @ task-current-notify !
+      enable-int
+    ;] cpu-index critical-with-other-core-spinlock
+  ;
+
   continue-module task-internal
 
     \ Core of readying a task
@@ -1179,7 +1298,8 @@ begin-module task
   ;
 
   \ Notify a task for a specified notification index, updating the notification
-  \ value with an xt with the signature ( x0 -- x1 )
+  \ value with an xt with the signature ( x0 -- x1 ) with the specified task
+  \ locked and interrupts disabled.
   : notify-update ( xt notify-index task -- )
     [:
       dup validate-not-terminated
@@ -1254,6 +1374,41 @@ begin-module task
       then
     ;] cpu-index critical-with-other-core-spinlock
     if wait-notify-timeout else wait-notify-indefinite then
+  ;
+
+  \ Wait for a notification at a specified notification index with a specified
+  \ initialized timeout and return the notification value; after fetching the
+  \ value of the mailbox, atomically set the mailbox to the specified value.
+  : wait-notify-set ( x' notify-index -- x )
+    [:
+      timeout @ no-timeout <> if
+        current-task @ timeout-systick-delay @
+        current-task @ timeout-systick-start @ rot
+        true
+      else
+        false
+      then
+    ;] cpu-index critical-with-other-core-spinlock
+    if wait-notify-set-timeout else wait-notify-set-indefinite then
+  ;
+
+  \ Wait for a notification at a specified notification index with a specified
+  \ initialized timeout and return the notification value; after fetching the
+  \ value of the mailbox, pass the current value of the mailbox to the passed-in
+  \ execution token, which is executed with the current task locked and
+  \ interrupts disabled, and then atomically set the mailbox to the returned
+  \ value.
+  : wait-notify-update ( xt notify-index -- x ) \ xt: ( x -- x' )
+    [:
+      timeout @ no-timeout <> if
+        current-task @ timeout-systick-delay @
+        current-task @ timeout-systick-start @ rot
+        true
+      else
+        false
+      then
+    ;] cpu-index critical-with-other-core-spinlock
+    if wait-notify-update-timeout else wait-notify-update-indefinite then
   ;
 
   \ Prepare blocking for a task
