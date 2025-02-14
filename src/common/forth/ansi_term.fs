@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ Copyright (c) 2025 tmsgthb (GitHub)
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,6 +36,9 @@ begin-module ansi-term
 
     \ Preserve cursor count
     user preserve-cursor-count
+
+    \ Background color offset
+    10 constant background-offset
     
   end-module> import
   
@@ -44,13 +47,13 @@ begin-module ansi-term
   \ Character constants
   $1B constant escape
 
+  \ No color or font set
   00 constant none
 
   \ Font constants
   01 constant bold
-  21 constant bold-off \ not works
   02 constant dim
-  22 constant dim-off
+  22 constant normal
   04 constant underline
   24 constant underline-off
 
@@ -72,7 +75,23 @@ begin-module ansi-term
   96 constant b-cyan
   97 constant b-white
 
+  \ Not a color exception
+  : x-not-color ( -- ) ." not a color" cr ;
 
+  \ Create a background color
+  : background { color -- color' }
+    color black >= color white <= and
+    color b-black >= color b-white <= and or if
+      color background-offset +
+    else
+      color [ black background-offset + ] literal >=
+      color [ white background-offset + ] literal <= and
+      color [ b-black background-offset + ] literal >=
+      color [ b-white background-offset + ] literal <= and or averts x-not-color
+      color
+    then
+  ;
+  
   \ Type a decimal integer
   : (dec.) ( n -- ) base @ 10 base ! swap (.) base ! ;
 
@@ -280,22 +299,8 @@ begin-module ansi-term
     drop
   ;
  
-  \ Reset colors and font effects
-  : reset-color-effect ( -- )
-    csi [char] 0 emit end-color-effect
-  ;
-
-  \ Set background and foreground color
-  : color! ( bg-color fg-color -- )
-    dup none <> if csi (dec.) end-color-effect else drop then
-    dup none <> if csi 10 + (dec.) end-color-effect else drop then 
-  ;
-
-  \ Set font's effect, also works with foreground and background color
-  : effect! ( effect -- )
-    csi (dec.) end-color-effect
-  ;
-
+  \ Set font effect or color
+  : color-effect! ( color-effect -- ) csi (dec.) end-color-effect ;
  
 end-module
 
