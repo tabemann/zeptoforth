@@ -43,33 +43,33 @@ begin-module ansi-term
   \ Character constants
   $1B constant escape
 
-  00 constant NONE
+  00 constant none
 
   \ Font constants
-  01 constant BOLD
-  21 constant BOLD-OFF \ not works
-  02 constant DIM
-  22 constant DIM-OFF
-  04 constant UNDERLINE
-  24 constant UNDERLINE-OFF
+  01 constant bold
+  21 constant bold-off \ not works
+  02 constant dim
+  22 constant dim-off
+  04 constant underline
+  24 constant underline-off
 
   \ Color constants
-  30 constant BLACK
-  31 constant RED
-  32 constant GREEN
-  33 constant YELLOW
-  34 constant BLUE
-  35 constant MAGENTA
-  36 constant CYAN
-  37 constant WHITE
-  90 constant B-BLACK
-  91 constant B-RED
-  92 constant B-GREEN
-  93 constant B-YELLOW
-  94 constant B-BLUE
-  95 constant B-MAGENTA
-  96 constant B-CYAN
-  97 constant B-WHITE
+  30 constant black
+  31 constant red
+  32 constant green
+  33 constant yellow
+  34 constant blue
+  35 constant magenta
+  36 constant cyan
+  37 constant white
+  90 constant b-black
+  91 constant b-red
+  92 constant b-green
+  93 constant b-yellow
+  94 constant b-blue
+  95 constant b-magenta
+  96 constant b-cyan
+  97 constant b-white
 
 
   \ Type a decimal integer
@@ -80,8 +80,8 @@ begin-module ansi-term
      $1B emit [char] [ emit
   ;
 
-  \ Type the end of CSI sequence
-  : csi$ ( -- )
+  \ End of color and font efectType the end of CSI sequence
+  : end-color-effect ( -- )
     [char] m emit 
   ;
 
@@ -280,19 +280,19 @@ begin-module ansi-term
   ;
  
   \ Reset colors and font effects
-  : reset-term ( -- )
-   csi [char] 0 emit csi$
+  : reset-color-effect ( -- )
+    csi [char] 0 emit end-color-effect
   ;
 
   \ Set background and foreground color
   : color! ( bg-color fg-color -- )
-      dup NONE <> if csi (dec.) csi$ else drop then
-      dup NONE <> if csi 10 + (dec.) csi$ else drop then 
+    dup none <> if csi (dec.) end-color-effect else drop then
+    dup none <> if csi 10 + (dec.) end-color-effect else drop then 
   ;
 
   \ Set font's effect, also works with foreground and background color
   : effect! ( effect -- )
-    csi (dec.) csi$
+    csi (dec.) end-color-effect
   ;
 
  
