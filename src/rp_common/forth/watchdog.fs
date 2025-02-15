@@ -1,4 +1,4 @@
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,17 @@ begin-module watchdog
     [then]
     rp2350? [if]
       $400D8000 constant WATCHDOG_BASE
+    [then]
+
+    \ Watchdog PSM settings
+    rp2040? [if]
+      $40010000 constant PSM_BASE
+      PSM_BASE $8 + constant PSM_WDSEL
+      $0001FFFF constant PSM_WDSEL_ALL
+      1 bit constant PSM_WDSEL_XOSC
+      0 bit constant PSM_WDSEL_ROSC
+      PSM_WDSEL_ALL PSM_WDSEL_XOSC bic PSM_WDSEL_ROSC bic
+      constant PSM_WDSEL_REBOOT
     [then]
 
     \ Watchdog control register
@@ -176,6 +187,7 @@ begin-module watchdog
 
     \ Initialize watchdog
     : init-watchdog ( -- )
+      [ rp2040? ] [if] PSM_WDSEL_REBOOT PSM_WDSEL ! [then]
       0 WATCHDOG_SCRATCH4 ! \ Do a normal reboot on watchdog timeout
       RESETS_ALL RESETS_WDSEL !
       false watchdog-enabled !

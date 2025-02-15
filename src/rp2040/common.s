@@ -114,16 +114,26 @@ _reboot:
         ldr tos, [tos]
         bl _execute
 
+        ldr r0, =PSM_WDSEL
+        ldr r1, =PSM_WDSEL_REBOOT
+        str r1, [r0]
+
         ldr r0, =WATCHDOG_BASE
+        movs r1, #0
+        str r1, [r0, #WATCHDOG_CTRL]
+        str r1, [r0, #WATCHDOG_SCRATCH4]
+        ldr r1, =10000
+        str r1, [r0, #WATCHDOG_LOAD]
+        ldr r1, =WATCHDOG_START_TICK
+        str r1, [r0, #WATCHDOG_TICK]
+
         ldr r1, =ALIAS_SET
         orrs r0, r1
-        ldr r1, =WATCHDOG_CTRL_TRIGGER
-        ldr r2, =0
-        orrs r1, r2
+        ldr r1, =WATCHDOG_CTRL_ENABLE
         str r1, [r0, #WATCHDOG_CTRL]
 
-1:      b 2f
-2:      b 1b
+1:      wfi
+        b 1b
 
 	pop {r4, pc}
 	end_inlined
