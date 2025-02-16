@@ -81,9 +81,9 @@ begin-module usb-core
     \ USB_EP0_MAX
     $40 c,
     \ USB_VENDOR_ID
-    $83 c, $04 c,
+    $8A c, $2E c,
     \ USB_PRODUCT_ID
-    $40 c, $57 c,
+    $0A c, $00 c,
     \ USB_PRODUCT_BCD
     $00 c, $02 c,
     \ STRING_MANUFACTURER (0 = none)
