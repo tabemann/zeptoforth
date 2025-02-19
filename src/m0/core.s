@@ -1152,9 +1152,8 @@ _literal:
 _recurse:
 	push {lr}
 	push_tos
-	ldr tos, =current_compile
+	ldr tos, =current_unit_start
 	ldr tos, [tos]
-	bl _to_xt
 	bl _asm_call
 	pop {pc}
 	end_inlined
@@ -2251,6 +2250,8 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =current_compile
 	str r1, [r0]
+        ldr r0, =current_unit_start
+        str r1, [r0]
 	ldr r0, =deferred_literal
 	str r1, [r0]
 	ldr r0, =literal_deferred_q

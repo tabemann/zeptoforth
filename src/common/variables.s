@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -232,3 +232,6 @@
 
         @@ The syntax stack pointer
         allot syntax_stack_ptr, 4
+
+        @@ The start of the current compilation unit (e.g. word, quotation)
+        allot current_unit_start, 4

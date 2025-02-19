@@ -501,6 +501,11 @@ the next column</p>
 <p>( b-addr bytes – addr|0 )</p>
 <p>Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
 </section>
+<section id="current-unit-start">
+<h3><code class="docutils literal notranslate"><span class="pre">current-unit-start</span></code><a class="headerlink" href="#current-unit-start" title="Link to this heading">¶</a></h3>
+<p>( – xt )</p>
+<p>Get the execution token for the current compilation unit, i.e. the outermost word or quotation being compiled.</p>
+</section>
 <section id="push-syntax">
 <h3><code class="docutils literal notranslate"><span class="pre">push-syntax</span></code><a class="headerlink" href="#push-syntax" title="Link to this heading">¶</a></h3>
 <p>( syntax – )</p>
@@ -720,7 +725,8 @@ the next column</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>

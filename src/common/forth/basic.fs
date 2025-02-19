@@ -2107,8 +2107,10 @@ commit-flash
   state @ if
     undefer-lit
     [ thumb-2? not ] [if] consts-inline, [then]
+    current-unit-start @
     reserve-branch
     here
+    dup current-unit-start !
     $B500 h,
     word-begin-hook @ ?execute
     syntax-lambda push-syntax
@@ -2132,6 +2134,7 @@ commit-flash
     $BD00 h,
     here rot branch-back!
     lit,
+    current-unit-start !
   else
     syntax-naked-lambda = averts x-unexpected-syntax
     drop-syntax

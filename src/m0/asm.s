@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -51,12 +51,14 @@ _asm_start_header:
 	bl _current_comma_cstring
 	bl _current_here
 	movs r0, #1
-	ands tos, r0
+	tst tos, r0
 	beq 1f
 	movs tos, #0
 	bl _current_comma_1
-        pop {pc}
-1:      pull_tos
+        bl _current_here
+1:      ldr r0, =current_unit_start
+        str tos, [r0]
+        pull_tos
         pop {pc}
 	end_inlined
 
@@ -172,6 +174,9 @@ _asm_finalize:
 	ldr tos, =finalize_hook
 	ldr tos, [tos]
 	bl _execute_nz
+        ldr r0, =current_unit_start
+        movs r1, #0
+        str r1, [r0]
 	pop {pc}
 	end_inlined
 	
@@ -234,6 +239,9 @@ _asm_finalize_no_align:
 	ldr tos, =finalize_hook
 	ldr tos, [tos]
 	bl _execute_nz
+        ldr r0, =current_unit_start
+        movs r1, #0
+        str r1, [r0]
 	pop {pc}
 	end_inlined
 
