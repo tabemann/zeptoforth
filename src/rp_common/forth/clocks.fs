@@ -1,5 +1,5 @@
 \ Copyright (c) 2024 Paul Koning
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ begin-module clocks
     $00 constant PLL_PWR_ON
 
     rp2040? [if]
-      133000000 constant MAX_SYSCLK
+      200000000 constant MAX_SYSCLK
     [then]
     rp2350? [if]
       150000000 constant MAX_SYSCLK
