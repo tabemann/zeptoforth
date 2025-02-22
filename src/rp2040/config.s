@@ -41,9 +41,9 @@
 	.equ flash_buffer_size, 0
 	.equ flash_buffer_space, 0
 	.equ flash_buffer_addr, 0
-	.equ flash_min_address, 0x10009000
+	.equ flash_min_address, 0x1000A000
 	.equ flash_start, 0x10000000
-	.equ flash_dict_start, 0x10009000
+	.equ flash_dict_start, 0x1000A000
         .equ flash_main_end, 0x10100000
 	.equ flash_dict_end, flash_main_end - 65536
 	.equ flash_end, 0x10200000

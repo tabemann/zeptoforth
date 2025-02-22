@@ -37,8 +37,13 @@
 <section id="set-sysclk">
 <h3><code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code></h3>
 <p>( refdiv fbdiv pdiv1 pdiv2 – )</p>
-<p>This changes the RP2040 system clock (“SYSCLK”) using the PLL parameters given.  The resulting system clock frequency is <code class="docutils literal notranslate"><span class="pre">xosc-frequency</span> <span class="pre">refdiv</span> <span class="pre">/</span> <span class="pre">fbdiv</span> <span class="pre">*</span> <span class="pre">pdiv1</span> <span class="pre">/</span> <span class="pre">pdiv2</span> <span class="pre">/</span></code>.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result.</p>
+<p>This changes the RP2040/RP2350 system clock (“SYSCLK”) using the PLL parameters given.  The resulting system clock frequency is <code class="docutils literal notranslate"><span class="pre">xosc-frequency</span> <span class="pre">refdiv</span> <span class="pre">/</span> <span class="pre">fbdiv</span> <span class="pre">*</span> <span class="pre">pdiv1</span> <span class="pre">/</span> <span class="pre">pdiv2</span> <span class="pre">/</span></code>.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result. This sets an upper limit of a 200 MHz system clock on the RP2040 and a 150 MHz system clock on the RP2350, per their current ratings.</p>
 <p>Since SYSCLK is the clock source for the UART, I2C, and SPI subsystems, if this word is used to change the SYSCLK frequency, those interfaces will run at a different rate than before.  The appropriate rate setting words (<code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code>, <code class="docutils literal notranslate"><span class="pre">i2c-clock!</span></code>, or <code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code>) should be called after any call to <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code> to reload the devices with the divider values needed for the updated system clock frequency.</p>
+</section>
+<section id="set-sysclk-overclock">
+<h3><code class="docutils literal notranslate"><span class="pre">set-sysclk-overclock</span></code></h3>
+<p>( refdiv fbdiv pdiv1 pdiv2 – )</p>
+<p>This word is like <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code> but it does not set an upper limit on the resulting system clock. Use with care! An inappropriate setting can brick your RP2040/RP2350, and even speeds that the RP2350/RP2350 itself can tolerate may be too fast for the Quad SPI flash!</p>
 </section>
 <section id="x-bad-refdiv">
 <h3><code class="docutils literal notranslate"><span class="pre">x-bad-refdiv</span></code></h3>
