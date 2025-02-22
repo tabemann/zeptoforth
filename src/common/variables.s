@@ -63,7 +63,7 @@
         .equ emit_q_hook_offset, 40
 
 	@@ The initial USER offset
-	.equ user_offset, 28
+	.equ user_offset, 44
 
 	@@ Pointer to the current Flash HERE location
 	allot flash_here, 4
