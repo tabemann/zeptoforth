@@ -84,7 +84,7 @@ begin-module dma
     12 bit constant CH_CTRL_TRIG_RING_SEL
 
     \ Ring lower bit count LSB
-    8 bit constant CH_CTRL_TRIG_RING_SIZE_LSB
+    8 constant CH_CTRL_TRIG_RING_SIZE_LSB
 
     \ Ring lower bit count mask
     $F CH_CTRL_TRIG_RING_SIZE_LSB lshift constant CH_CTRL_TRIG_RING_SIZE_MASK
