@@ -4,7 +4,7 @@ Under `extra/common/bitmap.fs` there is optional code for supporting bitmap oper
 
 Under `extra/common/pixmap16.fs` there is optional code for supporting 5-bit red, 6-bit green, 5-bit blue 16-bit pixmap operations, and under `extra/common/st7735s.fs` there is optional code for supporting SPI ST7735S-based displays with 16-bit color. The `<pixmap16>` class is defined under the `pixmap16` module in `extra/common/pixmap16.fs`. The `<st7735s>` class inherits from the `<pixmap16>` class and is defined under the `st7735s` module in `extra/common/st7735s.fs`.
 
-Under `extra/common/pixmap8.fs` there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations, and under `extra/common/st7735s_8.fs` there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers (but converting the image data to 16-bit color internally on an as-needed basis). The `<pixmap8>` class is defined under the `pixmap8` module in `extra/common/pixmap8.fs`. The `<st7735s-8>` class inherits from the `<pixmap8>` class and is defined under the `st7735s-8` module in `extra/common/st7735s_8.fs`.
+Under `extra/common/pixmap8.fs` there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations. Under `extra/common/st7735s_8.fs` there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers. Under `extra/rp_common/st7789v_parallel_8.fs` there is optional code for supporting parallel ST7789V-based displays using 8-bit backing buffers. Under `extra/common/st7789v_spi_8.fs` there is optional code for supporting SPI ST7789V-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The `<pixmap8>` class is defined under the `pixmap8` module in `extra/common/pixmap8.fs`. The `<st7735s-8>` class is defined under the `st7735s-8` module in `extra/common/st7735s_8.fs`. The `<st7789v-8>` class is defined under the `st7789v-8` module in `extra/common/st7789v_parallel_8.fs`. The `<st7789v-8-spi>` class is defined under the `st7789v-8-spi` module in `extra/common/st7789v_spi_8.fs`. All of these classes inherit from the `<pixmap8>` class.
 
 The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. `<ssd1306>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
 
@@ -19,6 +19,9 @@ The `<st7735s>` class implements a 16-bit ST7735S device interface and supports 
 The `<st7735s-8>` class implements a 16-bit ST7735S device interface with a 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffer and supports all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
 The `<st7735s-1>` class implements a 16-bit ST7735S device interface with fixed 16-bit foreground and background colors with a bitmap backing buffer and supports all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-1>` objects do not immediately update the display; rather the display must be manually after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+
+The `<st7789v-8>` and `<st7789v-8-spi>` classes implement 16-bit ST7789V device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` and `<st7789-v-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+
 
 ### `bitmap`
 
@@ -445,3 +448,59 @@ Get the foreground color of the ST7735S-based display.
 ( st7735s -- bg-color )
 
 Get the background color of the ST7735S-based display.
+
+### `st7789v-8`
+
+The `st7789v-8` module contains the following words:
+
+##### `<st7789v-8>`
+( -- class )
+
+The `<st7789v-8>` class is the class for 16-bit parallel ST7789V-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the `<pixmap8>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<st7789v-8>` class includes the following constructor:
+
+##### `new`
+( din-base-pin write-clk-pin read-clk-pin dc-pin cs-pin backlight-pin buffer-addr round? columns rows state-machine pio-device st7789v -- )
+
+This constructor initializes a parallel ST7789V display at the PIO device *pio-device*, the PIO state machine *state-machine*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<pixmap16>` instances), *columns* columns, *rows* rows, whether the display is *round?*, the base DIN pin *din-base-pin* (note that there are 8 DIN pins with parallel ST7789V displays), the write CLK pin *write-clk-pin*, the read CLK in *read-clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the backlight pin *backlight-pin*, and the `<st7789v-8>` instance being initialized, *st7789v*.
+
+The `<st7789v-8>` class includes the following method:
+
+##### `update-display`
+( st7789v -- )
+
+This updates the ST7789V-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight st7789v -- )
+
+Set the on/off state of the ST7789V-based display's backlight.
+
+### `st7789v-8-spi`
+
+The `st7789v-8-spi` module contains the following words:
+
+##### `<st7789v-8-spi>`
+( -- class )
+
+The `<st7789v-8-spi>` class is the class for 16-bit SPI ST7789V-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the `<pixmap8>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<st7789v-8-spi>` class includes the following constructor:
+
+##### `new`
+( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr round? columns rows spi-device st7789v -- )
+
+This constructor initializes an SPI ST7789V display at the SPI device *spi-device*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<pixmap16>` instances), *columns* columns, *rows* rows, whether the display is *round?*, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the backlight pin *backlight-pin*, the reset pin *reset-pin*, and the `<st7789v-8-spi>` instance being initialized, *st7789v*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<st7789v-8-spi>` class includes the following method:
+
+##### `update-display`
+( st7789v -- )
+
+This updates the ST7789V-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight st7789v -- )
+
+Set the on/off state of the ST7789V-based display's backlight.

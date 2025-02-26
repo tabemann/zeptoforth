@@ -65,7 +65,7 @@ begin-module st7789v-8-spi
     \ Constructor
     :noname
       { self }
-      { din sck reset dc cs backlight buf round cols rows device }
+      { din sck dc cs backlight reset buf round cols rows device }
       dc cs backlight buf round cols rows self <st7789v-8-common>->new
       device self st7789v-8-device !
       reset self st7789v-8-reset-pin !

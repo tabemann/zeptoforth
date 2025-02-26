@@ -92,7 +92,7 @@ begin-module turtle
 
     \ Initialize the turtle
     : init-turtle ( -- )
-      lcd-din lcd-sck lcd-rst lcd-dc lcd-cs lcd-bl
+      lcd-din lcd-sck lcd-dc lcd-cs lcd-bl lcd-rst
       my-buffer false screen-width screen-height my-spi
       <st7789v-8-spi> my-display init-object
       my-save-buffer save-width save-height <pixmap8> my-save init-object
