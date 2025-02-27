@@ -458,11 +458,7 @@ begin-module usb-core
   
   \ Send configuration descriptor to host
   : usb-send-config-descriptor ( -- )
-    usb-setup setup-length h@ 9 = if
-      9
-    else
-      config-data-size
-    then
+    usb-setup setup-length h@ config-data-size min
     config-data usb-start-control-transfer-to-host
   ;
 
