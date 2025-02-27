@@ -450,18 +450,22 @@ begin-module usb-core
     false EP0-to-Host endpoint-busy? !
   ;
 
-  \ Send device descriptor to host
+  \ Send device descriptor (default size 8 or full-length) to host
   : usb-send-device-descriptor ( -- )
-    usb-setup setup-length h@ device-data-size min
+    usb-setup setup-length h@ device-data-size = if
+      device-data-size
+    else
+      8
+    then
     device-data usb-start-control-transfer-to-host
   ;
   
-  \ Send configuration descriptor to host
+  \ Send configuration descriptor (default size 9 or full-length) to host
   : usb-send-config-descriptor ( -- )
-    usb-setup setup-length h@ 9 = if
-      9
-    else
+    usb-setup setup-length h@ config-data-size = if
       config-data-size
+    else
+      9
     then
     config-data usb-start-control-transfer-to-host
   ;
