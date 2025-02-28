@@ -213,7 +213,7 @@ begin-module line-internal
   ;
 
   \ Check for new line(s)
-  : check-new-line { scroll? -- }
+  : check-new-line { insert? -- }
     line @ line-count h@ 0> if
       line @ line-start-column h@ line @ line-count h@ + { full-columns }
       full-columns line @ line-terminal-columns h@ u/ { full-rows }
@@ -221,8 +221,12 @@ begin-module line-internal
       end-row line @ line-terminal-rows h@ >= if
         line @ line-start-row h@
         end-row 1+ line @ line-terminal-rows h@ -
-        scroll? if dup scroll-up then
+        dup scroll-up insert? not if return emit then
         - 0 max line @ line-start-row h!
+      else
+        full-columns line @ line-terminal-columns h@ umod 0= insert? not and if
+          cr
+        then
       then
     then
   ;
