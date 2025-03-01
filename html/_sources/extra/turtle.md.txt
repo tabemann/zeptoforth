@@ -68,7 +68,7 @@ Get the position of the turtle, where (0, 0) is in the center of the display. Th
 ##### `setheading`
 ( angle -- )
 
-Set the heading of the turtnle to *angle* degrees, where 0 is pointing right along the X dimension and 90 is pointing up along the Y dimension.
+Set the heading of the turtnle to *angle* degrees, where 0 is pointing up along the Y dimension and 90 is pointing left along the X dimension.
 
 ##### `hideturtle`
 ( -- )

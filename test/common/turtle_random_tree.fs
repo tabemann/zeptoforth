@@ -36,16 +36,20 @@ begin-module turtle-random-tree
   defer do-tree ( size level -- )
   :noname { level }
     level 0> if
-      size-vary 2@ vary-random { size' }
-      60 angle-vary 2@ vary-random { angle0' }
-      60 angle-vary 2@ vary-random { angle1' }
-      size' forward
-      angle0' left
-      size' 2 * 3 / level 1- do-tree
-      angle0' angle1' + right
-      size' 2 * 3 / level 1- do-tree
-      angle1' left
-      size' negate forward
+      dup 1 > if
+        size-vary 2@ vary-random { size' }
+        60 angle-vary 2@ vary-random { angle0' }
+        60 angle-vary 2@ vary-random { angle1' }
+        size' forward
+        angle0' left
+        size' 2 * 3 / level 1- do-tree
+        angle0' angle1' + right
+        size' 2 * 3 / level 1- do-tree
+        angle1' left
+        size' negate forward
+      else
+        dup forward negate forward
+      then
     else
       drop
     then
