@@ -33,6 +33,6 @@ begin-module turtle-tree
       60 left
       size negate forward
     then
-  ; is tre
+  ; is tree
 
 end-module
