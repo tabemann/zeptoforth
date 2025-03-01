@@ -23,34 +23,40 @@ begin-module turtle-random-tree
   turtle import
   tinymt32 import
 
-  : vary-random { n D: vary rng -- n' }
+  tinymt32-size buffer: rng
+  2variable angle-vary
+  2variable size-vary
+
+  : vary-random { n D: vary -- n' }
     n s>f { D: nd }
     rng tinymt32-generate-uint32 { random }
     random s>d 32 2lshift 33 2arshift vary f* nd f* nd d+ round-zero
   ;
 
-  defer do-tree ( size D: angle-vary D: size-vary level rng -- )
-  :noname { size D: angle-vary D: size-vary level rng }
+  defer do-tree ( size level -- )
+  :noname { level }
     level 0> if
-      size size-vary rng vary-random { size' }
-      60 angle-vary rng vary-random { angle0' }
-      60 angle-vary rng vary-random { angle1' }
+      size-vary 2@ vary-random { size' }
+      60 angle-vary 2@ vary-random { angle0' }
+      60 angle-vary 2@ vary-random { angle1' }
       size' forward
       angle0' left
-      size' 2 * 3 / angle-vary size-vary level 1- rng do-tree
+      size' 2 * 3 / level 1- do-tree
       angle0' angle1' + right
-      size' 2 * 3 / angle-vary size-vary level 1- rng do-tree
+      size' 2 * 3 / level 1- do-tree
       angle1' left
       size' negate forward
+    else
+      drop
     then
   ; is do-tree
 
-  : random-tree ( size D: angle-vary D: size-vary level seed -- )
-    tinymt32-size [: { size D: angle-vary D: size-vary level seed rng }
-      seed rng tinymt32-init
-      rng tinymt32-prepare-example
-      size angle-vary size-vary level rng do-tree
-    ;] with-aligned-allot
+  : random-tree { size D: angle-vary' D: size-vary' level seed -- }
+    seed rng tinymt32-init
+    angle-vary' angle-vary 2!
+    size-vary' size-vary 2!
+    rng tinymt32-prepare-example
+    size level do-tree
   ;
 
 end-module
