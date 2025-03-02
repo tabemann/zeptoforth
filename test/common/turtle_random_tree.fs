@@ -46,9 +46,9 @@ begin-module turtle-random-tree
         angle0' angle1' + right
         size' 2 * 3 / level 1- do-tree
         angle1' left
-        size' negate forward
+        penup size' negate forward pendown
       else
-        dup forward negate forward
+        dup forward penup negate forward pendown
       then
     else
       drop
