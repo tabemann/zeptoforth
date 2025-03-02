@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -209,6 +209,7 @@ $E000E010 constant SYST_CSR
   set-msi-4mhz
   set-pll-72mhz
   set-clk48
+  72_000_000 sysclk !
   set-brr-72mhz
   enable-usart2
   enable-int
