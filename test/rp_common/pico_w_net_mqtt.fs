@@ -60,8 +60,7 @@ begin-module mqtt-demo
   ;
 
   \ load stored passwords
-  \ 0 load
-
+  0 load
   \ mqtt test environment
   \ mosquitto server runs on 192.168.1.10:1883 
   \ and defined user/password: muser/mpassword
@@ -70,7 +69,7 @@ begin-module mqtt-demo
   \
   : run-demo { D: my-sid D: my-pass mqtt-server-ip }
     net-init my-sid my-pass connect-wpa2-ap show-info
-    my-interface @ mqtt-server-ip 1883 mqtt-client new
+    my-interface @ mqtt-server-ip 1883 mqtt-client init-mqtt-client
     s" muser" s" mpassword" mqtt-client credentials!
     s" /mychannel/mytopic" s" hello zeptoforth" 1 mqtt-client publish
     cr ." Publishing message..." 
