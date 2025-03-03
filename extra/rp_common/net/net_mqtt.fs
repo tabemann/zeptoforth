@@ -10,6 +10,7 @@ begin-module mqtt
 
     : x-out-of-range ." out of range" ;
     : x-header ." packet header exception" ;
+    : x-connection-failed ." connection failed" ;
     : x-alloc-endpoint ." unable to allocate TCP endpoint" ;
 
     \ 800 constant buffer-max-size
@@ -32,6 +33,13 @@ begin-module mqtt
     %10000000 constant user-flag
     %01000000 constant password-flag
     %00000010 constant clean-session-flag
+
+    begin-structure ack-packet-size
+      cfield: aps-header
+      cfield: aps-msglen
+      cfield: aps-ack-flag
+      cfield: aps-retval
+    end-structure
 
     \ offset of optional header and/or payload
     \ 2 value offset-ohp
@@ -127,40 +135,57 @@ begin-module mqtt
       \ password
       index swap move
       index temp-size + to index
-      \ return value to stack
+      \ return value
       c-addr dup index swap -
     ;
 
     \ Compute publish packet length
-    : pub-packet-size ( D: mqtt-topic D: mqtt-message -- D: mqtt-topic D: mqtt-message size )
-      dup 3 pick +
-      dup 5 + 127 > if 6 + else 5 + then
+    : pub-packet-size ( D: mqtt-topic D: mqtt-message mqtt-message-id -- D: mqtt-topic D: mqtt-message mqtt-message-id size )
+      1 pick 4 pick +
+      dup 4 + 127 > if 5 + else 4 + then
     ;
 
-    \ TODO
-    : pub-packet-init
+    \ Construct publish packet
+    : pub-packet-init 
       { D: mqtt-topic D: mqtt-message mqtt-message-id size c-addr -- c-addr size }
       c-addr size 0 fill
       \ header
+      cmd-publish-message cmd-ack-deliver or c-addr c!
+      c-addr 1 + { index }
       \ msg len
+      size encode-vbi dup { temp-size } index bytes>
+      index temp-size + to index
       \ topic length
+      mqtt-topic dup >hi-low 2 index bytes>
+      index 2 + to index
+      dup to temp-size
       \ topic
+      index swap move
+      index temp-size + to index
       \ message id
-      \ mnessage
-      c-addr size
+      mqtt-message-id >hi-low 2 index bytes>
+      index 2 + to index
+      \ message
+      mqtt-message dup to temp-size index swap move
+      index temp-size + to index
+      \ return value 
+      c-addr dup index swap -
+    
     ;
 
-    \ TODO
     \ Connect acknowledge?
-    : con-ack? ( c-addr n -- f) 
-        true
+    : con-ack? { c-addr n -- f }
+      c-addr aps-header c@ $20 = not triggers x-header
+      c-addr aps-msglen c@ $02 = not triggers x-header
+      c-addr aps-ack-flag c@ $00 = c-addr aps-retval c@ $00 = and
     ;
 
-    \ TODO
     \ Publish acknowledge?
-    : pub-ack? ( c-addr n -- f )
-        \ todo
-        true
+    : pub-ack? { c-addr n message-id -- f }
+      \ c-addr c-addr n + dump
+      c-addr aps-header c@ $40 = not triggers x-header
+      c-addr aps-msglen c@ $02 = not triggers x-header
+      c-addr aps-ack-flag c@ c-addr aps-retval c@ hi-low> message-id =
     ;
 
   end-module> import
@@ -332,19 +357,12 @@ begin-module mqtt
 
             endpoint self iface @
             self mqtt-client-id@ self mqtt-user@ self mqtt-password@
-            con-packet-size dup 2 + cr ." stack20: " .s
-            [: { buffer }
-              \ [ debug? ] [if] cr ." mqtt-packet-size: " mqtt-packet-size . [then]
-              cr ." stack21: " .s 
+            con-packet-size dup 2 + [: { buffer }
               buffer con-packet-init
-
               2swap
-              \ endpoint self iface @ send-tcp-endpoint
-              cr ." stack22: " .s
               send-tcp-endpoint
             ;] with-allot
             
-            \ endpoint self iface @ send-tcp-endpoint 
             recv-connect-ack self com-state !
             
           endof
@@ -353,27 +371,15 @@ begin-module mqtt
             [ debug? ] [if] self class-> ." handle-endpoint recv-connect-ack" [then] 
             
             endpoint endpoint-rx-data@ con-ack?
-           
+            if cr ." MQTT LOGIN OK" else ." MQTT LOGIN FAILED" then
+
             endpoint self iface @
             self mqtt-topic-addr @ self mqtt-topic-size @ 
-            self mqtt-message-addr @ self mqtt-message-size @ 
-            self pub-packet-size dup [: { buffer }
-              \ header
-              \ cmd-publish-message packet c!
-              \ msg len
-              \ mqtt-packet-size encode-vbi packet 1+ bytes>
-              \ topic length
-              \ dup >hi-low packet offset-mqtt-topic + 2 bytes>
-              \ topic
-              \ packet offset-mqtt-topic + 2 + swap move                
-              \ message length
-              \ dup >hi-low packet offset-mqtt-message + 2 bytes>
-              \ message
-              \ packet offset-mqtt-message + 2 + swap move
-              
-              \ endpoint self iface @ send-tcp-endpoint
+            self mqtt-message-addr @ self mqtt-message-size @ 1
+            pub-packet-size dup 2 + [: { buffer }
+              buffer pub-packet-init
+              2swap
               send-tcp-endpoint 
-
             ;] with-allot
            
             recv-publish-ack self com-state !
@@ -383,18 +389,19 @@ begin-module mqtt
             \ Receive publish ack and send disconnect request
             [ debug? ] [if] self class-> ." handle-endpoint recv-publish-ack" [then]
             
-            endpoint endpoint-rx-data@ pub-ack?
+            endpoint endpoint-rx-data@ 1 pub-ack?
             if cr ." PUBLISHED" else ." NOT PUBLISHED" then
 
             endpoint self iface @
-            2 [: { packet }
+            2 [: { buffer  }
                 \ header
-                cmd-disconnect packet c!
+                cmd-disconnect buffer c!
                 \ msg len
-                0 packet 1+ c!
-                packet 2 send-tcp-endpoint
+                0 buffer 1+ c!
+                buffer 2 
+                2swap
+                send-tcp-endpoint
             ;] with-allot
-            \ self discon-packet@ endpoint self iface @ send-tcp-endpoint
             
             close-connection self com-state !
           endof
@@ -452,7 +459,6 @@ begin-module mqtt
 
   : test-1
     s" client-id_1-2" s" muser" s" mpassword" mqtt-internal::con-packet-size
-    \ mqtt-client con-packet-size
   ;
 
   : test-2
@@ -466,5 +472,17 @@ begin-module mqtt
     ;] with-allot
   ;
 
+  : test-3
+    s" mychan/mytopic" s" hello world" 1 mqtt-internal::pub-packet-size
+  ;
+
+  : test-4
+    s" mychan/mytopic" s" hello world" 1 mqtt-internal::pub-packet-size
+    dup 2 + .s [: { buffer }
+      buffer mqtt-internal::pub-packet-init
+
+      over + dump
+    ;] with-allot
+  ;
 
 end-module

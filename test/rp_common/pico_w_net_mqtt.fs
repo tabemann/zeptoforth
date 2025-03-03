@@ -75,4 +75,8 @@ begin-module mqtt-demo
     cr ." Publishing message..." 
   ;
 
+  : publish-demo { D: topic D: msg -- }
+    topic msg 1 mqtt-client publish
+  ;
+
 end-module
