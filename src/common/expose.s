@@ -641,6 +641,14 @@ _current_unit_start:
         ldr tos, =current_unit_start
         bx lr
         end_inlined
+
+	@@ Get the sysclk variable
+	define_word "sysclk", visible_flag
+_sysclk:
+	push_tos
+	ldr tos, =sysclk
+	bx lr
+	end_inlined
         
 	.ltorg
 	

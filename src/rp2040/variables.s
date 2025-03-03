@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2025 Travis Bemann
 @ Copyright (c) 2024 Paul Koning
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,5 @@
 	allot core_waited, 4 * cpu_count
 
 	allot hold_core, 4 * cpu_count
-
-	allot sysclk, 4
 
 	allot pico_uuid, 12

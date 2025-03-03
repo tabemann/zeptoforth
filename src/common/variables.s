@@ -235,3 +235,6 @@
 
         @@ The start of the current compilation unit (e.g. word, quotation)
         allot current_unit_start, 4
+
+        @@ The system clock speed in Hz
+        allot sysclk, 4
