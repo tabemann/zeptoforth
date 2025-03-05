@@ -21,7 +21,6 @@ begin-module mqtt-demo
   variable my-interface
   0 value my-outgoing-endpoint
 
-
   <mqtt-client> class-size buffer: mqtt-client
 
   : net-init
@@ -60,23 +59,37 @@ begin-module mqtt-demo
   ;
 
   \ load stored passwords
-  0 load
+  \ 0 load
   \ mqtt test environment
   \ mosquitto server runs on 192.168.1.10:1883 
   \ and defined user/password: muser/mpassword
   \
-  \ example: s" mysid" s" my-pass" 192 168 1 10 net-misc::make-ipv4-addr run-demo
-  \
-  : run-demo { D: my-sid D: my-pass mqtt-server-ip }
+  \ example: 
+  \ s" mysid" s" my-pass" init-demo
+  \ 192 168 1 10 net-misc::make-ipv4-addr init-mqtt-demo
+  \ run-demo
+  : init-demo { D: my-sid D: my-pass }
     net-init my-sid my-pass connect-wpa2-ap show-info
-    my-interface @ mqtt-server-ip 1883 mqtt-client init-mqtt-client
-    s" muser" s" mpassword" mqtt-client credentials!
-    s" /mychannel/mytopic" s" hello zeptoforth" 1 mqtt-client publish
-    cr ." Publishing message..." 
   ;
 
-  : publish-demo { D: topic D: msg -- }
+  : init-mqtt-demo { mqtt-server-ip }
+    my-interface @ mqtt-server-ip 1883 mqtt-client init-mqtt-client
+  ;
+
+  : run-demo
+    s" muser" s" mpassword" mqtt-client credentials!
+    s" /mychannel/mytopic" s" hello zeptoforth" 1 mqtt-client publish
+    cr ." Publishing message started..." 
+  ;
+
+  : run-demo-again { D: topic D: msg -- }
+    cr ." Publishing new message started with old credentials"
     topic msg 1 mqtt-client publish
+  ;
+
+  : run-demo-fail
+    s" badusername" s" badpassword" mqtt-client credentials!
+    s" /mychannel/mytopic" s" fail message" 1 mqtt-client publish
   ;
 
 end-module
