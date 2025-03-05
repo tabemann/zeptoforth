@@ -81,17 +81,17 @@ begin-module usb-core
     \ USB_EP0_MAX
     $40 c,
     \ USB_VENDOR_ID
-    $8A c, $2E c,
+    $09 c, $12 c,
     \ USB_PRODUCT_ID
-    $0A c, $00 c,
+    $CC c, $CC c,
     \ USB_PRODUCT_BCD
     $00 c, $02 c,
-    \ STRING_MANUFACTURER (0 = none)
-    $00 c,
-    \ STRING_PRODUCT      (0 = none)
-    $00 c,
-    \ STRING_SERIAL       (0 = none)
-    $00 c,
+    \ STRING_MANUFACTURER
+    $01 c,
+    \ STRING_PRODUCT
+    $02 c,
+    \ STRING_SERIAL
+    $03 c,
     \ CONFIGURATIONS
     $01 c,
   here device-data - cell align, constant device-data-size
@@ -127,6 +127,17 @@ begin-module usb-core
     \ Language String for LANGUAGE_ENGLISH_US
     $04 c, $03 c, $09 c, $04 c,
   here language-string-data - cell align, constant language-string-data-size
+
+  \ String descriptors for requested PID CCCC
+  \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
+  : usb-string-1 ( -- addr ) c" zeptoforth" ;
+  : usb-string-2 ( -- addr ) c" zeptoforth CDC Console" ;
+ 
+  \ USB ASCII Character generated serial number buffer 
+  17 buffer: usb-string-3 \ (size byte + 16 ASCII Characters)
+  
+  \ USB ASCII to unicode string conversion buffer
+  64 buffer: unicode-buffer
 
   \ USB CDC/ACM Class line state notification descriptor
   begin-structure line-state-notification-descriptor
@@ -339,27 +350,29 @@ begin-module usb-core
   ;
 
   \ Set buffer available to Host - final step in sending data packet 
-  : usb-set-buffer-available { endpoint -- }
+  : usb-set-buffer-available { buffer-available endpoint -- }
+    [ rp2040? ] [if] 
     code[ b> >mark b> >mark b> >mark b> >mark b> >mark b> >mark ]code
-    USB_BUF_CTRL_AVAIL endpoint buffer-control @ bis!
+    [then]
+    buffer-available endpoint buffer-control @ bis!
   ;
 
   \ Mark buffer as full and set to available
   : usb-dispatch-buffer { endpoint -- }
     USB_BUF_CTRL_FULL endpoint buffer-control @ bis!
-    endpoint usb-set-buffer-available
+    USB_BUF_CTRL_AVAIL endpoint usb-set-buffer-available
   ;
 
   \ Receive zero-length-packet (ZLP) from host - control and function endpoints
   : usb-receive-zero-length-packet  { endpoint -- }
     endpoint next-pid @ endpoint buffer-control @ !
-    endpoint usb-set-buffer-available
+    USB_BUF_CTRL_AVAIL endpoint usb-set-buffer-available
   ;
 
   \ Send zero-length-packet (ZLP) to host - control and function endpoints
   : usb-send-zero-length-packet { endpoint -- }
     endpoint next-pid @ USB_BUF_CTRL_FULL or endpoint buffer-control @ !
-    endpoint usb-set-buffer-available
+    USB_BUF_CTRL_AVAIL endpoint usb-set-buffer-available
   ;
 
   \ Send stall packet for unsupported requests
@@ -450,33 +463,46 @@ begin-module usb-core
     false EP0-to-Host endpoint-busy? !
   ;
 
-  \ Send device descriptor (default size 8 or full-length) to host
+  \ Send device descriptor to host
   : usb-send-device-descriptor ( -- )
-    usb-setup setup-length h@ device-data-size = if
-      device-data-size
-    else
-      8
-    then
+    usb-setup setup-length h@ device-data-size min
     device-data usb-start-control-transfer-to-host
   ;
   
-  \ Send configuration descriptor (default size 9 or full-length) to host
+  \ Send configuration descriptor to host
   : usb-send-config-descriptor ( -- )
-    usb-setup setup-length h@ config-data-size = if
-      config-data-size
-    else
-      9
-    then
+    usb-setup setup-length h@ config-data-size min
     config-data usb-start-control-transfer-to-host
   ;
 
   \ Send language string descriptor to host
+  : usb-send-language-string-to-host ( -- )
+    4 language-string-data usb-start-control-transfer-to-host 
+  ;
+
+  \ Send usb string descriptor to host as unicode characters
+  : usb-send-string-descriptor-to-host { string-descriptor -- }
+    unicode-buffer 64 0 fill \ clear unicode buffer (64 bytes)
+    string-descriptor count 31 min { string-length } drop
+    string-length 2 * 2 + { unicode-bytes } 
+    string-descriptor 1 + { string-start }
+    unicode-bytes unicode-buffer 0 + c! \ descriptor length
+    USB_DT_STRING unicode-buffer 1 + c! \ descriptor type 3 = string
+    string-length 0 do    
+     string-start i + c@ unicode-buffer 2 + i 2 * + c!
+    loop
+    unicode-bytes unicode-buffer usb-start-control-transfer-to-host
+  ;
+  
+  \ Send requested string descriptor to host
   : usb-send-string-descriptor ( -- )
-    usb-setup setup-index h@ 0 = if
-      4 language-string-data usb-start-control-transfer-to-host
-    else
+    usb-setup setup-descriptor-index c@ case
+      0 of usb-send-language-string-to-host endof
+      1 of usb-string-1 usb-send-string-descriptor-to-host endof
+      2 of usb-string-2 usb-send-string-descriptor-to-host endof
+      3 of usb-string-3 usb-send-string-descriptor-to-host endof
       usb-ack-control-in-request
-    then
+    endcase
   ;
 
   \ Stall incoming request we cannot process
@@ -912,10 +938,23 @@ begin-module usb-core
     begin RESETS_RESET_DONE @ not RESETS_USBCTRL and while repeat
   ;
 
+  \ Simulate a counted string for USB serial number enumeration
+  : generate-usb-serial ( -- )
+    base @ { orig-base } 
+    [: $10 base !
+    $10 usb-string-3 c! \ simulate 16-byte counted string
+    unique-id <# $10 0 do # loop #> \ 16 hexadecimal characters
+    usb-string-3 1 + swap move
+    ;] try
+    orig-base base !
+    ?raise
+  ;
+ 
   \ Initialize USB hardware and variables
   : init-usb ( -- )
     init-port-signals
     reset-usb-hardware
+    generate-usb-serial 
     usb-init-setup-packet
     0 sof-callback-handler !
     USB_DPRAM_Base dpram-size 0 fill
