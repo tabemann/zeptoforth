@@ -1,7 +1,7 @@
 \ mqtt module
 begin-module mqtt
 
-  oo import 
+  sema import
 
   \ debug flag
   false constant debug?
@@ -34,6 +34,9 @@ begin-module mqtt
       cfield: aps-ack-flag
       cfield: aps-retval
     end-structure
+
+    sema-size aligned-buffer: pub-sema
+    1 1 pub-sema init-sema
 
     \ Copy byte to buffer
     : byte> ( byte c-addr -- ) { byte c-addr -- }
@@ -178,7 +181,7 @@ begin-module mqtt
 
   end-module> import
 
-
+  oo import
   net-consts import
   net import
   endpoint-process import
@@ -348,6 +351,7 @@ begin-module mqtt
       endpoint endpoint-tcp-state@ TCP_CLOSED = if
         cr ." CONNECTION CLOSED" cr
         none self com-state !
+        pub-sema give
       then
       endpoint self iface @ endpoint-done
 
@@ -357,28 +361,28 @@ begin-module mqtt
     :noname { D: topic D: message message-id self -- }
 
       [ debug? ] [if] self class-> ." publish method " [then]
+     
+      \ Block process
+      pub-sema take
       
-      self com-state @ none <> if 
-        cr ." PUBLISHING IN PROGRESS" cr
-      else
-        message self mqtt-message-size ! self mqtt-message-addr !
-        [ debug? ] [if] self class-> ." publish / message:" space 
-          self mqtt-message-addr @ self mqtt-message-size @ type 
-        [then]
+      message self mqtt-message-size ! self mqtt-message-addr !
+      [ debug? ] [if] self class-> ." publish / message:" space 
+        self mqtt-message-addr @ self mqtt-message-size @ type 
+      [then]
 
-        topic self mqtt-topic-size ! self mqtt-topic-addr !
-        [ debug? ] [if] self class-> ." publish / topic:" space
-          self mqtt-topic-addr @ self mqtt-topic-size @  type 
-        [then]
+      topic self mqtt-topic-size ! self mqtt-topic-addr !
+      [ debug? ] [if] self class-> ." publish / topic:" space
+        self mqtt-topic-addr @ self mqtt-topic-size @  type 
+      [then]
    
-        [ debug? ] [if] self class-> ." publish / allocate endpoint " [then]
+      [ debug? ] [if] self class-> ." publish / allocate endpoint " [then]
+     
+      EPHEMERAL_PORT self mqtt-server-ip @ self mqtt-server-port @
+      self iface @ allocate-tcp-connect-ipv4-endpoint 
+      if cr ." CONNECTED" else cr ." NOT CONNECTED" then
       
-        EPHEMERAL_PORT self mqtt-server-ip @ self mqtt-server-port @
-        self iface @ allocate-tcp-connect-ipv4-endpoint 
-        if cr ." CONNECTED" else cr ." NOT CONNECTED" then
+      send-connect-req self com-state !
       
-        send-connect-req self com-state !
-      then
     ; define publish
 
   end-implement
