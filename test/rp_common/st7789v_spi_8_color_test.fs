@@ -51,7 +51,7 @@ begin-module st7789v-spi-8-color-test
 
   \ Initialize the test:
   : init-test
-    lcd-din lcd-sck lcd-rst lcd-dc lcd-cs lcd-bl
+    lcd-din lcd-sck lcd-dc lcd-cs lcd-bl lcd-rst
     my-buffer false my-cols my-rows my-spi
     <st7789v-8-spi> my-display init-object
     my-display clear-pixmap
