@@ -202,9 +202,11 @@ begin-module mqtt
     cell member mqtt-endpoint
     cell member mqtt-server-ip
     cell member mqtt-server-port
-    cell member mqtt-client-id
-    cell member mqtt-user
-    cell member mqtt-password
+    9 cell align member mqtt-client-id
+    cell member mqtt-user-addr
+    cell member mqtt-user-size
+    cell member mqtt-password-addr
+    cell member mqtt-password-size
     cell member mqtt-topic-addr
     cell member mqtt-topic-size
     cell member mqtt-message-addr
@@ -218,9 +220,6 @@ begin-module mqtt
     method init-mqtt-client
     \ setters and gettesr
     method credentials!
-    method mqtt-client-id@
-    method mqtt-user@
-    method mqtt-password@
     \ util
     method publish
   end-class
@@ -244,29 +243,14 @@ begin-module mqtt
 
     \ Set user name, password and generate client id 
     :noname { D: user-str D: password-str self -- }
-      user-str cfix self mqtt-user !
-      password-str cfix self mqtt-password !
+      user-str self mqtt-user-size ! self mqtt-user-addr !
+      password-str self mqtt-password-size ! self mqtt-password-addr !
       self rng::random 20 [: { buffer }  
         base @ { my-base } hex 
-        buffer swap format-unsigned cfix swap mqtt-client-id !
+        buffer swap format-unsigned rot mqtt-client-id string!
         my-base base !
       ;] with-allot
     ; define credentials!
-
-    \ Get client-id
-    :noname { self -- client-id-addr client-id-size }
-      self mqtt-client-id @ count
-    ; define mqtt-client-id@
-
-    \ Get user name
-    :noname { self -- user-addr user-size }
-      self mqtt-user @ count
-    ; define mqtt-user@
-
-    \ Get password
-    :noname { self -- password-addr password-size }
-      self mqtt-password @ count
-    ; define mqtt-password@
 
     \ MQTT endpoint handler
     :noname { endpoint self }
@@ -283,8 +267,10 @@ begin-module mqtt
             [then]
 
             endpoint self iface @
-            self mqtt-client-id@ self mqtt-user@ self mqtt-password@
-            6dup con-packet-size dup 2 + [: { buffer }
+            self mqtt-client-id string@ 
+            self mqtt-user-addr @ self mqtt-user-size @
+            self mqtt-password-addr @ self mqtt-password-size @ 6dup 
+            con-packet-size dup 2 + [: { buffer }
               buffer con-packet-init
               2swap
               send-tcp-endpoint
@@ -362,7 +348,7 @@ begin-module mqtt
 
       [ debug? ] [if] self class-> ." publish method " [then]
      
-      \ Block process
+      \ Block publishing
       pub-sema take
       
       message self mqtt-message-size ! self mqtt-message-addr !
