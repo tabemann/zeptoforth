@@ -9,10 +9,10 @@ begin-module mqtt
   begin-module mqtt-internal
 
     : x-out-of-range ." out of range" ;
-    : x-header-con-ack ." connect ack packet header exception" ;
-    : x-header-pub-ack ." publish ack packet header exception" ;
-    : x-connection-failed ." connection failed" ;
-    : x-alloc-endpoint ." unable to allocate TCP endpoint" ;
+    \ : x-header-con-ack ." connect ack packet header exception" ;
+    \ : x-header-pub-ack ." publish ack packet header exception" ;
+    \ : x-connection-failed ." connection failed" ;
+    \ : x-alloc-endpoint ." unable to allocate TCP endpoint" ;
 
     \ header flags
     %00010000 constant cmd-connect
@@ -71,9 +71,14 @@ begin-module mqtt
       drop size
     ; 
 
+    \ Sixfold dup
+    : 6dup ( d1 d2 d3 -- d1 d2 d3 d1 d2 d3 )
+      3 0 ?do 5 pick 5 pick loop
+    ;
+
     \ Compute packet length
-    : con-packet-size ( D: client-id D: mqtt-user D: mqtt-password -- D: client-id D: mqtt-user D: mqtt-passsword size )
-      dup 3 pick 6 pick + +  
+    : con-packet-size ( D: client-id D: mqtt-user D: mqtt-password -- size )
+      swap drop + swap drop + swap drop
       dup 16 + 127 > if 17 + else 16 + then
     ;
 
@@ -120,8 +125,8 @@ begin-module mqtt
     ;
 
     \ Compute publish packet length
-    : pub-packet-size ( D: mqtt-topic D: mqtt-message mqtt-message-id -- D: mqtt-topic D: mqtt-message mqtt-message-id size )
-      1 pick 4 pick +
+    : pub-packet-size ( D: mqtt-topic D: mqtt-message -- size )
+      swap drop + swap drop
       dup 4 + 127 > if 5 + else 4 + then
     ;
 
@@ -276,7 +281,7 @@ begin-module mqtt
 
             endpoint self iface @
             self mqtt-client-id@ self mqtt-user@ self mqtt-password@
-            con-packet-size dup 2 + [: { buffer }
+            6dup con-packet-size dup 2 + [: { buffer }
               buffer con-packet-init
               2swap
               send-tcp-endpoint
@@ -293,8 +298,8 @@ begin-module mqtt
             if cr ." MQTT LOGIN OK" cr
               endpoint self iface @
               self mqtt-topic-addr @ self mqtt-topic-size @ 
-              self mqtt-message-addr @ self mqtt-message-size @ 1
-              pub-packet-size dup 2 + [: { buffer }
+              self mqtt-message-addr @ self mqtt-message-size @ 4dup 
+              pub-packet-size 1 swap dup 2 + [: { buffer }
                 buffer pub-packet-init
                 2swap
                 send-tcp-endpoint 
@@ -352,25 +357,28 @@ begin-module mqtt
     :noname { D: topic D: message message-id self -- }
 
       [ debug? ] [if] self class-> ." publish method " [then]
+      
+      self com-state @ none <> if 
+        cr ." PUBLISHING IN PROGRESS" cr
+      else
+        message self mqtt-message-size ! self mqtt-message-addr !
+        [ debug? ] [if] self class-> ." publish / message:" space 
+          self mqtt-message-addr @ self mqtt-message-size @ type 
+        [then]
 
-      message self mqtt-message-size ! self mqtt-message-addr !
-      [ debug? ] [if] self class-> ." publish / message:" space 
-        self mqtt-message-addr @ self mqtt-message-size @ type 
-      [then]
-
-      topic self mqtt-topic-size ! self mqtt-topic-addr !
-      [ debug? ] [if] self class-> ." publish / topic:" space
-        self mqtt-topic-addr @ self mqtt-topic-size @  type 
-      [then]
+        topic self mqtt-topic-size ! self mqtt-topic-addr !
+        [ debug? ] [if] self class-> ." publish / topic:" space
+          self mqtt-topic-addr @ self mqtt-topic-size @  type 
+        [then]
    
-      [ debug? ] [if] self class-> ." publish / allocate endpoint " [then]
+        [ debug? ] [if] self class-> ." publish / allocate endpoint " [then]
       
-      EPHEMERAL_PORT self mqtt-server-ip @ self mqtt-server-port @
-      self iface @ allocate-tcp-connect-ipv4-endpoint 
-      if cr ." CONNECTED" else cr ." NOT CONNECTED" then
+        EPHEMERAL_PORT self mqtt-server-ip @ self mqtt-server-port @
+        self iface @ allocate-tcp-connect-ipv4-endpoint 
+        if cr ." CONNECTED" else cr ." NOT CONNECTED" then
       
-      send-connect-req self com-state !
- 
+        send-connect-req self com-state !
+      then
     ; define publish
 
   end-implement
