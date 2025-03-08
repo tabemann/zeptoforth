@@ -3135,7 +3135,6 @@ begin-module net
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv6-rst
 
     \ Send a basic IPv6 TCP packet
@@ -3410,7 +3409,6 @@ begin-module net
       self send-ipv6-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-      endpoint free-endpoint
     ; define send-ipv6-rst-for-ack
 
     \ Process an IPv6 FIN packet for a TCP_ESTABLISHED state
