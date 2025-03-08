@@ -3392,7 +3392,7 @@ begin-module net
     
     \ Process an IPv6 ACK packet in TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ 1+ = if
         TCP_FIN_WAIT_2 endpoint endpoint-tcp-state!
       else
@@ -3413,7 +3413,7 @@ begin-module net
     \ Process an IPv6 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self process-ipv6-basic-ack
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
         endpoint self put-ready-endpoint
@@ -3960,7 +3960,7 @@ begin-module net
         src-0 src-1 src-2 src-3
         dest-0 dest-1 dest-2 dest-3
         buf udp-header-size bytes + 0 udp-checksum
-        compute-ipv6-udp-checksum rev16 buf udp-checksum hunaligned!
+        compute-ipv6-udp-checksum rev16 buf udp-checksum h!
       ;] self construct-and-send-ipv6-packet-with-src-addr
     ; define send-ipv6-udp-packet-raw
 
@@ -3980,7 +3980,7 @@ begin-module net
           self intf-ipv6-addr@
           dest-0 dest-1 dest-2 dest-3
           buf udp-header-size bytes + 0 udp-checksum
-          compute-ipv6-udp-checksum rev16 buf udp-checksum hunaligned!
+          compute-ipv6-udp-checksum rev16 buf udp-checksum h!
         ;] self construct-and-send-ipv6-packet
       else
         2drop false
