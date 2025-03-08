@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module net-ipv6
+begin-module net-ipv4
 
   oo import
   frame-interface import
@@ -32,11 +32,8 @@ begin-module net-ipv6
   chan import
   heap import
 
-  \ Out of range prefix length
-  : x-out-of-range-prefix-len ( -- ) ." out of range prefix length" cr ;
-
   \ zeptoIP internals
-  begin-module net-ipv6-internal
+  begin-module net-ipv4-internal
 
     \ Outstanding packet record
     <object> begin-class <out-packets>
@@ -260,7 +257,7 @@ begin-module net-ipv6
         dup out-packet-bytes @ over out-packet-offset @ - over
         out-packet-window @ small-send-bytes max min
         swap out-packet-mss @ min
-        [ mtu-size ipv6-header-size - tcp-header-size - ]
+        [ mtu-size ipv4-header-size - tcp-header-size - ]
         literal min
         [ debug? ] [if]
           [: cr ." === next-packet-size: " dup . ;] debug-hook execute
@@ -352,13 +349,13 @@ begin-module net-ipv6
       max-in-packets 1 lshift member in-packet-sizes
 
       \ The incoming UDP packets source IP address
-      max-in-packets ipv6-addr-size * member in-packet-ipv6-addrs
+      max-in-packets cells member in-packet-ipv4-addrs
 
       \ The incoming UDP packets source ports
       max-in-packets 1 lshift member in-packet-ports
 
       \ The pending UDP packet source IP address
-      ipv6-addr-size member in-packet-current-ipv6-addr
+      cell member in-packet-current-ipv4-addr
 
       \ The pending UDP packet source port
       cell member in-packet-current-port
@@ -409,7 +406,7 @@ begin-module net-ipv6
       method waiting-in-bytes@ ( self -- bytes )
 
       \ Get the incoming packets UDP remote address and port
-      method in-packets-udp-remote@ ( self -- ipv6-addr port )
+      method in-packets-udp-remote@ ( self -- ipv4-addr port )
       
       \ Push data
       \ method push-packets ( seq self -- )
@@ -437,7 +434,7 @@ begin-module net-ipv6
 
       \ Get the last seq
       method in-packet-seq@ ( self -- seq )
-      
+
       \ Promote incoming data to pending
       method promote-in-packets ( self -- bytes )
 
@@ -475,9 +472,9 @@ begin-module net-ipv6
         0 self in-packet-count !
         self in-packet-seqs max-in-packets cells 0 fill
         self in-packet-sizes max-in-packets 1 lshift 0 fill
-        self in-packet-ipv6-addrs max-in-packets ipv6-addr-size * 0 fill
+        self in-packet-ipv4-addrs max-in-packets cells 0 fill
         self in-packet-ports max-in-packets 1 lshift 0 fill
-        0 0 0 0 self in-packet-current-ipv6-addr ipv6-unaligned!
+        0 self in-packet-current-ipv4-addr !
         0 self in-packet-current-port h!
         0 self in-packet-offset !
         0 self pending-in-packet-offset !
@@ -498,9 +495,9 @@ begin-module net-ipv6
         0 self in-packet-count !
         self in-packet-seqs max-in-packets cells 0 fill
         self in-packet-sizes max-in-packets 1 lshift 0 fill
-        self in-packet-ipv6-addrs max-in-packets ipv6-addr-size * 0 fill
+        self in-packet-ipv4-addrs max-in-packets cells 0 fill
         self in-packet-ports max-in-packets 1 lshift 0 fill
-        0 0 0 0 self in-packet-current-ipv6-addr ipv6-unaligned!
+        0 self in-packet-current-ipv4-addr !
         0 self in-packet-current-port h!
         0 self in-packet-offset !
         0 self pending-in-packet-offset !
@@ -582,9 +579,9 @@ begin-module net-ipv6
       ; define join-complete-packets
 
       \ Add incoming TCP packet
-      :noname { addr bytes push? seq self -- }
+      :noname { addr bytes push? seq self -- }        
         seq self last-in-packet-seq !
-        
+
         seq self first-in-packet-seq @ - { diff }
 
         [ debug? ] [if]
@@ -741,14 +738,13 @@ begin-module net-ipv6
       ; define insert-tcp-packet
       
       \ Add incoming UDP packet
-      :noname { addr bytes src0 src1 src2 src3 src-port self -- }
+      :noname { addr bytes src-addr src-port self -- }
         self in-packet-offset @ bytes + self in-packet-bytes @ <=
         self in-packet-count @ max-in-packets < and if
           addr self in-packet-addr @ self in-packet-offset @ + bytes move
           bytes self in-packet-offset +!
           bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
-          src0 src1 src2 src3 self in-packet-ipv6-addrs
-          self in-packet-count @ ipv6-addr-size * + !
+          src-addr self in-packet-ipv4-addrs self in-packet-count @ cells + !
           src-port self in-packet-ports self in-packet-count @ 1 lshift + h!
           1 self in-packet-count +!
         then
@@ -759,8 +755,8 @@ begin-module net-ipv6
       ; define add-in-udp-packet
       
       \ Get the incoming packets UDP remote address and port
-      :noname ( self -- ipv6-addr0 ipv6-addr1 ipv6-addr2 ipv6-addr3 port )
-        dup in-packet-current-ipv6-addr ipv6-unaligned@
+      :noname ( self -- ipv4-addr port )
+        dup in-packet-current-ipv4-addr @
         swap in-packet-current-port h@
       ; define in-packets-udp-remote@
 
@@ -793,7 +789,7 @@ begin-module net-ipv6
       :noname ( self -- seq )
         last-in-packet-seq @
       ; define in-packet-seq@
-
+      
       \ Get whether there is waiting data
       :noname ( self -- waiting? )
         dup pending-in-packet-offset @ swap in-packet-offset @ <>
@@ -807,22 +803,20 @@ begin-module net-ipv6
         else
           self in-packet-count @ 0> if
             self in-packet-sizes h@ self pending-in-packet-offset !
-            self in-packet-ipv6-addrs ipv6-unaligned@
-            self in-packet-current-ipv6-addr ipv6-unaligned!
+            self in-packet-ipv4-addrs @ self in-packet-current-ipv4-addr !
             self in-packet-ports h@ self in-packet-current-port !
             -1 self in-packet-count +!
             self in-packet-count @ 0> if
               self in-packet-sizes 2 + self in-packet-sizes
               self in-packet-count @ 1 lshift move
-              self in-packet-ipv6-addrs ipv6-addr-size +
-              self in-packet-ipv6-addrs
-              self in-packet-count @ ipv6-addr-size * move
+              self in-packet-ipv4-addrs cell+ self in-packet-ipv4-addrs
+              self in-packet-count @ cells move
               self in-packet-ports 2 + self in-packet-ports
               self in-packet-count @ 1 lshift move
             then
           else
             0 self pending-in-packet-offset !
-            0 0 0 0 self in-packet-current-ipv6-addr ipv6-unaligned!
+            0 self in-packet-current-ipv4-addr !
             0 self in-packet-current-port !
           then
         then
@@ -904,7 +898,7 @@ begin-module net-ipv6
         self in-packet-offset @ pending - move
         pending negate self in-packet-offset +!
         0 self pending-in-packet-offset !
-        0 0 0 0 self in-packet-current-ipv6-addr ipv6-unaligned!
+        0 self in-packet-current-ipv4-addr !
         0 self in-packet-current-port h!
 
         [ debug? ] [if]
@@ -948,8 +942,8 @@ begin-module net-ipv6
     \ The DNS address cache
     <object> begin-class <dns-cache>
       
-      \ The cached IPv6 addresses
-      max-dns-cache ipv6-addr-size * member cached-ipv6-addrs
+      \ The cached IPv4 addresses
+      max-dns-cache cells member cached-ipv4-addrs
 
       \ The cached DNS names
       max-dns-cache cells member cached-dns-names
@@ -957,10 +951,10 @@ begin-module net-ipv6
       \ The IP address identification codes
       max-dns-cache cells member cached-dns-idents
       
-      \ The cached IPv6 ages
+      \ The cached IPv4 ages
       max-dns-cache cells member cached-dns-ages
 
-      \ The IPv6 response codes
+      \ The IPv4 response codes
       max-dns-cache cells member cached-dns-responses
 
       \ The newest age
@@ -973,9 +967,9 @@ begin-module net-ipv6
       dns-cache-heap-block-size dns-cache-heap-block-count heap-size
       member dns-cache-name-heap
 
-      \ Look up an IPv6 address by a DNS name
-      method lookup-ipv6-addr-by-dns
-      ( c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 response found? )
+      \ Look up an IPv4 address by a DNS name
+      method lookup-ipv4-addr-by-dns
+      ( c-addr bytes self -- ipv4-addr response found? )
 
       \ Reserve a DNS entry
       method reserve-dns ( ident c-addr bytes self -- )
@@ -983,9 +977,8 @@ begin-module net-ipv6
       \ Evict a DNS entry
       method evict-dns ( c-addr bytes self -- )
       
-      \ Save an IPv6 address by a DNS name
-      method save-ipv6-addr-by-dns
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self -- )
+      \ Save an IPv4 address by a DNS name
+      method save-ipv4-addr-by-dns ( ipv4-addr ident c-addr bytes self -- )
 
       \ Indicate an abnormal response by DNS name
       method save-response-by-dns ( response ident self -- )
@@ -1011,8 +1004,7 @@ begin-module net-ipv6
       :noname { self -- }
         self <object>->new
         self cached-dns-names [ max-dns-cache cells ] literal 0 fill
-        self cached-ipv6-addrs
-        [ max-dns-cache ipv6-addr-size * ] literal $FF fill
+        self cached-ipv4-addrs [ max-dns-cache cells ] literal $FF fill
         self cached-dns-idents [ max-dns-cache cells ] literal $FF fill
         self cached-dns-ages [ max-dns-cache cells ] literal 0 fill
         self cached-dns-responses [ max-dns-cache cells ] literal $FF fill
@@ -1022,8 +1014,8 @@ begin-module net-ipv6
         self dns-cache-name-heap init-heap
       ; define new
 
-      \ Look up an IPv6 address by a DNS name
-      :noname ( c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 response found? )
+      \ Look up an IPv4 address by a DNS name
+      :noname ( c-addr bytes self -- ipv4-addr response found? )
         [: { c-addr bytes self }
           c-addr bytes validate-dns-name
           max-dns-cache 0 ?do
@@ -1032,7 +1024,7 @@ begin-module net-ipv6
               -1 self cached-dns-idents i cells + @ = and if
                 self newest-dns-age @ 1+ dup self newest-dns-age !
                 self cached-dns-ages i cells + !
-                self cached-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned@
+                self cached-ipv4-addrs i cells + @
                 self cached-dns-responses i cells + @
                 true unloop exit
               then
@@ -1040,17 +1032,16 @@ begin-module net-ipv6
           loop
           0 -1 false
         ;] over dns-cache-lock with-lock
-      ; define lookup-ipv6-addr-by-dns
+      ; define lookup-ipv4-addr-by-dns
 
-      \ Save an IPv6 address by a DNS name
-      :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self -- )
-        [: { ipv6-0 ipv6-2 ipv6-2 ipv6-3 ident c-addr bytes self }
+      \ Save an IPv4 address by a DNS name
+      :noname ( ipv4-addr ident c-addr bytes self -- )
+        [: { ipv4-addr ident c-addr bytes self }
           max-dns-cache 0 ?do
             self cached-dns-names i cells + @ ?dup if
               count c-addr bytes equal-case-strings?
               self cached-dns-idents i cells + @ ident = and if
-                ipv6-0 ipv6-1 ipv6-2 ipv6-3
-                self cached-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned!
+                ipv4-addr self cached-ipv4-addrs i cells + !
                 -1 self cached-dns-idents i cells + !
                 self newest-dns-age @ 1+ dup self newest-dns-age !
                 self cached-dns-ages i cells + !
@@ -1060,7 +1051,7 @@ begin-module net-ipv6
             then
           loop
         ;] over dns-cache-lock with-lock
-      ; define save-ipv6-addr-by-dns
+      ; define save-ipv4-addr-by-dns
 
       \ Reserve a DNS entry
       :noname ( ident c-addr bytes self -- )
@@ -1069,8 +1060,7 @@ begin-module net-ipv6
             self cached-dns-names i cells + @ ?dup if
               count c-addr bytes equal-case-strings? if
                 ident self cached-dns-idents i cells + !
-                0 0 0 0 self cached-ipv6-addrs
-                i ipv6-addr-size * + ipv6-unaligned!
+                0 self cached-ipv4-addrs i cells + !
                 self newest-dns-age @ 1+ dup self newest-dns-age !
                 self cached-dns-ages i cells + !
                 -1 self cached-dns-responses i cells + !
@@ -1080,8 +1070,7 @@ begin-module net-ipv6
           loop
           c-addr bytes self save-dns-name { index }
           ident self cached-dns-idents index cells + !
-          0 0 0 0 self cached-ipv6-addrs
-          index ipv6-addr-size * + ipv6-unaligned!
+          0 self cached-ipv4-addrs index cells + !
           self newest-dns-age @ 1+ dup self newest-dns-age !
           self cached-dns-ages index cells + !
           -1 self cached-dns-responses index cells + !
@@ -1091,7 +1080,6 @@ begin-module net-ipv6
       \ Evict a DNS entry
       :noname ( c-addr bytes self -- )
         [: { c-addr bytes self }
-          c-addr bytes validate-dns-name
           max-dns-cache 0 ?do
             self cached-dns-names i cells + @ ?dup if
               count c-addr bytes equal-case-strings?
@@ -1121,7 +1109,7 @@ begin-module net-ipv6
         [: { response ident self }
           max-dns-cache 0 ?do
             ident self cached-dns-idents i cells + @ = if
-              0 0 0 0 self cached-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned!
+              0 self cached-ipv4-addrs i cells + !
               -1 self cached-dns-idents i cells + !
               response self cached-dns-responses i cells + !
               self newest-dns-age @ 1+ dup self newest-dns-age !
@@ -1190,11 +1178,11 @@ begin-module net-ipv6
 
     end-implement
 
-    \ The IPv6 address map
+    \ The IPv4 address map
     <object> begin-class <address-map>
 
-      \ The mapped IPv6 addresses
-      max-addresses ipv6-addr-size * member mapped-ipv6-addrs
+      \ The mapped IPv4 addresses
+      max-addresses cells member mapped-ipv4-addrs
 
       \ The mapped MAC addresses
       max-addresses 2 cells * member mapped-mac-addrs
@@ -1202,72 +1190,44 @@ begin-module net-ipv6
       \ The mapped address ages
       max-addresses cells member mapped-addr-ages
 
-      \ The mapped address discovery times
-      max-addresses cells member mapped-addr-discovery-times
-
       \ The newest age
       cell member newest-addr-age
 
       \ The address map lock
       lock-size member address-map-lock
 
-      \ Age out IPv6 addresses
-      method age-out-mac-addrs ( reachable-ms self -- )
+      \ Look up a MAC address by an IPv4 address
+      method lookup-mac-addr-by-ipv4 ( ipv4-addr self -- D: mac-addr found? )
 
-      \ Look up a MAC address by an IPv6 address
-      method lookup-mac-addr-by-ipv6
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- D: mac-addr found? )
-
-      \ Save a MAC address by an IPv6 address
-      method save-mac-addr-by-ipv6
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time self -- )
+      \ Save a MAC address by an IPv4 address
+      method save-mac-addr-by-ipv4 ( D: mac-addr ipv4-addr self -- )
       
       \ Get the oldest MAC address index
       method oldest-mac-addr-index ( self -- index )
 
-      \ Store a MAC address by an IPv6 address at an index
-      method save-mac-addr-at-index
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time index self -- )
+      \ Store a MAC address by an IPv4 address at an index
+      method save-mac-addr-at-index ( D: mac-addr ipv4-addr index self -- )
       
     end-class
 
-    \ Implement the IPv6 address map
+    \ Implement the IPv4 address map
     <address-map> begin-implement
 
       \ Constructor
       :noname { self -- }
         self <object>->new
-        self mapped-ipv6-addrs [ max-addresses ipv6-addr-size * ] literal 0 fill
+        self mapped-ipv4-addrs [ max-addresses cells ] literal 0 fill
         self mapped-mac-addrs [ max-addresses 2 cells * ] literal $FF fill
         self mapped-addr-ages [ max-addresses cells ] literal 0 fill
-        self mapped-addr-discovery-times [ max addresses cells ] literal 0 fill
         0 self newest-addr-age !
         self address-map-lock init-lock
       ; define new
 
-      \ Age out IPv6 addresses
-      :noname { reachable-ms self -- }
-        [ $FFFFFFFF 10 u/ ] literal reachable-ms min 10 * { reachable-time }
-        systick::systick-counter { time }
-        max-addresses 0 ?do
-          self mapped-mac-addrs i [ 2 cells ] literal * + 2@ -1. <> if
-            time self mapped-addr-discovery-times i cells + @ -
-            reachable-time > if
-              0 0 0 0 self mapped-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned!
-              -1. self mapped-mac-addrs i [ 2 cells ] literal * + 2!
-              0 self mapped-addr-ages i cells + !
-              0 self mapped-addr-discovery-times i cells + !
-            then
-          then
-        loop
-      ; define age-out-mac-addrs
-
-      \ Look up a MAC address by an IPv6 address
-      :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- D: mac-addr found? )
-        [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 self }
+      \ Look up a MAC address by an IPv4 address
+      :noname ( ipv4-addr self -- D: mac-addr found? )
+        [: { ipv4-addr self }
           max-addresses 0 ?do
-            self mapped-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned@
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 = if
+            self mapped-ipv4-addrs i cells + @ ipv4-addr = if
               self mapped-mac-addrs i 2 cells * + 2@
               self newest-addr-age @ 1+ dup self newest-addr-age !
               self mapped-addr-ages i cells + !
@@ -1276,26 +1236,22 @@ begin-module net-ipv6
           loop
           0. false
         ;] over address-map-lock with-lock
-      ; define lookup-mac-addr-by-ipv6
+      ; define lookup-mac-addr-by-ipv4
 
-      \ Save a MAC address by an IPv6 address
-      :noname
-        ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time self -- )
-        [: { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time self }
-          ipv6-0 ipv6-1 ipv6-2 ipv6-3 0 0 0 0 ipv6= not if
+      \ Save a MAC address by an IPv4 address
+      :noname ( D: mac-addr ipv4-addr self -- )
+        [: { D: mac-addr ipv4-addr self }
+          ipv4-addr 0<> if
             max-addresses 0 ?do
-              self mapped-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned@
-              ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= if
-                mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time i
-                self save-mac-addr-at-index unloop exit
+              self mapped-ipv4-addrs i cells + @ ipv4-addr = if
+                mac-addr ipv4-addr i self save-mac-addr-at-index  unloop exit
               then
             loop
             self oldest-mac-addr-index { index }
-            mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time index
-            self save-mac-addr-at-index
+            mac-addr ipv4-addr index self save-mac-addr-at-index
           then
         ;] over address-map-lock with-lock
-      ; define save-mac-addr-by-ipv6
+      ; define save-mac-addr-by-ipv4
 
       \ Get the oldest MAC address index
       :noname { self -- index }
@@ -1310,13 +1266,10 @@ begin-module net-ipv6
         index
       ; define oldest-mac-addr-index
 
-      \ Store a MAC address by an IPv6 address at an index
-      :noname
-        { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 discovery-time index self -- }
+      \ Store a MAC address by an IPv4 address at an index
+      :noname { D: mac-addr ipv4-addr index self -- }
         mac-addr self mapped-mac-addrs index 2 cells * + 2!
-        ipv6-0 ipv6-1 ipv6-2 ipv6-3
-        discovery-time self mapped-addr-discovery-times index cells + !
-        self mapped-ipv6-addrs index ipv6-addr-size * + ipv6-unaligned!
+        ipv4-addr self mapped-ipv4-addrs index cells + !
         self newest-addr-age @ 1+ dup self newest-addr-age !
         self mapped-addr-ages index cells + !
       ; define save-mac-addr-at-index
@@ -1326,9 +1279,9 @@ begin-module net-ipv6
   end-module> import
   
   \ The endpoint class
-  <endpoint> begin-class <ipv6-endpoint>
+  <endpoint> begin-class <ipv4-endpoint>
 
-    continue-module net-ipv6-internal
+    continue-module net-ipv4-internal
       
       \ Is the endpoint state
       cell member endpoint-state
@@ -1339,8 +1292,8 @@ begin-module net-ipv6
       \ The current endpoint ID
       cell member endpoint-id
       
-      \ The remote IPv6 address
-      ipv6-addr-size member endpoint-remote-ipv6-addr
+      \ The remote IPv4 address
+      cell member endpoint-remote-ipv4-addr
 
       \ The remote port
       cell member endpoint-remote-port
@@ -1454,7 +1407,7 @@ begin-module net-ipv6
       method endpoint-rx-data! ( addr bytes self -- )
 
       \ Set endpoint source
-      method endpoint-ipv6-remote! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 port self -- )
+      method endpoint-ipv4-remote! ( ipv4-addr port self -- )
 
       \ Get endpoint remote MAC address
       method endpoint-remote-mac-addr@ ( self -- D: mac-addr )
@@ -1490,18 +1443,16 @@ begin-module net-ipv6
       method try-allocate-endpoint ( self -- allocated? )
 
       \ Try to accepting on an endpoint
-      method try-ipv6-accept-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self )
-      ( -- accepted? )
+      method try-ipv4-accept-endpoint
+      ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? )
 
       \ Try to open a connection on an endpoint
-      method try-ipv6-connect-endpoint
-      ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self )
-      ( -- allocated? )
+      method try-ipv4-connect-endpoint
+      ( src-port dest-ipv4-addr dest-port D: mac-addr self -- allocated? )
 
-      \ Match an endpoint with an IPv6 TCP connection
-      method match-ipv6-connect?
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self -- match? )
+      \ Match an endpoint with an IPv4 TCP connection
+      method match-ipv4-connect?
+      ( src-ipv4-addr src-port dest-port self -- match? )
       
       \ Set an endpoint to listen on UDP
       method listen-udp ( port self -- )
@@ -1528,8 +1479,7 @@ begin-module net-ipv6
       method add-endpoint-tcp-data ( addr bytes push? seq self -- )
 
       \ Add data to a UDP endpoint if possible
-      method add-endpoint-udp-data
-      ( addr bytes src-0 src-1 src-2 src-3 src-port self -- )
+      method add-endpoint-udp-data ( addr bytes src-addr src-port self -- )
 
       \ Handle an incoming ACK
       method endpoint-ack-in ( window ack self -- )
@@ -1606,19 +1556,19 @@ begin-module net-ipv6
     end-module
     
     \ Get endpoint source
-    method endpoint-ipv6-remote@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 port )
+    method endpoint-ipv4-remote@ ( self -- ipv4-addr port )
 
   end-class
 
-  \ Implement the endpoint class
-  <ipv6-endpoint> begin-implement
+  \ Implement the IPv4 endpoint class
+  <ipv4-endpoint> begin-implement
 
     \ Constructor
     :noname { self -- }
       self <endpoint>->new
       0 self endpoint-state !
       0 self endpoint-queue-state !
-      0 0 0 0 self endpoint-remote-ipv6-addr ipv6-unaligned!
+      0 self endpoint-remote-ipv4-addr !
       0 self endpoint-remote-port !
       0 self endpoint-local-port !
       0 self endpoint-rx-size !
@@ -1746,20 +1696,20 @@ begin-module net-ipv6
     ; define endpoint-rx-data!
 
     \ Get endpoint source
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 port )
+    :noname ( self -- ipv4-addr port )
       dup udp-endpoint? not if
-        dup endpoint-remote-ipv6-addr ipv6-unaligned@
+        dup endpoint-remote-ipv4-addr @
         swap endpoint-remote-port @
       else
         endpoint-in-packets in-packets-udp-remote@
       then
-    ; define endpoint-ipv6-remote@
+    ; define endpoint-ipv4-remote@
     
     \ Set endpoint source
-    :noname { ipv6-0 ipv6-1 ipv6-2 ipv6-3 port self -- }
-      ipv6-0 ipv6-1 ipv6-2 ipv6-3 self endpoint-remote-ipv6-addr ipv6-unaligned!
+    :noname { ipv4-addr port self -- }
+      ipv4-addr self endpoint-remote-ipv4-addr !
       port self endpoint-remote-port !
-    ; define endpoint-ipv6-remote!
+    ; define endpoint-ipv4-remote!
 
     \ Get endpoint remote MAC address
     :noname ( self -- D: mac-addr )
@@ -1828,37 +1778,32 @@ begin-module net-ipv6
     ; define try-allocate-endpoint
 
     \ Try to accept a connection on an endpoint
-    :noname
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self )
-      ( -- accepted? )
-      [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self }
+    :noname ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? )
+      [: { src-ipv4-addr src-port dest-port D: mac-addr self }
         self endpoint-tcp-state@ dup TCP_LISTEN = swap TCP_SYN_RECEIVED = or
         dest-port self endpoint-local-port@ = and if
           self endpoint-tcp-state@ TCP_LISTEN = if
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port self endpoint-ipv6-remote!
+            src-ipv4-addr src-port self endpoint-ipv4-remote!
             TCP_SYN_RECEIVED self endpoint-tcp-state!
             mac-addr self endpoint-remote-mac-addr 2!
             false self endpoint-event !
             self reset-endpoint-refresh
             true
           else
-            self endpoint-ipv6-remote@ src-port = { port-match? }
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= port-match? and
+            self endpoint-ipv4-remote@ src-port = src-ipv4-addr = and
           then
         else
           false
         then
       ;] over endpoint-lock with-lock
-    ; define try-ipv6-accept-endpoint
+    ; define try-ipv4-accept-endpoint
 
     \ Try to open a connection on an endpoint
-    :noname
-      ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self )
-      ( -- allocated? )
-      [: { src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self }
+    :noname ( src-port dest-ipv4-addr dest-port D: mac-addr self -- allocated? )
+      [: { src-port dest-ipv4-addr dest-port D: mac-addr self }
         self try-allocate-endpoint if
           src-port self endpoint-local-port!
-          ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port self endpoint-ipv6-remote!
+          dest-ipv4-addr dest-port self endpoint-ipv4-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
           false self endpoint-event !
@@ -1868,20 +1813,19 @@ begin-module net-ipv6
           false
         then
       ;] over endpoint-lock with-lock
-    ; define try-ipv6-connect-endpoint
+    ; define try-ipv4-connect-endpoint
 
-    \ Match an endpoint with an IPv6 TCP connection
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self -- match? )
-      [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self }
+    \ Match an endpoint with an IPv4 TCP connection
+    :noname ( src-ipv4-addr src-port dest-port self -- match? )
+      [: { src-ipv4-addr src-port dest-port self }
         self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if
-          self endpoint-ipv6-remote@ src-port = { port-match? }
-          ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= port-match? and
+          self endpoint-ipv4-remote@ src-port = swap src-ipv4-addr = and
           self endpoint-local-port@ dest-port = and
         else
           false
         then
       ;] over endpoint-lock with-lock
-    ; define match-ipv6-connect?
+    ; define match-ipv4-connect?
 
     \ Free an endpoint
     :noname ( self -- )
@@ -1955,7 +1899,7 @@ begin-module net-ipv6
     ; define add-endpoint-tcp-data
 
     \ Add data to a UDP endpoint if possible
-    :noname ( addr bytes src-0 src-1 src-2 src-3 self -- )
+    :noname ( addr bytes src-addr src-port self -- )
       [: endpoint-in-packets add-in-udp-packet ;] over endpoint-lock with-lock
     ; define add-endpoint-udp-data
 
@@ -2189,7 +2133,7 @@ begin-module net-ipv6
 
   end-implement
   
-  continue-module net-ipv6-internal
+  continue-module net-ipv4-internal
     
     \ TCP_WAIT class
     <object> begin-class <time-wait>
@@ -2197,8 +2141,8 @@ begin-module net-ipv6
       \ TCP wait remote MAC address
       2 cells member time-wait-remote-mac-addr
       
-      \ TCP wait remote IPv6 address
-      ipv6-addr-size member time-wait-remote-ipv6-addr
+      \ TCP wait remote IPv4 address
+      cell member time-wait-remote-ipv4-addr
       
       \ Local port
       2 member time-wait-local-port
@@ -2235,9 +2179,9 @@ begin-module net-ipv6
     \ Set a TIME_WAIT record
     :noname ( seq endpoint self -- )
       [: { seq endpoint self }
-        endpoint endpoint-ipv6-remote@
+        endpoint endpoint-ipv4-remote@
         self time-wait-remote-port h!
-        self time-wait-remote-ipv6-addr ipv6-unaligned!
+        self time-wait-remote-ipv4-addr !
         endpoint endpoint-local-port@ self time-wait-local-port h!
         endpoint endpoint-remote-mac-addr@ self time-wait-remote-mac-addr 2!
         endpoint endpoint-local-seq@ 1+ self time-wait-local-seq !
@@ -2249,82 +2193,163 @@ begin-module net-ipv6
 
   end-implement
 
-  \ The interface class
-  <interface> begin-class <ipv6-interface>
+  continue-module net-ipv4-internal
 
-    continue-module net-ipv6-internal
+    \ The fragment collector class
+    <object> begin-class <fragment-collect>
+      
+      \ Is the fragment collector active
+      cell member fragment-active
+      
+      \ The fragment source IP address
+      cell member fragment-src-ipv4-addr
+      
+      \ The fragment protocol
+      cell member fragment-protocol
+      
+      \ The fragment identification field
+      cell member fragment-ident
+      
+      \ Maximum fragment length
+      cell member fragment-end-length
+      
+      \ The fragment bitmap
+      max-fragment-units 8 align 8 / member fragment-bitmap
+      
+      \ The fragment buffer
+      fragment-buf-size cell align member fragment-buf
+      
+      \ Apply a fragment
+      method apply-fragment ( addr byte self -- complete? )
+      
+      \ Clear the fragment
+      method clear-fragment ( self -- )
+      
+      \ Get the completed packet
+      method get-completed-packet ( self -- src-ipv4-addr protocol addr bytes )
+      
+    end-class
+
+    \ Implement the fragment collector class
+    <fragment-collect> begin-implement
+
+      \ Constructor
+      :noname { self -- }
+        self <object>->new
+        self clear-fragment
+      ; define new
+      
+      \ Apply a fragment
+      :noname { addr bytes self -- complete? }
+        addr ipv4-fragment? not if false exit then
+        addr ipv4-identification h@ rev16 { ident }
+        ident self fragment-ident @ <> if self clear-fragment then
+        addr ipv4-protocol c@ self fragment-protocol @ <> if
+          self clear-fragment
+        then
+        addr ipv4-version-ihl c@ $F 5 max and 4 * { header-size }
+        addr ipv4-total-len h@ rev16
+        dup bytes <> if false exit then
+        header-size - { len }
+        addr ipv4-flags-fragment-offset h@ rev16
+        dup $1FFF and { offset }
+        13 rshift { flags }
+        offset 8 * len + fragment-buf-size <= if
+          true self fragment-active !
+          ident self fragment-ident !
+          addr ipv4-src-addr unaligned@ rev self fragment-src-ipv4-addr !
+          addr ipv4-protocol c@ self fragment-protocol !
+          flags MF and 0= if
+            offset 8 * len + self fragment-end-length !
+          then
+          len 8 align 8 / offset + offset ?do
+            i 7 and bit i 3 rshift self fragment-bitmap + 2dup cbit@ not if
+              cbis!
+            else
+              2drop self clear-fragment false unloop exit
+            then
+          loop
+          addr header-size + self fragment-buf offset 8 * + len move
+          self fragment-end-length @ -1 <> if
+            self fragment-end-length @ 8 align 8 / 0 ?do
+              i 7 and bit i 3 rshift self fragment-bitmap + cbit@ not if
+                false unloop exit
+              then
+            loop
+            true
+          else
+            false
+          then
+        else
+          self clear-fragment false
+        then
+      ; define apply-fragment
+
+      \ Clear the fragment
+      :noname { self -- }
+        false self fragment-active !
+        0 self fragment-src-ipv4-addr !
+        0 self fragment-protocol !
+        0 self fragment-ident !
+        -1 self fragment-end-length !
+        self fragment-bitmap max-fragment-units 8 align 8 / 0 fill
+      ; define clear-fragment
+
+      \ Get the completed packet
+      :noname { self -- src-ipv4-addr protocol addr bytes }
+        self fragment-src-ipv4-addr @
+        self fragment-protocol @
+        self fragment-buf
+        self fragment-end-length @
+      ; define get-completed-packet
+
+    end-implement
+
+  end-module
+
+  \ The interface class
+  <interface> begin-class <ipv4-interface>
+
+    continue-module net-ipv4-internal
       
       \ The output frame interface
       cell member out-frame-interface
       
-      \ The IPv6 address
-      ipv6-addr-size member intf-ipv6-addr
-
-      \ The IPv6 prefix
-      ipv6-addr-size member intf-ipv6-prefix
-
-      \ The IPv6 autonomous state
-      cell member intf-autonomous?
-
-      \ The discovered IPv6 address
-      ipv6-addr-size member discovered-ipv6-addr
+      \ The IPv4 address
+      cell member intf-ipv4-addr
 
       \ The DNS server
-      ipv6-addr-size member dns-server-ipv6-addr
+      cell member dns-server-ipv4-addr
 
-      \ The gateway IPv6 address
-      ipv6-addr-size member gateway-ipv6-addr
+      \ The gateway IPv4 address
+      cell member gateway-ipv4-addr
       
-      \ Current hop limit
-      cell member intf-hop-limit
+      \ The IPv4 netmask
+      cell member intf-ipv4-netmask
+
+      \ Current TTL
+      cell member intf-ttl
 
       \ MAC address resolution semaphore
-      sema-size member neighbor-discovery-sema
+      sema-size member mac-addr-resolve-sema
 
-      \ Is a router discovered
-      cell member router-discovered?
+      \ Curreht DHCP xid
+      cell member current-dhcp-xid
 
-      \ Are we detecting duplicates
-      cell member detecting-duplicate?
+      \ Current DHCP server MAC address
+      2 cells member dhcp-server-mac-addr
       
-      \ Are we discovering a router
-      cell member router-discovery?
+      \ Current DHCP server IPv4 address
+      cell member dhcp-server-ipv4-addr
 
-      \ Are we to get an IP address with DHCPv6
-      cell member use-dhcpv6?
-
-      \ Are we to only get a DNS server address with DHCPv6
-      cell member use-dhcpv6-other?
-
-      \ The router lifetime in seconds
-      cell member router-lifetime
-
-      \ The neighbor reachable time in milliseconds
-      cell member neighbor-reachable-time
-
-      \ The neighbor retransmit time in milliseconds
-      cell member neighbor-retrans-time
-      
-      \ Current DHCP transaction id
-      cell member current-dhcp-transact-id
-
-      \ Current DHCP server DUID
-      max-duid-size member dhcp-server-duid
-
-      \ Router discovery start
-      cell member router-discovery-start
-
-      \ Router discovered start
-      cell member router-discovered-start
-      
-      \ Current DHCP server DUID length
-      cell member dhcp-server-duid-len
+      \ Current DHCP requested IPv4 address
+      cell member dhcp-req-ipv4-addr
 
       \ DHCP discovery state
       cell member dhcp-discover-state
 
-      \ DHCP discovery start
-      cell member dhcp-discover-start
+      \ DHCP remaining ARP attempt count
+      cell member dhcp-remaining-arp-attempts
       
       \ DHCP discovery stage start
       cell member dhcp-discover-stage-start
@@ -2347,20 +2372,26 @@ begin-module net-ipv6
       \ DHCP rebinding start time
       cell member dhcp-rebind-start
 
-      \ Router semaphore
-      sema-size member router-discovery-sema
+      \ Provisional DHCP IPv4 netmask
+      cell member prov-ipv4-netmask
+
+      \ Provisional DHCP IPv4 gateway
+      cell member prov-gateway-ipv4-addr
+
+      \ Provisional DHCP DNS server
+      cell member prov-dns-server-ipv4-addr
+
+      \ Provisional DHCP renewal interval
+      cell member prov-dhcp-renew-interval
       
       \ DHCP semaphore
       sema-size member dhcp-sema
-
-      \ Found DNS semaphore
-      sema-size member found-dns-sema
       
       \ DNS resolution semaphore
       sema-size member dns-resolve-sema
 
       \ The endpoints
-      <ipv6-endpoint> class-size max-endpoints * member intf-endpoints
+      <ipv4-endpoint> class-size max-endpoints * member intf-endpoints
 
       \ The address map
       <address-map> class-size member address-map
@@ -2368,12 +2399,15 @@ begin-module net-ipv6
       \ The DNS cache
       <dns-cache> class-size member dns-cache
       
+      \ The IPv4 fragment collector
+      <fragment-collect> class-size member fragment-collect
+
       \ Outgoing buffer lock
       lock-size member outgoing-buf-lock
 
       \ This is to force outgoing-buf to be offset by two bytes
       2 member outgoing-buf-offset
-
+      
       \ The outgoing frame buffer
       ethernet-frame-size cell align 2 + member outgoing-buf
 
@@ -2403,185 +2437,159 @@ begin-module net-ipv6
 
       \ TIME_WAIT list
       <time-wait> class-size time-wait-count * member time-wait-list
-
-      \ Router discovery lock
-      lock-size member router-discovery-lock
       
       \ DHCP lock
       lock-size member dhcp-lock
 
-      \ Are we listening to IPv6 address
-      method ipv6-addr-listen?
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- listen? )
-
-      \ Process a MAC address for an IPv6 address
-      method process-ipv6-mac-addr
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-
-      \ Process an IPv6 packet
-      method process-ipv6-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
-
-      \ Find a listening IPv6 TCP endpoint
-      method find-listen-ipv6-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- endpoint found? )
-
-      \ Find a connecting/connected IPv6 TCP endpoint
-      method find-connect-ipv6-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- endpoint found? )
+      \ Process a MAC address for an IPv4 address
+      method process-ipv4-mac-addr ( D: mac-addr ipv4-addr self -- )
       
-      \ Process an IPv6 TCP packet
-      method process-ipv6-tcp-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      \ Process a fragment
+      method process-fragment ( addr bytes self -- )
 
-      \ Process an IPv6 TCP SYN packet
-      method process-ipv6-syn-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Process an IPv4 packet
+      method process-ipv4-packet ( src-addr protocol addr bytes self -- )
+
+      \ Find a listening IPv4 TCP endpoint
+      method find-listen-ipv4-endpoint
+      ( src-addr addr bytes self -- endpoint found? )
+
+      \ Find a connecting/connected IPv4 TCP endpoint
+      method find-connect-ipv4-endpoint
+      ( src-addr addr bytes self -- endpoint found? )
+      
+      \ Process an IPv4 TCP packet
+      method process-ipv4-tcp-packet ( src-addr protocol addr bytes self -- )
+
+      \ Process an IPv4 TCP SYN packet
+      method process-ipv4-syn-packet ( src-addr addr bytes self -- )
 
       \ Send a TCP SYN packet
       method send-syn ( endpoint self -- )
       
-      \ Send an IPv6 TCP SYN+ACK packet
-      method send-ipv6-syn-ack
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes endpoint self -- ) 
+      \ Send an IPv4 TCP SYN+ACK packet
+      method send-ipv4-syn-ack ( src-addr addr bytes endpoint self -- ) 
 
-      \ Send an IPv6 TCP RST packet in response to a packet
-      method send-ipv6-rst-for-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Send an IPv4 TCP RST packet in response to a packet
+      method send-ipv4-rst-for-packet ( src-addr addr bytes self -- )
 
-      \ Send a generic IPv6 TCP RST packet
-      method send-ipv6-rst ( endpoint self -- )
+      \ Send a generic IPv4 TCP RST packet
+      method send-ipv4-rst ( endpoint self -- )
       
-      \ Send a basic IPv6 TCP packet
-      method send-ipv6-basic-tcp
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 remote-port local-port seq ack window )
-      ( flags D: mac-addr self -- )
+      \ Send a basic IPv4 TCP packet
+      method send-ipv4-basic-tcp
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
 
-      \ Send an IPv6 TCP packet with an MSS option
-      method send-ipv6-tcp-with-mss
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 remote-port local-port seq ack window )
-      ( flags D: mac-addr self -- )
+      \ Send an IPv4 TCP packet with an MSS option
+      method send-ipv4-tcp-with-mss
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
       
-      \ Process an IPv6 TCP SYN+ACK packet
-      method process-ipv6-syn-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Process an IPv4 TCP SYN+ACK packet
+      method process-ipv4-syn-ack-packet ( src-addr addr bytes self -- )
 
-      \ Process an IPv6 ACK packet
-      method process-ipv6-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Process an IPv4 ACK packet
+      method process-ipv4-ack-packet ( src-addr addr bytes self -- )
 
-      \ Process an IPv6 FIN+ACK packet
-      method process-ipv6-fin-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Process an IPv4 FIN+ACK packet
+      method process-ipv4-fin-ack-packet ( src-addr addr bytes self -- )
 
-      \ Process an IPv6 ACK packet in the general case
-      method process-ipv6-basic-ack ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in the general case
+      method process-ipv4-basic-ack ( addr bytes endpoint self -- )
 
-      \ Process an IPv6 ACK packet in TCP_SYN_SENT state
-      method process-ipv6-ack-syn-sent ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_SYN_SENT state
+      method process-ipv4-ack-syn-sent ( addr bytes endpoint self -- )
 
-      \ Process an IPv6 ACK packet in TCP_SYN_RECEIVED state
-      method process-ipv6-ack-syn-received ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
+      method process-ipv4-ack-syn-received ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 ACK packet in TCP_ESTABLISHED state
-      method process-ipv6-ack-established ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
+      method process-ipv4-ack-established ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 ACK packet in TCP_FIN_WAIT_1 state
-      method process-ipv6-ack-fin-wait-1 ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
+      method process-ipv4-ack-fin-wait-1 ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 ACK packet in TCP_FIN_WAIT_2 state
-      method process-ipv6-ack-fin-wait-2 ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_FIN_WAIT_2 state
+      method process-ipv4-ack-fin-wait-2 ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 ACK packet in TCP_CLOSE_WAIT state
-      method process-ipv6-ack-close-wait ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_CLOSE_WAIT state
+      method process-ipv4-ack-close-wait ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 ACK packet in TCP_LAST_ACK state
-      method process-ipv6-ack-last-ack ( addr bytes endpoint self -- )
+      \ Process an IPv4 ACK packet in TCP_LAST_ACK state
+      method process-ipv4-ack-last-ack ( addr bytes endpoint self -- )
 
-      \ Process an errant IPv6 ACK packet
-      method send-ipv6-rst-for-ack ( addr bytes endpoint self -- )
-
-      \ Process an IPv6 FIN/ACK packet for a TCP_ESTABLISHED state
-      method process-ipv6-ack-fin-established ( addr bytes endpoint self -- )
-
-      \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_1 state
-      method process-ipv6-ack-fin-fin-wait-1 ( addr bytes endpoint self -- )
+      \ Process an errant IPv4 ACK packet
+      method send-ipv4-rst-for-ack ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_2 state
-      method process-ipv6-ack-fin-fin-wait-2 ( addr bytes endpoint self -- )
+      \ Process an IPv4 FIN packet
+      \      method process-ipv4-fin-packet ( src-addr addr bytes self -- )
 
-      \ Process an unexpected IPv6 FIN packet
-      method process-ipv6-unexpected-fin ( addr bytes endpoint self -- )
+      \ Process an IPv4 FIN/ACK packet for a TCP_ESTABLISHED state
+      method process-ipv4-ack-fin-established ( addr bytes endpoint self -- )
+
+      \ Process an IPv4 FIN/ACK packet for a TCP_FIN_WAIT_1 state
+      method process-ipv4-ack-fin-fin-wait-1 ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 FIN/ACK packet for a TCP_FIN_WAIT_2 state
+      method process-ipv4-ack-fin-fin-wait-2 ( addr bytes endpoint self -- )
+
+      \ Process an unexpected IPv4 FIN packet
+      method process-ipv4-unexpected-fin ( addr bytes endpoint self -- )
 
       \ Send an ACK in response to a FIN packet
-      method send-ipv6-fin-reply-ack ( addr bytes endpoint self -- )
+      method send-ipv4-fin-reply-ack ( addr bytes endpoint self -- )
       
-      \ Process an IPv6 RST packet
-      method process-ipv6-rst-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      \ Process an IPv4 RST packet
+      method process-ipv4-rst-packet ( src-addr addr bytes self -- )
       
-      \ Process an IPv6 UDP packet
-      method process-ipv6-udp-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      \ Process an IPv4 UDP packet
+      method process-ipv4-udp-packet ( src-addr protocol addr bytes self -- )
 
-      \ Process an IPv6 DNS response packet
-      method process-ipv6-dns-packet ( addr bytes self -- )
+      \ Process an IPv4 DNS response packet
+      method process-ipv4-dns-packet ( addr bytes self -- )
       
-      \ Process an ICMPv6 packet
-      method process-icmpv6-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      \ Process an IPv4 ICMP packet
+      method process-ipv4-icmp-packet ( src-addr protocol addr bytes self -- )
 
-      \ Send an ICMPv6 neighbor solicit packet
-      method send-icmpv6-neighbor-solicit
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-
-      \ Send an ICMPv6 router solicit packet
-      method send-icmpv6-router-solicit ( self -- )
+      \ Process an IPv4 ICMP echo request packet
+      method process-ipv4-echo-request-packet ( src-addr addr bytes self -- )
       
-      \ Process an ICMPv6 echo request packet
-      method process-icmpv6-echo-request-packet
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
-
-      \ Process an ICMPv6 neighbor solicit packet
-      method process-icmpv6-neighbor-solicit-packet
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
-
-      \ Process an ICMPv6 neighbor advertise packet
-      method process-icmpv6-neighbor-advertise-packet
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
-
-      \ Process an ICMPv6 router advertise packet
-      method process-icmpv6-router-advertise-packet
-      ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
-
       \ Construct and send a frame
       method construct-and-send-frame
       ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
 
-      \ Construct and send a IPv6 packet with a specified source IPv6 address
-      method construct-and-send-ipv6-packet-with-src-addr
-      ( ? D: mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
-      ( protocol bytes xt self -- ? sent? )
+      \ Construct and send a IPv4 packet with a specified source IPv4 address
+      method construct-and-send-ipv4-packet-with-src-addr
+      ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- ? sent? )
       ( xt: ? buf -- ? send? )
 
-      \ Construct an IPv6 packet
-      method construct-and-send-ipv6-packet
-      ( ? D: mac-addr dest-0 dest-1 dest-2 dest-3 protocol bytes xt self )
-      ( -- ? sent? )
+      \ Construct an IPv4 packet
+      method construct-and-send-ipv4-packet
+      ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
       ( xt: ? buf -- ? send? )
 
-      \ Process IPv6 DNS response packet answers
-      method process-ipv6-dns-answers
+      \ Attempt IPv4 DHCP ARP
+      method attempt-ipv4-dhcp-arp ( dest-addr self -- found? )
+      
+      \ Process IPv4 DNS response packet answers
+      method process-ipv4-dns-answers
       ( addr bytes all-addr all-bytes ancount ident self -- )
 
-      \ Send a DNS request packet
-      method send-ipv6-dns-request ( c-addr bytes self -- )
+      \ Send an ARP request packet
+      method send-ipv4-arp-request ( dest-addr self -- )
 
-      \ Send a UDP packet with a specified source IPv6 address and destination
+      \ Send a DHCP ARP request packet
+      method send-ipv4-dhcp-arp-request ( dest-addr self -- )
+
+      \ Send a DNS request packet
+      method send-ipv4-dns-request ( c-addr bytes self -- )
+
+      \ Send a UDP packet with a specified source IPv4 address and destination
       \ MAC address
-      method send-ipv6-udp-packet-raw
-      ( ? D: mac-addr src-0 src-1 src-2 src-3 src-addr src-port )
-      ( dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self -- ? success? )
+      method send-ipv4-udp-packet-raw
+      ( ? D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- )
+      ( ? success? )
       ( xt: ? buf -- ? sent? )    
       
       \ Wait for a TCP endpoint to close
@@ -2609,25 +2617,28 @@ begin-module net-ipv6
       method apply-dhcp ( self -- )
 
       \ Refresh DHCP rebinding
-      method refresh-dhcpv6-rebinding ( self -- )
+      method refresh-dhcp-rebinding ( self -- )
       
       \ Refresh DHCP renewal
-      method refresh-dhcpv6-renewing ( self -- )
+      method refresh-dhcp-renewing ( self -- )
 
       \ Refresh DHCP discovered
-      method refresh-dhcpv6-discovered ( self -- )
+      method refresh-dhcp-discovered ( self -- )
       
       \ Refresh DHCP got NAK
       method refresh-dhcp-got-nak ( self -- )
 
       \ Refresh DHCP wait offer
-      method refresh-dhcpv6-wait-advertise ( self -- )
+      method refresh-dhcp-wait-offer ( self -- )
 
       \ Refresh DHCP wait ACK
-      method refresh-dhcpv6-wait-reply ( self -- )
+      method refresh-dhcp-wait-ack ( self -- )
+
+      \ Refresh DHCP wait confirm
+      method refresh-dhcp-wait-confirm ( self -- )
 
       \ Refresh DHCP declined
-      method refresh-dhcpv6-declined ( self -- )
+      method refresh-dhcp-declined ( self -- )
       
       \ Refresh DHCP
       method refresh-dhcp ( self -- )
@@ -2635,35 +2646,32 @@ begin-module net-ipv6
       \ Refresh an interface
       method refresh-interface ( self -- )
       
-      \ Send a DHCPv6 SOLICIT packet
-      method send-dhcpv6-solicit ( self -- )
+      \ Send a DHCPDISCOVER packet
+      method send-dhcpdiscover ( self -- )
 
-      \ Send a DHCPv6 REQUEST packet
-      method send-dhcpv6-request ( self -- )
+      \ Send a DHCPREQUEST packet
+      method send-dhcprequest ( self -- )
 
       \ Send a renewal DHCPREQUEST packet
-      method send-dhcpv6-renew ( self -- )
+      method send-renew-dhcprequest ( self -- )
 
       \ Send a rebinding DHCPREQUEST packet
-      method send-dhcpv6-rebind ( self -- )
-
-      \ Send a DHCPv6 INFORMATION-REQUEST packet
-      method send-dhcpv6-information-request ( self -- )
+      method send-rebind-dhcprequest ( self -- )
 
       \ Send a DHCPDECLINE packet
       method send-dhcpdecline ( self -- )
 
-      \ Process a DHCPv6 packet
-      method process-dhcpv6-packet ( addr bytes self -- )
+      \ Process an IPv4 DHCP packet
+      method process-ipv4-dhcp-packet ( addr bytes src-addr self -- )
 
-      \ Process a DHCPv6 ADVERTISE
-      method process-dhcpv6-advertise ( addr bytes self -- )
+      \ Process an IPv4 DHCPOFFER packet
+      method process-ipv4-dhcpoffer ( addr bytes self -- )
 
-      \ Process a DHCPv6 REPLY packet
-      method process-dhcpv6-reply ( addr bytes self -- )
+      \ Process an IPv4 DHCPACK packet
+      method process-ipv4-dhcpack ( addr bytes src-addr self -- )
 
-      \ Process a DHCPv6 DECLINE packet
-      method process-dhcpv6-decline ( addr bytes self -- )
+      \ Process an IPv4 DHCPNAK packet
+      method process-ipv4-dhcpnak ( addr bytes self -- )
 
       \ Enqueue a ready receiving IP endpoint
       method put-ready-endpoint ( endpoint self -- )
@@ -2674,122 +2682,83 @@ begin-module net-ipv6
       \ Claim the endpoint queue lock, and if an exception occurs, restore the
       \ endpoint queue status
       method with-endpoint-queue ( xt start-ticks self -- )
-
-      \ Attempt to set interface IPv6 address, detecting duplicates
-      method detect-duplicate-and-set-intf-ipv6-addr
-      ( target-0 target-1 target-2 target-3 self -- success? )
       
     end-module
     
-    \ Get the IPv6 address
-    method intf-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    \ Get the IPv4 address
+    method intf-ipv4-addr@ ( self -- addr )
     
-    \ Set the IPv6 address
-    method intf-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+    \ Set the IPv4 address
+    method intf-ipv4-addr! ( addr self -- )
 
-    \ Get the IPv6 prefix
-    method intf-ipv6-prefix@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    \ Get the IPv4 netmask
+    method intf-ipv4-netmask@ ( self -- netmask )
+
+    \ Set the IPv4 netmask
+    method intf-ipv4-netmask! ( netmask self -- )
+
+    \ Get the gateway IPv4 address
+    method gateway-ipv4-addr@ ( self -- addr )
+
+    \ Set the gateway IPv4 address
+    method gateway-ipv4-addr! ( addr self -- )
+
+    \ Get the DNS server IPv4 address
+    method dns-server-ipv4-addr@ ( self -- addr )
+
+    \ Set the DNS server IPv4 address
+    method dns-server-ipv4-addr! ( addr self -- )
     
-    \ Set the IPv6 prefix
-    method intf-ipv6-prefix! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-
-    \ Get IPv6 autonomous state
-    method intf-autonomous@ ( self -- autonomous? )
-
-    \ Set IPv6 autonomous state
-    method intf-autonomous! ( autonomous? self -- )
-
-    \ Get the IPv6 prefix length
-    method intf-ipv6-prefix-len@ ( self -- length )
-
-    \ Set the IPv6 prefix length
-    method intf-ipv6-prefix-len! ( length self -- )
-
-    \ Get the gateway IPv6 address
-    method gateway-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-
-    \ Set the gateway IPv6 address
-    method gateway-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-
-    \ Get the DNS server IPv6 address
-    method dns-server-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-
-    \ Set the DNS server IPv6 address
-    method dns-server-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+    \ Get the IPv4 broadcast address
+    method intf-ipv4-broadcast@ ( self -- addr )
     
     \ Get the TTL
-    method intf-hop-limit@ ( self -- ttl )
+    method intf-ttl@ ( self -- ttl )
     
     \ Set the TTL
-    method intf-hop-limit! ( ttl self -- )
+    method intf-ttl! ( ttl self -- )
 
-    \ Autoconfigure link-local IPv6 address
-    method autoconfigure-link-local-ipv6-addr ( self -- success? )
-    
-    \ Start router discover
-    method discover-ipv6-router ( self -- )
-    
-    \ Start IPv6 discovery
-    method discover-ipv6-addr ( self -- success? )
+    \ Start DHCP discovery
+    method discover-ipv4-addr ( self -- )
 
-    \ Start DNS discovery
-    method discover-dns-ipv6-addr ( self -- )
-    
     \ Send a UDP packet
-    method send-ipv6-udp-packet
-    ( ? src-port dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self )
-    ( -- ? success? )
+    method send-ipv4-udp-packet
+    ( ? src-port dest-addr dest-port bytes xt self -- ? success? )
     ( xt: ? buf -- ? sent? )
     
-    \ Resolve an IPv6 address's MAC address
-    method resolve-ipv6-addr-mac-addr
-    ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- D: mac-addr success? )
+    \ Resolve an IPv4 address's MAC address
+    method resolve-ipv4-addr-mac-addr ( dest-addr self -- D: mac-addr success? )
 
-    \ Resolve a DNS name's IPv6 address
-    method resolve-dns-ipv6-addr
-    ( c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 success? )
+    \ Resolve a DNS name's IPv4 address
+    method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
 
     \ Get a TCP endpoint and connect to a host with it
-    method allocate-tcp-connect-ipv6-endpoint
-    ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port self -- endpoint success? )
+    method allocate-tcp-connect-ipv4-endpoint
+    ( src-port dest-ipv4-addr dest-port self -- endpoint success? )
 
   end-class
 
   \ Implement the interface class
-  <ipv6-interface> begin-implement
+  <ipv4-interface> begin-implement
 
     \ Constructor
     :noname { frame-interface self -- }
       self <interface>->new
       frame-interface self out-frame-interface !
-      0 0 0 0 self intf-ipv6-addr ipv6-unaligned!
-      $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
-      self intf-ipv6-prefx ipv6-unaligned!
-      true intf-autonomous !
-      0 0 0 0 self discovered-ipv6-addr ipv6-unaligned!
-      128 addr iptf-ipv6-prefix-len !
-      $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
-      self gateway-ipv6-addr ipv6-unaligned!
-      $2001 $4860 $4860 $0000 $0000 $0000 $0000 $8888 make-ipv6-addr
-      self dns-server-ipv6-addr ipv6-unaligned!
-      64 self intf-hop-limit !
-      false self router-discovered? !
-      false self router-discovery? !
-      false self use-dhcpv6? !
-      false self use-dhcpv6-other? !
-      false self detecting-duplicate? !
-      0 self router-lifetime !
-      0 self neighbor-reachable-time !
-      0 self neighbor-retrans-time !
-      1 0 self neighbor-discovery-sema init-sema
+      DEFAULT_IPV4_ADDR self intf-ipv4-addr !
+      255 255 255 0 make-ipv4-addr self intf-ipv4-netmask !
+      192 168 1 254 make-ipv4-addr self gateway-ipv4-addr !
+      8 8 8 8 make-ipv4-addr self dns-server-ipv4-addr !
+      64 self intf-ttl !
+      1 0 self mac-addr-resolve-sema init-sema
       1 0 self dns-resolve-sema init-sema
-      0 self current-dhcp-transact-id !
-      0 0 0 0 self dhcp-req-ipv6-addr ipv6-unaligned!
-      dhcpv6-not-discovering self dhcp-discover-state !
+      0 self current-dhcp-xid !
+      0 self dhcp-server-ipv4-addr !
+      $FFFFFFFFFF. self dhcp-server-mac-addr 2!
+      DEFAULT_IPV4_ADDR self dhcp-req-ipv4-addr !
+      dhcp-not-discovering self dhcp-discover-state !
       systick::systick-counter
-      dup self router-discovered-start !
-      dup self router-discovery-start !
-      dup self dhcp-discover-start !
+      dhcp-arp-attempt-count self dhcp-remaining-arp-attempts !
       dup self dhcp-discover-stage-start !
       dup self dhcp-renew-start !
       dup self dhcp-rebind-start !
@@ -2797,16 +2766,13 @@ begin-module net-ipv6
       default-dhcp-renew-interval self dhcp-real-renew-interval !
       default-dhcp-renew-interval self dhcp-renew-interval !
       default-dhcp-renew-interval self dhcp-rebind-interval !
-      no-sema-limit 0 self router-discovery-sema init-sema
       no-sema-limit 0 self dhcp-sema init-sema
-      no-sema-limit 0 self found-dns-sema init-sema
       self outgoing-buf-lock init-lock
       max-endpoints 0 ?do
-        <ipv6-endpoint> self intf-endpoints <ipv6-endpoint> class-size i * +
+        <ipv4-endpoint> self intf-endpoints <ipv4-endpoint> class-size i * +
         init-object
       loop
       self endpoint-queue-lock init-lock
-      self router-discovery-lock init-lock
       self dhcp-lock init-lock
       self mac-addr-resolve-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
@@ -2819,70 +2785,56 @@ begin-module net-ipv6
       time-wait-count 0 ?do
         <time-wait> self time-wait-list <time-wait> class-size i * + init-object
       loop
+      <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
     ; define new
 
-    \ Get the IPv6 address
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      intf-ipv6-addr ipv6-unaligned@
-    ; define intf-ipv6-addr@
+    \ Get the IPv4 address
+    :noname ( self -- addr )
+      intf-ipv4-addr @
+    ; define intf-ipv4-addr@
     
-    \ Set the IPv6 address
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      intf-ipv6-addr ipv6-unaligned!
-    ; define intf-ipv6-addr!
+    \ Set the IPv4 address
+    :noname ( addr self -- )
+      intf-ipv4-addr !
+    ; define intf-ipv4-addr!
 
-    \ Get the IPv6 prefix
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      intf-ipv6-prefix ipv6-unaligned@
-    ; define intf-ipv6-prefix@
+    \ Get the IPv4 netmask
+    :noname ( self -- netmask )
+      intf-ipv4-netmask @
+    ; define intf-ipv4-netmask@
+
+    \ Set the IPv4 netmask
+    :noname ( netmask self -- )
+      intf-ipv4-netmask !
+    ; define intf-ipv4-netmask!
+
+    \ Get the gateway IPv4 address
+    :noname ( self -- addr )
+      gateway-ipv4-addr @
+    ; define gateway-ipv4-addr@
     
-    \ Set the IPv6 prefix
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      intf-ipv6-prefix ipv6-unaligned!
-    ; define intf-ipv6-prefix!
+    \ Set the gateway IPv4 address
+    :noname ( addr self -- )
+      gateway-ipv4-addr !
+    ; define gateway-ipv4-addr!
 
-    \ Get IPv6 autonomous state
-    :noname ( self -- autonomous? )
-      intf-autonomous? @
-    ; define intf-autonomous@
-
-    \ Set IPv6 autonomous state
-    :noname ( autonomous? self -- )
-      intf-autonomous? !
-    ; define intf-autonomous!
+    \ Get the DNS server IPv4 address
+    :noname ( self -- addr )
+      dns-server-ipv4-addr @
+    ; define dns-server-ipv4-addr@
     
-    \ Get the IPv6 prefix length
-    :noname ( self -- length )
-      intf-ipv6-prefix-len @
-    ; define intf-ipv6-prefix-len@
+    \ Set the DNS server IPv4 address
+    :noname ( addr self -- )
+      dns-server-ipv4-addr !
+    ; define dns-server-ipv4-addr!
 
-    \ Set the IPv6 prefix length
-    :noname ( length self -- )
-      over 128 u<= averts x-out-of-range-prefix-len
-      intf-ipv6-prefix-len !
-    ; define intf-ipv6-prefix-len!
-
-    \ Get the gateway IPv6 address
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      gateway-ipv6-addr ipv6-unaligned@
-    ; define gateway-ipv6-addr@
-    
-    \ Set the gateway IPv6 address
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      gateway-ipv6-addr ipv6-unaligned!
-    ; define gateway-ipv6-addr!
-
-    \ Get the DNS server IPv6 address
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      dns-server-ipv6-addr ipv6-unaligned@
-    ; define dns-server-ipv6-addr@
-    
-    \ Set the DNS server IPv6 address
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      dns-server-ipv6-addr ipv6-unaligned!
-    ; define dns-server-ipv6-addr!
+    \ Get the IPv4 broadcast address
+    :noname { self -- addr }
+      self intf-ipv4-addr @ self intf-ipv4-netmask @ and
+      $FFFFFFFF self intf-ipv4-netmask @ bic or
+    ; define intf-ipv4-broadcast@
 
     \ Get the MAC address
     :noname ( self -- D: addr )
@@ -2891,147 +2843,126 @@ begin-module net-ipv6
 
     \ Get the TTL
     :noname ( self -- ttl )
-      intf-hop-limit @
-    ; define intf-hop-limit@
+      intf-ttl @
+    ; define intf-ttl@
     
     \ Set the TTL
     :noname { ttl self -- }
-      ttl 255 min 1 max self intf-hop-limit !
-    ; define intf-hop-limit!
+      ttl 255 min 1 max self intf-ttl !
+    ; define intf-ttl!
+    
+    \ Process a MAC address for an IPv4 address
+    :noname { D: mac-addr ipv4-addr self -- }
+      mac-addr ipv4-addr self address-map save-mac-addr-by-ipv4
+      self mac-addr-resolve-sema broadcast
+      self mac-addr-resolve-sema give
+    ; define process-ipv4-mac-addr
 
-    \ Are we listening to IPv6 address
-    :noname { src-0 src-1 src-2 src-3 self -- listen? }
-      src-0 src-1 src-2 src-3 self intf-ipv6-addr@ ipv6= if
-        true
-      else
-        src-0 src-1 src-2 src-3
-        self intf-mac-addr@ make-link-local-ipv6-addr ipv6= if
-          true
-        else
-          src-0 src-1 src-2 src-3 ipv6-addr-multicast? if
-            src-0 src-1 src-2 src-3 ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
-              true
-            else
-              src-0 src-1 src-2 src-3
-              self intf-ipv6-addr@ solicit-node-link-local-multicast ipv6=
-            then
-          else
-            false
-          then
-        then
+    \ Process a fragment
+    :noname ( addr bytes self -- )
+      dup { self }
+      fragment-collect apply-fragment if
+        self fragment-collect get-completed-packet self process-ipv4-packet
+        fragment-collect clear-fragment
       then
-    ; define method ipv6-addr-listen?
+    ; define process-fragment
 
-    \ Process a MAC address for an IPv6 address
-    :noname { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-2 self -- }
-      mac-addr multicast-mac-addr? if exit then
-      ipv6-0 ipv6-1 ipv6-2 ipv6-2 multicast-ipv6-addr? if exit then
-      mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 systick::systick-counter
-      self address-map save-mac-addr-by-ipv6
-      self neighbor-discovery-sema broadcast
-      self neighbor-discovery-sema give
-    ; define process-ipv6-mac-addr
-
-    \ Process an IPv6 packet
-    :noname ( src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- )
+    \ Process an IPv4 packet
+    :noname ( src-addr protocol addr bytes self -- )
       3 pick case
-        PROTOCOL_UDP of process-ipv6-udp-packet endof
-        PROTOCOL_TCP of process-ipv6-tcp-packet endof
-        PROTOCOL_ICMPV6 of process-icmpv6-packet endof
-        >r 2drop 2drop 2drop 2drop r>
+        PROTOCOL_UDP of process-ipv4-udp-packet endof
+        PROTOCOL_TCP of process-ipv4-tcp-packet endof
+        PROTOCOL_ICMP of process-ipv4-icmp-packet endof
+        >r 2drop 2drop drop r>
       endcase
-    ; define process-ipv6-packet
+    ; define process-ipv4-packet
 
-    \ Process an IPv6 TCP packet
-    :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
-      bytes ipv6-tcp-header-size >= if
+    \ Process an IPv4 TCP packet
+    :noname { src-addr protocol addr bytes self -- }
+      bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
         [ debug? ] [if]
           addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
         
-        src-0 src-1 src-2 src-3 addr bytes self
+        src-addr addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
         case
-          TCP_SYN of process-ipv6-syn-packet endof
-          [ TCP_SYN TCP_ACK or ] literal of process-ipv6-syn-ack-packet endof
-          TCP_ACK of process-ipv6-ack-packet endof
-          [ TCP_FIN TCP_ACK or ] literal of process-ipv6-fin-ack-packet endof
-          TCP_RST of process-ipv6-rst-packet endof
-          nip nip nip nip nip nip nip
+          TCP_SYN of process-ipv4-syn-packet endof
+          [ TCP_SYN TCP_ACK or ] literal of process-ipv4-syn-ack-packet endof
+          TCP_ACK of process-ipv4-ack-packet endof
+          \          TCP_FIN of process-ipv4-fin-packet endof
+          [ TCP_FIN TCP_ACK or ] literal of process-ipv4-fin-ack-packet endof
+          TCP_RST of process-ipv4-rst-packet endof
+          nip nip nip nip
         endcase
       then
-    ; define process-ipv6-tcp-packet
+    ; define process-ipv4-tcp-packet
 
-    \ Find a listening IPv6 TCP endpoint
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- endpoint found? }
+    \ Find a listening IPv4 TCP endpoint
+    :noname { src-addr addr bytes self -- endpoint found? }
       max-endpoints 0 ?do
-        self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-        src-0 src-1 src-2 src-3
+        self intf-endpoints <ipv4-endpoint> class-size i * + { endpoint }
+        src-addr
         addr tcp-src-port h@ rev16
         addr tcp-dest-port h@ rev16
-        src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
-          endpoint try-ipv6-accept-endpoint if
+        src-addr self address-map lookup-mac-addr-by-ipv4 if
+          endpoint try-ipv4-accept-endpoint if
             endpoint self put-ready-endpoint
             endpoint true unloop exit
           then
         else
-          2drop 2drop 2drop 2drop \ Should never happen
+          2drop 2drop drop \ Should never happen
         then
       loop
       0 false
-    ; define find-listen-ipv6-endpoint
+    ; define find-listen-ipv4-endpoint
 
-    \ Find a connecting/connected IPv6 TCP endpoint
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- endpoint found? }
+    \ Find a connecting/connected IPv4 TCP endpoint
+    :noname { src-addr addr bytes self -- endpoint found? }
       max-endpoints 0 ?do
-        self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-        src-0 src-1 src-2 src-3
+        self intf-endpoints <ipv4-endpoint> class-size i * + { endpoint }
+        src-addr
         addr tcp-src-port h@ rev16
         addr tcp-dest-port h@ rev16
-        endpoint match-ipv6-connect? if endpoint true unloop exit then
+        endpoint match-ipv4-connect? if endpoint true unloop exit then
       loop
       0 false
-    ; define find-connect-ipv6-endpoint
+    ; define find-connect-ipv4-endpoint
     
-    \ Process an IPv6 TCP SYN packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-listen-ipv6-endpoint if
-        { endpoint }
-        src-0 src-1 src-2 src-3 addr bytes endpoint self
-        [: swap send-ipv6-syn-ack ;] endpoint with-endpoint
+    \ Process an IPv4 TCP SYN packet
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-listen-ipv4-endpoint if
+        [: swap send-ipv4-syn-ack ;] over with-endpoint
       else
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
+        drop send-ipv4-rst-for-packet
       then
-    ; define process-ipv6-syn-packet
+    ; define process-ipv4-syn-packet
 
     \ Send a TCP SYN packet
     :noname { endpoint self -- }
       TCP_SYN_SENT endpoint endpoint-tcp-state!
-      endpoint endpoint-ipv6-remote@
+      endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       0
       max-endpoint-in-size
       TCP_SYN
       endpoint endpoint-remote-mac-addr@
-      self send-ipv6-tcp-with-mss
+      self send-ipv4-tcp-with-mss
     ; define send-syn
 
-    \ Send an IPv6 TCP SYN+ACK packet
-    :noname ( src-0 src-1 src-2 src-3 ) { addr bytes endpoint self -- }
-      2drop 2drop
+    \ Send an IPv4 TCP SYN+ACK packet
+    :noname { src-addr addr bytes endpoint self -- }
       rng::random endpoint endpoint-init-local-seq!
       addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
-        drop [ max-ipv6-packet-size ipv6-header-size - tcp-header-size - ]
-        literal
+        drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
       then
       addr tcp-window-size h@ rev16
       endpoint init-tcp-stream
-      endpoint endpoint-ipv6-remote@
+      endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       endpoint endpoint-ack@
@@ -3039,51 +2970,51 @@ begin-module net-ipv6
       [ TCP_SYN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
 
-      self send-ipv6-tcp-with-mss
+      self send-ipv4-tcp-with-mss
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
       endpoint reset-endpoint-refresh
-    ; define send-ipv6-syn-ack
+    ; define send-ipv4-syn-ack
 
-    \ Send an IPv6 TCP RST packet in response to a packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3
-      addr tcp-src-port h@ rev16
-      addr tcp-dest-port h@ rev16
-      rng::random
-      addr tcp-seq-no @ rev
+    \ Send an IPv4 TCP RST packet in response to a packet
+    :noname ( src-addr addr bytes self -- ) { self }
+      drop
+      over { src-addr }
+      dup tcp-src-port h@ rev16 swap
+      dup tcp-dest-port h@ rev16 swap
+      rng::random swap
+      tcp-seq-no @ rev
       0
       TCP_RST
-      src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
-        self send-ipv6-basic-tcp
+      src-addr self address-map lookup-mac-addr-by-ipv4 if
+        self send-ipv4-basic-tcp
       else
-        2drop 2drop 2drop 2drop 2drop 2drop \ Should never happen
+        2drop 2drop 2drop 2drop drop \ Should never happen
       then
-    ; define send-ipv6-rst-for-packet
+    ; define send-ipv4-rst-for-packet
 
-    \ Send a generic IPv6 TCP RST packet
+    \ Send a generic IPv4 TCP RST packet
     :noname { endpoint self -- }
-      endpoint endpoint-ipv6-remote@
+      endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@
       endpoint endpoint-ack@
       0
       TCP_RST
       endpoint endpoint-remote-mac-addr@
-      self send-ipv6-basic-tcp
+      self send-ipv4-basic-tcp
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-    ; define send-ipv6-rst
+    ; define send-ipv4-rst
 
-    \ Send a basic IPv6 TCP packet
+    \ Send a basic IPv4 TCP packet
     :noname
-      ( remote-0 remote-1 remote-2 remote-3 remote-port local-port seq ack )
-      ( window flags D: mac-addr self -- )
-      -rot 12 pick 12 pick 12 pick 12 pick PROTOCOL_TCP tcp-header-size
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
+      -rot 9 pick PROTOCOL_TCP tcp-header-size
       ( self D: mac-addr remote-addr protocol bytes )
-      [: { remote-0 remote-1 remote-2 remote-3
-        remote-port local-port seq ack window flags self buf }
+      [: { remote-addr remote-port local-port seq ack window flags self buf }
         local-port rev16 buf tcp-src-port h!
         remote-port rev16 buf tcp-dest-port h!
         seq rev buf tcp-seq-no !
@@ -3092,26 +3023,24 @@ begin-module net-ipv6
         flags buf tcp-flags c!
         window rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
-        self intf-ipv6-addr@
-        remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
+        compute-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
         true
-      ;] 9 pick construct-and-send-ipv6-packet drop
-    ; define send-ipv6-basic-tcp
+      ;] 6 pick construct-and-send-ipv4-packet drop
+    ; define send-ipv4-basic-tcp
 
-    \ Send an IPv6 TCP packet with an MSS field
+    \ Send an IPv4 TCP packet with an MSS field
     :noname
-      ( remote-0 remote-1 remote-2 remote-3 remote-port local-port seq ack )
-      ( window flags D: mac-addr self -- )
-      -rot 12 pick 12 pick 12 pick 12 pick PROTOCOL_TCP tcp-header-size 8 +
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
+      -rot 9 pick PROTOCOL_TCP tcp-header-size 8 +
       ( self D: mac-addr remote-addr protocol bytes )
-      [: { remote-0 remote-1 remote-2 remote-3
-        remote-port local-port seq ack window flags self buf }
+      [: { remote-addr remote-port local-port seq ack window flags self buf }
         local-port rev16 buf tcp-src-port h!
         remote-port rev16 buf tcp-dest-port h!
         seq rev buf tcp-seq-no !
@@ -3121,31 +3050,27 @@ begin-module net-ipv6
         window rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
         [ TCP_OPT_MSS 24 lshift 4 16 lshift or
-        max-ipv6-packet-size ipv6-header-size - tcp-header-size - or
+        mtu-size ipv4-header-size - tcp-header-size - or
         rev ] literal
         buf tcp-header-size + !
         [ $01010100 rev ] literal buf tcp-header-size + 4 + !
-        self intf-ipv6-addr@
-        remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 8 + 0
-        tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        self intf-ipv4-addr@ remote-addr buf tcp-header-size 8 + 0 tcp-checksum
+        compute-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
         true
-      ;] 6 pick construct-and-send-ipv6-packet drop
-    ; define send-ipv6-tcp-with-mss
+      ;] 6 pick construct-and-send-ipv4-packet drop
+    ; define send-ipv4-tcp-with-mss
     
-    \ Process an IPv6 TCP SYN+ACK packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes find-connect-ipv6-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes send-ipv6-rst-for-packet exit
+    \ Process an IPv4 TCP SYN+ACK packet
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-connect-ipv4-endpoint not if
+        drop send-ipv4-rst-for-packet exit
       then
-      { endpoint }
-      addr bytes self endpoint
-      [: { addr bytes self endpoint }
+      [: { src-addr addr bytes self endpoint }
         addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
@@ -3154,35 +3079,31 @@ begin-module net-ipv6
           endpoint endpoint-init-local-seq@ <> if exit then
           addr tcp-seq-no @ rev 1+
           addr bytes tcp-mss@ not if
-            drop [ max-ipv6-packet-size ipv6-header-size -
-            tcp-header-size - ] literal
+            drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
           then
           addr tcp-window-size h@ rev16
           endpoint init-tcp-stream
         then
-        endpoint endpoint-ipv6-remote@
+        endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         TCP_ACK
         endpoint endpoint-remote-mac-addr@
-        self send-ipv6-basic-tcp
+        self send-ipv4-basic-tcp
         TCP_ESTABLISHED endpoint endpoint-tcp-state!
         endpoint reset-endpoint-refresh
         endpoint self put-ready-endpoint
-      ;] endpoint with-endpoint
-    ; define process-ipv6-syn-ack-packet
+      ;] over with-endpoint
+    ; define process-ipv4-syn-ack-packet
 
-    \ Process an IPv6 ACK packet
-    :noname ( src-0 src-1 src-2 src-3 addr bytes self -- )
-      { addr bytes self }
-      addr bytes self find-connect-ipv6-endpoint not if
-        drop exit
+    \ Process an IPv4 ACK packet
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-connect-ipv4-endpoint not if
+        2drop 2drop drop exit
       then
-      { endpoint }
-      addr bytes self endpoint
-      [: { addr bytes self endpoint }
+      [: { src-addr addr bytes self endpoint }
         addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
@@ -3190,25 +3111,25 @@ begin-module net-ipv6
         addr bytes endpoint self
         state case
           TCP_SYN_SENT of
-            process-ipv6-ack-syn-sent
+            process-ipv4-ack-syn-sent
           endof
           TCP_SYN_RECEIVED of
-            process-ipv6-ack-syn-received
+            process-ipv4-ack-syn-received
           endof
           TCP_ESTABLISHED of
-            process-ipv6-ack-established
+            process-ipv4-ack-established
           endof
           TCP_FIN_WAIT_1 of
-            process-ipv6-ack-fin-wait-1
+            process-ipv4-ack-fin-wait-1
           endof
           TCP_FIN_WAIT_2 of
-            process-ipv6-ack-fin-wait-2
+            process-ipv4-ack-fin-wait-2
           endof
           TCP_CLOSE_WAIT of
-            process-ipv6-ack-close-wait
+            process-ipv4-ack-close-wait
           endof
           TCP_LAST_ACK of
-            process-ipv6-ack-last-ack
+            process-ipv4-ack-last-ack
           endof
           drop 2drop 2drop
         endcase
@@ -3219,28 +3140,25 @@ begin-module net-ipv6
           endpoint wake-endpoint
         then
         endpoint start-endpoint-timeout
-      ;] endpoint with-endpoint
-    ; define process-ipv6-ack-packet
+      ;] over with-endpoint
+    ; define process-ipv4-ack-packet
 
-    \ Process an IPv6 FIN+ACK packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
-        exit
+    \ Process an IPv4 FIN+ACK packet
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-connect-ipv4-endpoint not if
+        drop send-ipv4-rst-for-packet exit
       then
-      { endpoint }
-      addr bytes self endpoint
-      [: { addr bytes self endpoint }
+      [: { src-addr addr bytes self endpoint }
         addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ { state }
-        addr bytes endpoint self process-ipv6-basic-ack
+        addr bytes endpoint self process-ipv4-basic-ack
         addr bytes endpoint self
         state case
-          TCP_ESTABLISHED of process-ipv6-ack-fin-established endof
-          TCP_FIN_WAIT_1 of process-ipv6-ack-fin-fin-wait-1 endof
-          TCP_FIN_WAIT_2 of process-ipv6-ack-fin-fin-wait-2 endof
+          TCP_ESTABLISHED of process-ipv4-ack-fin-established endof
+          TCP_FIN_WAIT_1 of process-ipv4-ack-fin-fin-wait-1 endof
+          TCP_FIN_WAIT_2 of process-ipv4-ack-fin-fin-wait-2 endof
           >r 2drop 2drop r>
         endcase
         endpoint endpoint-waiting-bytes@ 0>
@@ -3249,10 +3167,10 @@ begin-module net-ipv6
         else
           endpoint wake-endpoint
         then
-      ;] endpoint with-endpoint
-    ; define process-ipv6-fin-ack-packet
+      ;] over with-endpoint
+    ; define process-ipv4-fin-ack-packet
 
-    \ Process an IPv6 ACK packet in the general case
+    \ Process an IPv4 ACK packet in the general case
     :noname { addr bytes endpoint self -- }
       addr full-tcp-header-size { header-size }
       addr header-size + bytes header-size -
@@ -3263,127 +3181,150 @@ begin-module net-ipv6
       addr tcp-ack-no @ rev
       endpoint endpoint-ack-in
       endpoint endpoint-send-ack? if
-        endpoint endpoint-ipv6-remote@
+        endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         TCP_ACK
         endpoint endpoint-remote-mac-addr@
-        self send-ipv6-basic-tcp
+        self send-ipv4-basic-tcp
         endpoint endpoint-ack-sent
         endpoint reset-endpoint-refresh
       then
-    ; define process-ipv6-basic-ack
+    ; define process-ipv4-basic-ack
 
-    \ Process an IPv6 ACK packet in TCP_SYN_SENT state
+    \ Process an IPv4 ACK packet in TCP_SYN_SENT state
     :noname ( addr bytes endpoint self -- )
       [: { addr bytes endpoint self }
         addr tcp-seq-no @ rev 1+
         addr bytes tcp-mss@ not if
-          drop [ max-ipv6-packet-size ipv6-header-size -
-          tcp-header-size - ] literal
+          drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
         then
         addr tcp-window-size h@ rev16
         endpoint init-tcp-stream
-        endpoint endpoint-ipv6-remote@
+        endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         TCP_ACK
         endpoint endpoint-remote-mac-addr@
-        self send-ipv6-basic-tcp
+        self send-ipv4-basic-tcp
         TCP_ESTABLISHED endpoint endpoint-tcp-state!
-        addr bytes endpoint self process-ipv6-basic-ack
+        addr bytes endpoint self process-ipv4-basic-ack
         endpoint self put-ready-endpoint
       ;] 2 pick with-endpoint
-    ; define process-ipv6-ack-syn-sent
+    ; define process-ipv4-ack-syn-sent
     
-    \ Process an IPv6 ACK packet in TCP_SYN_RECEIVED state
+    \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
     :noname { addr bytes endpoint self -- }
       TCP_ESTABLISHED endpoint endpoint-tcp-state!
-      addr bytes endpoint self process-ipv6-basic-ack
+      addr bytes endpoint self process-ipv4-basic-ack
       endpoint self put-ready-endpoint
-    ; define process-ipv6-ack-syn-received
+    ; define process-ipv4-ack-syn-received
     
-    \ Process an IPv6 ACK packet in TCP_ESTABLISHED state
+    \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv6-basic-ack
-    ; define process-ipv6-ack-established
+      addr bytes endpoint self process-ipv4-basic-ack
+    ; define process-ipv4-ack-established
     
-    \ Process an IPv6 ACK packet in TCP_FIN_WAIT_1 state
+    \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
       addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ 1+ = if
         TCP_FIN_WAIT_2 endpoint endpoint-tcp-state!
       else
-        addr bytes endpoint self process-ipv6-basic-ack
+        addr bytes endpoint self process-ipv4-basic-ack
       then
-    ; define process-ipv6-ack-fin-wait-1
+    ; define process-ipv4-ack-fin-wait-1
     
-    \ Process an IPv6 ACK packet in TCP_FIN_WAIT_2 state
+    \ Process an IPv4 ACK packet in TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      \ addr bytes endpoint self process-ipv6-basic-ack
-    ; define process-ipv6-ack-fin-wait-2
+      \ addr bytes endpoint self process-ipv4-basic-ack
+    ; define process-ipv4-ack-fin-wait-2
     
-    \ Process an IPv6 ACK packet in TCP_CLOSE_WAIT state
+    \ Process an IPv4 ACK packet in TCP_CLOSE_WAIT state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv6-basic-ack
-    ; define process-ipv6-ack-close-wait
+      addr bytes endpoint self process-ipv4-basic-ack
+    ; define process-ipv4-ack-close-wait
     
-    \ Process an IPv6 ACK packet in TCP_LAST_ACK state
+    \ Process an IPv4 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv6-basic-ack
+      addr bytes endpoint self process-ipv4-basic-ack
       addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
         endpoint self put-ready-endpoint
       then
-    ; define process-ipv6-ack-last-ack
+    ; define process-ipv4-ack-last-ack
 
-    \ Process an errant IPv6 ACK packet
+    \ Process an errant IPv4 ACK packet
     :noname { addr bytes endpoint self -- }
-      endpoint endpoint-ipv6-remote@ drop addr bytes
-      self send-ipv6-rst-for-packet
+      endpoint endpoint-ipv4-remote@ drop addr bytes
+      self send-ipv4-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-    ; define send-ipv6-rst-for-ack
+    ; define send-ipv4-rst-for-ack
+    
+    \ \ Process an IPv4 FIN packet
+    \ :noname ( src-addr addr bytes self -- )
+    \   2over 2over find-connect-ipv4-endpoint not if
+    \     drop send-ipv4-rst-for-packet exit
+    \   then
+    \   [: { src-addr addr bytes self endpoint }
+    \     addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
+    \       exit
+    \     then
+    \     addr bytes endpoint self
+    \     endpoint endpoint-tcp-state@ { state }
+    \     state case
+    \       TCP_ESTABLISHED of process-ipv4-fin-established endof
+    \       TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
+    \       >r process-ipv4-unexpected-fin r>
+    \     endcase
+    \     endpoint endpoint-tcp-state@ state <> or if
+    \       endpoint self put-ready-endpoint
+    \     else
+    \       endpoint wake-endpoint
+    \     then
+    \   ;] over with-endpoint
+    \ ; define process-ipv4-fin-packet
 
-    \ Process an IPv6 FIN packet for a TCP_ESTABLISHED state
+    \ Process an IPv4 FIN packet for a TCP_ESTABLISHED state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self send-ipv6-fin-reply-ack
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSE_WAIT endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
-    ; define process-ipv6-ack-fin-established
+    ; define process-ipv4-ack-fin-established
 
-    \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_1 state
+    \ Process an IPv4 FIN/ACK packet for a TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self send-ipv6-fin-reply-ack
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
-    ; define process-ipv6-ack-fin-fin-wait-1
+    ; define process-ipv4-ack-fin-fin-wait-1
 
-    \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_2 state
+    \ Process an IPv4 FIN/ACK packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self send-ipv6-fin-reply-ack
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
-    ; define process-ipv6-ack-fin-fin-wait-2
+    ; define process-ipv4-ack-fin-fin-wait-2
 
-    \ Process an unexpected IPv6 FIN packet
+    \ Process an unexpected IPv4 FIN packet
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self send-ipv6-fin-reply-ack
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
-    ; define process-ipv6-unexpected-fin
+    ; define process-ipv4-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
     :noname { addr bytes endpoint self -- }
-      endpoint endpoint-ipv6-remote@
+      endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1+
       addr tcp-seq-no @ rev 1+
@@ -3391,15 +3332,13 @@ begin-module net-ipv6
       TCP_ACK
       \      [ TCP_FIN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
-      self send-ipv6-basic-tcp
-    ; define send-ipv6-fin-reply-ack
+      self send-ipv4-basic-tcp
+    ; define send-ipv4-fin-reply-ack
     
-    \ Process an IPv6 RST packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint if
-        { endpoint }
-        addr bytes self endpoint
-        [: { addr bytes self endpoint }
+    \ Process an IPv4 RST packet
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-connect-ipv4-endpoint if
+        [: { src-addr addr bytes self endpoint }
           addr tcp-dest-port h@ rev16
           endpoint endpoint-local-port@ <> if
             exit
@@ -3409,37 +3348,45 @@ begin-module net-ipv6
           then
           endpoint reset-endpoint-local-port
           endpoint self put-ready-endpoint
-        ;] endpoint with-endpoint
+        ;] over with-endpoint
       else
-        drop
+        drop 2drop 2drop
       then
-    ; define process-ipv6-rst-packet
+    ; define process-ipv4-rst-packet
 
-    \ Process an IPv6 UDP packet
-    :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+    \ Process an IPv4 UDP packet
+    :noname { src-addr protocol addr bytes self -- }
       bytes udp-header-size >= if
+
+        [ debug? ] [if]
+          cr ." Source address: " src-addr ipv4.
+          cr ." Total length: " addr udp-total-len h@ rev16 .
+          cr ." Actual length: " bytes .
+          cr ." Source port: " addr udp-src-port h@ rev16 .
+          cr ." Destination port: " addr udp-dest-port h@ rev16 .
+        [then]
+        
         addr udp-total-len h@ rev16 bytes <> if exit then
-        src-0 src-1 src-2 src-3 self dns-server-ipv6-addr ipv6-unaligned@ ipv6=
+        src-addr self dns-server-ipv4-addr @ =
         addr udp-src-port h@ rev16 dns-port = and if
           addr udp-header-size + bytes udp-header-size -
-          self process-ipv6-dns-packet
+          self process-ipv4-dns-packet
           exit
         then
         addr udp-src-port h@ rev16 dhcp-server-port =
         addr udp-dest-port h@ rev16 dhcp-client-port = and if
           addr udp-header-size + bytes udp-header-size -
-          src-0 src-1 src-2 src-3 self process-dhcpv6-packet
+          src-addr self process-ipv4-dhcp-packet
           exit
         then
         max-endpoints 0 ?do
-          self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-          src-0 src-1 src-2 src-3 addr bytes endpoint self [:
-            { src-0 src-1 src-2 src-3 addr bytes endpoint self }
+          self intf-endpoints <ipv4-endpoint> class-size i * + { endpoint }
+          src-addr addr bytes endpoint self [:
+            { src-addr addr bytes endpoint self }
             endpoint udp-endpoint?
             endpoint endpoint-local-port@ addr udp-dest-port h@ rev16 = and if
               addr udp-header-size + bytes udp-header-size -
-              src-0 src-1 src-2 src-3 addr udp-src-port h@ rev16
+              src-addr addr udp-src-port h@ rev16
               endpoint add-endpoint-udp-data
               endpoint self put-ready-endpoint
               true
@@ -3450,9 +3397,9 @@ begin-module net-ipv6
           if unloop exit then
         loop
       then
-    ; define process-ipv6-udp-packet
+    ; define process-ipv4-udp-packet
 
-    \ Process an IPv6 DNS response packet
+    \ Process an IPv4 DNS response packet
     :noname { addr bytes self -- }
       bytes dns-header-size < if exit then
       addr bytes { all-addr all-bytes }
@@ -3479,31 +3426,31 @@ begin-module net-ipv6
         [ dns-qbody-size negate ] literal +to bytes
         -1 +to qdcount
       repeat
-      addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
-    ; define process-ipv6-dns-packet
+      addr bytes all-addr all-bytes ancount ident self process-ipv4-dns-answers
+    ; define process-ipv4-dns-packet
 
-    \ Process IPv6 DNS response packet answers
+    \ Process IPv4 DNS response packet answers
     :noname { addr bytes all-addr all-bytes ancount ident self -- }
       begin ancount 0> bytes 0> and while
         addr bytes { saved-addr saved-bytes }
         addr bytes skip-dns-name to bytes to addr
         bytes dns-abody-size < if exit then
 
-        addr dns-abody-type hunaligned@ [ DNS_QTYPE_AAAA rev16 ] literal =
+        addr dns-abody-type hunaligned@ [ 1 rev16 ] literal =
         addr dns-abody-class hunaligned@ [ 1 rev16 ] literal = and
-        addr dns-abody-rdlength hunaligned@ [ 16 rev16 ] literal = and if
+        addr dns-abody-rdlength hunaligned@ [ 4 rev16 ] literal = and if
           dns-abody-size +to addr
           [ dns-abody-size negate ] literal +to bytes
-          bytes 16 < if exit then
-          addr ipv6-unaligned@
+          bytes 4 < if exit then
+          addr unaligned@ rev
           saved-addr saved-bytes all-addr all-bytes ident self 256 [:
             { ident self buf }
             buf parse-dns-name if
-              ident buf rot self dns-cache save-ipv6-addr-by-dns
+              ident buf rot self dns-cache save-ipv4-addr-by-dns
               self dns-resolve-sema broadcast
               self dns-resolve-sema give
             else
-              2drop 2drop 2drop 2drop
+              2drop
             then
           ;] with-allot
           exit
@@ -3513,208 +3460,40 @@ begin-module net-ipv6
           -1 +to ancount
         then
       repeat
-    ; define process-ipv6-dns-answers
+    ; define process-ipv4-dns-answers
     
-    \ Process an ICMPv6 packet
-    :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+    \ Process an IPv4 ICMP packet
+    :noname { src-addr protocol addr bytes self -- }
       bytes icmp-header-size >= if
         addr bytes 0 icmp-checksum compute-inet-checksum
         addr icmp-checksum hunaligned@ rev16 <> if exit then
         addr icmp-type c@ case
-          ICMPV6_TYPE_ECHO_REQUEST of
-            src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
-            process-icmpv6-echo-request-packet
-          endof
-          ICMPV6_TYPE_ROUTER_ADVERTISE of
-            src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
-            process-icmpv6-router-advertise-packet
-          then
-          ICMPV6_TYPE_NEIGHBOR_SOLICIT of
-            src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
-            process-icmpv6-neighbor-solicit-packet
-          then
-          ICMPV6_TYPE_NEIGHBOR_ADVERTISE of
-            src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
-            process-icmpv6-neighbor-advertise-packet
+          ICMP_TYPE_ECHO_REQUEST of
+            src-addr addr bytes self process-ipv4-echo-request-packet
           endof
         endcase
       then
-    ; define process-icmpv6-packet
+    ; define process-ipv4-icmp-packet
 
-    \ Send an ICMPv6 neighbor solicit packet
-    :noname { target-0 target-1 target-2 target-3 self -- }
-      target-0 target-1 target-2 target-3 self
-      target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
-      self detecting-duplicate? @ if 0 0 0 0 else self intf-ipv6-addr@ then
-      PROTOCOL_ICMPV6
-      [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal [:
-        { target-0 target-1 target-2 target-3 self buf }
-        ICMPV6_TYPE_NEIGHBOR_SOLICIT buf icmp-type c!
-        ICMP_CODE_UNUSED buf icmp-code c!
-        target-0 target-1 target-2 target-3
-        buf icmp-header-size + ipv6-unaligned!
-        0 buf icmp-rest-of-header unaligned!
-        [ icmp-header-size ipv6-addr-size + ] literal buf + { opt-buf }
-        OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
-        1 opt-buf 1+ c!
-        self intf-mac-addr@ opt-buf 2 + mac!
-        buf [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal
-        0 icmp-checksum compute-inet-checksum rev16
-        buf icmp-checksum hunaligned!
-        true
-      ;] self construct-and-send-ipv6-packet drop
-    ; define send-icmpv6-neighbor-solicit
-
-    \ Send an ICMPv6 router solicit package
-    :noname { self -- }
-      self intf-hop-limit @ { saved-hop-limit }
-      255 self intf-hop-limit !
-      self
-      ALL_ROUTERS_LINK_LOCAL_MULTICAST
-      self intf-ipv6-addr@ PROTOCOL_ICMPV6
-      [ icmp-header-size 2 + mac-addr-size + ] literal
-      [: { self buf }
-        ICMPV6_TYPE_ROUTER_SOLICIT buf icmp-type c!
-        ICMP_CODE_UNUSED buf icmp-code c!
-        0 buf icmp-rest-of-header unaligned!
-        icmp-header-size buf + { opt-buf }
-        OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
-        1 opt-buf 1+ c!
-        self intf-mac-addr@ opt-buf 2 + mac!
-        buf [ icmp-header-size 2 + mac-addr-size + ] literal
-        0 icmp-checksum compute-inet-checksum rev16
-        buf icmp-checksum hunaligned!
-        true
-      ;] self construct-and-send-ipv6-packet drop
-      self intf-hop-limit @ 255 = if
-        saved-hop-limit self intf-hop-limit !
-      then
-    ; define send-icmpv6-router-solicit
-    
-    \ Process an ICMPv6 echo request packet
-    :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
+    \ Process an IPv4 ICMP echo request packet
+    :noname { src-addr addr bytes self -- }
       bytes icmp-header-size < if exit then
-      addr bytes self src-mac-addr
-      src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6 bytes [:
-        { addr bytes self buf }
-        ICMPV6_TYPE_ECHO_REPLY buf icmp-type c!
-        ICMP_CODE_UNUSED buf icmp-code c!
-        addr 4 + buf 4 + bytes 4 - move
-        buf bytes 0 icmp-checksum compute-inet-checksum rev16
-        buf icmp-checksum hunaligned!
-        true
-      ;] self construct-and-send-ipv6-packet drop
-    ; define process-icmpv6-echo-request-packet
-
-    \ Process an ICMPv6 neighbor solicit packet
-    :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
-      bytes icmp-header-size ipv6-addr-size + < if exit then
-      addr icmp-header-size + ipv6-unaligned@ self intf-ipv6-addr@ ipv6= not if
-        exit
+      src-addr self address-map lookup-mac-addr-by-ipv4 if
+        { D: src-mac-addr }
+        addr bytes self src-mac-addr src-addr PROTOCOL_ICMP bytes [:
+          { addr bytes self buf }
+          ICMP_TYPE_ECHO_REPLY buf icmp-type c!
+          ICMP_CODE_UNUSED buf icmp-code c!
+          addr 4 + buf 4 + bytes 4 - move
+          buf bytes 0 icmp-checksum compute-inet-checksum rev16
+          buf icmp-checksum hunaligned!
+          true
+        ;] self construct-and-send-ipv4-packet drop
+      else
+        2drop \ Should never happen
       then
-      OPTION_SOURCE_LINK_LAYER_ADDR addr bytes find-icmpv6-opt if
-        6 >= if mac@ to src-mac-addr else drop exit then
-      then
-      src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
-      src-mac-addr mac-addr-multicast? not and if
-        src-mac-addr src-0 src-1 src-2 src-3 systick:systick-counter
-        self address-map save-mac-addr-by-ipv6
-      then
-      [ icmp-header-size ipv6-addr-size + ] literal { reply-bytes }
-      src-mac-addr mac-addr-multicast? not if
-        [ 2 mac-addr-size + ] literal +to reply-bytes
-      then
-      reply-bytes src-mac-addr self src-mac-addr
-      src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6 reply-bytes [:
-        { D: bytes src-mac-addr self buf }
-        ICMPV6_TYPE_NEIGHBOR_ADVERTISE buf icmp-type c!
-        ICMP_CODE_UNUSED buf icmp-code c!
-        self intf-ipv6-addr@ buf icmp-header-size + ipv6-unaligned!
-        src-mac-addr mac-addr-multicast? not if
-          [ NEIGHBOR_SOLICITED rev ] buf icmp-rest-of-header unaligned!
-          [ icmp-header-size ipv6-addr-size + ] literal +to buf
-          OPTION_TARGET_LINK_LAYER_ADDR buf c!
-          1 buf 1+ c!
-          src-mac-addr buf 2 + mac!
-        else
-          0 buf icmp-rest-of-header unaligned!
-        then
-        buf bytes 0 icmp-checksum compute-inet-checksum rev16
-        buf icmp-checksum hunaligned!
-        true
-      ;] self construct-and-send-ipv6-packet drop
-    ; define process-icmpv6-neighbor-solicit-packet
-
-    \ Process an ICMPv6 neighbor advertise packet
-    :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
-      bytes icmp-header-size ipv6-addr-size + < if exit then
-      addr icmp-header-size + ipv6-unaligned@
-      { target-0 target-1 target-2 target-3 }
-      src-mac-addr target-0 target-1 target-2 target-3
-      self process-ipv6-mac-addr
-    ; define process-icmpv6-neighbor-advertise-packet
-
-    \ Process an ICMPv6 router advertise packet
-    :noname ( D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- )
-      [:
-        { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self }
-        bytes icmpv6-ra-header-size < if exit then
-        src-mac-addr src-0 src-1 src-2 src-3
-        self process-ipv6-mac-addr
-        self router-discovery? @ if
-          addr icmpv6-ra-router-lifetime hunaligned@ rev16 dup 0= if exit then
-          self router-lifetime !
-          src-0 src-1 src-2 src-3 self gateway-ipv6-addr ipv6-unaligned!
-          addr icmpv6-ra-cur-hop-limit c@ self intf-hop-limit !
-          addr icmpv6-ra-m-o-reserved c@
-          dup icmpv6-ra-managed and 0<> self use-dhcpv6? !
-          dup icmpv6-ra-managed and 0= swap icmpv6-ra-other and 0<> and
-          self use-dhcpv6-other? !
-          addr icmpv6-ra-reachable-time unaligned@
-          rev self neighbor-reachable-time !
-          addr icmpv6-ra-retrans-time unaligned@
-          rev self neighbor-retrans-time !
-          addr icmpv6-ra-header-size + { cur-addr }
-          addr icmpv6-ra-header-size - { cur-size }
-          begin
-            cur-size 0> if
-              OPTION_PREFIX_INFO cur-addr cur-size find-icmpv6-opt if
-                { opt-addr opt-size }
-                opt-addr icmpv6-prefix-info-prefix-len c@ 128 u<= if
-                  opt-addr icmpv6-prefix-info-prefix-len c@
-                  self intf-ipv6-prefix-len!
-                  opt-addr icmpv6-prefix-info-prefix ipv6-unaligned@
-                  self intf-ipv6-prefix!
-                  opt-addr icmpv6-prefix-info-flags c@
-                  icmpv6-prefix-info-autonomous and 0<>
-                  dup self intf-autonomous!
-                else
-                  false
-                then
-                not if
-                  opt-addr icmpv6-prefix-info-len c@ 8 * opt-addr +
-                  dup cur-addr - negate +to cur-size
-                  to cur-addr
-                  false
-                else
-                  true
-                then
-              else
-                2drop true
-              then
-            else
-              true
-            then
-          until
-          false self router-discovery? !
-          true self router-discovered? !
-          systick::systick-counter self router-discovered-start !
-          self router-discovery-sema give
-        then
-      ;] over router-discovery-lock with-lock
-    ; define process-icmpv6-router-advertise-packet
-
+    ; define process-ipv4-echo-request-packet
+    
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
       [:
@@ -3741,65 +3520,93 @@ begin-module net-ipv6
       ;] task::no-timeout task::with-timeout
     ; define construct-and-send-frame
 
-    \ Construct and send a IPv6 packet with a specified source IPv6 address
-    :noname
-      ( ? D: mac-addr src-0 src-1 src-2 src-3 )
-      ( dest-0 dest-1 dest-2 dest-3 protocol bytes xt self -- )
+    \ Construct and send a IPv4 packet with a specified source IPv4 address
+    :noname ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- )
       ( ? sent? ) ( xt: ? buf -- ? send? )
-      2 pick [ ethernet-header-size ipv6-header-size + ] literal + over
-      [: { D: mac-addr src-0 src-1 src-2 src-3
-        dest-0 dest-1 dest-2 dest-3 protocol bytes xt self buf }
+      2 pick [ ethernet-header-size ipv4-header-size + ] literal + over
+      [: { D: mac-addr src-addr dest-addr protocol bytes xt self buf }
         mac-addr buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
-        [ ETHER_TYPE_IPV6 rev16 ] literal buf ethh-ether-type h!
+        [ ETHER_TYPE_IPV4 rev16 ] literal buf ethh-ether-type h!
         buf ethernet-header-size + { ip-buf }
-        IPV6_VERSION_TRAFFIC_FLOW_CONST
-        ip-buf ipv6-version-traffic-flow unaligned!
-        bytes ip-buf ipv6-payload-len hunaligned!
-        protocol ip-buf ipv6-next-header c!
-        self intf-hop-limit c@ ip-buf ipv6-hop-limit c!
-        src-0 src-1 src-2 src-3 ip-buf ipv6-src-addr ipv6-unaligned!
-        dest-0 dest-1 dest-2 dest-3 ip-buf ipv6-dest-addr ipv6-unaligned!
-        ip-buf ipv6-header-size + xt execute
+        [ 4 4 lshift 5 or ] literal ip-buf ipv4-version-ihl c!
+        0 ip-buf ipv4-tos c!
+        bytes ipv4-header-size + rev16 ip-buf ipv4-total-len h!
+        0 ip-buf ipv4-identification h!
+        [ DF 13 lshift rev16 ] literal ip-buf ipv4-flags-fragment-offset h!
+        self intf-ttl c@ ip-buf ipv4-ttl c!
+        protocol ip-buf ipv4-protocol c!
+        src-addr rev ip-buf ipv4-src-addr !
+        dest-addr rev ip-buf ipv4-dest-addr !
+        ip-buf ipv4-header-size 0 ipv4-header-checksum compute-inet-checksum
+        rev16 ip-buf ipv4-header-checksum h!
+        ip-buf ipv4-header-size + xt execute
+
+        [ debug? ] [if]
+          buf bytes [ ethernet-header-size ipv4-header-size + ] literal +
+          [: over + dump ;] debug-hook execute
+        [then]
+        
       ;] swap construct-and-send-frame
-    ; define construct-and-send-ipv6-packet-with-src-addr
+    ; define construct-and-send-ipv4-packet-with-src-addr
 
-    \ Construct and send a IPv6 packet
-    :noname
-      { D: mac-addr dest-0 dest-1 dest-2 dest-3 protocol bytes xt self -- }
-      ( ? sent? xt: ? buf -- ? send? )
-      mac-addr self intf-ipv6-addr ipv6-unaligned@
-      dest-0 dest-1 dest-2 dest-3 protocol bytes xt self
-      construct-and-send-ipv6-packet-with-src-addr
-    ; define construct-and-send-ipv6-packet
+    \ Construct and send a IPv4 packet
+    :noname ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
+      ( xt: ? buf -- ? send? )
+      dup intf-ipv4-addr @
+      swap >r swap >r swap >r swap >r swap r> r> r> r>
+      construct-and-send-ipv4-packet-with-src-addr
+    ; define construct-and-send-ipv4-packet
 
-    \ Resolve an IPv6 address's MAC address
-    :noname
-      [:
-        { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
-        self reachable-time @ 0<> if
-          self reachable-time @ self address-map age-out-mac-addrs
+    \ Resolve an IPv4 address's MAC address
+    :noname { dest-addr self -- D: mac-addr success? }
+      dest-addr self intf-ipv4-netmask@ and
+      self gateway-ipv4-addr@ self intf-ipv4-netmask@ and <> if
+        self gateway-ipv4-addr@ to dest-addr
+      then
+      dest-addr self intf-ipv4-broadcast@ = if
+        $FFFFFFFFFFFF. true exit
+      then
+      systick::systick-counter mac-addr-resolve-interval - { tick }
+      max-mac-addr-resolve-attempts { attempts }
+      begin
+        dest-addr self address-map lookup-mac-addr-by-ipv4 not
+      while
+        2drop
+        systick::systick-counter tick - mac-addr-resolve-interval >= if
+          attempts 0> if
+            -1 +to attempts
+            dest-addr self send-ipv4-arp-request
+            systick::systick-counter to tick
+          else
+            0. false exit
+          then
+        else
+          task::timeout @ { old-timeout }
+          tick mac-addr-resolve-interval + systick::systick-counter -
+          self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
+          dup ['] task::x-timed-out = if 2drop drop 0 then
+          ?raise
+          old-timeout task::timeout !
         then
-        systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
-        max-neighbor-discovery-attempts { attempts }
+        systick::systick-counter mac-addr-resolve-interval - { tick }
+        max-mac-addr-resolve-attempts { attempts }
         begin
-          dest-0 dest-1 dest-2 dest-3
-          self address-map lookup-mac-addr-by-ipv6 not
+          dest-addr self address-map lookup-mac-addr-by-ipv4 not
         while
           2drop
-          systick::systick-counter tick -
-          self neighbor-retrans-time @ 10 * >= if
+          systick::systick-counter tick - mac-addr-resolve-interval >= if
             attempts 0> if
-              -1 to attempts
-              dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
+              -1 +to attempts
+              dest-addr self send-ipv4-arp-request
               systick::systick-counter to tick
             else
               0. false exit
             then
           else
             task::timeout @ { old-timeout }
-            tick self neighbor-retrans-time @ 10 * + systick::systick-counter -
-            self swap [: task::timeout ! neighbor-discovery-sema take ;] try
+            tick mac-addr-resolve-interval + systick::systick-counter -
+            self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
             dup ['] task::x-timed-out = if 2drop drop 0 then
             ?raise
             old-timeout task::timeout !
@@ -3807,26 +3614,57 @@ begin-module net-ipv6
         repeat
         true
       ;] over mac-addr-resolve-lock with-lock
-    ; define resolve-ipv6-addr-mac-addr
+    ; define resolve-ipv4-addr-mac-addr
 
-    \ Resolve a DNS name's IPv6 address
-    :noname { c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 success? }
+    \ Test for DHCP ARP
+    :noname { dest-addr self -- success? }
+      dest-addr self intf-ipv4-netmask@ and
+      self gateway-ipv4-addr@ self intf-ipv4-netmask@ and <> if
+        self gateway-ipv4-addr@ to dest-addr
+      then
+      systick::systick-counter dhcp-arp-interval - { tick }
+      dhcp-arp-attempt-count { attempts }
+      begin
+        dest-addr self address-map lookup-mac-addr-by-ipv4 not -rot 2drop
+      while
+        systick::systick-counter tick - dhcp-arp-interval >= if
+          attempts 0> if
+            -1 +to attempts
+            dest-addr self send-ipv4-dhcp-arp-request
+            systick::systick-counter to tick
+          else
+            false exit
+          then
+        else
+          task::timeout @ { old-timeout }
+          tick dhcp-arp-interval + systick::systick-counter - task::timeout !
+          self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
+          dup ['] task::x-timed-out = if 2drop drop 0 then
+          ?raise
+          old-timeout task::timeout !
+        then
+      repeat
+      true
+    ; define attempt-ipv4-dhcp-arp
+
+    \ Resolve a DNS name's IPv4 address
+    :noname { c-addr bytes self -- ipv4-addr success? }
       c-addr bytes validate-dns-name
       systick::systick-counter dns-resolve-interval - { tick }
       max-dns-resolve-attempts { attempts }
-      c-addr bytes self dns-cache lookup-ipv6-addr-by-dns if
+      c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
         0= if true exit then
       else
-        2drop 2drop drop
+        2drop
       then
       begin
         systick::systick-counter tick - dns-resolve-interval >= if
           attempts 0> if
             -1 +to attempts
-            c-addr bytes self send-ipv6-dns-request
+            c-addr bytes self send-ipv4-dns-request
             systick::systick-counter to tick
           else
-            0 0 0 0 false exit
+            0 false exit
           then
         else
           task::timeout @ { old-timeout }
@@ -3837,24 +3675,73 @@ begin-module net-ipv6
           ?raise
           old-timeout task::timeout !
         then
-        c-addr bytes self dns-cache lookup-ipv6-addr-by-dns if
+        c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
           0= true
         else
-          2drop 2drop drop false
+          2drop false
         then
       until
-    ; define resolve-dns-ipv6-addr
+    ; define resolve-dns-ipv4-addr
 
     \ Evict a DNS name's cache entry, forcing it to be re-resolved
     :noname { c-addr bytes self -- }
       c-addr bytes validate-dns-name
-      c-addr bytes self dns-cache net-ipv6-internal::evict-dns
+      c-addr bytes self dns-cache net-ipv4-internal::evict-dns
     ; define evict-dns
+
+    \ Send an ARP request packet
+    :noname ( dest-addr self -- )
+      [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
+        $FFFFFFFFFFFF. buf ethh-destination-mac mac!
+        self intf-mac-addr@ buf ethh-source-mac mac!
+        [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
+        buf ethernet-header-size + { arp-buf }
+        [ HTYPE_ETHERNET rev16 ] literal arp-buf arp-htype h!
+        [ ETHER_TYPE_IPV4 rev16 ] literal arp-buf arp-ptype h!
+        6 arp-buf arp-hlen c!
+        4 arp-buf arp-plen c!
+        [ OPER_REQUEST rev16 ] literal arp-buf arp-oper h!
+        self intf-mac-addr@ arp-buf arp-sha mac!
+        self intf-ipv4-addr@ rev arp-buf arp-spa unaligned!
+        0. arp-buf arp-tha mac!
+        dest-addr rev arp-buf arp-tpa unaligned!
+        true
+      ;] 2 pick construct-and-send-frame drop
+    ; define send-ipv4-arp-request
+
+    \ Send a DHCP ARP request packet
+    :noname ( dest-addr self -- )
+      [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
+
+        dhcp-log? if
+          [: cr ." Sending DHCP ARP request packet" ;] debug-hook execute
+        then
+        
+        $FFFFFFFFFFFF. buf ethh-destination-mac mac!
+        self intf-mac-addr@ buf ethh-source-mac mac!
+        [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
+        buf ethernet-header-size + { arp-buf }
+        [ HTYPE_ETHERNET rev16 ] literal arp-buf arp-htype h!
+        [ ETHER_TYPE_IPV4 rev16 ] literal arp-buf arp-ptype h!
+        6 arp-buf arp-hlen c!
+        4 arp-buf arp-plen c!
+        [ OPER_REQUEST rev16 ] literal arp-buf arp-oper h!
+        self intf-mac-addr@ arp-buf arp-sha mac!
+        [ $00000000 rev ] literal arp-buf arp-spa unaligned!
+        0. arp-buf arp-tha mac!
+        dest-addr rev arp-buf arp-tpa unaligned!
+        true
+      ;] 2 pick construct-and-send-frame drop
+
+      dhcp-log? if
+        [: cr ." Sent DHCP ARP request packet" ;] debug-hook execute
+      then
+      
+    ; define send-ipv4-dhcp-arp-request
 
     \ Send a DNS request packet
     :noname { c-addr bytes self -- }
-      c-addr bytes self dns-src-port
-      self dns-server-ipv6-addr ipv6-unaligned@ dns-port
+      c-addr bytes self dns-src-port self dns-server-ipv4-addr @ dns-port
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
         { c-addr bytes self buf }
         rng::random $FFFF and
@@ -3868,57 +3755,43 @@ begin-module net-ipv6
         dns-header-size +to buf
         c-addr bytes buf format-dns-name
         bytes dns-name-size +to buf
-        [ DNS_QTYPE_AAAA rev16 ] literal buf dns-qbody-qtype hunaligned!
+        [ 1 rev16 ] literal buf dns-qbody-qtype hunaligned!
         [ 1 rev16 ] literal buf dns-qbody-qclass hunaligned!
         true
-      ;] self send-ipv6-udp-packet drop
-    ; define send-ipv6-dns-request
+      ;] self send-ipv4-udp-packet drop
+    ; define send-ipv4-dns-request
 
-    \ Send a UDP packet with a specified source IPv6 address
+    \ Send a UDP packet with a specified source IPv4 address
     :noname
-      { D: mac-addr src-0 src-1 src-2 src-3 src-port
-      dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self -- }
+      { D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- }
       ( success? ) ( xt: ? buf -- ? sent? )
-      src-0 src-1 src-2 src-3
-      dest-0 dest-1 dest-2 dest-3
       src-port dest-port bytes xt self
-      mac-addr src-0 src-1 src-2 src-3
-      dest-0 dest-1 dest-2 dest-3 PROTOCOL_UDP bytes udp-header-size + [:
+      mac-addr src-addr dest-addr PROTOCOL_UDP bytes udp-header-size + [:
         { src-port dest-port bytes xt self buf }
-        { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
         src-port rev16 buf udp-src-port h!
         dest-port rev16 buf udp-dest-port h!
         bytes udp-header-size + rev16 buf udp-total-len h!
+        0 buf udp-checksum h!
         buf udp-header-size + xt execute
-        src-0 src-1 src-2 src-3
-        dest-0 dest-1 dest-2 dest-3
-        buf udp-header-size bytes + 0 udp-checksum
-        compute-ipv6-udp-checksum rev16 buf udp-checksum h!
-      ;] self construct-and-send-ipv6-packet-with-src-addr
-    ; define send-ipv6-udp-packet-raw
+      ;] self construct-and-send-ipv4-packet-with-src-addr
+    ; define send-ipv4-udp-packet-raw
 
     \ Send a UDP packet
-    :noname
-      { src-port dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self }
-      ( -- success? )
-      dest-0 dest-1 dest-2 dest-3
-      dest-0 dest-1 dest-2 dest-3 self resolve-ipv6-addr-mac-addr if
+    :noname { src-port dest-addr dest-port bytes xt self -- success? }
+      dest-addr self resolve-ipv4-addr-mac-addr if
         src-port -rot dest-port -rot bytes -rot xt -rot self -rot
-        dest-0 dest-1 dest-2 dest-3 PROTOCOL_UDP bytes udp-header-size + [:
-          { dest-0 dest-1 dest-2 dest-3 src-port dest-port bytes xt self buf }
+        dest-addr PROTOCOL_UDP bytes udp-header-size + [:
+          { src-port dest-port bytes xt self buf }
           src-port rev16 buf udp-src-port h!
           dest-port rev16 buf udp-dest-port h!
           bytes udp-header-size + rev16 buf udp-total-len h!
+          0 buf udp-checksum h!
           buf udp-header-size + xt execute
-          self intf-ipv6-addr@
-          dest-0 dest-1 dest-2 dest-3
-          buf udp-header-size bytes + 0 udp-checksum
-          compute-ipv6-udp-checksum rev16 buf udp-checksum h!
-        ;] self construct-and-send-ipv6-packet
+        ;] self construct-and-send-ipv4-packet
       else
         2drop false
       then
-    ; define send-ipv6-udp-packet
+    ; define send-ipv4-udp-packet
 
     \ Claim the endpoint queue lock, and if an exception occurs, restore the
     \ endpoint queue status
@@ -4019,7 +3892,7 @@ begin-module net-ipv6
         
         self [: { self }
           self endpoint-queue-index @ { index }
-          self intf-endpoints <ipv6-endpoint> class-size index * + { endpoint }
+          self intf-endpoints <ipv4-endpoint> class-size index * + { endpoint }
           endpoint endpoint-enqueued? if
             
             [ debug? ] [if]
@@ -4061,7 +3934,7 @@ begin-module net-ipv6
     \ Allocate an endpoint
     :noname { self -- endpoint success? }
       max-endpoints 0 ?do
-        self intf-endpoints i <ipv6-endpoint> class-size * + { endpoint }
+        self intf-endpoints i <ipv4-endpoint> class-size * + { endpoint }
         endpoint try-allocate-endpoint if endpoint true unloop exit then
       loop
       0 false
@@ -4133,14 +4006,14 @@ begin-module net-ipv6
     ; define allocate-tcp-listen-endpoint
 
     \ Get a TCP endpoint and connect to a host with it
-    :noname { src-port a0 a1 a2 a3 dest-port self -- endpoint success? }
-      a0 a1 a2 a3 self resolve-ipv6-addr-mac-addr not if
+    :noname { src-port dest-ipv4-addr dest-port self -- endpoint success? }
+      dest-ipv4-addr self resolve-ipv4-addr-mac-addr not if
         2drop 0 false exit
       then { D: mac-addr }
       max-endpoints 0 ?do
-        self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-        src-port a0 a1 a2 a3 dest-port mac-addr endpoint
-        try-ipv6-connect-endpoint if
+        self intf-endpoints <ipv4-endpoint> class-size i * + { endpoint }
+        src-port dest-ipv4-addr dest-port mac-addr endpoint
+        try-ipv4-connect-endpoint if
           endpoint self [: { endpoint self }
             rng::random endpoint endpoint-init-local-seq!
             endpoint reset-endpoint-local-port
@@ -4150,7 +4023,7 @@ begin-module net-ipv6
         then
       loop
       0 false
-    ; define allocate-tcp-connect-ipv6-endpoint   
+    ; define allocate-tcp-connect-ipv4-endpoint   
 
     \ Close a UDP endpoint
     :noname ( endpoint self -- )
@@ -4199,7 +4072,7 @@ begin-module net-ipv6
           -1 +to count
           systick::systick-counter
           time-wait time-wait-start-time @ time-wait-timeout + < if
-            time-wait time-wait-remote-ipv6-addr ipv6-unaligned@
+            time-wait time-wait-remote-ipv4-addr @
             time-wait time-wait-remote-port h@
             time-wait time-wait-local-port h@
             time-wait time-wait-local-seq @
@@ -4207,7 +4080,7 @@ begin-module net-ipv6
             time-wait time-wait-local-window @
             TCP_ACK
             time-wait time-wait-remote-mac-addr 2@
-            self send-ipv6-basic-tcp
+            self send-ipv4-basic-tcp
           else
             current self time-wait-list-start !
             count self time-wait-list-count !
@@ -4226,16 +4099,17 @@ begin-module net-ipv6
               TCP_LISTEN of
                 TCP_CLOSED endpoint endpoint-tcp-state!
                 endpoint free-endpoint
+                drop 0
               endof
             endcase
           ;] endpoint with-endpoint
           case
             TCP_SYN_SENT of
-              endpoint self send-ipv6-rst
+              endpoint self send-ipv4-rst
               endpoint free-endpoint
             endof
             TCP_SYN_RECEIVED of
-              endpoint self send-ipv6-rst
+              endpoint self send-ipv4-rst
               endpoint free-endpoint
             endof
             TCP_ESTABLISHED of
@@ -4293,14 +4167,14 @@ begin-module net-ipv6
     :noname ( state endpoint self -- )
       [: { state endpoint self }
         state endpoint endpoint-tcp-state!
-        endpoint endpoint-ipv6-remote@
+        endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         [ TCP_FIN TCP_ACK or ] literal
         endpoint endpoint-remote-mac-addr@
-        self send-ipv6-basic-tcp
+        self send-ipv4-basic-tcp
         endpoint endpoint-ack-sent
       ;] 2 pick with-endpoint
     ; define send-fin
@@ -4394,15 +4268,13 @@ begin-module net-ipv6
     \ Send a data ACK packet
     :noname ( addr bytes push? endpoint self -- )
       over endpoint-remote-mac-addr@
-      3 pick endpoint-ipv6-remote@ drop
+      3 pick endpoint-ipv4-remote@ drop
       PROTOCOL_TCP
-      10 pick tcp-header-size +
-      ( addr bytes push? endpoint self D: mac-addr )
-      ( remote-0 remote-1 remote-2 remote-3 protocol bytes )
+      7 pick tcp-header-size +
+      ( addr bytes push? endpoint self D: mac-addr remote-addr protocol bytes )
       [: { addr bytes push? endpoint self buf }
         endpoint endpoint-local-port@ rev16 buf tcp-src-port h!
-        endpoint endpoint-ipv6-remote@ nip nip nip nip rev16
-        buf tcp-dest-port h!
+        endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port h!
         endpoint endpoint-local-seq@ rev buf tcp-seq-no !
         endpoint endpoint-ack@ rev buf tcp-ack-no !
         [ 5 4 lshift ] literal buf tcp-data-offset c!
@@ -4411,10 +4283,10 @@ begin-module net-ipv6
         endpoint endpoint-local-window@ rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
         addr buf tcp-header-size + bytes move
-        self intf-ipv6-addr@
-        endpoint endpoint-ipv6-remote@ drop
+        self intf-ipv4-addr@
+        endpoint endpoint-ipv4-remote@ drop
         buf tcp-header-size bytes + 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        compute-tcp-checksum rev16 buf tcp-checksum h!
         [ debug? ] [if]
           buf bytes
           [: { buf bytes }
@@ -4423,511 +4295,523 @@ begin-module net-ipv6
           ;] debug-hook execute
         [then]
         true
-      ;] 6 pick construct-and-send-ipv6-packet drop
+      ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
 
     \ Apply DHCP data
     :noname { self -- }
+      self dhcp-req-ipv4-addr @ self intf-ipv4-addr!
+      self prov-ipv4-netmask @ self intf-ipv4-netmask!
+      self prov-gateway-ipv4-addr @ self gateway-ipv4-addr!
+      self prov-dns-server-ipv4-addr @ self dns-server-ipv4-addr!
+      self prov-dhcp-renew-interval @
+      dup self dhcp-real-renew-interval !
+      dup dhcp-renew-init-divisor / self dhcp-renew-interval !
+      dhcp-rebind-multiplier * dhcp-rebind-divisor / self dhcp-rebind-interval !
       systick::systick-counter
       dup self dhcp-real-renew-start !
       dup self dhcp-renew-start !
       self dhcp-rebind-start !
-      dhcpv6-discovered self dhcp-discover-state !
+      dhcp-discovered self dhcp-discover-state !
       self dhcp-sema broadcast
       self dhcp-sema give
     ; define apply-dhcp
 
-    \ Autoconfigure link-local IPv6 address
-    :noname { self -- success? }
-      self out-frame-interface @ mac-addr@ make-link-local-ipv6-addr
-      self detect-duplicate-and-set-intf-ipv6-addr
-    ; define autoconfigure-link-local-ipv6-addr
-
-    \ Attempt to set interface IPv6 address, detecting duplicates
-    :noname { target-0 target-1 target-2 target-3 self -- success? }
-      true self detecting-duplicate? !
-      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
-      nip nip if
-        false
-      else
-        target-0 target-1 target-2 target-3 self intf-ipv6-addr! true
-      then
-      false self detecting-duplicate? !
-    ; define detect-duplicate-and-set-intf-ipv6-addr
+    \ Start DHCP discovery
+    :noname ( self -- )
+      dup ['] send-dhcpdiscover over dhcp-lock with-lock dhcp-sema take
+    ; define discover-ipv4-addr
     
-    \ Start router discovery
-    :noname { self -- }
-      systick::systick-counter self router-discovery-start !
-      true self router-discovery? !
-      self ['] send-icmpv6-router-solicit
-      self router-discovery-lock with-lock
-      self router-discovery-sema take
-    ; define discover-ipv6-router
-    
-    \ Start IPv6 discovery
-    :noname { self -- success? }
-      self use-dhcpv6? @ if
-        systick::systick-counter self dhcp-discover-start !
-        self ['] send-dhcpv6-solicit self dhcp-lock with-lock
-        self dhcp-sema take
-        self discovered-ipv6-addr ipv6-unaligned@
-      else
-        self intf-autonomous@ if
-          self intf-mac-addr@ self intf-ipv6-prefix@ self intf-ipv6-prefix-len@
-          make-global-unicast-ipv6-addr
-          true
-        else
-          false exit
-        then
-      then
-      self detect-duplicate-and-set-intf-ipv6-addr      
-    ; define discover-ipv6-addr
-
-    \ Start DNS discovery
-    :noname { self -- }
-      self use-dhcpv6? @ if
-        self found-dns-sema take
-      else
-        self use-dhcpv6-other? @ if
-          systick::systick-counter self dhcp-discover-start !
-          self ['] send-dhcpv6-solicit self dhcp-lock with-lock
-          self found-dns-sema take
-        then
-      then
-    ; define discover-dns-ipv6-addr
-    
-    \ Send a DHCPV6_SOLICIT message
+    \ Send a DHCPDISCOVER packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPV6 SOLICIT" ;] debug-hook execute
+        [: cr ." Sending DHCPDISCOVER" ;] debug-hook execute
       then
-      self dhcp-server-duid max-duid-size 0 fill
-      0 self dhcp-server-duid-len !
-      rng::random $FFFFFF and self current-dhcp-transact-id !
-      dhcpv6-wait-advertise self dhcp-discover-state !
+      $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
+      $00000000 self dhcp-req-ipv4-addr !
+      $FFFFFFFF self dhcp-server-ipv4-addr !
+      rng::random self current-dhcp-xid !
+      dhcp-wait-offer self dhcp-discover-state !
       systick::systick-counter self dhcp-discover-stage-start !
       self
       $FFFFFFFFFFFF.
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 26 + ] literal [: { self buf }
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPV6 SOLICIT" ;] debug-hook execute
+          [: cr ." Constructing DHCPDISCOVER" ;] debug-hook execute
         then
-        self current-dhcp-transact-id @ rev buf unaligned!
-        DHCPV6_SOLICIT buf dhcpv6-msg-type c!
-        dhcpv6-header-size +to buf
-        [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
-        [ 10 rev16 ] literal buf 2 + hunaligned!
-        [ DUID_LL rev16 ] literal buf 4 + hunaligned!
-        [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
-        self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
-        systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 2 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPDISCOVER buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        [ DEFAULT_IPV4_ADDR rev ] literal buf 2 + unaligned!
+        6 +to buf
+        DHCP_PARAM_REQ_LIST buf c!
+        4 buf 1 + c!
+        DHCP_SERVICE_SUBNET_MASK buf 2 + c!
+        DHCP_SERVICE_ROUTER buf 3 + c!
+        DHCP_SERVICE_DNS_NAME buf 4 + c!
+        DHCP_SERVICE_DNS_SERVER buf 5 + c!
+        6 +to buf
+        DHCP_END buf c!
+        true
         dhcp-log? if
-          [: cr ." Constructed DHCPv6 SOLICIT packet" ;] debug-hook execute
+          [: cr ." Constructed DHCPDISCOVER packet" ;] debug-hook execute
         then
-      ;] self send-ipv6-udp-packet-raw drop
+      ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPV6 ADVERTISE" ;] debug-hook execute
+        [: cr ." Waiting for DHCPOFFER" ;] debug-hook execute
       then
-    ; define send-dhcpv6-solicit
+    ; define send-dhcpdiscover
 
-    \ Send a DHCPV6_REQUEST packet
+    \ Send a DHCPREQUEST packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPV6 REQUEST" ;] debug-hook execute
+        [: cr ." Sending DHCPREQUEST" ;] debug-hook execute
       then
-      dhcpv6-wait-reply self dhcp-discover-state !
       self
       $FFFFFFFFFFFF.
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 48 + ] literal self dhcp-server-duid-len @ +
-      [: { self buf }
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPV6 REQUEST" ;] debug-hook execute
+          [: cr ." Constructing DHCPREQUEST" ;] debug-hook execute
         then
-        self current-dhcp-transact-id @ rev buf unaligned!
-        DHCPV6_REQUEST buf dhcpv6-msg-type c!
-        dhcpv6-header-size +to buf
-        [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
-        [ 10 rev16 ] literal buf 2 + hunaligned!
-        [ DUID_LL rev16 ] literal buf 4 + hunaligned!
-        [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
-        self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
-        systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
-        0 buf 32 + unaligned!
-        0 buf 36 + unaligned!
-        0 buf 40 + unaligned!
-        [ OPTION_SERVERID rev16 ] literal buf 44 + hunaligned!
-        self dhcp-server-duid-len @ rev16 buf 46 + hunaligned!
-        self dhcp-server-duid buf 48 + self dhcp-server-duid-len @ move
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_SERVER_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_END buf c!
+        true
         dhcp-log? if
-          [: cr ." Constructed DHCPv6 REQUEST packet" ;] debug-hook execute
+          [: cr ." Constructed DHCPREQUEST packet" ;] debug-hook execute
         then
-      ;] self send-ipv6-udp-packet-raw drop
+      ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPv6 REPLY" ;] debug-hook execute
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
       then
       self dhcp-discover-state @
-      dup dhcpv6-discovered <> swap dhcpv6-renewing <> and if
-        dhcpv6-wait-reply self dhcp-discover-state !
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
         systick::systick-counter self dhcp-discover-stage-start !
       then
-    ; define send-dhcpv6-request
+    ; define send-dhcprequest
 
-    \ Send a DHCP RENEW packet
+    \ Send a renewal DHCPREQUEST packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPV6 RENEW" ;] debug-hook execute
+        [: cr ." Sending renewal DHCPREQUEST" ;] debug-hook execute
       then
-      dhcpv6-wait-reply self dhcp-discover-state !
       self
-      $FFFFFFFFFFFF.
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 48 + ] literal self dhcp-server-duid-len @ +
-      [: { self buf }
+      self dhcp-server-mac-addr 2@
+      self intf-ipv4-addr @ dhcp-client-port
+      self dhcp-server-ipv4-addr @ dhcp-server-port
+      [ dhcp-header-size 3 + 6 + ( 6 + ) 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPV6 RENEW" ;] debug-hook execute
+          [: cr ." Constructing renewal DHCPREQUEST" ;] debug-hook execute
         then
-        self current-dhcp-transact-id @ rev buf unaligned!
-        DHCPV6_RENEW buf dhcpv6-msg-type c!
-        dhcpv6-header-size +to buf
-        [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
-        [ 10 rev16 ] literal buf 2 + hunaligned!
-        [ DUID_LL rev16 ] literal buf 4 + hunaligned!
-        [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
-        self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
-        systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
-        0 buf 32 + unaligned!
-        0 buf 36 + unaligned!
-        0 buf 40 + unaligned!
-        [ OPTION_SERVERID rev16 ] literal buf 44 + hunaligned!
-        self dhcp-server-duid-len @ rev16 buf 46 + hunaligned!
-        self dhcp-server-duid buf 48 + self dhcp-server-duid-len @ move
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-ciaddr unaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        \        DHCP_SERVER_IPV4_ADDR buf c!
+        \        4 buf 1 + c!
+        \        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        \        6 +to buf
+        DHCP_END buf c!
+        true
         dhcp-log? if
-          [: cr ." Constructed DHCPv6 RENEW packet" ;] debug-hook execute
+          [: cr ." Constructed renewal DHCPREQUEST packet" ;] debug-hook execute
         then
-      ;] self send-ipv6-udp-packet-raw drop
+      ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPv6 REPLY" ;] debug-hook execute
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
       then
       self dhcp-discover-state @
-      dup dhcpv6-discovered <> swap dhcpv6-renewing <> and if
-        dhcpv6-wait-reply self dhcp-discover-state !
-        systick::systick-counter self dhcp-discover-stage-start !
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
       then
-    ; define send-dhcpv6-renew
+    ; define send-renew-dhcprequest
 
-    \ Send a DHCP REBIND packet
+    \ Send a rebinding DHCPREQUEST packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPV6 REBIND" ;] debug-hook execute
+        [: cr ." Sending rebinding DHCPREQUEST" ;] debug-hook execute
       then
-      dhcpv6-wait-reply self dhcp-discover-state !
-      0 self dhcp-server-duid-len !
       self
       $FFFFFFFFFFFF.
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 44 + ] literal
-      [: { self buf }
+      self intf-ipv4-addr @ dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + ( 6 + ) 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPV6 REBIND" ;] debug-hook execute
+          [: cr ." Constructing rebinding DHCPREQUEST" ;] debug-hook execute
         then
-        self current-dhcp-transact-id @ rev buf unaligned!
-        DHCPV6_REBIND buf dhcpv6-msg-type c!
-        dhcpv6-header-size +to buf
-        [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
-        [ 10 rev16 ] literal buf 2 + hunaligned!
-        [ DUID_LL rev16 ] literal buf 4 + hunaligned!
-        [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
-        self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
-        systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
-        0 buf 32 + unaligned!
-        0 buf 36 + unaligned!
-        0 buf 40 + unaligned!
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-ciaddr unaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        \        DHCP_SERVER_IPV4_ADDR buf c!
+        \        4 buf 1 + c!
+        \        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        \        6 +to buf
+        DHCP_END buf c!
+        true
         dhcp-log? if
-          [: cr ." Constructed DHCPv6 REBIND packet" ;] debug-hook execute
+          [: cr ." Constructed rebinding DHCPREQUEST packet" ;] debug-hook execute
         then
-      ;] self send-ipv6-udp-packet-raw drop
+      ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPv6 REPLY" ;] debug-hook execute
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
       then
       self dhcp-discover-state @
-      dup dhcpv6-discovered <> swap dhcpv6-renewing <> and if
-        dhcpv6-wait-reply self dhcp-discover-state !
-        systick::systick-counter self dhcp-discover-stage-start !
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
       then
-    ; define send-dhcpv6-rebind
-    
-    \ Send a DHCP INFORMATION REQUEST packet
+    ; define send-rebind-dhcprequest
+
+    \ Send a DHCPDECLINE packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPV6 INFORMATION REQUEST" ;] debug-hook execute
+        [: cr ." Sending DHCPDECLINE" ;] debug-hook execute
       then
-      dhcpv6-wait-reply self dhcp-discover-state !
       self
       $FFFFFFFFFFFF.
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
-      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 30 + ] literal self dhcp-server-duid-len @ +
-      [: { self buf }
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPV6 INFORMATION REQUEST" ;]
-          debug-hook execute
+          [: cr ." Constructing DHCPDECLINE" ;] debug-hook execute
         then
-        self current-dhcp-transact-id @ rev buf unaligned!
-        DHCPV6_INFORMATION_REQUEST buf dhcpv6-msg-type c!
-        dhcpv6-header-size +to buf
-        [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
-        [ 10 rev16 ] literal buf 2 + hunaligned!
-        [ DUID_LL rev16 ] literal buf 4 + hunaligned!
-        [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
-        self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
-        systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 2 rev16 ] buf 22 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 24 + hunaligned!
-        [ OPTION_SERVERID rev16 ] literal buf 26 + hunaligned!
-        self dhcp-server-duid-len @ rev16 buf 28 + hunaligned!
-        self dhcp-server-duid buf 30 + self dhcp-server-duid-len @ move
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPDECLINE buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_SERVER_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_END buf c!
+        true
         dhcp-log? if
-          [: cr ." Constructed DHCPv6 INFORMATION REQUEST packet" ;]
-          debug-hook execute
+          [: cr ." Constructed DHCPDECLINE packet" ;] debug-hook execute
         then
-      ;] self send-ipv6-udp-packet-raw drop
+      ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPv6 REPLY" ;] debug-hook execute
+        [: cr ." Sent DHCPDECLINE" ;] debug-hook execute
       then
-      self dhcp-discover-state @
-      dup dhcpv6-discovered <> swap dhcpv6-renewing <> and if
-        dhcpv6-wait-info-reply self dhcp-discover-state !
-        systick::systick-counter self dhcp-discover-stage-start !
-      then
-    ; define send-dhcpv6-information-request
+      dhcp-declined self dhcp-discover-state !
+      systick::systick-counter self dhcp-discover-stage-start !
+    ; define send-dhcpdecline
 
-    \ Process a DHCPv6 packet
-    :noname ( addr bytes src-0 src-1 src-2 src-3 self -- )
-      [: { addr bytes src-0 src-1 src-2 src-3 self }
-        bytes dhcpv6-header-size < if
+    \ Process an IPv4 DHCP packet
+    :noname ( addr bytes src-addr self -- )
+      [: { addr bytes src-addr self }
+        dhcp-log? if
+          [: cr ." Receiving DHCP packet" ;] debug-hook execute
+        then
+        bytes dhcp-header-size < if
+          dhcp-log? if
+            [: cr ." DHCP packet too small" ;] debug-hook execute
+          then
           exit
         then
-        dhcpv6-header-size +to addr
-        [ dhcpv6-header-size negate ] literal +to bytes
-        OPTION_CLIENTID addr bytes find-dhcpv6-opt if
-          10 = if
-            dup hunaligned@ rev16 DUID_LL = if
-              dup 2 + hunaligned@ rev16 HTYPE_ETHERNET = if
-                4 + mac@ self intf-mac-addr@ d<> if
-                  exit
-                then
-              else
-                drop exit
-              then
-            else
-              drop exit
-            then
-          else
-            drop exit
+        addr dhcp-op c@ DHCP_OP_SERVER <> if
+          dhcp-log? if
+            [: cr ." DHCP packet is not a server packet" ;] debug-hook execute
           then
-        else
-          2drop exit
+          exit
         then
-        addr unaligned@ rev $FFFFFF and self current-dhcp-transact-id @ = if
-          addr dhcpv6-msg-type c@ case
-            DHCPV6_ADVERTISE of
-              addr bytes self process-dhcpv6-advertise
-            endof
-            DHCPV6_REPLY of
-              addr bytes self process-dhcpv6-reply
-            endof
-            DHCPV6_DECLINE of
-              addr bytes self process-dhcpv6-decline
-            endof
+        addr dhcp-xid unaligned@ rev self current-dhcp-xid @ <> if
+          dhcp-log? if
+            [: cr ." DHCP packet XID does not match" ;] debug-hook execute
           then
+          exit
+        then
+        DHCP_MESSAGE_TYPE 1 addr bytes find-fixed-dhcp-opt if
+          dhcp-log? if
+            [: cr ." Got DHCP message type: " dup c@ . ;] debug-hook execute
+          then
+          c@ case
+            DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
+            DHCPACK of addr bytes src-addr self process-ipv4-dhcpack endof
+            DHCPNAK of addr bytes self process-ipv4-dhcpnak endof
+          endcase
+        else
+          dhcp-log? if
+            [: cr ." Did not get message type" ;] debug-hook execute
+          then
+          drop exit
         then
       ;] over dhcp-lock with-lock
-    ; define process-dhcpv6-packet
+    ; define process-ipv4-dhcp-packet
 
-    \ Process a DHCPv6 ADVERTISE packet
+    \ Process an IPv4 DHCPOFFER packet
     :noname { addr bytes self -- }
       dhcp-log? if
-        [: cr ." Handling DHCPv6 ADVERTISE" ;] debug-hook execute
+        [: cr ." Sending DHCPREQUEST" ;] debug-hook execute
       then
-      OPTION_SERVERID addr bytes find-dhcpv6-opt if
-        dup max-duid-size <= over min-duid-size >= and if
-          dup self dhcp-server-duid-len !
-          self dhcp-server-duid swap move
-        else
-          exit
-        then
-      else
-        2drop exit
-      then
-      self use-dhcpv6-other? @ if
-        self send-dhcpv6-information-request
-      else
-        self send-dhcpv6-request
-      then
-    ; define process-dhcpv6-advertise
+      addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr !
+      addr dhcp-siaddr unaligned@ rev self dhcp-server-ipv4-addr !
+      self send-dhcprequest
+    ; define process-ipv4-dhcpoffer
 
-    \ Process a DHCPv6 REPLY packet
-    :noname { addr bytes self -- }
-      dhcp-log? if
-        [: cr ." Handling DHCPv6 REPLY" ;] debug-hook execute
+    \ Process an IPv4 DHCPACK packet
+    :noname { addr bytes src-addr self -- }
+      src-addr self address-map lookup-mac-addr-by-ipv4 if
+        self dhcp-server-mac-addr 2!
+      else
+        2drop $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
       then
-      self use-dhcpv6? @ if
-        OPTION_SERVERID addr bytes find-dhcpv6-opt if
-          dup max-duid-size <= over min-duid-size >= and if
-            dup self dhcp-server-duid-len !
-            self dhcp-server-duid swap move
-          else
-            exit
+      addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr @ = if
+        self dhcp-req-ipv4-addr @ { ipv4-addr }
+        DHCP_IPV4_ADDR_LEASE_TIME 4 addr bytes find-fixed-dhcp-opt if
+          dhcp-log? if
+            [: cr ." Got DHCP lease time" ;] debug-hook execute
+          then
+          unaligned@ rev
+          dhcp-log? if
+            [: ." : " dup . ;] debug-hook execute
           then
         else
-          2drop exit
+          dhcp-log? if
+            [: cr ." Did not find lease time" ;] debug-hook execute
+          then
+          drop 86400
         then
-        OPTION_IA_NA addr bytes find-dhcpv6-opt if
-          dup 12 > if
-            { addr' bytes' }
-            addr' 4 + unaligned@ rev 0= if
-              addr' 8 + unaligned@ rev 10000 * { renew-interval }
-              addr' 12 + unaligned@ rev 10000 * { rebind-interval }
-              renew-interval rebind-interval u> if exit then
-              renew-interval 0= if
-                default-dhcp-renew-interval to renew-interval
+        { renew-interval }
+        DHCP_SERVICE_SUBNET_MASK 4 addr bytes find-fixed-dhcp-opt if
+          dhcp-log? if
+            [: cr ." Got DHCP netmask" ;] debug-hook execute
+          then
+          unaligned@ rev { ipv4-netmask }
+          DHCP_SERVICE_ROUTER 4 addr bytes find-fixed-dhcp-opt if
+            dhcp-log? if
+              [: cr ." Got DHCP gateway" ;] debug-hook execute
+            then
+            unaligned@ rev { gateway-ipv4-addr }
+            DHCP_SERVICE_DNS_SERVER addr bytes find-var-dhcp-opt if
+              dhcp-log? if
+                [: cr ." Got DHCP DNS server(s)" ;] debug-hook execute
               then
-              rebind-interval 0= if
-                default-dhcp-rebind-interval to rebind-interval
-              then
-              rebind-interval renew-interval u< if
-                rebind-interval to renew-interval
-              then
-              OPTION_IAADDR addr' 12 + bytes' 12 - find-dhcpv6-opt if
-                24 >= if
-                  { addr'' }
-                  addr'' 4 + unaligned@ 10000 * { deprecated-interval }
-                  addr'' 8 + unaligned@ 10000 * { valid-interval }
-                  deprecated-interval valid-interval u> if exit then
-                  deprecated-interval renew-interval u< if
-                    deprecated-interval to renew-interval
-                  then
-                  valid-interval renew-interval u< if
-                    valid-interval to renew-interval
-                  then
-                  addr'' ipv6-unaligned@
-                  self discovered-ipv6-addr ipv6-unaligned!
-                  rebind-interval dhcp-renew-rebind-limit-multiplier *
-                  dhcp-renew-rebind-limit-divisor u/ { limit }
-                  renew-interval limit u> if limit to renew-interval then
-                  renew-interval self dhcp-renew-interval !
-                  rebind-interval self dhcp-rebind-interval !
+              4 >= if
+                dhcp-log? if
+                  [: cr ." Found DHCPACK fields" ;] debug-hook execute
+                then
+                unaligned@ rev { dns-server-ipv4-addr }
+                ipv4-netmask self prov-ipv4-netmask !
+                gateway-ipv4-addr self prov-gateway-ipv4-addr !
+                dns-server-ipv4-addr self prov-dns-server-ipv4-addr !
+                renew-interval 10000 * self prov-dhcp-renew-interval !
+                self dhcp-discover-state @ dhcp-renewing =
+                self dhcp-discover-state @ dhcp-rebinding = or if
                   self apply-dhcp
                 else
-                  drop
+                  dhcp-arp-attempt-count self dhcp-remaining-arp-attempts !
+                  dhcp-wait-confirm self dhcp-discover-state !
+                  systick::systick-counter self dhcp-discover-stage-start !
+                then
+                dhcp-log? if
+                  [: cr ." Processed DHCPACK" ;] debug-hook execute
                 then
               else
-                2drop
+                dhcp-log? if
+                  [: cr ." Insufficient DNS servers" ;] debug-hook execute
+                then
+                drop
               then
+            else
+              dhcp-log? if
+                [: cr ." Did not find DNS server" ;] debug-hook execute
+              then
+              drop
             then
           else
-            2drop
+            dhcp-log? if
+              [: cr ." Did not find router" ;] debug-hook execute
+            then
+            drop
           then
         else
-          2drop
-        then
-      then
-      OPTION_DNS_SERVERS addr bytes find-dhcpv6-opt if { opt-addr opt-bytes }
-        opt-bytes 16 umod 0= opt-bytes 0> and if
-          opt-addr ipv6-unaligned@ self dns-server-ipv6-addr!
-          self found-dns-sema broadcast
-          self found-dns-sema give
+          dhcp-log? if
+            [: cr ." Did not find netmask" ;] debug-hook execute
+          then
+          drop
         then
       else
-        2drop
+        dhcp-log? if
+          [: cr ." yiaddr does not match" ;] debug-hook execute
+        then
       then
-    ; define process-dhcpv6-reply
+    ; define process-ipv4-dhcpack
+
+    \ Process an IPv4 DHCPNAK packet
+    :noname { addr bytes self -- }
+      dhcp-log? if
+        [: cr ." Got DHCPNAK" ;] debug-hook execute
+      then
+      0 self dhcp-req-ipv4-addr !
+      $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
+      0 self dhcp-server-ipv4-addr !
+      dhcp-got-nak self dhcp-discover-state !
+    ; define process-ipv4-dhcpnak
 
     \ Refresh DHCP rebinding
     :noname { self -- }
       systick::systick-counter self dhcp-real-renew-start @ -
       self dhcp-real-renew-interval @ > if
         dhcp-log? if
-          [: cr ." Rebinding failed, issuing DHCP REBIND" ;]
+          [: cr ." Rebinding faied, issuing DHCPDISCOVER" ;]
           debug-hook execute
         then
-        self send-dhcpv6-rebind
+        self send-dhcpdiscover
       then
-    ; define refresh-dhcpv6-rebinding
+    ; define refresh-dhcp-rebinding
     
     \ Refresh DHCP renewal
     :noname { self -- }
       systick::systick-counter self dhcp-rebind-start @ -
       self dhcp-rebind-interval @ > if
-        dhcpv6-rebinding self dhcp-discover-state !
+        dhcp-rebinding self dhcp-discover-state !
         dhcp-rebind-retry-interval self dhcp-rebind-interval !
         dhcp-log? if
-          [: cr ." Attempting rebinding, issuing DHCP REBIND" ;]
+          [: cr ." Attempting rebinding, issuing DHCPREQUEST" ;]
           debug-hook execute
         then
         systick::systick-counter self dhcp-rebind-start !
-        self send-dhcpv6-rebind
+        self send-rebind-dhcprequest
       else
         systick::systick-counter self dhcp-renew-start @ -
         self dhcp-renew-interval @ > if
           dhcp-log? if
-            [: cr ." Attempting renewing, issuing DHCP RENEW" ;]
+            [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
             debug-hook execute
           then
           systick::systick-counter self dhcp-renew-start !
-          self send-dhcpv6-renew
+          self send-renew-dhcprequest
         then
       then
-    ; define refresh-dhcpv6-renewing
+    ; define refresh-dhcp-renewing
 
     \ Refresh DHCP discovered
     :noname { self -- }
       systick::systick-counter self dhcp-renew-start @ -
       self dhcp-renew-interval @ > if
-        dhcpv6-renewing self dhcp-discover-state !
+        dhcp-renewing self dhcp-discover-state !
         self dhcp-renew-interval @ dhcp-renew-retry-divisor /
         self dhcp-renew-interval !
         dhcp-log? if
@@ -4937,7 +4821,15 @@ begin-module net-ipv6
         systick::systick-counter self dhcp-renew-start !
         self send-renew-dhcprequest
       then
-    ; define refresh-dhcpv6-discovered
+    ; define refresh-dhcp-discovered
+
+    \ Refresh DHCP got nak
+    :noname { self -- }
+      dhcp-log? if
+        [: cr ." Got DHCPNAK, retrying DHCPDISCOVER" ;] debug-hook execute
+      then
+      self send-dhcpdiscover
+    ; define refresh-dhcp-got-nak
 
     \ Refresh DHCP wait offer
     :noname { self -- }
@@ -4949,7 +4841,7 @@ begin-module net-ipv6
         then
         self send-dhcpdiscover
       then
-    ; define refresh-dhcpv6-wait-advertise
+    ; define refresh-dhcp-wait-offer
 
     \ Refresh DHCP wait ACK
     :noname { self -- }
@@ -4961,7 +4853,35 @@ begin-module net-ipv6
         then
         self send-dhcprequest
       then
-    ; define refresh-dhcpv6-wait-reply
+    ; define refresh-dhcp-wait-ack
+
+    \ Refresh DHCP wait confirm
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcp-arp-interval > if
+        dhcp-log? if
+          [: cr ." Trying to confirm DHCP with ARP..." ;] debug-hook execute
+        then
+        self dhcp-req-ipv4-addr @ self address-map
+        lookup-mac-addr-by-ipv4 not -rot 2drop if
+          -1 self dhcp-remaining-arp-attempts +!
+          self dhcp-remaining-arp-attempts @ 0> if
+            self dhcp-req-ipv4-addr @ self send-ipv4-dhcp-arp-request
+            systick::systick-counter self dhcp-discover-stage-start !
+          else
+            dhcp-log? if
+              [: cr ." DHCP is now accepted" ;] debug-hook execute
+            then
+            self apply-dhcp
+          then
+        else
+          dhcp-log? if
+            [: cr ." DHCP is declined" ;] debug-hook execute
+          then
+          self send-dhcpdecline
+        then
+      then      
+    ; define refresh-dhcp-wait-confirm
 
     \ Refresh DHCP declined
     :noname { self -- }
@@ -4970,47 +4890,21 @@ begin-module net-ipv6
         dhcp-log? if
           [: cr ." Retrying DHCP discovery" ;] debug-hook execute
         then
-        self send-dhcpv6-solicit
+        self send-dhcpdiscover
       then
-    ; define refresh-dhcpv6-declined
+    ; define refresh-dhcp-declined
 
-    \ Refresh router discovery
-    :noname { self -- }
-      self router-discovery? @ if
-        systick::systick-counter self router-discovery-start @ -
-        self router-discovery-interval @ > if
-          self [: { self }
-            self router-discovery? @ if
-              self send-icmpv6-router-solicit
-              systick::systick-counter self router-discovery-start !
-            then
-          ;] over router-discovery-lock with-lock
-        then
-      else
-        self router-discovered? @ if
-          systick::systick-counter self router-discovered-start @ -
-          self router-lifetime @ 10000 * > if
-            self [: { self }
-              self router-discovered? @ if
-                self send-icmpv6-router-solicit
-                systick::systick-counter self router-discovery-start !
-                true self router-discovery? !
-              then
-            ;] over router-discovery-lock with-lock
-          then
-        then
-      then
-    ; define refresh-router-discovery
-    
     \ Implement a jumptable for DHCP states
     create dhcp-jumptable
     ' drop ,
-    ' refresh-dhcpv6-wait-advertise ,
-    ' refresh-dhcpv6-wait-reply ,
-    ' refresh-dhcpv6-discovered ,
-    ' refresh-dhcpv6-renewing ,
-    ' refresh-dhcpv6-rebinding ,
-    ' refresh-dhcpv6-declined ,
+    ' refresh-dhcp-wait-offer ,
+    ' refresh-dhcp-wait-ack ,
+    ' refresh-dhcp-got-nak ,
+    ' refresh-dhcp-wait-confirm ,
+    ' refresh-dhcp-discovered ,
+    ' refresh-dhcp-renewing ,
+    ' refresh-dhcp-rebinding ,
+    ' refresh-dhcp-declined ,
     
     \ Refresh DHCP
     :noname ( self -- )
@@ -5021,11 +4915,10 @@ begin-module net-ipv6
     
     \ Refresh an interface
     :noname { self -- }
-      self refresh-router-discovery
       self refresh-dhcp
       self refresh-time-wait
       max-endpoints 0 ?do
-        self intf-endpoints <ipv6-endpoint> class-size i * +
+        self intf-endpoints <ipv4-endpoint> class-size i * +
         self [: { endpoint self }
           endpoint endpoint-refresh-ready? if
             endpoint endpoint-tcp-state@ { state }
@@ -5033,7 +4926,7 @@ begin-module net-ipv6
             state TCP_ESTABLISHED =
             state TCP_SYN_RECEIVED = or
             state TCP_CLOSE_WAIT = or if
-              endpoint endpoint-ipv6-remote@
+              endpoint endpoint-ipv4-remote@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
               state TCP_SYN_RECEIVED = if 1- then
@@ -5045,22 +4938,22 @@ begin-module net-ipv6
                 TCP_CLOSE_WAIT of TCP_ACK endof
               endcase
               endpoint endpoint-remote-mac-addr@
-              self send-ipv6-basic-tcp
+              self send-ipv4-basic-tcp
               endpoint endpoint-ack-sent
               endpoint advance-endpoint-refresh
             else
               state TCP_SYN_SENT = if
                 endpoint reset-endpoint-local-port
-                endpoint endpoint-ipv6-remote@
+                endpoint endpoint-ipv4-remote@
                 endpoint endpoint-local-port@
                 endpoint endpoint-init-local-seq@ 1+
                 endpoint endpoint-init-local-seq!
                 endpoint endpoint-local-seq@ 1-
                 0
-                [ mtu-size ipv6-header-size - tcp-header-size - ] literal
+                [ mtu-size ipv4-header-size - tcp-header-size - ] literal
                 TCP_SYN
                 endpoint endpoint-remote-mac-addr@
-                self send-ipv6-basic-tcp
+                self send-ipv4-basic-tcp
                 endpoint advance-endpoint-refresh
               else
                 state TCP_FIN_WAIT_1 = state TCP_LAST_ACK = or if
@@ -5078,9 +4971,9 @@ begin-module net-ipv6
   end-implement
 
   \ The IP protocol handler
-  <frame-handler> begin-class <ipv6-handler>
+  <frame-handler> begin-class <ipv4-handler>
 
-    continue-module net-ipv6-internal
+    continue-module net-ipv4-internal
       
       \ The IP interface
       cell member ip-interface
@@ -5089,8 +4982,8 @@ begin-module net-ipv6
 
   end-class
 
-  \ Implemnt the IP protocol handler
-  <ipv6-handler> begin-implement
+  \ Implemnt the IPv4 protocol handler
+  <ipv4-handler> begin-implement
 
     \ Constructor
     :noname { ip self -- }
@@ -5100,18 +4993,32 @@ begin-module net-ipv6
 
     \ Handle a frame
     :noname { addr bytes self -- }
-      addr ethh-ether-type h@ [ ETHER_TYPE_IPV6 rev16 ] literal = if
+      addr ethh-ether-type h@ [ ETHER_TYPE_IPV4 rev16 ] literal = if
         addr ethh-source-mac mac@ { D: src-mac-addr }
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
-        bytes ipv6-header-size >= if
-          bytes addr ipv6-payload-len h@ rev16 min to bytes
-          addr ipv6-dest-addr ipv6-unaligned@ self ipv6-addr-listen? if
-            src-mac-addr addr ipv6-src-addr ipv6-unaligned@
-            addr bytes find-ipv6-payload if 
-              addr ipvself ip-interface @ process-ipv6-packet
-            else
-              2drop 2drop 2drop drop
+        bytes ipv4-header-size >= if
+          src-mac-addr addr ipv4-src-addr @ rev
+          self ip-interface @
+          process-ipv4-mac-addr
+          bytes addr ipv4-total-len h@ rev16 min to bytes
+          addr ipv4-version-ihl c@ $F and dup { ihl } 5 >=
+          ihl 4 * bytes <= and if
+            addr ipv4-dest-addr @ rev
+            dup self ip-interface @ intf-ipv4-addr@ =
+            over self ip-interface @ intf-ipv4-broadcast@ = or
+            over $FFFFFFFF = or
+            self ip-interface @ dhcp-discover-state @ dhcp-wait-ack =
+            rot self ip-interface @ dhcp-req-ipv4-addr @ = and or
+            self ip-interface @ dhcp-discover-state @ dhcp-wait-offer = or if
+              addr ipv4-fragment? if
+                addr bytes self ip-interface @ process-fragment
+              else
+                addr ipv4-src-addr @ rev
+                addr ipv4-protocol c@
+                addr ihl cells + bytes ihl cells -
+                self ip-interface @ process-ipv4-packet
+              then
             then
           then
         then
@@ -5122,6 +5029,76 @@ begin-module net-ipv6
     :noname ( self -- )
       ip-interface @ refresh-interface
     ; define handle-refresh
+    
+  end-implement
+  
+  \ The ARP packet handler
+  <frame-handler> begin-class <arp-handler>
+
+    continue-module net-ipv4-internal
+      
+      \ The ARP IP interface
+      cell member arp-interface
+      
+      \ Send an ARP response
+      method send-arp-response ( addr self -- )
+      
+    end-module
+    
+  end-class
+  
+  \ Implement the ARP packet handler
+  <arp-handler> begin-implement
+    
+    \ Constructor
+    :noname { ip self -- }
+      self <frame-handler>->new
+      ip self arp-interface !
+    ; define new
+
+    \ Handle a frame
+    :noname { addr bytes self -- }
+      addr ethh-ether-type h@ [ ETHER_TYPE_ARP rev16 ] literal = if
+        ethernet-header-size +to addr
+        [ ethernet-header-size negate ] literal +to bytes
+        bytes arp-ipv4-size >= if
+          addr arp-htype h@ [ HTYPE_ETHERNET rev16 ] literal =
+          addr arp-ptype h@ [ ETHER_TYPE_IPV4 rev16 ] literal = and
+          addr arp-hlen c@ 6 = and
+          addr arp-plen c@ 4 = and if
+            addr arp-sha mac@ addr arp-spa unaligned@ rev self arp-interface @
+            process-ipv4-mac-addr
+            addr arp-oper h@ [ OPER_REQUEST rev16 ] literal = if
+              addr arp-tpa unaligned@ rev
+              self arp-interface @ intf-ipv4-addr@ = if
+                addr self send-arp-response
+              then
+            then
+          then
+        then
+      then
+    ; define handle-frame
+
+    \ Send an ARP response
+    :noname ( addr self -- )
+      [ ethernet-header-size arp-ipv4-size + ] literal
+      [: { addr self buf }
+        addr arp-sha mac@ buf ethh-destination-mac mac!
+        self arp-interface @ intf-mac-addr@ buf ethh-source-mac mac!
+        [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
+        buf ethernet-header-size + { arp-buf }
+        [ HTYPE_ETHERNET rev16 ] literal arp-buf arp-htype h!
+        [ ETHER_TYPE_IPV4 rev16 ] literal arp-buf arp-ptype h!
+        6 arp-buf arp-hlen c!
+        4 arp-buf arp-plen c!
+        [ OPER_REPLY rev16 ] literal arp-buf arp-oper h!
+        self arp-interface @ intf-mac-addr@ arp-buf arp-sha mac!
+        self arp-interface @ intf-ipv4-addr@ rev arp-buf arp-spa unaligned!
+        addr arp-sha mac@ arp-buf arp-tha mac!
+        addr arp-spa unaligned@ arp-buf arp-tpa unaligned!
+        true
+      ;] 2 pick arp-interface @ construct-and-send-frame drop
+    ; define send-arp-response
     
   end-implement
   
