@@ -2738,7 +2738,7 @@ begin-module net-ipv4
 
   end-class
 
-  \ Implement the interface class
+  \ Implement the IPv4 interface class
   <ipv4-interface> begin-implement
 
     \ Constructor
@@ -2774,7 +2774,6 @@ begin-module net-ipv4
       loop
       self endpoint-queue-lock init-lock
       self dhcp-lock init-lock
-      self mac-addr-resolve-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
@@ -3589,31 +3588,8 @@ begin-module net-ipv4
           ?raise
           old-timeout task::timeout !
         then
-        systick::systick-counter mac-addr-resolve-interval - { tick }
-        max-mac-addr-resolve-attempts { attempts }
-        begin
-          dest-addr self address-map lookup-mac-addr-by-ipv4 not
-        while
-          2drop
-          systick::systick-counter tick - mac-addr-resolve-interval >= if
-            attempts 0> if
-              -1 +to attempts
-              dest-addr self send-ipv4-arp-request
-              systick::systick-counter to tick
-            else
-              0. false exit
-            then
-          else
-            task::timeout @ { old-timeout }
-            tick mac-addr-resolve-interval + systick::systick-counter -
-            self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
-            dup ['] task::x-timed-out = if 2drop drop 0 then
-            ?raise
-            old-timeout task::timeout !
-          then
-        repeat
-        true
-      ;] over mac-addr-resolve-lock with-lock
+      repeat
+      true
     ; define resolve-ipv4-addr-mac-addr
 
     \ Test for DHCP ARP
@@ -4970,7 +4946,7 @@ begin-module net-ipv4
 
   end-implement
 
-  \ The IP protocol handler
+  \ The IPv4 protocol handler
   <frame-handler> begin-class <ipv4-handler>
 
     continue-module net-ipv4-internal
@@ -4982,7 +4958,7 @@ begin-module net-ipv4
 
   end-class
 
-  \ Implemnt the IPv4 protocol handler
+  \ Implement the IPv4 protocol handler
   <ipv4-handler> begin-implement
 
     \ Constructor

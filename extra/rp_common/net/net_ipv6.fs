@@ -2755,7 +2755,7 @@ begin-module net-ipv6
 
   end-class
 
-  \ Implement the interface class
+  \ Implement the IPv6 interface class
   <ipv6-interface> begin-implement
 
     \ Constructor
@@ -2808,7 +2808,6 @@ begin-module net-ipv6
       self endpoint-queue-lock init-lock
       self router-discovery-lock init-lock
       self dhcp-lock init-lock
-      self mac-addr-resolve-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
@@ -3774,39 +3773,36 @@ begin-module net-ipv6
     ; define construct-and-send-ipv6-packet
 
     \ Resolve an IPv6 address's MAC address
-    :noname
-      [:
-        { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
-        self reachable-time @ 0<> if
-          self reachable-time @ self address-map age-out-mac-addrs
-        then
-        systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
-        max-neighbor-discovery-attempts { attempts }
-        begin
-          dest-0 dest-1 dest-2 dest-3
-          self address-map lookup-mac-addr-by-ipv6 not
-        while
-          2drop
-          systick::systick-counter tick -
-          self neighbor-retrans-time @ 10 * >= if
-            attempts 0> if
-              -1 to attempts
-              dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
-              systick::systick-counter to tick
-            else
-              0. false exit
-            then
+    :noname { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
+      self reachable-time @ 0<> if
+        self reachable-time @ self address-map age-out-mac-addrs
+      then
+      systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
+      max-neighbor-discovery-attempts { attempts }
+      begin
+        dest-0 dest-1 dest-2 dest-3
+        self address-map lookup-mac-addr-by-ipv6 not
+      while
+        2drop
+        systick::systick-counter tick -
+        self neighbor-retrans-time @ 10 * >= if
+          attempts 0> if
+            -1 to attempts
+            dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
+            systick::systick-counter to tick
           else
-            task::timeout @ { old-timeout }
-            tick self neighbor-retrans-time @ 10 * + systick::systick-counter -
-            self swap [: task::timeout ! neighbor-discovery-sema take ;] try
-            dup ['] task::x-timed-out = if 2drop drop 0 then
-            ?raise
-            old-timeout task::timeout !
+            0. false exit
           then
-        repeat
-        true
-      ;] over mac-addr-resolve-lock with-lock
+        else
+          task::timeout @ { old-timeout }
+          tick self neighbor-retrans-time @ 10 * + systick::systick-counter -
+          self swap [: task::timeout ! neighbor-discovery-sema take ;] try
+          dup ['] task::x-timed-out = if 2drop drop 0 then
+          ?raise
+          old-timeout task::timeout !
+        then
+      repeat
+      true
     ; define resolve-ipv6-addr-mac-addr
 
     \ Resolve a DNS name's IPv6 address
@@ -5077,7 +5073,7 @@ begin-module net-ipv6
 
   end-implement
 
-  \ The IP protocol handler
+  \ The IPv6 protocol handler
   <frame-handler> begin-class <ipv6-handler>
 
     continue-module net-ipv6-internal
@@ -5089,7 +5085,7 @@ begin-module net-ipv6
 
   end-class
 
-  \ Implemnt the IP protocol handler
+  \ Implement the IPv6 protocol handler
   <ipv6-handler> begin-implement
 
     \ Constructor
