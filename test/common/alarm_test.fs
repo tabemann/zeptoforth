@@ -22,21 +22,27 @@ begin-module alarm-test
 
   alarm import
   
-  alarm-task-size aligned-buffer: my-alarm-task
-  alarm-size aligned-buffer: my-alarm0
-  alarm-size aligned-buffer: my-alarm1
-  alarm-size aligned-buffer: my-alarm2
+  alarm-task-size buffer: my-alarm-task
+  alarm-size buffer: my-alarm0
+  alarm-size buffer: my-alarm1
+  alarm-size buffer: my-alarm2
   
   320 128 512 0 my-alarm-task init-alarm-task
   
   defer do-alarm0
-  :noname 2drop ." A" 5000 0 0 ['] do-alarm0 my-alarm0 my-alarm-task set-alarm-delay ; ' do-alarm0 defer!
+  :noname
+    2drop ." A" 5000 0 0 ['] do-alarm0 my-alarm0 my-alarm-task set-alarm-delay
+  ; is do-alarm0
 
   defer do-alarm1
-  :noname 2drop ." B" 5000 1 0 ['] do-alarm1 my-alarm1 my-alarm-task set-alarm-delay ; ' do-alarm1 defer!
+  :noname
+    2drop ." B" 5000 1 0 ['] do-alarm1 my-alarm1 my-alarm-task set-alarm-delay
+  ; is do-alarm1
 
   defer do-alarm2
-  :noname 2drop ." C" 5000 2 0 ['] do-alarm2 my-alarm2 my-alarm-task set-alarm-delay ; ' do-alarm2 defer!
+  :noname
+    2drop ." C" 5000 2 0 ['] do-alarm2 my-alarm2 my-alarm-task set-alarm-delay
+  ; is do-alarm2
   
   5000 0 0 ' do-alarm0 my-alarm0 my-alarm-task set-alarm-delay
   5000 1 0 ' do-alarm1 my-alarm1 my-alarm-task set-alarm-delay

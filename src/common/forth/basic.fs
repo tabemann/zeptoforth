@@ -110,14 +110,15 @@ $DEFE constant start-string
 \ ISB instruction
 : isb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F6F h, ] ;
 
-\ Add to a cell
-\ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
+\ Write four cells to an address
+: 4! ( x y z w addr -- )
+  [ 3 cells ] literal + tuck ! cell - tuck ! cell - tuck ! cell - !
+;
 
-\ Get the minimum of two numbers
-\ : min ( n1 n2 -- n3 ) over - dup 0< and + ;
-
-\ Get the maximum of two numbers
-\ : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
+\ Read four cells from an address
+: 4@ ( addr -- x y z w )
+  dup @ swap cell+ dup @ swap cell+ dup @ swap cell+ @
+;
 
 \ Rotate three cells in revese
 : -rot ( x1 x2 x3 -- x3 x1 x2 ) rot rot [inlined] ;
@@ -649,8 +650,9 @@ commit-flash
   undefer-lit
   syntax-of verify-syntax drop-syntax
   end-block
-  rot ?dup if
-    here swap branch-back!
+  chip $73746D = swap $6C0001DC = and \ stm32l476
+  chip $7270 = swap 2040 = and or if \ rp2040
+    rot ?dup if here swap branch-back! else 0 -rot then
   then
   reserve-branch
   -rot postpone then-no-block
@@ -663,9 +665,7 @@ commit-flash
   undefer-lit
   syntax-case verify-syntax drop-syntax
   postpone drop
-  ?dup if
-    here swap branch-back!
-  then
+  begin ?dup while here swap branch-back! repeat
   end-block
 ;
 
@@ -709,9 +709,7 @@ commit-flash
   undefer-lit
   syntax-case verify-syntax drop-syntax
   postpone 2drop
-  ?dup if
-    here swap branch-back!
-  then
+  begin ?dup while here swap branch-back! repeat
   end-block
 ;
 
@@ -2109,8 +2107,10 @@ commit-flash
   state @ if
     undefer-lit
     [ thumb-2? not ] [if] consts-inline, [then]
+    current-unit-start @
     reserve-branch
     here
+    dup current-unit-start !
     $B500 h,
     word-begin-hook @ ?execute
     syntax-lambda push-syntax
@@ -2134,6 +2134,7 @@ commit-flash
     $BD00 h,
     here rot branch-back!
     lit,
+    current-unit-start !
   else
     syntax-naked-lambda = averts x-unexpected-syntax
     drop-syntax
@@ -2506,6 +2507,40 @@ commit-flash
 \ Hook for getting top of main task RAM dictionary
 variable main-here-hook
 
+\ Commit to flash
+commit-flash
+
+\ The ACCEPT hook
+variable accept-hook
+
+\ Implement ACCEPT when not using the line editor
+: do-accept ( addr bytes -- bytes' )
+  over
+  begin
+    key
+    dup $0A = over $0D = or if
+      drop nip swap - exit
+    else
+      dup $08 = over $7F = or if
+        drop
+        2 pick over u< if
+          $08 emit space $08 emit 1-
+        then
+      else
+        dup $1B = if
+          drop
+        else
+          2over + 2 pick u> if
+            dup emit over c! 1+
+          else
+            drop
+          then
+        then
+      then
+    then
+  again
+;
+
 \ Set forth
 forth set-current
 
@@ -2599,6 +2634,18 @@ forth set-current
   until
 ;
 
+\ Write a string to the dictionary, writing its length as a cell first
+: string, ( addr bytes -- )
+  cell align, dup , begin ?dup while swap dup c@ c, 1+ swap 1- repeat drop
+;
+
+\ Write a string starting at an address with its length as a cell first
+: string! ( src-addr bytes dest-addr -- ) cell align 2dup ! cell+ swap move ;
+
+\ Read a string written with STRING, or STRING! at an address with its length
+\ as a cell first
+: string@ ( addr -- addr' bytes ) cell align dup @ swap cell+ swap ;
+
 \ Attention hook
 variable attention-hook
 
@@ -2643,6 +2690,10 @@ commit-flash
     execute
   then
 ;
+
+\ Accept a line of text from the console into a buffer up to a specified number
+\ of bytes; the actual number of bytes entered is returned
+: accept ( addr bytes -- bytes' ) accept-hook @ execute ;
 
 \ Return control to the prompt
 : return-to-prompt
@@ -2698,6 +2749,7 @@ commit-flash
   [: true attention? ! ;] attention-start-hook !
   false attention? !
   [: begin pause again ;] crash-hook !
+  ['] do-accept accept-hook !
 ;
 
 \ Finish compressing the code

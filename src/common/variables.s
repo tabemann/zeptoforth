@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@
         .equ emit_q_hook_offset, 40
 
 	@@ The initial USER offset
-	.equ user_offset, 28
+	.equ user_offset, 44
 
 	@@ Pointer to the current Flash HERE location
 	allot flash_here, 4
@@ -232,3 +232,9 @@
 
         @@ The syntax stack pointer
         allot syntax_stack_ptr, 4
+
+        @@ The start of the current compilation unit (e.g. word, quotation)
+        allot current_unit_start, 4
+
+        @@ The system clock speed in Hz
+        allot sysclk, 4

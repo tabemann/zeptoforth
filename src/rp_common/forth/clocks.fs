@@ -1,5 +1,5 @@
 \ Copyright (c) 2024 Paul Koning
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ begin-module clocks
     $00 constant PLL_PWR_ON
 
     rp2040? [if]
-      133000000 constant MAX_SYSCLK
+      200000000 constant MAX_SYSCLK
     [then]
     rp2350? [if]
       150000000 constant MAX_SYSCLK
@@ -127,6 +127,10 @@ begin-module clocks
       PLL_PWR_ON PLL_SYS_PWR !             \ Power on everything
     ;
 
+    \ The minimum VCO frequency
+    rp2040? [if] 750000000 constant min-vcofreq [then]
+    rp2350? [if] 400000000 constant min-vcofreq [then]
+    
     \ Check PLL parameters and return resulting PLL output frequency
     : check-pll { refdiv fbdiv pdiv1 pdiv2 -- freq }
       pdiv2 1 7 bounds averts x-bad-postdiv2
@@ -136,9 +140,36 @@ begin-module clocks
       \ REFCLK / refdiv is the VCO reference frequency
       xosc-frequency refdiv / dup 5000000 < triggers x-bad-refclk
       \ VCO reference frequency * fbdiv is the VCO output frequency
-      fbdiv * dup 750000000 1600000000 bounds averts x-bad-vcofreq
+      fbdiv * dup min-vcofreq 1600000000 bounds averts x-bad-vcofreq
       \ VCO output frequency / (div1 * div2) is the new SYSCLK
-      pdiv1 / pdiv2 / dup MAX_SYSCLK <= averts x-bad-sysclk
+      pdiv1 / pdiv2 /
+    ;
+
+    \ Actually set the system clock
+    : actually-set-sysclk ( refdiv fbdiv pdiv1 pdiv2 freq -- )
+      \ Now do the clock/pll dance.  This is a critical section.
+      [:
+        [: { refdiv fbdiv pdiv1 pdiv2 freq }
+          disable-int
+
+          \ Save resulting new sysclk frequency
+          freq sysclk !
+
+          \ Switch sysclk to refclk (12 MHz)
+          SYS_CLK_REF sysclk-mainsrc
+
+          \ Set aux src to sys_pll (zero)
+          $e0 [ CLK_SYS_CTRL MOD_CLR + ] literal !
+
+          \ Set the PLL
+          refdiv fbdiv pdiv1 pdiv2 sysclk-pll
+
+          \ Switch sysclk to PLL
+          SYS_CLKSRC_CLK_SYS_AUX sysclk-mainsrc
+          
+          enable-int
+        ;] with-hold-core
+      ;] critical
     ;
 
   end-module> import
@@ -146,18 +177,16 @@ begin-module clocks
 \ Set sysclk parameters.
 : set-sysclk ( refdiv fbdiv pdiv1 pdiv2 -- )
   2over 2over check-pll
-  \ Now do the clock/pll dance.  This is a critical section.
-  [:
-    [: { refdiv fbdiv pdiv1 pdiv2 freq }
-      disable-int
-      freq sysclk !                   \ save resulting new sysclk frequency
-      SYS_CLK_REF sysclk-mainsrc \ Switch sysclk to refclk (12 MHz)
-      $e0 [ CLK_SYS_CTRL MOD_CLR + ] literal !  \ Set aux src to sys_pll (zero)
-      refdiv fbdiv pdiv1 pdiv2 sysclk-pll                 \ Set the PLL
-      SYS_CLKSRC_CLK_SYS_AUX sysclk-mainsrc \ Switch sysclk to PLL
-      enable-int
-    ;] with-hold-core
-  ;] critical
+  dup MAX_SYSCLK <= averts x-bad-sysclk
+  actually-set-sysclk
+;
+
+\ Set sysclk with the ability to overclock.
+\
+\ Warning! This can brick your MCU.
+: set-sysclk-overclock ( refdiv fbdiv pdiv1 pdiv2 -- )
+  2over 2over check-pll
+  actually-set-sysclk
 ;
 
 end-module

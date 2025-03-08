@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2024 Travis Bemann
+# Copyright (c) 2019-2025 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,11 @@ export DUMP=arm-none-eabi-objdump
 export ASFLAGS=-g
 export PREFIX=/usr/local
 export PLATFORM=stm32f407
-export VERSION=1.8.2-dev
+export VERSION=1.11.2-dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
-all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big rp2350
+all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big rp2350 rp2350_16mib
 
 install:
 	$(MAKE) -C src/stm32f407 install
@@ -43,6 +43,7 @@ install:
 	$(MAKE) -C src/rp2040 install
 	$(MAKE) -C src/rp2040_big install
 	$(MAKE) -C src/rp2350 install
+	$(MAKE) -C src/rp2350_16mib install
 
 stm32f407:
 	$(MAKE) -C src/stm32f407
@@ -65,7 +66,10 @@ rp2040_big:
 rp2350:
 	$(MAKE) -C src/rp2350
 
-.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big rp2350 clean html epub
+rp2350_16mib:
+	$(MAKE) -C src/rp2350_16mib
+
+.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big rp2350 rp2350_16mib clean html epub
 
 html:
 	cd docs ; sphinx-build -b html . ../html
@@ -81,5 +85,6 @@ clean:
 	$(MAKE) -C src/rp2040 clean
 	$(MAKE) -C src/rp2040_big clean
 	$(MAKE) -C src/rp2350 clean
+	$(MAKE) -C src/rp2350_16mib clean
 	$(MAKE) -C src/common clean
 

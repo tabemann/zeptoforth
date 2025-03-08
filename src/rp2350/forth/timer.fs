@@ -23,7 +23,8 @@ compile-to-flash
 begin-module timer
 
   interrupt import
-
+  systick import
+  
   \ Out of range alarm index
   : x-out-of-range-alarm ." out of range alarm" cr ;
   
@@ -185,10 +186,25 @@ begin-module timer
   : timer-sysclk? ( -- sysclk? )
     TIME_SOURCE @ 1 and 0<>
   ;
+
+  continue-module timer-internal
+
+    \ Initialize the systick override using TIMER0
+    : init-systick-override ( -- )
+      [: ( -- ticks )
+        us-counter 100. ud/ d>s
+      ;] systick-override-hook!
+    ;
+    
+  end-module
   
 end-module
 
 \ Initialize
-: init init timer::timer-internal::init-timer ;
+: init
+  init
+  timer::timer-internal::init-timer
+  timer::timer-internal::init-systick-override
+;
 
 reboot

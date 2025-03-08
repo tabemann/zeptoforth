@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Bidirectional Channel Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Semaphore Words" href="semaphore.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="bidirectional-channel-words">
-<h1>Bidirectional Channel Words<a class="headerlink" href="#bidirectional-channel-words" title="Permalink to this heading">¶</a></h1>
+<h1>Bidirectional Channel Words<a class="headerlink" href="#bidirectional-channel-words" title="Link to this heading">¶</a></h1>
 <p>A bidirectional channel is a bidirectional means of communicating data between two different tasks, involving interlocking messages sent to tasks listening on them followed by replies sent synchronously back to original sending tasks by the receiving tasks. Bidirectional channels are not buffered queues; provided another task is listening to a bidirectional channel, sending on a bidirectional channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
 <p>Tasks attempting to send on bidirectional channels first check whether there is a queued task waiting to receive on the bidirectional channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the bidirectional channel and is blocked, if <code class="docutils literal notranslate"><span class="pre">send-rchan</span></code> had been called, otherwise <code class="docutils literal notranslate"><span class="pre">x-no-recv-ready</span></code> is raised, if <code class="docutils literal notranslate"><span class="pre">send-rchan-recv-ready-only</span></code> had been called.</p>
 <p>Tasks attempting to receive on bidirectional channels first check whether there is a queued task waiting to send on the bidirectional channel; if there are tasks queued to send, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the sending task is readied. If no tasks are queued to send, the receiving task is queued to receive on the bidirectional channel and is blocked, if <code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code> had been called, otherwise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code> is raised, if <code class="docutils literal notranslate"><span class="pre">recv-rchan-no-block</span></code> had been called.</p>
@@ -45,70 +41,70 @@
 <p>Once a task receives a message on a bidirectional channel, the bidirectional channel is put into a state where it is pending a reply. No other messages will be sent over the bidirectional channel until the task which received the message sends a reply back to the task which had originally sent on the bidirectional channel. Like the original message sent from the sending task to the receiving task, no data is buffered in a reply but rather the reply data is copied directly from the buffer provided by the replying task to the reply buffer provided by the original sending task.</p>
 <p>Bidirectional channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
 <section id="rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">rchan</span></code><a class="headerlink" href="#rchan" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">rchan</span></code><a class="headerlink" href="#rchan" title="Link to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">rchan</span></code>:</p>
 <section id="x-rchan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code><a class="headerlink" href="#x-rchan-closed" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code><a class="headerlink" href="#x-rchan-closed" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>The bidirectional channel closed exception.</p>
 </section>
 <section id="x-reply-pending">
-<h3><code class="docutils literal notranslate"><span class="pre">x-reply-pending</span></code><a class="headerlink" href="#x-reply-pending" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-reply-pending</span></code><a class="headerlink" href="#x-reply-pending" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This exception is raised if a bidirectional channel is replied to after it has already been replied to and before the original sending task awaiting for a reply has had the chance to handle the reply</p>
 </section>
 <section id="x-no-recv-ready">
-<h3><code class="docutils literal notranslate"><span class="pre">x-no-recv-ready</span></code><a class="headerlink" href="#x-no-recv-ready" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-recv-ready</span></code><a class="headerlink" href="#x-no-recv-ready" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>The no receiving task is ready exception raised by <code class="docutils literal notranslate"><span class="pre">send-rchan-recv-ready-only</span></code>.</p>
 </section>
 <section id="rchan-size">
-<h3><code class="docutils literal notranslate"><span class="pre">rchan-size</span></code><a class="headerlink" href="#rchan-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">rchan-size</span></code><a class="headerlink" href="#rchan-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of an bidirectional channel in bytes.</p>
 </section>
 <section id="init-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">init-rchan</span></code><a class="headerlink" href="#init-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-rchan</span></code><a class="headerlink" href="#init-rchan" title="Link to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a bidirectional channel starting at the specified address.</p>
 </section>
 <section id="close-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">close-rchan</span></code><a class="headerlink" href="#close-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">close-rchan</span></code><a class="headerlink" href="#close-rchan" title="Link to this heading">¶</a></h3>
 <p>( rchan – )</p>
 <p>Close a bidirectional channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code>.</p>
 </section>
 <section id="reopen-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">reopen-rchan</span></code><a class="headerlink" href="#reopen-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-rchan</span></code><a class="headerlink" href="#reopen-rchan" title="Link to this heading">¶</a></h3>
 <p>( rchan – )</p>
 <p>Reopen a bidirectional channel.</p>
 </section>
 <section id="rchan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">rchan-closed?</span></code><a class="headerlink" href="#rchan-closed" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">rchan-closed?</span></code><a class="headerlink" href="#rchan-closed" title="Link to this heading">¶</a></h3>
 <p>( rchan – closed )</p>
 <p>Get whether a bidirectional channel is closed.</p>
 </section>
 <section id="send-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">send-rchan</span></code><a class="headerlink" href="#send-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-rchan</span></code><a class="headerlink" href="#send-rchan" title="Link to this heading">¶</a></h3>
 <p>( send-addr send-bytes reply-addr reply-bytes rchan – reply-bytes’ )</p>
 <p>Send message with a buffer <em>send-addr</em> with size <em>send-bytes</em> in bytes as a payload over a bidirectional channel. Block until another task replies to the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the bidirectional channel is smaller than the data provided, and padded with zeros if it is larger. In turn, the reply provided by the receiving task is copied into the provided reply buffer <em>reply-addr</em> with the size <em>reply-bytes</em> in bytes, and the actual size in bytes of the reply is returned. Note that this must not be called within a critical section.</p>
 </section>
 <section id="send-rchan-recv-ready-only">
-<h3><code class="docutils literal notranslate"><span class="pre">send-rchan-recv-ready-only</span></code><a class="headerlink" href="#send-rchan-recv-ready-only" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-rchan-recv-ready-only</span></code><a class="headerlink" href="#send-rchan-recv-ready-only" title="Link to this heading">¶</a></h3>
 <p>( send-addr send-bytes reply-addr reply-bytes rchan – reply-bytes’ )</p>
 <p>Send message with a buffer <em>send-addr</em> with size <em>send-bytes</em> in bytes as a payload over a bidirectional channel. Block until another task replies to the message; if a task is already waiting for a message, transfer control to it, otherwise raise <code class="docutils literal notranslate"><span class="pre">x-no-recv-ready</span></code>. Note that the buffer is copied, and will be truncated if the buffer size of the bidirectional channel is smaller than the data provided, and padded with zeros if it is larger. In turn, the reply provided by the receiving task is copied into the provided reply buffer <em>reply-addr</em> with the size <em>reply-bytes</em> in bytes, and the actual size in bytes of the reply is returned. Note that this must not be called within a critical section.</p>
 </section>
 <section id="recv-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code><a class="headerlink" href="#recv-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code><a class="headerlink" href="#recv-rchan" title="Link to this heading">¶</a></h3>
 <p>( addr bytes rchan – recv-bytes )</p>
 <p>Receive message with a buffer <em>addr</em> with size <em>bytes</em> in bytes as a payload over a bidirectional channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the bidirectional channel; the number of bytes copied is returned. At this point the bidirectional channel is in a state where it is waiting for a reply; the sending task will only be readied once a reply is provided with <code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code>. Note that this must not be called within a critical section. Note that the task for which a bidirectional channel is awaiting a reply following a receive cannot receive from that bidirectional channel; if this is attenpted <code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code> is raised.</p>
 </section>
 <section id="recv-rchan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-rchan-no-block</span></code><a class="headerlink" href="#recv-rchan-no-block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-rchan-no-block</span></code><a class="headerlink" href="#recv-rchan-no-block" title="Link to this heading">¶</a></h3>
 <p>( addr bytes rchan – recv-bytes )</p>
 <p>Receive message with a buffer <em>addr</em> with size <em>bytes</em> in bytes as a payload over a bidirectional channel. If no task is waiting to send a message, raise <code class="docutils literal notranslate"><span class="pre">task::x-would-block</span></code>. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the bidirectional channel; the number of bytes copied is returned. At this point the bidirectional channel is in a state where it is waiting for a reply; the sending task will only be readied once a reply is provided with <code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code>. Note that this must not be called within a critical section. Note that the task for which a bidirectional channel is awaiting a reply following a receive cannot receive from that bidirectional channel; if this is attenpted <code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code> is raised.</p>
 </section>
 <section id="reply-rchan">
-<h3><code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code><a class="headerlink" href="#reply-rchan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code><a class="headerlink" href="#reply-rchan" title="Link to this heading">¶</a></h3>
 <p>( addr bytes rchan – )</p>
 <p>Reply to a bidirectional channel which the current task had received a message from with the data in buffer <em>addr</em> with size <em>bytes</em> in bytes. This data is copied into the reply buffer of the original sending task, truncated to the size of the sending task’s reply buffer. Note that if no task is waiting for a reply, the reply is discarded silently; this is necessary due to the possibility of sending tasks timing out prior to receiving their reply.</p>
 </section>
@@ -120,7 +116,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -142,6 +138,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -158,6 +156,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -168,7 +167,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -189,7 +187,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -200,6 +198,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -224,7 +224,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -232,7 +232,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -247,10 +247,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

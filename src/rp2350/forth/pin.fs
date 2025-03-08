@@ -58,7 +58,11 @@ begin-module pin
     true over PADS_BANK0_OD!
     false over PADS_BANK0_ISO!
     5 over GPIO_CTRL_FUNCSEL!
-    bit GPIO_OE_CLR !
+    dup 32 < if
+      bit GPIO_OE_CLR !
+    else
+      32 - bit GPIO_HI_OE_CLR !
+    then
   ;
   
   \ Set a pin to output
@@ -69,7 +73,11 @@ begin-module pin
     false over PADS_BANK0_OD!
     false over PADS_BANK0_ISO!
     5 over GPIO_CTRL_FUNCSEL!
-    bit GPIO_OE_SET !
+    dup 32 < if
+      bit GPIO_OE_SET !
+    else
+      32 - bit GPIO_HI_OE_SET !
+    then
   ;
 
   \ Set an alternate function

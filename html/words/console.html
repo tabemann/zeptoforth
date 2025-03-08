@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Console Redirection Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Multitasking Words" href="task.html" />
@@ -37,225 +33,237 @@
           <div class="body" role="main">
             
   <section id="console-redirection-words">
-<h1>Console Redirection Words<a class="headerlink" href="#console-redirection-words" title="Permalink to this heading">¶</a></h1>
+<h1>Console Redirection Words<a class="headerlink" href="#console-redirection-words" title="Link to this heading">¶</a></h1>
 <p>These words concern redirecting the current console within a given task (each task has its own console configuration, which it inherits upon initialization from its parent task) within a given scope defined by an execution token. Console input and output may be independently redirected, including to arbitrary words called by <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> for input to <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for output, to null inputs and outputs, to the standard serial console, or to streams. Also, error output can be redirected in the same fashion as normal output.</p>
 <p>Take care when redirecting the console to streams because the typical dictionary size used for tasks of 320 is insufficient for this due to buffer space that is alloted in the current task’s dictionary; rather, a dictionary size of 512 has found to work.</p>
 <p>One should also take care, particularly when working with multiple tasks where one task inherits its console redirection from a parent task, to ensure that the redirected console is not accessed after the scope defined by the <code class="docutils literal notranslate"><span class="pre">with-*input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-*output</span></code>, or <code class="docutils literal notranslate"><span class="pre">with-*error-output</span></code> word is defined. However, with the exceptions of <code class="docutils literal notranslate"><span class="pre">with-null-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-null-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-null-error-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-error-output</span></code>, and <code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-swd-output</span></code>, and <code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code>, accessing the redirected console is safe even after its original specification goes out of scope.</p>
 <section id="console">
-<h2><code class="docutils literal notranslate"><span class="pre">console</span></code><a class="headerlink" href="#console" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">console</span></code><a class="headerlink" href="#console" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">console</span></code> module:</p>
 <section id="with-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-input</span></code><a class="headerlink" href="#with-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-input</span></code><a class="headerlink" href="#with-input" title="Link to this heading">¶</a></h3>
 <p>( input-hook input?-hook xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> redirected to call <em>input-hook</em> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected to call <em>input?-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-output</span></code><a class="headerlink" href="#with-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-output</span></code><a class="headerlink" href="#with-output" title="Link to this heading">¶</a></h3>
 <p>( output-hook output?-hook flush-console-hook xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> redirected to call <em>flush-console-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-error-output</span></code><a class="headerlink" href="#with-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-error-output</span></code><a class="headerlink" href="#with-error-output" title="Link to this heading">¶</a></h3>
 <p>( error-output-hook error-output?-hook error-flush-console-hook xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>error-output-hook</em>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>error-output?-hook</em>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> redirected to call <em>error-flush-console-hook</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-null-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-null-input</span></code><a class="headerlink" href="#with-null-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-input</span></code><a class="headerlink" href="#with-null-input" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> redirected to return 0 and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">false</span></code>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-null-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-null-output</span></code><a class="headerlink" href="#with-null-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-output</span></code><a class="headerlink" href="#with-null-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <code class="docutils literal notranslate"><span class="pre">drop</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">true</span></code>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-null-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-null-error-output</span></code><a class="headerlink" href="#with-null-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-error-output</span></code><a class="headerlink" href="#with-null-error-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <code class="docutils literal notranslate"><span class="pre">drop</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">true</span></code> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-serial-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-serial-input</span></code><a class="headerlink" href="#with-serial-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-input</span></code><a class="headerlink" href="#with-serial-input" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for serial console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-serial-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-serial-output</span></code><a class="headerlink" href="#with-serial-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-output</span></code><a class="headerlink" href="#with-serial-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for serial console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-serial-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-serial-error-output</span></code><a class="headerlink" href="#with-serial-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-error-output</span></code><a class="headerlink" href="#with-serial-error-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for serial console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-stream-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-stream-input</span></code><a class="headerlink" href="#with-stream-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-input</span></code><a class="headerlink" href="#with-stream-input" title="Link to this heading">¶</a></h3>
 <p>( stream xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from stream <em>stream</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-stream-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-stream-output</span></code><a class="headerlink" href="#with-stream-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-output</span></code><a class="headerlink" href="#with-stream-output" title="Link to this heading">¶</a></h3>
 <p>( stream xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to stream <em>stream</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-stream-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-stream-error-output</span></code><a class="headerlink" href="#with-stream-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-error-output</span></code><a class="headerlink" href="#with-stream-error-output" title="Link to this heading">¶</a></h3>
 <p>( stream xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to stream <em>stream</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-output-as-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-output-as-error-output</span></code><a class="headerlink" href="#with-output-as-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-output-as-error-output</span></code><a class="headerlink" href="#with-output-as-error-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with error output redirected to the current output. The previous redirection of error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 <section id="fat32">
-<h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code><a class="headerlink" href="#fat32" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code><a class="headerlink" href="#fat32" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module and pertain to direct access to instances of <code class="docutils literal notranslate"><span class="pre">fat32::&lt;fat32-file&gt;</span></code>. Note that there are identically named words in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module which pertain to files in the current FAT32 filesystem which are accessed by path.</p>
 <section id="with-file-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code><a class="headerlink" href="#with-file-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code><a class="headerlink" href="#with-file-input" title="Link to this heading">¶</a></h3>
 <p>( file xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-file-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code><a class="headerlink" href="#with-file-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code><a class="headerlink" href="#with-file-output" title="Link to this heading">¶</a></h3>
 <p>( file xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-file-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code><a class="headerlink" href="#with-file-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code><a class="headerlink" href="#with-file-error-output" title="Link to this heading">¶</a></h3>
 <p>( file xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 <section id="fat32-tools">
-<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#fat32-tools" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#fat32-tools" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module and pertain to access to files in the current FAT32 filesystem by path. Note that there are identically named words in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, listed above, which pertain to direct access to instances of <code class="docutils literal notranslate"><span class="pre">fat32::&lt;fat32-file&gt;</span></code>.</p>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( path-addr path-u xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 <section id="uart">
-<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
 <section id="with-uart-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-uart-input</span></code><a class="headerlink" href="#with-uart-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-input</span></code><a class="headerlink" href="#with-uart-input" title="Link to this heading">¶</a></h3>
 <p>( uart xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for U(S)ART console input for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-uart-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-uart-output</span></code><a class="headerlink" href="#with-uart-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-output</span></code><a class="headerlink" href="#with-uart-output" title="Link to this heading">¶</a></h3>
 <p>( uart xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for U(S)ART console output for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-uart-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-uart-error-output</span></code><a class="headerlink" href="#with-uart-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-error-output</span></code><a class="headerlink" href="#with-uart-error-output" title="Link to this heading">¶</a></h3>
 <p>( uart xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for U(S)ART console output for error output for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 <section id="usb">
-<h2><code class="docutils literal notranslate"><span class="pre">usb</span></code><a class="headerlink" href="#usb" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">usb</span></code><a class="headerlink" href="#usb" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">usb</span></code> module; note that they are only available for <code class="docutils literal notranslate"><span class="pre">full_usb</span></code> builds:</p>
 <section id="usb-console">
-<h3><code class="docutils literal notranslate"><span class="pre">usb-console</span></code><a class="headerlink" href="#usb-console" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">usb-console</span></code><a class="headerlink" href="#usb-console" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the console to use USB.</p>
 </section>
 <section id="with-usb-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-usb-input</span></code><a class="headerlink" href="#with-usb-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-input</span></code><a class="headerlink" href="#with-usb-input" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for USB console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-usb-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-usb-output</span></code><a class="headerlink" href="#with-usb-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-output</span></code><a class="headerlink" href="#with-usb-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for USB console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-usb-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-usb-error-output</span></code><a class="headerlink" href="#with-usb-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-error-output</span></code><a class="headerlink" href="#with-usb-error-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for USB console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="usb-special-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">usb-special-enabled</span></code><a class="headerlink" href="#usb-special-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">usb-special-enabled</span></code><a class="headerlink" href="#usb-special-enabled" title="Link to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>Get the variable address of the USB console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;</p>
 </section>
 </section>
 <section id="swd">
-<h2><code class="docutils literal notranslate"><span class="pre">swd</span></code><a class="headerlink" href="#swd" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">swd</span></code><a class="headerlink" href="#swd" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">swd</span></code> module; note that they are only available for <code class="docutils literal notranslate"><span class="pre">full_swdcom</span></code> and <code class="docutils literal notranslate"><span class="pre">mini_swdcom</span></code> builds:</p>
 <section id="swd-console">
-<h3><code class="docutils literal notranslate"><span class="pre">swd-console</span></code><a class="headerlink" href="#swd-console" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">swd-console</span></code><a class="headerlink" href="#swd-console" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the console to use <code class="docutils literal notranslate"><span class="pre">swdcom</span></code>.</p>
 </section>
 <section id="enable-sleep">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-sleep</span></code><a class="headerlink" href="#enable-sleep" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-sleep</span></code><a class="headerlink" href="#enable-sleep" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the console to sleep the CPU while waiting for input or output with
 <code class="docutils literal notranslate"><span class="pre">swdcom</span></code> and no other tasks are active.</p>
 </section>
 <section id="disable-sleep">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-sleep</span></code><a class="headerlink" href="#disable-sleep" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-sleep</span></code><a class="headerlink" href="#disable-sleep" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Set the console to not sleep the CPU while waiting for input or output with
 <code class="docutils literal notranslate"><span class="pre">swdcom</span></code> and no other tasks are active.</p>
 </section>
 <section id="with-swd-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code><a class="headerlink" href="#with-swd-input" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code><a class="headerlink" href="#with-swd-input" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for swdcom console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-swd-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-swd-output</span></code><a class="headerlink" href="#with-swd-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-output</span></code><a class="headerlink" href="#with-swd-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-swd-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code><a class="headerlink" href="#with-swd-error-output" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code><a class="headerlink" href="#with-swd-error-output" title="Link to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Link to this heading">¶</a></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module:</p>
 <section id="uart-special-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">uart-special-enabled</span></code><a class="headerlink" href="#uart-special-enabled" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-special-enabled</span></code><a class="headerlink" href="#uart-special-enabled" title="Link to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>Get the variable address of the UART console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;</p>
 </section>
 </section>
-<section id="int-io">
-<h2><code class="docutils literal notranslate"><span class="pre">int-io</span></code><a class="headerlink" href="#int-io" title="Permalink to this heading">¶</a></h2>
-<p>These words are in the <code class="docutils literal notranslate"><span class="pre">int-io</span></code> module:</p>
+<section id="serial">
+<h2><code class="docutils literal notranslate"><span class="pre">serial</span></code><a class="headerlink" href="#serial" title="Link to this heading">¶</a></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">serial</span></code> module:</p>
 <section id="serial-console">
-<h3><code class="docutils literal notranslate"><span class="pre">serial-console</span></code><a class="headerlink" href="#serial-console" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">serial-console</span></code><a class="headerlink" href="#serial-console" title="Link to this heading">¶</a></h3>
 <p>Set the current task’s console to use the interrupt-driven serial console.</p>
 </section>
-<section id="enable-int-io">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-int-io</span></code><a class="headerlink" href="#enable-int-io" title="Permalink to this heading">¶</a></h3>
+<section id="enable-serial-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-serial-int-io</span></code><a class="headerlink" href="#enable-serial-int-io" title="Link to this heading">¶</a></h3>
 <p>Enable interrupt-driven serial IO (enabled by default).</p>
 </section>
-<section id="disable-int-io">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code><a class="headerlink" href="#disable-int-io" title="Permalink to this heading">¶</a></h3>
+<section id="disable-serail-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-serail-int-io</span></code><a class="headerlink" href="#disable-serail-int-io" title="Link to this heading">¶</a></h3>
 <p>Disable interrupt-driven serial IO.</p>
 </section>
+<section id="enable-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-int-io</span></code><a class="headerlink" href="#enable-int-io" title="Link to this heading">¶</a></h3>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">enable-serial-int-io</span></code>. This will be removed at a future date.</p>
+</section>
+<section id="disable-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code><a class="headerlink" href="#disable-int-io" title="Link to this heading">¶</a></h3>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">disable-serial-int-io</span></code>. This will be removed at a future date.</p>
+</section>
+</section>
+<section id="int-io">
+<h2><code class="docutils literal notranslate"><span class="pre">int-io</span></code><a class="headerlink" href="#int-io" title="Link to this heading">¶</a></h2>
+<p>A deprecated name retained for compatibility’s sake for <code class="docutils literal notranslate"><span class="pre">serial</span></code>. This will be removed at a future date.</p>
 </section>
 </section>
 
@@ -264,7 +272,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -286,6 +294,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -302,6 +312,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -312,7 +323,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -333,7 +343,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -344,6 +354,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -368,7 +380,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -376,7 +388,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -391,10 +403,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

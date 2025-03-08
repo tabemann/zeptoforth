@@ -467,6 +467,11 @@ Find a word by name with the specified wordlist ID making use of the flash mini-
 
 Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word's address or, if not found, 0. (RP2040 only.)
 
+##### `current-unit-start`
+( -- xt )
+
+Get the execution token for the current compilation unit, i.e. the outermost word or quotation being compiled.
+
 ##### `push-syntax`
 ( syntax -- )
 

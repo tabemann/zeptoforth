@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Fonts &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Bitmap Utilities" href="bitmap_utils.html" />
@@ -37,90 +33,90 @@
           <div class="body" role="main">
             
   <section id="fonts">
-<h1>Fonts<a class="headerlink" href="#fonts" title="Permalink to this heading">¶</a></h1>
+<h1>Fonts<a class="headerlink" href="#fonts" title="Link to this heading">¶</a></h1>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/font.fs</span></code> there is optional code for supporting seven and eight-bit bitmap fonts for use with the bitmaps implemented in <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code> and displays based upon such bitmaps. The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">font</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/font.fs</span></code> Under <code class="docutils literal notranslate"><span class="pre">extra/common/simple_font.fs</span></code> there is a simple seven-bit ASCII font, defined as <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code> in the <code class="docutils literal notranslate"><span class="pre">simple-font</span></code> module.</p>
 <section id="font">
-<h2><code class="docutils literal notranslate"><span class="pre">font</span></code><a class="headerlink" href="#font" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">font</span></code><a class="headerlink" href="#font" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">font</span></code> module contains the following words:</p>
 <section id="font-buf-size">
-<h3><code class="docutils literal notranslate"><span class="pre">font-buf-size</span></code><a class="headerlink" href="#font-buf-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">font-buf-size</span></code><a class="headerlink" href="#font-buf-size" title="Link to this heading">¶</a></h3>
 <p>( char-columns char-rows min-char-index max-char-index – bytes )</p>
 <p>This gets the number of bytes needed for the buffer for a font with glyphs from character <em>min-char-index</em> to character <em>max-char-index</em>, inclusive, with glyphs of <em>char-columns</em> columns and <em>char-rows</em> rows.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>This class constitutes a bitmap font. It is backed by a bitmap which is not directly exposed to the user.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following constructor:</p>
 </section>
 <section id="new">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Link to this heading">¶</a></h3>
 <p>( buffer-addr default-char-index char-columns char-rows min-char-index max-char-index font – )</p>
 <p>This constructor initializes a <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> instance with a minimum character index of <em>min-char-index</em>, a maximum character index of <em>max-char-index</em>, glyphs of <em>char-columns</em> columns and <em>char-rows</em> rows, a default character <em>default-char-index</em> for out of range characters, and a backing bitmap buffer address <em>buffer-addr</em>. The backing bitmap buffer is set to zero at this time.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following members:</p>
 </section>
 <section id="char-cols">
-<h3><code class="docutils literal notranslate"><span class="pre">char-cols</span></code><a class="headerlink" href="#char-cols" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">char-cols</span></code><a class="headerlink" href="#char-cols" title="Link to this heading">¶</a></h3>
 <p>( font – addr )</p>
 <p>The address of a cell containing the number of columns in each glyph in a font.</p>
 </section>
 <section id="char-rows">
-<h3><code class="docutils literal notranslate"><span class="pre">char-rows</span></code><a class="headerlink" href="#char-rows" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">char-rows</span></code><a class="headerlink" href="#char-rows" title="Link to this heading">¶</a></h3>
 <p>( font – addr )</p>
 <p>The address of a cell containing the number of rows in each glyph in a font.</p>
 </section>
 <section id="min-char-index">
-<h3><code class="docutils literal notranslate"><span class="pre">min-char-index</span></code><a class="headerlink" href="#min-char-index" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">min-char-index</span></code><a class="headerlink" href="#min-char-index" title="Link to this heading">¶</a></h3>
 <p>( font – addr )</p>
 <p>The address of a cell containing the minimum character index in a font, below which the character specified by <code class="docutils literal notranslate"><span class="pre">default-char-index</span></code> is to be substituted.</p>
 </section>
 <section id="max-char-index">
-<h3>`max-char-index<a class="headerlink" href="#max-char-index" title="Permalink to this heading">¶</a></h3>
+<h3>`max-char-index<a class="headerlink" href="#max-char-index" title="Link to this heading">¶</a></h3>
 <p>( font – addr )</p>
 <p>The address of a cell containing the maximum character index in a font, above which the character specified by <code class="docutils literal notranslate"><span class="pre">default-char-index</span></code> is to be substituted.</p>
 </section>
 <section id="default-char-index">
-<h3><code class="docutils literal notranslate"><span class="pre">default-char-index</span></code><a class="headerlink" href="#default-char-index" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">default-char-index</span></code><a class="headerlink" href="#default-char-index" title="Link to this heading">¶</a></h3>
 <p>( font – addr )</p>
 <p>The address of a cell containing the default substituting character index.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following methods:</p>
 </section>
 <section id="char-row">
-<h3><code class="docutils literal notranslate"><span class="pre">char-row!</span></code><a class="headerlink" href="#char-row" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">char-row!</span></code><a class="headerlink" href="#char-row" title="Link to this heading">¶</a></h3>
 <p>( xn … x0 row character font – )</p>
 <p>This populates row <em>row</em> of the glyph <em>character</em> in font <em>font</em> with bits from one or more cells taken off the stack, where the bits are populated right to left from least significant bit to most significant bit of the cell on the top-most cell on the stack to the bottom-most cell on the stack, with extra bits being discarded. This is not meant for direct user use but by use by fonts to populate glyphs when they are initialized.</p>
 </section>
 <section id="draw-char">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-char</span></code><a class="headerlink" href="#draw-char" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-char</span></code><a class="headerlink" href="#draw-char" title="Link to this heading">¶</a></h3>
 <p>( character column row op bitmap font – )</p>
 <p>This draws a glyph <em>character</em> of font <em>font</em> with drawing operation <em>op</em> to <em>bitmap</em> with the top left corner of the glyph set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
 </section>
 <section id="draw-string">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-string</span></code><a class="headerlink" href="#draw-string" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-string</span></code><a class="headerlink" href="#draw-string" title="Link to this heading">¶</a></h3>
 <p>( c-addr bytes column row op bitmap font – )</p>
 <p>This draws a string at address <em>c-addr</em> of size <em>bytes</em> with glyphs from font <em>font</em> with drawing operation <em>op</em> to <em>bitmap</em> with the top left corner of the string’s glyphs set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
 </section>
 <section id="draw-char-to-pixmap16">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-char-to-pixmap16</span></code><a class="headerlink" href="#draw-char-to-pixmap16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-char-to-pixmap16</span></code><a class="headerlink" href="#draw-char-to-pixmap16" title="Link to this heading">¶</a></h3>
 <p>( color character column row pixmap font – )</p>
 <p>This draws a glyph <em>character</em> of font <em>font</em> to <em>pixmap</em> with the top left corner of the glyph set to the pixmap being at column <em>column</em> and row <em>row</em>. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.</p>
 </section>
 <section id="draw-string-to-pixmap16">
-<h3><code class="docutils literal notranslate"><span class="pre">draw-string-to-pixmap16</span></code><a class="headerlink" href="#draw-string-to-pixmap16" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">draw-string-to-pixmap16</span></code><a class="headerlink" href="#draw-string-to-pixmap16" title="Link to this heading">¶</a></h3>
 <p>( color c-addr bytes column row pixmap font – )</p>
 <p>This draws a string at address <em>c-addr</em> of size <em>bytes</em> with glyphs from font <em>font</em> to <em>pixmap</em> with the top left corner of the string’s glyphs set to the pixmap being at column <em>column</em> and row <em>row</em>. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.</p>
 </section>
 </section>
 <section id="simple-font">
-<h2><code class="docutils literal notranslate"><span class="pre">simple-font</span></code><a class="headerlink" href="#simple-font" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">simple-font</span></code><a class="headerlink" href="#simple-font" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-font</span></code> module contains the following words:</p>
 <section id="a-simple-font">
-<h3><code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code><a class="headerlink" href="#a-simple-font" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code><a class="headerlink" href="#a-simple-font" title="Link to this heading">¶</a></h3>
 <p>( – font )</p>
 <p>This, once initialized, is an instance of <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> that provides a simple seven-bit ASCII font.</p>
 </section>
 <section id="init-simple-font">
-<h3><code class="docutils literal notranslate"><span class="pre">init-simple-font</span></code><a class="headerlink" href="#init-simple-font" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-simple-font</span></code><a class="headerlink" href="#init-simple-font" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This initializes <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code>. It must be called before <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code> may be used.</p>
 </section>
@@ -132,7 +128,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -154,6 +150,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
@@ -170,6 +168,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -180,7 +179,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
@@ -201,7 +199,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -212,6 +210,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -236,7 +236,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -244,7 +244,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -259,10 +259,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

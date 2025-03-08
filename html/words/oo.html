@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Object Orientation &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Lock Words" href="lock.html" />
@@ -37,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="object-orientation">
-<h1>Object Orientation<a class="headerlink" href="#object-orientation" title="Permalink to this heading">¶</a></h1>
+<h1>Object Orientation<a class="headerlink" href="#object-orientation" title="Link to this heading">¶</a></h1>
 <p>zeptoforth includes an object-orientation layer implemented by the <code class="docutils literal notranslate"><span class="pre">oo</span></code> module. Its object model involves each class having a single superclass (with the ultimatet superclass, <code class="docutils literal notranslate"><span class="pre">object</span></code>, being its own superclass), and methods and members being independent words which are tied to the class for which they are originally declared which may be applied to objects of that class or of any subclass of that class.</p>
 <p>Binding is late by default, but if one explicitly specifies a class to use early binding is also available, and is necessary in some use cases such as <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> method implementations calling <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> respectively in their super classes. Early binding is specified via <em>class</em><code class="docutils literal notranslate"><span class="pre">-&gt;</span></code><em>method</em>; note that <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is not a word but is a special method lookup marker and cannot be separated from <em>class</em> or <em>method</em> by spaces. Note that <em>class</em> can contain a module lookup path specified with <code class="docutils literal notranslate"><span class="pre">::</span></code> delimiters.</p>
 <p>Outside of early binding, classes provide no sort of namespace mechanism; for that one must rely on modules or naming conventions.</p>
@@ -89,70 +85,70 @@ end-implement
 <p>Note that it is good manners for <code class="docutils literal notranslate"><span class="pre">new</span></code> of a given class to call the <code class="docutils literal notranslate"><span class="pre">new</span></code> of its superclass before it does anything else with a new <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>, or else the <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code> may not function as intended.</p>
 <p>Destroying an object is done through calling <code class="docutils literal notranslate"><span class="pre">destroy</span></code> on an object, which will carry out cleanup for an object. Note that actually freeing space for the <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code> is up to the user. The normal convention is that each <code class="docutils literal notranslate"><span class="pre">destroy</span></code> of a given class calls the <code class="docutils literal notranslate"><span class="pre">destroy</span></code> of its superclass after it has cleaned up for itself; however, this should be broken with if a class handles freeing memory allocated for itself, e.g. in a heap, where this should be done after all superclasses’ <code class="docutils literal notranslate"><span class="pre">destroy</span></code> methods have been called.</p>
 <section id="oo">
-<h2><code class="docutils literal notranslate"><span class="pre">oo</span></code><a class="headerlink" href="#oo" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">oo</span></code><a class="headerlink" href="#oo" title="Link to this heading">¶</a></h2>
 <p>The following words are defined in this module:</p>
 <section id="object">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code><a class="headerlink" href="#object" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code><a class="headerlink" href="#object" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The ultimate superclass of all classes.</p>
 </section>
 <section id="new">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Link to this heading">¶</a></h3>
 <p>( object – )</p>
 <p>The class constructor method.</p>
 </section>
 <section id="destroy">
-<h3><code class="docutils literal notranslate"><span class="pre">destroy</span></code><a class="headerlink" href="#destroy" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">destroy</span></code><a class="headerlink" href="#destroy" title="Link to this heading">¶</a></h3>
 <p>( object – )</p>
 <p>The class destructor method.</p>
 </section>
 <section id="begin-class">
-<h3><code class="docutils literal notranslate"><span class="pre">begin-class</span></code><a class="headerlink" href="#begin-class" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">begin-class</span></code><a class="headerlink" href="#begin-class" title="Link to this heading">¶</a></h3>
 <p>( superclass “name” – class member-offset method-list )</p>
 <p>Begin the declaration of class <em>name</em> inheriting from <em>superclass</em> as <em>class</em>, with an initial member offset <em>member-offset</em> and method list <em>method-list</em>.</p>
 </section>
 <section id="end-class">
-<h3><code class="docutils literal notranslate"><span class="pre">end-class</span></code><a class="headerlink" href="#end-class" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">end-class</span></code><a class="headerlink" href="#end-class" title="Link to this heading">¶</a></h3>
 <p>( class member-offset method-list – )</p>
 <p>Finish the declaration of <em>class</em> with a final member offset <em>member-offset</em> and method list <em>method-list</em>, alloting the method table for <em>class</em>.</p>
 </section>
 <section id="begin-implement">
-<h3><code class="docutils literal notranslate"><span class="pre">begin-implement</span></code><a class="headerlink" href="#begin-implement" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">begin-implement</span></code><a class="headerlink" href="#begin-implement" title="Link to this heading">¶</a></h3>
 <p>( class – class )</p>
 <p>Begin the definition of methods of <em>class</em>.</p>
 </section>
 <section id="end-implement">
-<h3><code class="docutils literal notranslate"><span class="pre">end-implement</span></code><a class="headerlink" href="#end-implement" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">end-implement</span></code><a class="headerlink" href="#end-implement" title="Link to this heading">¶</a></h3>
 <p>( class – )</p>
 <p>End the defintion of methods of <em>class</em>, populating the method table for <em>class</em> with methods defined in the superclass if they are not defined for <em>class</em>.</p>
 </section>
 <section id="member">
-<h3><code class="docutils literal notranslate"><span class="pre">member</span></code><a class="headerlink" href="#member" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">member</span></code><a class="headerlink" href="#member" title="Link to this heading">¶</a></h3>
 <p>( member-offset method-list member-size “name” – member-offset method-list )</p>
 <p>Declare a member <em>name</em> of size <em>member-size</em> of the class currently being declared. Note that no automatic alignment is done, so the user must take care to properly align their members.</p>
 </section>
 <section id="method">
-<h3><code class="docutils literal notranslate"><span class="pre">method</span></code><a class="headerlink" href="#method" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">method</span></code><a class="headerlink" href="#method" title="Link to this heading">¶</a></h3>
 <p>( method-list “name” – method-list )</p>
 <p>Declare a method <em>name</em> of the class currently being declared.</p>
 </section>
 <section id="define">
-<h3><code class="docutils literal notranslate"><span class="pre">define</span></code><a class="headerlink" href="#define" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">define</span></code><a class="headerlink" href="#define" title="Link to this heading">¶</a></h3>
 <p>( class xt “name” – class )</p>
 <p>Define method <em>name</em> as being bound to <em>xt</em> for <em>class</em>.</p>
 </section>
 <section id="class-size">
-<h3><code class="docutils literal notranslate"><span class="pre">class-size</span></code><a class="headerlink" href="#class-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">class-size</span></code><a class="headerlink" href="#class-size" title="Link to this heading">¶</a></h3>
 <p>( class – bytes )</p>
 <p>Get the size <em>bytes</em> of an object of <em>class</em>.</p>
 </section>
 <section id="object-class">
-<h3><code class="docutils literal notranslate"><span class="pre">object-class</span></code><a class="headerlink" href="#object-class" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">object-class</span></code><a class="headerlink" href="#object-class" title="Link to this heading">¶</a></h3>
 <p>( object – class )</p>
 <p>Get the class of <em>object</em>.</p>
 </section>
 <section id="init-object">
-<h3><code class="docutils literal notranslate"><span class="pre">init-object</span></code><a class="headerlink" href="#init-object" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-object</span></code><a class="headerlink" href="#init-object" title="Link to this heading">¶</a></h3>
 <p>( class addr – )</p>
 <p>Initialize the memory at <em>addr</em> to be an object of <em>class</em> and then call <em>new</em> for that object.</p>
 </section>
@@ -164,7 +160,7 @@ end-implement
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -186,6 +182,8 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -202,6 +200,7 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -212,7 +211,6 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -233,7 +231,7 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -244,6 +242,8 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -268,7 +268,7 @@ end-implement
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -276,7 +276,7 @@ end-implement
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -291,10 +291,10 @@ end-implement
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

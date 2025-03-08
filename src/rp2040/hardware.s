@@ -1,4 +1,4 @@
-@ Copyright (c) 2021-2023 Travis Bemann
+@ Copyright (c) 2021-2025 Travis Bemann
 @ Copyright (c) 2021 Jan Bramkamp
 @ Copyright (c) 2024 Paul Koning
 @
@@ -174,8 +174,12 @@
 
 .equ PSM_BASE       , 0x40010000
 .equ PSM_FRCE_OFF   , PSM_BASE + 0x4
-.equ PSM_FRCE_OFF_PROC1, 1 << 16	
-
+.equ PSM_FRCE_OFF_PROC1, 1 << 16
+.equ PSM_WDSEL      , PSM_BASE + 0x8
+.equ PSM_WDSEL_ALL  , 0x0001FFFF
+.equ PSM_WDSEL_XOSC , (1<<1)
+.equ PSM_WDSEL_ROSC , (1<<0)
+.equ PSM_WDSEL_REBOOT , (PSM_WDSEL_ALL & ~(PSM_WDSEL_XOSC | PSM_WDSEL_ROSC))
 .equ WAKE_EN0, CLOCKS_BASE + 0x000000a0
 
 .equ GPIO_0_STATUS,  IO_BANK0_BASE + (8 *  0)
@@ -263,6 +267,8 @@
 .equ WATCHDOG_TICK    , 0x2c
 .equ WATCHDOG_TICK_ENABLE, 9
 .equ WATCHDOG_START_TICK, (1<<WATCHDOG_TICK_ENABLE) | XOSC_MHZ
+.equ WATCHDOG_CTRL_TRIGGER, (1<<31)
+.equ WATCHDOG_CTRL_ENABLE, (1<<30)
 
 @ -----------------------------------------------------------------------------
 _init_hardware: @ Many thanks to Jan Bramkamp

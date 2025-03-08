@@ -27,7 +27,7 @@ begin-module simple-blocks-fat32
   blk import
   fat32 import
   
-  \ Simple FAT32 filesystem class definition
+  \ Simple blocks FAT32 filesystem class definition
   <base-fat32-fs> begin-class <simple-blocks-fat32-fs>
   
     begin-module simple-blocks-fat32-internal
@@ -65,6 +65,10 @@ begin-module simple-blocks-fat32
     
     :noname ( dir fs -- ) simple-blocks-fat32-fs root-dir@ ; define root-dir@
 
+    :noname ( dir fs -- )
+      simple-blocks-fat32-fs current-dir@
+    ; define current-dir@
+    
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir )
       simple-blocks-fat32-fs with-root-path
     ; define with-root-path
@@ -98,6 +102,8 @@ begin-module simple-blocks-fat32
     ; define write-through@
     
     :noname ( fs -- ) simple-blocks-fat32-fs flush ; define flush
+
+    :noname ( fs -- fs' ) simple-blocks-fat32-fs ; define real-fs@
     
   end-implement
 

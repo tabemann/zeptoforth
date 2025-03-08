@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,7 +37,7 @@
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
-#include src/rp_common/forth/int_io.fs
+#include src/rp_common/forth/serial.fs
 #include src/rp2040/forth/gpio.fs
 #include src/rp2040/forth/pin.fs
 #include src/rp2040/forth/pio.fs
@@ -62,6 +62,9 @@
 #include src/common/forth/full_extra.fs
 #include src/common/forth/blocks_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs
+#include src/rp_common/forth/usb_constants.fs
+#include src/rp_common/forth/usb_cdc_buffers.fs
+#include src/rp_common/forth/usb_core_and_cdc.fs
 #include src/rp_common/forth/usb.fs
 #include src/common/forth/save_minidict.fs
 

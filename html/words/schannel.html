@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Simple channel Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Bidirectional Channel Words" href="rchannel.html" />
@@ -37,89 +33,89 @@
           <div class="body" role="main">
             
   <section id="simple-channel-words">
-<h1>Simple channel Words<a class="headerlink" href="#simple-channel-words" title="Permalink to this heading">¶</a></h1>
+<h1>Simple channel Words<a class="headerlink" href="#simple-channel-words" title="Link to this heading">¶</a></h1>
 <p>A simple channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks and/or interrupt service routines. Simple channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full simple channel, or receive data on an empty simple channel, will be suspended until either data is received from the simple channel, or data is sent to the simple channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) is raised instead of blocking. Note that non-blocking simple channel routines are specifically interrupt service routine-safe, unlike other channel constructs provided by zeptoforth.</p>
 <p>Simple channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a simple channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">schan-size</span></code>.</p>
 <section id="schan">
-<h2><code class="docutils literal notranslate"><span class="pre">schan</span></code><a class="headerlink" href="#schan" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">schan</span></code><a class="headerlink" href="#schan" title="Link to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">schan</span></code>:</p>
 <section id="x-schan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code><a class="headerlink" href="#x-schan-closed" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code><a class="headerlink" href="#x-schan-closed" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Simple channel closed exception. Raised on attempting to send to a closed simple channel or when trying to receive on an empty closed simple channel.</p>
 </section>
 <section id="schan-full">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-full?</span></code><a class="headerlink" href="#schan-full" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-full?</span></code><a class="headerlink" href="#schan-full" title="Link to this heading">¶</a></h3>
 <p>( schan – flag )</p>
 <p>Get whether a simple channel is full.</p>
 </section>
 <section id="schan-empty">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-empty?</span></code><a class="headerlink" href="#schan-empty" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-empty?</span></code><a class="headerlink" href="#schan-empty" title="Link to this heading">¶</a></h3>
 <p>( schan – flag )</p>
 <p>Get whether a simple channel is empty.</p>
 </section>
 <section id="schan-size">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-size</span></code><a class="headerlink" href="#schan-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-size</span></code><a class="headerlink" href="#schan-size" title="Link to this heading">¶</a></h3>
 <p>( element-bytes element-count – total-bytes )</p>
 <p>Get the size in memory for a simple channel with a specified element size in bytes and element count.</p>
 </section>
 <section id="init-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">init-schan</span></code><a class="headerlink" href="#init-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-schan</span></code><a class="headerlink" href="#init-schan" title="Link to this heading">¶</a></h3>
 <p>( element-bytes element-count addr – )</p>
 <p>Initialize a simple channel starting at the specified address with the element size and element count. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">schan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
 </section>
 <section id="close-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">close-schan</span></code><a class="headerlink" href="#close-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">close-schan</span></code><a class="headerlink" href="#close-schan" title="Link to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Close a simple channel. Raise <code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code> for all pending sending tasks or for all pending receiving tasks if the simple channel is empty.</p>
 </section>
 <section id="reopen-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">reopen-schan</span></code><a class="headerlink" href="#reopen-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-schan</span></code><a class="headerlink" href="#reopen-schan" title="Link to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Reopen a simple channel.</p>
 </section>
 <section id="schan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-closed?</span></code><a class="headerlink" href="#schan-closed" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-closed?</span></code><a class="headerlink" href="#schan-closed" title="Link to this heading">¶</a></h3>
 <p>( schan – closed )</p>
 <p>Get whether a simple channel is closed.</p>
 </section>
 <section id="send-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">send-schan</span></code><a class="headerlink" href="#send-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-schan</span></code><a class="headerlink" href="#send-schan" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – )</p>
 <p>Send message with a buffer as a payload over a simple channel. Block until another task receives the message if the simple channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the simple channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-schan</span></code><a class="headerlink" href="#recv-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-schan</span></code><a class="headerlink" href="#recv-schan" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – recv-bytes )</p>
 <p>Receive message into a buffer from a simple channel. Block until another task sends a message if the simple channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">peek-schan</span></code><a class="headerlink" href="#peek-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-schan</span></code><a class="headerlink" href="#peek-schan" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a simple channel, without popping it from the simple channel’s queue. Block until another task sends a message if the simple channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">skip-schan</span></code><a class="headerlink" href="#skip-schan" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-schan</span></code><a class="headerlink" href="#skip-schan" title="Link to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Skip the most oldest message in a simple channel. Block until another task sends a message if the simple channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="send-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">send-schan-no-block</span></code><a class="headerlink" href="#send-schan-no-block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-schan-no-block</span></code><a class="headerlink" href="#send-schan-no-block" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – )</p>
 <p>Send message with a buffer as a payload over a simple channel. If the simple channel is full, or if another task or interrupt service rouine is attempting to send on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the simple channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-schan-no-block</span></code><a class="headerlink" href="#recv-schan-no-block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-schan-no-block</span></code><a class="headerlink" href="#recv-schan-no-block" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – recv-bytes )</p>
 <p>Receive message into a buffer from a simple channel. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">peek-schan-no-block</span></code><a class="headerlink" href="#peek-schan-no-block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-schan-no-block</span></code><a class="headerlink" href="#peek-schan-no-block" title="Link to this heading">¶</a></h3>
 <p>( addr bytes schan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a simple channel, without popping it from the simple channel’s queue. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">skip-schan-no-block</span></code><a class="headerlink" href="#skip-schan-no-block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-schan-no-block</span></code><a class="headerlink" href="#skip-schan-no-block" title="Link to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Skip the most oldest message in a simple channel. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
@@ -131,7 +127,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -153,6 +149,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -169,6 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -179,7 +178,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -200,7 +198,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -211,6 +209,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -235,7 +235,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -243,7 +243,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -258,10 +258,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

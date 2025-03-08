@@ -1,6 +1,6 @@
-# RP2040 clock control words
+# Pico clock control words
 
-These words allow the RP2040 system clock (normally 125 MHz) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 data sheet.
+These words allow the RP2040/RP2350 system clock (normally 125 MHz on the RP2040, 150 MHz on the RP2350) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz on an RP2040.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 and RP2350 data sheets.
 
 ### `forth`
 
@@ -14,7 +14,7 @@ Returns the crystal oscillator frequency in Hz.  This is set at built time; curr
 ##### `sysclk`
 ( -- addr )
 
-Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz, and will be changed to the new value by `set-sysclk`.
+Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by `set-sysclk`. Unlike the rest of the words mentioned here, this word is available and its underlying variable is set on all platforms.
 
 ### `clocks`
 
@@ -23,9 +23,14 @@ The following words are in `clocks`:
 ##### `set-sysclk`
 ( refdiv fbdiv pdiv1 pdiv2 -- )
 
-This changes the RP2040 system clock ("SYSCLK") using the PLL parameters given.  The resulting system clock frequency is `xosc-frequency refdiv / fbdiv * pdiv1 / pdiv2 /`.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result.
+This changes the RP2040/RP2350 system clock ("SYSCLK") using the PLL parameters given.  The resulting system clock frequency is `xosc-frequency refdiv / fbdiv * pdiv1 / pdiv2 /`.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result. This sets an upper limit of a 200 MHz system clock on the RP2040 and a 150 MHz system clock on the RP2350, per their current ratings.
 
 Since SYSCLK is the clock source for the UART, I2C, and SPI subsystems, if this word is used to change the SYSCLK frequency, those interfaces will run at a different rate than before.  The appropriate rate setting words (`uart-baud!`, `i2c-clock!`, or `spi-baud!`) should be called after any call to `set-sysclk` to reload the devices with the divider values needed for the updated system clock frequency.
+
+##### `set-sysclk-overclock`
+( refdiv fbdiv pdiv1 pdiv2 -- )
+
+This word is like `set-sysclk` but it does not set an upper limit on the resulting system clock. Use with care! An inappropriate setting can brick your RP2040/RP2350, and even speeds that the RP2350/RP2350 itself can tolerate may be too fast for the Quad SPI flash!
 
 ##### `x-bad-refdiv`
 ( -- )

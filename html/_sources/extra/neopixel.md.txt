@@ -1,6 +1,6 @@
-# Neopixels on the RP2040
+# Neopixels on the RP2040 and RP2350
 
-There is optional support for Neopixels and Neopixel strips on the RP2040 using a PIO block to drive the Neopixel protocol.
+There is optional support for Neopixels and Neopixel strips on the RP2040 and RP2350 using a PIO block to drive the Neopixel protocol.
 
 Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, `neopixel!` can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with `update-neopixel`.
 

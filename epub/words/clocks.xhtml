@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>RP2040 clock control words</title>
+    <title>Pico clock control words</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
   </head><body>
@@ -14,9 +14,9 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section id="rp2040-clock-control-words">
-<h1>RP2040 clock control words</h1>
-<p>These words allow the RP2040 system clock (normally 125 MHz) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 data sheet.</p>
+  <section id="pico-clock-control-words">
+<h1>Pico clock control words</h1>
+<p>These words allow the RP2040/RP2350 system clock (normally 125 MHz on the RP2040, 150 MHz on the RP2350) to be changed.  This is sometimes desirable, for example if it is necessary to run PIO operations at an integer multiple of 10 MHz on an RP2040.  In that case, the system clock can be changed to 120 MHz.  Other values are allowed, subject to the limitations outlined in the PLL chapter of the RP2040 and RP2350 data sheets.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
 <p>The following words are built into the kernel:</p>
@@ -28,7 +28,7 @@
 <section id="sysclk">
 <h3><code class="docutils literal notranslate"><span class="pre">sysclk</span></code></h3>
 <p>( – addr )</p>
-<p>Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz, and will be changed to the new value by <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code>.</p>
+<p>Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code>. Unlike the rest of the words mentioned here, this word is available and its underlying variable is set on all platforms.</p>
 </section>
 </section>
 <section id="clocks">
@@ -37,8 +37,13 @@
 <section id="set-sysclk">
 <h3><code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code></h3>
 <p>( refdiv fbdiv pdiv1 pdiv2 – )</p>
-<p>This changes the RP2040 system clock (“SYSCLK”) using the PLL parameters given.  The resulting system clock frequency is <code class="docutils literal notranslate"><span class="pre">xosc-frequency</span> <span class="pre">refdiv</span> <span class="pre">/</span> <span class="pre">fbdiv</span> <span class="pre">*</span> <span class="pre">pdiv1</span> <span class="pre">/</span> <span class="pre">pdiv2</span> <span class="pre">/</span></code>.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result.</p>
+<p>This changes the RP2040/RP2350 system clock (“SYSCLK”) using the PLL parameters given.  The resulting system clock frequency is <code class="docutils literal notranslate"><span class="pre">xosc-frequency</span> <span class="pre">refdiv</span> <span class="pre">/</span> <span class="pre">fbdiv</span> <span class="pre">*</span> <span class="pre">pdiv1</span> <span class="pre">/</span> <span class="pre">pdiv2</span> <span class="pre">/</span></code>.  Refer to the RP2040 data sheet for the rules on which values are allowed and what restrictions apply on the internally generated frequencies that result. This sets an upper limit of a 200 MHz system clock on the RP2040 and a 150 MHz system clock on the RP2350, per their current ratings.</p>
 <p>Since SYSCLK is the clock source for the UART, I2C, and SPI subsystems, if this word is used to change the SYSCLK frequency, those interfaces will run at a different rate than before.  The appropriate rate setting words (<code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code>, <code class="docutils literal notranslate"><span class="pre">i2c-clock!</span></code>, or <code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code>) should be called after any call to <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code> to reload the devices with the divider values needed for the updated system clock frequency.</p>
+</section>
+<section id="set-sysclk-overclock">
+<h3><code class="docutils literal notranslate"><span class="pre">set-sysclk-overclock</span></code></h3>
+<p>( refdiv fbdiv pdiv1 pdiv2 – )</p>
+<p>This word is like <code class="docutils literal notranslate"><span class="pre">set-sysclk</span></code> but it does not set an upper limit on the resulting system clock. Use with care! An inappropriate setting can brick your RP2040/RP2350, and even speeds that the RP2350/RP2350 itself can tolerate may be too fast for the Quad SPI flash!</p>
 </section>
 <section id="x-bad-refdiv">
 <h3><code class="docutils literal notranslate"><span class="pre">x-bad-refdiv</span></code></h3>

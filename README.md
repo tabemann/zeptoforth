@@ -14,7 +14,7 @@ Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2
 
 The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_usb`, and `full_swdcom` builds, includes the following:
 
-* A priority-scheduled preemptive multitasker
+* A priority-scheduled preemptive multitasker with deadline scheduling
 * Semaphores
 * Locks, with priority inversion handling
 * Message-oriented queue channels
@@ -29,6 +29,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Action scheduler support
 * Multicore support (on the RP2040 and RP2350)
 * Double cell and S31.32 fixed-point numeric support
+* Single-precision floating-point numeric support (except on the RP2040 and STM32F411)
 * Lambda expressions
 * `value`s and block-scoped local variables
 * Closures
@@ -63,6 +64,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Support for code loading from files in FAT32 filesystems
 * User-level FAT32 tools
 * FAT32 filesystem support on top of block storage in on-board Quad SPI flash (on the RP2040, RP2350, and STM32F746 DISCOVERY boards)
+* FAT32 filesystem support on top of PSRAM (on RP2350 boards with PSRAM)
 * Best-effort fault recovery
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the RP2040)
 * A block editor (on the STM32F746 DISCOVERY board, the RP2040, and the RP2350)
@@ -76,6 +78,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 There is also support for loadable extras not included in any builds:
 
 * Single-cell S15.16 fixed-point numeric support
+* Complex numbers built on top of single-precision hardware floating point
 * A profiler
 * An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
 * A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.
@@ -85,10 +88,12 @@ There is also support for loadable extras not included in any builds:
 * 16-bit pixmaps (in `extra/common/pixmap16.fs`)
 * SSD1306-based displays (in `extra/common/ssd1306.fs`)
 * ST7735S-based displays (in `extra/common/st7735s.fs` with 16-bit framebuffers and in `extra/common/st7735s_8.fs` with 8-bit framebuffers)
+* ST7789V-based displays (in `extra/rp_common/st7789v_parallel_8.fs` for parallel displays and `extra/common/st7789v_spi_8.fs` for SPI displays with 8-bit framebuffers)
 * Monospace, bitmap fonts (in `extra/common/font.fs`)
 * A simple monospace, bitmap ASCII font (in `extra/common/simple_font.fs`)
 * Turtle graphics for ST7735S displays (in `extra/rp2040/turtle.fs`)
 * Neopixel support (in `extra/rp2040/neopixel.fs`, for the RP2040)
+* I2C LCD1602 16x2 character LCD displays (in `extra/rp_common/lcd1602.fs`)
 
 ## Loading
 
@@ -151,10 +156,13 @@ and where \<platform> is one of
 * `rp2040`
 * `rp2040_big`
 * `rp2350`
+* `rp2350_16mib`
 
-Note that for the `rp2040`, `rp2040_big`, or `rp2350` platforms, to load code with the bootloader onto an RP2040-based or RP2350-based board one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
+Note that for the `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib` platforms, to load code with the bootloader onto an RP2040-based or RP2350-based board one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
 
 The `rp2040` and `rp2040_big` platforms only differ, aside from there are no `mini` builds for `rp2040_big`, in that `rp2040` builds devote 960 KB of space to the flash dictionary, 48 KB of space to the flash dictionary index, and 1 MB of space to block storage (but some of that space is not usable due to being used for metadata) while `rp2040_big` builds devote 1472 KB of space to the flash dictionary, 60 KB of space to the flash dictionary index, and 512 MB of space (with overhead) to block storage. `rp2040_big` is intended in particular for zeptoIP, due to the space taken up by the CYW43439 driver and zeptoIP. From this point on, all mentions of `rp2040` shall also encompass `rp2040_big`.
+
+The `rp2350` and `rp2350_16mib` platforms only differ in that the full 16 MiB of Quad SPI flash is used by `rp2350_16mib` builds, with the lower 2 MiB being used for the zeptoforth kernel and flash dictionary and the upper 14 MiB being used for block/FAT32 storage, whereas for `rp2350` builds only 2 MiB are available for block/FAT32 storage. Note that there are no `mini` builds available for the `rp2350_16mib` platform, as `mini` builds do not support block/FAT32 storage.
 
 \* There is no cornerstone for STM32F411 builds, because a cornerstone would exhaust all the remaining flash space on these targets.
 
@@ -219,7 +227,7 @@ to use the default version or:
 
     $ make VERSION=<version>
 
-This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the `rp2040` platform, a `zeptoforth.rp2040_big.uf2` file will be built for the `rp2040_big` platform, and a `zeptoforth.rp2350.uf2` file will be built for the `rp2350` platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
+This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the `rp2040` platform, a `zeptoforth.rp2040_big.uf2` file will be built for the `rp2040_big` platform, a `zeptoforth.rp2350.uf2` file will be built for the `rp2350` platform, and a `zeptoforth.rp2350_16mib.uf2` file will be built for the `rp2350_16mib` platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
 ## Console Access
 
@@ -267,9 +275,13 @@ or, for an RP2040-based board for a "big" build:
 
     #include src/rp2040_big/forth/setup_<type>.fs
 
-or, for an RP2350-based board:
+or, for an RP2350-based board for a 4 MiB flash build:
 
     #include src/rp2350/forth/setup_<type>.fs
+
+or, for an RP2350-based board for a 16 MiB flash build:
+
+    @include src/rp2350_16mib/forth/setup_<type>.fs
 
 where \<type> is one of the types given above, with the meanings given above.
 
@@ -293,9 +305,9 @@ It has significantly better performance and functionality than screen with `slow
 
 To build a complete image for zeptoforth, one uses `utils/make_image.sh` or, for an RP2040 or RP2350-based board, `utils/make_uf2_image.sh` after using `make clean`, `make VERSION=<version>`, and `make install VERSION=<version>` to install binaries for all platforms in the `bin/<version>/<platform>` directories (which it creates if they do not exist).
 
-In the case of an RP2040-based board one must then flash one's board with `bin/<version>/<platform>/rp2040/zeptoforth_kernel-<version>.uf2`, for a normal build, or `bin/<version>/<platform>/rp2040_big/zeptoforth_kernel-<version>.uf2`, for a big build, using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the board, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
+In the case of an RP2040-based board one must then flash one's board with `bin/<version>/rp2040/zeptoforth_kernel-<version>.uf2`, for a normal build, or `bin/<version>/rp2040_big/zeptoforth_kernel-<version>.uf2`, for a big build, using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the board, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
 
-In the case of an RP2350-based board one must then flash one's board with `bin/<version>/<platform>/rp2350/zeptoforth_kernel-<version>.uf2` using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the board, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
+In the case of an RP2350-based board one must then flash one's board with `bin/<version>/rp2350/zeptoforth_kernel-<version>.uf2`, for a 4 MiB flash build, or `bin/<version>/rp2350_16mib/zeptoforth_kernel-<version>.uf2`, for a 16 MiB flash build, using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the board, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
 
 For STM based boards one executes:
 

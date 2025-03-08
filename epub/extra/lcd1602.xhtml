@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LCD1602 Support</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="lcd1602-support">
+<h1>LCD1602 Support</h1>
+<p>There is an optional driver for I2C LCD1602 displays. The LCD1602 is a 2 row by 16 character text LCD display.</p>
+<p>Configuring the LCD1602 is in the form of two steps. The first step is configuring the I2C bus, for which a convenience word <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> is provided; if the user manually configures the I2C bus or previously has used it to access another device, the user must manually call <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to set the I2C bus to use with the LCD1602 and then <code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code>. The second step is initializing the LCD1602 device, which is done through calling <code class="docutils literal notranslate"><span class="pre">init-lcd</span></code>. These steps must be carried out before using the LCD1602 device.</p>
+<p>LCD1602 support is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_demo.fs</span></code>.</p>
+<section id="lcd1602">
+<h2><code class="docutils literal notranslate"><span class="pre">lcd1602</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">lcd1602</span></code> module contains the following words:</p>
+<section id="init-lcd-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code></h3>
+<p>( pin1 pin2 i2c-device – )</p>
+<p>Configure the I2C bus <em>i2c-device</em> to use GPIO’s <em>pin1</em> and <em>pin2</em> and set it up to communicate with the LCD1602 device on that bus.</p>
+</section>
+<section id="init-lcd">
+<h3><code class="docutils literal notranslate"><span class="pre">init-lcd</span></code></h3>
+<p>( – )</p>
+<p>Initialize the LCD1602 device. The I2C bus must be set up to communicate with the LCD1602 device first.</p>
+</section>
+<section id="lcd-i2c-device">
+<h3><code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code></h3>
+<p>( i2c-device – )</p>
+<p>Manually set the I2C bus <em>i2c-device</em> to use with the LCD1602 without initializing the I2C bus itself.</p>
+</section>
+<section id="activate-lcd-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code></h3>
+<p>( – )</p>
+<p>Manually set the I2C bus configured with <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> or <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to communicate with the LCD1602 device. This is necessary if the I2C bus has been configured manually or if another device has been previously used on the I2C bus.</p>
+</section>
+<section id="clear-display">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h3>
+<p>( – )</p>
+<p>Clear the LCD1602 display.</p>
+</section>
+<section id="put-text">
+<h3><code class="docutils literal notranslate"><span class="pre">put-text</span></code></h3>
+<p>( row col c-addr bytes – )</p>
+<p>Write the specified string to the LCD1602 display at the specified row and column.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

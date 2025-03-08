@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Watchdog Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Development Tools Words" href="dev_tools.html" />
@@ -37,67 +33,67 @@
           <div class="body" role="main">
             
   <section id="watchdog-words">
-<h1>Watchdog Words<a class="headerlink" href="#watchdog-words" title="Permalink to this heading">¶</a></h1>
+<h1>Watchdog Words<a class="headerlink" href="#watchdog-words" title="Link to this heading">¶</a></h1>
 <p>The RP2040 includes watchdog functionality that, when enabled, triggers a reboot after a set delay during which the watchdog timer is not updated. It also has the capability to force a reset. By default the watchdog timer is disabled, the watchog delay is 1 second, and the watchdog (once enabled) is updated automatically each time the multitasker runs outside of a critical section. This behavior chan be changed in that the watchdog delay can be set to any time between 0 microseconds (i.e. trigger immediately, and report a ‘force’ reboot reason rather than a ‘timer’ reason) and 8388607 microseconds, and the multitasker can be set to not automatically update the watchdog timer (and this require manual updating by the user).</p>
 <section id="watchdog">
-<h2><code class="docutils literal notranslate"><span class="pre">watchdog</span></code><a class="headerlink" href="#watchdog" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">watchdog</span></code><a class="headerlink" href="#watchdog" title="Link to this heading">¶</a></h2>
 <section id="x-out-of-range-watchdog-delay">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-watchdog-delay</span></code><a class="headerlink" href="#x-out-of-range-watchdog-delay" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-watchdog-delay</span></code><a class="headerlink" href="#x-out-of-range-watchdog-delay" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range watchdog delay exception.</p>
 </section>
 <section id="update-watchdog">
-<h3><code class="docutils literal notranslate"><span class="pre">update-watchdog</span></code><a class="headerlink" href="#update-watchdog" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-watchdog</span></code><a class="headerlink" href="#update-watchdog" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Update the watchdog timer with the currently set watchdog delay.</p>
 </section>
 <section id="force-watchdog-reboot">
-<h3><code class="docutils literal notranslate"><span class="pre">force-watchdog-reboot</span></code><a class="headerlink" href="#force-watchdog-reboot" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">force-watchdog-reboot</span></code><a class="headerlink" href="#force-watchdog-reboot" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Force an immediate watchdog reboot even if the watchdog timer is not enabled.</p>
 </section>
 <section id="watchdog-delay-us">
-<h3><code class="docutils literal notranslate"><span class="pre">watchdog-delay-us!</span></code><a class="headerlink" href="#watchdog-delay-us" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">watchdog-delay-us!</span></code><a class="headerlink" href="#watchdog-delay-us" title="Link to this heading">¶</a></h3>
 <p>( us – )</p>
 <p>Set the watchdog delay to a specified non-negative number of microseconds, up to a delay of 8388607 microseconds. If an out of range delay is provided <code class="docutils literal notranslate"><span class="pre">x-out-of-range-watchdog-delay</span></code> will be raised. Note that if a value of 0 is provided and the watchdog is currently enabled the watchdog will trigger immediately and a ‘force’ reboot reason will be reported; this also will happen if the watchdog is disabled, and then the watchdog is enabled after this is called. Also note that if the watchdog is enabled and a value other than 0 is given the watchog timer will be updated with that value.</p>
 </section>
 <section id="enable-watchdog">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-watchdog</span></code><a class="headerlink" href="#enable-watchdog" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-watchdog</span></code><a class="headerlink" href="#enable-watchdog" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the watchdog timer. If the watchdog delay is currently set to 0 the watchdog will trigger immediately and a ‘force’ reboot reason will be reported.</p>
 </section>
 <section id="disable-watchdog">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-watchdog</span></code><a class="headerlink" href="#disable-watchdog" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-watchdog</span></code><a class="headerlink" href="#disable-watchdog" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the watchdog timer.</p>
 </section>
 <section id="reboot-reason-watchdog-force">
-<h3><code class="docutils literal notranslate"><span class="pre">reboot-reason-watchdog-force?</span></code><a class="headerlink" href="#reboot-reason-watchdog-force" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reboot-reason-watchdog-force?</span></code><a class="headerlink" href="#reboot-reason-watchdog-force" title="Link to this heading">¶</a></h3>
 <p>( – force? )</p>
 <p>Get whether the most recent reboot was due to a watchdog force.</p>
 </section>
 <section id="reboot-reason-watchdog-timer">
-<h3><code class="docutils literal notranslate"><span class="pre">reboot-reason-watchdog-timer?</span></code><a class="headerlink" href="#reboot-reason-watchdog-timer" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reboot-reason-watchdog-timer?</span></code><a class="headerlink" href="#reboot-reason-watchdog-timer" title="Link to this heading">¶</a></h3>
 <p>( – timer? )</p>
 <p>Get whether the most reason reboot was due to a watchdog timeout.</p>
 </section>
 <section id="enable-multitasker-update-watchdog">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-multitasker-update-watchdog</span></code><a class="headerlink" href="#enable-multitasker-update-watchdog" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-multitasker-update-watchdog</span></code><a class="headerlink" href="#enable-multitasker-update-watchdog" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the multitasker automatically updating the watchdog timer each time it runs outside of a critical section.</p>
 </section>
 <section id="disable-multitasker-update-watchdog">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-multitasker-update-watchdog</span></code><a class="headerlink" href="#disable-multitasker-update-watchdog" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-multitasker-update-watchdog</span></code><a class="headerlink" href="#disable-multitasker-update-watchdog" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the multitasker automatically updating the watchdog timer each time it runs outside of a critical section.</p>
 </section>
 <section id="enable-fault-watchdog-reboot">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-fault-watchdog-reboot</span></code><a class="headerlink" href="#enable-fault-watchdog-reboot" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-fault-watchdog-reboot</span></code><a class="headerlink" href="#enable-fault-watchdog-reboot" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable triggering a watchdog force reboot on a hardware fault.</p>
 </section>
 <section id="disable-fault-watchdog-reboot">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-fault-watchdog-reboot</span></code><a class="headerlink" href="#disable-fault-watchdog-reboot" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-fault-watchdog-reboot</span></code><a class="headerlink" href="#disable-fault-watchdog-reboot" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable triggering a watchdog force reboot on a hardware fault.</p>
 </section>
@@ -109,7 +105,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -131,6 +127,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -147,6 +145,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -157,7 +156,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -178,7 +176,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -189,6 +187,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -213,7 +213,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -221,7 +221,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -236,10 +236,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

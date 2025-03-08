@@ -4,7 +4,7 @@
 
 ### `fixed32`
 
-The `fixed2` module contains the following words:
+The `fixed32` module contains the following words:
 
 ##### `f32*`
 ( x y -- z )

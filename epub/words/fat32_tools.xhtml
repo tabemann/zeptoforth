@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>FAT32 Tools</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -26,6 +26,11 @@
 <p>( – )</p>
 <p>Current filesystem not set exception.</p>
 </section>
+<section id="x-current-path-too-long">
+<h3><code class="docutils literal notranslate"><span class="pre">x-current-path-too-long</span></code></h3>
+<p>( – )</p>
+<p>Current path is too long (i.e. longer than 256 bytes)</p>
+</section>
 <section id="x-include-stack-overflow">
 <h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code></h3>
 <p>( – )</p>
@@ -40,6 +45,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">current-fs&#64;</span></code></h3>
 <p>( – fs )</p>
 <p>Get the current FAT32 filesystem. This filesystem is a subclass of <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
+</section>
+<section id="change-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">change-dir</span></code></h3>
+<p>( addr bytes – )</p>
+<p>Set the current path for the current FAT32 filesystem.</p>
 </section>
 <section id="init-simple-fat32">
 <h3><code class="docutils literal notranslate"><span class="pre">init-simple-fat32</span></code></h3>

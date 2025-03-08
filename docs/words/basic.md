@@ -494,6 +494,11 @@ Test for whether the system is ready to receive a character
 
 Flush the current console's transmit buffer. Note that if the current console is a UART, this has the same considerations as `flush-uart` in the `uart` module, i.e. this will flush the in-RAM transmit buffer and the UART's transmit fifo, but not any data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.
 
+##### `accept`
+( c-addr bytes -- bytes' )
+
+Accept a line of text from the console into a buffer up to a specified number of bytes. The actual number of bytes entered is returned.
+
 ##### `enable-int`
 ( -- )
 
@@ -1002,6 +1007,21 @@ Get the data stack pointer
 ( a-addr -- )
 
 Set the data stack pointer
+
+##### `string,`
+( c-addr u -- )
+
+Write a string to the dictionary, writing its length as a cell first.
+
+##### `string!`
+( c-addr u dest-addr -- )
+
+Write a string at an address with its length as a cell first.
+
+##### `string@`
+( addr -- c-addr u )
+
+Read a string written with `string,` or `string!` at an address with its length as a cell first.
 
 ##### `reboot`
 ( -- )

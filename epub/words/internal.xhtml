@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Internal Words</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -482,6 +482,11 @@ the next column</p>
 <h3><code class="docutils literal notranslate"><span class="pre">find-optimized</span></code></h3>
 <p>( b-addr bytes – addr|0 )</p>
 <p>Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+<section id="current-unit-start">
+<h3><code class="docutils literal notranslate"><span class="pre">current-unit-start</span></code></h3>
+<p>( – xt )</p>
+<p>Get the execution token for the current compilation unit, i.e. the outermost word or quotation being compiled.</p>
 </section>
 <section id="push-syntax">
 <h3><code class="docutils literal notranslate"><span class="pre">push-syntax</span></code></h3>

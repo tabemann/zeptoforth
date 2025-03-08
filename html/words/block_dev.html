@@ -1,24 +1,20 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>SDHC/SDXC Card and Blocks Block Device Support &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="FAT32 Support" href="fat32.html" />
-    <link rel="prev" title="PSRAM words" href="psram.html" />
+    <link rel="prev" title="Always-On Timer words" href="aon_timer.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -37,154 +33,154 @@
           <div class="body" role="main">
             
   <section id="sdhc-sdxc-card-and-blocks-block-device-support">
-<h1>SDHC/SDXC Card and Blocks Block Device Support<a class="headerlink" href="#sdhc-sdxc-card-and-blocks-block-device-support" title="Permalink to this heading">¶</a></h1>
+<h1>SDHC/SDXC Card and Blocks Block Device Support<a class="headerlink" href="#sdhc-sdxc-card-and-blocks-block-device-support" title="Link to this heading">¶</a></h1>
 <p>zeptoforth includes SDHC/SDXC card support (SD cards greater or equal to 4 GB in size only) using the SPI interface for the supported and a separate chip-select pin independent of the SPI interface. It is built upon zeptoforth’s object system, and involves an abstract block device <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module from which the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">sd</span></code> module inherits. Note that the SPI pins used need to be configured appropriately and the chip-select pin must be configured as an output pin.</p>
 <p>zeptoforth also includes blocks block device support on platforms that support Quad SPI flash, specifically RP2040 boards and the STM32F746 DISCOVERY board. It likewise uses zeptoforth’s object system, and involves an abstract block device <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module from which the <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">blk</span></code> module inherits.</p>
 <p>These both cache up to eight blocks in RAM at any given time, and have support for both write-through and non-write-through modes of operation, with the latter providing better performance at the expense of potential loss of data integrity in the event of unexpected resets or power loss.</p>
 <section id="block-dev">
-<h2><code class="docutils literal notranslate"><span class="pre">block-dev</span></code><a class="headerlink" href="#block-dev" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">block-dev</span></code><a class="headerlink" href="#block-dev" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module contains the following words:</p>
 <section id="x-block-out-of-range">
-<h3><code class="docutils literal notranslate"><span class="pre">x-block-out-of-range</span></code><a class="headerlink" href="#x-block-out-of-range" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-block-out-of-range</span></code><a class="headerlink" href="#x-block-out-of-range" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Block out of range exception.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The block device class. Note that this class is not meant to be directly instantiated, and if any methods on it are called other than <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code>, <code class="docutils literal notranslate"><span class="pre">abstract-method</span></code> will be called.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class has no constructor.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class includes the following methods:</p>
 </section>
 <section id="block-size">
-<h3><code class="docutils literal notranslate"><span class="pre">block-size</span></code><a class="headerlink" href="#block-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block-size</span></code><a class="headerlink" href="#block-size" title="Link to this heading">¶</a></h3>
 <p>( dev – bytes )</p>
 <p>Get block size.</p>
 </section>
 <section id="block-count">
-<h3><code class="docutils literal notranslate"><span class="pre">block-count</span></code><a class="headerlink" href="#block-count" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block-count</span></code><a class="headerlink" href="#block-count" title="Link to this heading">¶</a></h3>
 <p>( dev – blocks )</p>
 <p>Get block count.</p>
 </section>
 <section id="block">
-<h3><code class="docutils literal notranslate"><span class="pre">block!</span></code><a class="headerlink" href="#block" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block!</span></code><a class="headerlink" href="#block" title="Link to this heading">¶</a></h3>
 <p>( c-addr u block-index dev – )</p>
 <p>Write block.</p>
 </section>
 <section id="block-part">
-<h3><code class="docutils literal notranslate"><span class="pre">block-part!</span></code><a class="headerlink" href="#block-part" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block-part!</span></code><a class="headerlink" href="#block-part" title="Link to this heading">¶</a></h3>
 <p>( c-addr u offset block-index dev – )</p>
 <p>Write part of a block.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">block&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( c-addr u block-index dev – )</p>
 <p>Read block.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">block-part&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">block-part&#64;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( c-addr u offset block-index dev – )</p>
 <p>Read part of a block.</p>
 </section>
 <section id="flush-blocks">
-<h3><code class="docutils literal notranslate"><span class="pre">flush-blocks</span></code><a class="headerlink" href="#flush-blocks" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">flush-blocks</span></code><a class="headerlink" href="#flush-blocks" title="Link to this heading">¶</a></h3>
 <p>( dev – )</p>
 <p>Flush blocks.</p>
 </section>
 <section id="clear-blocks">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-blocks</span></code><a class="headerlink" href="#clear-blocks" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-blocks</span></code><a class="headerlink" href="#clear-blocks" title="Link to this heading">¶</a></h3>
 <p>( dev – )</p>
 <p>Clear cached blocks.</p>
 </section>
 <section id="write-through">
-<h3><code class="docutils literal notranslate"><span class="pre">write-through!</span></code><a class="headerlink" href="#write-through" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-through!</span></code><a class="headerlink" href="#write-through" title="Link to this heading">¶</a></h3>
 <p>( write-through dev – )</p>
 <p>Set write-through cache mode.</p>
 </section>
 <section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">write-through&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-through&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( dev – write-through )</p>
 <p>Get write-through cache mode.</p>
 </section>
 </section>
 <section id="sd">
-<h2><code class="docutils literal notranslate"><span class="pre">sd</span></code><a class="headerlink" href="#sd" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">sd</span></code><a class="headerlink" href="#sd" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">sd</span></code> module contains the following words:</p>
 <section id="x-sd-timeout">
-<h3><code class="docutils literal notranslate"><span class="pre">x-sd-timeout</span></code><a class="headerlink" href="#x-sd-timeout" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-timeout</span></code><a class="headerlink" href="#x-sd-timeout" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SD Card timeout.</p>
 </section>
 <section id="x-sd-init-error">
-<h3><code class="docutils literal notranslate"><span class="pre">x-sd-init-error</span></code><a class="headerlink" href="#x-sd-init-error" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-init-error</span></code><a class="headerlink" href="#x-sd-init-error" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SD Card init error.</p>
 </section>
 <section id="x-sd-read-error">
-<h3><code class="docutils literal notranslate"><span class="pre">x-sd-read-error</span></code><a class="headerlink" href="#x-sd-read-error" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-read-error</span></code><a class="headerlink" href="#x-sd-read-error" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SD Card read error.</p>
 </section>
 <section id="x-sd-write-error">
-<h3><code class="docutils literal notranslate"><span class="pre">x-sd-write-error</span></code><a class="headerlink" href="#x-sd-write-error" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-write-error</span></code><a class="headerlink" href="#x-sd-write-error" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SD Card write error.</p>
 </section>
 <section id="x-sd-not-sdhc">
-<h3><code class="docutils literal notranslate"><span class="pre">x-sd-not-sdhc</span></code><a class="headerlink" href="#x-sd-not-sdhc" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-not-sdhc</span></code><a class="headerlink" href="#x-sd-not-sdhc" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SD Card is not SDHC/SDXC error.</p>
 </section>
 <section id="x-block-zero-protected">
-<h3><code class="docutils literal notranslate"><span class="pre">x-block-zero-protected</span></code><a class="headerlink" href="#x-block-zero-protected" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-block-zero-protected</span></code><a class="headerlink" href="#x-block-zero-protected" title="Link to this heading">¶</a></h3>
 <p>( - )</p>
 <p>Attempted to write to protected block zero.</p>
 </section>
 <section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The SDHC/SDXC interface class.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class has the following constructor:</p>
 </section>
 <section id="new">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Link to this heading">¶</a></h3>
 <p>( cs-pin spi-device sd-card – )</p>
 <p>This constructs a <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> instance for SPI device <em>spi-device</em> and chip select pin <em>cs-pin</em>. Note that <code class="docutils literal notranslate"><span class="pre">init-sd</span></code> must be called to actually initialize communication with the SDHC/SDXC card connected via said SPI device and chip select line. Note that write-through is set to <code class="docutils literal notranslate"><span class="pre">false</span></code> by default and block zero protection is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> by default.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class contains the following methods in addition to those in <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code>:</p>
 </section>
 <section id="init-sd">
-<h3><code class="docutils literal notranslate"><span class="pre">init-sd</span></code><a class="headerlink" href="#init-sd" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-sd</span></code><a class="headerlink" href="#init-sd" title="Link to this heading">¶</a></h3>
 <p>( sd-card – )</p>
 <p>Init SDHC/SDXC card device.</p>
 </section>
 <section id="write-sd-block-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">write-sd-block-zero!</span></code><a class="headerlink" href="#write-sd-block-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-sd-block-zero!</span></code><a class="headerlink" href="#write-sd-block-zero" title="Link to this heading">¶</a></h3>
 <p>( enabled sd-card – )</p>
 <p>Enable block zero writes.</p>
 </section>
 </section>
 <section id="blk">
-<h2><code class="docutils literal notranslate"><span class="pre">blk</span></code><a class="headerlink" href="#blk" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">blk</span></code><a class="headerlink" href="#blk" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">blk</span></code> module provided by contains the following words:</p>
 <section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">x-block-zero-protected</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-block-zero-protected</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( - )</p>
 <p>Attempted to write to protected block zero.</p>
 </section>
 <section id="blocks">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code><a class="headerlink" href="#blocks" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code><a class="headerlink" href="#blocks" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The blocks block device interface class.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code> class has the following constructor:</p>
 </section>
 <section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This constructs a <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code> instance for the on-board Quad SPI flash of RP2040 boards and the STM32F746 DISCOVERY board. Note that write-through is set to <code class="docutils literal notranslate"><span class="pre">false</span></code> by default and block zero protection is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> by default.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;blocks&gt;</span></code> class contains the following methods in addition to those in <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code>:</p>
 </section>
 <section id="write-blk-block-zero">
-<h3><code class="docutils literal notranslate"><span class="pre">write-blk-block-zero!</span></code><a class="headerlink" href="#write-blk-block-zero" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">write-blk-block-zero!</span></code><a class="headerlink" href="#write-blk-block-zero" title="Link to this heading">¶</a></h3>
 <p>( enabled blk – )</p>
 <p>Enable block zero writes.</p>
 </section>
@@ -196,7 +192,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -218,6 +214,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -234,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -244,7 +243,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -265,7 +263,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -276,6 +274,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -295,12 +295,12 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="psram.html" title="previous chapter">PSRAM words</a></li>
+      <li>Previous: <a href="aon_timer.html" title="previous chapter">Always-On Timer words</a></li>
       <li>Next: <a href="fat32.html" title="next chapter">FAT32 Support</a></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -308,7 +308,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -323,10 +323,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

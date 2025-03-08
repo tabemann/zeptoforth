@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Complex Numbers Based on Single-Precision Floating-Point Values &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Copying Files Between Filesystems" href="inter_fs_copy.html" />
+    <link rel="prev" title="S15.16 Fixed Point Numbers" href="fixed32.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="complex-numbers-based-on-single-precision-floating-point-values">
+<h1>Complex Numbers Based on Single-Precision Floating-Point Values<a class="headerlink" href="#complex-numbers-based-on-single-precision-floating-point-values" title="Link to this heading">¶</a></h1>
+<p>There is optional support on platforms for which hardware single-precision floating point is supported for complex numbers. Complex numbers are implemented as pairs of cells containing single-precision floating-point values on the stack, with the real component being on the top of the stack and the imaginary componet being beneath it.</p>
+<p>An array of basic mathematical functions are implemented for complex numbers based on single-precision floating-point values. They are in the <code class="docutils literal notranslate"><span class="pre">complex-float32</span></code> module.</p>
+<p>There is also support for complex literals, which have the format of <code class="docutils literal notranslate"><span class="pre">x{+,-}yi</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are floating-point values (but where the <code class="docutils literal notranslate"><span class="pre">e</span></code> is optional).</p>
+<section id="complex-float32">
+<h2><code class="docutils literal notranslate"><span class="pre">complex-float32</span></code><a class="headerlink" href="#complex-float32" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">complex-float32</span></code> module contains the following words:</p>
+<section id="x-domain-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-domain-error</span></code><a class="headerlink" href="#x-domain-error" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Domain error.</p>
+</section>
+<section id="cvimag">
+<h3><code class="docutils literal notranslate"><span class="pre">cvimag</span></code><a class="headerlink" href="#cvimag" title="Link to this heading">¶</a></h3>
+<p>( f – complex )</p>
+<p>Create an imaginary number.</p>
+</section>
+<section id="cvreal">
+<h3><code class="docutils literal notranslate"><span class="pre">cvreal</span></code><a class="headerlink" href="#cvreal" title="Link to this heading">¶</a></h3>
+<p>( f – complex )</p>
+<p>Create a real number.</p>
+</section>
+<section id="cv">
+<h3><code class="docutils literal notranslate"><span class="pre">cv+</span></code><a class="headerlink" href="#cv" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Add two complex numbers.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">cv-</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Subtract two complex numbers.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">cv*</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Multiply two complex numbers.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">cv/</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>Divide two complex number.</p>
+</section>
+<section id="cvnegate">
+<h3><code class="docutils literal notranslate"><span class="pre">cvnegate</span></code><a class="headerlink" href="#cvnegate" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Negate a complex number.</p>
+</section>
+<section id="cvexp">
+<h3><code class="docutils literal notranslate"><span class="pre">cvexp</span></code><a class="headerlink" href="#cvexp" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the natural exponent of a complex number.</p>
+</section>
+<section id="cvabs">
+<h3><code class="docutils literal notranslate"><span class="pre">cvabs</span></code><a class="headerlink" href="#cvabs" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – f )</p>
+<p>Get the absolute value of a complex number.</p>
+</section>
+<section id="cvarg">
+<h3><code class="docutils literal notranslate"><span class="pre">cvarg</span></code><a class="headerlink" href="#cvarg" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – f )</p>
+<p>Get the argument function of a complex number.</p>
+</section>
+<section id="cvsqrt">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsqrt</span></code><a class="headerlink" href="#cvsqrt" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the square root of a complex number.</p>
+</section>
+<section id="cvln">
+<h3><code class="docutils literal notranslate"><span class="pre">cvln</span></code><a class="headerlink" href="#cvln" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the natural logarithm of a complex value.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">cv**</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 – D: complex2 )</p>
+<p>The power function.</p>
+</section>
+<section id="cvn">
+<h3><code class="docutils literal notranslate"><span class="pre">cvn**</span></code><a class="headerlink" href="#cvn" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 D: complex1 n – D: complex2 )</p>
+<p>The generalized power function, taking a value n due to the multivariant
+\ nature of the natural logarithm.</p>
+</section>
+<section id="cvsin">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsin</span></code><a class="headerlink" href="#cvsin" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the sine of a complex number.</p>
+</section>
+<section id="cvcos">
+<h3><code class="docutils literal notranslate"><span class="pre">cvcos</span></code><a class="headerlink" href="#cvcos" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the cosine of a complex number.</p>
+</section>
+<section id="cvtan">
+<h3><code class="docutils literal notranslate"><span class="pre">cvtan</span></code><a class="headerlink" href="#cvtan" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the tangent of a complex number.</p>
+</section>
+<section id="cvasin">
+<h3><code class="docutils literal notranslate"><span class="pre">cvasin</span></code><a class="headerlink" href="#cvasin" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arcsine of a complex value.</p>
+</section>
+<section id="cvacos">
+<h3><code class="docutils literal notranslate"><span class="pre">cvacos</span></code><a class="headerlink" href="#cvacos" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arccosine of a complex value.</p>
+</section>
+<section id="cvatan">
+<h3><code class="docutils literal notranslate"><span class="pre">cvatan</span></code><a class="headerlink" href="#cvatan" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the arctangent of a complex value.</p>
+</section>
+<section id="cvsinh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvsinh</span></code><a class="headerlink" href="#cvsinh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic sine of a complex value.</p>
+</section>
+<section id="cvcosh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvcosh</span></code><a class="headerlink" href="#cvcosh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic cosine of a complex value.</p>
+</section>
+<section id="cvtanh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvtanh</span></code><a class="headerlink" href="#cvtanh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic tangent of a complex value.</p>
+</section>
+<section id="cvasinh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvasinh</span></code><a class="headerlink" href="#cvasinh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arcsine of a complex value.</p>
+</section>
+<section id="cvacosh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvacosh</span></code><a class="headerlink" href="#cvacosh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arccosine of a complex value.</p>
+</section>
+<section id="cvatanh">
+<h3><code class="docutils literal notranslate"><span class="pre">cvatanh</span></code><a class="headerlink" href="#cvatanh" title="Link to this heading">¶</a></h3>
+<p>( D: complex0 – D: complex1 )</p>
+<p>Get the principal value of the hyperbolic arctangent of a complex value.</p>
+</section>
+<section id="format-complex-float32-exponent">
+<h3><code class="docutils literal notranslate"><span class="pre">format-complex-float32-exponent</span></code><a class="headerlink" href="#format-complex-float32-exponent" title="Link to this heading">¶</a></h3>
+<p>( addr bytes D: complex – addr’ bytes’ )</p>
+<p>Format a complex value as a string.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">(cv.)</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>( D: complex – )</p>
+<p>Print out a complex value without a space.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">cv.</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>( D: complex – )</p>
+<p>Print out a complex value with a space.</p>
+</section>
+<section id="parse-complex-float32">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-complex-float32</span></code><a class="headerlink" href="#parse-complex-float32" title="Link to this heading">¶</a></h3>
+<p>( addr bytes – D: complex success? )</p>
+<p>Parse a complex value as a string.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fixed32.html" title="previous chapter">S15.16 Fixed Point Numbers</a></li>
+      <li>Next: <a href="inter_fs_copy.html" title="next chapter">Copying Files Between Filesystems</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2025, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/extra/complex_float32.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

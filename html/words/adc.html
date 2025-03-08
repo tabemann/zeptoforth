@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Analog-Digital Converter Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SPI Words" href="spi.html" />
@@ -37,139 +33,139 @@
           <div class="body" role="main">
             
   <section id="analog-digital-converter-words">
-<h1>Analog-Digital Converter Words<a class="headerlink" href="#analog-digital-converter-words" title="Permalink to this heading">¶</a></h1>
+<h1>Analog-Digital Converter Words<a class="headerlink" href="#analog-digital-converter-words" title="Link to this heading">¶</a></h1>
 <p>Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040 and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and, using STMicroelectronics’ numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.</p>
 <section id="adc">
-<h2><code class="docutils literal notranslate"><span class="pre">adc</span></code><a class="headerlink" href="#adc" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">adc</span></code><a class="headerlink" href="#adc" title="Link to this heading">¶</a></h2>
 <section id="all-platforms">
-<h3>All Platforms<a class="headerlink" href="#all-platforms" title="Permalink to this heading">¶</a></h3>
+<h3>All Platforms<a class="headerlink" href="#all-platforms" title="Link to this heading">¶</a></h3>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
 <p>( channel adc – value )</p>
 <p>Read <em>channel</em> on <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
 </section>
 <section id="enable-adc">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-adc</span></code><a class="headerlink" href="#enable-adc" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-adc</span></code><a class="headerlink" href="#enable-adc" title="Link to this heading">¶</a></h4>
 <p>( adc – )</p>
 <p>Enable <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
 </section>
 <section id="disable-adc">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-adc</span></code><a class="headerlink" href="#disable-adc" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-adc</span></code><a class="headerlink" href="#disable-adc" title="Link to this heading">¶</a></h4>
 <p>( adc – )</p>
 <p>Disable <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
 </section>
 <section id="adc-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">adc-pin</span></code><a class="headerlink" href="#adc-pin" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">adc-pin</span></code><a class="headerlink" href="#adc-pin" title="Link to this heading">¶</a></h4>
 <p>( adc pin – )</p>
 <p>Configure <em>pin</em> for use with <em>adc</em>.</p>
 </section>
 <section id="default-adc">
-<h4><code class="docutils literal notranslate"><span class="pre">default-adc</span></code><a class="headerlink" href="#default-adc" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">default-adc</span></code><a class="headerlink" href="#default-adc" title="Link to this heading">¶</a></h4>
 <p>( – adc )</p>
 <p>The default ADC on a platform. On the RP2040 this is 0, on the other supported platforms it is 1.</p>
 </section>
 <section id="temp-adc-chan">
-<h4><code class="docutils literal notranslate"><span class="pre">temp-adc-chan</span></code><a class="headerlink" href="#temp-adc-chan" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">temp-adc-chan</span></code><a class="headerlink" href="#temp-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( – channel )</p>
 <p>The ADC channel, on the default ADC, for the microcontroller’s temperature sensor</p>
 </section>
 <section id="adc-min">
-<h4><code class="docutils literal notranslate"><span class="pre">adc-min</span></code><a class="headerlink" href="#adc-min" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">adc-min</span></code><a class="headerlink" href="#adc-min" title="Link to this heading">¶</a></h4>
 <p>( – Value )</p>
 <p>The minimum value returned by <code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code></p>
 </section>
 <section id="adc-max">
-<h4><code class="docutils literal notranslate"><span class="pre">adc-max</span></code><a class="headerlink" href="#adc-max" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">adc-max</span></code><a class="headerlink" href="#adc-max" title="Link to this heading">¶</a></h4>
 <p>( – value )</p>
 <p>The maximum value returned by <code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code></p>
 </section>
 <section id="x-invalid-adc">
-<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc</span></code><a class="headerlink" href="#x-invalid-adc" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc</span></code><a class="headerlink" href="#x-invalid-adc" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>The invalid ADC exception.</p>
 </section>
 <section id="x-invalid-adc-chan">
-<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc-chan</span></code><a class="headerlink" href="#x-invalid-adc-chan" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc-chan</span></code><a class="headerlink" href="#x-invalid-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>The invalid ADC channel exception.</p>
 </section>
 </section>
 <section id="rp2040-only-words">
-<h3>RP2040 only words<a class="headerlink" href="#rp2040-only-words" title="Permalink to this heading">¶</a></h3>
+<h3>RP2040 only words<a class="headerlink" href="#rp2040-only-words" title="Link to this heading">¶</a></h3>
 <section id="pin-adc-chan">
-<h4><code class="docutils literal notranslate"><span class="pre">pin-adc-chan</span></code><a class="headerlink" href="#pin-adc-chan" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pin-adc-chan</span></code><a class="headerlink" href="#pin-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( pin – channel )</p>
 <p>Get the ADC channel for <em>pin</em>.</p>
 </section>
 </section>
 <section id="stm32f407-stm32f411-stm32f746-and-stm32l476-only-words">
-<h3>STM32F407, STM32F411, STM32F746, and STM32L476 only words<a class="headerlink" href="#stm32f407-stm32f411-stm32f746-and-stm32l476-only-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F407, STM32F411, STM32F746, and STM32L476 only words<a class="headerlink" href="#stm32f407-stm32f411-stm32f746-and-stm32l476-only-words" title="Link to this heading">¶</a></h3>
 <section id="adc-sampling-time">
-<h4><code class="docutils literal notranslate"><span class="pre">adc-sampling-time!</span></code><a class="headerlink" href="#adc-sampling-time" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">adc-sampling-time!</span></code><a class="headerlink" href="#adc-sampling-time" title="Link to this heading">¶</a></h4>
 <p>( sampling-time channel adc – )</p>
 <p>Set <em>sampling-time</em> for <em>channel</em> on <em>adc</em>. Note that this value is rounded up to the next valid sampling time for the microcontroller in question, and on the STM32L476 an additional 0.5 is added to the value. The maximum sampling time for STM32F407, STM32F411, and STM32F746 microcontrollers is 480, and the maximum sampling time for STM32L476 microcontrollers is 640 (before the 0.5 is added). For more information see the microcontroller’s reference manual. Also note that without sufficient sampling time, some channels, such as the temperature sensor, may provide erroneous data.</p>
 </section>
 <section id="vrefint-adc-chan">
-<h4><code class="docutils literal notranslate"><span class="pre">vrefint-adc-chan</span></code><a class="headerlink" href="#vrefint-adc-chan" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">vrefint-adc-chan</span></code><a class="headerlink" href="#vrefint-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( – channel )</p>
 <p>Channel on ADC 1 for the internal reference voltage.</p>
 </section>
 <section id="vbat-adc-chan">
-<h4><code class="docutils literal notranslate"><span class="pre">vbat-adc-chan</span></code><a class="headerlink" href="#vbat-adc-chan" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">vbat-adc-chan</span></code><a class="headerlink" href="#vbat-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( – channel )</p>
 <p>Channel on ADC 1 for Vbat.</p>
 </section>
 <section id="x-out-of-range-sampling-time">
-<h4><code class="docutils literal notranslate"><span class="pre">x-out-of-range-sampling-time</span></code><a class="headerlink" href="#x-out-of-range-sampling-time" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-out-of-range-sampling-time</span></code><a class="headerlink" href="#x-out-of-range-sampling-time" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Out of range sampling time exception.</p>
 </section>
 </section>
 <section id="stm32f411-stm32f746-and-stm32l476-only-words">
-<h3>STM32F411, STM32F746, and STM32L476 only words<a class="headerlink" href="#stm32f411-stm32f746-and-stm32l476-only-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F411, STM32F746, and STM32L476 only words<a class="headerlink" href="#stm32f411-stm32f746-and-stm32l476-only-words" title="Link to this heading">¶</a></h3>
 <section id="enable-vbat">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-vbat</span></code><a class="headerlink" href="#enable-vbat" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vbat</span></code><a class="headerlink" href="#enable-vbat" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Enable the Vbat ADC channel.</p>
 </section>
 <section id="disable-vbat">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-vbat</span></code><a class="headerlink" href="#disable-vbat" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vbat</span></code><a class="headerlink" href="#disable-vbat" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Disable the Vbat ADC channel.</p>
 </section>
 </section>
 <section id="stm32f411-and-stm32f746-only-words">
-<h3>STM32F411 and STM32F746 only words<a class="headerlink" href="#stm32f411-and-stm32f746-only-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F411 and STM32F746 only words<a class="headerlink" href="#stm32f411-and-stm32f746-only-words" title="Link to this heading">¶</a></h3>
 <section id="enable-tsvref">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-tsvref</span></code><a class="headerlink" href="#enable-tsvref" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-tsvref</span></code><a class="headerlink" href="#enable-tsvref" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Enable the temperature sensor and Vrefint ADC channels.</p>
 </section>
 <section id="disable-tsvref">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-tsvref</span></code><a class="headerlink" href="#disable-tsvref" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-tsvref</span></code><a class="headerlink" href="#disable-tsvref" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Disable the temperature sensor and Vrefint ADC channels.</p>
 </section>
 </section>
 <section id="stm32l476-only-words">
-<h3>STM32L476 only words<a class="headerlink" href="#stm32l476-only-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32L476 only words<a class="headerlink" href="#stm32l476-only-words" title="Link to this heading">¶</a></h3>
 <section id="enable-vsense">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-vsense</span></code><a class="headerlink" href="#enable-vsense" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vsense</span></code><a class="headerlink" href="#enable-vsense" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Enable the temperature sensor ADC channel.</p>
 </section>
 <section id="disable-vesnse">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-vesnse</span></code><a class="headerlink" href="#disable-vesnse" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vesnse</span></code><a class="headerlink" href="#disable-vesnse" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Disable the temperature sensor ADC channel.</p>
 </section>
 <section id="enable-vrefint">
-<h4><code class="docutils literal notranslate"><span class="pre">enable-vrefint</span></code><a class="headerlink" href="#enable-vrefint" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vrefint</span></code><a class="headerlink" href="#enable-vrefint" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Enable the Vrefint ADC channel.</p>
 </section>
 <section id="disable-vrefint">
-<h4><code class="docutils literal notranslate"><span class="pre">disable-vrefint</span></code><a class="headerlink" href="#disable-vrefint" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vrefint</span></code><a class="headerlink" href="#disable-vrefint" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Disable the Vrefint ADC channel.</p>
 </section>
@@ -182,7 +178,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -204,6 +200,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -220,6 +218,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -230,7 +229,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -251,7 +249,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -262,6 +260,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -286,7 +286,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -294,7 +294,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -309,10 +309,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

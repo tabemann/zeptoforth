@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -177,6 +177,7 @@ USART1_Base $0C + constant USART1_BRR
   set-pll-216mhz
   set-flash-latency-for-216mhz
   set-sysclk-pll
+  216_000_000 sysclk !
   set-brr-108mhz
   enable-usart1
   enable-int

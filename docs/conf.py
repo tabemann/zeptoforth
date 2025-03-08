@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'zeptoforth'
-copyright = '2020-2024, Travis Bemann'
+copyright = '2020-2025, Travis Bemann'
 author = 'Travis Bemann'
 
 
@@ -28,7 +28,8 @@ author = 'Travis Bemann'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'myst_parser'
+    'myst_parser',
+    'sphinxcontrib.mermaid'
 ]
 
 source_suffix = {
@@ -45,6 +46,7 @@ templates_path = ['../doc_resources/templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['conf.py', 'Thumbs.db', '.DS_Store']
 
+myst_fence_as_directive = ['mermaid']
 
 # -- Options for HTML output -------------------------------------------------
 

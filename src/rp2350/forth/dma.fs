@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -66,10 +66,10 @@ begin-module dma
     : CH_CTRL_TRIG ( channel -- addr ) 6 lshift [ DMA_BASE $0C + ] literal + ;
 
     \ Timer
-    : DMA_TIMER ( timer -- ) 2 lshift [ DMA_BASE $420 + ] literal + ;
+    : DMA_TIMER ( timer -- ) 2 lshift [ DMA_BASE $440 + ] literal + ;
 
     \ Abort register
-    : CHAN_ABORT ( -- ) [ DMA_BASE $444 + ] literal ;
+    : CHAN_ABORT ( -- ) [ DMA_BASE $464 + ] literal ;
     
     \ Busy bit
     26 bit constant CH_CTRL_TRIG_BUSY
@@ -84,7 +84,7 @@ begin-module dma
     12 bit constant CH_CTRL_TRIG_RING_SEL
 
     \ Ring lower bit count LSB
-    8 bit constant CH_CTRL_TRIG_RING_SIZE_LSB
+    8 constant CH_CTRL_TRIG_RING_SIZE_LSB
 
     \ Ring lower bit count mask
     $F CH_CTRL_TRIG_RING_SIZE_LSB lshift constant CH_CTRL_TRIG_RING_SIZE_MASK
@@ -236,7 +236,7 @@ begin-module dma
   ;
 
   \ Incrementing ring buffer write
-  : INCR_RING_BUFFER_READ ( low-ring-bits -- mode )
+  : INCR_RING_BUFFER_WRITE ( low-ring-bits -- mode )
     CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
     [ INCR_BUFFER_WRITE CH_CTRL_TRIG_RING_SEL or ] literal or
   ;
@@ -248,7 +248,7 @@ begin-module dma
   ;
 
   \ Decrementing ring buffer write
-  : DECR_RING_BUFFER_READ ( low-ring-bits -- mode )
+  : DECR_RING_BUFFER_WRITE ( low-ring-bits -- mode )
     CH_CTRL_TRIG_RING_SIZE_LSB lshift CH_CTRL_TRIG_RING_SIZE_MASK and
     [ DECR_BUFFER_WRITE CH_CTRL_TRIG_RING_SEL or ] literal or
   ;

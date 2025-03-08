@@ -1,23 +1,19 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Neopixels on the RP2040 &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <title>Neopixels on the RP2040 and RP2350 &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="zeptoIP Words" href="net.html" />
+    <link rel="next" title="LCD1602 Support" href="lcd1602.html" />
     <link rel="prev" title="Turtle graphics" href="turtle.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -36,52 +32,52 @@
 
           <div class="body" role="main">
             
-  <section id="neopixels-on-the-rp2040">
-<h1>Neopixels on the RP2040<a class="headerlink" href="#neopixels-on-the-rp2040" title="Permalink to this heading">¶</a></h1>
-<p>There is optional support for Neopixels and Neopixel strips on the RP2040 using a PIO block to drive the Neopixel protocol.</p>
+  <section id="neopixels-on-the-rp2040-and-rp2350">
+<h1>Neopixels on the RP2040 and RP2350<a class="headerlink" href="#neopixels-on-the-rp2040-and-rp2350" title="Link to this heading">¶</a></h1>
+<p>There is optional support for Neopixels and Neopixel strips on the RP2040 and RP2350 using a PIO block to drive the Neopixel protocol.</p>
 <p>Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, <code class="docutils literal notranslate"><span class="pre">neopixel!</span></code> can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code>.</p>
 <p>Note that in some setups, such as the SeeedStudio XIAO RP2040, a separate GPIO pin may need to be set high to enable a Neopixel (e.g. GPIO pin 11 on the SeeedStudio XIAO RP2040, in addition to the data GPIO pin 12). Use the <code class="docutils literal notranslate"><span class="pre">pin!</span></code> word in the <code class="docutils literal notranslate"><span class="pre">pin</span></code> module for this.</p>
 <p>Neopixel support is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/neopixel.fs</span></code>, which can be compiled either to RAM or to flash as needed.</p>
 <section id="neopixel">
-<h2><code class="docutils literal notranslate"><span class="pre">neopixel</span></code><a class="headerlink" href="#neopixel" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">neopixel</span></code><a class="headerlink" href="#neopixel" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">neopixel</span></code> module contains the following words:</p>
 <section id="init-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">init-neopixel</span></code><a class="headerlink" href="#init-neopixel" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-neopixel</span></code><a class="headerlink" href="#init-neopixel" title="Link to this heading">¶</a></h3>
 <p>( state-machine pio count pin addr – )</p>
 <p>Initialize a Neopixel structure at <em>addr</em> for <em>count</em> Neopixels, data GPIO pin <em>pin</em>, PIO block <em>pio</em> (<code class="docutils literal notranslate"><span class="pre">PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">PIO1</span></code> from the <code class="docutils literal notranslate"><span class="pre">pio</span></code> module), and state machine <em>state-machine</em> (from 0 to 3). This does not take into account any power GPIO pin that may need to be configured. It reprograms the specified PIO block and assumes that it has full control over said block. Note that it is safe to use if one wishes to use multiple state machines that are all controlling Neopixels in one PIO block, because it will only overwrite the PIO program with the very same PIO program.</p>
 </section>
 <section id="clear-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-neopixel</span></code><a class="headerlink" href="#clear-neopixel" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-neopixel</span></code><a class="headerlink" href="#clear-neopixel" title="Link to this heading">¶</a></h3>
 <p>( neopixel – )</p>
 <p>Clear all the Neopixel states in Neopixel structure <em>neopixel</em>.</p>
 </section>
 <section id="update-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code><a class="headerlink" href="#update-neopixel" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code><a class="headerlink" href="#update-neopixel" title="Link to this heading">¶</a></h3>
 <p>( neopixel – )</p>
 <p>Transmit all the stored Neopixel color data for the Neopixels in Neopixel structure <em>neopixel</em>.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( red green blue index neopixel – )</p>
 <p>Specify the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255. Note that this does <em>not</em> transmit the color data to the Neopixel in question; rather one must call <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code> to do so.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( index neopixel – red green blue )</p>
 <p>Get the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255.</p>
 </section>
 <section id="neopixel-size">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel-size</span></code><a class="headerlink" href="#neopixel-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel-size</span></code><a class="headerlink" href="#neopixel-size" title="Link to this heading">¶</a></h3>
 <p>( count – bytes )</p>
 <p>Get the size of a Neopixel structure in bytes with <em>count</em> Neopixels.</p>
 </section>
 <section id="x-out-of-range-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-neopixel</span></code><a class="headerlink" href="#x-out-of-range-neopixel" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-neopixel</span></code><a class="headerlink" href="#x-out-of-range-neopixel" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range Neopixel index exception.</p>
 </section>
 <section id="x-out-of-range-color">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-color</span></code><a class="headerlink" href="#x-out-of-range-color" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-color</span></code><a class="headerlink" href="#x-out-of-range-color" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range color component exception.</p>
 </section>
@@ -93,7 +89,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -115,6 +111,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
@@ -131,6 +129,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -141,7 +140,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
@@ -162,7 +160,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -173,6 +171,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
@@ -182,7 +182,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Neopixels on the RP2040</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
@@ -193,11 +194,11 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="turtle.html" title="previous chapter">Turtle graphics</a></li>
-      <li>Next: <a href="net.html" title="next chapter">zeptoIP Words</a></li>
+      <li>Next: <a href="lcd1602.html" title="next chapter">LCD1602 Support</a></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -205,7 +206,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -220,10 +221,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

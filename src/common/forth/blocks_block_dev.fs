@@ -24,11 +24,7 @@ begin-module blk
 
   oo import
   block-dev import
-  spi import
-  pin import
-  systick import
   lock import
-  armv6m import
   block import
 
   \ Attempted to write to protected block zero
@@ -126,7 +122,7 @@ begin-module blk
       clear-blocks
     ; define new
 
-    :noname ( blk -- bytes ) sector-size ; define block-size
+    :noname { blk -- bytes } sector-size ; define block-size
     
     :noname ( blk -- blocks ) max-block-count @ ; define block-count
 

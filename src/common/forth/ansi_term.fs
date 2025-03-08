@@ -1,4 +1,5 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
+\ Copyright (c) 2025 tmsgthb (GitHub)
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +36,9 @@ begin-module ansi-term
 
     \ Preserve cursor count
     user preserve-cursor-count
+
+    \ Background color offset
+    10 constant background-offset
     
   end-module> import
   
@@ -42,13 +46,63 @@ begin-module ansi-term
 
   \ Character constants
   $1B constant escape
-    
+
+  \ No color or font set
+  00 constant none
+
+  \ Font constants
+  01 constant bold
+  02 constant dim
+  22 constant normal
+  04 constant underline
+  24 constant underline-off
+
+  \ Color constants
+  30 constant black
+  31 constant red
+  32 constant green
+  33 constant yellow
+  34 constant blue
+  35 constant magenta
+  36 constant cyan
+  37 constant white
+  90 constant b-black
+  91 constant b-red
+  92 constant b-green
+  93 constant b-yellow
+  94 constant b-blue
+  95 constant b-magenta
+  96 constant b-cyan
+  97 constant b-white
+
+  \ Not a color exception
+  : x-not-color ( -- ) ." not a color" cr ;
+
+  \ Create a background color
+  : background { color -- color' }
+    color black >= color white <= and
+    color b-black >= color b-white <= and or if
+      color background-offset +
+    else
+      color [ black background-offset + ] literal >=
+      color [ white background-offset + ] literal <= and
+      color [ b-black background-offset + ] literal >=
+      color [ b-white background-offset + ] literal <= and or averts x-not-color
+      color
+    then
+  ;
+  
   \ Type a decimal integer
   : (dec.) ( n -- ) base @ 10 base ! swap (.) base ! ;
 
   \ Type the CSI sequence
   : csi ( -- )
      $1B emit [char] [ emit
+  ;
+
+  \ End of color and font efectType the end of CSI sequence
+  : end-color-effect ( -- )
+    [char] m emit 
   ;
 
   commit-flash
@@ -244,7 +298,10 @@ begin-module ansi-term
     until
     drop
   ;
-  
+ 
+  \ Set font effect or color
+  : color-effect! ( color-effect -- ) csi (dec.) end-color-effect ;
+ 
 end-module
 
 commit-flash

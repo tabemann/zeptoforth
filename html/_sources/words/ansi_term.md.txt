@@ -138,3 +138,52 @@ Get the terminal size in rows and columns.
 ##### `reset-ansi-term`
 
 Reset the state of the ANSI terminal. Note that if the cursor is currently hidden, it will not show it automatically.
+
+##### `background`
+( color -- color' )
+
+Create a background color from a color; note that `x-not-color` will be raised if the argument is not a color.
+
+##### `x-not-color`
+( -- )
+
+Not a color exception
+
+##### `color-effect!`
+( color/effect -- )
+
+Set a font color or effect.
+
+The following constant signifies resetting the font color and effect to the default:
+
+##### `none`
+
+The following are font effect constants:
+
+##### `bold`
+##### `dim`
+##### `normal`
+##### `underline`
+##### `underline-off`
+
+The following are normal font color constants:
+
+##### `black`
+##### `red`
+##### `green`
+##### `yellow`
+##### `blue`
+##### `magenta`
+##### `cyan`
+##### `white`
+
+The following are bright font color constants:
+
+##### `b-black`
+##### `b-red`
+##### `b-green`
+##### `b-yellow`
+##### `b-blue`
+##### `b-magenta`
+##### `b-cyan`
+##### `b-white`

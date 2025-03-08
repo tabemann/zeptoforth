@@ -1162,7 +1162,7 @@ begin-module pio
 
   \ PIO MOV instruction
   : mov, ( source op destination -- )
-    $07 and 5 lshift swap $03 and 3 lshift or swap $03 and or $A000 or h,
+    $07 and 5 lshift swap $03 and 3 lshift or swap $07 and or $A000 or h,
   ;
 
   \ PIO IRQ instruction
@@ -1231,7 +1231,7 @@ begin-module pio
   \ PIO MOV instruction with delay or side-set
   : mov+, ( source delay/side-set op destination -- )
     $07 and 5 lshift swap $03 and 3 lshift or swap $1F and 8 lshift or
-    swap $03 and or $A000 or h,
+    swap $07 and or $A000 or h,
   ;
 
   \ PIO IRQ instruction with delay or side-set

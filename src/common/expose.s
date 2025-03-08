@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2024 Travis Bemann
+@ Copyright (c) 2020-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -632,6 +632,23 @@ _prompt_disabled:
         push_tos
         ldr tos, =prompt_disabled
         bx lr
+        end_inlined
+
+        @@ The current compilation unit (e.g. word, quotation) variable
+        define_internal_word "current-unit-start", visible_flag
+_current_unit_start:
+        push_tos
+        ldr tos, =current_unit_start
+        bx lr
+        end_inlined
+
+	@@ Get the sysclk variable
+	define_word "sysclk", visible_flag
+_sysclk:
+	push_tos
+	ldr tos, =sysclk
+	bx lr
+	end_inlined
         
 	.ltorg
 	

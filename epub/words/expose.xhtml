@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Exposed Kernel Variables</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -93,11 +93,13 @@
 </section>
 <section id="parse">
 <h3><code class="docutils literal notranslate"><span class="pre">&gt;parse</span></code></h3>
-<p>The parse index</p>
+<p>( – parse-index-addr )</p>
+<p>The parse index; note that the address of the parse index is returned and not the parse index itself, and it may be modified by the user (it must remain in the range from 0 to the size of the parse buffer returned by <code class="docutils literal notranslate"><span class="pre">source</span></code> - 1, and reducing its value is not recommended).</p>
 </section>
 <section id="source">
 <h3><code class="docutils literal notranslate"><span class="pre">source</span></code></h3>
-<p>The source info</p>
+<p>( – parse-buffer-addr parse-buffer-size )</p>
+<p>The current string in the parse buffer, as defined by its starting address and its size in bytes.</p>
 </section>
 <section id="build-target">
 <h3><code class="docutils literal notranslate"><span class="pre">build-target</span></code></h3>

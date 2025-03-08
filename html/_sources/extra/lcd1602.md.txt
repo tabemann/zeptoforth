@@ -1,0 +1,41 @@
+# LCD1602 Support
+
+There is an optional driver for I2C LCD1602 displays. The LCD1602 is a 2 row by 16 character text LCD display.
+
+Configuring the LCD1602 is in the form of two steps. The first step is configuring the I2C bus, for which a convenience word `init-lcd-i2c` is provided; if the user manually configures the I2C bus or previously has used it to access another device, the user must manually call `lcd-i2c-device!` to set the I2C bus to use with the LCD1602 and then `activate-lcd-i2c`. The second step is initializing the LCD1602 device, which is done through calling `init-lcd`. These steps must be carried out before using the LCD1602 device.
+
+LCD1602 support is in `extra/rp_common/lcd1602.fs`, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in `extra/rp_common/lcd1602_demo.fs`.
+
+### `lcd1602`
+
+The `lcd1602` module contains the following words:
+
+##### `init-lcd-i2c`
+( pin1 pin2 i2c-device -- )
+
+Configure the I2C bus *i2c-device* to use GPIO's *pin1* and *pin2* and set it up to communicate with the LCD1602 device on that bus.
+
+##### `init-lcd`
+( -- )
+
+Initialize the LCD1602 device. The I2C bus must be set up to communicate with the LCD1602 device first.
+
+##### `lcd-i2c-device!`
+( i2c-device -- )
+
+Manually set the I2C bus *i2c-device* to use with the LCD1602 without initializing the I2C bus itself.
+
+##### `activate-lcd-i2c`
+( -- )
+
+Manually set the I2C bus configured with `init-lcd-i2c` or `lcd-i2c-device!` to communicate with the LCD1602 device. This is necessary if the I2C bus has been configured manually or if another device has been previously used on the I2C bus.
+
+##### `clear-display`
+( -- )
+
+Clear the LCD1602 display.
+
+##### `put-text`
+( row col c-addr bytes -- )
+
+Write the specified string to the LCD1602 display at the specified row and column.

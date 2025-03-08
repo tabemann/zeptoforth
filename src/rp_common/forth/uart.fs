@@ -28,8 +28,8 @@ begin-module uart
   internal import
   interrupt import
   multicore import
-  int-io import
-  int-io-internal import
+  serial import
+  serial-internal import
   pin import
   closure import
 
@@ -462,13 +462,13 @@ begin-module uart
   \ Enable interrupt-driven IO on a UART
   : enable-uart-int-io ( uart -- )
     dup validate-uart
-    0= if enable-int-io else enable-uart1-int-io then
+    0= if enable-serial-int-io else enable-uart1-int-io then
   ;
 
   \ Disable interrupt-driven IO on a UART
   : disable-uart-int-io ( uart -- )
     dup validate-uart
-    0= if disable-int-io else disable-uart1-int-io then
+    0= if disable-serial-int-io else disable-uart1-int-io then
   ;
 
   \ Set a pin to be a UART pin

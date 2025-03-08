@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -254,6 +254,9 @@ begin-module zeptoed-internal
     \ Is the buffer dirty
     cell member buffer-dirty
 
+    \ Is autoindent enabled
+    cell member buffer-autoindent
+    
     \ Character entry mode
     cell member buffer-char-entry-mode
 
@@ -738,6 +741,12 @@ begin-module zeptoed-internal
 
     \ Find a string backward
     method handle-search-backward ( buffer -- )
+
+    \ Enable autoindent
+    method handle-enable-autoindent ( buffer -- )
+
+    \ Disable autoindent
+    method handle-disable-autoindent ( buffer -- )
     
   end-class
 
@@ -1003,6 +1012,12 @@ begin-module zeptoed-internal
     \ Handle editor unindent
     method handle-editor-unindent ( editor -- )
 
+    \ Handle editor enable autoindent
+    method handle-editor-enable-autoindent ( editor -- )
+
+    \ Handle editor disable autoindent
+    method handle-editor-disable-autoindent ( editor -- )
+
     \ Handle editor refresh
     method handle-editor-refresh ( editor -- )
 
@@ -1043,6 +1058,7 @@ begin-module zeptoed-internal
       0 buffer buffer-left-bound !
       false buffer buffer-select-enabled !
       false buffer buffer-dirty !
+      true buffer buffer-autoindent !
       insert-mode buffer buffer-char-entry-mode !
       0 0 buffer buffer-search-text 2!
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
@@ -2443,11 +2459,15 @@ begin-module zeptoed-internal
       buffer dirty-buffer
     ; define do-insert
 
-    \ Enter a newline with indentation into the buffer
+    \ Enter a newline with (or without) indentation into the buffer
     :noname { buffer -- }
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
-      buffer edit-cursor-left-line-indent { indent }
+      buffer buffer-autoindent @ if
+        buffer edit-cursor-left-line-indent
+      else
+        0
+      then { indent }
       newline { W^ data }
       data 1 buffer buffer-edit-cursor insert-data
       bl data c!
@@ -3333,7 +3353,21 @@ begin-module zeptoed-internal
         then
       then
     ; define handle-search-backward
-    
+
+    \ Enable autoindent
+    :noname { buffer -- }
+      true buffer buffer-autoindent !
+      s" Enabled autoindent" buffer buffer-editor @ editor-minibuffer @
+      set-message
+    ; define handle-enable-autoindent
+
+    \ Disable autoindent
+    :noname { buffer -- }
+      false buffer buffer-autoindent !
+      s" Disabled autoindent" buffer buffer-editor @ editor-minibuffer @
+      set-message
+    ; define handle-disable-autoindent
+
   end-implement
 
   \ Implement the file buffer
@@ -3548,6 +3582,7 @@ begin-module zeptoed-internal
     :noname { heap editor minibuffer -- }
       s" " heap editor minibuffer <buffer>->new
       true minibuffer minibuffer-read-only !
+      false minibuffer buffer-autoindent !
       0 minibuffer minibuffer-callback !
       0 minibuffer minibuffer-callback-object !
     ; define new
@@ -4299,7 +4334,21 @@ begin-module zeptoed-internal
       then
       editor display-search-text
     ; define handle-editor-search-backward
-    
+
+    \ Handle editor enable autoindent
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ handle-enable-autoindent
+      then
+    ; define handle-editor-enable-autoindent
+
+    \ Handle editor disable autoindent
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-current @ handle-disable-autoindent
+      then
+    ; define handle-editor-disable-autoindent
+
     \ Handle editor refresh
     :noname { editor -- }
       page
@@ -4430,6 +4479,13 @@ begin-module zeptoed-internal
         ctrl-x of editor handle-editor-close endof
         ctrl-r of editor handle-editor-search-backward endof
         [char] [ of editor handle-special endof
+        [char] O of
+          get-key case
+            [char] P of editor handle-editor-disable-autoindent endof \ F1
+            [char] Q of editor handle-editor-enable-autoindent endof \ F2
+            dup set-key
+          endcase
+        endof
         clear-keys
       endcase
     ; define handle-escape

@@ -154,7 +154,7 @@ begin-module fixed32
   ;
   
   \ Round a S15.16 fixed-point number to the nearest integer with half rounding
-  \ towards even
+  \ towards odd
   : f32round-half-odd ( f32 -- n )
     dup 16 arshift 1 and if f32round-half-down else f32round-half-up then
   ;
@@ -294,7 +294,7 @@ begin-module fixed32
   ;
   
   \ Get the angle of an x and an y S15.16 fixed-point numbers
-  : f32atan2 ( f32x f32y -- f32angle )
+  : f32atan2 ( f32y f32x -- f32angle )
     dup 0> if
       f32/ f32atan
     else
@@ -305,12 +305,12 @@ begin-module fixed32
           f32/ f32atan f32pi -
         else
           2dup 0= swap 0> and if
-            drop [ f32pi 2 / ] literal
+            2drop [ f32pi 2 / ] literal
           else
             2dup 0= swap 0< and if
-              drop [ f32pi -2 / ] literal
+              2drop [ f32pi -2 / ] literal
             else
-              drop 0
+              2drop 0
             then
           then
         then
@@ -320,13 +320,13 @@ begin-module fixed32
   
   \ Get the arcsine of an S15.16 fixed-point number
   : f32asin ( f32 -- f32' )
-    dup 2 f32i** [ 1 s>f32 ] literal <  if
+    dup 2 f32i** [ 1 s>f32 ] literal < if
       [ 1 s>f32 ] literal over 2 f32i** - f32sqrt f32/ f32atan
     else
-      dup 0> if
-        drop [ f32pi 2 / ] literal
+      0> if
+        [ f32pi 2 / ] literal
       else
-        drop [ f32pi -2 / ] literal
+        [ f32pi -2 / ] literal
       then
     then
   ;
@@ -437,14 +437,13 @@ begin-module fixed32
         rdrop 2drop false
       then
     ;
-    
-  end-module
 
-  continue-module internal
+    \ Saved handle-number-hook
+    variable saved-handle-number-hook
     
     \ Handle parsing numbers, extending it to S15.16 fixed-point numbers
     : do-handle-number { addr bytes -- flag }
-      addr bytes do-handle-number not if
+      addr bytes saved-handle-number-hook @ execute not if
         addr bytes
         parse-base >r
         dup 0<> if
@@ -477,7 +476,15 @@ begin-module fixed32
         true
       then
     ;
-    
+
+    \ Initialize handle-number-hook
+    : init-handle-number-hook ( -- )
+      handle-number-hook @ saved-handle-number-hook !
+      ['] do-handle-number handle-number-hook !
+    ;
+
+    initializer init-handle-number-hook
+
   end-module
 
   \ Parse a 32-bit fixed-point number
@@ -616,9 +623,3 @@ begin-module fixed32
   : f32.n ( f32 places -- ) (f32.n) space ;
   
 end-module
-
-: init-f32 ( -- )
-  ['] internal::do-handle-number handle-number-hook !
-;
-
-initializer init-f32

@@ -37,7 +37,7 @@
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
-#include src/rp_common/forth/int_io.fs
+#include src/rp_common/forth/serial.fs
 #include src/rp2040/forth/gpio.fs
 #include src/rp2040/forth/pin.fs
 #include src/rp2040/forth/pio.fs

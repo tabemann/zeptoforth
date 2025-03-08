@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Lock Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simple Lock Words" href="slock.html" />
@@ -37,38 +33,38 @@
           <div class="body" role="main">
             
   <section id="lock-words">
-<h1>Lock Words<a class="headerlink" href="#lock-words" title="Permalink to this heading">¶</a></h1>
+<h1>Lock Words<a class="headerlink" href="#lock-words" title="Link to this heading">¶</a></h1>
 <p>A lock enforces mutual exclusion, typically with regard to control of a resource, between multiple tasks. It also serves as a queue for multiple tasks waiting on the lock which is held by another task. Furthermore, it provides a mechanism to avoid priority inversion, by temporarily elevating each task holding a lock’s priority to the maximum priority of all the tasks waiting for it; this applies even when chaining together multiple locks held by tasks holding some locks and waiting on others. Recursive lockings are permitted, with a recursive locking count being maintained by a given lock, which is finally released when all the lockings are matched by releases.</p>
 <section id="lock">
-<h2><code class="docutils literal notranslate"><span class="pre">lock</span></code><a class="headerlink" href="#lock" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">lock</span></code><a class="headerlink" href="#lock" title="Link to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">lock</span></code>:</p>
 <section id="x-not-currently-owned">
-<h3><code class="docutils literal notranslate"><span class="pre">x-not-currently-owned</span></code><a class="headerlink" href="#x-not-currently-owned" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-currently-owned</span></code><a class="headerlink" href="#x-not-currently-owned" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Exception raised if a task attempts to unlock a lock it is not the holder of.</p>
 </section>
 <section id="lock-size">
-<h3><code class="docutils literal notranslate"><span class="pre">lock-size</span></code><a class="headerlink" href="#lock-size" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lock-size</span></code><a class="headerlink" href="#lock-size" title="Link to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of a lock in bytes.</p>
 </section>
 <section id="init-lock">
-<h3><code class="docutils literal notranslate"><span class="pre">init-lock</span></code><a class="headerlink" href="#init-lock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-lock</span></code><a class="headerlink" href="#init-lock" title="Link to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">lock-size</span></code> bytes in size.</p>
 </section>
 <section id="claim-lock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-lock</span></code><a class="headerlink" href="#claim-lock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-lock</span></code><a class="headerlink" href="#claim-lock" title="Link to this heading">¶</a></h3>
 <p>( lock – )</p>
 <p>Attempt to acquire a lock <em>lock</em>; if the lock is already held, put the current task in a queue and disable it. In that case, update the priority of the holder of a lock, and any subsequent holders of any locks waited for by the holder of this lock, in order to avoid priority inversion. Note that this must not be called within a critical section. Any number of lockings by the same task are permitted; the lock will be freed when they are balanced by an equal number of releasings.</p>
 </section>
 <section id="release-lock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-lock</span></code><a class="headerlink" href="#release-lock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-lock</span></code><a class="headerlink" href="#release-lock" title="Link to this heading">¶</a></h3>
 <p>( lock – )</p>
 <p>Attempt to release a lock <em>lock</em> if it is not recursively locked; if the current task is not the holder of the lock, raise <code class="docutils literal notranslate"><span class="pre">x-not-currently-owned</span></code>. If releasing the lock is successful, restore the priority of the current task to what it would be had its priority not been updated in order to avoid priority inversion; afterwards, carry out all the functionality that <code class="docutils literal notranslate"><span class="pre">lock</span></code> would carry out had it been called by the task at the head of the queue if there is one. If a lock <em>lock</em> is recursively locked, decrement the recursive lock count by one. Note that this must not be called within a critical section.</p>
 </section>
 <section id="with-lock">
-<h3><code class="docutils literal notranslate"><span class="pre">with-lock</span></code><a class="headerlink" href="#with-lock" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-lock</span></code><a class="headerlink" href="#with-lock" title="Link to this heading">¶</a></h3>
 <p>( xt lock – )</p>
 <p>Execute an xt with a given lock <em>lock</em> locked while it executes, unlocking it afterwards. If an exception is raised by <em>xt</em>, unlock <em>lock</em> and then re-raise the exception.</p>
 </section>
@@ -80,7 +76,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -102,6 +98,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -118,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -128,7 +127,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -149,7 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -160,6 +158,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -184,7 +184,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -192,7 +192,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -207,10 +207,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

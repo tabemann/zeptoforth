@@ -1,20 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>LED Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="GPIO Words" href="gpio.html" />
@@ -37,100 +33,100 @@
           <div class="body" role="main">
             
   <section id="led-words">
-<h1>LED Words<a class="headerlink" href="#led-words" title="Permalink to this heading">¶</a></h1>
+<h1>LED Words<a class="headerlink" href="#led-words" title="Link to this heading">¶</a></h1>
 <p>LEDs are initialized at boot time, and can be used as is afterwards.</p>
 <section id="led">
-<h2><code class="docutils literal notranslate"><span class="pre">led</span></code><a class="headerlink" href="#led" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">led</span></code><a class="headerlink" href="#led" title="Link to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">led</span></code> module:</p>
 <section id="common-led-words">
-<h3>Common LED Words<a class="headerlink" href="#common-led-words" title="Permalink to this heading">¶</a></h3>
+<h3>Common LED Words<a class="headerlink" href="#common-led-words" title="Link to this heading">¶</a></h3>
 <section id="x-led-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-led-out-of-range</span></code><a class="headerlink" href="#x-led-out-of-range" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-led-out-of-range</span></code><a class="headerlink" href="#x-led-out-of-range" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>LED out of range exception.</p>
 </section>
 <section id="on">
-<h4><code class="docutils literal notranslate"><span class="pre">on</span></code><a class="headerlink" href="#on" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">on</span></code><a class="headerlink" href="#on" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>LED on state.</p>
 </section>
 <section id="off">
-<h4><code class="docutils literal notranslate"><span class="pre">off</span></code><a class="headerlink" href="#off" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">off</span></code><a class="headerlink" href="#off" title="Link to this heading">¶</a></h4>
 <p>( – )</p>
 <p>LED off state</p>
 </section>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">led!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">led!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
 <p>( state led – )</p>
 <p>Set <em>led</em> to the on/off state <em>state</em></p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">led&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">led&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
 <p>( led – state )</p>
 <p>Get the on/off state of <em>led</em>.</p>
 </section>
 <section id="toggle-led">
-<h4><code class="docutils literal notranslate"><span class="pre">toggle-led</span></code><a class="headerlink" href="#toggle-led" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">toggle-led</span></code><a class="headerlink" href="#toggle-led" title="Link to this heading">¶</a></h4>
 <p>( led – )</p>
 <p>Toggle the on/off state of <em>led</em>.</p>
 </section>
 </section>
 <section id="stm32f407-discovery-led-words">
-<h3>STM32F407 DISCOVERY LED Words<a class="headerlink" href="#stm32f407-discovery-led-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F407 DISCOVERY LED Words<a class="headerlink" href="#stm32f407-discovery-led-words" title="Link to this heading">¶</a></h3>
 <section id="green">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#green" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#green" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The green LED.</p>
 </section>
 <section id="orange">
-<h4><code class="docutils literal notranslate"><span class="pre">orange</span></code><a class="headerlink" href="#orange" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">orange</span></code><a class="headerlink" href="#orange" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The orange LED.</p>
 </section>
 <section id="red">
-<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#red" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#red" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The red LED.</p>
 </section>
 <section id="blue">
-<h4><code class="docutils literal notranslate"><span class="pre">blue</span></code><a class="headerlink" href="#blue" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">blue</span></code><a class="headerlink" href="#blue" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The blue LED.</p>
 </section>
 </section>
 <section id="stm32f411-black-pill-words">
-<h3>STM32F411 “Black Pill” Words<a class="headerlink" href="#stm32f411-black-pill-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F411 “Black Pill” Words<a class="headerlink" href="#stm32f411-black-pill-words" title="Link to this heading">¶</a></h3>
 <section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">blue</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">blue</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The blue LED.</p>
 </section>
 </section>
 <section id="stm32f411-nucleo-64-words">
-<h3>STM32F411 Nucleo 64 Words<a class="headerlink" href="#stm32f411-nucleo-64-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32F411 Nucleo 64 Words<a class="headerlink" href="#stm32f411-nucleo-64-words" title="Link to this heading">¶</a></h3>
 <section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The green LED.</p>
 </section>
 </section>
 <section id="stm32l476-discovery-led-words">
-<h3>STM32L476 DISCOVERY LED Words<a class="headerlink" href="#stm32l476-discovery-led-words" title="Permalink to this heading">¶</a></h3>
+<h3>STM32L476 DISCOVERY LED Words<a class="headerlink" href="#stm32l476-discovery-led-words" title="Link to this heading">¶</a></h3>
 <section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The green LED.</p>
 </section>
 <section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The red LED.</p>
 </section>
 </section>
 <section id="raspberry-pi-pico-led-words">
-<h3>Raspberry Pi Pico LED WOrds<a class="headerlink" href="#raspberry-pi-pico-led-words" title="Permalink to this heading">¶</a></h3>
+<h3>Raspberry Pi Pico LED WOrds<a class="headerlink" href="#raspberry-pi-pico-led-words" title="Link to this heading">¶</a></h3>
 <section id="id7">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
 <p>( – led )</p>
 <p>The green LED.</p>
 </section>
@@ -143,7 +139,7 @@
           
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
 
@@ -165,6 +161,8 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="console.html">Console Redirection Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="float32.html">Single-Precision Floating-Point Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alarm.html">Software Alarm Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
@@ -181,6 +179,7 @@
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -191,7 +190,6 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
@@ -212,7 +210,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="clocks.html">RP2040 clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
@@ -223,6 +221,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
@@ -247,7 +247,7 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
@@ -255,7 +255,7 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 
 
@@ -270,10 +270,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2024, Travis Bemann.
+      &#169;2020-2025, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 5.3.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |

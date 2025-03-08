@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -589,6 +589,8 @@ _quit:	bl _rstack_base
         movs r1, #0
         str r1, [r0]
         ldr r0, =current_compile
+        str r1, [r0]
+        ldr r0, =current_unit_start
         str r1, [r0]
         bl _prepare_prompt
 	ldr tos, =_main

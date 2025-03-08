@@ -20,12 +20,14 @@
 
 \ Display the license message
 : license ( -- )
-  cr ." Copyright (c) 2019-2024 Travis Bemann"
+  cr ." Copyright (c) 2019-2025 Travis Bemann"
   cr ." Copyright (c) 2013, 2021 Matthias Koch"
   cr ." Copyright (c) 2021 Jan Bramkamp"
   cr ." Copyright (c) 2023 Rob Probin"
   cr ." Copyright (c) 2023 Chris Salch"
-  cr ." Copyright (c) 2024 Paul Koning"
+  cr ." Copyright (c) 2024-2025 Paul Koning"
+  cr ." Copyright (c) 2024-2025 Serialcomms (GitHub)"
+  cr ." Copyright (c) 2025 tmsgthb (GitHub)"
   cr
   cr ." Permission is hereby granted, free of charge, to any person obtaining a copy"
   cr .\" of this software and associated documentation files (the \"Software\"), to deal"

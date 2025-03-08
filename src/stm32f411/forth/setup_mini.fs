@@ -33,7 +33,7 @@
 #include src/common/forth/multicore.fs
 #include src/stm32f411/forth/erase.fs
 #include src/common/forth/systick.fs
-#include src/stm32f411/forth/int_io.fs
+#include src/stm32f411/forth/serial.fs
 #include src/stm32f411/forth/gpio.fs
 #include src/common/forth/task.fs
 

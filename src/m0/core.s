@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -1152,9 +1152,8 @@ _literal:
 _recurse:
 	push {lr}
 	push_tos
-	ldr tos, =current_compile
+	ldr tos, =current_unit_start
 	ldr tos, [tos]
-	bl _to_xt
 	bl _asm_call
 	pop {pc}
 	end_inlined
@@ -2131,25 +2130,6 @@ _context_switch:
 
 	.ltorg
 	
-	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
-	@@ dictionary
-	define_word "reboot", visible_flag
-_reboot:
-	push {lr}
-        push_tos
-        ldr tos, =reboot_hook
-        ldr tos, [tos]
-        bl _execute
-        
-	bl _pre_reboot
-	ldr r0, =0xE000ED0C @ AIRCR
-	ldr r1, =0x05FA0004
-	str r1, [r0]
-	dsb
-	isb
-	pop {pc}
-	end_inlined
-
 	@@ Null exception handler
 	define_word "handle-null", visible_flag
 _handle_null:
@@ -2270,6 +2250,8 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =current_compile
 	str r1, [r0]
+        ldr r0, =current_unit_start
+        str r1, [r0]
 	ldr r0, =deferred_literal
 	str r1, [r0]
 	ldr r0, =literal_deferred_q
