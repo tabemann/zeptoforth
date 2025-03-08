@@ -34,8 +34,8 @@ begin-module simple-net
   \ Endpoint process has not been started exception
   : x-endpoint-process-not-started ( -- ) ." endpoint process not started" cr ;
   
-  \ A simple networking and interface base class
-  <object> begin-class <simple-net>
+  \ An IPv4 simple networking and interface base class
+  <object> begin-class <ipv4-simple-net>
 
     begin-module simple-net-internal
 
