@@ -3385,7 +3385,7 @@ begin-module net
     
     \ Process an IPv6 ACK packet in TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self process-ipv6-basic-ack
+      \ addr bytes endpoint self process-ipv6-basic-ack
     ; define process-ipv6-ack-fin-wait-2
     
     \ Process an IPv6 ACK packet in TCP_CLOSE_WAIT state
@@ -4340,7 +4340,7 @@ begin-module net
         dup ['] task::x-timed-out = if 2drop drop true 0 else false swap then
         ?raise
         if
-          endpoint ednpoint-remote-seq@ endpoint self add-time-wait
+          endpoint endpoint-remote-seq@ endpoint self add-time-wait
           TCP_CLOSED endpoint endpoint-tcp-state!
           endpoint free-endpoint
           exit
