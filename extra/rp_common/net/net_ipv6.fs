@@ -2764,7 +2764,7 @@ begin-module net
     \ Start router discover
     method discover-ipv6-router ( self -- )
     
-    \ Start IPv4 discovery
+    \ Start IPv6 discovery
     method discover-ipv6-addr ( self -- success? )
 
     \ Start DNS discovery
@@ -2933,7 +2933,7 @@ begin-module net
     \ Set the gateway IPv6 address
     :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
       gateway-ipv6-addr ipv6-unaligned!
-    ; define gateway-ipv4-addr!
+    ; define gateway-ipv6-addr!
 
     \ Get the DNS server IPv6 address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -3062,7 +3062,7 @@ begin-module net
       src-0 src-1 src-2 src-3 addr bytes self find-listen-ipv6-endpoint if
         { endpoint }
         src-0 src-1 src-2 src-3 addr bytes endpoint self
-        [: swap send-ipv4-syn-ack ;] endpoint with-endpoint
+        [: swap send-ipv6-syn-ack ;] endpoint with-endpoint
       else
         drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
       then
@@ -3239,8 +3239,8 @@ begin-module net
     \ Process an IPv6 ACK packet
     :noname ( src-0 src-1 src-2 src-3 addr bytes self -- )
       { addr bytes self }
-      addr bytes self find-connect-ipv4-endpoint not if
-        2drop 2drop drop exit
+      addr bytes self find-connect-ipv6-endpoint not if
+        drop exit
       then
       { endpoint }
       addr bytes self endpoint
@@ -3286,8 +3286,8 @@ begin-module net
 
     \ Process an IPv6 FIN+ACK packet
     :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv4-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv4-rst-for-packet
+      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint not if
+        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
         exit
       then
       { endpoint }
@@ -3297,7 +3297,7 @@ begin-module net
           exit
         then
         endpoint endpoint-tcp-state@ { state }
-        addr bytes endpoint self process-ipv4-basic-ack
+        addr bytes endpoint self process-ipv6-basic-ack
         addr bytes endpoint self
         state case
           TCP_ESTABLISHED of process-ipv6-ack-fin-established endof
@@ -3430,13 +3430,13 @@ begin-module net
 
     \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      addr bytes endpoint self send-ipv4-fin-reply-ack
+      addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-2
 
-    \ Process an unexpected IPv4 FIN packet
+    \ Process an unexpected IPv6 FIN packet
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
@@ -3873,7 +3873,7 @@ begin-module net
     ; define resolve-ipv6-addr-mac-addr
 
     \ Resolve a DNS name's IPv6 address
-    :noname { c-addr bytes self -- ipv4-0 ipv4-1 ipv4-2 ipv4-3 success? }
+    :noname { c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 success? }
       c-addr bytes validate-dns-name
       systick::systick-counter dns-resolve-interval - { tick }
       max-dns-resolve-attempts { attempts }
@@ -4262,7 +4262,7 @@ begin-module net
           -1 +to count
           systick::systick-counter
           time-wait time-wait-start-time @ time-wait-timeout + < if
-            time-wait time-wait-remote-ipv4-addr @
+            time-wait time-wait-remote-ipv6-addr ipv6-unaligned@
             time-wait time-wait-remote-port h@
             time-wait time-wait-local-port h@
             time-wait time-wait-local-seq @
@@ -4270,7 +4270,7 @@ begin-module net
             time-wait time-wait-local-window @
             TCP_ACK
             time-wait time-wait-remote-mac-addr 2@
-            self send-ipv4-basic-tcp
+            self send-ipv6-basic-tcp
           else
             current self time-wait-list-start !
             count self time-wait-list-count !
@@ -4293,8 +4293,14 @@ begin-module net
             endcase
           ;] endpoint with-endpoint
           case
-            TCP_SYN_SENT of endpoint self send-ipv4-rst endof
-            TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
+            TCP_SYN_SENT of
+              endpoint self send-ipv6-rst
+              endpoint free-endpoint
+            endof
+            TCP_SYN_RECEIVED of
+              endpoint self send-ipv6-rst
+              endpoint free-endpoint
+            endof
             TCP_ESTABLISHED of
               timeout start endpoint self close-tcp-established
             endof
