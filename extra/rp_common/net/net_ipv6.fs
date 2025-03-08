@@ -277,7 +277,7 @@ begin-module net
       dup out-packet-bytes @ over out-packet-offset @ - over
       out-packet-window @ small-send-bytes max min
       swap out-packet-mss @ min
-      [ mtu-size ethernet-header-size - ipv6-header-size - tcp-header-size - ]
+      [ mtu-size ipv6-header-size - tcp-header-size - ]
       literal min
       [ debug? ] [if]
         [: cr ." === next-packet-size: " dup . ;] debug-hook execute
@@ -2442,15 +2442,9 @@ begin-module net
       \ DHCP lock
       lock-size member dhcp-lock
 
-      \ MAC address resolution lock
-      lock-size member mac-addr-resolve-lock
-
       \ Are we listening to IPv6 address
       method ipv6-addr-listen?
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- listen? )
-
-      \ Send a frame
-      method send-frame ( addr bytes self -- )
 
       \ Process a MAC address for an IPv6 address
       method process-ipv6-mac-addr
@@ -2989,16 +2983,6 @@ begin-module net
       then
     ; define method ipv6-addr-listen?
 
-    \ Send a frame
-    :noname { addr bytes self -- }
-      bytes mtu-size u<= averts x-oversized-frame
-      [ debug? ] [if]
-        cr ." SENT: "
-        addr addr bytes + dump
-      [then]
-      addr bytes self out-frame-interface @ put-tx-frame
-    ; define send-frame
-    
     \ Process a MAC address for an IPv6 address
     :noname { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-2 self -- }
       mac-addr multicast-mac-addr? if exit then
@@ -3146,7 +3130,7 @@ begin-module net
       endpoint endpoint-ack@
       0
       TCP_RST
-      endpoint endpoint-remote-mac-addr @
+      endpoint endpoint-remote-mac-addr@
       self send-ipv6-basic-tcp
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
@@ -3797,14 +3781,26 @@ begin-module net
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
       [:
+        dup { self }
+        2 pick ethernet-frame-size u<= averts x-oversized-frame
         [: { bytes xt self }
-          bytes mtu-size u<= averts x-oversized-frame
           self outgoing-buf xt execute if
-            self outgoing-buf bytes self send-frame true
+\            [ debug? ] [if]
+\              [: cr ." BEFORE SEND depth: " depth . ;] debug-hook execute
+\            [then]
+            [ debug? ] [if]
+              self outgoing-buf dup bytes +
+              [: cr ." SENT: " dump ;] debug-hook execute
+            [then]
+            self outgoing-buf bytes self out-frame-interface @ put-tx-frame
+            true
+\            [ debug? ] [if]
+\              [: cr ." AFTER SEND depth: " depth . ;] debug-hook execute
+\            [then]
           else
             false
           then
-        ;] over outgoing-buf-lock with-lock
+        ;] self outgoing-buf-lock with-lock
       ;] task::no-timeout task::with-timeout
     ; define construct-and-send-frame
 
@@ -4414,15 +4410,11 @@ begin-module net
                     else
                       endpoint start-endpoint-timeout
                     then
-                    endpoint endpoint-send-ready?
-                    self out-frame-interface @ tx-full? not and
-                    self out-frame-interface @ rx-full? not and if
+                    endpoint endpoint-send-ready? if
                       endpoint get-endpoint-send-packet
                       endpoint endpoint-send-last?
                       endpoint self send-data-ack
-                      endpoint endpoint-send-ready? not
-                      self out-frame-interface @ tx-full? or
-                      self out-frame-interface @ rx-full? or true
+                      endpoint endpoint-send-ready? not true
                     else
                       true true
                     then
@@ -5122,8 +5114,7 @@ begin-module net
                 endpoint endpoint-init-local-seq!
                 endpoint endpoint-local-seq@ 1-
                 0
-                [ mtu-size ethernet-header-size -
-                ipv6-header-size - tcp-header-size - ] literal
+                [ mtu-size ipv6-header-size - tcp-header-size - ] literal
                 TCP_SYN
                 endpoint endpoint-remote-mac-addr@
                 self send-ipv4-basic-tcp
