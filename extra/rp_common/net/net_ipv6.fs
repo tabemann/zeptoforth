@@ -3432,7 +3432,7 @@ begin-module net
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
-    ; define process-ipv4-ack-fin-fin-wait-2
+    ; define process-ipv6-ack-fin-fin-wait-2
 
     \ Process an unexpected IPv6 FIN packet
     :noname { addr bytes endpoint self -- }
@@ -4354,14 +4354,14 @@ begin-module net
     :noname ( state endpoint self -- )
       [: { state endpoint self }
         state endpoint endpoint-tcp-state!
-        endpoint endpoint-ipv4-remote@
+        endpoint endpoint-ipv6-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         [ TCP_FIN TCP_ACK or ] literal
         endpoint endpoint-remote-mac-addr@
-        self send-ipv4-basic-tcp
+        self send-ipv6-basic-tcp
         endpoint endpoint-ack-sent
       ;] 2 pick with-endpoint
     ; define send-fin
@@ -5094,7 +5094,7 @@ begin-module net
             state TCP_ESTABLISHED =
             state TCP_SYN_RECEIVED = or
             state TCP_CLOSE_WAIT = or if
-              endpoint endpoint-ipv4-remote@
+              endpoint endpoint-ipv6-remote@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
               state TCP_SYN_RECEIVED = if 1- then
@@ -5106,13 +5106,13 @@ begin-module net
                 TCP_CLOSE_WAIT of TCP_ACK endof
               endcase
               endpoint endpoint-remote-mac-addr@
-              self send-ipv4-basic-tcp
+              self send-ipv6-basic-tcp
               endpoint endpoint-ack-sent
               endpoint advance-endpoint-refresh
             else
               state TCP_SYN_SENT = if
                 endpoint reset-endpoint-local-port
-                endpoint endpoint-ipv4-remote@
+                endpoint endpoint-ipv6-remote@
                 endpoint endpoint-local-port@
                 endpoint endpoint-init-local-seq@ 1+
                 endpoint endpoint-init-local-seq!
@@ -5121,7 +5121,7 @@ begin-module net
                 [ mtu-size ipv6-header-size - tcp-header-size - ] literal
                 TCP_SYN
                 endpoint endpoint-remote-mac-addr@
-                self send-ipv4-basic-tcp
+                self send-ipv6-basic-tcp
                 endpoint advance-endpoint-refresh
               else
                 state TCP_FIN_WAIT_1 = state TCP_LAST_ACK = or if
