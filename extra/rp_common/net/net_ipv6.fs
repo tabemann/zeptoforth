@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -2403,8 +2403,11 @@ begin-module net
       \ Outgoing buffer lock
       lock-size member outgoing-buf-lock
 
+      \ This is to force outgoing-buf to be offset by two bytes
+      2 member outgoing-buf-offset
+
       \ The outgoing frame buffer
-      mtu-size cell align member outgoing-buf
+      ethernet-frame-size cell align 2 + member outgoing-buf
 
       \ Endpoint queue lock
       lock-size member endpoint-queue-lock
@@ -3044,8 +3047,8 @@ begin-module net
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-0 src-1 src-2 src-3
-        addr tcp-src-port hunaligned@ rev16
-        addr tcp-dest-port hunaligned@ rev16
+        addr tcp-src-port h@ rev16
+        addr tcp-dest-port h@ rev16
         src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
           endpoint try-ipv6-accept-endpoint if
             endpoint self put-ready-endpoint
@@ -3063,8 +3066,8 @@ begin-module net
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-0 src-1 src-2 src-3
-        addr tcp-src-port hunaligned@ rev16
-        addr tcp-dest-port hunaligned@ rev16
+        addr tcp-src-port h@ rev16
+        addr tcp-dest-port h@ rev16
         endpoint match-ipv6-connect? if endpoint true unloop exit then
       loop
       0 false
@@ -3098,12 +3101,12 @@ begin-module net
     :noname ( src-0 src-1 src-2 src-3 ) { addr bytes endpoint self -- }
       2drop 2drop
       rng::random endpoint endpoint-init-local-seq!
-      addr tcp-seq-no unaligned@ rev 1+
+      addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
         drop [ max-ipv6-packet-size ipv6-header-size - tcp-header-size - ]
         literal
       then
-      addr tcp-window-size hunaligned@ rev16
+      addr tcp-window-size h@ rev16
       endpoint init-tcp-stream
       endpoint endpoint-ipv6-remote@
       endpoint endpoint-local-port@
@@ -3122,10 +3125,10 @@ begin-module net
     \ Send an IPv6 TCP RST packet in response to a packet
     :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
       src-0 src-1 src-2 src-3
-      addr tcp-src-port hunaligned@ rev16
-      addr tcp-dest-port hunaligned@ rev16
+      addr tcp-src-port h@ rev16
+      addr tcp-dest-port h@ rev16
       rng::random
-      addr tcp-seq-no unaligned@ rev
+      addr tcp-seq-no @ rev
       0
       TCP_RST
       src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
@@ -3159,17 +3162,17 @@ begin-module net
       ( self D: mac-addr remote-addr protocol bytes )
       [: { remote-0 remote-1 remote-2 remote-3
         remote-port local-port seq ack window flags self buf }
-        local-port rev16 buf tcp-src-port hunaligned!
-        remote-port rev16 buf tcp-dest-port hunaligned!
-        seq rev buf tcp-seq-no unaligned!
-        ack rev buf tcp-ack-no unaligned!
+        local-port rev16 buf tcp-src-port h!
+        remote-port rev16 buf tcp-dest-port h!
+        seq rev buf tcp-seq-no !
+        ack rev buf tcp-ack-no !
         [ 5 4 lshift ] literal buf tcp-data-offset c!
         flags buf tcp-flags c!
-        window rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        window rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         self intf-ipv6-addr@
         remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3187,23 +3190,23 @@ begin-module net
       ( self D: mac-addr remote-addr protocol bytes )
       [: { remote-0 remote-1 remote-2 remote-3
         remote-port local-port seq ack window flags self buf }
-        local-port rev16 buf tcp-src-port hunaligned!
-        remote-port rev16 buf tcp-dest-port hunaligned!
-        seq rev buf tcp-seq-no unaligned!
-        ack rev buf tcp-ack-no unaligned!
+        local-port rev16 buf tcp-src-port h!
+        remote-port rev16 buf tcp-dest-port h!
+        seq rev buf tcp-seq-no !
+        ack rev buf tcp-ack-no !
         [ 7 4 lshift ] literal buf tcp-data-offset c!
         flags buf tcp-flags c!
-        window rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        window rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         [ TCP_OPT_MSS 24 lshift 4 16 lshift or
         max-ipv6-packet-size ipv6-header-size - tcp-header-size - or
         rev ] literal
-        buf tcp-header-size + unaligned!
-        [ $01010100 rev ] literal buf tcp-header-size + 4 + unaligned!
+        buf tcp-header-size + !
+        [ $01010100 rev ] literal buf tcp-header-size + 4 + !
         self intf-ipv6-addr@
         remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 8 + 0
         tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3221,18 +3224,18 @@ begin-module net
       { endpoint }
       addr bytes self endpoint
       [: { addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ TCP_SYN_SENT = if
-          addr tcp-ack-no unaligned@ rev
+          addr tcp-ack-no @ rev
           endpoint endpoint-init-local-seq@ <> if exit then
-          addr tcp-seq-no unaligned@ rev 1+
+          addr tcp-seq-no @ rev 1+
           addr bytes tcp-mss@ not if
             drop [ max-ipv6-packet-size ipv6-header-size -
             tcp-header-size - ] literal
           then
-          addr tcp-window-size hunaligned@ rev16
+          addr tcp-window-size h@ rev16
           endpoint init-tcp-stream
         then
         endpoint endpoint-ipv6-remote@
@@ -3258,7 +3261,7 @@ begin-module net
       { endpoint }
       addr bytes self endpoint
       [: { addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ { state }
@@ -3306,7 +3309,7 @@ begin-module net
       { endpoint }
       addr bytes self endpoint
       [: { addr bytes self endpoint }
-        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+        addr tcp-dest-port h@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
         endpoint endpoint-tcp-state@ { state }
@@ -3332,10 +3335,10 @@ begin-module net
       addr full-tcp-header-size { header-size }
       addr header-size + bytes header-size -
       addr tcp-flags c@ TCP_PSH and 0<>
-      addr tcp-seq-no unaligned@ rev
+      addr tcp-seq-no @ rev
       endpoint add-endpoint-tcp-data
-      addr tcp-window-size hunaligned@ rev16
-      addr tcp-ack-no unaligned@ rev
+      addr tcp-window-size h@ rev16
+      addr tcp-ack-no @ rev
       endpoint endpoint-ack-in
       endpoint endpoint-send-ack? if
         endpoint endpoint-ipv6-remote@
@@ -3354,12 +3357,12 @@ begin-module net
     \ Process an IPv6 ACK packet in TCP_SYN_SENT state
     :noname ( addr bytes endpoint self -- )
       [: { addr bytes endpoint self }
-        addr tcp-seq-no unaligned@ rev 1+
+        addr tcp-seq-no @ rev 1+
         addr bytes tcp-mss@ not if
           drop [ max-ipv6-packet-size ipv6-header-size -
           tcp-header-size - ] literal
         then
-        addr tcp-window-size hunaligned@ rev16
+        addr tcp-window-size h@ rev16
         endpoint init-tcp-stream
         endpoint endpoint-ipv6-remote@
         endpoint endpoint-local-port@
@@ -3437,7 +3440,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv6-ack-fin-fin-wait-1
 
@@ -3445,7 +3448,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv4-ack-fin-fin-wait-2
 
@@ -3453,7 +3456,7 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
-      addr tcp-seq-no unaligned@ rev endpoint self add-time-wait
+      addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
     ; define process-ipv6-unexpected-fin
 
@@ -3462,7 +3465,7 @@ begin-module net
       endpoint endpoint-ipv6-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1+
-      addr tcp-seq-no unaligned@ rev 1+
+      addr tcp-seq-no @ rev 1+
       endpoint endpoint-local-window@
       TCP_ACK
 \      [ TCP_FIN TCP_ACK or ] literal
@@ -3476,7 +3479,7 @@ begin-module net
         { endpoint }
         addr bytes self endpoint
         [: { addr bytes self endpoint }
-          addr tcp-dest-port hunaligned@ rev16
+          addr tcp-dest-port h@ rev16
           endpoint endpoint-local-port@ <> if
             exit
           then
@@ -4462,21 +4465,21 @@ begin-module net
       ( addr bytes push? endpoint self D: mac-addr )
       ( remote-0 remote-1 remote-2 remote-3 protocol bytes )
       [: { addr bytes push? endpoint self buf }
-        endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned!
+        endpoint endpoint-local-port@ rev16 buf tcp-src-port h!
         endpoint endpoint-ipv6-remote@ nip nip nip nip rev16
-        buf tcp-dest-port hunaligned!
-        endpoint endpoint-local-seq@ rev buf tcp-seq-no unaligned!
-        endpoint endpoint-ack@ rev buf tcp-ack-no unaligned!
+        buf tcp-dest-port h!
+        endpoint endpoint-local-seq@ rev buf tcp-seq-no !
+        endpoint endpoint-ack@ rev buf tcp-ack-no !
         [ 5 4 lshift ] literal buf tcp-data-offset c!
         push? if [ TCP_ACK TCP_PSH or ] literal else TCP_ACK then
         buf tcp-flags c!
-        endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned!
-        0 buf tcp-urgent-ptr hunaligned!
+        endpoint endpoint-local-window@ rev16 buf tcp-window-size h!
+        0 buf tcp-urgent-ptr h!
         addr buf tcp-header-size + bytes move
         self intf-ipv6-addr@
         endpoint endpoint-ipv6-remote@ drop
         buf tcp-header-size bytes + 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
         [ debug? ] [if]
           buf bytes
           [: { buf bytes }
