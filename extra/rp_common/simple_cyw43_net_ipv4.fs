@@ -27,10 +27,10 @@ begin-module simple-cyw43-net
   frame-process import
   net import
   endpoint-process import
-  simple-net import
+  ipv4-simple-net import
   
-  \ A simple CYW43439 networking and interface class
-  <simple-net> begin-class <simple-cyw43-net>
+  \ A simple IPv4 CYW43439 networking and interface class
+  <ipv4-simple-net> begin-class <simple-cyw43-net>
 
     begin-module simple-cyw43-net-internal
 
@@ -66,7 +66,7 @@ begin-module simple-cyw43-net
     \ (pio::PIO0 or pio::PIO1)
     :noname
       { pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- }
-      self <simple-net>->new
+      self <ipv4-simple-net>->new
 
       default-mac-addr
       cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
@@ -98,7 +98,7 @@ begin-module simple-cyw43-net
     \ the endpoint process
     :noname { self -- }
       self my-cyw43-control init-cyw43
-      self <simple-net>->init-net-no-handler
+      self <ipv4-simple-net>->init-net-no-handler
     ; define init-net-no-handler
 
     \ Alias for the old name
@@ -118,7 +118,7 @@ begin-module simple-cyw43-net
 
   end-implement
 
-  \ Re-exporting <simple-net> methods for the sake of compatibility
+  \ Re-exporting <ipv4-simple-net> methods for the sake of compatibility
 
   \ Initialize a networking and interface class instance
   : init-cyw43-net ( self -- ) init-net ;
