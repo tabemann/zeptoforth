@@ -1044,7 +1044,7 @@ begin-module net-ipv6
 
       \ Save an IPv6 address by a DNS name
       :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self -- )
-        [: { ipv6-0 ipv6-2 ipv6-2 ipv6-3 ident c-addr bytes self }
+        [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self }
           max-dns-cache 0 ?do
             self cached-dns-names i cells + @ ?dup if
               count c-addr bytes equal-case-strings?
@@ -1240,7 +1240,7 @@ begin-module net-ipv6
         self mapped-ipv6-addrs [ max-addresses ipv6-addr-size * ] literal 0 fill
         self mapped-mac-addrs [ max-addresses 2 cells * ] literal $FF fill
         self mapped-addr-ages [ max-addresses cells ] literal 0 fill
-        self mapped-addr-discovery-times [ max addresses cells ] literal 0 fill
+        self mapped-addr-discovery-times [ max-addresses cells ] literal 0 fill
         0 self newest-addr-age !
         self address-map-lock init-lock
       ; define new
@@ -2263,6 +2263,9 @@ begin-module net-ipv6
       \ The IPv6 prefix
       ipv6-addr-size member intf-ipv6-prefix
 
+      \ The IPv6 prefix length
+      cell member intf-ipv6-prefix-len
+      
       \ The IPv6 autonomous state
       cell member intf-autonomous?
 
@@ -2307,6 +2310,9 @@ begin-module net-ipv6
       
       \ Current DHCP transaction id
       cell member current-dhcp-transact-id
+
+      \ Current DHCP request IPv6 address
+      ipv6-addr-size member dhcp-req-ipv6-addr
 
       \ Current DHCP server DUID
       max-duid-size member dhcp-server-duid
@@ -2631,6 +2637,9 @@ begin-module net-ipv6
       
       \ Refresh DHCP
       method refresh-dhcp ( self -- )
+
+      \ Refresh router discovery
+      method refresh-router-discovery ( self -- )
       
       \ Refresh an interface
       method refresh-interface ( self -- )
@@ -2649,9 +2658,6 @@ begin-module net-ipv6
 
       \ Send a DHCPv6 INFORMATION-REQUEST packet
       method send-dhcpv6-information-request ( self -- )
-
-      \ Send a DHCPDECLINE packet
-      method send-dhcpdecline ( self -- )
 
       \ Process a DHCPv6 packet
       method process-dhcpv6-packet ( addr bytes self -- )
@@ -2764,10 +2770,10 @@ begin-module net-ipv6
       frame-interface self out-frame-interface !
       0 0 0 0 self intf-ipv6-addr ipv6-unaligned!
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
-      self intf-ipv6-prefx ipv6-unaligned!
-      true intf-autonomous !
+      self intf-ipv6-prefix ipv6-unaligned!
+      true intf-autonomous? !
       0 0 0 0 self discovered-ipv6-addr ipv6-unaligned!
-      128 addr iptf-ipv6-prefix-len !
+      128 self intf-ipv6-prefix-len !
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self gateway-ipv6-addr ipv6-unaligned!
       $2001 $4860 $4860 $0000 $0000 $0000 $0000 $8888 make-ipv6-addr
@@ -2919,12 +2925,12 @@ begin-module net-ipv6
           then
         then
       then
-    ; define method ipv6-addr-listen?
+    ; define ipv6-addr-listen?
 
     \ Process a MAC address for an IPv6 address
-    :noname { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-2 self -- }
-      mac-addr multicast-mac-addr? if exit then
-      ipv6-0 ipv6-1 ipv6-2 ipv6-2 multicast-ipv6-addr? if exit then
+    :noname { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- }
+      mac-addr mac-addr-multicast? if exit then
+      ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6-addr-multicast? if exit then
       mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 systick::systick-counter
       self address-map save-mac-addr-by-ipv6
       self neighbor-discovery-sema broadcast
@@ -2944,7 +2950,7 @@ begin-module net-ipv6
     \ Process an IPv6 TCP packet
     :noname
       { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
-      bytes ipv6-tcp-header-size >= if
+      bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
         [ debug? ] [if]
@@ -3528,11 +3534,11 @@ begin-module net-ipv6
           ICMPV6_TYPE_ROUTER_ADVERTISE of
             src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
             process-icmpv6-router-advertise-packet
-          then
+          endof
           ICMPV6_TYPE_NEIGHBOR_SOLICIT of
             src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
             process-icmpv6-neighbor-solicit-packet
-          then
+          endof
           ICMPV6_TYPE_NEIGHBOR_ADVERTISE of
             src-mac-addr src-0 src-1 src-2 src-3 addr bytes self
             process-icmpv6-neighbor-advertise-packet
@@ -3617,7 +3623,7 @@ begin-module net-ipv6
       then
       src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
       src-mac-addr mac-addr-multicast? not and if
-        src-mac-addr src-0 src-1 src-2 src-3 systick:systick-counter
+        src-mac-addr src-0 src-1 src-2 src-3 systick::systick-counter
         self address-map save-mac-addr-by-ipv6
       then
       [ icmp-header-size ipv6-addr-size + ] literal { reply-bytes }
@@ -3631,7 +3637,7 @@ begin-module net-ipv6
         ICMP_CODE_UNUSED buf icmp-code c!
         self intf-ipv6-addr@ buf icmp-header-size + ipv6-unaligned!
         src-mac-addr mac-addr-multicast? not if
-          [ NEIGHBOR_SOLICITED rev ] buf icmp-rest-of-header unaligned!
+          [ NEIGHBOR_SOLICITED rev ] literal buf icmp-rest-of-header unaligned!
           [ icmp-header-size ipv6-addr-size + ] literal +to buf
           OPTION_TARGET_LINK_LAYER_ADDR buf c!
           1 buf 1+ c!
@@ -3774,8 +3780,8 @@ begin-module net-ipv6
 
     \ Resolve an IPv6 address's MAC address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
-      self reachable-time @ 0<> if
-        self reachable-time @ self address-map age-out-mac-addrs
+      self neighbor-reachable-time @ 0<> if
+        self neighbor-reachable-time @ self address-map age-out-mac-addrs
       then
       systick::systick-counter self neighbor-retrans-time @ 10 * - { tick }
       max-neighbor-discovery-attempts { attempts }
@@ -4522,9 +4528,9 @@ begin-module net-ipv6
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
         buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 2 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 2 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
         dhcp-log? if
           [: cr ." Constructed DHCPv6 SOLICIT packet" ;] debug-hook execute
         then
@@ -4561,12 +4567,12 @@ begin-module net-ipv6
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
         buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 4 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
+        [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
         0 buf 36 + unaligned!
         0 buf 40 + unaligned!
@@ -4614,12 +4620,12 @@ begin-module net-ipv6
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
         buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 4 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
+        [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
         0 buf 36 + unaligned!
         0 buf 40 + unaligned!
@@ -4668,12 +4674,12 @@ begin-module net-ipv6
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
         buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 4 rev16 ] buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 26 + hunaligned!
-        [ OPTION_IA_NA rev16 ] buf 28 + hunaligned!
-        [ 12 rev16 ] buf 30 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 4 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
+        [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
         0 buf 36 + unaligned!
         0 buf 40 + unaligned!
@@ -4719,9 +4725,9 @@ begin-module net-ipv6
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
         buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] buf 20 + hunaligned!
-        [ 2 rev16 ] buf 22 + hunaligned!
-        [ OPTION_DNS_SERVERS ] buf 24 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 2 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_DNS_SERVERS ] literal buf 24 + hunaligned!
         [ OPTION_SERVERID rev16 ] literal buf 26 + hunaligned!
         self dhcp-server-duid-len @ rev16 buf 28 + hunaligned!
         self dhcp-server-duid buf 30 + self dhcp-server-duid-len @ move
@@ -4778,7 +4784,7 @@ begin-module net-ipv6
             DHCPV6_DECLINE of
               addr bytes self process-dhcpv6-decline
             endof
-          then
+          endcase
         then
       ;] over dhcp-lock with-lock
     ; define process-dhcpv6-packet
@@ -4927,11 +4933,11 @@ begin-module net-ipv6
         self dhcp-renew-interval @ dhcp-renew-retry-divisor /
         self dhcp-renew-interval !
         dhcp-log? if
-          [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
+          [: cr ." Attempting renewing, issuing DHCP RENEW" ;]
           debug-hook execute
         then
         systick::systick-counter self dhcp-renew-start !
-        self send-renew-dhcprequest
+        self send-dhcpv6-renew
       then
     ; define refresh-dhcpv6-discovered
 
@@ -4941,9 +4947,9 @@ begin-module net-ipv6
       dhcp-discover-timeout > if
         systick::systick-counter self dhcp-discover-stage-start !
         dhcp-log? if
-          [: cr ." Timeout, retrying DHCPDISCOVER" ;] debug-hook execute
+          [: cr ." Timeout, retrying DHCP SOLICIT" ;] debug-hook execute
         then
-        self send-dhcpdiscover
+        self send-dhcpv6-solicit
       then
     ; define refresh-dhcpv6-wait-advertise
 
@@ -4953,9 +4959,9 @@ begin-module net-ipv6
       dhcp-discover-timeout > if
         systick::systick-counter self dhcp-discover-stage-start !
         dhcp-log? if
-          [: cr ." TImeout, retrying DHCPREQUEST" ;] debug-hook execute
+          [: cr ." TImeout, retrying DHCP REQUEST" ;] debug-hook execute
         then
-        self send-dhcprequest
+        self send-dhcpv6-request
       then
     ; define refresh-dhcpv6-wait-reply
 
@@ -4974,7 +4980,7 @@ begin-module net-ipv6
     :noname { self -- }
       self router-discovery? @ if
         systick::systick-counter self router-discovery-start @ -
-        self router-discovery-interval @ > if
+        router-discovery-interval > if
           self [: { self }
             self router-discovery? @ if
               self send-icmpv6-router-solicit
@@ -5105,9 +5111,9 @@ begin-module net-ipv6
           addr ipv6-dest-addr ipv6-unaligned@ self ipv6-addr-listen? if
             src-mac-addr addr ipv6-src-addr ipv6-unaligned@
             addr bytes find-ipv6-payload if 
-              addr ipvself ip-interface @ process-ipv6-packet
+              self ip-interface @ process-ipv6-packet
             else
-              2drop 2drop 2drop drop
+              2drop 2drop 2drop 2drop drop
             then
           then
         then

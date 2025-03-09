@@ -158,6 +158,9 @@ begin-module net-config
 
   \ TIME_WAIT interval timeout
   2500 value time-wait-interval-timeout
+
+  \ IPv6 router discovery interval
+  50000 value router-discovery-interval
   
   \ IPv4 discover attempts
   50000 value dhcp-discover-timeout
@@ -209,5 +212,8 @@ begin-module net-config
 
   \ Maximum DNS resolution attempts
   5 value max-dns-resolve-attempts
+
+  \ Maximum neighbor discovery attempts
+  5 value max-neighbor-discovery-attempts
   
 end-module

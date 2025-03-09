@@ -658,8 +658,8 @@ begin-module pico-w-net-http-server
         http-server http-timeout-set? @ if
           http-server http-endpoint @ ?dup if { endpoint }
             endpoint endpoint-tcp-state@ { state }
-            state TCP_SYN_RECEIVED =
-            state TCP_ESTABLISHED = or
+\            state TCP_SYN_RECEIVED =
+            state TCP_ESTABLISHED = \ or
             state TCP_CLOSE_WAIT = or
             state TCP_CLOSED = or if
               http-server http-timeout @ current-systick - 0 max
@@ -684,8 +684,8 @@ begin-module pico-w-net-http-server
           http-server http-timeout @ current-systick - 0<= if
             http-server http-endpoint @ ?dup if { endpoint }
               endpoint endpoint-tcp-state@ { state }
-              state TCP_SYN_RECEIVED =
-              state TCP_ESTABLISHED = or
+\              state TCP_SYN_RECEIVED =
+              state TCP_ESTABLISHED = \ or
               state TCP_CLOSE_WAIT = or
               state TCP_CLOSED = or if
                 cr ." Force-closing connection... "

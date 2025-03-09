@@ -117,10 +117,10 @@ begin-module net-misc
   67 constant dhcp-server-port
 
   \ IPv6 DHCP client port
-  546 constant ipv6-dhcp-client-port
+  546 constant dhcpv6-client-port
 
   \ IPv6 DHCP server port
-  547 constant ipv6-dhcp-server-port
+  547 constant dhcpv6-server-port
 
   \ DHCP discovery state
   0 constant dhcp-not-discovering
@@ -281,7 +281,7 @@ begin-module net-misc
     cfield: icmpv6-ra-m-o-reserved
     hfield: icmpv6-ra-router-lifetime
     field: icmpv6-ra-reachable-time
-    field: icmpv6-ra-retrans-timer
+    field: icmpv6-ra-retrans-time
   end-structure
 
   \ ICMPv6 router advertise "managed" bit
