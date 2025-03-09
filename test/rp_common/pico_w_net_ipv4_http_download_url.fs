@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -60,16 +60,16 @@ begin-module pico-w-net-http
   net-consts import
   net-config import
   net import
+  net-ipv4 import
   endpoint-process import
   alarm import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
 
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
 
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
@@ -222,7 +222,7 @@ begin-module pico-w-net-http
   \ Initialize the test
   : init-test { D: ssid D: pass -- }
     1024 256 1024 0 init-default-alarm-task
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net

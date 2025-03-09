@@ -430,7 +430,7 @@ begin-module cyw43-runner
     \ The constructor.  Note that pio-addr is no longer used but it's
     \ included in the argument list because it comes that way from
     \ the outside.
-    :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- }
+    :noname { fw-addr fw-bytes pwr clk dio cs sm pio self -- }
 
       \ Initialize the superclass
       self <object>->new

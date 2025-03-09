@@ -22,7 +22,7 @@
 \ This is the base class for the "simple network interface" object.  It is
 \ meant to be subclassed with an actual device driver class.
 
-begin-module ipv4-simple-net
+begin-module simple-net-ipv4
 
   oo import
   net-misc import
@@ -35,9 +35,9 @@ begin-module ipv4-simple-net
   : x-endpoint-process-not-started ( -- ) ." endpoint process not started" cr ;
   
   \ An IPv4 simple networking and interface base class
-  <object> begin-class <ipv4-simple-net>
+  <object> begin-class <simple-net-ipv4>
 
-    begin-module ipv4-simple-net-internal
+    begin-module simple-net-ipv4-internal
 
       \ The IP stack interface
       <ipv4-interface> class-size member my-interface
@@ -85,7 +85,7 @@ begin-module ipv4-simple-net
   end-class
 
   \ Implement the common IPv4 networking and interface class
-  <ipv4-simple-net> begin-implement
+  <simple-net-ipv4> begin-implement
 
     \ Constructor.  
     :noname

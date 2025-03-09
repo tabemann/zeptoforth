@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -65,21 +65,21 @@ begin-module pico-w-net-udp-interval
   net-consts import
   net-config import
   net import
+  net-ipv4 import
   endpoint-process import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
 
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
   
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
 
   \ Initialize the test
   : init-test ( -- )
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
@@ -88,9 +88,31 @@ begin-module pico-w-net-udp-interval
   \ Event message buffer
   event-message-size aligned-buffer: my-event
 
+  \ The sending task
+  variable send-task
+
+  \ The mailbox
+  variable send-mailbox
+  
+  \ Send alarm time
+  variable send-alarm-time
+
+  \ Send alarm interval
+  variable send-alarm-interval
+  
+  \ Send alarm handler
+  defer send-alarm-handler ( -- )
+  :noname
+    0 timer::clear-alarm-int
+    0 send-task @ task::notify
+    send-alarm-interval @ send-alarm-time +!
+    send-alarm-time @ ['] send-alarm-handler 0 timer::set-alarm
+  ; is send-alarm-handler
+  
   \ Start the server
   : start-client { interval src-port addr dest-port D: ssid D: pass -- }
     init-test
+    interval 100 * send-alarm-interval !
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-control @ disable-all-cyw43-events
@@ -116,12 +138,10 @@ begin-module pico-w-net-udp-interval
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
-    interval src-port addr dest-port 4 [: { interval src-port addr dest-port }
-      systick::systick-counter { time }
+    src-port addr dest-port 3 [: { src-port addr dest-port }
       0 { index }
       begin
-        interval time task::current-task task::delay
-        interval +to time
+        0 task::wait-notify drop
         index src-port addr dest-port cell [: { index buf }
           index net-misc::rev buf ! true
         ;] my-interface @ send-ipv4-udp-packet drop
@@ -129,9 +149,12 @@ begin-module pico-w-net-udp-interval
         1 +to index
         my-cyw43-net toggle-pico-w-led
       again
-    ;] 512 256 1024 task::spawn
-    c" udp-client" over task::task-name!
-    task::run
+    ;] 512 256 1024 task::spawn send-task !
+    c" udp-client" send-task @ task::task-name!
+    send-mailbox 1 send-task @ task::config-notify
+    send-task @ task::run
+    timer::us-counter-lsb send-alarm-interval @ + send-alarm-time !
+    send-alarm-time @ ['] send-alarm-handler 0 timer::set-alarm
   ;
 
 end-module

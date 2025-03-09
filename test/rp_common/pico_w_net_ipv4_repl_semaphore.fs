@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -70,23 +70,28 @@ begin-module pico-w-net-repl
   net-consts import
   net-config import
   net import
+  net-ipv4 import
   endpoint-process import
-  stream import
   sema import
-  alarm import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  slock import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
   
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
 
   \ Port to set server at
   6668 constant server-port
+  
+  \ Server Rx lock
+  slock-size buffer: server-rx-slock
+  
+  \ Server Tx lock
+  slock-size buffer: server-tx-slock
   
   \ Server active
   variable server-active?
@@ -95,68 +100,175 @@ begin-module pico-w-net-repl
   variable server-task
 
   \ Tx and rx delay
-  250 constant server-delay
+  50 constant server-delay
   
-  \ Constant for number of bytes to buffer in the Rx stream
-  2048 constant rx-stream-size
-
-  \ Rx stream
-  rx-stream-size stream-size buffer: rx-stream
+  \ RAM variable for rx buffer read-index
+  variable rx-read-index
   
-  \ Constant for number of bytes to buffer in the Tx stream
-  2048 constant tx-stream-size
-
-  \ Tx stream
-  tx-stream-size stream-size buffer: tx-stream
-
-  \ Constant for number of bytes to buffer for Tx
+  \ RAM variable for rx buffer write-index
+  variable rx-write-index
+  
+  \ Constant for number of bytes to buffer
+  2048 constant rx-buffer-size
+  
+  \ Rx buffer index mask
+  $7FF constant rx-index-mask
+  
+  \ Rx buffer
+  rx-buffer-size buffer: rx-buffer
+  
+  \ Variables for tx buffer write-index
+  2variable tx-write-index
+  
+  \ Tx buffer index
+  variable tx-buffer-index
+    
+  \ Constant for number of bytes to buffer
   2048 constant tx-buffer-size
   
   \ Tx buffers
-  tx-buffer-size buffer: tx-buffer
+  tx-buffer-size 2 * buffer: tx-buffers
   
-  \ Tx send size
-  variable tx-size
-
-  \ tx alarm
-  alarm-size buffer: tx-alarm
-
-  \ Tx send semaphore
-  sema-size buffer: tx-sema
+  \ Tx timeout
+  100 value tx-timeout
   
-  \ Tx complete semaphore
-  sema-size buffer: tx-complete-sema
+  \ Tx timeout start
+  variable tx-timeout-start
   
+  \ Rx semaphore
+  sema-size aligned-buffer: rx-sema
+  
+  \ Tx semaphore
+  sema-size aligned-buffer: tx-sema
+  
+  \ Tx block semaphore
+  sema-size aligned-buffer: tx-block-sema
+    
   \ The TCP endpoint
   variable my-endpoint
   
+  \ Get whether the rx buffer is full
+  : rx-full? ( -- f )
+    rx-write-index @ rx-read-index @
+    rx-buffer-size 1- + rx-index-mask and =
+  ;
+
+  \ Get whether the rx buffer is empty
+  : rx-empty? ( -- f )
+    rx-read-index @ rx-write-index @ =
+  ;
+
+  \ Write a byte to the rx buffer
+  : write-rx ( c -- )
+    rx-full? not if
+      rx-write-index @ rx-buffer + c!
+      rx-write-index @ 1+ rx-index-mask and rx-write-index !
+    else
+      drop
+    then
+  ;
+
+  \ Read a byte from the rx buffer
+  : read-rx ( -- c )
+    rx-empty? not if
+      rx-read-index @ rx-buffer + c@
+      rx-read-index @ 1+ rx-index-mask and rx-read-index !
+    else
+      0
+    then
+  ;
+
+  \ Get whether the tx buffer is full
+  : tx-full? ( -- f )
+    tx-write-index tx-buffer-index @ cells + @ tx-buffer-size =
+  ;
+  
+  \ Get whether the tx buffer is empty
+  : tx-empty? ( -- f )
+    tx-write-index @ 0= tx-write-index cell+ @ 0= and
+  ;
+
+  \ Write a byte to the tx buffer
+  : write-tx { c -- }
+    tx-buffer-index @ { buffer-index }
+    tx-write-index buffer-index cells + { write-var }
+    write-var @ { write-index }
+    write-index tx-buffer-size <> if
+      c tx-buffers buffer-index tx-buffer-size * + write-index + c!
+      1 write-var +!
+    then
+  ;
+
   \ Do server transmission
   : do-server ( -- )
     begin
-      tx-sema take
-      tx-buffer tx-buffer-size tx-stream recv-stream { bytes-read }
-      bytes-read tx-size !
+      tx-timeout systick::systick-counter tx-timeout-start @ - - 0 max { my-timeout }
+      my-timeout task::timeout !
+      tx-sema ['] take try
+      dup ['] task::x-timed-out = if 2drop 0 then
+      task::no-timeout task::timeout !
+      ?raise 
       server-active? @ if
-        tx-buffer bytes-read my-endpoint @ my-interface @ send-tcp-endpoint
-        my-cyw43-net toggle-pico-w-led
-        0 tx-size !
-        tx-complete-sema broadcast
-        tx-complete-sema give
+        [: 
+          tx-buffer-index @ { buffer-index }
+          tx-buffers buffer-index tx-buffer-size * +
+          tx-write-index buffer-index cells + @
+          buffer-index 1+ 1 and dup { new-buffer-index } tx-buffer-index ! 
+          0 tx-write-index new-buffer-index cells + !
+        ;] server-tx-slock with-slock { buffer count }
+        count 0> if
+          my-endpoint @ if
+            buffer count my-endpoint @ my-interface @ send-tcp-endpoint
+            my-cyw43-net toggle-pico-w-led
+          then
+        then
       then
+      systick::systick-counter tx-timeout-start !
+      tx-block-sema broadcast
+      tx-block-sema give
     again
   ;
   
   \ Actually handle received data
   : do-rx-data ( c-addr bytes -- )
-    rx-stream send-stream-partial-no-block drop
+    dup 0> if
+      [: { c-addr bytes }
+        c-addr bytes + c-addr ?do
+          rx-full? not if
+            i c@ write-rx
+          else
+            leave
+          then
+        loop
+      ;] server-rx-slock with-slock
+      rx-sema broadcast
+      rx-sema give
+    then
   ;
   
   \ EMIT for telnet
   : telnet-emit ( c -- )
     server-active? @ if
-      tx-stream stream-full? if tx-sema give then
-      { W^ buffer }
-      buffer 1 tx-stream send-stream
+      begin
+        [:
+          tx-full? not if
+            write-tx
+            true
+          else
+            tx-sema give
+            false
+          then
+        ;] server-tx-slock with-slock
+        dup not if
+          task::timeout @ { old-timeout }
+          server-delay 10 * task::timeout !
+          tx-block-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
+          old-timeout task::timeout !
+          ?raise
+        then
+      until
     else
       drop
     then
@@ -165,7 +277,7 @@ begin-module pico-w-net-repl
   \ EMIT? for telnet
   : telnet-emit? ( -- emit? )
     server-active? @ if
-      tx-stream stream-empty? not
+      [: tx-full? not ;] server-tx-slock with-slock
     else
       false
     then
@@ -173,15 +285,35 @@ begin-module pico-w-net-repl
 
   \ KEY for telnet
   : telnet-key ( -- c )
-    0 { W^ buffer }
-    buffer 1 rx-stream recv-stream drop
-    buffer c@
+    begin
+      server-active? @ if
+        [:
+          rx-empty? not if
+            read-rx
+            true
+          else
+            false
+          then
+        ;] server-rx-slock with-slock
+        dup not if
+          task::timeout @ { old-timeout }
+          server-delay 10 * task::timeout !
+          rx-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
+          old-timeout task::timeout !
+          ?raise
+        then
+      else
+        false
+      then
+    until
   ;
 
   \ KEY? for telnet
   : telnet-key? ( -- key? )
     server-active? @ if
-      rx-stream stream-empty? not
+      [: rx-empty? not ;] server-rx-slock with-slock
     else
       false
     then
@@ -221,14 +353,20 @@ begin-module pico-w-net-repl
 
   \ Initialize the test
   : init-test ( -- )
-    rx-stream-size rx-stream init-stream
-    tx-stream-size tx-stream init-stream
-    0 tx-size !
-    1 0 tx-sema init-sema
-    1 0 tx-complete-sema init-sema
+    server-tx-slock init-slock
+    server-rx-slock init-slock
+    0 tx-buffer-index !
+    0 tx-write-index !
+    0 tx-write-index cell+ !
+    0 rx-read-index !
+    0 rx-write-index !
+    systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    1 0 rx-sema init-sema
+    1 0 tx-sema init-sema
+    1 0 tx-block-sema init-sema
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
@@ -236,21 +374,13 @@ begin-module pico-w-net-repl
     my-tcp-session-handler
     my-cyw43-net net-endpoint-process@ add-endpoint-handler
     0 ['] do-server 512 128 1024 1 task::spawn-on-core server-task !
-    c" server-tx" server-task @ task::task-name!
+    c" repl-tx" server-task @ task::task-name!
     server-task @ task::run
   ;
 
   \ Event message buffer
   event-message-size aligned-buffer: my-event
 
-  \ Carry out the Tx alarm
-  defer tx-action
-  :noname ( x x -- )
-    2drop
-    tx-sema give
-    server-delay 0 0 ['] tx-action tx-alarm set-alarm-delay-default
-  ; is tx-action
-  
   \ Connect to WiFi
   : connect-wifi { D: ssid D: pass -- }
     init-test
@@ -279,7 +409,6 @@ begin-module pico-w-net-repl
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
-    server-delay 0 0 ['] tx-action tx-alarm set-alarm-delay-default
   ;
 
   \ Start the server
@@ -287,16 +416,16 @@ begin-module pico-w-net-repl
     connect-wifi
     server-port my-interface @ allocate-tcp-listen-endpoint if
       my-endpoint !
-      \ 0 [:
-      \   begin
-      \     my-endpoint @ if
-      \       my-endpoint @ net-internal::endpoint-out-packets
-      \       net-internal::out-packet-window @ dup cr ." Window: " .
-      \       0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
-      \     then
-      \     1000 ms
-      \   again
-      \ ;] 320 128 1024 task::spawn task::run
+\      0 [:
+\        begin
+\          my-endpoint @ if
+\            my-endpoint @ net-internal::endpoint-out-packets
+\            net-internal::out-packet-window @ dup cr ." Window: " .
+\            0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
+\          then
+\          1000 ms
+\        again
+\      ;] 320 128 1024 task::spawn task::run
     else
       drop
     then
@@ -304,9 +433,19 @@ begin-module pico-w-net-repl
   
   \ Flush the telnet console
   : telnet-flush-console ( -- )
-    begin server-active? @ tx-stream stream-empty? not or tx-size @ 0<> or while
-      tx-complete-sema take
-    repeat
+    server-active? @ if
+      begin
+        [:
+          tx-empty? if
+            true
+          else
+            tx-sema give
+            false
+          then
+        ;] server-tx-slock with-slock
+        dup not if server-delay ms then
+      until
+    then
   ;
   
   \ Set up telnet as a console

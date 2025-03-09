@@ -64,10 +64,9 @@ begin-module ipv4-pico-w-cyw43-net
   \ Implement an IPv4 CYW43493 networking and interface class for the Pico W
   <ipv4-pico-w-cyw43-net> begin-implement
 
-    \ Constructor, using a specified PIO instruction base address, PIO state
-    \ machine index, and PIO instance (pio::PIO0 or pio::PIO1)
-    :noname { pio-addr sm-index pio-instance self -- }
-      pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance
+    \ Constructor, using a PIO state machine index, and PIO instance
+    :noname { sm-index pio-instance self -- }
+      pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance
       self <ipv4-simple-cyw43-net>->new
       false self pico-w-led-state !
     ; define new
