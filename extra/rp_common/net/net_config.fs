@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ begin-module net-config
   value debug-hook
 
   \ Are we debugging?
-  false constant debug?
+  true constant debug?
   
   \ DHCP logging
   false value dhcp-log?

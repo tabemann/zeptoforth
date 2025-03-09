@@ -3576,10 +3576,11 @@ begin-module net-ipv6
       self intf-hop-limit @ { saved-hop-limit }
       255 self intf-hop-limit !
       self
-      ALL_ROUTERS_LINK_LOCAL_MULTICAST
+      ALL_ROUTERS_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-ipv6-addr@ PROTOCOL_ICMPV6
       [ icmp-header-size 2 + mac-addr-size + ] literal
       [: { self buf }
+        [ debug? ] [if] ['] .s debug-hook execute [then]
         ICMPV6_TYPE_ROUTER_SOLICIT buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         0 buf icmp-rest-of-header unaligned!

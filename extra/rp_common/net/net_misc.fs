@@ -80,6 +80,11 @@ begin-module net-misc
     40 2rshift 1 and 0<>
   ;
 
+  \ Get an IPv6 multicast MAC address
+  : ipv6-multicast-mac-addr ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- mac-0 mac-1 )
+    drop drop drop $3333
+  ;
+
   \ Get the solicit link-local multicast address
   : solicit-node-link-local-multicast
     ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- ipv6-0' ipv6-1' ipv6-2' ipv6-3' )
