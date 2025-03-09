@@ -635,6 +635,18 @@ begin-module net-misc
     0 24 ?do ip i rshift $FF and (.) i 0 <> if ." ." then -8 +loop
   ;
 
+  \ Print an IPv6 address
+  : ipv6. ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- )
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4
+  ;
+  
   \ Strip an Ethernet header
   : strip-ethernet-header { addr bytes -- addr' bytes' }
     addr cyw43-structs::ethernet-header-size +
