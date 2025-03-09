@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ begin-module net-misc
   : make-link-local-ipv6-addr
     { mac-addr-0 mac-addr-1 -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 }
     mac-addr-0 $FFFFF and $FE000000 or \ ipv6-0
-    mac-addr-0 16 rshift $FF00 and $FF or mac-addr1 16 lshift or
+    mac-addr-0 16 rshift $FF00 and $FF or mac-addr-1 16 lshift or
     $02000000 xor \ ipv6-1
     0 \ ipv6-2
     $FE800000 \ ipv6-3
@@ -481,7 +481,7 @@ begin-module net-misc
     r6 r6 rev_,_
     0 r7 r0 ldr_,[_,#_]
     r0 r0 rev_,_
-    0 r7 r0 str_.[_,#_]
+    0 r7 r0 str_,[_,#_]
     4 r7 r0 ldr_,[_,#_]
     r0 r0 rev_,_
     4 r7 r0 str_,[_,#_]

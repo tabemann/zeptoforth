@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ipv4-pico-w-cyw43-net
+begin-module pico-w-cyw43-net-ipv4
 
   oo import
-  ipv4-simple-cyw43-net import
+  simple-cyw43-net-ipv4 import
 
-  begin-module ipv4-pico-w-cyw43-net-internal
+  begin-module pico-w-cyw43-net-ipv4-internal
 
     \ The pins used for the CYW43 interface
     23 constant pwr-pin
@@ -34,9 +34,9 @@ begin-module ipv4-pico-w-cyw43-net
   end-module> import
 
   \ A CYW43439 networking and interface class for the Pico W
-  <ipv4-simple-cyw43-net> begin-class <ipv4-pico-w-cyw43-net>
+  <simple-cyw43-net-ipv4> begin-class <pico-w-cyw43-net-ipv4>
 
-    continue-module ipv4-pico-w-cyw43-net-internal
+    continue-module pico-w-cyw43-net-ipv4-internal
 
       \ LED state
       cell member pico-w-led-state
@@ -62,31 +62,31 @@ begin-module ipv4-pico-w-cyw43-net
   end-class
 
   \ Implement an IPv4 CYW43493 networking and interface class for the Pico W
-  <ipv4-pico-w-cyw43-net> begin-implement
+  <pico-w-cyw43-net-ipv4> begin-implement
 
     \ Constructor, using a PIO state machine index, and PIO instance
     :noname { sm-index pio-instance self -- }
       pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance
-      self <ipv4-simple-cyw43-net>->new
+      self <simple-cyw43-net-ipv4>->new
       false self pico-w-led-state !
     ; define new
 
     \ Initialize the CYW43439 network and interface object
     :noname { self -- }
-      self <ipv4-simple-cyw43-net>->init-cyw43-net
+      self <simple-cyw43-net-ipv4>->init-cyw43-net
       self pico-w-led-state @ self pico-w-led!
     ; define init-cyw43-net
 
     \ Initialize the CYW43439 network and interface object without starting
     \ the endpoint process
     :noname { self -- }
-      self <ipv4-simple-cyw43-net>->init-cyw43-net-no-handler
+      self <simple-cyw43-net-ipv4>->init-cyw43-net-no-handler
       self pico-w-led-state @ self pico-w-led!
     ; define init-cyw43-net-no-handler
 
     \ Set the state of the Pico W's LED
     :noname { state self -- }
-      state 0 self <ipv4-simple-cyw43-net>->cyw43-gpio!
+      state 0 self <simple-cyw43-net-ipv4>->cyw43-gpio!
       state self pico-w-led-state !
     ; define pico-w-led!
 
@@ -105,7 +105,7 @@ begin-module ipv4-pico-w-cyw43-net
       gpio 0= if
         state self pico-w-led!
       else
-        state gpio self <ipv4-simple-cyw43-net>->cyw43-gpio!
+        state gpio self <simple-cyw43-net-ipv4>->cyw43-gpio!
       then
     ; define cyw43-gpio!
     

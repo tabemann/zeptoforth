@@ -27,10 +27,10 @@ begin-module simple-cyw43-net-ipv4
   frame-process import
   net import
   endpoint-process import
-  ipv4-simple-net import
+  simple-net-ipv4 import
   
   \ A simple IPv4 CYW43439 networking and interface class
-  <simple-net-ipv4> begin-class <simple-cyw43-net>
+  <simple-net-ipv4> begin-class <simple-cyw43-net-ipv4>
 
     begin-module simple-cyw43-net-internal
 
@@ -52,14 +52,14 @@ begin-module simple-cyw43-net-ipv4
     method cyw43-control@ ( self -- control )
 
     \ These just aliases, but they are sometimes invoked as
-    \ <simple-cyw43-net>->init-cyw43-net etc. so the need to be methods
+    \ <simple-cyw43-net-ipv4>->init-cyw43-net etc. so the need to be methods
     method init-cyw43-net ( self -- )
     method init-cyw43-net-no-handler ( self -- )
 
   end-class
 
   \ Implement the CYW43439 networking and interface class
-  <simple-cyw43-net> begin-implement
+  <simple-cyw43-net-ipv4> begin-implement
 
     \ The constructor, using a specified PWR pin, DIO pin, CS pin, CLK pin,
     \ PIO state machine index, and PIO instance
