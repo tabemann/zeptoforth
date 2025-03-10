@@ -76,3 +76,5 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-Y: Paste the contents of the clipboard at the cursor, unless searching, where then the contents of the clipboard will be pasted into the search string, and will then be searched for.
 * Control-Z: Carry out one undo; note that some operations have their undos combined, while others may be split into multiple undos (i.e. are non-atomic).
 * Control-L: Refresh the display, e.g. if the terminal has changed size.
+* F1: Disable autoindent for the current buffer.
+* F2: Enable autoindent for the current buffer.
