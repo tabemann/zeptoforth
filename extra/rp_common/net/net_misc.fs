@@ -615,12 +615,13 @@ begin-module net-misc
   ;
 
   \ Do an alignment-safe IPv6 address store
-  : ipv6-unaligned! { x0 x1 x2 x3 addr -- }
-    x3 addr unaligned!
-    x2 addr cell + unaligned!
-    x1 addr [ 2 cells ] literal + unaligned!
-    x0 addr [ 3 cells ] literal + unaligned!
+  : ipv6-unaligned! ( x0 x1 x2 x3 addr -- )
+    { addr }
     rev128
+    addr unaligned!
+    addr cell + unaligned!
+    addr [ 2 cells ] literal + unaligned!
+    addr [ 3 cells ] literal + unaligned!
   ;
 
   \ Compare two IPv6 addresses

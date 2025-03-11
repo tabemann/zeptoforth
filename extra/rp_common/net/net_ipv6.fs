@@ -2905,19 +2905,23 @@ begin-module net-ipv6
     ; define intf-hop-limit!
 
     \ Are we listening to IPv6 address
-    :noname { src-0 src-1 src-2 src-3 self -- listen? }
-      src-0 src-1 src-2 src-3 self intf-ipv6-addr@ ipv6= if
+    :noname { dest-0 dest-1 dest-2 dest-3 self -- listen? }
+      [ debug? ] [if]
+        dest-0 dest-1 dest-2 dest-3
+        [: cr ." ipv6-addr-listen " ipv6. ;] debug-hook execute
+      [then]
+      dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@ ipv6= if
         true
       else
-        src-0 src-1 src-2 src-3
+        dest-0 dest-1 dest-2 dest-3
         self intf-mac-addr@ make-link-local-ipv6-addr ipv6= if
           true
         else
-          src-0 src-1 src-2 src-3 ipv6-addr-multicast? if
-            src-0 src-1 src-2 src-3 ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
+          dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if
+            dest-0 dest-1 dest-2 dest-3 ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
               true
             else
-              src-0 src-1 src-2 src-3
+              dest-0 dest-1 dest-2 dest-3
               self intf-ipv6-addr@ solicit-node-link-local-multicast ipv6=
             then
           else
@@ -2925,6 +2929,9 @@ begin-module net-ipv6
           then
         then
       then
+      [ debug? ] [if]
+        dup [: cr ."  match: " . ;] debug-hook execute
+      [then]
     ; define ipv6-addr-listen?
 
     \ Process a MAC address for an IPv6 address
@@ -2935,15 +2942,19 @@ begin-module net-ipv6
       self address-map save-mac-addr-by-ipv6
       self neighbor-discovery-sema broadcast
       self neighbor-discovery-sema give
+      [ debug? ] [if]
+        [: cr ." Processed MAC address for IPv6 address" ;] debug-hook execute
+      [then]
     ; define process-ipv6-mac-addr
 
     \ Process an IPv6 packet
-    :noname ( src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- )
+    :noname
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- )
       3 pick case
         PROTOCOL_UDP of process-ipv6-udp-packet endof
         PROTOCOL_TCP of process-ipv6-tcp-packet endof
         PROTOCOL_ICMPV6 of process-icmpv6-packet endof
-        >r 2drop 2drop 2drop 2drop r>
+        >r 2drop 2drop 2drop 2drop 2drop r>
       endcase
     ; define process-ipv6-packet
 
@@ -3568,6 +3579,9 @@ begin-module net-ipv6
         0 icmp-checksum compute-inet-checksum rev16
         buf icmp-checksum hunaligned!
         true
+        [ debug? ] [if]
+          [: cr ." Sending neighbor solicit" ;] debug-hook execute
+        [then]
       ;] self construct-and-send-ipv6-packet drop
     ; define send-icmpv6-neighbor-solicit
 
@@ -3580,7 +3594,6 @@ begin-module net-ipv6
       self intf-ipv6-addr@ PROTOCOL_ICMPV6
       [ icmp-header-size 2 + mac-addr-size + ] literal
       [: { self buf }
-        [ debug? ] [if] ['] .s debug-hook execute [then]
         ICMPV6_TYPE_ROUTER_SOLICIT buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         0 buf icmp-rest-of-header unaligned!
@@ -3592,6 +3605,9 @@ begin-module net-ipv6
         0 icmp-checksum compute-inet-checksum rev16
         buf icmp-checksum hunaligned!
         true
+        [ debug? ] [if]
+          [: cr ." Sending router solicit" ;] debug-hook execute
+        [then]
       ;] self construct-and-send-ipv6-packet drop
       self intf-hop-limit @ 255 = if
         saved-hop-limit self intf-hop-limit !
@@ -3615,6 +3631,9 @@ begin-module net-ipv6
 
     \ Process an ICMPv6 neighbor solicit packet
     :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
+      [ debug? ] [if]
+        [: cr ." Processing neighbor solicit" ;] debug-hook execute
+      [then]
       bytes icmp-header-size ipv6-addr-size + < if exit then
       addr icmp-header-size + ipv6-unaligned@ self intf-ipv6-addr@ ipv6= not if
         exit
@@ -3622,6 +3641,9 @@ begin-module net-ipv6
       OPTION_SOURCE_LINK_LAYER_ADDR addr bytes find-icmpv6-opt if
         6 >= if mac@ to src-mac-addr else drop exit then
       then
+      [ debug? ] [if]
+        [: cr ." Good neighbor solicit" ;] debug-hook execute
+      [then]
       src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
       src-mac-addr mac-addr-multicast? not and if
         src-mac-addr src-0 src-1 src-2 src-3 systick::systick-counter
@@ -3643,18 +3665,30 @@ begin-module net-ipv6
           OPTION_TARGET_LINK_LAYER_ADDR buf c!
           1 buf 1+ c!
           src-mac-addr buf 2 + mac!
+          [ debug? ] [if]
+            [: cr ." Setting target link layer address" ;] debug-hook execute
+          [then]
         else
           0 buf icmp-rest-of-header unaligned!
         then
         buf bytes 0 icmp-checksum compute-inet-checksum rev16
         buf icmp-checksum hunaligned!
         true
+        [ debug? ] [if]
+          [: cr ." Sending neighbor advertise" ;] debug-hook execute
+        [then]
       ;] self construct-and-send-ipv6-packet drop
     ; define process-icmpv6-neighbor-solicit-packet
 
     \ Process an ICMPv6 neighbor advertise packet
     :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
+      [ debug? ] [if]
+        [: cr ." Processing neighbor advertise" ;] debug-hook execute
+      [then]
       bytes icmp-header-size ipv6-addr-size + < if exit then
+      [ debug? ] [if]
+        [: cr ." Good neighbor advertise" ;] debug-hook execute
+      [then]
       addr icmp-header-size + ipv6-unaligned@
       { target-0 target-1 target-2 target-3 }
       src-mac-addr target-0 target-1 target-2 target-3
@@ -3665,11 +3699,17 @@ begin-module net-ipv6
     :noname ( D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- )
       [:
         { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self }
+        [ debug? ] [if]
+          [: cr ." Processing router advertise" ;] debug-hook execute
+        [then]
         bytes icmpv6-ra-header-size < if exit then
         src-mac-addr src-0 src-1 src-2 src-3
         self process-ipv6-mac-addr
         self router-discovery? @ if
           addr icmpv6-ra-router-lifetime hunaligned@ rev16 dup 0= if exit then
+          [ debug? ] [if]
+            [: cr ." Good router advertise" ;] debug-hook execute
+          [then]
           self router-lifetime !
           src-0 src-1 src-2 src-3 self gateway-ipv6-addr ipv6-unaligned!
           addr icmpv6-ra-cur-hop-limit c@ self intf-hop-limit !
@@ -3695,6 +3735,9 @@ begin-module net-ipv6
                   opt-addr icmpv6-prefix-info-flags c@
                   icmpv6-prefix-info-autonomous and 0<>
                   dup self intf-autonomous!
+                  [ debug? ] [if]
+                    [: cr ." Got prefix info" ;] debug-hook execute
+                  [then]
                 else
                   false
                 then
@@ -3717,6 +3760,10 @@ begin-module net-ipv6
           true self router-discovered? !
           systick::systick-counter self router-discovered-start !
           self router-discovery-sema give
+        else
+          [ debug? ] [if]
+            [: cr ." Not handling router advertise" ;] debug-hook execute
+          [then]
         then
       ;] over router-discovery-lock with-lock
     ; define process-icmpv6-router-advertise-packet
@@ -3728,18 +3775,12 @@ begin-module net-ipv6
         2 pick ethernet-frame-size u<= averts x-oversized-frame
         [: { bytes xt self }
           self outgoing-buf xt execute if
-            \            [ debug? ] [if]
-            \              [: cr ." BEFORE SEND depth: " depth . ;] debug-hook execute
-            \            [then]
             [ debug? ] [if]
               self outgoing-buf dup bytes +
               [: cr ." SENT: " dump ;] debug-hook execute
             [then]
             self outgoing-buf bytes self out-frame-interface @ put-tx-frame
             true
-            \            [ debug? ] [if]
-            \              [: cr ." AFTER SEND depth: " depth . ;] debug-hook execute
-            \            [then]
           else
             false
           then
@@ -3759,9 +3800,9 @@ begin-module net-ipv6
         self intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_IPV6 rev16 ] literal buf ethh-ether-type h!
         buf ethernet-header-size + { ip-buf }
-        IPV6_VERSION_TRAFFIC_FLOW_CONST
+        [ IPV6_VERSION_TRAFFIC_FLOW_CONST rev ] literal
         ip-buf ipv6-version-traffic-flow unaligned!
-        bytes ip-buf ipv6-payload-len hunaligned!
+        bytes rev16 ip-buf ipv6-payload-len hunaligned!
         protocol ip-buf ipv6-next-header c!
         self intf-hop-limit c@ ip-buf ipv6-hop-limit c!
         src-0 src-1 src-2 src-3 ip-buf ipv6-src-addr ipv6-unaligned!
@@ -5105,6 +5146,10 @@ begin-module net-ipv6
     :noname { addr bytes self -- }
       addr ethh-ether-type h@ [ ETHER_TYPE_IPV6 rev16 ] literal = if
         addr ethh-source-mac mac@ { D: src-mac-addr }
+        [ debug? ] [if]
+          src-mac-addr
+          [: cr ." Received ETHER_TYPE_IPV6 from " mac. ;] debug-hook execute
+        [then]
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
         bytes ipv6-header-size >= if
