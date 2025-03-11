@@ -195,8 +195,6 @@ begin-module mqtt
   net-consts import
   net import
   endpoint-process import
-  \ simple-cyw43-net import
-
 
   \ Communication state constants
   0 constant none
@@ -206,36 +204,56 @@ begin-module mqtt
   4 constant close-connection
 
   <endpoint-handler> begin-class <mqtt-client>
-    \ members
+    \ Interface
     cell member iface
-    cell member cyw43-net
+    \ Allocated endpoint
     cell member mqtt-endpoint
+    \ IP of mqtt server
     cell member mqtt-server-ip
+    \ Port of mqtt server
     cell member mqtt-server-port
+    \ Mqtt client id 
     9 cell align member mqtt-client-id
+    \ Address of mqtt user 
     cell member mqtt-user-addr
+    \ Size of mqtt user
     cell member mqtt-user-size
+    \ Address of mqtt password
     cell member mqtt-password-addr
+    \ Size of mqtt password
     cell member mqtt-password-size
+    \ Address of mqtt topic 
     cell member mqtt-topic-addr
+    \ Size of mqtt topic
     cell member mqtt-topic-size
+    \ Address of mqtt message
     cell member mqtt-message-addr
+    \ Size of mqtt message
     cell member mqtt-message-size
+    \ Communication state
     cell member com-state
+    \ Semaphore to enable publishing
     sema-size cell align member pub-sema
+    \ Flag to change pub-sema semaphore
     cell member sema-give?
+    \ Publication done handler's token
     cell member pub-done-handler
 
-    \ methods
-    \ debug
-    method class->
-    \ init base settings
-    method init-mqtt-client
-    \ setters and gettesr
-    method credentials!
-    \ util
-    method publish
-    method pub-done-handler!
+    \ Debug prologoue
+    method class-> ( self -- )
+
+    \ Init mqtt client - set iface, server ip and port
+    method init-mqtt-client ( iface dest-addr dest-port self -- )
+    
+    \ Set user name, passsword and generate client id
+    method credentials! ( D: user-str D: password-str self -- )
+
+    \ Connect to mqtt server and allocate endpoint
+    method publish ( D: topic D: message message-id self -- )
+
+    \ Set publication done handler
+    method pub-done-handler! ( xt-handler self -- ) 
+
   end-class
 
   <mqtt-client> begin-implement
@@ -247,7 +265,6 @@ begin-module mqtt
 
     \ Init mqtt client - set iface, server ip and port  
     :noname { {iface} dest-addr dest-port self -- }
-      \ debug
       [ debug? ] [if] self class-> ." init-mqtt-client method" [then]
 
       {iface} self iface !
@@ -271,7 +288,6 @@ begin-module mqtt
 
     \ MQTT endpoint handler
     :noname { endpoint self }
-      \ my-cyw43-net toggle-pico-w-led
       [ debug? ] [if] self class-> ." handle-endpoint / state: " 
         endpoint endpoint-tcp-state@ . 
       [then]
@@ -298,7 +314,8 @@ begin-module mqtt
           endof
           recv-connect-ack of 
             \ Receive connect ack and send publish packet
-            [ debug? ] [if] self class-> ." handle-endpoint / recv-connect-ack" [then] 
+            [ debug? ] [if] self class-> ." handle-endpoint / recv-connect-ack" 
+            [then] 
             
             endpoint endpoint-rx-data@ 10 ms con-ack?
             if cr ." MQTT LOGIN OK" cr
@@ -362,7 +379,7 @@ begin-module mqtt
       then
       endpoint self iface @ endpoint-done
       
-      \ semaphore manupulation
+      \ Semaphore manupulation
       self sema-give? @ if
         [ debug? ] [if] self class-> ." handle-enpoint / semaphore manupulation"
         [then]
