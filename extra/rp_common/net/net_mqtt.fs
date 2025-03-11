@@ -224,6 +224,7 @@ begin-module mqtt
     cell member com-state
     sema-size cell align member pub-sema
     cell member sema-give?
+    cell member pub-done-handler
 
     \ methods
     \ debug
@@ -234,10 +235,12 @@ begin-module mqtt
     method credentials!
     \ util
     method publish
+    method pub-done-handler!
   end-class
 
   <mqtt-client> begin-implement
 
+    \ Debug prologue
     :noname { self -- }
       cr ." <mqtt-client> -> " 
     ; define class->
@@ -252,6 +255,7 @@ begin-module mqtt
       dest-port self mqtt-server-port !
       none self com-state !
       1 1 self pub-sema init-sema
+      0 self pub-done-handler !
     ; define init-mqtt-client
 
     \ Set user name, password and generate client id 
@@ -319,6 +323,9 @@ begin-module mqtt
             endpoint endpoint-rx-data@ 10 ms 1 pub-ack?
             if 
               cr ." MESSAGE PUBLISHED" cr
+              \ call handler
+              self pub-done-handler @ ?execute
+
               endpoint self iface @ 2 [: { buffer  }
                 \ header
                 cmd-disconnect buffer c!
@@ -396,9 +403,14 @@ begin-module mqtt
       else 
         cr ." NOT CONNECTED" 
       then
-      
-           
+                 
     ; define publish
+
+    \ Set publication done handler
+    :noname { xt-handler self -- }      
+      [ debug? ] [if]  self class-> ." pub-done-handler " [then]
+      xt-handler self pub-done-handler !
+    ; define pub-done-handler!
 
   end-implement
 
