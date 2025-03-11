@@ -78,8 +78,8 @@ begin-module mqtt-demo
 
   : run-demo
     s" muser" s" mpassword" mqtt-client credentials!
-    s" /mychannel/mytopic" s" hello zeptoforth" 1 mqtt-client publish
     cr ." Publishing message started..." 
+    s" /mychannel/mytopic" s" hello zeptoforth" 1 mqtt-client publish
   ;
 
   : run-demo-again { D: topic D: msg -- }

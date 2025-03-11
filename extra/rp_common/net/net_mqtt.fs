@@ -20,20 +20,14 @@
 
 begin-module mqtt
 
-  sema import
-
   \ debug flag
   false constant debug?
 
   begin-module mqtt-internal
 
     : x-out-of-range ." out of range" ;
-    \ : x-header-con-ack ." connect ack packet header exception" ;
-    \ : x-header-pub-ack ." publish ack packet header exception" ;
-    \ : x-connection-failed ." connection failed" ;
-    \ : x-alloc-endpoint ." unable to allocate TCP endpoint" ;
 
-    \ header flags
+    \ MQTT header flags
     %00010000 constant cmd-connect
     %00110000 constant cmd-publish-message
     %00000010 constant cmd-ack-deliver
@@ -42,7 +36,7 @@ begin-module mqtt
     %00100000 constant header-con-ack
     %01000000 constant header-pub-ack
 
-    \ connect flag constants
+    \ MQTT connect flag constants
     %10000000 constant user-flag
     %01000000 constant password-flag
     %00000010 constant clean-session-flag
@@ -53,9 +47,6 @@ begin-module mqtt
       cfield: aps-ack-flag
       cfield: aps-retval
     end-structure
-
-    sema-size aligned-buffer: pub-sema
-    1 1 pub-sema init-sema
 
     \ Copy byte to buffer
     : byte> ( byte c-addr -- ) { byte c-addr -- }
@@ -177,7 +168,6 @@ begin-module mqtt
       index temp-size + to index
       \ return value 
       c-addr dup index swap -
-    
     ;
 
     \ Connect acknowledge?
@@ -200,6 +190,7 @@ begin-module mqtt
 
   end-module> import
 
+  sema import
   oo import
   net-consts import
   net import
@@ -231,6 +222,8 @@ begin-module mqtt
     cell member mqtt-message-addr
     cell member mqtt-message-size
     cell member com-state
+    sema-size cell align member pub-sema
+    cell member sema-give?
 
     \ methods
     \ debug
@@ -249,7 +242,7 @@ begin-module mqtt
       cr ." <mqtt-client> -> " 
     ; define class->
 
-    \ init mqtt client - set iface, server ip and port  
+    \ Init mqtt client - set iface, server ip and port  
     :noname { {iface} dest-addr dest-port self -- }
       \ debug
       [ debug? ] [if] self class-> ." init-mqtt-client method" [then]
@@ -258,6 +251,7 @@ begin-module mqtt
       dest-addr self mqtt-server-ip !
       dest-port self mqtt-server-port !
       none self com-state !
+      1 1 self pub-sema init-sema
     ; define init-mqtt-client
 
     \ Set user name, password and generate client id 
@@ -348,6 +342,7 @@ begin-module mqtt
           [ debug? ] [if] self class-> ." handle-endpoint / close-tcp-endpoint" 
           [then]
           endpoint self iface @ close-tcp-endpoint 
+          true self sema-give? !
         then
       then
       endpoint endpoint-tcp-state@ TCP_LAST_ACK = if
@@ -355,10 +350,19 @@ begin-module mqtt
       then
       endpoint endpoint-tcp-state@ TCP_CLOSED = if
         cr ." CONNECTION CLOSED" cr
-        none self com-state !
-        pub-sema give
+        \ none self com-state !
+        true self sema-give? !
       then
       endpoint self iface @ endpoint-done
+      
+      \ semaphore manupulation
+      self sema-give? @ if
+        [ debug? ] [if] self class-> ." handle-enpoint / semaphore manupulation"
+        [then]
+        none self com-state !
+        self pub-sema give
+        false self sema-give? !
+      then
 
     ; define handle-endpoint
 
@@ -368,7 +372,8 @@ begin-module mqtt
       [ debug? ] [if] self class-> ." publish method " [then]
      
       \ Block publishing
-      pub-sema take
+      self pub-sema take
+      false self sema-give? !
       
       message self mqtt-message-size ! self mqtt-message-addr !
       [ debug? ] [if] self class-> ." publish / message:" space 
@@ -382,12 +387,17 @@ begin-module mqtt
    
       [ debug? ] [if] self class-> ." publish / allocate endpoint " [then]
      
-      EPHEMERAL_PORT self mqtt-server-ip @ self mqtt-server-port @
-      self iface @ allocate-tcp-connect-ipv4-endpoint 
-      if cr ." CONNECTED" else cr ." NOT CONNECTED" then
+      EPHEMERAL_PORT self mqtt-server-ip @ 
+      self mqtt-server-port @
+      self iface @ 
+      allocate-tcp-connect-ipv4-endpoint if
+        cr ." CONNECTED" 
+        send-connect-req self com-state ! 
+      else 
+        cr ." NOT CONNECTED" 
+      then
       
-      send-connect-req self com-state !
-      
+           
     ; define publish
 
   end-implement
