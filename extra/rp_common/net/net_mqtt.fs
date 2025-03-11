@@ -239,7 +239,7 @@ begin-module mqtt
     \ Publication done handler's token
     cell member pub-done-handler
 
-    \ Debug prologoue
+    \ Debug prologue
     method class-> ( self -- )
 
     \ Init mqtt client - set iface, server ip and port
