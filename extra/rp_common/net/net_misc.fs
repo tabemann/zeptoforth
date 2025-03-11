@@ -493,9 +493,6 @@ begin-module net-misc
     8 r7 r0 ldr_,[_,#_]
     r0 r0 rev_,_
     8 r7 r0 str_,[_,#_]
-    12 r7 r0 ldr_,[_,#_]
-    r0 r0 rev_,_
-    12 r7 r0 str_,[_,#_]
     ]code
   ;
 
@@ -688,10 +685,10 @@ begin-module net-misc
     addr bytes zero-offset compute-checksum
   ;
 
-  \ Compute an IPv6 TCP checksum
-  : compute-ipv6-tcp-checksum
+  \ Compute an IPv6 checksum
+  : compute-ipv6-checksum
     { zero-offset }
-    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes }
+    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 protocol addr bytes }
     ( -- h )
     src-3 16 rshift
     src-3 $FFFF and + dup 16 rshift + $FFFF and
@@ -710,32 +707,7 @@ begin-module net-misc
     dest-0 16 rshift + dup 16 rshift + $FFFF and
     dest-0 $FFFF and + dup 16 rshift + $FFFF and
     bytes + dup 16 rshift + $FFFF and
-    PROTOCOL_TCP + dup 16 rshift + $FFFF and
-    addr bytes zero-offset compute-checksum
-  ;
-
-  : compute-ipv6-udp-checksum
-    { zero-offset }
-    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes }
-    ( -- h )
-    src-3 16 rshift
-    src-3 $FFFF and + dup 16 rshift + $FFFF and
-    src-2 16 rshift + dup 16 rshift + $FFFF and
-    src-2 $FFFF and + dup 16 rshift + $FFFF and
-    src-1 16 rshift + dup 16 rshift + $FFFF and
-    src-1 $FFFF and + dup 16 rshift + $FFFF and
-    src-0 16 rshift + dup 16 rshift + $FFFF and
-    src-0 $FFFF and + dup 16 rshift + $FFFF and
-    dest-3 16 rshift + dup 16 rshift + $FFFF and
-    dest-3 $FFFF and + dup 16 rshift + $FFFF and
-    dest-2 16 rshift + dup 16 rshift + $FFFF and
-    dest-2 $FFFF and + dup 16 rshift + $FFFF and
-    dest-1 16 rshift + dup 16 rshift + $FFFF and
-    dest-1 $FFFF and + dup 16 rshift + $FFFF and
-    dest-0 16 rshift + dup 16 rshift + $FFFF and
-    dest-0 $FFFF and + dup 16 rshift + $FFFF and
-    bytes + dup 16 rshift + $FFFF and
-    PROTOCOL_UDP + dup 16 rshift + $FFFF and
+    protocol + dup 16 rshift + $FFFF and
     addr bytes zero-offset compute-checksum
   ;
 

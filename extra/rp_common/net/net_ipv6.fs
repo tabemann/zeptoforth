@@ -2426,7 +2426,8 @@ begin-module net-ipv6
 
       \ Process an IPv6 packet
       method process-ipv6-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( protocol addr bytes self -- )
 
       \ Find a listening IPv6 TCP endpoint
       method find-listen-ipv6-endpoint
@@ -2438,6 +2439,7 @@ begin-module net-ipv6
       
       \ Process an IPv6 TCP packet
       method process-ipv6-tcp-packet
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
 
       \ Process an IPv6 TCP SYN packet
@@ -2528,14 +2530,16 @@ begin-module net-ipv6
       
       \ Process an IPv6 UDP packet
       method process-ipv6-udp-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( protocol addr bytes self -- )
 
       \ Process an IPv6 DNS response packet
       method process-ipv6-dns-packet ( addr bytes self -- )
       
       \ Process an ICMPv6 packet
       method process-icmpv6-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( protocol addr bytes self -- )
 
       \ Send an ICMPv6 neighbor solicit packet
       method send-icmpv6-neighbor-solicit
@@ -2949,18 +2953,20 @@ begin-module net-ipv6
 
     \ Process an IPv6 packet
     :noname
-      ( D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- )
+      ( D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( protocol addr bytes self -- )
       3 pick case
         PROTOCOL_UDP of process-ipv6-udp-packet endof
         PROTOCOL_TCP of process-ipv6-tcp-packet endof
         PROTOCOL_ICMPV6 of process-icmpv6-packet endof
-        >r 2drop 2drop 2drop 2drop 2drop r>
+        >r 2drop 2drop 2drop 2drop 2drop 2drop 2drop r>
       endcase
     ; define process-ipv6-packet
 
     \ Process an IPv6 TCP packet
     :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+      { protocol addr bytes self -- }
+      { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
@@ -3109,8 +3115,9 @@ begin-module net-ipv6
         window rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
         self intf-ipv6-addr@
-        remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        remote-0 remote-1 remote-2 remote-3 PROTOCOL_TCP buf tcp-header-size
+        0 tcp-checksum
+        compute-ipv6-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3142,9 +3149,9 @@ begin-module net-ipv6
         buf tcp-header-size + !
         [ $01010100 rev ] literal buf tcp-header-size + 4 + !
         self intf-ipv6-addr@
-        remote-0 remote-1 remote-2 remote-3 buf tcp-header-size 8 + 0
-        tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        remote-0 remote-1 remote-2 remote-3 PROTOCOL_TCP
+        buf tcp-header-size 8 + 0 tcp-checksum
+        compute-ipv6-checksum rev16 buf tcp-checksum h!
 
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
@@ -3433,7 +3440,8 @@ begin-module net-ipv6
 
     \ Process an IPv6 UDP packet
     :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+      { protocol addr bytes self -- }
+      { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
       bytes udp-header-size >= if
         addr udp-total-len h@ rev16 bytes <> if exit then
         src-0 src-1 src-2 src-3 self dns-server-ipv6-addr ipv6-unaligned@ ipv6=
@@ -3533,9 +3541,11 @@ begin-module net-ipv6
     
     \ Process an ICMPv6 packet
     :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+      { protocol addr bytes self -- }
+      { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
       bytes icmp-header-size >= if
-        addr bytes 0 icmp-checksum compute-inet-checksum
+        src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 PROTOCOL_ICMPV6
+        addr bytes 0 icmp-checksum compute-ipv6-checksum
         addr icmp-checksum hunaligned@ rev16 <> if exit then
         addr icmp-type c@ case
           ICMPV6_TYPE_ECHO_REQUEST of
@@ -3562,7 +3572,9 @@ begin-module net-ipv6
     :noname { target-0 target-1 target-2 target-3 self -- }
       target-0 target-1 target-2 target-3 self
       target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
+      ipv6-multicast-mac-addr
       self detecting-duplicate? @ if 0 0 0 0 else self intf-ipv6-addr@ then
+      target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
       PROTOCOL_ICMPV6
       [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal [:
         { target-0 target-1 target-2 target-3 self buf }
@@ -3575,14 +3587,17 @@ begin-module net-ipv6
         OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
         1 opt-buf 1+ c!
         self intf-mac-addr@ opt-buf 2 + mac!
+        self detecting-duplicate? @ if 0 0 0 0 else self intf-ipv6-addr@ then
+        target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
+        PROTOCOL_ICMPV6
         buf [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal
-        0 icmp-checksum compute-inet-checksum rev16
+        0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
         [ debug? ] [if]
           [: cr ." Sending neighbor solicit" ;] debug-hook execute
         [then]
-      ;] self construct-and-send-ipv6-packet drop
+      ;] self construct-and-send-ipv6-packet-with-src-addr drop
     ; define send-icmpv6-neighbor-solicit
 
     \ Send an ICMPv6 router solicit package
@@ -3591,7 +3606,8 @@ begin-module net-ipv6
       255 self intf-hop-limit !
       self
       ALL_ROUTERS_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ PROTOCOL_ICMPV6
+      ALL_ROUTERS_LINK_LOCAL_MULTICAST
+      PROTOCOL_ICMPV6
       [ icmp-header-size 2 + mac-addr-size + ] literal
       [: { self buf }
         ICMPV6_TYPE_ROUTER_SOLICIT buf icmp-type c!
@@ -3601,8 +3617,9 @@ begin-module net-ipv6
         OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
         1 opt-buf 1+ c!
         self intf-mac-addr@ opt-buf 2 + mac!
+        self intf-ipv6-addr@ ALL_ROUTERS_LINK_LOCAL_MULTICAST PROTOCOL_ICMPV6
         buf [ icmp-header-size 2 + mac-addr-size + ] literal
-        0 icmp-checksum compute-inet-checksum rev16
+        0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
         [ debug? ] [if]
@@ -3653,9 +3670,9 @@ begin-module net-ipv6
       src-mac-addr mac-addr-multicast? not if
         [ 2 mac-addr-size + ] literal +to reply-bytes
       then
-      reply-bytes src-mac-addr self src-mac-addr
+      reply-bytes src-mac-addr src-0 src-1 src-2 src-3 self src-mac-addr
       src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6 reply-bytes [:
-        { D: bytes src-mac-addr self buf }
+        { D: bytes src-mac-addr src-0 src-1 src-2 src-3 self buf }
         ICMPV6_TYPE_NEIGHBOR_ADVERTISE buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         self intf-ipv6-addr@ buf icmp-header-size + ipv6-unaligned!
@@ -3671,7 +3688,8 @@ begin-module net-ipv6
         else
           0 buf icmp-rest-of-header unaligned!
         then
-        buf bytes 0 icmp-checksum compute-inet-checksum rev16
+        self intf-ipv6-addr@ src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
+        buf bytes 0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
         [ debug? ] [if]
@@ -3796,6 +3814,16 @@ begin-module net-ipv6
       2 pick [ ethernet-header-size ipv6-header-size + ] literal + over
       [: { D: mac-addr src-0 src-1 src-2 src-3
         dest-0 dest-1 dest-2 dest-3 protocol bytes xt self buf }
+        [ debug? ] [if]
+          self intf-mac-addr@
+          [: cr ." Source MAC:       " mac. ;] debug-hook execute
+          mac-addr
+          [: cr ." Destination MAC:  " mac. ;] debug-hook execute
+          src-0 src-1 src-2 src-3
+          [: cr ." Source IPv6:      " ipv6. ;] debug-hook execute
+          dest-0 dest-1 dest-2 dest-3
+          [: cr ." Destination IPv6: " ipv6. ;] debug-hook execute
+        [then]
         mac-addr buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_IPV6 rev16 ] literal buf ethh-ether-type h!
@@ -3936,8 +3964,8 @@ begin-module net-ipv6
         buf udp-header-size + xt execute
         src-0 src-1 src-2 src-3
         dest-0 dest-1 dest-2 dest-3
-        buf udp-header-size bytes + 0 udp-checksum
-        compute-ipv6-udp-checksum rev16 buf udp-checksum h!
+        PROTOCOL_UDP buf udp-header-size bytes + 0 udp-checksum
+        compute-ipv6-checksum rev16 buf udp-checksum h!
       ;] self construct-and-send-ipv6-packet-with-src-addr
     ; define send-ipv6-udp-packet-raw
 
@@ -3956,8 +3984,8 @@ begin-module net-ipv6
           buf udp-header-size + xt execute
           self intf-ipv6-addr@
           dest-0 dest-1 dest-2 dest-3
-          buf udp-header-size bytes + 0 udp-checksum
-          compute-ipv6-udp-checksum rev16 buf udp-checksum h!
+          PROTOCOL_UDP buf udp-header-size bytes + 0 udp-checksum
+          compute-ipv6-checksum rev16 buf udp-checksum h!
         ;] self construct-and-send-ipv6-packet
       else
         2drop false
@@ -4457,8 +4485,8 @@ begin-module net-ipv6
         addr buf tcp-header-size + bytes move
         self intf-ipv6-addr@
         endpoint endpoint-ipv6-remote@ drop
-        buf tcp-header-size bytes + 0 tcp-checksum
-        compute-ipv6-tcp-checksum rev16 buf tcp-checksum h!
+        PROTOCOL_TCP buf tcp-header-size bytes + 0 tcp-checksum
+        compute-ipv6-checksum rev16 buf tcp-checksum h!
         [ debug? ] [if]
           buf bytes
           [: { buf bytes }
@@ -5156,10 +5184,11 @@ begin-module net-ipv6
           bytes addr ipv6-payload-len h@ rev16 min to bytes
           addr ipv6-dest-addr ipv6-unaligned@ self ipv6-addr-listen? if
             src-mac-addr addr ipv6-src-addr ipv6-unaligned@
+            addr ipv6-dest-addr ipv6-unaligned@
             addr bytes find-ipv6-payload if 
               self ip-interface @ process-ipv6-packet
             else
-              2drop 2drop 2drop 2drop drop
+              2drop 2drop 2drop 2drop 2drop 2drop drop
             then
           then
         then
