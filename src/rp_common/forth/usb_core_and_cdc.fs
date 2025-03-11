@@ -37,11 +37,26 @@ begin-module usb-core
   usb-constants import
   usb-cdc-buffers import
 
+  \ Start a descriptor
+  : :desc ( desc-id -- desc-start )
+    here 1 allot swap c,
+  ;
+
+  \ End a descriptor
+  : ;desc ( desc-start -- )
+    here over - swap ccurrent!
+  ;
+  \ Ditto but then align things
+  : ;desc4 ( desc-start -- )
+    ;desc cell align,
+  ;
+
   \ Device connected to USB host 
   variable usb-device-connected?
 
   \ Device configuration set by host
   variable usb-device-configured?
+  variable usb-device-confignum
 
   \ Line state notification to host complete
   variable line-notification-complete?
@@ -72,8 +87,7 @@ begin-module usb-core
   
   \ USB Standard Device Descriptor - 18 bytes
   create device-data
-    \ USB_DEVICE_DESCRIPTOR
-    $12 c, $01 c,
+    USB_DT_DEVICE :desc
     \ USB_VERSION_BCD
     $00 c, $02 c,
     \ USB_MISC_IAD_DEVICE (IAD = Interface Association Device)
@@ -94,39 +108,39 @@ begin-module usb-core
     $03 c,
     \ CONFIGURATIONS
     $01 c,
-  here device-data - cell align, constant device-data-size
+  ;desc4
 
   \ USB Standard Configuration Descriptor
   create config-data
-    \ Configuration Descriptor (75 bytes)
-    $09 c, $02 c, $4B c, $00 c, $02 c, $01 c, $00 c, $80 c, $FA c,
+  \ Configuration Descriptor (75 bytes)
+    USB_DT_CONFIG :desc 2 allot $02 c, $01 c, $00 c, $80 c, $FA c, ;desc
     \ Interface Association Descriptor (IAD)
-    $08 c, $0B c, $00 c, $02 c, $02 c, $02 c, $00 c, $00 c,
+    11 :desc $00 c, $02 c, $02 c, $02 c, $00 c, $00 c, ;desc
     \ CDC Class Interface Descriptor (CCI)
-    $09 c, $04 c, $00 c, $00 c, $01 c, $02 c, $02 c, $00 c, $00 c,
+    4 :desc $00 c, $00 c, $01 c, $02 c, $02 c, $00 c, $00 c, ;desc
     \ CDC Functional Descriptor - Header (CDC Class revision 1.20)
-    $05 c, $24 c, $00 c, $20 c, $01 c,
+    $24 :desc $00 c, $20 c, $01 c, ;desc
     \ CDC Functional Descriptor - Abstract Control Management
-    $04 c, $24 c, $02 c, $06 c,
+    $24 :desc $02 c, $06 c, ;desc
     \ CDC Functional Descriptor - Union
-    $05 c, $24 c, $06 c, $00 c, $01 c,
+    $24 :desc $06 c, $00 c, $01 c, ;desc
     \ CDC Functional Descriptor - Call Management
-    $05 c, $24 c, $01 c, $01 c, $01 c,
+    $24 :desc $01 c, $01 c, $01 c, ;desc
     \ Endpoint Descriptor: EP3 In - (max packet size = 16)
-    $07 c, $05 c, $83 c, $03 c, $10 c, $00 c, $FF c,
+    5 :desc $83 c, $03 c, $10 c, $00 c, $FF c, ;desc
     \ CDC Data Class Interface Descriptor: CDC Data
-    $09 c, $04 c, $01 c, $00 c, $02 c, $0A c, $00 c, $00 c, $00 c,
+    4 :desc $01 c, $00 c, $02 c, $0A c, $00 c, $00 c, $00 c, ;desc
     \ Endpoint Descriptor: EP1 In  - Bulk Transfer Type
-    $07 c, $05 c, $81 c, $02 c, $40 c, $00 c, $00 c,
+    5 :desc $81 c, $02 c, $40 c, $00 c, $00 c, ;desc
     \ Endpoint Descriptor: EP1 Out - Bulk Transfer Type
-    $07 c, $05 c, $01 c, $02 c, $40 c, $00 c, $00 c,
+    5 :desc  $01 c, $02 c, $40 c, $00 c, $00 c, ;desc
   here config-data - cell align, constant config-data-size
+  config-data-size config-data 2 + hcurrent!
 
   \ USB Language String Descriptor
   create language-string-data
     \ Language String for LANGUAGE_ENGLISH_US
-    $04 c, $03 c, $09 c, $04 c,
-  here language-string-data - cell align, constant language-string-data-size
+    USB_DT_STRING :desc $09 c, $04 c, ;desc4
 
   \ String descriptors for requested PID CCCC
   \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
@@ -463,10 +477,15 @@ begin-module usb-core
     false EP0-to-Host endpoint-busy? !
   ;
 
+  \ Send a descriptor to the host, trimming the length sent if the
+  \ host asked for less than the full descriptor size.
+  : usb-send-descriptor ( desc -- )
+    dup c@ usb-setup setup-length h@ min swap usb-start-control-transfer-to-host
+  ;
+
   \ Send device descriptor to host
   : usb-send-device-descriptor ( -- )
-    usb-setup setup-length h@ device-data-size min
-    device-data usb-start-control-transfer-to-host
+    device-data usb-send-descriptor
   ;
   
   \ Send configuration descriptor to host
@@ -477,7 +496,7 @@ begin-module usb-core
 
   \ Send language string descriptor to host
   : usb-send-language-string-to-host ( -- )
-    4 language-string-data usb-start-control-transfer-to-host 
+    language-string-data usb-send-descriptor
   ;
 
   \ Send usb string descriptor to host as unicode characters
@@ -491,20 +510,9 @@ begin-module usb-core
     string-length 0 do    
      string-start i + c@ unicode-buffer 2 + i 2 * + c!
     loop
-    unicode-bytes unicode-buffer usb-start-control-transfer-to-host
+    unicode-buffer usb-send-descriptor
   ;
   
-  \ Send requested string descriptor to host
-  : usb-send-string-descriptor ( -- )
-    usb-setup setup-descriptor-index c@ case
-      0 of usb-send-language-string-to-host endof
-      1 of usb-string-1 usb-send-string-descriptor-to-host endof
-      2 of usb-string-2 usb-send-string-descriptor-to-host endof
-      3 of usb-string-3 usb-send-string-descriptor-to-host endof
-      usb-ack-control-in-request
-    endcase
-  ;
-
   \ Stall incoming request we cannot process
   : usb-stall-ep0-request-to-pico ( -- )
     EP0_STALL_TO_PICO EP0_STALL_ARM bis!
@@ -515,6 +523,17 @@ begin-module usb-core
   : usb-stall-ep0-respond-to-host ( -- )
     EP0_STALL_TO_HOST EP0_STALL_ARM bis!
     EP0-to-Host usb-send-stall-packet
+  ;
+
+  \ Send requested string descriptor to host
+  : usb-send-string-descriptor ( -- )
+    usb-setup setup-descriptor-index c@ case
+      0 of usb-send-language-string-to-host endof
+      1 of usb-string-1 usb-send-string-descriptor-to-host endof
+      2 of usb-string-2 usb-send-string-descriptor-to-host endof
+      3 of usb-string-3 usb-send-string-descriptor-to-host endof
+      usb-stall-ep0-respond-to-host
+    endcase
   ;
 
   \ Inform host of Pico's line signal state (send line state notification)
@@ -564,6 +583,7 @@ begin-module usb-core
     EP1-to-Pico 64 usb-receive-data-packet
     \ device not ready to use until this point reached
     true usb-device-configured? !
+    1 usb-device-confignum !
   ;
 
   \ Send requested descriptor type to host
@@ -578,10 +598,16 @@ begin-module usb-core
     endcase
   ;
 
+  \ Send current configuration number to host
+  : usb-send-config-to-host ( -- )
+    1 usb-device-confignum usb-start-control-transfer-to-host
+  ;
+
   \ Route standard setup type request to Host request handler word
   : usb-setup-type-standard-respond-to-host ( -- )
     usb-setup setup-request c@ case
       USB_REQUEST_GET_DESCRIPTOR of usb-send-descriptor-to-host endof
+      USB_REQUEST_GET_CONFIGURATION of usb-send-config-to-host endof
       usb-stall-ep0-respond-to-host
     endcase
   ;
@@ -705,7 +731,7 @@ begin-module usb-core
     usb-setup setup-request-type c@ case
       USB_REQUEST_TYPE_STANDARD of usb-setup-type-standard endof
       USB_REQUEST_TYPE_CLASS of usb-setup-type-class endof
-      usb-ack-control-out-request
+      usb-stall-ep0-respond-to-host
     endcase
   ;
 
@@ -714,6 +740,7 @@ begin-module usb-core
     USB_SIE_STATUS_BUS_RESET USB_SIE_STATUS !
     0 USB_DEVICE_ADDRESS !
     false usb-device-configured? !
+    0 usb-device-confignum !
     false usb-readied? !
   ;
 
@@ -752,7 +779,7 @@ begin-module usb-core
 
   \ EP0 to Host buffer completion handler - including Multipacket transfers
   : ep0-handler-to-host ( -- )
-    USB_BUFFER_STATUS_EP0_TO_HOST USB_BUFFER_STATUS bis!  \ Write to clear
+    USB_BUFFER_STATUS_EP0_TO_HOST USB_BUFFER_STATUS !  \ Write 1 to clear
     EP0-to-Host usb-update-transfer-bytes
     EP0-to-Host usb-toggle-data-pid
     EP0-to-Host usb-update-endpoint-byte-counts
@@ -776,7 +803,7 @@ begin-module usb-core
 
   \ EP0 to Pico buffer completion handler - including callback handler
   : ep0-handler-to-pico ( -- )
-    USB_BUFFER_STATUS_EP0_TO_PICO USB_BUFFER_STATUS bis!
+    USB_BUFFER_STATUS_EP0_TO_PICO USB_BUFFER_STATUS !
     EP0-to-Pico usb-update-transfer-bytes
     EP0-to-Pico usb-toggle-data-pid
     EP0-to-Pico callback-handler @ if
@@ -875,11 +902,9 @@ begin-module usb-core
   \ USB buffer completion handler routing
   : usb-handle-buffer-status ( -- )
     \ EP0-to-Host and/or EP0-to-Pico
-    USB_BUFFER_STATUS @ USB_BUFFER_STATUS_EP0 and if
-      usb-buffer-status-control-endpoints
-    else
-      usb-buffer-status-function-endpoints
-    then
+    USB_BUFFER_STATUS @
+    dup USB_BUFFER_STATUS_EP0 and if usb-buffer-status-control-endpoints then
+    [ USB_BUFFER_STATUS_EP0 not ] literal and if usb-buffer-status-function-endpoints then
   ;
 
   \ Device connected to active USB host (SIE = Serial Interface Engine)
