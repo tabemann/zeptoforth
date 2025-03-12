@@ -1,5 +1,6 @@
 \ Copyright (c) 2023-2025 Travis Bemann
 \ Copyright (c) 2024-2025 Serialcomms (GitHub)
+\ Copyright (c) 2025 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +31,8 @@ end-module> import
 
 begin-module usb-core
 
-  task import
-  armv6m import
+  rp2040? [if] armv6m import [then]
   interrupt import
-
   usb-constants import
   usb-cdc-buffers import
 
@@ -393,7 +392,9 @@ begin-module usb-core
   : usb-send-stall-packet { endpoint -- }
     true endpoint endpoint-busy? !
     endpoint next-pid @ endpoint buffer-control @ !
-    code[ b> >mark b> >mark b> >mark b> >mark b> >mark b> >mark ]code
+    [ rp2040? ] [if]
+      code[ b> >mark b> >mark b> >mark b> >mark b> >mark b> >mark ]code
+    [then]
     USB_BUF_CTRL_STALL endpoint buffer-control @ bis!
   ;
 
