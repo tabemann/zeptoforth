@@ -1,5 +1,6 @@
 \ Copyright (c) 2023-2025 Travis Bemann
 \ Copyright (c) 2024-2025 Serialcomms (GitHub)
+\ Copyright (c) 2025 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -193,7 +194,7 @@ $3 constant USB_BUFFER_STATUS_EP0 \ in or out
 5 constant USB_REQUEST_SET_ADDRESS
 6 constant USB_REQUEST_GET_DESCRIPTOR
 \ 7 constant USB_REQUEST_SET_DESCRIPTOR
-\ 8 constant USB_REQUEST_GET_CONFIGURATION
+8 constant USB_REQUEST_GET_CONFIGURATION
 9 constant USB_REQUEST_SET_CONFIGURATION
 \ 10 constant USB_REQUEST_GET_INTERFACE
 \ 11 constant USB_REQUEST_SET_INTERFACE
