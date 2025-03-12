@@ -1267,7 +1267,7 @@ begin-module net-ipv6
         [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 self }
           max-addresses 0 ?do
             self mapped-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned@
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 = if
+            ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= if
               self mapped-mac-addrs i 2 cells * + 2@
               self newest-addr-age @ 1+ dup self newest-addr-age !
               self mapped-addr-ages i cells + !
