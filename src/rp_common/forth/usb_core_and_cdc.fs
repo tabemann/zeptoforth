@@ -37,18 +37,13 @@ begin-module usb-core
   usb-cdc-buffers import
 
   \ Start a descriptor
-  : :desc ( desc-id -- desc-start )
-    here 1 allot swap c,
-  ;
+  : :desc ( desc-id -- desc-start ) here 1 allot swap c, ;
 
   \ End a descriptor
-  : ;desc ( desc-start -- )
-    here over - swap ccurrent!
-  ;
+  : ;desc ( desc-start -- ) here over - swap ccurrent! ;
+  
   \ Ditto but then align things
-  : ;desc4 ( desc-start -- )
-    ;desc cell align,
-  ;
+  : ;desc4 ( desc-start -- ) ;desc cell align, ;
 
   \ Device connected to USB host 
   variable usb-device-connected?
@@ -136,10 +131,8 @@ begin-module usb-core
   here config-data - cell align, constant config-data-size
   config-data-size config-data 2 + hcurrent!
 
-  \ USB Language String Descriptor
-  create language-string-data
-    \ Language String for LANGUAGE_ENGLISH_US
-    USB_DT_STRING :desc $09 c, $04 c, ;desc4
+  \ Language ID String Descriptor for LANGUAGE_ENGLISH_US
+  : usb-language-id-string ( -- addr) c\" \x04\x03\x09\x04" ; 
 
   \ String descriptors for requested PID CCCC
   \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
@@ -494,12 +487,13 @@ begin-module usb-core
     usb-setup setup-length h@ config-data-size min
     config-data usb-start-control-transfer-to-host
   ;
-
-  \ Send language string descriptor to host
-  : usb-send-language-string-to-host ( -- )
-    language-string-data usb-send-descriptor
+  
+  \ Send usb language id string descriptor to host
+  : usb-send-language-id-string-to-host ( -- )   
+    usb-language-id-string count swap 
+    usb-start-control-transfer-to-host
   ;
-
+ 
   \ Send usb string descriptor to host as unicode characters
   : usb-send-string-descriptor-to-host { string-descriptor -- }
     unicode-buffer 64 0 fill \ clear unicode buffer (64 bytes)
@@ -511,7 +505,7 @@ begin-module usb-core
     string-length 0 do    
      string-start i + c@ unicode-buffer 2 + i 2 * + c!
     loop
-    unicode-buffer usb-send-descriptor
+    unicode-bytes unicode-buffer usb-start-control-transfer-to-host
   ;
   
   \ Stall incoming request we cannot process
@@ -529,7 +523,7 @@ begin-module usb-core
   \ Send requested string descriptor to host
   : usb-send-string-descriptor ( -- )
     usb-setup setup-descriptor-index c@ case
-      0 of usb-send-language-string-to-host endof
+      0 of usb-send-language-id-string-to-host endof
       1 of usb-string-1 usb-send-string-descriptor-to-host endof
       2 of usb-string-2 usb-send-string-descriptor-to-host endof
       3 of usb-string-3 usb-send-string-descriptor-to-host endof
