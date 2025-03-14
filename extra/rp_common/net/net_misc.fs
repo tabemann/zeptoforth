@@ -49,7 +49,7 @@ begin-module net-misc
   \ Make a link-local IPv6 address
   : make-link-local-ipv6-addr
     { mac-addr-0 mac-addr-1 -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 }
-    mac-addr-0 $FFFFF and $FE000000 or \ ipv6-0
+    mac-addr-0 $FFFFFF and $FE000000 or \ ipv6-0
     mac-addr-0 16 rshift $FF00 and $FF or mac-addr-1 16 lshift or
     $02000000 xor \ ipv6-1
     0 \ ipv6-2
@@ -506,7 +506,7 @@ begin-module net-misc
     addr0 5 + c@ addr1 5 + c@ = and
   ;
 
-    \ Do an alignment-safe 32-bit load
+  \ Do an alignment-safe 32-bit load
   thumb-2? not [if]
     : unaligned@ ( addr -- x )
       [inlined]
@@ -706,8 +706,10 @@ begin-module net-misc
     dest-1 $FFFF and + dup 16 rshift + $FFFF and
     dest-0 16 rshift + dup 16 rshift + $FFFF and
     dest-0 $FFFF and + dup 16 rshift + $FFFF and
-    bytes + dup 16 rshift + $FFFF and
-    protocol + dup 16 rshift + $FFFF and
+    bytes 16 rshift + dup 16 rshift + $FFFF and
+    bytes $FFFF and + dup 16 rshift + $FFFF and
+    protocol 16 rshift + dup 16 rshift + $FFFF and
+    protocol $FFFF and + dup 16 rshift + $FFFF and
     addr bytes zero-offset compute-checksum
   ;
 
