@@ -2926,7 +2926,13 @@ begin-module net-ipv6
               true
             else
               dest-0 dest-1 dest-2 dest-3
-              self intf-ipv6-addr@ solicit-node-link-local-multicast ipv6=
+              self intf-ipv6-addr@ solicit-node-link-local-multicast ipv6= if
+                true
+              else
+                dest-0 dest-1 dest-2 dest-3
+                self intf-mac-addr@ make-link-local-ipv6-addr
+                solicit-node-link-local-multicast ipv6=
+              then
             then
           else
             false
