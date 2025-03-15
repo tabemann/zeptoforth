@@ -215,5 +215,8 @@ begin-module net-config
 
   \ Maximum neighbor discovery attempts
   5 value max-neighbor-discovery-attempts
+
+  \ Initial neighbor retransmit time milliseconds
+  250 value initial-neighbor-retrans-time-ms
   
 end-module

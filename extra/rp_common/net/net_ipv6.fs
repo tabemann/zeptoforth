@@ -2790,7 +2790,7 @@ begin-module net-ipv6
       false self detecting-duplicate? !
       0 self router-lifetime !
       0 self neighbor-reachable-time !
-      0 self neighbor-retrans-time !
+      initial-neighbor-retrans-time-ms self neighbor-retrans-time !
       1 0 self neighbor-discovery-sema init-sema
       1 0 self dns-resolve-sema init-sema
       0 self current-dhcp-transact-id !
@@ -3869,7 +3869,7 @@ begin-module net-ipv6
         systick::systick-counter tick -
         self neighbor-retrans-time @ 10 * >= if
           attempts 0> if
-            -1 to attempts
+            -1 +to attempts
             dest-0 dest-1 dest-2 dest-3 self send-icmpv6-neighbor-solicit
             systick::systick-counter to tick
           else
