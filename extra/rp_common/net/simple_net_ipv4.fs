@@ -89,7 +89,7 @@ begin-module simple-net-ipv4
 
     \ Constructor.  
     :noname
-      { self -- )
+      { self -- }
       self <object>->new
 
       false self endpoint-process-started? !
