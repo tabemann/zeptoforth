@@ -88,7 +88,7 @@ begin-module simple-net
 
     \ Constructor.  
     :noname
-      { self -- )
+      { self -- }
       self <object>->new
 
       false self endpoint-process-started? !
