@@ -37,18 +37,13 @@ begin-module usb-core
   usb-cdc-buffers import
 
   \ Start a descriptor
-  : :desc ( desc-id -- desc-start )
-    here 1 allot swap c,
-  ;
+  : :desc ( desc-id -- desc-start ) here 1 allot swap c, ;
 
   \ End a descriptor
-  : ;desc ( desc-start -- )
-    here over - swap ccurrent!
-  ;
+  : ;desc ( desc-start -- ) here over - swap ccurrent! ;
+  
   \ Ditto but then align things
-  : ;desc4 ( desc-start -- )
-    ;desc cell align,
-  ;
+  : ;desc4 ( desc-start -- ) ;desc cell align, ;
 
   \ Device connected to USB host 
   variable usb-device-connected?
@@ -137,7 +132,7 @@ begin-module usb-core
   config-data-size config-data 2 + hcurrent!
 
   \ USB Language String Descriptor
-  create language-string-data
+  create language-id-string-data
     \ Language String for LANGUAGE_ENGLISH_US
     USB_DT_STRING :desc $09 c, $04 c, ;desc4
 
@@ -496,8 +491,8 @@ begin-module usb-core
   ;
 
   \ Send language string descriptor to host
-  : usb-send-language-string-to-host ( -- )
-    language-string-data usb-send-descriptor
+  : usb-send-language-id-string-to-host ( -- )
+    language-id-string-data usb-send-descriptor
   ;
 
   \ Send usb string descriptor to host as unicode characters
@@ -529,7 +524,7 @@ begin-module usb-core
   \ Send requested string descriptor to host
   : usb-send-string-descriptor ( -- )
     usb-setup setup-descriptor-index c@ case
-      0 of usb-send-language-string-to-host endof
+      0 of usb-send-language-id-string-to-host endof
       1 of usb-string-1 usb-send-string-descriptor-to-host endof
       2 of usb-string-2 usb-send-string-descriptor-to-host endof
       3 of usb-string-3 usb-send-string-descriptor-to-host endof
