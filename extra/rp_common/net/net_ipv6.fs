@@ -3614,17 +3614,29 @@ begin-module net-ipv6
       ALL_ROUTERS_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       ALL_ROUTERS_LINK_LOCAL_MULTICAST
       PROTOCOL_ICMPV6
-      [ icmp-header-size 2 + mac-addr-size + ] literal
+      self intf-ipv6-addr@ 0 0 0 0 ipv6= if
+        icmp-header-size
+      else
+        [ icmp-header-size 2 + mac-addr-size + ] literal
+      then
       [: { self buf }
         ICMPV6_TYPE_ROUTER_SOLICIT buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         0 buf icmp-rest-of-header unaligned!
-        icmp-header-size buf + { opt-buf }
-        OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
-        1 opt-buf 1+ c!
-        self intf-mac-addr@ opt-buf 2 + mac!
+        self intf-ipv6-addr@ 0 0 0 0 ipv6= { addr-any? }
+        addr-any? not if
+          icmp-header-size buf + { opt-buf }
+          OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
+          1 opt-buf 1+ c!
+          self intf-mac-addr@ opt-buf 2 + mac!
+        then
         self intf-ipv6-addr@ ALL_ROUTERS_LINK_LOCAL_MULTICAST PROTOCOL_ICMPV6
-        buf [ icmp-header-size 2 + mac-addr-size + ] literal
+        buf
+        addr-any? if
+          icmp-header-size
+        else
+          [ icmp-header-size 2 + mac-addr-size + ] literal
+        then
         0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
