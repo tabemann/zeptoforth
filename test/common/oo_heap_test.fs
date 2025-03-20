@@ -22,6 +22,7 @@ begin-module oo-heap-test
 
   oo import
   heap import
+  lambda import
   
   4 cells constant block-size
   256 constant block-count
