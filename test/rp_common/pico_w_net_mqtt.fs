@@ -21,19 +21,19 @@
 begin-module mqtt-demo
 
   oo import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
   cyw43-control import
   net import
+  net-ipv4
   endpoint-process import
   net-consts import
   mqtt import
 
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
 
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   \ 0 value my-cyw43-control
   \ 0 value my-interface
   variable my-cyw43-control
@@ -44,7 +44,7 @@ begin-module mqtt-demo
 
   : net-init
     cr ." Network stack initializing..."
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net 

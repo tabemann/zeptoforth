@@ -19,7 +19,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module simple-cyw43-net
+begin-module simple-cyw43-net-ipv4
 
   oo import
   cyw43-control import
@@ -27,10 +27,10 @@ begin-module simple-cyw43-net
   frame-process import
   net import
   endpoint-process import
-  simple-net import
+  simple-net-ipv4 import
   
-  \ A simple CYW43439 networking and interface class
-  <simple-net> begin-class <simple-cyw43-net>
+  \ A simple IPv4 CYW43439 networking and interface class
+  <simple-net-ipv4> begin-class <simple-cyw43-net-ipv4>
 
     begin-module simple-cyw43-net-internal
 
@@ -52,26 +52,24 @@ begin-module simple-cyw43-net
     method cyw43-control@ ( self -- control )
 
     \ These just aliases, but they are sometimes invoked as
-    \ <simple-cyw43-net>->init-cyw43-net etc. so the need to be methods
+    \ <simple-cyw43-net-ipv4>->init-cyw43-net etc. so the need to be methods
     method init-cyw43-net ( self -- )
     method init-cyw43-net-no-handler ( self -- )
 
   end-class
 
   \ Implement the CYW43439 networking and interface class
-  <simple-cyw43-net> begin-implement
+  <simple-cyw43-net-ipv4> begin-implement
 
     \ The constructor, using a specified PWR pin, DIO pin, CS pin, CLK pin,
-    \ PIO instruction base address, PIO state machine index, and PIO instance
-    \ (pio::PIO0 or pio::PIO1)
+    \ PIO state machine index, and PIO instance
     :noname
-      { pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- }
-      self <simple-net>->new
+      { pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance self -- }
+      self <simple-net-ipv4>->new
 
       default-mac-addr
       cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
-      pwr-pin clk-pin dio-pin cs-pin
-      pio-addr sm-index pio-instance
+      pwr-pin clk-pin dio-pin cs-pin sm-index pio-instance
       <cyw43-control> self my-cyw43-control init-object
     ; define new
 
@@ -98,7 +96,7 @@ begin-module simple-cyw43-net
     \ the endpoint process
     :noname { self -- }
       self my-cyw43-control init-cyw43
-      self <simple-net>->init-net-no-handler
+      self <simple-net-ipv4>->init-net-no-handler
     ; define init-net-no-handler
 
     \ Alias for the old name
@@ -118,7 +116,7 @@ begin-module simple-cyw43-net
 
   end-implement
 
-  \ Re-exporting <simple-net> methods for the sake of compatibility
+  \ Re-exporting <simple-net-ipv4> methods for the sake of compatibility
 
   \ Initialize a networking and interface class instance
   : init-cyw43-net ( self -- ) init-net ;

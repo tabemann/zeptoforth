@@ -36,12 +36,99 @@ The `net` module contains the following classes:
 
 #### `<interface>`
 
-The `<interface>` class has the following constructor:
+The `<interface>` class has the following methods:
+
+##### `intf-mac-addr@`
+( interface -- D: mac-addr )
+
+Get an interface's MAC address.
+
+##### `send-tcp-endpoint`
+( addr bytes endpoint interface -- )
+
+Send *bytes* at *addr* to the peer of *endpoint*. This will return when sending data is complete or if the connection is closed or its connection is not yet established.
+
+##### `evict-dns`
+( c-addr bytes interface -- )
+
+Evict a DNS name's cache entry, forcing it to be re-resolved.
+
+##### `get-ready-endpoint`
+( interface -- endpoint )
+
+Do a blocking wait to get the next ready endpoint; note that the user may use `task::timeout` to apply a timeout to this.
+
+##### `wait-ready-endpoint`
+( endpoint interface -- )
+
+Do a blocking wait until the given endpoint becomes ready; note that the user may use `task::timeout` to apply a timeout to this.
+
+##### `endpoint-done`
+( endpoint interface -- )
+
+Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.
+
+##### `allocate-udp-listen-endpoint`
+( port interface -- endpoint success? )
+
+Attempt to allocate a UDP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
+
+##### `allocate-tcp-listen-endpoint`
+( port interface -- endpoint success? )
+
+Attempt to allocate a TCP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
+
+##### `close-udp-endpoint`
+( endpoint interface -- )
+
+Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.
+
+##### `close-tcp-endpoint`
+( endpoint interface -- )
+
+Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.
+
+#### `<endpoint>`
+
+The `<endpoint>` class has the following methods:
+
+##### `endpoint-tcp-state@`
+( endpoint -- tcp-state )
+
+This word returns the current TCP state of an endpoint.
+
+##### `endpoint-rx-data@`
+( endpoint -- addr bytes )
+
+This word returns the address and size in bytes of the current pending data for an endpoint.
+
+##### `udp-endpoint?`
+( endpoint -- udp? )
+
+Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).
+
+##### `endpoint-local-port@`
+( endpoint -- port )
+
+Get the local port for *endpoint*. Note that if the local port for an endpoint had been specified as `net-consts::EPHEMERAL_PORT` this will be the actual local port.
+
+#### `waiting-rx-data?`
+( endpoint -- waiting? )
+
+Get whether there is any data waiting on endpoint beyond the currently pending data.
+
+### `net-ipv4`
+
+The `net-ipv4` module contains the following classes:
+
+#### `<ipv4-interface>`
+
+The `<ipv4-interface>` class inherits from `net::<interface>` and has the following constructor:
 
 ##### `new`
 ( frame-interface interface -- )
 
-This constructs an `<interface>` instance for a given _frame interface_, an instance of `frame-interface::<frame-interface>`, which encapsulates a connection to the hardware network interface.
+This constructs an `<ipv4-interface>` instance for a given _frame interface_, an instance of `frame-interface::<frame-interface>`, which encapsulates a connection to the hardware network interface.
 
 ##### `intf-ipv4-addr@`
 ( interface -- addr )
@@ -88,11 +175,6 @@ Manually set an interface's gateway's IPv4 address.
 
 Get an interface's IPv4 broadcast address.
 
-##### `intf-mac-addr@`
-( interface -- D: mac-addr )
-
-Get an interface's MAC address.
-
 ##### `intf-ttl@`
 ( interface -- tll )
 
@@ -107,11 +189,6 @@ Set an interface's TTL.
 ( interface -- )
 
 Discover an interface's IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP.
-
-##### `send-tcp-endpoint`
-( addr bytes endpoint interface -- )
-
-Send *bytes* at *addr* to the peer of *endpoint*. This will return when sending data is complete or if the connection is closed or its connection is not yet established.
 
 ##### `send-ipv4-udp-packet`
 ( ? src-port dest-addr dest-port bytes xt interface -- ? success? )
@@ -128,97 +205,32 @@ Attempt to resolve the MAC address of an IPv4 address; if successful, true and t
 
 Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.
 
-##### `evict-dns`
-( c-addr bytes interface -- )
-
-Evict a DNS name's cache entry, forcing it to be re-resolved.
-
-##### `get-ready-endpoint`
-( interface -- endpoint )
-
-Do a blocking wait to get the next ready endpoint; note that the user may use `task::timeout` to apply a timeout to this.
-
-##### `wait-ready-endpoint`
-( endpoint interface -- )
-
-Do a blocking wait until the given endpoint becomes ready; note that the user may use `task::timeout` to apply a timeout to this.
-
-##### `endpoint-done`
-( endpoint interface -- )
-
-Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.
-
-##### `allocate-udp-listen-endpoint`
-( port interface -- endpoint success? )
-
-Attempt to allocate a UDP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
-
-##### `allocate-tcp-listen-endpoint`
-( port interface -- endpoint success? )
-
-Attempt to allocate a TCP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
-
 ##### `allocate-tcp-connect-ipv4-endpoint`
 ( src-port dest-addr dest-port interface -- endpoint success? )
 
 Attempt to allocate a TCP endpoint connected to the IPv4 address *dest-addr* at *dest-port* from *src-port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.
 
-##### `close-udp-endpoint`
-( endpoint interface -- )
+#### `<ipv4-endpoint>`
 
-Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.
-
-##### `close-tcp-endpoint`
-( endpoint interface -- )
-
-Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.
-
-#### `<endpoint>`
-
-The `<endpoint>` class has the following methods:
-
-##### `endpoint-tcp-state@`
-( endpoint -- tcp-state )
-
-This word returns the current TCP state of an endpoint.
-
-##### `endpoint-rx-data@`
-( endpoint -- addr bytes )
-
-This word returns the address and size in bytes of the current pending data for an endpoint.
+The `<ipv4-endpoint>` class inherits from `net::<endpoint>` and has the following methods:
 
 ##### `endpoint-ipv4-remote@`
 ( endpoint -- ipv4-addr port )
 
 This word returns the IPv4 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.
 
-##### `udp-endpoint?`
-( endpoint -- udp? )
+#### `<ipv4-handler>`
 
-Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).
+The `<ipv4-handler>` class handles receiving IP frames from a frame interface and passing them on to an instance of `<ipv4-interface>`.
 
-##### `endpoint-local-port@`
-( endpoint -- port )
-
-Get the local port for *endpoint*. Note that if the local port for an endpoint had been specified as `net-consts::EPHEMERAL_PORT` this will be the actual local port.
-
-#### `waiting-rx-data?`
-( endpoint -- waiting? )
-
-Get whether there is any data waiting on endpoint beyond the currently pending data.
-
-#### `<ip-handler>`
-
-The `<ip-handler>` class handles receiving IP frames from a frame interface and passing them on to an instance of `<interface>`.
-
-The `<ip-handler>` class has the following constructor:
+The `<ipv4-handler>` class has the following constructor:
 
 ##### `new`
 ( interface handler -- )
 
 Construct an IP frame handler for *interface*.
 
-The `<ip-handler>` class has the following methods:
+The `<ipv4-handler>` class has the following methods:
 
 ##### `handle-frame`
 ( addr bytes handler -- )
@@ -465,34 +477,34 @@ Get a frame to transmit.
 
 Poll a frame to transmit.
 
-### `simple-net`
+### `simple-net-ipv4`
 
-The `simple-net` module contains the following word:
+The `simple-net-ipv4` module contains the following word:
 
 ##### `x-endpoint-process-not-started`
 ( -- )
 
-This exception is raised if one attempts to obtain the endpoint process from a `<simple-net>` instance for which the endpoint process has not been started.
+This exception is raised if one attempts to obtain the endpoint process from a `<simple-net-ipv4>` instance for which the endpoint process has not been started.
 
-The `simple-net` module contains the following class:
+The `simple-net-ipv4` module contains the following class:
 
-#### `<simple-net>`
+#### `<simple-net-ipv4>`
 
-The `<simple-net>` class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.
+The `<simple-net-ipv4>` class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.
 
 It has the following constructor:
 
 ##### `new`
 ( driver -- )
 
-This is a basic constructor that initializes the state of the `<simple-net>` base class.
+This is a basic constructor that initializes the state of the `<simple-net-ipv4>` base class.
 
 It has the following methods:
 
 ##### `init-net`
 ( driver -- )
 
-This initializes a `<simple-net>` instance.
+This initializes a `<simple-net-ipv4>` instance.
 
 ##### `init-net-no-handler`
 ( driver -- )
@@ -544,12 +556,12 @@ It has the following methods:
 ##### `init-cyw43-net`
 ( driver -- )
 
-This method is an alias for `simple-net::init-net`.
+This method is an alias for `simple-net-ipv4::init-net`.
 
 ##### `init-cyw43-net-no-handler`
 ( driver -- )
 
-This method is an alias for `simple-net::init-net-no-handler`.
+This method is an alias for `simple-net-ipv4::init-net-no-handler`.
 
 ##### `cyw43-net-country!`
 ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
@@ -569,17 +581,17 @@ This gets the CYW43xxx controller instance.
 ##### `net-interface@`
 ( driver -- interface )
 
-This method is an alias for `simple-net::net-interface@`.
+This method is an alias for `simple-net-ipv4::net-interface@`.
 
 ##### `net-endpoint-process@`
 ( driver -- endpoint-processor )
 
-This method is an alias for `simple-net::net-endpoint-process@`.
+This method is an alias for `simple-net-ipv4::net-endpoint-process@`.
 
 ##### `run-net-process`
 ( driver -- )
 
-This method is an alias for `simple-net::run-net-process`.
+This method is an alias for `simple-net-ipv4::run-net-process`.
 
 ### `pico-w-cyw43-net`
 

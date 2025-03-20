@@ -41,11 +41,98 @@
 </section>
 <section id="interface">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> class has the following constructor:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> class has the following methods:</p>
+<section id="intf-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-mac-addr&#64;</span></code></h4>
+<p>( interface – D: mac-addr )</p>
+<p>Get an interface’s MAC address.</p>
+</section>
+<section id="send-tcp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code></h4>
+<p>( addr bytes endpoint interface – )</p>
+<p>Send <em>bytes</em> at <em>addr</em> to the peer of <em>endpoint</em>. This will return when sending data is complete or if the connection is closed or its connection is not yet established.</p>
+</section>
+<section id="evict-dns">
+<h4><code class="docutils literal notranslate"><span class="pre">evict-dns</span></code></h4>
+<p>( c-addr bytes interface – )</p>
+<p>Evict a DNS name’s cache entry, forcing it to be re-resolved.</p>
+</section>
+<section id="get-ready-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">get-ready-endpoint</span></code></h4>
+<p>( interface – endpoint )</p>
+<p>Do a blocking wait to get the next ready endpoint; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
+</section>
+<section id="wait-ready-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">wait-ready-endpoint</span></code></h4>
+<p>( endpoint interface – )</p>
+<p>Do a blocking wait until the given endpoint becomes ready; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
+</section>
+<section id="endpoint-done">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-done</span></code></h4>
+<p>( endpoint interface – )</p>
+<p>Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.</p>
+</section>
+<section id="allocate-udp-listen-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-udp-listen-endpoint</span></code></h4>
+<p>( port interface – endpoint success? )</p>
+<p>Attempt to allocate a UDP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
+</section>
+<section id="allocate-tcp-listen-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-listen-endpoint</span></code></h4>
+<p>( port interface – endpoint success? )</p>
+<p>Attempt to allocate a TCP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
+</section>
+<section id="close-udp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">close-udp-endpoint</span></code></h4>
+<p>( endpoint interface – )</p>
+<p>Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.</p>
+</section>
+<section id="close-tcp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">close-tcp-endpoint</span></code></h4>
+<p>( endpoint interface – )</p>
+<p>Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.</p>
+</section>
+</section>
+<section id="endpoint">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code> class has the following methods:</p>
+<section id="endpoint-tcp-state">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-tcp-state&#64;</span></code></h4>
+<p>( endpoint – tcp-state )</p>
+<p>This word returns the current TCP state of an endpoint.</p>
+</section>
+<section id="endpoint-rx-data">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-rx-data&#64;</span></code></h4>
+<p>( endpoint – addr bytes )</p>
+<p>This word returns the address and size in bytes of the current pending data for an endpoint.</p>
+</section>
+<section id="udp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">udp-endpoint?</span></code></h4>
+<p>( endpoint – udp? )</p>
+<p>Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).</p>
+</section>
+<section id="endpoint-local-port">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-local-port&#64;</span></code></h4>
+<p>( endpoint – port )</p>
+<p>Get the local port for <em>endpoint</em>. Note that if the local port for an endpoint had been specified as <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> this will be the actual local port.</p>
+</section>
+</section>
+<section id="waiting-rx-data">
+<h3><code class="docutils literal notranslate"><span class="pre">waiting-rx-data?</span></code></h3>
+<p>( endpoint – waiting? )</p>
+<p>Get whether there is any data waiting on endpoint beyond the currently pending data.</p>
+</section>
+</section>
+<section id="net-ipv4">
+<h2><code class="docutils literal notranslate"><span class="pre">net-ipv4</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">net-ipv4</span></code> module contains the following classes:</p>
+<section id="ipv4-interface">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code> and has the following constructor:</p>
 <section id="new">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( frame-interface interface – )</p>
-<p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
+<p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
 </section>
 <section id="intf-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr&#64;</span></code></h4>
@@ -92,11 +179,6 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s IPv4 broadcast address.</p>
 </section>
-<section id="intf-mac-addr">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-mac-addr&#64;</span></code></h4>
-<p>( interface – D: mac-addr )</p>
-<p>Get an interface’s MAC address.</p>
-</section>
 <section id="intf-ttl">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ttl&#64;</span></code></h4>
 <p>( interface – tll )</p>
@@ -111,11 +193,6 @@
 <h4><code class="docutils literal notranslate"><span class="pre">discover-ipv4-addr</span></code></h4>
 <p>( interface – )</p>
 <p>Discover an interface’s IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP.</p>
-</section>
-<section id="send-tcp-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code></h4>
-<p>( addr bytes endpoint interface – )</p>
-<p>Send <em>bytes</em> at <em>addr</em> to the peer of <em>endpoint</em>. This will return when sending data is complete or if the connection is closed or its connection is not yet established.</p>
 </section>
 <section id="send-ipv4-udp-packet">
 <h4><code class="docutils literal notranslate"><span class="pre">send-ipv4-udp-packet</span></code></h4>
@@ -132,95 +209,30 @@
 <p>( c-addr bytes interface – ipv4-addr success? )</p>
 <p>Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.</p>
 </section>
-<section id="evict-dns">
-<h4><code class="docutils literal notranslate"><span class="pre">evict-dns</span></code></h4>
-<p>( c-addr bytes interface – )</p>
-<p>Evict a DNS name’s cache entry, forcing it to be re-resolved.</p>
-</section>
-<section id="get-ready-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">get-ready-endpoint</span></code></h4>
-<p>( interface – endpoint )</p>
-<p>Do a blocking wait to get the next ready endpoint; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
-</section>
-<section id="wait-ready-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">wait-ready-endpoint</span></code></h4>
-<p>( endpoint interface – )</p>
-<p>Do a blocking wait until the given endpoint becomes ready; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
-</section>
-<section id="endpoint-done">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-done</span></code></h4>
-<p>( endpoint interface – )</p>
-<p>Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.</p>
-</section>
-<section id="allocate-udp-listen-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">allocate-udp-listen-endpoint</span></code></h4>
-<p>( port interface – endpoint success? )</p>
-<p>Attempt to allocate a UDP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
-</section>
-<section id="allocate-tcp-listen-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-listen-endpoint</span></code></h4>
-<p>( port interface – endpoint success? )</p>
-<p>Attempt to allocate a TCP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
-</section>
 <section id="allocate-tcp-connect-ipv4-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-connect-ipv4-endpoint</span></code></h4>
 <p>( src-port dest-addr dest-port interface – endpoint success? )</p>
 <p>Attempt to allocate a TCP endpoint connected to the IPv4 address <em>dest-addr</em> at <em>dest-port</em> from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.</p>
 </section>
-<section id="close-udp-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">close-udp-endpoint</span></code></h4>
-<p>( endpoint interface – )</p>
-<p>Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.</p>
 </section>
-<section id="close-tcp-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">close-tcp-endpoint</span></code></h4>
-<p>( endpoint interface – )</p>
-<p>Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.</p>
-</section>
-</section>
-<section id="endpoint">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code> class has the following methods:</p>
-<section id="endpoint-tcp-state">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-tcp-state&#64;</span></code></h4>
-<p>( endpoint – tcp-state )</p>
-<p>This word returns the current TCP state of an endpoint.</p>
-</section>
-<section id="endpoint-rx-data">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-rx-data&#64;</span></code></h4>
-<p>( endpoint – addr bytes )</p>
-<p>This word returns the address and size in bytes of the current pending data for an endpoint.</p>
-</section>
+<section id="ipv4-endpoint">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-endpoint&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-endpoint&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> and has the following methods:</p>
 <section id="endpoint-ipv4-remote">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-ipv4-remote&#64;</span></code></h4>
 <p>( endpoint – ipv4-addr port )</p>
 <p>This word returns the IPv4 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.</p>
 </section>
-<section id="udp-endpoint">
-<h4><code class="docutils literal notranslate"><span class="pre">udp-endpoint?</span></code></h4>
-<p>( endpoint – udp? )</p>
-<p>Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).</p>
 </section>
-<section id="endpoint-local-port">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-local-port&#64;</span></code></h4>
-<p>( endpoint – port )</p>
-<p>Get the local port for <em>endpoint</em>. Note that if the local port for an endpoint had been specified as <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> this will be the actual local port.</p>
-</section>
-</section>
-<section id="waiting-rx-data">
-<h3><code class="docutils literal notranslate"><span class="pre">waiting-rx-data?</span></code></h3>
-<p>( endpoint – waiting? )</p>
-<p>Get whether there is any data waiting on endpoint beyond the currently pending data.</p>
-</section>
-<section id="ip-handler">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class handles receiving IP frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following constructor:</p>
+<section id="ipv4-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class handles receiving IP frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following constructor:</p>
 <section id="id6">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( interface handler – )</p>
 <p>Construct an IP frame handler for <em>interface</em>.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following methods:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="handle-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
