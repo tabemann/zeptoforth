@@ -16439,14 +16439,14 @@
       </navPoint>
       <navPoint id="navPoint2739" playOrder="2523">
         <navLabel>
-          <text>simple-net</text>
+          <text>simple-net-ipv4</text>
         </navLabel>
-        <content src="extra/net.xhtml#simple-net" />  
+        <content src="extra/net.xhtml#simple-net-ipv4" />  
         <navPoint id="navPoint2740" playOrder="2523">
           <navLabel>
-            <text>simple-net</text>
+            <text>simple-net-ipv4</text>
           </navLabel>
-          <content src="extra/net.xhtml#simple-net" />  
+          <content src="extra/net.xhtml#simple-net-ipv4" />  
         </navPoint>
         <navPoint id="navPoint2741" playOrder="2524">
           <navLabel>
@@ -16456,43 +16456,43 @@
         </navPoint>
         <navPoint id="navPoint2742" playOrder="2525">
           <navLabel>
-            <text>&lt;simple-net&gt;</text>
+            <text>&lt;simple-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id21" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2743" playOrder="2526">
         <navLabel>
-          <text>simple-cyw43-net</text>
+          <text>simple-cyw43-net-ipv4</text>
         </navLabel>
-        <content src="extra/net.xhtml#simple-cyw43-net" />  
+        <content src="extra/net.xhtml#simple-cyw43-net-ipv4" />  
         <navPoint id="navPoint2744" playOrder="2526">
           <navLabel>
-            <text>simple-cyw43-net</text>
+            <text>simple-cyw43-net-ipv4</text>
           </navLabel>
-          <content src="extra/net.xhtml#simple-cyw43-net" />  
+          <content src="extra/net.xhtml#simple-cyw43-net-ipv4" />  
         </navPoint>
         <navPoint id="navPoint2745" playOrder="2527">
           <navLabel>
-            <text>&lt;simple-cyw43-net&gt;</text>
+            <text>&lt;simple-cyw43-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id23" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2746" playOrder="2528">
         <navLabel>
-          <text>pico-w-cyw43-net</text>
+          <text>pico-w-cyw43-net-ipv4</text>
         </navLabel>
-        <content src="extra/net.xhtml#pico-w-cyw43-net" />  
+        <content src="extra/net.xhtml#pico-w-cyw43-net-ipv4" />  
         <navPoint id="navPoint2747" playOrder="2528">
           <navLabel>
-            <text>pico-w-cyw43-net</text>
+            <text>pico-w-cyw43-net-ipv4</text>
           </navLabel>
-          <content src="extra/net.xhtml#pico-w-cyw43-net" />  
+          <content src="extra/net.xhtml#pico-w-cyw43-net-ipv4" />  
         </navPoint>
         <navPoint id="navPoint2748" playOrder="2529">
           <navLabel>
-            <text>&lt;pico-w-cyw43-net&gt;</text>
+            <text>&lt;pico-w-cyw43-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id28" />  
         </navPoint>

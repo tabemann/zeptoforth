@@ -511,29 +511,29 @@
 </section>
 </section>
 </section>
-<section id="simple-net">
-<h2><code class="docutils literal notranslate"><span class="pre">simple-net</span></code><a class="headerlink" href="#simple-net" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">simple-net</span></code> module contains the following word:</p>
+<section id="simple-net-ipv4">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-net-ipv4</span></code><a class="headerlink" href="#simple-net-ipv4" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4</span></code> module contains the following word:</p>
 <section id="x-endpoint-process-not-started">
 <h3><code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code><a class="headerlink" href="#x-endpoint-process-not-started" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
-<p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> instance for which the endpoint process has not been started.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">simple-net</span></code> module contains the following class:</p>
+<p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> instance for which the endpoint process has not been started.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4</span></code> module contains the following class:</p>
 </section>
 <section id="id21">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
 <section id="id22">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> base class.</p>
+<p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> base class.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="init-net">
 <h4><code class="docutils literal notranslate"><span class="pre">init-net</span></code><a class="headerlink" href="#init-net" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net&gt;</span></code> instance.</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> instance.</p>
 </section>
 <section id="init-net-no-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code><a class="headerlink" href="#init-net-no-handler" title="Link to this heading">¶</a></h4>
@@ -567,28 +567,28 @@
 </section>
 </section>
 </section>
-<section id="simple-cyw43-net">
-<h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code><a class="headerlink" href="#simple-cyw43-net" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
+<section id="simple-cyw43-net-ipv4">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code><a class="headerlink" href="#simple-cyw43-net-ipv4" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code> module contains the following class:</p>
 <section id="id23">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
 <section id="id24">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
-<p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver – )</p>
-<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
+<p>( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver – )</p>
+<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="init-cyw43-net">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#init-cyw43-net" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::init-net</span></code>.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::init-net</span></code>.</p>
 </section>
 <section id="init-cyw43-net-no-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#init-cyw43-net-no-handler" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::init-net-no-handler</span></code>.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::init-net-no-handler</span></code>.</p>
 </section>
 <section id="cyw43-net-country">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code><a class="headerlink" href="#cyw43-net-country" title="Link to this heading">¶</a></h4>
@@ -608,42 +608,42 @@
 <section id="id25">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
 <p>( driver – interface )</p>
-<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::net-interface&#64;</span></code>.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-interface&#64;</span></code>.</p>
 </section>
 <section id="id26">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h4>
 <p>( driver – endpoint-processor )</p>
-<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::net-endpoint-process&#64;</span></code>.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-endpoint-process&#64;</span></code>.</p>
 </section>
 <section id="id27">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net::run-net-process</span></code>.</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::run-net-process</span></code>.</p>
 </section>
 </section>
 </section>
-<section id="pico-w-cyw43-net">
-<h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code><a class="headerlink" href="#pico-w-cyw43-net" title="Link to this heading">¶</a></h2>
-<p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net</span></code> class has the following class:</p>
+<section id="pico-w-cyw43-net-ipv4">
+<h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code><a class="headerlink" href="#pico-w-cyw43-net-ipv4" title="Link to this heading">¶</a></h2>
+<p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code> class has the following class:</p>
 <section id="id28">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
 <section id="id29">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h4>
-<p>( pio-addr sm-index pio-instance driver – )</p>
-<p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
+<p>( sm-index pio-instance driver – )</p>
+<p>This instantiates an instance with a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="id30">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance.</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance.</p>
 </section>
 <section id="id31">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
-<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
 <section id="pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code><a class="headerlink" href="#pico-w-led" title="Link to this heading">¶</a></h4>

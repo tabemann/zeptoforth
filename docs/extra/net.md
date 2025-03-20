@@ -536,20 +536,20 @@ This gets the zeptoIP endpoint processor instance. This raises `x-endpoint-proce
 
 This starts the zeptoIP frame and endpoint processors.
 
-### `simple-cyw43-net`
+### `simple-cyw43-net-ipv4`
 
-The `simple-cyw43-net` module contains the following class:
+The `simple-cyw43-net-ipv4` module contains the following class:
 
-#### `<simple-cyw43-net>`
+#### `<simple-cyw43-net-ipv4>`
 
-The `<simple-cyw43-net>` class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.
+The `<simple-cyw43-net-ipv4>` class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.
 
 It has the following constructor:
 
 ##### `new`
-( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver -- )
+( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver -- )
 
-This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
+This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1` or, on the RP2350, `pio::PIO2`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 
@@ -593,32 +593,32 @@ This method is an alias for `simple-net-ipv4::net-endpoint-process@`.
 
 This method is an alias for `simple-net-ipv4::run-net-process`.
 
-### `pico-w-cyw43-net`
+### `pico-w-cyw43-net-ipv4`
 
-This `pico-w-cyw43-net` class has the following class:
+This `pico-w-cyw43-net-ipv4` class has the following class:
 
-#### `<pico-w-cyw43-net>`
+#### `<pico-w-cyw43-net-ipv4>`
 
-The `<pico-w-cyw43-net>` class inherits from the `<simple-cyw43-net>` class, providing functionality specific to the Raspberry Pi Pico W.
+The `<pico-w-cyw43-net-ipv4>` class inherits from the `<simple-cyw43-net-ipv4>` class, providing functionality specific to the Raspberry Pi Pico W.
 
 It has the following constructor:
 
 ##### `new`
-( pio-addr sm-index pio-instance driver -- )
+( sm-index pio-instance driver -- )
 
-This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
+This instantiates an instance with a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1` or, on the RP2350, `pio::PIO2`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 
 ##### `init-cyw43-net`
 ( driver -- )
 
-This initializes a `<pico-w-cyw43-net>` instance.
+This initializes a `<pico-w-cyw43-net-ipv4>` instance.
 
 ##### `init-cyw43-net-no-handler`
 ( driver -- )
 
-This initalizes a `<pico-w-cyw43-net>` instance without starting an endpoint processing task.
+This initalizes a `<pico-w-cyw43-net-ipv4>` instance without starting an endpoint processing task.
 
 ##### `pico-w-led!`
 ( state driver -- )
