@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +19,6 @@
 \ SOFTWARE.
 
 #include extra/rp_common/cyw43/cyw43_all.fs
-#include extra/rp_common/net/net_all.fs
-#include extra/rp_common/simple_cyw43_net.fs
+#include extra/rp_common/net/net_ipv4_all.fs
+#include extra/rp_common/simple_cyw43_net_ipv4.fs
 

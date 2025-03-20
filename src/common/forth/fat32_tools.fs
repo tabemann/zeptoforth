@@ -703,7 +703,7 @@ begin-module fat32-tools
     [:
       [:
         { file }
-        swap seek-set file seek-file
+        seek-set file seek-file
         file read-file
       ;] current-fs@ with-open-file-at-root-path
     ;] fs-lock with-lock

@@ -1,4 +1,5 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2025 Paul Koning
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,11 +19,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-compile-to-flash
-
-marker erase-net
-
-#include extra/rp_common/cyw43_net_all.fs
-#include extra/rp_common/pico_w_cyw43_net.fs
-
-compile-to-ram
+#include extra/rp_common/net/net_consts.fs
+#include extra/rp_common/net/net_config.fs
+#include extra/rp_common/net/net_misc.fs
+#include extra/rp_common/net/frame_process.fs
+#include extra/rp_common/net/net.fs
+#include extra/rp_common/net/net_ipv4.fs
+#include extra/rp_common/net/net_diagnostic.fs
+#include extra/rp_common/net/endpoint_process.fs
+#include extra/rp_common/net/simple_net_ipv4.fs

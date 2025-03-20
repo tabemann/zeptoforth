@@ -20,6 +20,15 @@
 
 begin-module net-consts
 
+  \ IPv4 address size
+  4 constant ipv4-addr-size
+  
+  \ IPv6 address size
+  16 constant ipv6-addr-size
+
+  \ MAC address size
+  6 constant mac-addr-size
+  
   \ TCP states
   0 constant TCP_CLOSED
   1 constant TCP_LISTEN

@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@
 \ 
 \ Then execute from the base directory of zeptoforth:
 \ 
-\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp2040/pico_w_net_all.fs
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
 \ 
 \ Afterwards, if you had not already installed the CYW43439 firmware, driver,
 \ and zeptoIP, make sure to reboot zeptoforth, either by executing:
@@ -70,17 +70,17 @@ begin-module pico-w-net-repl
   net-consts import
   net-config import
   net import
+  net-ipv4 import
   endpoint-process import
   sema import
   slock import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
   
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
 
@@ -92,9 +92,6 @@ begin-module pico-w-net-repl
   
   \ Server Tx lock
   slock-size buffer: server-tx-slock
-
-  \ Tx notify area
-  variable tx-notify-area
   
   \ Server active
   variable server-active?
@@ -136,10 +133,13 @@ begin-module pico-w-net-repl
   100 value tx-timeout
   
   \ Tx timeout start
-  \ variable tx-timeout-start
+  variable tx-timeout-start
   
   \ Rx semaphore
   sema-size aligned-buffer: rx-sema
+  
+  \ Tx semaphore
+  sema-size aligned-buffer: tx-sema
   
   \ Tx block semaphore
   sema-size aligned-buffer: tx-block-sema
@@ -202,10 +202,12 @@ begin-module pico-w-net-repl
   \ Do server transmission
   : do-server ( -- )
     begin
-      \ 0 task::wait-notify drop
-      [: server-delay 10 * systick::systick-counter 0 task::wait-notify-timeout drop ;] try
-      dup ['] task::x-timed-out = if drop 0 then
-      ?raise
+      tx-timeout systick::systick-counter tx-timeout-start @ - - 0 max { my-timeout }
+      my-timeout task::timeout !
+      tx-sema ['] take try
+      dup ['] task::x-timed-out = if 2drop 0 then
+      task::no-timeout task::timeout !
+      ?raise 
       server-active? @ if
         [: 
           tx-buffer-index @ { buffer-index }
@@ -221,6 +223,7 @@ begin-module pico-w-net-repl
           then
         then
       then
+      systick::systick-counter tx-timeout-start !
       tx-block-sema broadcast
       tx-block-sema give
     again
@@ -252,15 +255,16 @@ begin-module pico-w-net-repl
             write-tx
             true
           else
+            tx-sema give
             false
           then
         ;] server-tx-slock with-slock
-        0 server-task @ task::notify
         dup not if
           task::timeout @ { old-timeout }
           server-delay 10 * task::timeout !
-          [: tx-block-sema take ;] try
-          dup ['] task::x-timed-out = if drop 0 then
+          tx-block-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
           old-timeout task::timeout !
           ?raise
         then
@@ -294,8 +298,9 @@ begin-module pico-w-net-repl
         dup not if
           task::timeout @ { old-timeout }
           server-delay 10 * task::timeout !
-          [: rx-sema take ;] try
-          dup ['] task::x-timed-out = if drop 0 then
+          rx-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
           old-timeout task::timeout !
           ?raise
         then
@@ -355,11 +360,13 @@ begin-module pico-w-net-repl
     0 tx-write-index cell+ !
     0 rx-read-index !
     0 rx-write-index !
+    systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
     1 0 rx-sema init-sema
+    1 0 tx-sema init-sema
     1 0 tx-block-sema init-sema
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
@@ -367,7 +374,6 @@ begin-module pico-w-net-repl
     my-tcp-session-handler
     my-cyw43-net net-endpoint-process@ add-endpoint-handler
     0 ['] do-server 512 128 1024 1 task::spawn-on-core server-task !
-    tx-notify-area 1 server-task @ task::config-notify
     c" repl-tx" server-task @ task::task-name!
     server-task @ task::run
   ;
@@ -433,20 +439,11 @@ begin-module pico-w-net-repl
           tx-empty? if
             true
           else
-\            tx-sema give
+            tx-sema give
             false
           then
         ;] server-tx-slock with-slock
-        0 server-task @ task::notify
-        dup not if
-          task::timeout @ { old-timeout }
-          server-delay 10 * task::timeout !
-          tx-block-sema ['] take try dup ['] task::x-timed-out = if
-            2drop 0
-          then
-          old-timeout task::timeout !
-          ?raise
-        then
+        dup not if server-delay ms then
       until
     then
   ;

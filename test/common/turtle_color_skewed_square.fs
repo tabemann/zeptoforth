@@ -1,5 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
-\ Copyright (c) 2025 Paul Koning
+\ Copyright (c) 2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -19,11 +18,35 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp_common/net/net_consts.fs
-#include extra/rp_common/net/net_config.fs
-#include extra/rp_common/net/net_misc.fs
-#include extra/rp_common/net/frame_process.fs
-#include extra/rp_common/net/net.fs
-#include extra/rp_common/net/net_diagnostic.fs
-#include extra/rp_common/net/endpoint_process.fs
-#include extra/rp_common/net/simple_net.fs
+begin-module turtle-color-skewed-square
+
+  turtle import
+
+  : angle-color { degrees -- r g b }
+    degrees 360 umod to degrees
+    degrees 60 /mod { remainder quotient }
+    remainder 255 * 60 / { shade }
+    quotient case
+      0 of 255 shade 0 endof
+      1 of 255 shade - 255 0 endof
+      2 of 0 255 shade endof
+      3 of 0 255 shade - 255 endof
+      4 of shade 0 255 endof
+      5 of 255 0 255 shade - endof
+    endcase
+  ;
+
+  : color-skewed-square ( -- )
+    0,0 { D: color }
+    0 begin dup 200 < while
+      color round-zero angle-color setpencolor
+      3,6 +to color
+      dup forward
+      91 left
+      2 +
+    repeat
+    drop
+  ;
+
+end-module
+

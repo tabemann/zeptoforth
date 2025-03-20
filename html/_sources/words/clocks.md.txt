@@ -14,7 +14,7 @@ Returns the crystal oscillator frequency in Hz.  This is set at built time; curr
 ##### `sysclk`
 ( -- addr )
 
-Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by `set-sysclk`.
+Get the address of the system clock frequency in Hz.  This is initialized to 125 MHz on the RP2040, or 150 MHz on the RP2350, and will be changed to the new value by `set-sysclk`. Unlike the rest of the words mentioned here, this word is available and its underlying variable is set on all platforms.
 
 ### `clocks`
 

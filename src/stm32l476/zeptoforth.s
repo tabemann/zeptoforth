@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2023 Travis Bemann
+@ Copyright (c) 2019-2025 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,9 @@ _handle_reset:
 	@@ The outermost exception handling - if an exception happens here the
 	@@ system will reboot
 outer_exc_handled:
+        ldr r0, =sysclk
+        ldr r1, =4000000
+        str r1, [r0]
 	bl _init_variables
 	bl _init_dict
 	bl _uart_init

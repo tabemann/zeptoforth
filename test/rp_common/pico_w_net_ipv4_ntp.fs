@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@
 \ 
 \ Then execute from the base directory of zeptoforth:
 \ 
-\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp2040/pico_w_net_all.fs
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
 \
 \ Afterwards, if you had not already installed the CYW43439 firmware, driver,
 \ and zeptoIP, make sure to reboot zeptoforth, either by executing:
@@ -42,21 +42,16 @@
 \ 
 \ Use instructions
 \ 
-\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
-\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
-\    or e4thcom in noforth mode.
-\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-udp::start-server
+\ 1. Load extra/rp2040/net/net_ntp.fs (relative to the base directory of
+\    zeptoforth) and then this code into RAM on a zeptoforth install where
+\    zeptoIP has already been installed using a terminal which supports
+\    zeptoforth, e.g. zeptocom.js or e4thcom in noforth mode.
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
 \
-\ This will establish a UDP server on port 4444 at the IPv4 address acquired via
-\ DHCP that is reported on the console.
-\
-\ The recommended means of communicating with this REPL is:
-\
-\ nc -u <the reported IPv4 address> 4444
-\
-\ Each line transmitted by netcat will be echoed back to the user via UDP.
+\ This will start an NTP client pointed at pool.ntp.org and regularly report
+\ the time.
 
-begin-module pico-w-net-udp
+begin-module pico-w-net-ntp
   
   oo import
   cyw43-events import
@@ -67,63 +62,37 @@ begin-module pico-w-net-udp
   net-consts import
   net-config import
   net import
+  net-ipv4 import
   endpoint-process import
-  simple-cyw43-net import
-  pico-w-cyw43-net import
+  simple-cyw43-net-ipv4 import
+  pico-w-cyw43-net-ipv4 import
+  ntp import
+  rtc import
 
-  <pico-w-cyw43-net> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
   
-  0 constant pio-addr
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  \ Our port
-  4444 constant my-port
-  
-  <endpoint-handler> begin-class <udp-echo-handler>
-    
-  end-class
-
-  <udp-echo-handler> begin-implement
-  
-    \ Handle a endpoint packet
-    :noname { endpoint self -- }
-      endpoint endpoint-ipv4-remote@ { src-addr src-port }
-      endpoint endpoint-rx-data@ { addr bytes }
-      addr bytes my-port src-addr src-port bytes [: { addr bytes buf }
-        addr buf bytes move true
-      ;] my-interface @ send-ipv4-udp-packet drop
-      my-cyw43-net toggle-pico-w-led
-      endpoint my-interface @ endpoint-done
-    ; define handle-endpoint
-  
-  end-implement
-  
-  <udp-echo-handler> class-size buffer: my-udp-echo-handler
+  <ntp> class-size buffer: my-ntp
 
   \ Initialize the test
   : init-test ( -- )
-    pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
-    <udp-echo-handler> my-udp-echo-handler init-object
-    my-udp-echo-handler
-    my-cyw43-net net-endpoint-process@ add-endpoint-handler
-    my-port my-interface @ allocate-udp-listen-endpoint if
-      drop
-    else
-      [: ." unable to allocate UDP listen endpoint" cr ;] ?raise
-    then
+    my-interface @ <ntp> my-ntp init-object
+    my-ntp my-cyw43-net net-endpoint-process@ add-endpoint-handler
   ;
 
   \ Event message buffer
   event-message-size aligned-buffer: my-event
 
-  \ Start the server
-  : start-server { D: ssid D: pass -- }
+  \ Start the client
+  : start-client { D: ssid D: pass -- }
     init-test
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
@@ -150,6 +119,20 @@ begin-module pico-w-net-udp
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
+    s" pool.ntp.org" ntp-port my-ntp init-ntp
+    0 [:
+      begin
+        my-ntp time-set? if
+          my-ntp current-time@ f.
+          date-time-size [: { date-time }
+            date-time date-time@ date-time date-time. space
+          ;] with-aligned-allot
+        then
+        1000 ms
+      again
+    ;] 512 128 512 task::spawn
+    c" ntp-display" over task::task-name!
+    task::run
   ;
 
 end-module

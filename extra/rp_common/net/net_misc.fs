@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,77 @@ begin-module net-misc
     swap $FF and 24 lshift or
   ;
 
+  \ Make a global unicast IPv6 address
+  : make-global-unicast-ipv6-addr
+    { mac-addr-0 mac-addr-1 prefix-0 prefix-1 prefix-2 prefix-3 prefix-bits }
+    ( -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    $FFFF_FFFF 128 prefix-bits - 0 min 32 max lshift { mask-0 }
+    $FFFF_FFFF 96 prefix-bits - 0 min 32 max lshift { mask-1 }
+    $FFFF_FFFF 64 prefix-bits - 0 min 32 max lshift { mask-2 }
+    $FFFF_FFFF 32 prefix-bits - 0 min 32 max lshift { mask-3 }
+    prefix-0 mask-0 and mac-addr-0 mask-0 bic or ( ipv6-0 )
+    prefix-1 mask-1 and mac-addr-1 $FFFF and mask-1 bic or ( ipv6-1 )
+    prefix-2 mask-2 and ( ipv6-3 )
+    prefix-3 mask-3 and ( ipv6-4 )
+  ;
+
+  \ Make a link-local IPv6 address
+  : make-link-local-ipv6-addr
+    { mac-addr-0 mac-addr-1 -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 }
+    mac-addr-0 $FFFFFF and $FE000000 or \ ipv6-0
+    mac-addr-0 16 rshift $FF00 and $FF or mac-addr-1 16 lshift or
+    $02000000 xor \ ipv6-1
+    0 \ ipv6-2
+    $FE800000 \ ipv6-3
+  ;
+
+  \ IPv6 address size
+  4 cells constant ipv6-addr-size
+
+  \ Make an IPv6 address
+  : make-ipv6-addr
+    ( addr0 addr1 addr2 addr3 addr4 addr5 addr6 addr7 )
+    ( -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-0 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-1 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-2 }
+    $FFFF and swap $FFFF and 16 lshift or { ipv6-3 }
+    ipv6-0 ipv6-1 ipv6-2 ipv6-3
+  ;
+
+  \ Is an IPv6 address multicast
+  : ipv6-addr-multicast? ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- multicast? )
+    nip nip nip $FFFF0000 and $FF020000 =
+  ;
+
+  \ Is this a multicast MAC address
+  : mac-addr-multicast? ( D: mac-addr -- multicast? )
+    40 2rshift 1 and 0<>
+  ;
+
+  \ Get an IPv6 multicast MAC address
+  : ipv6-multicast-mac-addr ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- mac-0 mac-1 )
+    drop drop drop $3333
+  ;
+
+  \ Get the solicit link-local multicast address
+  : solicit-node-link-local-multicast
+    ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- ipv6-0' ipv6-1' ipv6-2' ipv6-3' )
+    drop drop drop $FFFFFF and $FF000000 or $1 $0 $FF020000
+  ;
+  
+  \ The DHCPv6 link-local multicast address
+  : DHCPV6_LINK_LOCAL_MULTICAST $0001002 $0 $0 $FF020000 ;
+
+  \ The all-nodes link-local multicast address
+  : ALL_NODES_LINK_LOCAL_MULTICAST $1 $0 $0 $FF020000 ;
+
+  \ The all-routers link-local multicast address
+  : ALL_ROUTERS_LINK_LOCAL_MULTICAST $2 $0 $0 $FF020000 ;
+
+  \ IPv6 version traffic flow
+  6 28 lshift constant IPV6_VERSION_TRAFFIC_FLOW_CONST
+  
   \ Max domain name length
   253 constant max-dns-name-len
   
@@ -41,11 +112,20 @@ begin-module net-misc
   \ DNS source port
   65535 constant dns-src-port
 
+  \ The AAAA DNS QTYPE
+  $001C constant DNS_QTYPE_AAAA
+  
   \ DHCP client port
   68 constant dhcp-client-port
 
   \ DHCP server port
   67 constant dhcp-server-port
+
+  \ IPv6 DHCP client port
+  546 constant dhcpv6-client-port
+
+  \ IPv6 DHCP server port
+  547 constant dhcpv6-server-port
 
   \ DHCP discovery state
   0 constant dhcp-not-discovering
@@ -57,7 +137,30 @@ begin-module net-misc
   6 constant dhcp-renewing
   7 constant dhcp-rebinding
   8 constant dhcp-declined
+
+  \ DHCPv6 discovery state
+  0 constant dhcpv6-not-discovering
+  1 constant dhcpv6-wait-advertise
+  2 constant dhcpv6-wait-reply
+  3 constant dhcpv6-discovered
+  4 constant dhcpv6-renewing
+  5 constant dhcpv6-rebinding
+  6 constant dhcpv6-declined
+  7 constant dhcpv6-wait-info-reply
+
+  \ DHCPv6 options
+  1 constant OPTION_CLIENTID
+  2 constant OPTION_SERVERID
+  3 constant OPTION_IA_NA
+  5 constant OPTION_IAADDR
+  6 constant OPTION_ORO
+  8 constant OPTION_ELAPSED_TIME
+  23 constant OPTION_DNS_SERVERS
+  82 constant OPTION_SOL_MAX_RT
   
+  \ Maximumm IPv6 packet size
+  1280 constant max-ipv6-packet-size
+
   \ The Ethernet header structure
   begin-structure ethernet-header-size
     6 +field ethh-destination-mac
@@ -68,6 +171,7 @@ begin-module net-misc
   \ Some constants
   $0800 constant ETHER_TYPE_IPV4
   $0806 constant ETHER_TYPE_ARP
+  $86DD constant ETHER_TYPE_IPV6
   $0001 constant HTYPE_ETHERNET
   $0001 constant OPER_REQUEST
   $0002 constant OPER_REPLY
@@ -80,11 +184,29 @@ begin-module net-misc
   1 constant PROTOCOL_ICMP
   6 constant PROTOCOL_TCP
   17 constant PROTOCOL_UDP
+  58 constant PROTOCOL_ICMPV6
 
   \ ICMP types
   0 constant ICMP_TYPE_ECHO_REPLY
   8 constant ICMP_TYPE_ECHO_REQUEST
 
+  \ ICMPv6 types
+  128 constant ICMPV6_TYPE_ECHO_REQUEST
+  129 constant ICMPV6_TYPE_ECHO_REPLY
+  133 constant ICMPV6_TYPE_ROUTER_SOLICIT
+  134 constant ICMPV6_TYPE_ROUTER_ADVERTISE
+  135 constant ICMPV6_TYPE_NEIGHBOR_SOLICIT
+  136 constant ICMPV6_TYPE_NEIGHBOR_ADVERTISE
+  137 constant ICMPV6_TYPE_REDIRECT
+
+  \ ICMPv6 options
+  1 constant OPTION_SOURCE_LINK_LAYER_ADDR
+  2 constant OPTION_TARGET_LINK_LAYER_ADDR
+  3 constant OPTION_PREFIX_INFO
+
+  \ ICMPv6 neighbor adverisement solicited flag
+  30 bit constant NEIGHBOR_SOLICITED
+  
   \ ICMP codes
   0 constant ICMP_CODE_UNUSED
 
@@ -131,6 +253,16 @@ begin-module net-misc
     field: ipv4-dest-addr
   end-structure
 
+  \ IPv6 header structure
+  begin-structure ipv6-header-size
+    field: ipv6-version-traffic-flow
+    hfield: ipv6-payload-len
+    cfield: ipv6-next-header
+    cfield: ipv6-hop-limit
+    ipv6-addr-size +field ipv6-src-addr
+    ipv6-addr-size +field ipv6-dest-addr
+  end-structure
+
   \ UDP header structure
   begin-structure udp-header-size
     hfield: udp-src-port
@@ -146,6 +278,37 @@ begin-module net-misc
     hfield: icmp-checksum
     field: icmp-rest-of-header
   end-structure
+
+  \ ICMPv6 router advertise header structure
+  begin-structure icmpv6-ra-header-size
+    field: icmpv6-ra-icmp-header
+    cfield: icmpv6-ra-cur-hop-limit
+    cfield: icmpv6-ra-m-o-reserved
+    hfield: icmpv6-ra-router-lifetime
+    field: icmpv6-ra-reachable-time
+    field: icmpv6-ra-retrans-time
+  end-structure
+
+  \ ICMPv6 router advertise "managed" bit
+  $80 constant icmpv6-ra-managed
+
+  \ ICMPv6 router advertise "other stateful configuration" bit
+  $40 constant icmpv6-ra-other
+
+  \ ICMPv6 prefix information option structure
+  begin-structure icmpv6-prefix-info-opt-size
+    cfield: icmpv6-prefix-info-type
+    cfield: icmpv6-prefix-info-len
+    cfield: icmpv6-prefix-info-prefix-len
+    cfield: icmpv6-prefix-info-flags
+    field: icmpv6-prefix-info-valid-lifetime
+    field: icmpv6-prefix-info-preferred-lifetime
+    field: icmpv6-prefix-info-reserved2
+    ipv6-addr-size +field icmpv6-prefix-info-prefix
+  end-structure
+
+  \ ICMPv6 prefix information "autononmous" bit
+  $40 constant icmpv6-prefix-info-autonomous
 
   \ DNS header structure
   begin-structure dns-header-size
@@ -239,6 +402,33 @@ begin-module net-misc
   6 constant DHCP_SERVICE_DNS_SERVER
   15 constant DHCP_SERVICE_DNS_NAME
 
+  \ DHCP header structure
+  begin-structure dhcpv6-header-size
+    cfield: dhcpv6-msg-type
+    3 +field dhcp6-transact-id
+  end-structure
+
+  \ IPv6 DHCP message types
+  1 constant DHCPV6_SOLICIT
+  2 constant DHCPV6_ADVERTISE
+  3 constant DHCPV6_REQUEST
+  4 constant DHCPV6_CONFIRM
+  5 constant DHCPV6_RENEW
+  6 constant DHCPV6_REBIND
+  7 constant DHCPV6_REPLY
+  8 constant DHCPV6_RELEASE
+  9 constant DHCPV6_DECLINE
+  11 constant DHCPV6_INFORMATION_REQUEST
+
+  \ DUID_LL type
+  3 constant DUID_LL
+
+  \ Minimum DUID size
+  4 constant min-duid-size
+  
+  \ Maximum DUID size
+  132 constant max-duid-size
+  
   \ Default requested IP address
   0 0 0 0 make-ipv4-addr constant DEFAULT_IPV4_ADDR
 \  192 168 1 100 make-ipv4-addr constant DEFAULT_IPV4_ADDR
@@ -290,6 +480,22 @@ begin-module net-misc
   \ Reverse byte order in a 16-bit value
   : rev16 ( h -- h' ) [inlined] code[ r6 r6 rev16_,_ ]code ;
 
+  \ Reverse byte order in a 128-bit value
+  : rev128 ( x0 x1 x2 x3 -- x0' x1' x2' x3 )
+    code[
+    r6 r6 rev_,_
+    0 r7 r0 ldr_,[_,#_]
+    r0 r0 rev_,_
+    0 r7 r0 str_,[_,#_]
+    4 r7 r0 ldr_,[_,#_]
+    r0 r0 rev_,_
+    4 r7 r0 str_,[_,#_]
+    8 r7 r0 ldr_,[_,#_]
+    r0 r0 rev_,_
+    8 r7 r0 str_,[_,#_]
+    ]code
+  ;
+
   \ Get whether two MAC addresses are the same
   : mac= { addr0 addr1 -- equal? }
     addr0 c@ addr1 c@ =
@@ -300,7 +506,7 @@ begin-module net-misc
     addr0 5 + c@ addr1 5 + c@ = and
   ;
 
-    \ Do an alignment-safe 32-bit load
+  \ Do an alignment-safe 32-bit load
   thumb-2? not [if]
     : unaligned@ ( addr -- x )
       [inlined]
@@ -396,6 +602,30 @@ begin-module net-misc
     ;
   [then]
 
+  \ Do an alignment-safe IPv6 address load
+  : ipv6-unaligned@ { addr -- x0 x1 x2 x3 }
+    addr [ 3 cells ] literal + unaligned@
+    addr [ 2 cells ] literal + unaligned@
+    addr cell + unaligned@
+    addr unaligned@
+    rev128
+  ;
+
+  \ Do an alignment-safe IPv6 address store
+  : ipv6-unaligned! ( x0 x1 x2 x3 addr -- )
+    { addr }
+    rev128
+    addr unaligned!
+    addr cell + unaligned!
+    addr [ 2 cells ] literal + unaligned!
+    addr [ 3 cells ] literal + unaligned!
+  ;
+
+  \ Compare two IPv6 addresses
+  : ipv6= { x0-0 x0-1 x0-2 x0-3 x1-0 x1-1 x1-2 x1-3 -- equal? }
+    x0-0 x1-0 = x0-1 x1-1 = and x0-2 x1-2 = and x0-3 x1-3 = and
+  ;
+  
   \ Print a MAC address
   : mac. { D: addr -- }
     0 5 ?do
@@ -408,6 +638,18 @@ begin-module net-misc
     0 24 ?do ip i rshift $FF and (.) i 0 <> if ." ." then -8 +loop
   ;
 
+  \ Print an IPv6 address
+  : ipv6. ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- )
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4 ." :"
+    dup 16 rshift h.4 ." :"
+    $FFFF and h.4
+  ;
+  
   \ Strip an Ethernet header
   : strip-ethernet-header { addr bytes -- addr' bytes' }
     addr cyw43-structs::ethernet-header-size +
@@ -442,13 +684,144 @@ begin-module net-misc
     bytes + dup 16 rshift + $FFFF and
     addr bytes zero-offset compute-checksum
   ;
-  
+
+  \ Compute an IPv6 checksum
+  : compute-ipv6-checksum
+    { zero-offset }
+    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 protocol addr bytes }
+    ( -- h )
+    src-3 16 rshift
+    src-3 $FFFF and + dup 16 rshift + $FFFF and
+    src-2 16 rshift + dup 16 rshift + $FFFF and
+    src-2 $FFFF and + dup 16 rshift + $FFFF and
+    src-1 16 rshift + dup 16 rshift + $FFFF and
+    src-1 $FFFF and + dup 16 rshift + $FFFF and
+    src-0 16 rshift + dup 16 rshift + $FFFF and
+    src-0 $FFFF and + dup 16 rshift + $FFFF and
+    dest-3 16 rshift + dup 16 rshift + $FFFF and
+    dest-3 $FFFF and + dup 16 rshift + $FFFF and
+    dest-2 16 rshift + dup 16 rshift + $FFFF and
+    dest-2 $FFFF and + dup 16 rshift + $FFFF and
+    dest-1 16 rshift + dup 16 rshift + $FFFF and
+    dest-1 $FFFF and + dup 16 rshift + $FFFF and
+    dest-0 16 rshift + dup 16 rshift + $FFFF and
+    dest-0 $FFFF and + dup 16 rshift + $FFFF and
+    bytes 16 rshift + dup 16 rshift + $FFFF and
+    bytes $FFFF and + dup 16 rshift + $FFFF and
+    protocol 16 rshift + dup 16 rshift + $FFFF and
+    protocol $FFFF and + dup 16 rshift + $FFFF and
+    addr bytes zero-offset compute-checksum
+  ;
+
   \ Get whether an IPv4 packet is fragmented
   : ipv4-fragment? ( addr -- fragmented? )
     ipv4-flags-fragment-offset h@ rev16
     dup $1FFF and { offset }
     13 rshift { flags }
     flags MF and 0<> offset 0<> or
+  ;
+
+  \ IPv6 extensions
+  0 constant ipv6-ext-hop-by-hop-options
+  43 constant ipv6-ext-routing
+  44 constant ipv6-ext-fragment
+
+  \ Hop by hop extension header
+  begin-structure ipv6-ext-hop-by-hop-size
+    cfield: ipv6-ext-hop-by-hop-next-header
+    cfield: ipv6-ext-hop-by-hop-len
+    6 +field ipv6-ext-hop-by-hop-pad
+  end-structure
+  
+  \ Routing extension header
+  begin-structure ipv6-ext-routing-size
+    cfield: ipv6-ext-routing-next-header
+    cfield: ipv6-ext-routing-len
+    6 +field ipv6-ext-routing-pad
+  end-structure
+
+  \ Fragment extension header
+  begin-structure ipv6-ext-fragment-size
+    cfield: ipv6-ext-fragment-next-header
+    cfield: ipv6-ext-fragment-reserved
+    hfield: ipv6-ext-fragment-offset
+    field: ipv6-ext-fragment-ident
+  end-structure
+
+  \ Find the final payload of an IPv6 packet
+  : find-ipv6-payload { addr bytes -- header-type addr bytes valid? }
+    bytes ipv6-header-size > if
+      addr ipv6-next-header c@ { next-header }
+      ipv6-header-size +to addr
+      [ ipv6-header-size negate ] literal +to bytes
+      begin
+        next-header case
+          ipv6-ext-hop-by-hop-options of
+            bytes ipv6-ext-hop-by-hop-size >= if
+              addr ipv6-ext-hop-by-hop-next-header c@ to next-header
+              addr ipv6-ext-hop-by-hop-len c@ dup +to addr negate +to bytes
+            else
+              next-header addr bytes false exit
+            then
+          endof
+          ipv6-ext-routing of
+            bytes ipv6-ext-routing-size >= if
+              addr ipv6-ext-routing-next-header c@ to next-header
+              addr ipv6-ext-routing-len c@ dup +to addr negate +to bytes
+            else
+              next-header addr bytes false exit
+            then
+          endof
+          ipv6-ext-fragment of
+            addr bytes bytes ipv6-ext-fragment-size >= if
+              addr ipv6-ext-fragment-next-header c@ to next-header
+              ipv6-ext-fragment-size +to addr
+              [ ipv6-ext-fragment-size negate ] literal +to bytes
+            else
+              next-header addr bytes false exit
+            then
+          endof
+          addr bytes true exit
+        endcase
+      again
+    else
+      addr bytes false
+    then
+  ;
+
+  \ Find an IPv6 fragment header
+  : find-ipv6-fragment { addr bytes -- addr bytes fragmented? }
+    bytes ipv6-header-size > if
+      addr ipv6-next-header c@ { next-header }
+      ipv6-header-size +to addr
+      [ ipv6-header-size negate ] literal +to bytes
+      begin
+        next-header case
+          ipv6-ext-hop-by-hop-options of
+            bytes ipv6-ext-hop-by-hop-size >= if
+              addr ipv6-ext-hop-by-hop-next-header c@ to next-header
+              addr ipv6-ext-hop-by-hop-len c@ dup +to addr negate +to bytes
+            else
+              addr bytes false exit
+            then
+          endof
+          ipv6-ext-routing of
+            bytes ipv6-ext-routing-size >= if
+              addr ipv6-ext-routing-next-header c@ to next-header
+              addr ipv6-ext-routing-len c@ dup +to addr negate +to bytes
+            else
+              addr bytes false exit
+            then
+          endof
+          ipv6-ext-fragment of
+            addr bytes bytes ipv6-ext-fragment-size >= exit
+          endof
+          drop addr bytes false exit
+        endcase
+      again
+    else
+      addr bytes false
+    then
   ;
 
   \ Load a MAC address as a double
@@ -702,6 +1075,40 @@ begin-module net-misc
         then
       then
     until
+  ;
+
+  \ Get a variable size DHCPv6 option
+  : find-dhcpv6-opt { opt addr bytes -- addr' len found? }
+    begin bytes 4 >= while
+      addr 2 + hunaligned@ rev16 { len }
+      addr hunaligned@ rev16 opt = if
+        bytes 4 - len >= if
+          addr 4 + len true exit
+        else
+          0 0 false exit
+        then
+      else
+        len 4 + dup +to addr negate +to bytes
+      then
+    repeat
+    0 0 false
+  ;
+
+  \ Get a variable size ICMPv6 option
+  : find-icmpv6-opt { opt addr bytes -- addr' len found? }
+    begin bytes 2 >= while
+      addr 1+ c@ 8 * { len }
+      addr c@ opt =  if
+        bytes len >= if
+          addr 2 + len 2 - true exit
+        else
+          0 0 false exit
+        then
+      else
+        len dup +to addr negate +to bytes
+      then
+    repeat
+    0 0 false
   ;
 
 end-module

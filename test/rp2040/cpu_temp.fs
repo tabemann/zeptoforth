@@ -24,6 +24,7 @@ begin-module uart-adc-test
   uart import
   pin import
   adc import
+  lambda import
   
   begin-module uart-adc-test-internal
   
