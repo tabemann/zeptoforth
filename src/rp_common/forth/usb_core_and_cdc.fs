@@ -88,10 +88,21 @@ begin-module usb-core
     $EF c, $02 c, $01 c,
     \ USB_EP0_MAX
     $40 c,
+
+    \ Temporarily using Raspberry Pi pico-sdk VID:PID as pid.codes VID:PID has
+    \ not been granted yet.
     \ USB_VENDOR_ID
-    $09 c, $12 c,
+    $8A c, $2E c,
     \ USB_PRODUCT_ID
-    $CC c, $CC c,
+    $0A c, $00 c,
+
+    \ Requested PID CCCC
+    \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
+    \ USB_VENDOR_ID
+    \ $09 c, $12 c,
+    \ USB_PRODUCT_ID
+    \ $CC c, $CC c,
+  
     \ USB_PRODUCT_BCD
     $00 c, $02 c,
     \ STRING_MANUFACTURER
@@ -136,8 +147,6 @@ begin-module usb-core
     \ Language String for LANGUAGE_ENGLISH_US
     USB_DT_STRING :desc $09 c, $04 c, ;desc4
 
-  \ String descriptors for requested PID CCCC
-  \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
   : usb-string-1 ( -- addr ) c" zeptoforth" ;
   : usb-string-2 ( -- addr ) c" zeptoforth CDC Console" ;
  
