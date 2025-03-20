@@ -345,31 +345,37 @@ begin-module spi
       ;] task::core-init-hook !
     ;
 
+    \ Find a postdiv for a baud rate and prescale
+    : find-spi-postdiv ( baud prescale -- postdiv )
+      sysclk @ swap / { baud divided-clock }
+      256 begin dup 1 > while
+        divided-clock over / baud >= if exit else 1- then
+      repeat
+    ;
+    
     \ Find a prescale for a baud rate
     : find-spi-prescale ( baud -- prescale )
       s>d { D: baud }
+      2 -1 { prescale real-baud }
       2. begin 2dup 254. d<= while
 	2dup 2. d+ 256. d* baud d* sysclk @ s>d d> if
-	  d>s exit
-	else
-	  2. d+
-	then
+          2dup d>s { attempt-prescale }
+          baud d>s attempt-prescale find-spi-postdiv { attempt-postdiv }
+          sysclk @ attempt-prescale / attempt-postdiv / { attempt-baud }
+          real-baud -1 =
+          attempt-baud real-baud <
+          real-baud baud d>s < or
+          attempt-baud baud d>s >= and or if
+            attempt-prescale to prescale
+            attempt-baud to real-baud
+          then
+        then
+        2. d+
       repeat
       d>s
+      real-baud -1 <> if drop prescale then
     ;
 
-    \ Find a postdiv for a baud rate and prescale
-    : find-spi-postdiv ( baud prescale -- postdiv )
-      256 begin dup 1 > while
-	2dup 1- * sysclk @ swap / 3 pick > if
-	  nip nip exit
-	else
-	  1-
-	then
-      repeat
-      nip nip
-    ;
-    
   end-module> import
 
   \ Set the SPI baud
