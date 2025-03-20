@@ -22,6 +22,7 @@ begin-module priority-test
 
   task import
   lock import
+  lambda import
   
   lock-size buffer: my-lock
   

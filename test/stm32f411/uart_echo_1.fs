@@ -22,6 +22,7 @@ continue-module forth
 
   uart import
   pin import
+  lambda import
 
   \ Echo characters received by UART1 (GPIO pins PB6, PB7) at a given baud
   : init-test ( baud -- )
