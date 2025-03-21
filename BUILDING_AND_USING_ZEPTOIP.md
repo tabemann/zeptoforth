@@ -8,12 +8,12 @@ Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040 
 
 For examples of demos involving zeptoIP, there are:
 
-* `test/rp_common/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
-* `test/rp_common/pico_w_net_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
-* `test/rp_common/pico_w_net_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
-* `test/rp_common/pico_w_net_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
-* `test/rp_common/pico_w_net_udp.fs`, a tiny UDP echo server
-* `test/rp_common/pico_w_net_uart.fs`, a TCP-UART interface server
+* `test/rp_common/pico_w_net_ipv4_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
+* `test/rp_common/pico_w_net_ipv4_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_ipv4_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
+* `test/rp_common/pico_w_net_ipv4_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
+* `test/rp_common/pico_w_net_ipv4_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
+* `test/rp_common/pico_w_net_ipv4_udp.fs`, a tiny UDP echo server
+* `test/rp_common/pico_w_net_ipv4_uart.fs`, a TCP-UART interface server
 
 Directions for use of the individual demos are included therein.
 
@@ -34,34 +34,34 @@ Note that this will be faster if one uses a USB CDC console device rather than a
 Once one has uploaded the CYW43439 firmware, both the CYW43439 driver and zeptoIP may be built together by executing:
 
 ```
-utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/pico_w_net_all.fs
+utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
 ```
 
 Note that once this is complete one must reboot the board prior to using zeptoIP or the CYW43439 driver. On the first reboot there likely will be a noticeable delay before the board responds, as it will be generating new entries in the flash dictionary index, which is stored in flash.
 
 ## Bringing up zeptoIP and the CYW43439 driver
 
-Once one has built the CYW43439 driver and zeptoIP and rebooted, the simplest and easiest way to use zeptoIP and the CYW43439 driver is by making use of the `<pico-w-cyw43-net>` class in the `pico-w-cyw43-net` module. In the following example we show the initialization of an `<pico-w-cyw43-net>` instance:
+Once one has built the CYW43439 driver and zeptoIP and rebooted, the simplest and easiest way to use zeptoIP and the CYW43439 driver is by making use of the `<pico-w-cyw43-net-ipv4>` class in the `pico-w-cyw43-net-ipv4` module. In the following example we show the initialization of an `<pico-w-cyw43-net-ipv4>` instance:
 
 ```
 oo import
-simple-cyw43-net import
-pico-w-cyw43-net import
+simple-cyw43-net-ipv4 import
+pico-w-cyw43-net-ipv4 import
 cyw43-control import
 net import
+net-ipv4 import
 endpoint-process import
 
-0 constant pio-addr
 0 constant sm-index
 pio::PIO0 constant pio-instance
 
-<pico-w-cyw43-net> class-size buffer: my-cyw43-net
+<pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
 0 value my-cyw43-control
 0 value my-interface
 
-pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
-s" XX" s" XX" -1 my-cyw43-net cyw43-net-country! \ This is optional
-my-cyw43-net init-cyw43-net
+sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
+s" XX" s" XX" -1 my-cyw43-net cyw43-net-ipv4-country! \ This is optional
+my-cyw43-net init-cyw43-net-ipv4
 my-cyw43-net cyw43-control@ to my-cyw43-control
 my-cyw43-net net-interface@ to my-interface
 
@@ -70,14 +70,14 @@ my-cyw43-net net-interface@ to my-interface
 The line above:
 
 ```
-s" XX" s" XX" -1 my-cyw43-net cyw43-net-country! \ This is optional
+s" XX" s" XX" -1 my-cyw43-net cyw43-net-ipv4-country! \ This is optional
 ```
 
 specifies the default country settings, but under some circumstances one might to specify a different setting. In particular, the default country code/abbreviation, `XX`, which is a catch-all international country code, excludes the use of 802.11n, and some routers are 802.11n-only. Take, for instance, the settings for the UK, which would be:
 
 
 ```
-s" GB" s" GB" 0 my-cyw43-net cyw43-net-country!
+s" GB" s" GB" 0 my-cyw43-net cyw43-net-ipv4-country!
 ```
 
 For a list of abbreviations and codes (which are normally identical) and revisions see `extra/rp_common/cyw43/COUNTRIES.md`.
