@@ -24,6 +24,7 @@
 #include extra/rp_common/net/net_misc.fs
 #include extra/rp_common/net/frame_process.fs
 #include extra/rp_common/net/net.fs
+#include extra/rp_common/net/net_ipv4.fs
 #include extra/rp_common/net/net_diagnostic.fs
 #include extra/rp_common/net/endpoint_process.fs
-#include extra/rp_common/net/simple_net.fs
+#include extra/rp_common/net/simple_net_ipv4.fs

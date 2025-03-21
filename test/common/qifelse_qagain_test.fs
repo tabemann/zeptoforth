@@ -22,6 +22,7 @@ continue-module forth
   
   task import
   led import
+  lambda import
   
   : test0 ( -- )
     0 [:

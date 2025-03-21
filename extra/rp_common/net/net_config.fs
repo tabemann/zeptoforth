@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@ begin-module net-config
   value debug-hook
 
   \ Are we debugging?
-  false constant debug?
+  true constant debug?
   
   \ DHCP logging
   false value dhcp-log?
@@ -158,12 +158,24 @@ begin-module net-config
 
   \ TIME_WAIT interval timeout
   2500 value time-wait-interval-timeout
+
+  \ IPv6 router discovery interval
+  50000 value router-discovery-interval
   
   \ IPv4 discover attempts
   50000 value dhcp-discover-timeout
 
   \ Default DHCP renewal time
   86400 10000 * 2 / value default-dhcp-renew-interval
+
+  \ Default DHCP rebinding time
+  86400 10000 * value default-dhcp-rebind-interval
+
+  \ Default DHCP renew/rebind limit divisor
+  3 value dhcp-renew-rebind-limit-divisor
+
+  \ Default DHCP renew/rebind limit multiplier
+  2 value dhcp-renew-rebind-limit-multiplier
 
   \ Initial DHCP renewal divisor
   2 value dhcp-renew-init-divisor
@@ -200,5 +212,11 @@ begin-module net-config
 
   \ Maximum DNS resolution attempts
   5 value max-dns-resolve-attempts
+
+  \ Maximum neighbor discovery attempts
+  5 value max-neighbor-discovery-attempts
+
+  \ Initial neighbor retransmit time milliseconds
+  250 value initial-neighbor-retrans-time-ms
   
 end-module

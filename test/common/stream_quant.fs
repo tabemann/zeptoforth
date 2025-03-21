@@ -22,6 +22,7 @@ begin-module stream-test
 
   task import
   stream import
+  lambda import
   
   1024 constant my-stream-data-size
   256 constant recv-buf-size

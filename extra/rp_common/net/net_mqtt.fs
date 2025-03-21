@@ -194,6 +194,7 @@ begin-module mqtt
   oo import
   net-consts import
   net import
+  net-ipv4 import
   endpoint-process import
 
   \ Communication state constants

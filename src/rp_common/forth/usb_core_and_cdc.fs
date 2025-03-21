@@ -88,10 +88,21 @@ begin-module usb-core
     $EF c, $02 c, $01 c,
     \ USB_EP0_MAX
     $40 c,
+
+    \ Temporarily using Raspberry Pi pico-sdk VID:PID as pid.codes VID:PID has
+    \ not been granted yet.
     \ USB_VENDOR_ID
-    $09 c, $12 c,
+    $8A c, $2E c,
     \ USB_PRODUCT_ID
-    $CC c, $CC c,
+    $0A c, $00 c,
+
+    \ Requested PID CCCC
+    \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
+    \ USB_VENDOR_ID
+    \ $09 c, $12 c,
+    \ USB_PRODUCT_ID
+    \ $CC c, $CC c,
+  
     \ USB_PRODUCT_BCD
     $00 c, $02 c,
     \ STRING_MANUFACTURER
@@ -131,11 +142,11 @@ begin-module usb-core
   here config-data - cell align, constant config-data-size
   config-data-size config-data 2 + hcurrent!
 
-  \ Language ID String Descriptor for LANGUAGE_ENGLISH_US
-  : usb-language-id-string ( -- addr) c\" \x04\x03\x09\x04" ; 
+  \ USB Language String Descriptor
+  create language-id-string-data
+    \ Language String for LANGUAGE_ENGLISH_US
+    USB_DT_STRING :desc $09 c, $04 c, ;desc4
 
-  \ String descriptors for requested PID CCCC
-  \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
   : usb-string-1 ( -- addr ) c" zeptoforth" ;
   : usb-string-2 ( -- addr ) c" zeptoforth CDC Console" ;
  
@@ -487,13 +498,12 @@ begin-module usb-core
     usb-setup setup-length h@ config-data-size min
     config-data usb-start-control-transfer-to-host
   ;
-  
-  \ Send usb language id string descriptor to host
-  : usb-send-language-id-string-to-host ( -- )   
-    usb-language-id-string count swap 
-    usb-start-control-transfer-to-host
+
+  \ Send language string descriptor to host
+  : usb-send-language-id-string-to-host ( -- )
+    language-id-string-data usb-send-descriptor
   ;
- 
+
   \ Send usb string descriptor to host as unicode characters
   : usb-send-string-descriptor-to-host { string-descriptor -- }
     unicode-buffer 64 0 fill \ clear unicode buffer (64 bytes)
@@ -505,7 +515,7 @@ begin-module usb-core
     string-length 0 do    
      string-start i + c@ unicode-buffer 2 + i 2 * + c!
     loop
-    unicode-bytes unicode-buffer usb-start-control-transfer-to-host
+    unicode-buffer usb-send-descriptor
   ;
   
   \ Stall incoming request we cannot process

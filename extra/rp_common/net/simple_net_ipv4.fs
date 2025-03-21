@@ -22,24 +22,25 @@
 \ This is the base class for the "simple network interface" object.  It is
 \ meant to be subclassed with an actual device driver class.
 
-begin-module simple-net
+begin-module simple-net-ipv4
 
   oo import
   net-misc import
   frame-process import
   net import
+  net-ipv4 import
   endpoint-process import
 
   \ Endpoint process has not been started exception
   : x-endpoint-process-not-started ( -- ) ." endpoint process not started" cr ;
   
-  \ A simple networking and interface base class
-  <object> begin-class <simple-net>
+  \ An IPv4 simple networking and interface base class
+  <object> begin-class <simple-net-ipv4>
 
-    begin-module simple-net-internal
+    begin-module simple-net-ipv4-internal
 
       \ The IP stack interface
-      <interface> class-size member my-interface
+      <ipv4-interface> class-size member my-interface
 
       \ The frame processor
       <frame-process> class-size member my-frame-process
@@ -48,7 +49,7 @@ begin-module simple-net
       <arp-handler> class-size member my-arp-handler
 
       \ The IP frame handler
-      <ip-handler> class-size member my-ip-handler
+      <ipv4-handler> class-size member my-ip-handler
 
       \ The endpoint processor
       <endpoint-process> class-size member my-endpoint-process
@@ -83,12 +84,11 @@ begin-module simple-net
     
   end-class
 
-  \ Implement the common networking and interface class
-  <simple-net> begin-implement
+  \ Implement the common IPv4 networking and interface class
+  <simple-net-ipv4> begin-implement
 
     \ Constructor.  
-    :noname
-      { self -- )
+    :noname { self -- }
       self <object>->new
 
       false self endpoint-process-started? !
@@ -104,10 +104,12 @@ begin-module simple-net
     \ Initialize the network and interface object without starting
     \ the endpoint process
     :noname { self -- }
-      self device-frame-interface@ <interface> self my-interface init-object
-      self device-frame-interface@ <frame-process> self my-frame-process init-object
+      self device-frame-interface@
+      <ipv4-interface> self my-interface init-object
+      self device-frame-interface@
+      <frame-process> self my-frame-process init-object
       self my-interface <arp-handler> self my-arp-handler init-object
-      self my-interface <ip-handler> self my-ip-handler init-object
+      self my-interface <ipv4-handler> self my-ip-handler init-object
       self my-arp-handler self my-frame-process add-frame-handler
       self my-ip-handler self my-frame-process add-frame-handler
     ; define init-net-no-handler

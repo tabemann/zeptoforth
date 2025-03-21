@@ -31,7 +31,7 @@
 \ 
 \ Then execute from the base directory of zeptoforth:
 \ 
-\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp2040/pico_w_net_all.fs
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
 \ 
 \ If one only desires the CYW43439 driver and not zeptoIP, the following can be
 \ substituted:

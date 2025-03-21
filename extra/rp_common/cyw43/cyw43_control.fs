@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -200,7 +200,7 @@ begin-module cyw43-control
     \ Constructor
     :noname { self }
       ( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs )
-      ( pio-addr sm pio )
+      ( sm pio )
 
       \ Initialize the superclass
       self <object>->new

@@ -22,7 +22,7 @@ compile-to-flash
 
 marker erase-net
 
-#include extra/rp_common/cyw43_net_all.fs
-#include extra/rp_common/pico_w_cyw43_net.fs
+#include extra/rp_common/cyw43_net_ipv4_all.fs
+#include extra/rp_common/pico_w_cyw43_net_ipv4.fs
 
 compile-to-ram
