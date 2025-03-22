@@ -25,7 +25,7 @@ begin-module net-config
   value debug-hook
 
   \ Are we debugging?
-  false constant debug?
+  true constant debug?
   
   \ DHCP logging
   false value dhcp-log?
