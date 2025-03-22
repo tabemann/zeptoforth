@@ -70,27 +70,31 @@ begin-module map
       map-entry-count @ umod
     ;
 
-    \ Find a key in a map and return the index or, if not found, 0
-    : find-key ( hash-key key-addr map -- index|0 )
+    \ Find a key in a map and return the index or, if not found, -1
+    : find-key ( hash-key key-addr map -- index | -1 )
       rot >r r@ over map-init-index dup begin
-	dup 3 pick map-entry dup @ r@ = if
-	  cell+ 4 pick 4 pick map-equals-xt @ execute if
-	    nip nip nip rdrop exit
-	  else
-	    1+ 2 pick map-entry-count @ umod
-	  then
-	else
-	  drop 1+ 2 pick map-entry-count @ umod
-	then
+        dup 3 pick map-entry dup @ ?dup if
+          r@ = if
+            cell+ 4 pick 4 pick map-equals-xt @ execute if
+              nip nip nip rdrop exit
+            else
+              1+ 2 pick map-entry-count @ umod
+            then
+          else
+            drop 1+ 2 pick map-entry-count @ umod
+          then
+        else
+          drop 2drop 2drop rdrop -1 exit
+        then
       2dup = until
-      2drop 2drop rdrop 0
+      2drop 2drop rdrop -1
     ;
 
     \ Get the next available index for a key in a map - note that this
     \ does *not* check for the full condition
     : find-available ( hash-key map -- index )
       tuck map-init-index begin
-	2dup swap map-entry @ 0= if
+	2dup swap map-entry @ dup 0= swap -1 = or if
 	  nip exit
 	else
 	  1+ over map-entry-count @ umod
@@ -144,22 +148,23 @@ begin-module map
 
   \ Find a key's value in a map or return 0 if not found
   : find-map ( key-addr map -- value-addr|0 )
-    dup >r 2dup key-hash -rot find-key ?dup if
+    dup >r 2dup key-hash -rot find-key dup -1 <> if
       r@ map-entry r> map-key-size @ cell+ +
     else
-      rdrop 0
+      drop rdrop 0
     then
   ;
 
   \ Insert a value with a key into a map
   : insert-map ( value-addr key-addr map -- )
     2dup key-hash
-    >r 2dup r@ -rot find-key ?dup if
+    >r 2dup r@ -rot find-key dup -1 <> if
       rdrop swap >r r@ map-entry cell+
       r@ map-remove-xt @ if
 	dup dup r@ map-key-size @ + swap r@ map-remove-xt @ execute
       then
     else
+      drop
       dup map-used-entry-count @ over map-entry-count @ < averts x-map-full
       r> 2dup swap find-available
       rot >r r@ map-entry
@@ -172,8 +177,8 @@ begin-module map
 
   \ Remove a value with a key from a map
   : remove-map ( key-addr map -- )
-    dup >r 2dup key-hash -rot find-key ?dup if
-      r@ map-entry 0 over !
+    dup >r 2dup key-hash -rot find-key dup -1 <> if
+      r@ map-entry -1 over !
       -1 r@ map-used-entry-count +!
       r@ map-remove-xt @ if
 	cell+ dup r@ map-key-size @ + swap r> map-remove-xt @ execute
@@ -181,14 +186,14 @@ begin-module map
 	rdrop
       then
     else
-      rdrop
+      drop rdrop
     then
   ;
 
   \ Get the first index in a map, or return -1 if no entry is found
   : first-map ( map -- index|-1 )
     >r 0 begin
-      dup r@ map-entry @ 0<> if rdrop exit then
+      dup r@ map-entry @ dup 0<> swap -1 <> and if rdrop exit then
     1+ dup r@ map-entry-count @ = until
     rdrop drop -1
   ;
@@ -198,7 +203,7 @@ begin-module map
     over 0 >= averts x-map-index-out-of-range
     2dup map-entry-count @ < averts x-map-index-out-of-range
     >r 1+ begin
-      dup r@ map-entry @ 0<> if rdrop exit then
+      dup r@ map-entry @ dup 0<> swap -1 <> and if rdrop exit then
     1+ dup r@ map-entry-count @ = until
     rdrop drop -1
   ;
@@ -207,7 +212,7 @@ begin-module map
   : at-map ( index map -- value-addr key-addr )
     over 0 >= averts x-map-index-out-of-range
     2dup map-entry-count @ < averts x-map-index-out-of-range
-    dup >r map-entry dup @ averts x-map-index-no-entry
+    dup >r map-entry dup @ dup 0<> swap -1 <> and averts x-map-index-no-entry
     cell+ dup r> map-value-size @ + swap
   ;
 
