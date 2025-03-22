@@ -58,4 +58,6 @@ elif [ ${PLATFORM} = 'rp2040' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2350' ]; then
     ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2350_16mib' ]; then
+    ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 fi
