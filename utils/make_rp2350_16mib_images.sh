@@ -42,7 +42,7 @@ Usage:
 EOF
 fi
 
-RP2350_KERNEL="bin/${VERSION}/rp2350/zeptoforth_kernel-${VERSION}.uf2"
+RP2350_KERNEL="bin/${VERSION}/rp2350_16mib/zeptoforth_kernel-${VERSION}.uf2"
 
 flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2350_16mib ${PORT} full
