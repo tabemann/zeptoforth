@@ -892,16 +892,16 @@ begin-module pio
     : GPIOBASE ( pio -- addr ) [inlined] $168 + ;
 
     \ Raw interrupts
-    : INTR ( pio -- addr ) [inlined] $128 + ;
+    : INTR ( pio -- addr ) [inlined] $16C + ;
     
     \ Interrupt enable registers
-    : INTE ( irq pio -- addr ) [inlined] $12C + swap $0C * + ;
+    : INTE ( irq pio -- addr ) [inlined] $170 + swap $0C * + ;
     
     \ Interrupt force regisers
-    : INTF ( irq pio -- addr ) [inlined] $130 + swap $0C * + ;
+    : INTF ( irq pio -- addr ) [inlined] $174 + swap $0C * + ;
     
     \ Interrupt status registers
-    : INTS ( irq pio -- addr ) [inlined] $134 + swap $0C * + ;
+    : INTS ( irq pio -- addr ) [inlined] $178 + swap $0C * + ;
 
   end-module> import
 
