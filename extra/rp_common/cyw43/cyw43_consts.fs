@@ -145,6 +145,9 @@ begin-module cyw43-consts
   1 constant CHANNEL_TYPE_EVENT
   2 constant CHANNEL_TYPE_DATA
 
+  \ Maximum number of registered multicast addresses
+  10 constant max-multicast-addresses
+  
   \ CYW_SPID command structure constants.
   true constant CYW43_WRITE
   false constant CYW43_READ

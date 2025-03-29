@@ -33,6 +33,12 @@ begin-module frame-interface
     \ Set the MAC address
     method mac-addr! ( D: mac-addr self -- )
 
+    \ Add a MAC address to the multicast filter
+    method add-multicast-filter ( D: mac-addr self -- )
+
+    \ Remove a MAC address from the multicast filter
+    method remove-multicast-filter ( D: mac-addr self -- )
+
     \ Attempt to put a received frame
     method poll-put-rx-frame ( addr bytes self -- success? )
     

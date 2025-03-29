@@ -104,6 +104,7 @@ begin-module simple-net-ipv6
     :noname { self -- }
       self device-frame-interface@
       <ipv6-interface> self my-interface init-object
+      self my-interface init-multicast
       self device-frame-interface@
       <frame-process> self my-frame-process init-object
       self my-interface <ipv6-handler> self my-ip-handler init-object

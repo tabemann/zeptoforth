@@ -27,6 +27,7 @@ begin-module cyw43-runner
   cyw43-bus import
   cyw43-ioctl import
   cyw43-nvram import
+  cyw43-multicast import
   buffer-queue import
   frame-interface import
   chan import
@@ -181,6 +182,9 @@ begin-module cyw43-runner
 
     \ The MAC address
     2 cells member cyw43-mac-addr
+
+    \ The multicast filter implementation
+    cell member cyw43-multicast-impl
     
   end-class
 
@@ -188,8 +192,9 @@ begin-module cyw43-runner
   <cyw43-frame-interface> begin-implement
 
     \ Constructor
-    :noname { self -- }
+    :noname { multicast self -- }
       self <frame-interface>->new
+      multicast self cyw43-multicast-impl !
 
       \ Initialize the receive buffer queue
       self cyw43-rx-queue-data
@@ -220,6 +225,16 @@ begin-module cyw43-runner
       cyw43-mac-addr 2!
     ; define mac-addr!
 
+    \ Add a MAC address to the multicast filter
+    :noname ( D: mac-addr self -- )
+      cyw43-multicast-impl @ add-cyw43-multicast-filter
+    ; define add-multicast-filter
+
+    \ Remove a MAC address from the multicast filter
+    :noname ( D: mac-addr self -- )
+      cyw43-multicast-impl @ remove-cyw43-multicast-filter
+    ; define remove-multicast-filter
+    
     \ Attempt to put a received frame
     :noname ( addr bytes self -- success? )
       [ debug? ] [if] cr ." BEGIN poll-put-rx-frame" [then]
@@ -430,13 +445,13 @@ begin-module cyw43-runner
     \ The constructor.  Note that pio-addr is no longer used but it's
     \ included in the argument list because it comes that way from
     \ the outside.
-    :noname { fw-addr fw-bytes pwr clk dio cs sm pio self -- }
+    :noname { fw-addr fw-bytes pwr clk dio cs sm pio multicast self -- }
 
       \ Initialize the superclass
       self <object>->new
 
       \ Initialize the frame interface
-      <cyw43-frame-interface> self cyw43-frame-interface init-object
+      multicast <cyw43-frame-interface> self cyw43-frame-interface init-object
 
       \ Initialize the event lock
       self cyw43-event-lock init-lock

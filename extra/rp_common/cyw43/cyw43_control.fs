@@ -27,6 +27,7 @@ begin-module cyw43-control
   cyw43-events import
   cyw43-ioctl import
   cyw43-runner import
+  cyw43-multicast import
   frame-interface import
 
   \ Use default MAC address
@@ -43,13 +44,41 @@ begin-module cyw43-control
   
   \ Passphrase is too short or too long
   : x-invalid-pass-len ( -- ) ." passphrase is too short or too long" cr ;
-  
+
   \ Link state
   0 constant cyw43-link-down
   1 constant cyw43-link-up
 
   begin-module cyw43-control-internal
+
+    \ MAC address size
+    6 constant mac-addr-size
     
+    \ Load a MAC address as a double
+    : mac@ { addr -- D: mac-addr }
+      addr 2 + unaligned@ rev addr h@ rev16
+    ;
+    
+    \ Store a double as a MAC address
+    : mac! { D: mac-addr addr -- }
+      mac-addr rev16 addr h! rev addr 2 + unaligned!
+    ;
+
+    \ Subclass <cyw43-multicast> to implement it
+    <cyw43-multicast> begin-class <cyw43-multicast-impl>
+      
+      \ The corresponding <cyw43-control> object
+      cell member cyw43-multicast-control
+      
+      \ Multicast filter
+      cell mac-addr-size max-multicast-addresses * + cell align
+      member cyw43-multicast-filter
+      
+      \ Write the multicast filter
+      method >cyw43-multicast-filter ( self -- )
+      
+    end-class
+
     \ Download chunk size
     1024 constant cyw43-download-chunk-size
     
@@ -69,6 +98,9 @@ begin-module cyw43-control
       
       \ CYW43 runner
       <cyw43-runner> class-size member cyw43-core
+
+      \ CYW43 multicast filter implementation
+      <cyw43-multicast-impl> class-size member cyw43-multicast-impl
       
       \ CYW43 control lock
       lock-size member cyw43-lock
@@ -96,7 +128,7 @@ begin-module cyw43-control
 
       \ Country revision
       cell member cyw43-country-rev
-    
+
       \ Wait for joining an AP
       method wait-for-cyw43-join ( ssid-info self -- )
 
@@ -191,8 +223,68 @@ begin-module cyw43-control
 
     \ Clear event queue
     method clear-cyw43-events ( self -- )
-        
+
   end-class
+
+  \ Actually implement the <cyw43-multicast-impl> class
+  <cyw43-multicast-impl> begin-implement
+
+    \ Constructor
+    :noname { control self -- }
+      self <cyw43-multicast>->new
+      control self cyw43-multicast-control !
+      
+      \ Initialize the multicast filter
+      self cyw43-multicast-filter
+      cell mac-addr-size max-multicast-addresses * + cell align
+      0 fill
+      
+    ; define new
+
+    \ Add an address to the multicast filter
+    :noname { D: mac-addr self -- }
+      mac-addr $FFFF and to mac-addr
+      self cyw43-multicast-filter @ dup { count current-count }
+      self cyw43-multicast-filter cell+ { addr }
+      begin current-count 0> while
+        addr mac@ mac-addr d= if exit then
+        -1 +to current-count
+        mac-addr-size +to addr
+      repeat
+      count max-multicast-addresses < averts x-multicast-filter-full
+      mac-addr addr mac!
+      1 self cyw43-multicast-filter +!
+      self >cyw43-multicast-filter
+    ; define add-cyw43-multicast-filter
+
+    \ Remove an address from the multicast filter
+    :noname { D: mac-addr self -- }
+      mac-addr $FFFF and to mac-addr
+      self cyw43-multicast-filter @ { current-count }
+      self cyw43-multicast-filter cell+ { addr }
+      begin
+        current-count 0= if exit then
+        addr mac@ mac-addr d= if
+          true
+        else
+          -1 +to current-count
+          mac-addr-size +to addr
+          false
+        then
+      until
+      addr mac-addr-size + addr current-count 1- mac-addr-size * move
+      -1 self cyw43-multicast-filter +!
+      self >cyw43-multicast-filter
+    ; define remove-cyw43-multicast-filter
+
+    \ Write the multicast filter
+    :noname { self -- }
+      self cyw43-multicast-filter
+      cell mac-addr-size max-multicast-addresses * +
+      s" mcast_list" self cyw43-multicast-control @ >iovar-cyw43
+    ; define >cyw43-multicast-filter
+
+  end-implement
 
   \ Implement the CYW43 control class
   <cyw43-control> begin-implement
@@ -205,8 +297,11 @@ begin-module cyw43-control
       \ Initialize the superclass
       self <object>->new
 
+      \ Initialize the multicast filter
+      self <cyw43-multicast-impl> self cyw43-multicast-impl init-object
+
       \ Instantiate the runner
-      <cyw43-runner> self cyw43-core init-object
+      self cyw43-multicast-impl <cyw43-runner> self cyw43-core init-object
 
       \ Set the locals
       self cyw43-clm-size !
@@ -221,7 +316,7 @@ begin-module cyw43-control
 
       \ Set the default country
       s" XX" 2dup -1 self cyw43-country!
-      
+
     ; define new
 
     \ Initialize the CYW43
@@ -263,7 +358,6 @@ begin-module cyw43-control
           $FFFF and rev16 buf h!
           rev buf 2 + unaligned!
           buf 6 s" cur_etheraddr" self >iovar-cyw43
-
           [ debug? ] [if]
             cr ." MAC address: "
             6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop

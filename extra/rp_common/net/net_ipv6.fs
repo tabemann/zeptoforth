@@ -2763,6 +2763,9 @@ begin-module net-ipv6
     method allocate-tcp-connect-ipv6-endpoint
     ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port self -- endpoint success? )
 
+    \ Initialize multicast
+    method init-multicast ( self -- )
+
   end-class
 
   \ Implement the IPv6 interface class
@@ -2772,7 +2775,7 @@ begin-module net-ipv6
     :noname { frame-interface self -- }
       self <interface>->new
       frame-interface self out-frame-interface !
-      0 0 0 0 self intf-ipv6-addr ipv6-unaligned!
+      1 0 0 0 self intf-ipv6-addr ipv6-unaligned!
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self intf-ipv6-prefix ipv6-unaligned!
       true intf-autonomous? !
@@ -2839,7 +2842,19 @@ begin-module net-ipv6
     
     \ Set the IPv6 address
     :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      intf-ipv6-addr ipv6-unaligned!
+      { self }
+      self intf-ipv6-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
+      self intf-ipv6-addr ipv6-unaligned!
+      self intf-ipv6-addr ipv6-unaligned@
+      solicit-node-link-local-multicast ipv6-multicast-mac-addr
+      { D: new-multicast }
+      new-multicast self out-frame-interface @ add-multicast-filter
+      old-0 old-1 old-2 old-3
+      solicit-node-link-local-multicast ipv6-multicast-mac-addr
+      { D: old-multicast }
+      new-multicast old-multicast d<> if
+        old-multicast self out-frame-interface @ remove-multicast-filter
+      then
     ; define intf-ipv6-addr!
 
     \ Get the IPv6 prefix
@@ -4586,6 +4601,12 @@ begin-module net-ipv6
       then
     ; define discover-dns-ipv6-addr
     
+    \ Initialize multicast
+    :noname { self -- }
+      ALL_NODES_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
+      self out-frame-interface @ add-multicast-filter
+    ; define init-multicast
+
     \ Send a DHCPV6_SOLICIT message
     :noname { self -- }
       dhcp-log? if
@@ -5200,7 +5221,8 @@ begin-module net-ipv6
         [ ethernet-header-size negate ] literal +to bytes
         bytes ipv6-header-size >= if
           bytes addr ipv6-payload-len h@ rev16 min to bytes
-          addr ipv6-dest-addr ipv6-unaligned@ self ipv6-addr-listen? if
+          addr ipv6-dest-addr ipv6-unaligned@
+          self ip-interface @ ipv6-addr-listen? if
             src-mac-addr addr ipv6-src-addr ipv6-unaligned@
             addr ipv6-dest-addr ipv6-unaligned@
             addr bytes find-ipv6-payload if 
@@ -5210,6 +5232,13 @@ begin-module net-ipv6
             then
           then
         then
+      else
+        addr ethh-ether-type h@ rev16 { ether-type }
+        addr ethh-source-mac mac@ { D: src-mac-addr }
+        [ debug? ] [if]
+          src-mac-addr ether-type
+          [: cr ." Received " h.4 ."  from " mac. ;] debug-hook execute
+        [then]        
       then
     ; define handle-frame
 
