@@ -77,7 +77,7 @@ begin-module net-misc
 
   \ Is this a multicast MAC address
   : mac-addr-multicast? ( D: mac-addr -- multicast? )
-    40 2rshift 1 and 0<>
+    40 2rshift drop 1 and 0<>
   ;
 
   \ Get an IPv6 multicast MAC address
@@ -204,8 +204,11 @@ begin-module net-misc
   2 constant OPTION_TARGET_LINK_LAYER_ADDR
   3 constant OPTION_PREFIX_INFO
 
-  \ ICMPv6 neighbor adverisement solicited flag
+  \ ICMPv6 neighbor advertisement solicited flag
   30 bit constant NEIGHBOR_SOLICITED
+
+  \ ICMPv6 neighbor advertisement override flag
+  29 bit constant NEIGHBOR_OVERRIDE
   
   \ ICMP codes
   0 constant ICMP_CODE_UNUSED
@@ -220,6 +223,9 @@ begin-module net-misc
   24 constant endpoint-tcp-state-lsb
   $FF endpoint-tcp-state-lsb lshift constant endpoint-tcp-state-mask
 
+  \ Use default hop limit
+  -1 constant default-hop-limit
+  
   \ TCP options
   0 constant TCP_OPT_END
   1 constant TCP_OPT_NOP
@@ -687,29 +693,33 @@ begin-module net-misc
 
   \ Compute an IPv6 checksum
   : compute-ipv6-checksum
-    { zero-offset }
-    { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 protocol addr bytes }
-    ( -- h )
-    src-3 16 rshift
-    src-3 $FFFF and + dup 16 rshift + $FFFF and
-    src-2 16 rshift + dup 16 rshift + $FFFF and
-    src-2 $FFFF and + dup 16 rshift + $FFFF and
-    src-1 16 rshift + dup 16 rshift + $FFFF and
-    src-1 $FFFF and + dup 16 rshift + $FFFF and
-    src-0 16 rshift + dup 16 rshift + $FFFF and
-    src-0 $FFFF and + dup 16 rshift + $FFFF and
-    dest-3 16 rshift + dup 16 rshift + $FFFF and
-    dest-3 $FFFF and + dup 16 rshift + $FFFF and
-    dest-2 16 rshift + dup 16 rshift + $FFFF and
-    dest-2 $FFFF and + dup 16 rshift + $FFFF and
-    dest-1 16 rshift + dup 16 rshift + $FFFF and
-    dest-1 $FFFF and + dup 16 rshift + $FFFF and
-    dest-0 16 rshift + dup 16 rshift + $FFFF and
-    dest-0 $FFFF and + dup 16 rshift + $FFFF and
+    { addr bytes zero-offset }
+    ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 protocol -- h )
+    0
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+    swap dup -rot 16 rshift + dup 16 rshift + $FFFF and
+    swap $FFFF and + dup 16 rshift + $FFFF and
+
     bytes 16 rshift + dup 16 rshift + $FFFF and
     bytes $FFFF and + dup 16 rshift + $FFFF and
-    protocol 16 rshift + dup 16 rshift + $FFFF and
-    protocol $FFFF and + dup 16 rshift + $FFFF and
+
     addr bytes zero-offset compute-checksum
   ;
 
@@ -752,8 +762,10 @@ begin-module net-misc
   : find-ipv6-payload { addr bytes -- header-type addr bytes valid? }
     bytes ipv6-header-size > if
       addr ipv6-next-header c@ { next-header }
+      addr ipv6-payload-len h@ rev16 { payload-len }
       ipv6-header-size +to addr
       [ ipv6-header-size negate ] literal +to bytes
+      bytes payload-len min to bytes
       begin
         next-header case
           ipv6-ext-hop-by-hop-options of
@@ -773,7 +785,7 @@ begin-module net-misc
             then
           endof
           ipv6-ext-fragment of
-            addr bytes bytes ipv6-ext-fragment-size >= if
+            bytes ipv6-ext-fragment-size >= if
               addr ipv6-ext-fragment-next-header c@ to next-header
               ipv6-ext-fragment-size +to addr
               [ ipv6-ext-fragment-size negate ] literal +to bytes
@@ -785,7 +797,7 @@ begin-module net-misc
         endcase
       again
     else
-      addr bytes false
+      0 addr bytes false
     then
   ;
 
@@ -1094,11 +1106,24 @@ begin-module net-misc
     0 0 false
   ;
 
+  \ Validate ICMPv6 options
+  : validate-icmpv6-opt { addr bytes -- valid? }
+    begin
+      bytes 0= if true exit then
+      bytes 8 < if false exit then
+      addr 1+ c@ 8 * { len }
+      bytes len < if false exit then
+      len +to addr
+      len negate +to bytes
+    again
+  ;
+  
   \ Get a variable size ICMPv6 option
   : find-icmpv6-opt { opt addr bytes -- addr' len found? }
     begin bytes 2 >= while
       addr 1+ c@ 8 * { len }
-      addr c@ opt =  if
+      len 0= if 0 0 false exit then
+      addr c@ opt = if
         bytes len >= if
           addr 2 + len 2 - true exit
         else
