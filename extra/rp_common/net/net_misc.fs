@@ -36,10 +36,10 @@ begin-module net-misc
   : make-global-unicast-ipv6-addr
     { mac-addr-0 mac-addr-1 prefix-0 prefix-1 prefix-2 prefix-3 prefix-bits }
     ( -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-    $FFFF_FFFF 128 prefix-bits - 0 min 32 max lshift { mask-0 }
-    $FFFF_FFFF 96 prefix-bits - 0 min 32 max lshift { mask-1 }
-    $FFFF_FFFF 64 prefix-bits - 0 min 32 max lshift { mask-2 }
-    $FFFF_FFFF 32 prefix-bits - 0 min 32 max lshift { mask-3 }
+    $FFFF_FFFF 128 prefix-bits - 0 max 32 min lshift { mask-0 }
+    $FFFF_FFFF 96 prefix-bits - 0 max 32 min lshift { mask-1 }
+    $FFFF_FFFF 64 prefix-bits - 0 max 32 min lshift { mask-2 }
+    $FFFF_FFFF 32 prefix-bits - 0 max 32 min lshift { mask-3 }
     prefix-0 mask-0 and mac-addr-0 mask-0 bic or ( ipv6-0 )
     prefix-1 mask-1 and mac-addr-1 $FFFF and mask-1 bic or ( ipv6-1 )
     prefix-2 mask-2 and ( ipv6-3 )
@@ -203,6 +203,7 @@ begin-module net-misc
   1 constant OPTION_SOURCE_LINK_LAYER_ADDR
   2 constant OPTION_TARGET_LINK_LAYER_ADDR
   3 constant OPTION_PREFIX_INFO
+  25 constant OPTION_RECURSIVE_DNS_SERVER
 
   \ ICMPv6 neighbor advertisement solicited flag
   30 bit constant NEIGHBOR_SOLICITED
@@ -303,18 +304,23 @@ begin-module net-misc
 
   \ ICMPv6 prefix information option structure
   begin-structure icmpv6-prefix-info-opt-size
-    cfield: icmpv6-prefix-info-type
-    cfield: icmpv6-prefix-info-len
     cfield: icmpv6-prefix-info-prefix-len
     cfield: icmpv6-prefix-info-flags
-    field: icmpv6-prefix-info-valid-lifetime
-    field: icmpv6-prefix-info-preferred-lifetime
-    field: icmpv6-prefix-info-reserved2
+    cell +field icmpv6-prefix-info-valid-lifetime
+    cell +field icmpv6-prefix-info-preferred-lifetime
+    cell +field icmpv6-prefix-info-reserved2
     ipv6-addr-size +field icmpv6-prefix-info-prefix
   end-structure
 
   \ ICMPv6 prefix information "autononmous" bit
   $40 constant icmpv6-prefix-info-autonomous
+
+  \ ICMPv6 recursive DNS server option structure
+  begin-structure icmpv6-recursive-dns-opt-size
+    2 +field icmpv6-recursive-dns-reserved
+    cell +field icmpv6-recursive-dns-lifetime
+    ipv6-addr-size +field icmpv6-recursive-dns-addr
+  end-structure
 
   \ DNS header structure
   begin-structure dns-header-size

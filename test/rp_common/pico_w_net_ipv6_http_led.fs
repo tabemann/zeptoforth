@@ -736,14 +736,14 @@ begin-module pico-w-net-http-server
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-net run-net-process
-    cr ." Discovering IPv6 router..."
-    my-interface @ discover-ipv6-router
     cr ." Autoconfiguring link-local IPv6 address... "
     my-interface @ autoconfigure-link-local-ipv6-addr if
       ." Success"
     else
       ." Failure"
     then
+    cr ." Discovering IPv6 router..."
+    my-interface @ discover-ipv6-router
     cr ." Discovering IPv6 address..."
     my-interface @ discover-ipv6-addr
     my-interface @ intf-ipv6-addr@ cr ." IPv6 address: " ipv6.
