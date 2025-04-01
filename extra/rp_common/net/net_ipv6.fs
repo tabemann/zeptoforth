@@ -3694,15 +3694,18 @@ begin-module net-ipv6
     ; define send-icmpv6-router-solicit
     
     \ Process an ICMPv6 echo request packet
-    :noname { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes self -- }
+    :noname
+      { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- }
       bytes icmp-header-size < if exit then
-      addr bytes self src-mac-addr
-      src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6 bytes [:
-        { addr bytes self buf }
+      src-0 src-1 src-2 src-3
+      addr bytes self
+      src-mac-addr src-0 src-1 src-2 src-3 -1 PROTOCOL_ICMPV6 bytes [:
+        { src-0 src-1 src-2 src-3 addr bytes self buf }
         ICMPV6_TYPE_ECHO_REPLY buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         addr 4 + buf 4 + bytes 4 - move
-        buf bytes 0 icmp-checksum compute-inet-checksum rev16
+        self intf-ipv6-addr@ src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
+        buf bytes 0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
       ;] self construct-and-send-ipv6-packet drop
@@ -3759,11 +3762,11 @@ begin-module net-ipv6
       then
       [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal
       { reply-bytes }
-      reply-bytes self
-      ALL_NODES_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
+      src-0 src-1 src-2 src-3 reply-bytes self
+      src-mac-addr
       self intf-ipv6-addr@
-      ALL_NODES_LINK_LOCAL_MULTICAST 255 PROTOCOL_ICMPV6 reply-bytes [:
-        { bytes self buf }
+      src-0 src-1 src-2 src-3 255 PROTOCOL_ICMPV6 reply-bytes [:
+        { src-0 src-1 src-2 src-3 bytes self buf }
         ICMPV6_TYPE_NEIGHBOR_ADVERTISE buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         self intf-ipv6-addr@ buf icmp-header-size + ipv6-unaligned!
@@ -3776,7 +3779,7 @@ begin-module net-ipv6
         [ debug? ] [if]
           [: cr ." Setting target link layer address" ;] debug-hook execute
         [then]
-        self intf-ipv6-addr@ ALL_NODES_LINK_LOCAL_MULTICAST PROTOCOL_ICMPV6
+        self intf-ipv6-addr@ src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
         buf bytes 0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
