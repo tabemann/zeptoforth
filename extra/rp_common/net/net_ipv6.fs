@@ -3022,6 +3022,12 @@ begin-module net-ipv6
         [ debug? ] [if]
           addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
+
+        src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
+        src-mac-addr mac-addr-multicast? not and if
+          src-mac-addr src-0 src-1 src-2 src-3 systick::systick-counter
+          self address-map save-mac-addr-by-ipv6
+        then
         
         src-0 src-1 src-2 src-3 addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
@@ -3534,10 +3540,17 @@ begin-module net-ipv6
         then
         max-endpoints 0 ?do
           self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-          src-0 src-1 src-2 src-3 addr bytes endpoint self [:
-            { src-0 src-1 src-2 src-3 addr bytes endpoint self }
+          src-mac-addr src-0 src-1 src-2 src-3 addr bytes endpoint self [:
+            { D: src-mac-addr src-0 src-1 src-2 src-3 addr bytes endpoint self }
             endpoint udp-endpoint?
             endpoint endpoint-local-port@ addr udp-dest-port h@ rev16 = and if
+
+              src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
+              src-mac-addr mac-addr-multicast? not and if
+                src-mac-addr src-0 src-1 src-2 src-3 systick::systick-counter
+                self address-map save-mac-addr-by-ipv6
+              then
+
               addr udp-header-size + bytes udp-header-size -
               src-0 src-1 src-2 src-3 addr udp-src-port h@ rev16
               endpoint add-endpoint-udp-data
