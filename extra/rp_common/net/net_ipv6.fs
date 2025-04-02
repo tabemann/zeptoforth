@@ -409,7 +409,7 @@ begin-module net-ipv6
       method waiting-in-bytes@ ( self -- bytes )
 
       \ Get the incoming packets UDP remote address and port
-      method in-packets-udp-remote@ ( self -- ipv6-addr port )
+      method in-packets-udp-remote@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 port )
       
       \ Push data
       \ method push-packets ( seq self -- )
@@ -759,9 +759,9 @@ begin-module net-ipv6
       ; define add-in-udp-packet
       
       \ Get the incoming packets UDP remote address and port
-      :noname ( self -- ipv6-addr0 ipv6-addr1 ipv6-addr2 ipv6-addr3 port )
-        dup in-packet-current-ipv6-addr ipv6-unaligned@
-        swap in-packet-current-port h@
+      :noname { self -- ipv6-addr0 ipv6-addr1 ipv6-addr2 ipv6-addr3 port }
+        self in-packet-current-ipv6-addr ipv6-unaligned@
+        self in-packet-current-port h@
       ; define in-packets-udp-remote@
 
       \ Get whether to send an ACK packet
