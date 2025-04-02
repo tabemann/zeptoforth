@@ -748,7 +748,7 @@ begin-module net-ipv6
           bytes self in-packet-offset +!
           bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
           src0 src1 src2 src3 self in-packet-ipv6-addrs
-          self in-packet-count @ ipv6-addr-size * + !
+          self in-packet-count @ ipv6-addr-size * + ipv6-unaligned!
           src-port self in-packet-ports self in-packet-count @ 1 lshift + h!
           1 self in-packet-count +!
         then
@@ -1746,12 +1746,12 @@ begin-module net-ipv6
     ; define endpoint-rx-data!
 
     \ Get endpoint source
-    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 port )
-      dup udp-endpoint? not if
-        dup endpoint-remote-ipv6-addr ipv6-unaligned@
-        swap endpoint-remote-port @
+    :noname { self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 port }
+      self udp-endpoint? not if
+        self endpoint-remote-ipv6-addr ipv6-unaligned@
+        self endpoint-remote-port @
       else
-        endpoint-in-packets in-packets-udp-remote@
+        self endpoint-in-packets in-packets-udp-remote@
       then
     ; define endpoint-ipv6-remote@
     
@@ -3072,7 +3072,7 @@ begin-module net-ipv6
       src-0 src-1 src-2 src-3 addr bytes self find-listen-ipv6-endpoint if
         { endpoint }
         src-0 src-1 src-2 src-3 addr bytes endpoint self
-        [: swap send-ipv6-syn-ack ;] endpoint with-endpoint
+        [: send-ipv6-syn-ack ;] endpoint with-endpoint
       else
         drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
       then
@@ -3109,7 +3109,6 @@ begin-module net-ipv6
       endpoint endpoint-local-window@
       [ TCP_SYN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
-
       self send-ipv6-tcp-with-mss
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
@@ -3153,9 +3152,22 @@ begin-module net-ipv6
       ( window flags D: mac-addr self -- )
       -rot 12 pick 12 pick 12 pick 12 pick default-hop-limit PROTOCOL_TCP
       tcp-header-size
-      ( self D: mac-addr remote-addr protocol bytes )
+
+      [ debug? ] [if]
+        [: cr ." About to send TCP packet without MSS: " .s ;]
+        debug-hook execute
+      [then]
+
+      ( self D: mac-addr remote-0 remote-1 remote-2 remote-3 hop-limit )
+      ( protocol bytes )
       [: { remote-0 remote-1 remote-2 remote-3
         remote-port local-port seq ack window flags self buf }
+
+        [ debug? ] [if]
+          [: cr ." Preparing TCP packet without MSS: " .s ;]
+          debug-hook execute
+        [then]
+
         local-port rev16 buf tcp-src-port h!
         remote-port rev16 buf tcp-dest-port h!
         seq rev buf tcp-seq-no !
@@ -3174,7 +3186,7 @@ begin-module net-ipv6
         [then]
         
         true
-      ;] 9 pick construct-and-send-ipv6-packet drop
+      ;] 10 pick construct-and-send-ipv6-packet drop
     ; define send-ipv6-basic-tcp
 
     \ Send an IPv6 TCP packet with an MSS field
@@ -3183,9 +3195,22 @@ begin-module net-ipv6
       ( window flags D: mac-addr self -- )
       -rot 12 pick 12 pick 12 pick 12 pick default-hop-limit PROTOCOL_TCP
       tcp-header-size 8 +
-      ( self D: mac-addr remote-addr protocol bytes )
+      ( self D: mac-addr remote-0 remote-1 remote-2 remote-3 hop-limit )
+      ( protocol bytes )
+
+      [ debug? ] [if]
+        [: cr ." About to send TCP packet with MSS: " .s ;]
+        debug-hook execute
+      [then]
+      
       [: { remote-0 remote-1 remote-2 remote-3
         remote-port local-port seq ack window flags self buf }
+
+        [ debug? ] [if]
+          [: cr ." Preparing TCP packet with MSS: " .s ;]
+          debug-hook execute
+        [then]
+
         local-port rev16 buf tcp-src-port h!
         remote-port rev16 buf tcp-dest-port h!
         seq rev buf tcp-seq-no !
@@ -3209,7 +3234,7 @@ begin-module net-ipv6
         [then]
         
         true
-      ;] 6 pick construct-and-send-ipv6-packet drop
+      ;] 10 pick construct-and-send-ipv6-packet drop
     ; define send-ipv6-tcp-with-mss
     
     \ Process an IPv6 TCP SYN+ACK packet
@@ -4582,9 +4607,9 @@ begin-module net-ipv6
       over endpoint-remote-mac-addr@
       3 pick endpoint-ipv6-remote@ drop
       default-hop-limit PROTOCOL_TCP
-      10 pick tcp-header-size +
+      11 pick tcp-header-size +
       ( addr bytes push? endpoint self D: mac-addr )
-      ( remote-0 remote-1 remote-2 remote-3 protocol bytes )
+      ( remote-0 remote-1 remote-2 remote-3 hop-limit protocol bytes )
       [: { addr bytes push? endpoint self buf }
         endpoint endpoint-local-port@ rev16 buf tcp-src-port h!
         endpoint endpoint-ipv6-remote@ nip nip nip nip rev16
@@ -4609,7 +4634,7 @@ begin-module net-ipv6
           ;] debug-hook execute
         [then]
         true
-      ;] 6 pick construct-and-send-ipv6-packet drop
+      ;] 10 pick construct-and-send-ipv6-packet drop
     ; define send-data-ack
 
     \ Apply DHCP data

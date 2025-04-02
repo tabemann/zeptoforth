@@ -752,7 +752,7 @@ begin-module pico-w-net-http-server
     if ." yes" else ." no" then
     my-interface @ intf-ipv6-prefix-len@ cr ." IPv6 prefix length: " .
     my-interface @ gateway-ipv6-addr@ cr ." Gateway IPv6 address: " ipv6.
-    cr ." Discoverying IPv6 DNS server..."
+    cr ." Discovering IPv6 DNS server..."
     my-interface @ discover-dns-ipv6-addr
     my-interface @ dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " ipv6.
     my-cyw43-net toggle-pico-w-led
