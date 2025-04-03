@@ -1038,7 +1038,7 @@ begin-module net-ipv6
               then
             then
           loop
-          0 -1 false
+          0 0 0 0 -1 false
         ;] over dns-cache-lock with-lock
       ; define lookup-ipv6-addr-by-dns
 
@@ -3245,8 +3245,9 @@ begin-module net-ipv6
     
     \ Process an IPv6 TCP SYN+ACK packet
     :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes find-connect-ipv6-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes send-ipv6-rst-for-packet exit
+      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint not if
+        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
+        exit
       then
       { endpoint }
       addr bytes self endpoint
@@ -3601,7 +3602,6 @@ begin-module net-ipv6
         addr bytes { saved-addr saved-bytes }
         addr bytes skip-dns-name to bytes to addr
         bytes dns-abody-size < if exit then
-
         addr dns-abody-type hunaligned@ [ DNS_QTYPE_AAAA rev16 ] literal =
         addr dns-abody-class hunaligned@ [ 1 rev16 ] literal = and
         addr dns-abody-rdlength hunaligned@ [ 16 rev16 ] literal = and if
@@ -3680,7 +3680,11 @@ begin-module net-ipv6
         OPTION_SOURCE_LINK_LAYER_ADDR opt-buf c!
         1 opt-buf 1+ c!
         self intf-mac-addr@ opt-buf 2 + mac!
-        self detecting-duplicate? @ if 0 0 0 0 else self intf-ipv6-addr@ then
+        self detecting-duplicate? @ if
+          0 0 0 0
+        else
+          self intf-link-local-ipv6-addr@
+        then
         target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
         PROTOCOL_ICMPV6
         buf [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal
@@ -3873,10 +3877,12 @@ begin-module net-ipv6
           dup icmpv6-ra-managed and 0<> self use-dhcpv6? !
           dup icmpv6-ra-managed and 0= swap icmpv6-ra-other and 0<> and
           self use-dhcpv6-other? !
-          addr icmpv6-ra-reachable-time unaligned@
-          rev self neighbor-reachable-time !
-          addr icmpv6-ra-retrans-time unaligned@
-          rev self neighbor-retrans-time !
+          addr icmpv6-ra-reachable-time unaligned@ rev ?dup if
+            self neighbor-reachable-time !
+          then
+          addr icmpv6-ra-retrans-time unaligned@ rev ?dup if
+            self neighbor-retrans-time !
+          then
           addr icmpv6-ra-header-size + { cur-addr }
           bytes icmpv6-ra-header-size - { cur-size }
           false self dns-server-set!
@@ -4000,6 +4006,11 @@ begin-module net-ipv6
 
     \ Resolve an IPv6 address's MAC address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
+      self intf-ipv6-prefix ipv6-unaligned@ dest-0 dest-1 dest-2 dest-3
+      self intf-ipv6-prefix-len @ ipv6-addr-matches-prefix? not if
+        self gateway-ipv6-addr ipv6-unaligned@
+        to dest-3 to dest-2 to dest-1 to dest-0
+      then
       self neighbor-reachable-time @ 0<> if
         self neighbor-reachable-time @ self address-map age-out-mac-addrs
       then
@@ -4093,7 +4104,7 @@ begin-module net-ipv6
         [ DNS_QTYPE_AAAA rev16 ] literal buf dns-qbody-qtype hunaligned!
         [ 1 rev16 ] literal buf dns-qbody-qclass hunaligned!
         true
-      ;] self send-ipv6-udp-packet drop
+      ;] self send-ipv6-udp-packet not if 2drop drop then
     ; define send-ipv6-dns-request
 
     \ Send a UDP packet with a specified source IPv6 address
@@ -4140,7 +4151,7 @@ begin-module net-ipv6
           compute-ipv6-checksum rev16 buf udp-checksum h!
         ;] self construct-and-send-ipv6-packet
       else
-        2drop false
+        2drop 2drop 2drop false
       then
     ; define send-ipv6-udp-packet
 

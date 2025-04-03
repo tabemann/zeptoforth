@@ -637,6 +637,17 @@ begin-module net-misc
   : ipv6= { x0-0 x0-1 x0-2 x0-3 x1-0 x1-1 x1-2 x1-3 -- equal? }
     x0-0 x1-0 = x0-1 x1-1 = and x0-2 x1-2 = and x0-3 x1-3 = and
   ;
+
+  \ Get whether an IPv6 address matches a prefix
+  : ipv6-addr-matches-prefix?
+    { prefix-bits }
+    { addr-0 addr-1 addr-2 addr-3 }
+    ( prefix-0 prefix-1 prefix-2 prefix-3 )
+    addr-0 $FFFF_FFFF 128 prefix-bits - 0 max 32 min lshift and
+    addr-1 $FFFF_FFFF 96 prefix-bits - 0 max 32 min lshift and
+    addr-2 $FFFF_FFFF 64 prefix-bits - 0 max 32 min lshift and
+    addr-3 $FFFF_FFFF 32 prefix-bits - 0 max 32 min lshift and ipv6=
+  ;
   
   \ Print a MAC address
   : mac. { D: addr -- }
