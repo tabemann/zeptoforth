@@ -92,7 +92,7 @@ begin-module net-misc
   ;
   
   \ The DHCPv6 link-local multicast address
-  : DHCPV6_LINK_LOCAL_MULTICAST $0001002 $0 $0 $FF020000 ;
+  : DHCPV6_LINK_LOCAL_MULTICAST $00010002 $0 $0 $FF020000 ;
 
   \ The all-nodes link-local multicast address
   : ALL_NODES_LINK_LOCAL_MULTICAST $1 $0 $0 $FF020000 ;
@@ -417,7 +417,7 @@ begin-module net-misc
   \ DHCP header structure
   begin-structure dhcpv6-header-size
     cfield: dhcpv6-msg-type
-    3 +field dhcp6-transact-id
+    3 +field dhcpv6-transact-id
   end-structure
 
   \ IPv6 DHCP message types

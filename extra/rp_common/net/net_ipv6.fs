@@ -2630,9 +2630,6 @@ begin-module net-ipv6
       \ Refresh DHCP discovered
       method refresh-dhcpv6-discovered ( self -- )
       
-      \ Refresh DHCP got NAK
-      method refresh-dhcp-got-nak ( self -- )
-
       \ Refresh DHCP wait offer
       method refresh-dhcpv6-wait-advertise ( self -- )
 
@@ -2642,6 +2639,9 @@ begin-module net-ipv6
       \ Refresh DHCP declined
       method refresh-dhcpv6-declined ( self -- )
       
+      \ Refresh DHCP information request
+      method refresh-dhcpv6-wait-info-reply ( self -- )
+
       \ Refresh DHCP
       method refresh-dhcp ( self -- )
 
@@ -3526,15 +3526,28 @@ begin-module net-ipv6
       { hop-limit protocol addr bytes self -- }
       { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
       bytes udp-header-size >= if
+        [ debug? ] [if]
+          addr udp-total-len h@ rev16 bytes
+          addr udp-dest-port h@ rev16 dest-0 dest-1 dest-2 dest-3
+          addr udp-src-port h@ rev16 src-0 src-1 src-2 src-3
+          [:
+            cr ." Received UDP packet"
+            cr ." Source IPv6:      " ipv6. ."  Port: " .
+            cr ." Destination IPv6: " ipv6. ."  Port: " .
+            cr ." Bytes:            " . ."  Total length: " .
+          ;] debug-hook execute
+        [then]
+        
         addr udp-total-len h@ rev16 bytes <> if exit then
+
         src-0 src-1 src-2 src-3 self dns-server-ipv6-addr ipv6-unaligned@ ipv6=
         addr udp-src-port h@ rev16 dns-port = and if
           addr udp-header-size + bytes udp-header-size -
           self process-ipv6-dns-packet
           exit
         then
-        addr udp-src-port h@ rev16 dhcp-server-port =
-        addr udp-dest-port h@ rev16 dhcp-client-port = and if
+        addr udp-src-port h@ rev16 dhcpv6-server-port =
+        addr udp-dest-port h@ rev16 dhcpv6-client-port = and if
           addr udp-header-size + bytes udp-header-size -
           src-0 src-1 src-2 src-3 self process-dhcpv6-packet
           exit
@@ -3636,6 +3649,19 @@ begin-module net-ipv6
         src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 PROTOCOL_ICMPV6
         addr bytes 0 icmp-checksum compute-ipv6-checksum
         addr icmp-checksum hunaligned@ rev16 <> if exit then
+
+        [ debug? ] [if]
+          bytes
+          dest-0 dest-1 dest-2 dest-3
+          src-0 src-1 src-2 src-3
+          [:
+            cr ." Received ICMPv6 packet"
+            cr ." Source IPv6:      " ipv6.
+            cr ." Destination IPv6: " ipv6.
+            cr ." Bytes:            " .
+          ;] debug-hook execute
+        [then]
+        
         addr icmp-type c@ case
           ICMPV6_TYPE_ECHO_REQUEST of
             src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self
@@ -3739,6 +3765,14 @@ begin-module net-ipv6
     :noname
       { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- }
       bytes icmp-header-size < if exit then
+
+      [ debug? ] [if]
+        addr bytes
+        [:
+          cr ." Received ICMPv6 echo request: " over + dump
+        ;] debug-hook execute
+      [then]
+      
       src-0 src-1 src-2 src-3
       addr bytes self
       src-mac-addr src-0 src-1 src-2 src-3 -1 PROTOCOL_ICMPV6 bytes [:
@@ -4670,6 +4704,9 @@ begin-module net-ipv6
       dhcpv6-discovered self dhcp-discover-state !
       self dhcp-sema broadcast
       self dhcp-sema give
+      [ debug? ] [if]
+        [: cr ." Applied DHCP data" ;] debug-hook execute
+      [then]
     ; define apply-dhcp
 
     \ Autoconfigure link-local IPv6 address
@@ -4718,18 +4755,13 @@ begin-module net-ipv6
         false
       then
       { success? }
-      success? self intf-autonomous@ or if
-        self use-dhcpv6? @
-        self intf-autonomous@ self dns-server-set@ and not and if
+      success? if
+        self use-dhcpv6? @ if
           systick::systick-counter self dhcp-discover-start !
           self ['] send-dhcpv6-solicit self dhcp-lock with-lock
           self dhcp-sema take
-          self intf-autonomous@ not if
-            self discovered-ipv6-addr ipv6-unaligned@
-            self detect-duplicate-and-set-intf-ipv6-addr
-          else
-            success?
-          then
+          self discovered-ipv6-addr ipv6-unaligned@
+          self detect-duplicate-and-set-intf-ipv6-addr
         else
           success?
         then
@@ -4765,6 +4797,12 @@ begin-module net-ipv6
       self dhcp-server-duid max-duid-size 0 fill
       0 self dhcp-server-duid-len !
       rng::random $FFFFFF and self current-dhcp-transact-id !
+
+      [ debug? ] [if]
+        self current-dhcp-transact-id @
+        [: cr ." Current DHCP transact ID: " h.8 ;] debug-hook execute
+      [then]
+      
       dhcpv6-wait-advertise self dhcp-discover-state !
       systick::systick-counter self dhcp-discover-stage-start !
       self
@@ -4778,6 +4816,12 @@ begin-module net-ipv6
           [: cr ." Constructing DHCPV6 SOLICIT" ;] debug-hook execute
         [then]
         self current-dhcp-transact-id @ rev buf unaligned!
+        
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          [: cr ." Populating DHCP transact ID: " h.8 ;] debug-hook execute
+        [then]
+
         DHCPV6_SOLICIT buf dhcpv6-msg-type c!
         dhcpv6-header-size +to buf
         [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
@@ -4788,7 +4832,7 @@ begin-module net-ipv6
         [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
+        rev16 buf 18 + hunaligned!
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 2 rev16 ] literal buf 22 + hunaligned!
         [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
@@ -4809,8 +4853,6 @@ begin-module net-ipv6
       [then]
       dhcpv6-wait-reply self dhcp-discover-state !
       self
-\      $FFFFFFFFFFFF.
-\      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
@@ -4820,6 +4862,12 @@ begin-module net-ipv6
           [: cr ." Constructing DHCPV6 REQUEST" ;] debug-hook execute
         [then]
         self current-dhcp-transact-id @ rev buf unaligned!
+        
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          [: cr ." Populating DHCP transact ID: " h.8 ;] debug-hook execute
+        [then]
+
         DHCPV6_REQUEST buf dhcpv6-msg-type c!
         dhcpv6-header-size +to buf
         [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
@@ -4830,11 +4878,11 @@ begin-module net-ipv6
         [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
+        rev16 buf 18 + hunaligned!
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 4 rev16 ] literal buf 22 + hunaligned!
         [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_DNS_SERVERS rev16 ] literal buf 26 + hunaligned!
         [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
         [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
@@ -4865,8 +4913,6 @@ begin-module net-ipv6
       [then]
       dhcpv6-wait-reply self dhcp-discover-state !
       self
-      \ $FFFFFFFFFFFF.
-      \ DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
@@ -4876,6 +4922,12 @@ begin-module net-ipv6
           [: cr ." Constructing DHCPV6 RENEW" ;] debug-hook execute
         [then]
         self current-dhcp-transact-id @ rev buf unaligned!
+        
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          [: cr ." Populating DHCP transact ID: " h.8 ;] debug-hook execute
+        [then]
+
         DHCPV6_RENEW buf dhcpv6-msg-type c!
         dhcpv6-header-size +to buf
         [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
@@ -4890,7 +4942,7 @@ begin-module net-ipv6
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 4 rev16 ] literal buf 22 + hunaligned!
         [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_DNS_SERVERS rev16 ] literal buf 26 + hunaligned!
         [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
         [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
@@ -4921,8 +4973,7 @@ begin-module net-ipv6
       [then]
       dhcpv6-wait-reply self dhcp-discover-state !
       0 self dhcp-server-duid-len !
-      \ $FFFFFFFFFFFF.
-      \ DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
+      self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
@@ -4932,6 +4983,12 @@ begin-module net-ipv6
           [: cr ." Constructing DHCPV6 REBIND" ;] debug-hook execute
         [then]
         self current-dhcp-transact-id @ rev buf unaligned!
+        
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          [: cr ." Populating DHCP transact ID: " h.8 ;] debug-hook execute
+        [then]
+
         DHCPV6_REBIND buf dhcpv6-msg-type c!
         dhcpv6-header-size +to buf
         [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
@@ -4946,7 +5003,7 @@ begin-module net-ipv6
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 4 rev16 ] literal buf 22 + hunaligned!
         [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
-        [ OPTION_DNS_SERVERS ] literal buf 26 + hunaligned!
+        [ OPTION_DNS_SERVERS rev16 ] literal buf 26 + hunaligned!
         [ OPTION_IA_NA rev16 ] literal buf 28 + hunaligned!
         [ 12 rev16 ] literal buf 30 + hunaligned!
         0 buf 32 + unaligned!
@@ -4973,8 +5030,7 @@ begin-module net-ipv6
         [: cr ." Sending DHCPV6 INFORMATION REQUEST" ;] debug-hook execute
       [then]
       dhcpv6-wait-reply self dhcp-discover-state !
-      \ $FFFFFFFFFFFF.
-      \ DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
+      self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
@@ -4985,6 +5041,12 @@ begin-module net-ipv6
           debug-hook execute
         [then]
         self current-dhcp-transact-id @ rev buf unaligned!
+        
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          [: cr ." Populating DHCP transact ID: " h.8 ;] debug-hook execute
+        [then]
+
         DHCPV6_INFORMATION_REQUEST buf dhcpv6-msg-type c!
         dhcpv6-header-size +to buf
         [ OPTION_CLIENTID rev16 ] literal buf hunaligned!
@@ -4995,10 +5057,10 @@ begin-module net-ipv6
         [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
         [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        buf 18 + hunaligned!
+        rev16 buf 18 + hunaligned!
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 2 rev16 ] literal buf 22 + hunaligned!
-        [ OPTION_DNS_SERVERS ] literal buf 24 + hunaligned!
+        [ OPTION_DNS_SERVERS rev16 ] literal buf 24 + hunaligned!
         [ OPTION_SERVERID rev16 ] literal buf 26 + hunaligned!
         self dhcp-server-duid-len @ rev16 buf 28 + hunaligned!
         self dhcp-server-duid buf 30 + self dhcp-server-duid-len @ move
@@ -5024,27 +5086,76 @@ begin-module net-ipv6
         bytes dhcpv6-header-size < if
           exit
         then
-        dhcpv6-header-size +to addr
-        [ dhcpv6-header-size negate ] literal +to bytes
-        OPTION_CLIENTID addr bytes find-dhcpv6-opt if
+
+        [ debug? ] [if]
+          [: cr ." Received DHCPv6 packet" ;] debug-hook execute
+        [then]
+        
+        OPTION_CLIENTID addr dhcpv6-header-size + bytes dhcpv6-header-size -
+        find-dhcpv6-opt if
           10 = if
             dup hunaligned@ rev16 DUID_LL = if
               dup 2 + hunaligned@ rev16 HTYPE_ETHERNET = if
                 4 + mac@ self intf-mac-addr@ d<> if
+
+                  [ debug? ] [if]
+                    [: cr ." OPTION_CLIENTID does not match" ;]
+                    debug-hook execute
+                  [then]
+                  
                   exit
                 then
               else
+
+                [ debug? ] [if]
+                  [: cr ." OPTION_CLIENTID does not match" ;]
+                  debug-hook execute
+                [then]
+                  
                 drop exit
               then
             else
+              
+              [ debug? ] [if]
+                [: cr ." OPTION_CLIENTID does not match" ;]
+                debug-hook execute
+              [then]
+              
               drop exit
             then
           else
+
+            [ debug? ] [if]
+              [: cr ." OPTION_CLIENTID size is not 10" ;]
+              debug-hook execute
+            [then]
+                  
             drop exit
           then
         else
+
+          [ debug? ] [if]
+            [: cr ." OPTION_CLIENTID not found" ;]
+            debug-hook execute
+          [then]                  
+          
           2drop exit
         then
+
+        [ debug? ] [if]
+          self current-dhcp-transact-id @
+          addr unaligned@ rev $FFFFFF and
+          [:
+            2dup = if
+              cr ." Matching DHCP transact ID's"
+            else
+              cr ." Non-matching DHCP transact ID's
+            then
+            cr ." Received DHCP transact ID: " h.8
+            cr ." Current DHCP transact ID:  " h.8
+          ;] debug-hook execute
+        [then]
+
         addr unaligned@ rev $FFFFFF and self current-dhcp-transact-id @ = if
           addr dhcpv6-msg-type c@ case
             DHCPV6_ADVERTISE of
@@ -5057,6 +5168,13 @@ begin-module net-ipv6
               addr bytes self process-dhcpv6-decline
             endof
           endcase
+        else
+
+          [ debug? ] [if]
+            [: cr ." dhcpv6-transact-id does not match" ;]
+            debug-hook execute
+          [then]                  
+          
         then
       ;] over dhcp-lock with-lock
     ; define process-dhcpv6-packet
@@ -5066,7 +5184,8 @@ begin-module net-ipv6
       [ debug? ] [if]
         [: cr ." Handling DHCPv6 ADVERTISE" ;] debug-hook execute
       [then]
-      OPTION_SERVERID addr bytes find-dhcpv6-opt if
+      OPTION_SERVERID addr dhcpv6-header-size + bytes dhcpv6-header-size -
+      find-dhcpv6-opt if
         dup max-duid-size <= over min-duid-size >= and if
           dup self dhcp-server-duid-len !
           self dhcp-server-duid swap move
@@ -5089,74 +5208,124 @@ begin-module net-ipv6
         [: cr ." Handling DHCPv6 REPLY" ;] debug-hook execute
       [then]
       self use-dhcpv6? @ if
-        OPTION_SERVERID addr bytes find-dhcpv6-opt if
+        OPTION_SERVERID addr dhcpv6-header-size + bytes dhcpv6-header-size -
+        find-dhcpv6-opt if
           dup max-duid-size <= over min-duid-size >= and if
             dup self dhcp-server-duid-len !
             self dhcp-server-duid swap move
           else
-            exit
+            [ debug? ] [if]
+              [: cr ." OPTION_SERVERID not right size" ;] debug-hook execute
+            [then]
+            2drop exit
           then
         else
+          [ debug? ] [if]
+            [: cr ." OPTION_SERVERID not found" ;] debug-hook execute
+          [then]
           2drop exit
         then
-        OPTION_IA_NA addr bytes find-dhcpv6-opt if
+        OPTION_IA_NA addr dhcpv6-header-size + bytes dhcpv6-header-size -
+        find-dhcpv6-opt if
           dup 12 > if
             { addr' bytes' }
-            addr' 4 + unaligned@ rev 0= if
-              addr' 8 + unaligned@ rev 10000 * { renew-interval }
-              addr' 12 + unaligned@ rev 10000 * { rebind-interval }
-              renew-interval rebind-interval u> if exit then
-              renew-interval 0= if
+            addr' 8 + unaligned@ rev
+            [ $7FFF_FFFF 10000 u/ ] literal min 10000 * { renew-interval }
+            addr' 12 + unaligned@ rev
+            [ $7FFF_FFFF 10000 u/ ] literal min 10000 * { rebind-interval }
+            renew-interval 0= if
+              rebind-interval 0<> if
+                rebind-interval to renew-interval
+              else
                 default-dhcp-renew-interval to renew-interval
               then
-              rebind-interval 0= if
-                default-dhcp-rebind-interval to rebind-interval
-              then
-              rebind-interval renew-interval u< if
-                rebind-interval to renew-interval
-              then
-              OPTION_IAADDR addr' 12 + bytes' 12 - find-dhcpv6-opt if
-                24 >= if
-                  { addr'' }
-                  addr'' 4 + unaligned@ 10000 * { deprecated-interval }
-                  addr'' 8 + unaligned@ 10000 * { valid-interval }
-                  deprecated-interval valid-interval u> if exit then
-                  deprecated-interval renew-interval u< if
-                    deprecated-interval to renew-interval
-                  then
+            then
+            rebind-interval 0= if
+              default-dhcp-rebind-interval to rebind-interval
+            then
+            rebind-interval renew-interval u< if
+              rebind-interval to renew-interval
+            then
+            OPTION_IAADDR addr' 12 + bytes' 12 - find-dhcpv6-opt if
+              24 >= if
+                { addr'' }
+                addr'' 4 + unaligned@
+                [ $7FFF_FFFF 10000 u/ ] literal min 10000 *
+                { deprecated-interval }
+                addr'' 8 + unaligned@
+                [ $7FFF_FFFF 10000 u/ ] literal min 10000 *
+                { valid-interval }
+                deprecated-interval valid-interval u< if
+                  deprecated-interval to valid-interval
+                then
+                deprecated-interval renew-interval u< if
+                  deprecated-interval to renew-interval
+                then
+                valid-interval 0<> if
                   valid-interval renew-interval u< if
                     valid-interval to renew-interval
                   then
-                  addr'' ipv6-unaligned@
-                  self discovered-ipv6-addr ipv6-unaligned!
-                  rebind-interval dhcp-renew-rebind-limit-multiplier *
-                  dhcp-renew-rebind-limit-divisor u/ { limit }
-                  renew-interval limit u> if limit to renew-interval then
-                  renew-interval self dhcp-renew-interval !
-                  rebind-interval self dhcp-rebind-interval !
-                  self apply-dhcp
-                else
-                  drop
                 then
+                addr'' ipv6-unaligned@
+                self discovered-ipv6-addr ipv6-unaligned!
+                rebind-interval dhcp-renew-rebind-limit-multiplier *
+                dhcp-renew-rebind-limit-divisor u/ { limit }
+                renew-interval limit u> if limit to renew-interval then
+                renew-interval self dhcp-renew-interval !
+                rebind-interval self dhcp-rebind-interval !
+                [ debug? ] [if]
+                  rebind-interval renew-interval
+                  [:
+                    cr ." DHCP RENEW interval:  " .
+                    cr ." DHCP REBIND interval: " .
+                  ;] debug-hook execute
+                [then]
+                self apply-dhcp
               else
-                2drop
+                [ debug? ] [if]
+                  [: cr ." OPTION_IAADDR not right size" ;] debug-hook execute
+                [then]
+                drop
               then
+            else
+              [ debug? ] [if]
+                [: cr ." OPTION_IAADDR not found" ;] debug-hook execute
+              [then]
+              2drop
             then
           else
+            [ debug? ] [if]
+              [: cr ." OPTION_IA_NA not right size" ;] debug-hook execute
+            [then]
             2drop
           then
         else
+          [ debug? ] [if]
+            [: cr ." OPTION_IA_NA not found" ;] debug-hook execute
+          [then]
           2drop
         then
+      else
+        [ debug? ] [if]
+          [: cr ." Not managed via DHCPv6" ;] debug-hook execute
+        [then]        
       then
-      OPTION_DNS_SERVERS addr bytes find-dhcpv6-opt if { opt-addr opt-bytes }
+      OPTION_DNS_SERVERS addr dhcpv6-header-size + bytes dhcpv6-header-size -
+      find-dhcpv6-opt if { opt-addr opt-bytes }
         opt-bytes 16 umod 0= opt-bytes 0> and if
           opt-addr ipv6-unaligned@ self dns-server-ipv6-addr!
           true self dns-server-set!
           self found-dns-sema broadcast
           self found-dns-sema give
+        else
+          [ debug? ] [if]
+            [: cr ." OPTION_DNS_SERVERS not right size" ;] debug-hook execute
+          [then]
         then
       else
+        [ debug? ] [if]
+          [: cr ." OPTION_DNS_SERVERS not found" ;] debug-hook execute
+        [then]
         2drop
       then
     ; define process-dhcpv6-reply
@@ -5214,7 +5383,7 @@ begin-module net-ipv6
       then
     ; define refresh-dhcpv6-discovered
 
-    \ Refresh DHCP wait offer
+    \ Refresh DHCP SOLICIT on waiting for ADVERTISE
     :noname { self -- }
       systick::systick-counter self dhcp-discover-stage-start @ -
       dhcp-discover-timeout > if
@@ -5226,7 +5395,7 @@ begin-module net-ipv6
       then
     ; define refresh-dhcpv6-wait-advertise
 
-    \ Refresh DHCP wait ACK
+    \ Refresh DHCP REQUEST on waiting for REPLY
     :noname { self -- }
       systick::systick-counter self dhcp-discover-stage-start @ -
       dhcp-discover-timeout > if
@@ -5248,6 +5417,19 @@ begin-module net-ipv6
         self send-dhcpv6-solicit
       then
     ; define refresh-dhcpv6-declined
+
+    \ Refresh DHCP INFORMATION REQUEST on waiting for REPLY
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcp-discover-timeout > if
+        systick::systick-counter self dhcp-discover-stage-start !
+        [ debug? ] [if]
+          [: cr ." Timeout, retrying DHCP INFORMATION REQUEST" ;]
+          debug-hook execute
+        [then]
+        self send-dhcpv6-information-request
+      then
+    ; define refresh-dhcpv6-wait-info-reply
 
     \ Refresh router discovery
     :noname { self -- }
@@ -5286,6 +5468,7 @@ begin-module net-ipv6
     ' refresh-dhcpv6-renewing ,
     ' refresh-dhcpv6-rebinding ,
     ' refresh-dhcpv6-declined ,
+    ' refresh-dhcpv6-wait-info-reply ,
     
     \ Refresh DHCP
     :noname ( self -- )
