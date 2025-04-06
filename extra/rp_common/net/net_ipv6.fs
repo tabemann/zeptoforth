@@ -2278,9 +2278,6 @@ begin-module net-ipv6
       \ The gateway IPv6 address
       ipv6-addr-size member gateway-ipv6-addr
 
-      \ Whether the DNS server has been set
-      cell member dns-server-set?
-      
       \ Current hop limit
       cell member intf-hop-limit
 
@@ -2733,16 +2730,10 @@ begin-module net-ipv6
     \ Set the DNS server IPv6 address
     method dns-server-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
 
-    \ Get whether the DNS server is set
-    method dns-server-set@ ( self -- set? )
-    
-    \ Set whether the DNS server is set
-    method dns-server-set! ( set? self -- )
-    
-    \ Get the TTL
+    \ Get the hop limit
     method intf-hop-limit@ ( self -- ttl )
     
-    \ Set the TTL
+    \ Set the hop limit
     method intf-hop-limit! ( ttl self -- )
 
     \ Autoconfigure link-local IPv6 address
@@ -2797,7 +2788,6 @@ begin-module net-ipv6
       self gateway-ipv6-addr ipv6-unaligned!
       $2001 $4860 $4860 $0000 $0000 $0000 $0000 $8888 make-ipv6-addr
       self dns-server-ipv6-addr ipv6-unaligned!
-      false self dns-server-set? !
       64 self intf-hop-limit !
       false self router-discovered? !
       false self router-discovery? !
@@ -2925,16 +2915,6 @@ begin-module net-ipv6
     :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
       dns-server-ipv6-addr ipv6-unaligned!
     ; define dns-server-ipv6-addr!
-
-    \ Get whether the DNS server is set
-    :noname ( self -- set? )
-      dns-server-set? @
-    ; define dns-server-set@
-    
-    \ Set whether the DNS server is set
-    :noname ( set? self -- )
-      dns-server-set? !
-    ; define dns-server-set!
 
     \ Get the MAC address
     :noname ( self -- D: addr )
@@ -3919,7 +3899,6 @@ begin-module net-ipv6
           then
           addr icmpv6-ra-header-size + { cur-addr }
           bytes icmpv6-ra-header-size - { cur-size }
-          false self dns-server-set!
           OPTION_PREFIX_INFO cur-addr cur-size find-icmpv6-opt if
             { opt-addr opt-size }
             opt-size icmpv6-prefix-info-opt-size u>=
@@ -3951,7 +3930,6 @@ begin-module net-ipv6
             opt-size icmpv6-recursive-dns-opt-size u>= if
               opt-addr icmpv6-recursive-dns-addr ipv6-unaligned@
               self dns-server-ipv6-addr!
-              true self dns-server-set!
               self found-dns-sema broadcast
               self found-dns-sema give
             then
@@ -5314,7 +5292,6 @@ begin-module net-ipv6
       find-dhcpv6-opt if { opt-addr opt-bytes }
         opt-bytes 16 umod 0= opt-bytes 0> and if
           opt-addr ipv6-unaligned@ self dns-server-ipv6-addr!
-          true self dns-server-set!
           self found-dns-sema broadcast
           self found-dns-sema give
         else
