@@ -2260,6 +2260,9 @@ begin-module net-ipv6
       \ The IPv6 address
       ipv6-addr-size member intf-ipv6-addr
 
+      \ The link-local IPv6 address
+      ipv6-addr-size member intf-link-local-ipv6-addr
+      
       \ The IPv6 prefix
       ipv6-addr-size member intf-ipv6-prefix
 
@@ -2688,18 +2691,25 @@ begin-module net-ipv6
       \ Attempt to set interface IPv6 address, detecting duplicates
       method detect-duplicate-and-set-intf-ipv6-addr
       ( target-0 target-1 target-2 target-3 self -- success? )
-      
+
+      \ Attempt to set interface link-local IPv6 address, detecting duplicates
+      method detect-duplicate-and-set-intf-link-local-ipv6-addr
+      ( target-0 target-1 target-2 target-3 self -- success? )
+
     end-module
     
     \ Get the IPv6 address
     method intf-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
 
-    \ Get the IPv6 link-local address
-    method intf-link-local-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-    
     \ Set the IPv6 address
     method intf-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
 
+    \ Get the IPv6 link-local address
+    method intf-link-local-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    
+    \ Set the IPv6 link-local address
+    method intf-link-local-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+    
     \ Get the IPv6 prefix
     method intf-ipv6-prefix@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
     
@@ -2779,6 +2789,7 @@ begin-module net-ipv6
       self <interface>->new
       frame-interface self out-frame-interface !
       1 0 0 0 self intf-ipv6-addr ipv6-unaligned!
+      1 0 0 0 self intf-link-local-ipv6-addr ipv6-unaligned!
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self intf-ipv6-prefix ipv6-unaligned!
       true intf-autonomous? !
@@ -2845,7 +2856,7 @@ begin-module net-ipv6
 
     \ Get the IPv6 link-local address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      intf-mac-addr@ make-link-local-ipv6-addr
+      intf-link-local-ipv6-addr ipv6-unaligned@
     ; define intf-link-local-ipv6-addr@
 
     \ Set the IPv6 address
@@ -2864,6 +2875,23 @@ begin-module net-ipv6
         old-multicast self out-frame-interface @ remove-multicast-filter
       then
     ; define intf-ipv6-addr!
+
+    \ Set the link-local IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      { self }
+      self intf-link-local-ipv6-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
+      self intf-link-local-ipv6-addr ipv6-unaligned!
+      self intf-link-local-ipv6-addr ipv6-unaligned@
+      solicit-node-link-local-multicast ipv6-multicast-mac-addr
+      { D: new-multicast }
+      new-multicast self out-frame-interface @ add-multicast-filter
+      old-0 old-1 old-2 old-3
+      solicit-node-link-local-multicast ipv6-multicast-mac-addr
+      { D: old-multicast }
+      new-multicast old-multicast d<> if
+        old-multicast self out-frame-interface @ remove-multicast-filter
+      then
+    ; define intf-link-local-ipv6-addr!
 
     \ Get the IPv6 prefix
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -2940,8 +2968,7 @@ begin-module net-ipv6
       dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@ ipv6= if
         true
       else
-        dest-0 dest-1 dest-2 dest-3
-        self intf-mac-addr@ make-link-local-ipv6-addr ipv6= if
+        dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@ ipv6= if
           true
         else
           dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if
@@ -2953,7 +2980,7 @@ begin-module net-ipv6
                 true
               else
                 dest-0 dest-1 dest-2 dest-3
-                self intf-mac-addr@ make-link-local-ipv6-addr
+                self intf-link-local-ipv6-addr@
                 solicit-node-link-local-multicast ipv6=
               then
             then
@@ -4690,7 +4717,7 @@ begin-module net-ipv6
     \ Autoconfigure link-local IPv6 address
     :noname { self -- success? }
       self out-frame-interface @ mac-addr@ make-link-local-ipv6-addr
-      self detect-duplicate-and-set-intf-ipv6-addr
+      self detect-duplicate-and-set-intf-link-local-ipv6-addr
     ; define autoconfigure-link-local-ipv6-addr
 
     \ Attempt to set interface IPv6 address, detecting duplicates
@@ -4705,6 +4732,19 @@ begin-module net-ipv6
       false self detecting-duplicate? !
     ; define detect-duplicate-and-set-intf-ipv6-addr
     
+    \ Attempt to set interface link-local IPv6 address, detecting duplicates
+    :noname { target-0 target-1 target-2 target-3 self -- success? }
+      true self detecting-duplicate? !
+      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
+      nip nip if
+        false
+      else
+        target-0 target-1 target-2 target-3 self intf-link-local-ipv6-addr!
+        target-0 target-1 target-2 target-3 self intf-ipv6-addr! true
+      then
+      false self detecting-duplicate? !
+    ; define detect-duplicate-and-set-intf-link-local-ipv6-addr
+
     \ Start router discovery
     :noname { self -- }
       systick::systick-counter self router-discovery-start !
