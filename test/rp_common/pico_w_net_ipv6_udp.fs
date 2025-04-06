@@ -153,7 +153,11 @@ begin-module pico-w-net-udp
     cr ." Discovering IPv6 router..."
     my-interface @ discover-ipv6-router
     cr ." Discovering IPv6 address..."
-    my-interface @ discover-ipv6-addr
+    my-interface @ discover-ipv6-addr if
+      ." Success"
+    else
+      ." Failure"
+    then
     my-interface @ intf-ipv6-addr@ cr ." IPv6 address: " ipv6.
     my-interface @ intf-ipv6-prefix@ cr ." IPv6 prefix: " ipv6.
     my-interface @ intf-autonomous@ cr ." Autonomous: "
