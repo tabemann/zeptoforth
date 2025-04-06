@@ -287,15 +287,20 @@ The `<ipv6-interface>` class has the following methods:
 
 Get an interface's primary IPv6 address.
 
+##### `intf-ipv6-addr!`
+( addr-0 addr-1 addr-2 addr-3 interface -- )
+
+Manually set an interface's primary IPv6 address.
+
 ##### `intf-link-local-ipv6-addr@`
 ( interface -- addr-0 addr-1 addr-2 addr-3 )
 
 Get an interface's link-local IPv6 address.
 
-##### `intf-ipv6-addr!`
+##### `intf-link-local-ipv6-addr!`
 ( addr-0 addr-1 addr-2 addr-3 interface -- )
 
-Manually set an interface's primary IPv6 address.
+Manually set an interface's link-local IPv6 address.
 
 ##### `intf-ipv6-prefix@`
 ( interface -- prefix-0 prefix-1 prefix-2 prefix-3 )

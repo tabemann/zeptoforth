@@ -16422,7 +16422,7 @@
           <navLabel>
             <text>&lt;endpoint-process&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id21" />  
+          <content src="extra/net.xhtml#id22" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2737" playOrder="2522">
@@ -16446,7 +16446,7 @@
           <navLabel>
             <text>&lt;frame-process&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id28" />  
+          <content src="extra/net.xhtml#id29" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2741" playOrder="2525">
@@ -16464,7 +16464,7 @@
           <navLabel>
             <text>&lt;frame-interface&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id30" />  
+          <content src="extra/net.xhtml#id31" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2744" playOrder="2527">
@@ -16488,7 +16488,7 @@
           <navLabel>
             <text>&lt;simple-net-ipv4&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id32" />  
+          <content src="extra/net.xhtml#id33" />  
         </navPoint>
         <navPoint id="navPoint2748" playOrder="2530">
           <navLabel>
@@ -16512,7 +16512,7 @@
           <navLabel>
             <text>&lt;simple-cyw43-net-ipv4&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id42" />  
+          <content src="extra/net.xhtml#id43" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2752" playOrder="2533">
@@ -16530,7 +16530,7 @@
           <navLabel>
             <text>&lt;simple-cyw43-net-ipv6&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id47" />  
+          <content src="extra/net.xhtml#id48" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2755" playOrder="2535">
@@ -16548,7 +16548,7 @@
           <navLabel>
             <text>&lt;pico-w-cyw43-net-ipv4&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id57" />  
+          <content src="extra/net.xhtml#id58" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2758" playOrder="2537">
@@ -16566,7 +16566,7 @@
           <navLabel>
             <text>&lt;pico-w-cyw43-net-ipv6&gt;</text>
           </navLabel>
-          <content src="extra/net.xhtml#id62" />  
+          <content src="extra/net.xhtml#id63" />  
         </navPoint>
       </navPoint>
       <navPoint id="navPoint2761" playOrder="2539">
