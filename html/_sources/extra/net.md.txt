@@ -302,6 +302,26 @@ Get an interface's link-local IPv6 address.
 
 Manually set an interface's link-local IPv6 address.
 
+##### `intf-slaac-ipv6-addr@`
+( interface -- addr-0 addr-1 addr-2 addr-3 )
+
+Get an interface's SLAAC IPv6 address.
+
+##### `intf-slaac-ipv6-addr!`
+( addr-0 addr-1 addr-2 addr-3 interface -- )
+
+Manually set an interface's SLAAC IPv6 address.
+
+##### `intf-dhcpv6-ipv6-addr@`
+( interface -- addr-0 addr-1 addr-2 addr-3 )
+
+Get an interface's DHCPv6 IPv6 address.
+
+##### `intf-dhcpv6-ipv6-addr!`
+( addr-0 addr-1 addr-2 addr-3 interface -- )
+
+Manually set an interface's DHCPv6 IPv6 address.
+
 ##### `intf-ipv6-prefix@`
 ( interface -- prefix-0 prefix-1 prefix-2 prefix-3 )
 

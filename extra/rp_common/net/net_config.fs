@@ -29,6 +29,9 @@ begin-module net-config
   
   \ DHCP logging
   false value dhcp-log?
+
+  \ The deprecated address count
+  4 constant max-deprecated-count
   
   \ The MTU size
   1500 constant mtu-size
@@ -218,5 +221,8 @@ begin-module net-config
 
   \ Initial neighbor retransmit time milliseconds
   250 value initial-neighbor-retrans-time-ms
+
+  \ Default valid time for static addresses
+  86400 10000 * value default-static-valid-time
   
 end-module

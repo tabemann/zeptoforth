@@ -2260,8 +2260,38 @@ begin-module net-ipv6
       \ The IPv6 address
       ipv6-addr-size member intf-ipv6-addr
 
+      \ The IPv6 address is set
+      cell member intf-addr-set?
+
       \ The link-local IPv6 address
       ipv6-addr-size member intf-link-local-ipv6-addr
+
+      \ The link-local IPv6 address is set?
+      cell member intf-link-local-set?
+      
+      \ The SLAAC IPv6 address
+      ipv6-addr-size member intf-slaac-ipv6-addr
+
+      \ The SLAAC address is set?
+      cell member intf-slaac-set?
+      
+      \ The DHCPv6 IPv6 address
+      ipv6-addr-size member intf-dhcpv6-ipv6-addr
+
+      \ The DHCPv6 valid time
+      cell member intf-dhcpv6-valid-time
+
+      \ The DHCPv6 address is set?
+      cell member intf-dhcpv6-set?
+
+      \ The deprecated address count
+      cell member deprecated-count
+      
+      \ The deprecated addresses
+      max-deprecated-count ipv6-addr-size * member deprecated-ipv6-addrs
+
+      \ The deprecated address validity times
+      max-deprecated-count cells member deprecated-valid-times
       
       \ The IPv6 prefix
       ipv6-addr-size member intf-ipv6-prefix
@@ -2272,6 +2302,9 @@ begin-module net-ipv6
       \ The IPv6 autonomous state
       cell member intf-autonomous?
 
+      \ The discovered address valid time
+      cell member discovered-valid-time
+      
       \ The discovered IPv6 address
       ipv6-addr-size member discovered-ipv6-addr
 
@@ -2419,7 +2452,22 @@ begin-module net-ipv6
       \ DHCP lock
       lock-size member dhcp-lock
 
-      \ Are we listening to IPv6 address
+      \ Address lock
+      lock-size member addr-lock
+
+      \ Remove an IPv6 address from the deprecated IPv6 addresses
+      method remove-deprecated-ipv6-addr
+      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      
+      \ Deprecate an IPv6 address
+      method deprecate-ipv6-addr
+      ( valid-time ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+
+      \ Are we listening to a multicast IPv6 address
+      method ipv6-multicast-addr-listen?
+      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- listen? )
+      
+      \ Are we listening to an IPv6 address
       method ipv6-addr-listen?
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- listen? )
 
@@ -2647,6 +2695,9 @@ begin-module net-ipv6
 
       \ Refresh router discovery
       method refresh-router-discovery ( self -- )
+
+      \ Refresh address validity
+      method refresh-valid ( self -- )
       
       \ Refresh an interface
       method refresh-interface ( self -- )
@@ -2688,13 +2739,17 @@ begin-module net-ipv6
       \ endpoint queue status
       method with-endpoint-queue ( xt start-ticks self -- )
 
-      \ Attempt to set interface IPv6 address, detecting duplicates
-      method detect-duplicate-and-set-intf-ipv6-addr
-      ( target-0 target-1 target-2 target-3 self -- success? )
-
       \ Attempt to set interface link-local IPv6 address, detecting duplicates
       method detect-duplicate-and-set-intf-link-local-ipv6-addr
       ( target-0 target-1 target-2 target-3 self -- success? )
+
+      \ Attempt to set interface SLAAC IPv6 address, detecting duplicates
+      method detect-duplicate-and-set-intf-slaac-ipv6-addr
+      ( target-0 target-1 target-2 target-3 self -- success? )
+
+      \ Attempt to set interface DHCPv6 IPv6 address, detecting duplicates
+      method detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
+      ( valid-time target-0 target-1 target-2 target-3 self -- success? )
 
     end-module
     
@@ -2709,6 +2764,19 @@ begin-module net-ipv6
     
     \ Set the IPv6 link-local address
     method intf-link-local-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+
+    \ Get the IPv6 SLAAC address
+    method intf-slaac-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    
+    \ Set the IPv6 SLAAC address
+    method intf-slaac-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+
+    \ Get the IPv6 DHCPv6 address
+    method intf-dhcpv6-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+    
+    \ Set the IPv6 SLAAC address
+    method intf-dhcpv6-ipv6-addr!
+    ( valid-time ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
     
     \ Get the IPv6 prefix
     method intf-ipv6-prefix@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -2789,10 +2857,23 @@ begin-module net-ipv6
       self <interface>->new
       frame-interface self out-frame-interface !
       1 0 0 0 self intf-ipv6-addr ipv6-unaligned!
+      false self intf-addr-set? !
       1 0 0 0 self intf-link-local-ipv6-addr ipv6-unaligned!
+      false self intf-link-local-set? !
+      1 0 0 0 self intf-slaac-ipv6-addr ipv6-unaligned!
+      false self intf-slaac-set? !
+      1 0 0 0 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
+      systick::systick-counter self intf-dhcpv6-valid-time !
+      false self intf-dhcpv6-set? !
+      0 self deprecated-count !
+      max-deprecated-count 0 ?do
+        1 0 0 0 i ipv6-addr-size * self deprecated-ipv6-addrs + ipv6-unaligned!
+        systick::systick-counter i cells self deprecated-valid-times + !
+      loop
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self intf-ipv6-prefix ipv6-unaligned!
       true intf-autonomous? !
+      systick::systick-counter self discovered-valid-time !
       0 0 0 0 self discovered-ipv6-addr ipv6-unaligned!
       128 self intf-ipv6-prefix-len !
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
@@ -2835,6 +2916,7 @@ begin-module net-ipv6
       self endpoint-queue-lock init-lock
       self router-discovery-lock init-lock
       self dhcp-lock init-lock
+      self addr-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
@@ -2851,47 +2933,225 @@ begin-module net-ipv6
 
     \ Get the IPv6 address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      intf-ipv6-addr ipv6-unaligned@
+      dup intf-addr-set? @ if
+        intf-ipv6-addr ipv6-unaligned@
+      else
+        drop 1 0 0 0
+      then
     ; define intf-ipv6-addr@
 
     \ Get the IPv6 link-local address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
-      intf-link-local-ipv6-addr ipv6-unaligned@
+      dup intf-link-local-set? @ if
+        intf-link-local-ipv6-addr ipv6-unaligned@
+      else
+        drop 1 0 0 0
+      then
     ; define intf-link-local-ipv6-addr@
 
-    \ Set the IPv6 address
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      { self }
-      self intf-ipv6-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
-      self intf-ipv6-addr ipv6-unaligned!
-      self intf-ipv6-addr ipv6-unaligned@
-      solicit-node-link-local-multicast ipv6-multicast-mac-addr
-      { D: new-multicast }
-      new-multicast self out-frame-interface @ add-multicast-filter
-      old-0 old-1 old-2 old-3
-      solicit-node-link-local-multicast ipv6-multicast-mac-addr
-      { D: old-multicast }
-      new-multicast old-multicast d<> if
-        old-multicast self out-frame-interface @ remove-multicast-filter
+    \ Get the SLAAC IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      dup intf-slaac-set? @ if
+        intf-slaac-ipv6-addr ipv6-unaligned@
+      else
+        drop 1 0 0 0
       then
+    ; define intf-slaac-ipv6-addr@
+
+    \ Get the DHCPv6 IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      dup intf-dhcpv6-set? @ if
+        intf-dhcpv6-ipv6-addr ipv6-unaligned@
+      else
+        drop 1 0 0 0
+      then
+    ; define intf-dhcpv6-ipv6-addr@
+
+    \ Remove an IPv6 address from the deprecated IPv6 addresses
+    :noname ( addr-0 addr-1 addr-2 addr-3 self -- )
+      [:
+        { addr-0 addr-1 addr-2 addr-3 self }
+        self deprecated-count @ 0 ?do
+          i ipv6-addr-size * self deprecated-ipv6-addrs + ipv6-unaligned@
+          addr-0 addr-1 addr-2 addr-3 ipv6= if
+            -1 self deprecated-count +!
+            i ipv6-addr-size * self deprecated-ipv6-addrs +
+            dup ipv6-addr-size + swap
+            self deprecated-count @ i - ipv6-addr-size * move
+            i cells self deprecated-valid-times +
+            dup cell+ swap
+            self deprecated-count @ i - cells move
+            exit
+          then
+        loop
+      ;] over addr-lock with-lock
+    ; define remove-deprecated-ipv6-addr
+    
+    \ Deprecate an IPv6 address
+    :noname ( valid-time addr-0 addr-1 addr-2 addr-3 self -- )
+      [:
+        { valid-time addr-0 addr-1 addr-2 addr-3 self -- }
+        systick::systick-counter { current-time }
+        valid-time current-time - 0> if
+          self deprecated-count @ max-deprecated-count < if
+            addr-0 addr-1 addr-2 addr-3
+            self deprecated-count @ ipv6-addr-size *
+            self deprecated-ipv6-addrs + ipv6-unaligned!
+            valid-time self deprecated-count @ cells
+            self deprecated-valid-times + !
+            1 self deprecated-count +!
+          else
+            0 self deprecated-valid-times @ current-time -
+            { min-index min-time }
+            max-deprecated-count 0 ?do
+              self deprecated-valid-times @ i cells + @ current-time -
+              { this-time }
+              this-time min-time <= if
+                i to min-index
+                this-time to min-time
+              then
+            loop
+            self deprecated-ipv6-addrs min-index ipv6-addr-size * +
+            { old-ipv6-addr-addr }
+            valid-time self deprecated-valid-times min-index cells + !
+            old-ipv6-addr-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
+            addr-0 addr-1 addr-2 addr-3 old-0 old-1 old-2 old-3 ipv6= not if
+              old-0 old-1 old-2 old-3 solicit-node-link-local-multicast
+              ipv6-multicast-mac-addr
+              self out-frame-interface @ remove-multicast-filter
+              addr-0 addr-1 addr-2 addr-3 old-ipv6-addr-addr ipv6-unaligned!
+            then
+          then
+        else
+          addr-0 addr-1 addr-2 addr-3 solicit-node-link-local-multicast
+          ipv6-multicast-mac-addr
+          self out-frame-interface @ remove-multicast-filter
+        then
+      ;] over addr-lock with-lock
+    ; define deprecate-ipv6-addr
+
+    \ Set the IPv6 address
+    :noname ( new-0 new-1 new-2 new-3 self -- )
+      [: { new-0 new-1 new-2 new-3 self }
+        self intf-ipv6-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
+        new-0 new-1 new-2 new-3 self remove-deprecated-ipv6-addr
+        1 0 0 0 old-0 old-1 old-2 old-3 ipv6= not if
+          systick::systick-counter default-static-valid-time + { valid-time }
+          self intf-dhcpv6-set? @ if
+            self intf-dhcpv6-ipv6-addr ipv6-unaligned@
+            old-0 old-1 old-2 old-3 ipv6= if
+              false self intf-dhcpv6-set? !
+              self intf-dhcpv6-valid-time @ to valid-time
+            then
+          then
+          old-0 old-1 old-2 old-3 self remove-deprecated-ipv6-addr
+          valid-time old-0 old-1 old-2 old-3 self deprecate-ipv6-addr
+        then
+        new-0 new-1 new-2 new-3 self intf-ipv6-addr ipv6-unaligned!
+        new-0 new-1 new-2 new-3 solicit-node-link-local-multicast
+        ipv6-multicast-mac-addr
+        self out-frame-interface @ add-multicast-filter
+        true self intf-addr-set? !
+      ;] over addr-lock with-lock
     ; define intf-ipv6-addr!
 
     \ Set the link-local IPv6 address
     :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      { self }
-      self intf-link-local-ipv6-addr ipv6-unaligned@ { old-0 old-1 old-2 old-3 }
-      self intf-link-local-ipv6-addr ipv6-unaligned!
-      self intf-link-local-ipv6-addr ipv6-unaligned@
-      solicit-node-link-local-multicast ipv6-multicast-mac-addr
-      { D: new-multicast }
-      new-multicast self out-frame-interface @ add-multicast-filter
-      old-0 old-1 old-2 old-3
-      solicit-node-link-local-multicast ipv6-multicast-mac-addr
-      { D: old-multicast }
-      new-multicast old-multicast d<> if
-        old-multicast self out-frame-interface @ remove-multicast-filter
-      then
+      [: { new-0 new-1 new-2 new-3 self }
+        new-0 new-1 new-2 new-3 self remove-deprecated-ipv6-addr
+        self intf-link-local-set? @ if
+          self intf-link-local-ipv6-addr ipv6-unaligned@
+          self remove-deprecated-ipv6-addr
+          self intf-link-local-ipv6-addr ipv6-unaligned@
+          new-0 new-1 new-2 new-3 ipv6= if exit then
+          systick::systick-counter default-static-valid-time +
+          self intf-link-local-ipv6-addr ipv6-unaligned@
+          self deprecate-ipv6-addr
+          self intf-slaac-set? @ self intf-dhcpv6-set? @ or not
+          self intf-ipv6-addr ipv6-unaligned@
+          new-0 new-1 new-2 new-3 ipv6= and if
+            false self intf-addr-set? !
+          then
+        then
+        new-0 new-1 new-2 new-3 self intf-link-local-ipv6-addr ipv6-unaligned!
+        self intf-addr-set? @ not if
+          new-0 new-1 new-2 new-3 self intf-ipv6-addr ipv6-unaligned!
+          true self intf-addr-set? !
+        then
+        new-0 new-1 new-2 new-3 solicit-node-link-local-multicast
+        ipv6-multicast-mac-addr
+        self out-frame-interface @ add-multicast-filter
+        true self intf-link-local-set? !
+      ;] over addr-lock with-lock
     ; define intf-link-local-ipv6-addr!
+    
+    \ Set the SLAAC IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      [: { new-0 new-1 new-2 new-3 self }
+        new-0 new-1 new-2 new-3 self remove-deprecated-ipv6-addr
+        self intf-slaac-set? @ if
+          self intf-slaac-ipv6-addr ipv6-unaligned@
+          self remove-deprecated-ipv6-addr
+          new-0 new-1 new-2 new-3
+          self intf-slaac-ipv6-addr ipv6-unaligned@ ipv6= if exit then
+          systick::systick-counter default-static-valid-time +
+          self intf-slaac-ipv6-addr ipv6-unaligned@
+          self deprecate-ipv6-addr
+        then
+        new-0 new-1 new-2 new-3 self intf-slaac-ipv6-addr ipv6-unaligned!
+        self intf-dhcpv6-set? @ not if
+          new-0 new-1 new-2 new-3 self intf-ipv6-addr ipv6-unaligned!
+          true self intf-addr-set? !
+        then
+        new-0 new-1 new-2 new-3 solicit-node-link-local-multicast
+        ipv6-multicast-mac-addr
+        self out-frame-interface @ add-multicast-filter
+        true self intf-link-local-set? !
+      ;] over addr-lock with-lock
+    ; define intf-slaac-ipv6-addr!
+
+    \ Set the DHCPv6 IPv6 address
+    :noname ( valid-time ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      [: { valid-time new-0 new-1 new-2 new-3 self }
+        self intf-dhcpv6-set? @ if
+          self intf-dhcpv6-ipv6-addr ipv6-unaligned@
+          self remove-deprecated-ipv6-addr
+          new-0 new-1 new-2 new-3
+          self intf-dhcpv6-ipv6-addr ipv6-unaligned@ ipv6= if
+            valid-time self intf-dhcpv6-valid-time ! exit
+          then
+          self intf-dhcpv6-valid-time @
+          self intf-dhcpv6-ipv6-addr ipv6-unaligned@
+          self deprecate-ipv6-addr
+          valid-time systick::systick-counter - 0< if
+            self intf-slaac-set? @ if
+              self intf-slaac-ipv6-addr ipv6-unaligned@
+              self intf-ipv6-addr ipv6-unaligned!
+            else
+              self intf-link-local-set? @ if
+                self intf-link-local-ipv6-addr ipv6-unaligned@
+                self intf-ipv6-addr ipv6-unaligned!
+              else
+                false self intf-addr-set? !
+              then
+            then
+            false self intf-dhcpv6-set? !
+            exit
+          then
+        else
+          valid-time systick::systick-counter - 0< if exit then
+        then
+        new-0 new-1 new-2 new-3 self remove-deprecated-ipv6-addr
+        valid-time self intf-dhcpv6-valid-time !
+        new-0 new-1 new-2 new-3 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
+        new-0 new-1 new-2 new-3 self intf-ipv6-addr ipv6-unaligned!
+        new-0 new-1 new-2 new-3 solicit-node-link-local-multicast
+        ipv6-multicast-mac-addr
+        self out-frame-interface @ add-multicast-filter
+        true self intf-addr-set? !
+        true self intf-dhcpv6-set? !
+      ;] over addr-lock with-lock
+    ; define intf-dhcpv6-ipv6-addr!
 
     \ Get the IPv6 prefix
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
@@ -2959,39 +3219,88 @@ begin-module net-ipv6
       ttl 255 min 1 max self intf-hop-limit !
     ; define intf-hop-limit!
 
-    \ Are we listening to IPv6 address
+    \ Are we listening to a mulicast IPv6 address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- listen? }
-      [ debug? ] [if]
-        dest-0 dest-1 dest-2 dest-3
-        [: cr ." ipv6-addr-listen " ipv6. ;] debug-hook execute
-      [then]
-      dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@ ipv6= if
+      dest-0 dest-1 dest-2 dest-3
+      ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
         true
       else
-        dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@ ipv6= if
+        self intf-addr-set? @
+        dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@
+        solicit-node-link-local-multicast ipv6= and if
           true
         else
-          dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if
-            dest-0 dest-1 dest-2 dest-3 ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
+          self intf-link-local-set? @
+          dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@
+          solicit-node-link-local-multicast ipv6= and if
+            true
+          else
+            self intf-slaac-set? @
+            dest-0 dest-1 dest-2 dest-3 self intf-slaac-ipv6-addr@
+            solicit-node-link-local-multicast ipv6= and if
               true
             else
-              dest-0 dest-1 dest-2 dest-3
-              self intf-ipv6-addr@ solicit-node-link-local-multicast ipv6= if
+              self intf-dhcpv6-set? @
+              dest-0 dest-1 dest-2 dest-3 self intf-dhcpv6-ipv6-addr@
+              solicit-node-link-local-multicast ipv6= and if
                 true
               else
-                dest-0 dest-1 dest-2 dest-3
-                self intf-link-local-ipv6-addr@
-                solicit-node-link-local-multicast ipv6=
+                self deprecated-count @ 0 ?do
+                  i ipv6-addr-size * self deprecated-ipv6-addrs +
+                  ipv6-unaligned@
+                  solicit-node-link-local-multicast ipv6= and if true exit then
+                loop
+                false
               then
             then
-          else
-            false
           then
         then
       then
-      [ debug? ] [if]
-        dup [: ."  match: " . ;] debug-hook execute
-      [then]
+    ; define ipv6-multicast-addr-listen?
+
+    \ Are we listening to an IPv6 address
+    :noname ( dest-0 dest-1 dest-2 dest-3 self -- listen? )
+      [: { dest-0 dest-1 dest-2 dest-3 self -- listen? }
+        [ debug? ] [if]
+          dest-0 dest-1 dest-2 dest-3
+          [: cr ." ipv6-addr-listen " ipv6. ;] debug-hook execute
+        [then]
+        self intf-addr-set? @
+        dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@ ipv6= and if
+          true
+        else
+          self intf-link-local-set? @
+          dest-0 dest-1 dest-2 dest-3
+          self intf-link-local-ipv6-addr@ ipv6= and if
+            true
+          else
+            self intf-slaac-set? @
+            dest-0 dest-1 dest-2 dest-3
+            self intf-slaac-ipv6-addr@ ipv6= and if
+              true
+            else
+              self intf-dhcpv6-set? @
+              dest-0 dest-1 dest-2 dest-3
+              self intf-dhcpv6-ipv6-addr@ ipv6= and if
+                true
+              else
+                dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if
+                  dest-0 dest-1 dest-2 dest-3 self ipv6-multicast-addr-listen?
+                else
+                  self deprecated-count @ 0 ?do
+                    i ipv6-addr-size * self deprecated-ipv6-addrs +
+                    ipv6-unaligned@ ipv6= and if true exit then
+                  loop
+                  false
+                then
+              then
+            then
+          then
+        then
+        [ debug? ] [if]
+          dup [: ."  match: " . ;] debug-hook execute
+        [then]
+      ;] over addr-lock with-lock
     ; define ipv6-addr-listen?
 
     \ Process a MAC address for an IPv6 address
@@ -4720,18 +5029,6 @@ begin-module net-ipv6
       self detect-duplicate-and-set-intf-link-local-ipv6-addr
     ; define autoconfigure-link-local-ipv6-addr
 
-    \ Attempt to set interface IPv6 address, detecting duplicates
-    :noname { target-0 target-1 target-2 target-3 self -- success? }
-      true self detecting-duplicate? !
-      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
-      nip nip if
-        false
-      else
-        target-0 target-1 target-2 target-3 self intf-ipv6-addr! true
-      then
-      false self detecting-duplicate? !
-    ; define detect-duplicate-and-set-intf-ipv6-addr
-    
     \ Attempt to set interface link-local IPv6 address, detecting duplicates
     :noname { target-0 target-1 target-2 target-3 self -- success? }
       true self detecting-duplicate? !
@@ -4740,10 +5037,36 @@ begin-module net-ipv6
         false
       else
         target-0 target-1 target-2 target-3 self intf-link-local-ipv6-addr!
-        target-0 target-1 target-2 target-3 self intf-ipv6-addr! true
+        true
       then
       false self detecting-duplicate? !
     ; define detect-duplicate-and-set-intf-link-local-ipv6-addr
+
+    \ Attempt to set interface SLAAC IPv6 address, detecting duplicates
+    :noname { target-0 target-1 target-2 target-3 self -- success? }
+      true self detecting-duplicate? !
+      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
+      nip nip if
+        false
+      else
+        target-0 target-1 target-2 target-3 self intf-slaac-ipv6-addr! true
+      then
+      false self detecting-duplicate? !
+    ; define detect-duplicate-and-set-intf-slaac-ipv6-addr
+
+    \ Attempt to set interface DHCPv6 IPv6 address, detecting duplicates
+    :noname { valid-time target-0 target-1 target-2 target-3 self -- success? }
+      true self detecting-duplicate? !
+      target-0 target-1 target-2 target-3 self resolve-ipv6-addr-mac-addr
+      nip nip if
+        false
+      else
+        valid-time target-0 target-1 target-2 target-3
+        self intf-dhcpv6-ipv6-addr!
+        true
+      then
+      false self detecting-duplicate? !
+    ; define detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
 
     \ Start router discovery
     :noname { self -- }
@@ -4765,7 +5088,7 @@ begin-module net-ipv6
         [then]
         self intf-mac-addr@ self intf-ipv6-prefix@ self intf-ipv6-prefix-len@
         make-global-unicast-ipv6-addr
-        self detect-duplicate-and-set-intf-ipv6-addr
+        self detect-duplicate-and-set-intf-slaac-ipv6-addr
       else
         [ debug? ] [if]
           [: cr ." Not autonomous" ;] debug-hook execute
@@ -4778,8 +5101,9 @@ begin-module net-ipv6
           systick::systick-counter self dhcp-discover-start !
           self ['] send-dhcpv6-solicit self dhcp-lock with-lock
           self dhcp-sema take
+          self discovered-valid-time @
           self discovered-ipv6-addr ipv6-unaligned@
-          self detect-duplicate-and-set-intf-ipv6-addr
+          self detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
         else
           success?
         then
@@ -5260,9 +5584,13 @@ begin-module net-ipv6
             then
             rebind-interval 0= if
               default-dhcp-rebind-interval to rebind-interval
-            then
-            rebind-interval renew-interval u< if
-              rebind-interval to renew-interval
+              rebind-interval renew-interval u< if
+                renew-interval to rebind-interval
+              then
+            else
+              rebind-interval renew-interval u< if
+                rebind-interval to renew-interval
+              then
             then
             OPTION_IAADDR addr' 12 + bytes' 12 - find-dhcpv6-opt if
               24 >= if
@@ -5273,19 +5601,23 @@ begin-module net-ipv6
                 addr'' 8 + unaligned@
                 [ $7FFF_FFFF 10000 u/ ] literal min 10000 *
                 { valid-interval }
-                deprecated-interval valid-interval u< if
-                  deprecated-interval to valid-interval
-                then
                 deprecated-interval renew-interval u< if
                   deprecated-interval to renew-interval
                 then
                 valid-interval 0<> if
+                  valid-interval deprecated-interval u< if
+                    deprecated-interval to valid-interval
+                  then
                   valid-interval renew-interval u< if
                     valid-interval to renew-interval
                   then
+                else
+                  rebind-interval to valid-interval
                 then
                 addr'' ipv6-unaligned@
                 self discovered-ipv6-addr ipv6-unaligned!
+                systick::systick-counter valid-interval +
+                self discovered-valid-time !
                 rebind-interval dhcp-renew-rebind-limit-multiplier *
                 dhcp-renew-rebind-limit-divisor u/ { limit }
                 renew-interval limit u> if limit to renew-interval then
@@ -5493,10 +5825,50 @@ begin-module net-ipv6
         dup dhcp-discover-state @ cells dhcp-jumptable + @ execute
       ;] over dhcp-lock with-lock
     ; define refresh-dhcp
+
+    \ Refresh address validity
+    :noname { self -- }
+      self intf-dhcpv6-set? @ if
+        self [: { self }
+          systick::systick-counter { current-time }
+          self intf-dhcpv6-valid-time @ current-time - 0< if
+            false intf-dhcpv6-set? !
+            self intf-dhcpv6-ipv6-addr ipv6-unaligned@
+            solicit-node-link-local-multicast ipv6-multicast-mac-addr
+            self out-frame-interface @ remove-multicast-filter
+            1 0 0 0 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
+          then
+        ;] self addr-lock with-lock
+      then
+      self deprecated-count @ 0> if
+        self [: { self }
+          systick::systick-counter { current-time }
+          0 { index }
+          begin index self deprecated-count @ < while
+            index cells self deprecated-valid-times + @
+            current-time - 0< if
+              index ipv6-addr-size * self deprecated-ipv6-addrs +
+              ipv6-unaligned@ solicit-node-link-local-multicast
+              ipv6-multicast-mac-addr
+              self out-frame-interface @ remove-multicast-filter
+              -1 self deprecated-count +!
+              index cells self deprecated-valid-times + dup cell+ swap
+              self deprecated-count @ index - cells move
+              index ipv6-addr-size * self deprecated-ipv6-addrs +
+              dup ipv6-addr-size + swap
+              self deprecated-count @ index - ipv6-addr-size * move
+            else
+              1 +to index
+            then
+          repeat
+        ;] self addr-lock with-lock
+      then
+    ; define refresh-valid
     
     \ Refresh an interface
     :noname { self -- }
       self refresh-router-discovery
+      self refresh-valid
       self refresh-dhcp
       self refresh-time-wait
       max-endpoints 0 ?do
