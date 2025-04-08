@@ -4317,7 +4317,8 @@ begin-module net-ipv6
         
         addr icmp-type c@ case
           ICMPV6_TYPE_ECHO_REQUEST of
-            src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self
+            src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+            hop-limit addr bytes self
             process-icmpv6-echo-request-packet
           endof
           ICMPV6_TYPE_ROUTER_ADVERTISE of
@@ -4416,28 +4417,36 @@ begin-module net-ipv6
     
     \ Process an ICMPv6 echo request packet
     :noname
-      { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- }
+      { dest-0 dest-1 dest-2 dest-3 hop-limit addr bytes self -- }
+      { D: src-mac-addr src-0 src-1 src-2 src-3 }
       bytes icmp-header-size < if exit then
 
+      dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if exit then
+      
       [ debug? ] [if]
         addr bytes
         [:
           cr ." Received ICMPv6 echo request: " over + dump
         ;] debug-hook execute
       [then]
-      
+
+      dest-0 dest-1 dest-2 dest-3
       src-0 src-1 src-2 src-3
       addr bytes self
-      src-mac-addr src-0 src-1 src-2 src-3 -1 PROTOCOL_ICMPV6 bytes [:
+      src-mac-addr dest-0 dest-1 dest-2 dest-3
+      src-0 src-1 src-2 src-3 -1 PROTOCOL_ICMPV6 bytes [:
         { src-0 src-1 src-2 src-3 addr bytes self buf }
+        { dest-0 dest-1 dest-2 dest-3 }
         ICMPV6_TYPE_ECHO_REPLY buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
         addr 4 + buf 4 + bytes 4 - move
-        self intf-ipv6-addr@ src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
+        dest-0 dest-1 dest-2 dest-3 src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
         buf bytes 0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
-      ;] self construct-and-send-ipv6-packet drop
+      ;] self construct-and-send-ipv6-packet-with-src-addr not if
+        2drop 2drop 2drop 2drop 2drop drop
+      then
     ; define process-icmpv6-echo-request-packet
 
     \ Process an ICMPv6 neighbor solicit packet
@@ -4451,12 +4460,9 @@ begin-module net-ipv6
       [ debug? ] [if]
         [: cr ." Neighbor solicit is of right size" ;] debug-hook execute
       [then]
-      addr icmp-header-size + ipv6-unaligned@ self intf-ipv6-addr@ ipv6= not if
-        [ debug? ] [if]
-          [: cr ." Neighbor solicit does not match address" ;] debug-hook execute
-        [then]
-        exit
-      then
+      addr icmp-header-size + ipv6-unaligned@
+      { target-0 target-1 target-2 target-3 }
+      target-0 target-1 target-2 target-3 ipv6-addr-multicast? if exit then
       [ debug? ] [if]
         [: cr ." Finding OPTION_SOURCE_LINK_LAYER_ADDR" ;] debug-hook execute
       [then]
@@ -4491,14 +4497,17 @@ begin-module net-ipv6
       then
       [ icmp-header-size ipv6-addr-size + 2 + mac-addr-size + ] literal
       { reply-bytes }
+      target-0 target-1 target-2 target-3
       src-0 src-1 src-2 src-3 reply-bytes self
       src-mac-addr
-      self intf-ipv6-addr@
+      target-0 target-1 target-2 target-3
       src-0 src-1 src-2 src-3 255 PROTOCOL_ICMPV6 reply-bytes [:
         { src-0 src-1 src-2 src-3 bytes self buf }
+        { target-0 target-1 target-2 target-3 }
         ICMPV6_TYPE_NEIGHBOR_ADVERTISE buf icmp-type c!
         ICMP_CODE_UNUSED buf icmp-code c!
-        self intf-ipv6-addr@ buf icmp-header-size + ipv6-unaligned!
+        target-0 target-1 target-2 target-3
+        buf icmp-header-size + ipv6-unaligned!
         [ NEIGHBOR_SOLICITED NEIGHBOR_OVERRIDE or rev ] literal
         buf icmp-rest-of-header unaligned!
         [ icmp-header-size ipv6-addr-size + ] literal buf + { opt-buf }
@@ -4508,7 +4517,8 @@ begin-module net-ipv6
         [ debug? ] [if]
           [: cr ." Setting target link layer address" ;] debug-hook execute
         [then]
-        self intf-ipv6-addr@ src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
+        target-0 target-1 target-2 target-3
+        src-0 src-1 src-2 src-3 PROTOCOL_ICMPV6
         buf bytes 0 icmp-checksum compute-ipv6-checksum rev16
         buf icmp-checksum hunaligned!
         true
