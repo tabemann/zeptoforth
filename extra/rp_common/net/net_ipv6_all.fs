@@ -1,4 +1,5 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2025 Paul Koning
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,16 +19,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp_common/cyw43/cyw43_consts.fs
-#include extra/rp_common/cyw43/cyw43_structs.fs
-#include extra/rp_common/cyw43/cyw43_events.fs
-#include extra/rp_common/cyw43/cyw43_nvram.fs
-#include extra/rp_common/cyw43/cyw43_spi.fs
-#include extra/rp_common/cyw43/cyw43_bus.fs
-#include extra/rp_common/cyw43/cyw43_ioctl.fs
-#include extra/rp_common/net/buffer_queue.fs
-#include extra/rp_common/net/frame_interface.fs
-#include extra/rp_common/cyw43/cyw43_multicast.fs
-#include extra/rp_common/cyw43/cyw43_runner.fs
-#include extra/rp_common/cyw43/cyw43_control.fs
-
+#include extra/rp_common/net/net_consts.fs
+#include extra/rp_common/net/net_config.fs
+#include extra/rp_common/net/net_misc.fs
+#include extra/rp_common/net/frame_process.fs
+#include extra/rp_common/net/net.fs
+#include extra/rp_common/net/net_ipv6.fs
+#include extra/rp_common/net/net_diagnostic.fs
+#include extra/rp_common/net/endpoint_process.fs
+#include extra/rp_common/net/simple_net_ipv6.fs

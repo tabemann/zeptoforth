@@ -16,12 +16,12 @@
             
   <section id="zeptoip-words">
 <h1>zeptoIP Words</h1>
-<p>zeptoIP is an Internet Protocol stack for zeptoforth. Currently it supports the Raspberry Pi Pico W and Raspberry Pi Pico 2 W’s CYW43439 WiFi chip. By design it can be extended to any WiFi or Ethernet interface which exposes receiving and sending Ethernet frames. It expressly does not support WiFi interfaces such as the ESP8285 on the Wio RP2040 which operate by using their own protocols such as the “AT” protocol. Note that currently zeptoIP only supports IPv4.</p>
-<p>zeptoIP is centered around one or more <em>interfaces</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code>each of which has its own IP address, netmask, gateway IP address, and DNS server IP address. With interfaces sources of incoming (and in the case of TCP data, outgoing) data, known as <em>endpoints</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> may be created, endpoints with ready data or state changes can be fetched, UDP packets may be sent, IP addresses of hostnames can be resolved via DNS, and IP addresses may be acquired via DHCP.</p>
+<p>zeptoIP is an Internet Protocol stack for zeptoforth. Currently it supports the Raspberry Pi Pico W and Raspberry Pi Pico 2 W’s CYW43439 WiFi chip. Unofficially it should also work on the Pimoroni Pico Plus 2 W as well. By design it can be extended to any WiFi or Ethernet interface which exposes receiving and sending Ethernet frames. It expressly does not support WiFi interfaces such as the ESP8285 on the Wio RP2040 which operate by using their own protocols such as the “AT” protocol. Note that there are separate bodies of code for zeptoIP for IPv4 and IPv6, which are referred to in particular as zeptoIPv4 and zeptoIPv6.</p>
+<p>zeptoIP is centered around one or more <em>interfaces</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code>each of which has its own IPv4 or IPv6 address (and in the case of IPv6 there is also a link-local IPv6 address), netmask in the case of IPv4, prefix and prefix length in the case of IPv6, gateway IPv4 or IPv6 address, and DNS server IPv4 or IPv6 address. With interfaces sources of incoming (and in the case of TCP data, outgoing) data, known as <em>endpoints</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> may be created, endpoints with ready data or state changes can be fetched, UDP packets may be sent, IP addresses of hostnames can be resolved via DNS, and IPv4 and IPv6 addresses may be acquired via DHCP or, in the case of IPv6, SLAAC.</p>
 <p>Endpoints encapsulate connection state in the case of TCP, and received packet state in the case of UDP. Reading received data from an endpoint need not require copying the data; the received data associated with an endpoint is valid until the endpoint is marked as <em>done</em>, at which the received data is cleared from the endpoint’s buffer and the room it took up in the endpoint’s buffer is made available for more received data. Note that data continues to be received even between the time that ready endpoint is fetched with <code class="docutils literal notranslate"><span class="pre">net::get-ready-endpoint</span></code> or is waited for with <code class="docutils literal notranslate"><span class="pre">net::wait-ready-endpoint</span></code> and it is marked as done with <code class="docutils literal notranslate"><span class="pre">net::endpoint-done</span></code>. Also note that with UDP endpoints the ready data at any one data comprises only a single received UDP packet’s data.</p>
-<p>The typical means by which endpoints are serviced is by creating an <em>endpoint processor</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-process&gt;</span></code>, and registering an <em>endpoint handler</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-handler&gt;</span></code> with it. The endpoint processor involves a task which fetches ready endpoints one at a time from an interface, and then applies it to each register endpoint handler. Once all the endpoint handlers have processed the endpoint, it should be marked as done to make it available for new data or state changes.</p>
+<p>The typical means by which endpoints are serviced is by creating an <em>endpoint processor</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-process&gt;</span></code>, and registering an <em>endpoint handler</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-handler&gt;</span></code> with it. The endpoint processor involves a task which fetches ready endpoints one at a time from an interface, and then applies it to each registered endpoint handler. Once all the endpoint handlers have processed the endpoint, it should be marked as done to make it available for new data or state changes.</p>
 <p>A more conventional approach to servicing endpoints, albeit one that requires multiple tasks if multiple endpoints are to be serviced, is through calling <code class="docutils literal notranslate"><span class="pre">net::wait-ready-endpoint</span></code>, which blocks until the endpoint is ready, and then promotes the data its receive buffer.</p>
-<p>Sending data is done differently with regard to TCP and UDP. With TCP sending data requires a TCP endpoint, gotten through either receiving an incoming connection on a listening TCP endpoint, started with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-listen-endpoint</span></code>, which will result in the endpoint being readied with the appropriate state change(s), or starting a TCP connection with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-connect-ipv4-endpoint</span></code>, at which an TCP endpoint will be provided to the user. Once one has done this, all that one must do is call <code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code>, which will send the provided data unless the connection is closed or reset, where then it will exit prematurely. With UDP sending data simply requires executing <code class="docutils literal notranslate"><span class="pre">net::send-ipv4-udp-packet</span></code>.</p>
+<p>Sending data is done differently with regard to TCP and UDP. With TCP sending data requires a TCP endpoint, gotten through either receiving an incoming connection on a listening TCP endpoint, started with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-listen-endpoint</span></code>, which will result in the endpoint being readied with the appropriate state change(s), or starting a TCP connection with <code class="docutils literal notranslate"><span class="pre">net-ipv4::allocate-tcp-connect-ipv4-endpoint</span></code> (for IPv4) or <code class="docutils literal notranslate"><span class="pre">net-ipv6::allocate-tcp-connect-ipv6-endpoint</span></code> (for IPv6), at which an TCP endpoint will be provided to the user. Once one has done this, all that one must do is call <code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code>, which will send the provided data unless the connection is closed or reset, where then it will exit prematurely. With UDP sending data simply requires executing <code class="docutils literal notranslate"><span class="pre">net-ipv4::send-ipv4-udp-packet</span></code> (for IPv4) or <code class="docutils literal notranslate"><span class="pre">net-ipv6::send-ipv6-udp-packet</span></code> (for IPv6).</p>
 <p>Closing an endpoint is accomplished through <code class="docutils literal notranslate"><span class="pre">net::close-tcp-endpoint</span></code>, for TCP endpoints, and <code class="docutils literal notranslate"><span class="pre">net::close-udp-endpoint</span></code>, for UDP endpoints. Closing UDP endpoints is immediate, while closing TCP endpoints involves waiting for the endpoint to be closed after a four-way handshake.</p>
 <p>If the user wishes to listen to multiple connections on the same point they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.</p>
 <p>Note that there is a fixed number of available endpoints which is set at compile-time, specified by the constant <code class="docutils literal notranslate"><span class="pre">net-config::max-endpoints</span></code>. This is set to four by default.</p>
@@ -133,6 +133,7 @@
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( frame-interface interface – )</p>
 <p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="intf-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr&#64;</span></code></h4>
@@ -217,7 +218,7 @@
 </section>
 <section id="ipv4-endpoint">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-endpoint&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-endpoint&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> and has the following methods:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-endpoint&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> and has the following method:</p>
 <section id="endpoint-ipv4-remote">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-ipv4-remote&#64;</span></code></h4>
 <p>( endpoint – ipv4-addr port )</p>
@@ -226,12 +227,12 @@
 </section>
 <section id="ipv4-handler">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class handles receiving IP frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class handles receiving IPv4 frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following constructor:</p>
 <section id="id6">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( interface handler – )</p>
-<p>Construct an IP frame handler for <em>interface</em>.</p>
+<p>Construct an IPv4 frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="handle-frame">
@@ -261,6 +262,195 @@
 <p>Handle a received frame.</p>
 </section>
 <section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
+<p>( handler – )</p>
+<p>Handle periodic housekeeping activities.</p>
+</section>
+</section>
+</section>
+<section id="net-ipv6">
+<h2><code class="docutils literal notranslate"><span class="pre">net-ipv6</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">net-ipv6</span></code> module contains the following classes:</p>
+<section id="ipv6-interface">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code> and has the following constructor:</p>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( frame-interface interface – )</p>
+<p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="intf-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
+<p>Get an interface’s primary IPv6 address.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-addr!</span></code></h4>
+<p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
+<p>Manually set an interface’s primary IPv6 address.</p>
+</section>
+<section id="intf-link-local-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-link-local-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
+<p>Get an interface’s link-local IPv6 address.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-link-local-ipv6-addr!</span></code></h4>
+<p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
+<p>Manually set an interface’s link-local IPv6 address.</p>
+</section>
+<section id="intf-slaac-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-slaac-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
+<p>Get an interface’s SLAAC IPv6 address.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-slaac-ipv6-addr!</span></code></h4>
+<p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
+<p>Manually set an interface’s SLAAC IPv6 address.</p>
+</section>
+<section id="intf-dhcpv6-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-dhcpv6-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
+<p>Get an interface’s DHCPv6 IPv6 address.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-dhcpv6-ipv6-addr!</span></code></h4>
+<p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
+<p>Manually set an interface’s DHCPv6 IPv6 address.</p>
+</section>
+<section id="intf-ipv6-prefix">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix&#64;</span></code></h4>
+<p>( interface – prefix-0 prefix-1 prefix-2 prefix-3 )</p>
+<p>Get an interface’s prefix</p>
+</section>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix!</span></code></h4>
+<p>( prefix-0 prefix-1 prefix-2 prefix-3 interface – )</p>
+<p>Manually set an interface’s prefix</p>
+</section>
+<section id="intf-ipv6-prefix-len">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix-len&#64;</span></code></h4>
+<p>( interface – bits )</p>
+<p>Get the length of an interface’s prefix in bits.</p>
+</section>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix-len!</span></code></h4>
+<p>( bits interface – )</p>
+<p>Manually set the length of an interface’s prefix in bits.</p>
+</section>
+<section id="intf-autonomous">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-autonomous&#64;</span></code></h4>
+<p>( interface – autonomous? )</p>
+<p>Get whether an interface is autonomous (note that this does not mean that it does not use DHCPv6).</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-autonomous!</span></code></h4>
+<p>( autonomous? interface – )</p>
+<p>Manually set whether an interface is autonomous.</p>
+</section>
+<section id="gateway-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr )</p>
+<p>Get an interface’s gateway’s IPv6 address.</p>
+</section>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv6-addr!</span></code></h4>
+<p>( addr interface – )</p>
+<p>Manually set an interface’s gateway’s IPv6 address.</p>
+</section>
+<section id="dns-server-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv6-addr&#64;</span></code></h4>
+<p>( interface – addr )</p>
+<p>Get an interface’s DNS server’s IPv6 address.</p>
+</section>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv6-addr!</span></code></h4>
+<p>( addr interface – )</p>
+<p>Manually set an interface’s gateway’s IPv6 address.</p>
+</section>
+<section id="intf-hop-limit">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-hop-limit&#64;</span></code></h4>
+<p>( interface – hop-limit )</p>
+<p>Get an interface’s hop limit.</p>
+</section>
+<section id="id20">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-hop-limit!</span></code></h4>
+<p>( hop-limit interface – )</p>
+<p>Manually set an interface’s hop limit.</p>
+</section>
+<section id="init-multicast">
+<h4><code class="docutils literal notranslate"><span class="pre">init-multicast</span></code></h4>
+<p>( interface – )</p>
+<p>Initialize the link-local Ethernet multicast address used by IPv6. Note that this is automatically called when <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::&lt;simple-net-ipv6&gt;</span></code> is initialized.</p>
+</section>
+<section id="autoconfigure-link-local-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">autoconfigure-link-local-ipv6-addr</span></code></h4>
+<p>( interface – success? )</p>
+<p>Autoconfigure a link local IPv6 address. It is recommended that one do this first when bringing up an IPv6 interface. Returns <code class="docutils literal notranslate"><span class="pre">false</span></code> if an address collision is detected, otherwise <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="discover-ipv6-router">
+<h4><code class="docutils literal notranslate"><span class="pre">discover-ipv6-router</span></code></h4>
+<p>( interface – )</p>
+<p>Discover an IPv6 router using neighbor discovery. It is recommended that one do this after autoconfiguring the link local IPv6 address except on setups where there is no router.</p>
+</section>
+<section id="discover-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">discover-ipv6-addr</span></code></h4>
+<p>( interface – success? )</p>
+<p>Discover an IPv6 address using SLAAC and/or DHCPv6. This requires that an IPv6 router has been discovered first. Returns <code class="docutils literal notranslate"><span class="pre">false</span></code> if an address collision is detected, otherwise <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="discover-dns-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">discover-dns-ipv6-addr</span></code></h4>
+<p>( interface – )</p>
+<p>Discover a DNS server IPv6 address. This requires that an IPv6 router has been discovered first.</p>
+</section>
+<section id="send-ipv6-udp-packet">
+<h4><code class="docutils literal notranslate"><span class="pre">send-ipv6-udp-packet</span></code></h4>
+<p>( ? src-port dest-addr-0 dest-addr-1 dest-addr-2 dest-addr-3 dest-port bytes xt interface – ? success? )</p>
+<p>This will call <em>xt</em> with a signature of ( ? buffer – ? send? ) with an address of a buffer guaranteed to be of size <em>bytes</em> to construct a UDP packet with a payload consisting of that buffer from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) to (<em>dest-addr-0</em>, <em>dest-addr-1</em>, <em>dest-addr-2</em>, <em>dest-addr-3</em>) at <em>dest-port</em>; if true is returned the packet is sent, and true will be returned afterwards, else the packet is not sent and false is returned. Note that false may be returned if the MAC address corresponding to (<em>dest-addr-0</em>, <em>dest-addr-1</em>, <em>dest-addr-2</em>, <em>dest-addr-3</em>) cannot be resolved.</p>
+</section>
+<section id="resolve-ipv6-addr-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-ipv6-addr-mac-addr</span></code></h4>
+<p>( dest-addr interface – D: mac-addr success? )</p>
+<p>Attempt to resolve the MAC address of an IPv6 address; if successful, true and the MAC address are returned, else false and padding cells are returned.</p>
+</section>
+<section id="resolve-dns-ipv6-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-dns-ipv6-addr</span></code></h4>
+<p>( c-addr bytes interface – addr-0 addr-1 addr-2 addr-3 success? )</p>
+<p>Attempt to resolve the IPv6 address of a hostname, i.e. the first AAAA record, via DNS; if successful, true and the IPv6 address are returned, else false and a apdding cell is returned.</p>
+</section>
+<section id="allocate-tcp-connect-ipv6-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-connect-ipv6-endpoint</span></code></h4>
+<p>( src-port dest-addr-0 dest-addr-1 dest-addr-2 dest-addr-3 dest-port interface – endpoint success? )</p>
+<p>Attempt to allocate a TCP endpoint connected to the IPv6 address (<em>dest-addr-0</em>, <em>dest-addr-1</em>, <em>dest-addr-2</em>, <em>dest-addr-3</em>) at <em>dest-port</em> from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.</p>
+</section>
+</section>
+<section id="ipv6-endpoint">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv6-endpoint&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-endpoint&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> and has the following method:</p>
+<section id="endpoint-ipv6-remote">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-ipv6-remote&#64;</span></code></h4>
+<p>( endpoint – ipv6-addr-0 ipv6-addr-1 ipv6-addr-2 ipv6-addr-3 port )</p>
+<p>This word returns the IPv6 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.</p>
+</section>
+</section>
+<section id="ipv6-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class handles receiving IPv6 frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class has the following constructor:</p>
+<section id="id21">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface handler – )</p>
+<p>Construct an IPv6 frame handler for <em>interface</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
+<p>( addr bytes handler – )</p>
+<p>Handle a received frame.</p>
+</section>
+<section id="id23">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
 <p>( handler – )</p>
 <p>Handle periodic housekeeping activities.</p>
@@ -346,11 +536,11 @@
 <p>Get the current timeout for an endpoint handler in ticks from the present; note that <code class="docutils literal notranslate"><span class="pre">task::no-timeout</span></code> signifies there being no timeout.</p>
 </section>
 </section>
-<section id="id10">
+<section id="id24">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class encapsulates a task carrying out the core loop of handling input and state changes on endpoints associated with a interface.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following constructor:</p>
-<section id="id11">
+<section id="id25">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( interface process – )</p>
 <p>This constructor sets the interface for the endpoint processor to <em>interface</em>.</p>
@@ -371,7 +561,7 @@
 <p>( priority self – )</p>
 <p>Set the endpoint processor priority. The default endpoint processor priority is  0. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the priority of the endpoint processor when it is started.</p>
 </section>
-<section id="id12">
+<section id="id26">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-priority&#64;</span></code></h4>
 <p>( self – priority )</p>
 <p>Get the endpoint processor priority. The default endpoint processor priority is 0.</p>
@@ -381,7 +571,7 @@
 <p>( interval self – )</p>
 <p>Set the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the interval of the endpoint processor when it is started with.</p>
 </section>
-<section id="id13">
+<section id="id27">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-interval&#64;</span></code></h4>
 <p>( self – interval )</p>
 <p>Get the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value.</p>
@@ -391,7 +581,7 @@
 <p>( deadline self – )</p>
 <p>Set the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
 </section>
-<section id="id14">
+<section id="id28">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-deadline&#64;</span></code></h4>
 <p>( self – deadline )</p>
 <p>Get the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
@@ -405,22 +595,22 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-frame</span></code> and <code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code> methods.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class contains the following method:</p>
-<section id="id15">
+<section id="id29">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
 <p>( addr bytes process – )</p>
 <p>Handle a frame of <em>bytes</em> at <em>addr</em>.</p>
 </section>
-<section id="id16">
+<section id="id30">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
 <p>( process – )</p>
 <p>Carry out periodic housekeeeping activities.</p>
 </section>
 </section>
-<section id="id17">
+<section id="id31">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class encapsulates receiving frames from a frame interface and handling periodic housekeeping activties.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following constructor:</p>
-<section id="id18">
+<section id="id32">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( frame-interface process – )</p>
 <p>This constructor sets the frame interface for the frame processor to <em>frame-interface</em>.</p>
@@ -442,7 +632,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">frame-interface</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module encapsulates the interface between a network and zeptoIP, by providing a means of receiving and sending frames.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module contains the following class:</p>
-<section id="id19">
+<section id="id33">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class is meant to be subclassed by implementors of interfaces to external networks.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class contains the following abstract methods:</p>
@@ -456,10 +646,20 @@
 <p>( frame-interface – D: mac-addr )</p>
 <p>Get the MAC address.</p>
 </section>
-<section id="id20">
+<section id="id34">
 <h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code></h4>
 <p>( D: mac-addr frame-interface – )</p>
 <p>Set the MAC address.</p>
+</section>
+<section id="add-multicast-filter">
+<h4><code class="docutils literal notranslate"><span class="pre">add-multicast-filter</span></code></h4>
+<p>( D: mac-addr frame-interface – )</p>
+<p>Add a MAC address to a multicast filter if there is a multicast filter; if there is no multicast filter this is a no-op. Note that if a MAC address is already in a multicast filter this is a no-op. There may be an implementation-dependent limit on the number of entries in a multicast filter.</p>
+</section>
+<section id="remove-multicast-filter">
+<h4><code class="docutils literal notranslate"><span class="pre">remove-multicast-filter</span></code></h4>
+<p>( D: mac-addr frame-interface – )</p>
+<p>Remove a MAC address from a multicast filter if there is a multicast filter; if there is no multicast filter this is a no-op. Note that if a MAC address is not in a multicast filter this is a no-op.</p>
 </section>
 <section id="put-rx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">put-rx-frame</span></code></h4>
@@ -502,11 +702,11 @@
 <p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> instance for which the endpoint process has not been started.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4</span></code> module contains the following class:</p>
 </section>
-<section id="id21">
+<section id="id35">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIP network stack while simplifying their configuration.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id22">
+<section id="id36">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( driver – )</p>
 <p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> base class.</p>
@@ -520,7 +720,7 @@
 <section id="init-net-no-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code></h4>
 <p>( driver – )</p>
-<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simpl-net&gt;</span></code> instance without starting an endpoint processing task.</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
 <section id="device-frame-interface">
 <h4><code class="docutils literal notranslate"><span class="pre">device-frame-interface&#64;</span></code></h4>
@@ -530,7 +730,7 @@
 <section id="net-interface">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
 <p>( driver – interface )</p>
-<p>This gets the zeptoIP interface instance.</p>
+<p>This gets the zeptoIPv4 interface instance.</p>
 </section>
 <section id="net-frame-process">
 <h4><code class="docutils literal notranslate"><span class="pre">net-frame-process&#64;</span></code></h4>
@@ -540,9 +740,56 @@
 <section id="net-endpoint-process">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
 <p>( driver – endpoint-processor )</p>
-<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code> has been called instead).</p>
+<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code> has been called instead).</p>
 </section>
 <section id="run-net-process">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
+<p>( driver – )</p>
+<p>This starts the zeptoIP frame and endpoint processors.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6</span></code> module contains the following class:</p>
+</section>
+</section>
+<section id="simple-net-ipv6">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIPv6 network stack while simplifying their configuration.</p>
+<p>It has the following constructor:</p>
+<section id="id37">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( driver – )</p>
+<p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> base class.</p>
+<p>It has the following methods:</p>
+</section>
+<section id="id38">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net</span></code></h4>
+<p>( driver – )</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> instance.</p>
+</section>
+<section id="id39">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code></h4>
+<p>( driver – )</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> instance without starting an endpoint processing task.</p>
+</section>
+<section id="id40">
+<h4><code class="docutils literal notranslate"><span class="pre">device-frame-interface&#64;</span></code></h4>
+<p>( driver – frame-interface )</p>
+<p>This gets the network interface driver’s frame interface instance.</p>
+</section>
+<section id="id41">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
+<p>( driver – interface )</p>
+<p>This gets the zeptoIPv6 interface instance.</p>
+</section>
+<section id="id42">
+<h4><code class="docutils literal notranslate"><span class="pre">net-frame-process&#64;</span></code></h4>
+<p>( driver – frame-processor )</p>
+<p>This gets the zeptoIP frame processor instance.</p>
+</section>
+<section id="id43">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
+<p>( driver – endpoint-processor )</p>
+<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code> has been called instead).</p>
+</section>
+<section id="id44">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
 <p>( driver – )</p>
 <p>This starts the zeptoIP frame and endpoint processors.</p>
@@ -552,11 +799,11 @@
 <section id="simple-cyw43-net-ipv4">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code> module contains the following class:</p>
-<section id="id23">
+<section id="id45">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id24">
+<section id="id46">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
@@ -587,42 +834,97 @@
 <p>( driver – control )</p>
 <p>This gets the CYW43xxx controller instance.</p>
 </section>
-<section id="id25">
+<section id="id47">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
 <p>( driver – interface )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-interface&#64;</span></code>.</p>
 </section>
-<section id="id26">
+<section id="id48">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
 <p>( driver – endpoint-processor )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-endpoint-process&#64;</span></code>.</p>
 </section>
-<section id="id27">
+<section id="id49">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
 <p>( driver – )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::run-net-process</span></code>.</p>
 </section>
 </section>
 </section>
+<section id="simple-cyw43-net-ipv6">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv6</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv6</span></code> module contains the following class:</p>
+<section id="id50">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIPv6 network stack while simplifying their configuration.</p>
+<p>It has the following constructor:</p>
+<section id="id51">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver – )</p>
+<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
+<p>It has the following methods:</p>
+</section>
+<section id="id52">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
+<p>( driver – )</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::init-net</span></code>.</p>
+</section>
+<section id="id53">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code></h4>
+<p>( driver – )</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::init-net-no-handler</span></code>.</p>
+</section>
+<section id="id54">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code></h4>
+<p>( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self – )</p>
+<p>Initialize the country abbrevation, code, and revision; these default to <code class="docutils literal notranslate"><span class="pre">XX</span></code>, <code class="docutils literal notranslate"><span class="pre">XX</span></code>, and -1. Note that this must be called before <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code>, if it called at all.</p>
+</section>
+<section id="id55">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code></h4>
+<p>( state gpio driver – )</p>
+<p>This sets a GPIO pin on the CYW43xxx.</p>
+</section>
+<section id="id56">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code></h4>
+<p>( driver – control )</p>
+<p>This gets the CYW43xxx controller instance.</p>
+</section>
+<section id="id57">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
+<p>( driver – interface )</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::net-interface&#64;</span></code>.</p>
+</section>
+<section id="id58">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
+<p>( driver – endpoint-processor )</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::net-endpoint-process&#64;</span></code>.</p>
+</section>
+<section id="id59">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
+<p>( driver – )</p>
+<p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::run-net-process</span></code>.</p>
+</section>
+</section>
+</section>
 <section id="pico-w-cyw43-net-ipv4">
 <h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code> class has the following class:</p>
-<section id="id28">
+<section id="id60">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
-<section id="id29">
+<section id="id61">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id30">
+<section id="id62">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance.</p>
 </section>
-<section id="id31">
+<section id="id63">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance without starting an endpoint processing task.</p>
@@ -630,17 +932,57 @@
 <section id="pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code></h4>
 <p>( state driver – )</p>
-<p>This sets the LED on the Raspberry Pi Pico W to <em>state</em>.</p>
+<p>This sets the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W to <em>state</em>.</p>
 </section>
-<section id="id32">
+<section id="id64">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code></h4>
 <p>( driver – state )</p>
-<p>This gets the state of the LED on the Raspberry Pi Pico W.</p>
+<p>This gets the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
 </section>
 <section id="toggle-pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">toggle-pico-w-led</span></code></h4>
 <p>( driver – )</p>
-<p>This toggles the state of the LED on the Raspberry Pi Pico W.</p>
+<p>This toggles the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
+</section>
+</section>
+</section>
+<section id="pico-w-cyw43-net-ipv6">
+<h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv6</span></code></h2>
+<p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv6</span></code> class has the following class:</p>
+<section id="id65">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
+<p>It has the following constructor:</p>
+<section id="id66">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( sm-index pio-instance driver – )</p>
+<p>This instantiates an instance with a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
+<p>It has the following methods:</p>
+</section>
+<section id="id67">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
+<p>( driver – )</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> instance.</p>
+</section>
+<section id="id68">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code></h4>
+<p>( driver – )</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> instance without starting an endpoint processing task.</p>
+</section>
+<section id="id69">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code></h4>
+<p>( state driver – )</p>
+<p>This sets the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W to <em>state</em>.</p>
+</section>
+<section id="id70">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code></h4>
+<p>( driver – state )</p>
+<p>This gets the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
+</section>
+<section id="id71">
+<h4><code class="docutils literal notranslate"><span class="pre">toggle-pico-w-led</span></code></h4>
+<p>( driver – )</p>
+<p>This toggles the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
 </section>
 </section>
 </section>
@@ -655,10 +997,23 @@
 </pre></div>
 </div>
 </section>
+<section id="make-ipv6-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">make-ipv6-addr</span></code></h3>
+<p>( addr0 addr1 addr2 addr3 addr4 addr5 addr6 addr7 – ipv6-0 ipv6-1 ipv6-2 ipv6-3 )</p>
+<p>Construct an IPv6 address from groups of 16 bits in the typical order, i.e. the highest significance groups of bits are lowest on the data stack, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$FF02 0 0 0 0 0 2 1 net-misc::make-ipv6-addr
+</pre></div>
+</div>
+</section>
 <section id="ipv4">
 <h3><code class="docutils literal notranslate"><span class="pre">ipv4.</span></code></h3>
 <p>( addr – )</p>
 <p>Print an IPv4 address formatted in the typical x.y.z.w format to the console.</p>
+</section>
+<section id="ipv6">
+<h3><code class="docutils literal notranslate"><span class="pre">ipv6.</span></code></h3>
+<p>( addr-0 addr-1 addr-2 addr-3 – )</p>
+<p>Print an IPv6 address formatted in an uncompressed, uppercase hexadecimal format to the console.</p>
 </section>
 </section>
 </section>

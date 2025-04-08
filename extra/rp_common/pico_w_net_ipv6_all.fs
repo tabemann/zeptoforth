@@ -18,16 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp_common/cyw43/cyw43_consts.fs
-#include extra/rp_common/cyw43/cyw43_structs.fs
-#include extra/rp_common/cyw43/cyw43_events.fs
-#include extra/rp_common/cyw43/cyw43_nvram.fs
-#include extra/rp_common/cyw43/cyw43_spi.fs
-#include extra/rp_common/cyw43/cyw43_bus.fs
-#include extra/rp_common/cyw43/cyw43_ioctl.fs
-#include extra/rp_common/net/buffer_queue.fs
-#include extra/rp_common/net/frame_interface.fs
-#include extra/rp_common/cyw43/cyw43_multicast.fs
-#include extra/rp_common/cyw43/cyw43_runner.fs
-#include extra/rp_common/cyw43/cyw43_control.fs
+compile-to-flash
 
+marker erase-net
+
+#include extra/rp_common/cyw43_net_ipv6_all.fs
+#include extra/rp_common/pico_w_cyw43_net_ipv6.fs
+
+compile-to-ram

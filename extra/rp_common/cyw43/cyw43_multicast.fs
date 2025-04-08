@@ -1,5 +1,5 @@
-\ Copyright (c) 2023-2024 Travis Bemann
-\ 
+\ Copyright (c) 2025 Travis Bemann
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,16 +18,24 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp_common/cyw43/cyw43_consts.fs
-#include extra/rp_common/cyw43/cyw43_structs.fs
-#include extra/rp_common/cyw43/cyw43_events.fs
-#include extra/rp_common/cyw43/cyw43_nvram.fs
-#include extra/rp_common/cyw43/cyw43_spi.fs
-#include extra/rp_common/cyw43/cyw43_bus.fs
-#include extra/rp_common/cyw43/cyw43_ioctl.fs
-#include extra/rp_common/net/buffer_queue.fs
-#include extra/rp_common/net/frame_interface.fs
-#include extra/rp_common/cyw43/cyw43_multicast.fs
-#include extra/rp_common/cyw43/cyw43_runner.fs
-#include extra/rp_common/cyw43/cyw43_control.fs
+begin-module cyw43-multicast
 
+  oo import
+
+  \ Multicast filter is full
+  : x-multicast-filter-full ( -- ) ." multicast filter is full" cr ;
+  
+  <object> begin-class <cyw43-multicast>
+
+    \ Add an address to the multicast filter
+    method add-cyw43-multicast-filter ( D: mac-addr self -- )
+
+    \ Remove an address from the multicast filter
+    method remove-cyw43-multicast-filter ( D: mac-addr self -- )    
+
+  end-class
+
+  <cyw43-multicast> begin-implement
+  end-implement
+  
+end-module

@@ -1,12 +1,12 @@
 # Building and Using zeptoIP
 
-zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W. It is designed to enable communication by zeptoforth via WiFi. Note that it is currently IPv4-only, but with sufficient demand an IPv6 port may appear in the future. Also, while it is originally implemented specifically for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W, it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
+zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W. It is designed to enable communication by zeptoforth via WiFi. It has versions for both IPv4 and IPv6, which are largely separate but share some common code. These will be referred to as zeptoIPv4 and zeptoIPv6 respectively when it is needed to disambiguate the two. Also, while it is originally implemented specifically for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W, it unofficially supports some other boards such as the Pimoroni Pico Plus 2 W, and it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
 
 zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space. This is not an issue on the Raspberry Pi Pico 2 W, where a standard `rp2350` platform build will do.
 
 Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040 and RP2350, so it is a good idea to leave these cores be and run one's user code on core 0.
 
-For examples of demos involving zeptoIP, there are:
+For examples of demos involving zeptoIPv4, there are:
 
 * `test/rp_common/pico_w_net_ipv4_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
 * `test/rp_common/pico_w_net_ipv4_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_ipv4_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
@@ -14,6 +14,12 @@ For examples of demos involving zeptoIP, there are:
 * `test/rp_common/pico_w_net_ipv4_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
 * `test/rp_common/pico_w_net_ipv4_udp.fs`, a tiny UDP echo server
 * `test/rp_common/pico_w_net_ipv4_uart.fs`, a TCP-UART interface server
+
+For examples of demos involving zeptoIPv6, there are:
+
+* `test/rp_common/pico_w_net_ipv6_http_led.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_led.fs`
+* `test/rp_common/pico_w_net_ipv6_http_download.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download.fs`
+* `test/rp_common/pico_w_net_ipv6_udp.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_udp.fs`
 
 Directions for use of the individual demos are included therein.
 
@@ -41,7 +47,7 @@ Note that once this is complete one must reboot the board prior to using zeptoIP
 
 ## Bringing up zeptoIP and the CYW43439 driver
 
-Once one has built the CYW43439 driver and zeptoIP and rebooted, the simplest and easiest way to use zeptoIP and the CYW43439 driver is by making use of the `<pico-w-cyw43-net-ipv4>` class in the `pico-w-cyw43-net-ipv4` module. In the following example we show the initialization of an `<pico-w-cyw43-net-ipv4>` instance:
+Once one has built the CYW43439 driver and zeptoIP and rebooted, the simplest and easiest way to use zeptoIP and the CYW43439 driver is by making use of the `<pico-w-cyw43-net-ipv4>` class in the `pico-w-cyw43-net-ipv4` module, for zeptoIPv4, or the `<pico-w-cyw43-net-ipv6>` class in the `pico-w-cyw43-net-ipv6` module, for zeptoIPv6. In the following example we show the initialization of an `<pico-w-cyw43-net-ipv4>` instance:
 
 ```
 oo import
@@ -110,6 +116,8 @@ If one instead wishes to connect to an open AP, execute the following instead:
 s" my-ssid-here" connect-open-ap
 ```
 
+For the above if one wants to use zeptoIPv6 rather than zeptoIPv4, just substitute all references to `ipv4` with `ipv6`.
+
 Next, in most cases, you will want to acquire an IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP. This can simply be carried out through the following:
 
 ```
@@ -139,13 +147,62 @@ To manually set a static IPv4 address, IPv4 netmask, gateway IPv4 address, and D
 
 Replace the values with those for your configuration.
 
+Setting up zeptoIPv6 is slightly more complex. First one will need to configure one's link-local address. That can be accomplished with:
+
+```
+cr ." Autoconfiguring link-local IPv6 address... "
+my-interface autoconfigure-link-local-ipv6-addr if
+  ." Success"
+else
+  ." Failure"
+then
+```
+
+Then, in most configurations, one will need to discover one's router. That can be accomplished with:
+
+```
+cr ." Discovering IPv6 router..."
+my-interface discover-ipv6-router
+```
+
+After that, provided one has discovered one's router, one will typically want to discover one's global IPv6 address with SLAAC or DHCPv6. Note that this blocks indefinitely waiting for positive confirmation from a DHCPv6 server if the router has specified that the client is to obtain its address from DHCPv6 even if SLAAC is also enabled. This will always be successful except in the use case where a collision with an existing node is detected, where then a failure will be reported. This is accomplished with:
+
+```
+cr ." Discovering IPv6 address..."
+my-interface discover-ipv6-addr if
+  ." Success"
+else
+  ." Failure"
+then
+```
+
+Last but not least, if one plans on using DNS one will want to ensure that a DNS server has been found. Note that this step does not in itself find a DNS server, as it may have been found during router discovery or already been found via DHCPv6, but if stateless DHCPv6 is used `discover-ipv6-addr` may return prior to the DNS server address being found. This is accomplished with:
+
+```
+cr ." Discovering IPv6 DNS server..."
+my-interface discover-dns-ipv6-addr
+```
+
+To print out the configuration of your IPv6 interface, you can execute the following:
+
+```
+my-interface intf-ipv6-addr@ cr ." IPv6 address: " net-misc::ipv6.
+my-interface intf-ipv6-prefix@ cr ." IPv6 prefix: " net-misc::ipv6.
+my-interface intf-autonomous@ cr ." Autonomous: " if ." yes" else ." no" then
+my-interface intf-ipv6-prefix-len@ cr ." IPv6 prefix length: " .
+my-interface gateway-ipv6-addr@ cr ." Gateway IPv6 address: " net-misc::ipv6.
+my-interface dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " net-misc::ipv6.
+```
+
+Manually configuring an IPv6 interface is similar to manually configuring an IPv4 interface, except that IPv6 addresses are used instead of IPv4 addresses, and an IPv6 prefix and prefix length are used instead of an IPv4 netmask.
+
 ## Using zeptoIP
 
 Once you have initialized zeptoIP you will probably want to actually use it. This encompasses resolving IP addresses with DNS, sending UDP packets, listening for and receiving IP packets, connecting to TCP endpoints, listening for incoming TCP connections, sending data over TCP, and receiving data from TCP.
 
 ### Resolving IP addresses with DNS
 
-Continuing from the aforementioned code, to acquire a DNS address one may execute something like the following:
+Continuing from the aforementioned code, to resolve a DNS A record (i.e. an IPv4 address from a DNS name) one may execute something like the following:
 
 ```
 0 value my-resolved-ip
@@ -157,6 +214,22 @@ Continuing from the aforementioned code, to acquire a DNS address one may execut
 ;
 
 s" my.host.name.org" resolve-my-ip dup net-misc::ipv4. to my-resolved-ip
+```
+
+To resolve a DNS AAAA record (i.e an IPv6 address from a DNS name) one may execute something like the following:
+
+```
+4 cells buffer: my-resolved-ip
+
+: resolve-my-ip
+{ D: hostname -- ipv6-addr-0 ipv6-addr-1 ipv6-addr-2 ipv6-addr-3 }
+  my-interface resolve-dns-ipv6-addr not if
+    [: ." hostname not found" cr ;] ?raise
+  then
+;
+
+s" my.host.name.org" resolve-my-ip my-resolved-ip net-misc::ipv6-unaligned!
+my-resolved-ip net-misc::ipv6-unaligned@ net-misc::ipv6.
 ```
 
 ### Sending UDP packets
@@ -181,9 +254,28 @@ s" send me!" my-port my-resolved-ip their-port send-a-udp-packet
 
 This sends a single UDP packet from our port, 4444, to the destination port, 4445, on the IPv4 address that we just resolved. Note that there is no guarantee that the packet will reach its destination, but in this test an exception is raised if the MAC address for our destination IPv4 address cannot be resolved.
 
+The process is similar for IPv6 addresses, as you can see below:
+
+```
+4444 constant my-port
+4445 constant their-port
+
+: send-a-udp-packet
+  { addr bytes src-port dest-ipv6-0 dest-ipv6-1 dest-ipv6-2 dest-ipv6-3 dest-port -- }
+  addr bytes src-port dest-ipv4-0 dest-ipv6-1 dest-ipv6-2 dest-ipv6-3 dest-port bytes [: { addr bytes buf }
+    addr buf bytes move true
+  ;] my-interface send-ipv6-udp-packet not if
+    [: ." unable to send packet (unable to find MAC address?)" cr ;] ?raise
+  then
+;
+
+s" send me!" my-port my-resolved-ip net-misc::ipv6-unaligned@ their-port send-a-udp-packet
+  
+```
+
 ### Receiving UDP packets
 
-To receive UDP packets we use a mechanism that is rather different from now `recvfrom()` works with POSIX-compliant sytsems. We register a handler which handles endpoints that become ready, processes the data, and retires them once they are no longer needed. Take the following:
+To receive UDP packets we use a mechanism that is rather different from now `recvfrom()` works with POSIX-compliant sytsems. We register a handler which handles endpoints that become ready, processes the data, and retires them once they are no longer needed. Take the following example in the case of IPv4:
 
 ```
 <endpoint-handler> begin-class <udp-handler> end-class
@@ -217,11 +309,44 @@ register-udp-endpoint
 
 Here we register an endpoint handler which, when a UDP packet is received on `my-port`, port 4444, the source IPv4 address and port of the packet along with the content of the packet are dumped to the console and the LED on the Raspberry Pi Pico W is toggled. Afterwards the endpoint is marked as done, permitting more data to be made available on it.
 
+The code is almost identical for IPv6 except that one uses `endpoint-ipv6-remote@` and the remote addresses are 4 cells rather than a single cell:
+
+```
+<endpoint-handler> begin-class <udp-handler> end-class
+
+<udp-handler> begin-implement
+  :noname { endpoint self -- }
+    endpoint endpoint-local-port@ my-port = endpoint udp-endpoint? and if
+      endpoint endpoint-ipv6-remote@
+      { src-addr-0 src-addr-1 src-addr-2 src-addr-3 src-port }
+      endpoint endpoint-rx-data@ { data-addr data-bytes }
+      cr ." UDP: " src-addr-0 src-addr-1 src-addr-2 src-addr-3 net-misc::ipv6. ." :" src-port .
+      data-addr data-bytes over + dump
+      my-cyw43-net toggle-pico-w-led
+      endpoint my-interface endpoint-done
+    then
+  ; define handle-endpoint
+end-implement
+
+<udp-handler> class-size buffer: my-udp-handler
+<udp-handler> my-udp-handler init-object
+
+: register-udp-endpoint ( -- )
+  my-udp-handler my-cyw43-net net-endpoint-process@ add-endpoint-handler
+  my-port my-interface allocate-udp-listen-endpoint not if
+    [: ." unable to allocate UDP listen endpoint (too many endpoints)" cr ;]
+    ?raise
+  then
+;
+
+register-udp-endpoint
+```
+
 ### Connecting to Hosts via TCP
 
 To connect to a most via TCP we must allocate an outgoing endpoint for it. Also note that the local port for this endpoint must be unique; there is a mechanism for automatically allocating unique endpoints, which is to specify `net-consts::EPHEMERAL_PORT` for the local port. It should be noted that the number of local endpoints are limited; this is hardcoded as `net-consts::max-endpoints`, which can be changed as need be (but note that each endpoint takes up a non-negligible amount of memory).
 
-To initiate an outgoing TCP connection, take the following:
+To initiate an outgoing TCP connection over IPv4, take the following:
 
 ```
 0 value my-outgoing-endpoint
@@ -240,6 +365,25 @@ my-resolved-ip their-port register-tcp-endpoint
 ```
 
 Here we allocate an endpoint for the connection to the port `their-port` (4445) on the host at `my-resolved-ip` which we just had resolved. Note that the endpoint will not be immediately ready for sending data, as the connection will not hae been established yet.
+
+The code is very similar with IPv6 except that one uses `allocate-tcp-connect-ipv6-endpoint` and the addresses are 4 cells rather than one cell in size:
+
+```
+0 value my-outgoing-endpoint
+
+: register-tcp-endpoint
+  ( dest-addr-0 dest-addr-1 dest-addr-2 dest-addr-3 dest-port -- )
+  EPHEMERAL_PORT dest-addr-0 dest-addr-1 dest-addr-2 dest-addr-3 dest-port
+  my-interface allocate-tcp-connect-ipv6-endpoint not if
+    [: ." unable to allocate TCP outgoing endpoint (too many endpoints)" cr ;]
+    ?raise
+  then
+  to my-outgoing-endpoint
+;
+
+my-resolved-ip net-misc::ipv6-unaligned@ their-port register-tcp-endpoint
+
+```
 
 ### Sending Data to a Host via TCP
 
@@ -294,7 +438,7 @@ To listen for data via TCP we use a mechanism that is very similar to listening 
       endpoint endpoint-tcp-state@ net-consts::TCP_ESTABLISHED = if
         endpoint endpoint-ipv4-remote@ { src-addr src-port }
         endpoint endpoint-rx-data@ { data-addr data-bytes }
-        cr ." TCP: "src-addr net-misc::ipv4. ." :" src-port .
+        cr ." TCP: " src-addr net-misc::ipv4. ." :" src-port .
         data-addr data-bytes over + dump
         my-cyw43-net toggle-pico-w-led
       then
@@ -323,3 +467,41 @@ my-port register-tcp-listen-endpoint
 Here we register an endpoint handler which, when TCP data (when the connection is in a `TCP_ESTABLISHED` state) is registered from a connection on `my-port`, port 4444, the source IPv4 address and port of the packet along with the content of the packet are dumped to the console and the LED on the Raspberry Pi Pico W is toggled. If the connection is in `TCP_CLOSE_WAIT` state, indicating that the peer has initiated connection closure, the connection is closed. Afterwards the endpoint is marked as done, permitting more data to be made available on it.
 
 Note that if one wishes to have multiple TCP connections on the same local port, multiple endpoints need to be registered; to listen to multiple connections on the same port one must register multiple listening endpoints on that port.
+
+If one wants to use IPv6, the code is very similar except that one uses `endpoint-ipv6-remote@` and the addresses are 4 cells rather than one cell in size:
+
+```
+<endpoint-handler> begin-class <tcp-handler> end-class
+
+<tcp-handler> begin-implement
+  :noname { endpoint self -- }
+    endpoint endpoint-local-port@ my-port = endpoint udp-endpoint? not and if
+      endpoint endpoint-tcp-state@ net-consts::TCP_ESTABLISHED = if
+        endpoint endpoint-ipv6-remote@
+        { src-addr-0 src-addr-1 src-addr-2 src-addr-3 src-port }
+        endpoint endpoint-rx-data@ { data-addr data-bytes }
+        cr ." TCP: " src-addr-0 src-addr-1 src-addr-2 src-addr-3 net-misc::ipv6. ." :" src-port .
+        data-addr data-bytes over + dump
+        my-cyw43-net toggle-pico-w-led
+      then
+      endpoint endpoint-tcp-state@ net-consts::TCP_CLOSE_WAIT = if
+        endpoint close-tcp-endpoint
+      then
+      endpoint my-interface endpoint-done
+    then
+  ; define handle-endpoint
+end-implement
+
+<tcp-handler> class-size buffer: my-tcp-handler
+<tcp-handler> my-tcp-handler init-object
+
+: register-tcp-listen-endpoint { port -- }
+  my-tcp-handler my-cyw43-net net-endpoint-process@ add-endpoint-handler
+  port my-interface allocate-tcp-listen-endpoint not if
+    [: ." unable to allocate TCP listen endpoint (too many endpoints)" cr ;]
+    ?raise
+  then
+;
+
+my-port register-tcp-listen-endpoint
+```
