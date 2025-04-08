@@ -151,7 +151,11 @@ begin-module pico-w-net-http
     else
       ." Failure"
     then
-    my-interface @ intf-ipv6-addr@ cr ." IPv6 address: " ipv6.
+    my-interface @ intf-ipv6-addr@ cr ." Primary IPv6 address: " ipv6.
+    my-interface @ intf-link-local-ipv6-addr@
+    cr ." Link-local IPv6 address: " ipv6.
+    my-interface @ intf-slaac-ipv6-addr@ cr ." SLAAC IPv6 address: " ipv6.
+    my-interface @ intf-dhcpv6-ipv6-addr@ cr ." DHCPv6 IPv6 address: " ipv6.
     my-interface @ intf-ipv6-prefix@ cr ." IPv6 prefix: " ipv6.
     my-interface @ intf-autonomous@ cr ." Autonomous: "
     if ." yes" else ." no" then

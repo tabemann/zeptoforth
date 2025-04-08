@@ -1354,6 +1354,9 @@ begin-module net-ipv6
       \ The delayed data size
       cell member endpoint-delayed-size
 
+      \ The local IPv6 address; this is used for TCP only
+      ipv6-addr-size member endpoint-local-ipv6-addr
+      
       \ The remote MAC address
       2 cells member endpoint-remote-mac-addr
 
@@ -1456,6 +1459,12 @@ begin-module net-ipv6
       \ Set endpoint source
       method endpoint-ipv6-remote! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 port self -- )
 
+      \ Set endpoint local IPv6 address
+      method endpoint-local-ipv6-addr! ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+
+      \ Get endpoint local IPv6 address
+      method endpoint-local-ipv6-addr@ ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      
       \ Get endpoint remote MAC address
       method endpoint-remote-mac-addr@ ( self -- D: mac-addr )
 
@@ -1491,17 +1500,20 @@ begin-module net-ipv6
 
       \ Try to accepting on an endpoint
       method try-ipv6-accept-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self )
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self )
       ( -- accepted? )
 
       \ Try to open a connection on an endpoint
       method try-ipv6-connect-endpoint
-      ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self )
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self )
       ( -- allocated? )
 
       \ Match an endpoint with an IPv6 TCP connection
       method match-ipv6-connect?
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self -- match? )
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port self -- match? )
       
       \ Set an endpoint to listen on UDP
       method listen-udp ( port self -- )
@@ -1619,6 +1631,7 @@ begin-module net-ipv6
       0 self endpoint-state !
       0 self endpoint-queue-state !
       0 0 0 0 self endpoint-remote-ipv6-addr ipv6-unaligned!
+      0 0 0 0 self endpoint-local-ipv6-addr ipv6-unaligned!
       0 self endpoint-remote-port !
       0 self endpoint-local-port !
       0 self endpoint-rx-size !
@@ -1633,7 +1646,17 @@ begin-module net-ipv6
       0 self endpoint-id !
       systick::systick-counter self endpoint-last-refresh !
     ; define new
-
+    
+    \ Set endpoint local IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      endpoint-local-ipv6-addr ipv6-unaligned!
+    ; define endpoint-local-ipv6-addr!
+    
+    \ Get endpoint local IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      endpoint-local-ipv6-addr ipv6-unaligned@
+    ; define endpoint-local-ipv6-addr@
+      
     \ Get the current endpoint ID
     :noname ( self -- id )
       endpoint-id @
@@ -1829,13 +1852,17 @@ begin-module net-ipv6
 
     \ Try to accept a connection on an endpoint
     :noname
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self )
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self )
       ( -- accepted? )
-      [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port D: mac-addr self }
+      [:
+        { dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self }
+        { src-0 src-1 src-2 src-3 src-port }
         self endpoint-tcp-state@ dup TCP_LISTEN = swap TCP_SYN_RECEIVED = or
         dest-port self endpoint-local-port@ = and if
           self endpoint-tcp-state@ TCP_LISTEN = if
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port self endpoint-ipv6-remote!
+            dest-0 dest-1 dest-2 dest-3 self endpoint-local-ipv6-addr!
+            src-0 src-1 src-2 src-3 src-port self endpoint-ipv6-remote!
             TCP_SYN_RECEIVED self endpoint-tcp-state!
             mac-addr self endpoint-remote-mac-addr 2!
             false self endpoint-event !
@@ -1843,7 +1870,9 @@ begin-module net-ipv6
             true
           else
             self endpoint-ipv6-remote@ src-port = { port-match? }
-            ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= port-match? and
+            src-0 src-1 src-2 src-3 ipv6= port-match? and
+            self endpoint-local-ipv6-addr@
+            dest-0 dest-1 dest-2 dest-3 ipv6= and
           then
         else
           false
@@ -1853,12 +1882,16 @@ begin-module net-ipv6
 
     \ Try to open a connection on an endpoint
     :noname
-      ( src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self )
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self )
       ( -- allocated? )
-      [: { src-port ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port D: mac-addr self }
+      [:
+        { dest-0 dest-1 dest-2 dest-3 dest-port D: mac-addr self }
+        { src-0 src-1 src-2 src-3 src-port }
         self try-allocate-endpoint if
+          src-0 src-1 src-2 src-3 self endpoint-local-ipv6-addr!
           src-port self endpoint-local-port!
-          ipv6-0 ipv6-1 ipv6-2 ipv6-3 dest-port self endpoint-ipv6-remote!
+          dest-0 dest-1 dest-2 dest-3 dest-port self endpoint-ipv6-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
           false self endpoint-event !
@@ -1871,11 +1904,16 @@ begin-module net-ipv6
     ; define try-ipv6-connect-endpoint
 
     \ Match an endpoint with an IPv6 TCP connection
-    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self -- match? )
-      [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 src-port dest-port self }
+    :noname
+      ( src-0 src-1 src-2 src-3 src-port )
+      ( dest-0 dest-1 dest-2 dest-3 dest-port self -- match? )
+      [:
+        { dest-0 dest-1 dest-2 dest-3 dest-port self }
+        { src-0 src-1 src-2 src-3 src-port }
         self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if
           self endpoint-ipv6-remote@ src-port = { port-match? }
-          ipv6-0 ipv6-1 ipv6-2 ipv6-3 ipv6= port-match? and
+          src-0 src-1 src-2 src-3 ipv6= port-match? and
+          self endpoint-local-ipv6-addr@ dest-0 dest-1 dest-2 dest-3 ipv6= and
           self endpoint-local-port@ dest-port = and
         else
           false
@@ -2199,6 +2237,9 @@ begin-module net-ipv6
       
       \ TCP wait remote IPv6 address
       ipv6-addr-size member time-wait-remote-ipv6-addr
+
+      \ TCP wait local IPv6 address
+      ipv6-addr-size member time-wait-local-ipv6-addr
       
       \ Local port
       2 member time-wait-local-port
@@ -2239,6 +2280,8 @@ begin-module net-ipv6
         self time-wait-remote-port h!
         self time-wait-remote-ipv6-addr ipv6-unaligned!
         endpoint endpoint-local-port@ self time-wait-local-port h!
+        endpoint endpoint-local-ipv6-addr@ self time-wait-local-ipv6-addr
+        ipv6-unaligned!
         endpoint endpoint-remote-mac-addr@ self time-wait-remote-mac-addr 2!
         endpoint endpoint-local-seq@ 1+ self time-wait-local-seq !
         seq 1+ self time-wait-ack !
@@ -2482,11 +2525,13 @@ begin-module net-ipv6
 
       \ Find a listening IPv6 TCP endpoint
       method find-listen-ipv6-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- endpoint found? )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( addr bytes self -- endpoint found? )
 
       \ Find a connecting/connected IPv6 TCP endpoint
       method find-connect-ipv6-endpoint
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- endpoint found? )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      ( addr bytes self -- endpoint found? )
       
       \ Process an IPv6 TCP packet
       method process-ipv6-tcp-packet
@@ -2495,7 +2540,7 @@ begin-module net-ipv6
 
       \ Process an IPv6 TCP SYN packet
       method process-ipv6-syn-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
 
       \ Send a TCP SYN packet
       method send-syn ( endpoint self -- )
@@ -2506,32 +2551,34 @@ begin-module net-ipv6
 
       \ Send an IPv6 TCP RST packet in response to a packet
       method send-ipv6-rst-for-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
 
       \ Send a generic IPv6 TCP RST packet
       method send-ipv6-rst ( endpoint self -- )
       
       \ Send a basic IPv6 TCP packet
       method send-ipv6-basic-tcp
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 remote-port local-port seq ack window )
+      ( remote-0 remote-1 remote-2 remote-3 remote-port )
+      ( local-0 local-1 local-2 local-3 local-port seq ack window )
       ( flags D: mac-addr self -- )
 
       \ Send an IPv6 TCP packet with an MSS option
       method send-ipv6-tcp-with-mss
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 remote-port local-port seq ack window )
+      ( remote-0 remote-1 remote-2 remote-3 remote-port )
+      ( local-0 local-1 local-2 local-3 local-port seq ack window )
       ( flags D: mac-addr self -- )
       
       \ Process an IPv6 TCP SYN+ACK packet
       method process-ipv6-syn-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
 
       \ Process an IPv6 ACK packet
       method process-ipv6-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
 
       \ Process an IPv6 FIN+ACK packet
       method process-ipv6-fin-ack-packet
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
 
       \ Process an IPv6 ACK packet in the general case
       method process-ipv6-basic-ack ( addr bytes endpoint self -- )
@@ -3106,7 +3153,7 @@ begin-module net-ipv6
         new-0 new-1 new-2 new-3 solicit-node-link-local-multicast
         ipv6-multicast-mac-addr
         self out-frame-interface @ add-multicast-filter
-        true self intf-link-local-set? !
+        true self intf-slaac-set? !
       ;] over addr-lock with-lock
     ; define intf-slaac-ipv6-addr!
 
@@ -3221,34 +3268,58 @@ begin-module net-ipv6
 
     \ Are we listening to a mulicast IPv6 address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- listen? }
+
+      \ DEBUG
+      \ [: cr ." all-nodes-link-local-multicast before: " depth . ;] debug-hook execute
+
       dest-0 dest-1 dest-2 dest-3
       ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
         true
       else
+
+        \ DEBUG
+        \ [: cr ." intf-ipv6-addr solicit-node before: " depth . ;] debug-hook execute
+
         self intf-addr-set? @
         dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@
         solicit-node-link-local-multicast ipv6= and if
           true
         else
+
+          \ DEBUG
+          \ [: cr ." intf-link-local-ipv6-addr solicit-node before: " depth . ;] debug-hook execute
+
           self intf-link-local-set? @
           dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@
           solicit-node-link-local-multicast ipv6= and if
             true
           else
+
+            \ DEBUG
+            \ [: cr ." intf-slaac-ipv6-addr solicit-node before: " depth . ;] debug-hook execute
+
             self intf-slaac-set? @
             dest-0 dest-1 dest-2 dest-3 self intf-slaac-ipv6-addr@
             solicit-node-link-local-multicast ipv6= and if
               true
             else
+
+              \ DEBUG
+              \ [: cr ." intf-dhvp6-ipv6-addr solicit-node before: " depth . ;] debug-hook execute
+
               self intf-dhcpv6-set? @
               dest-0 dest-1 dest-2 dest-3 self intf-dhcpv6-ipv6-addr@
               solicit-node-link-local-multicast ipv6= and if
                 true
               else
+
+                \ DEBUG
+                \ [: cr ." deprecated solicit-node before: " depth . ;] debug-hook execute
+
                 self deprecated-count @ 0 ?do
                   i ipv6-addr-size * self deprecated-ipv6-addrs +
-                  ipv6-unaligned@
-                  solicit-node-link-local-multicast ipv6= and if true exit then
+                  ipv6-unaligned@ solicit-node-link-local-multicast
+                  dest-0 dest-1 dest-2 dest-3 ipv6= and if true exit then
                 loop
                 false
               then
@@ -3265,31 +3336,57 @@ begin-module net-ipv6
           dest-0 dest-1 dest-2 dest-3
           [: cr ." ipv6-addr-listen " ipv6. ;] debug-hook execute
         [then]
+
+        \ DEBUG
+        \ [: cr ." intf-ipv6-addr before: " depth . ;] debug-hook execute
+
         self intf-addr-set? @
         dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@ ipv6= and if
           true
         else
+
+          \ DEBUG
+          \ [: cr ." intf-link-local-ipv6-addr before: " depth . ;] debug-hook execute
+
           self intf-link-local-set? @
           dest-0 dest-1 dest-2 dest-3
           self intf-link-local-ipv6-addr@ ipv6= and if
             true
           else
+
+            \ DEBUG
+            \ [: cr ." intf-slaac-ipv6-addr before: " depth . ;] debug-hook execute
+
             self intf-slaac-set? @
             dest-0 dest-1 dest-2 dest-3
             self intf-slaac-ipv6-addr@ ipv6= and if
               true
             else
+
+              \ DEBUG
+              \ [: cr ." intf-dhcpv6-ipv6-addr before: " depth . ;] debug-hook execute
+
               self intf-dhcpv6-set? @
               dest-0 dest-1 dest-2 dest-3
               self intf-dhcpv6-ipv6-addr@ ipv6= and if
                 true
               else
+
+                \ DEBUG
+                \ [: cr ." multicast before: " depth . ;] debug-hook execute
+
                 dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if
                   dest-0 dest-1 dest-2 dest-3 self ipv6-multicast-addr-listen?
                 else
+
+                  \ DEBUG
+                  \ [: cr ." deprecated before: " depth . ;] debug-hook execute
+
                   self deprecated-count @ 0 ?do
                     i ipv6-addr-size * self deprecated-ipv6-addrs +
-                    ipv6-unaligned@ ipv6= and if true exit then
+                    ipv6-unaligned@ dest-0 dest-1 dest-2 dest-3 ipv6= and if
+                      true exit
+                    then
                   loop
                   false
                 then
@@ -3301,6 +3398,10 @@ begin-module net-ipv6
           dup [: ."  match: " . ;] debug-hook execute
         [then]
       ;] over addr-lock with-lock
+
+      \ DEBUG
+      \ [: cr ." ipv6-addr-listen? after: " depth . ;] debug-hook execute
+
     ; define ipv6-addr-listen?
 
     \ Process a MAC address for an IPv6 address
@@ -3332,6 +3433,10 @@ begin-module net-ipv6
     :noname
       { hop-limit protocol addr bytes self -- }
       { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
+      
+      \ DEBUG
+      \ [: cr ." process-ipv6-tcp-packet before: " depth . ;] debug-hook execute
+
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
@@ -3345,7 +3450,7 @@ begin-module net-ipv6
           self address-map save-mac-addr-by-ipv6
         then
         
-        src-0 src-1 src-2 src-3 addr bytes self
+        src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
         case
           TCP_SYN of process-ipv6-syn-packet endof
@@ -3353,17 +3458,24 @@ begin-module net-ipv6
           TCP_ACK of process-ipv6-ack-packet endof
           [ TCP_FIN TCP_ACK or ] literal of process-ipv6-fin-ack-packet endof
           TCP_RST of process-ipv6-rst-packet endof
-          nip nip nip nip nip nip nip
+          nip nip nip nip nip nip nip nip nip nip nip
         endcase
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-tcp-packet after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-tcp-packet
 
     \ Find a listening IPv6 TCP endpoint
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- endpoint found? }
+    :noname
+      { dest-0 dest-1 dest-2 dest-3 addr bytes self -- endpoint found? }
+      { src-0 src-1 src-2 src-3 }
       max-endpoints 0 ?do
         self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
         src-0 src-1 src-2 src-3
         addr tcp-src-port h@ rev16
+        dest-0 dest-1 dest-2 dest-3
         addr tcp-dest-port h@ rev16
         src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
           endpoint try-ipv6-accept-endpoint if
@@ -3371,18 +3483,21 @@ begin-module net-ipv6
             endpoint true unloop exit
           then
         else
-          2drop 2drop 2drop 2drop \ Should never happen
+          2drop 2drop 2drop 2drop 2drop 2drop \ Should never happen
         then
       loop
       0 false
     ; define find-listen-ipv6-endpoint
 
     \ Find a connecting/connected IPv6 TCP endpoint
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- endpoint found? }
+    :noname
+      { dest-0 dest-1 dest-2 dest-3 addr bytes self -- endpoint found? }
+      { src-0 src-1 src-2 src-3 }
       max-endpoints 0 ?do
         self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
         src-0 src-1 src-2 src-3
         addr tcp-src-port h@ rev16
+        dest-0 dest-1 dest-2 dest-3
         addr tcp-dest-port h@ rev16
         endpoint match-ipv6-connect? if endpoint true unloop exit then
       loop
@@ -3390,20 +3505,38 @@ begin-module net-ipv6
     ; define find-connect-ipv6-endpoint
     
     \ Process an IPv6 TCP SYN packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-listen-ipv6-endpoint if
+    :noname
+      { dest-0 dest-1 dest-2 dest-3 addr bytes self -- }
+      { src-0 src-1 src-2 src-3 }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-syn-packet before: " depth . ;] debug-hook execute
+      
+      src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes
+      self find-listen-ipv6-endpoint if
         { endpoint }
-        src-0 src-1 src-2 src-3 addr bytes endpoint self
+        src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+        addr bytes endpoint self
         [: send-ipv6-syn-ack ;] endpoint with-endpoint
       else
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
+        drop src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes
+        self send-ipv6-rst-for-packet
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-syn-packet after: " depth . ;] debug-hook execute
+      
     ; define process-ipv6-syn-packet
 
     \ Send a TCP SYN packet
     :noname { endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." send-syn before: " depth . ;] debug-hook execute
+      
       TCP_SYN_SENT endpoint endpoint-tcp-state!
       endpoint endpoint-ipv6-remote@
+      endpoint endpoint-local-ipv6-addr@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       0
@@ -3411,11 +3544,21 @@ begin-module net-ipv6
       TCP_SYN
       endpoint endpoint-remote-mac-addr@
       self send-ipv6-tcp-with-mss
+
+      \ DEBUG
+      \ [: cr ." send-syn after: " depth . ;] debug-hook execute
+
     ; define send-syn
 
     \ Send an IPv6 TCP SYN+ACK packet
-    :noname ( src-0 src-1 src-2 src-3 ) { addr bytes endpoint self -- }
-      2drop 2drop
+    :noname
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 )
+      { addr bytes endpoint self -- }
+      2drop 2drop 2drop 2drop
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-syn-ack before: " depth . ;] debug-hook execute
+      
       rng::random endpoint endpoint-init-local-seq!
       addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
@@ -3425,6 +3568,7 @@ begin-module net-ipv6
       addr tcp-window-size h@ rev16
       endpoint init-tcp-stream
       endpoint endpoint-ipv6-remote@
+      endpoint endpoint-local-ipv6-addr@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       endpoint endpoint-ack@
@@ -3435,12 +3579,22 @@ begin-module net-ipv6
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
       endpoint reset-endpoint-refresh
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-syn-ack after: " depth . ;] debug-hook execute
+
     ; define send-ipv6-syn-ack
 
     \ Send an IPv6 TCP RST packet in response to a packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
+    :noname
+      { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- }
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst-for-packet before: " depth . ;] debug-hook execute
+      
       src-0 src-1 src-2 src-3
       addr tcp-src-port h@ rev16
+      dest-0 dest-1 dest-2 dest-3
       addr tcp-dest-port h@ rev16
       rng::random
       addr tcp-seq-no @ rev
@@ -3449,13 +3603,22 @@ begin-module net-ipv6
       src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 if
         self send-ipv6-basic-tcp
       else
-        2drop 2drop 2drop 2drop 2drop 2drop \ Should never happen
+        2drop 2drop 2drop 2drop 2drop 2drop 2drop 2drop \ Should never happen
       then
+      
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst-for-packet after: " depth . ;] debug-hook execute
+
     ; define send-ipv6-rst-for-packet
 
     \ Send a generic IPv6 TCP RST packet
     :noname { endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst before: " depth . ;] debug-hook execute
+
       endpoint endpoint-ipv6-remote@
+      endpoint endpoint-local-ipv6-addr@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@
       endpoint endpoint-ack@
@@ -3466,24 +3629,34 @@ begin-module net-ipv6
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst after: " depth . ;] debug-hook execute
+
     ; define send-ipv6-rst
 
     \ Send a basic IPv6 TCP packet
     :noname
-      ( remote-0 remote-1 remote-2 remote-3 remote-port local-port seq ack )
+      ( remote-0 remote-1 remote-2 remote-3 remote-port )
+      ( local-0 local-1 local-2 local-3 local-port seq ack )
       ( window flags D: mac-addr self -- )
-      -rot 12 pick 12 pick 12 pick 12 pick default-hop-limit PROTOCOL_TCP
+
+      -rot 11 pick 11 pick 11 pick 11 pick
+      20 pick 20 pick 20 pick 20 pick default-hop-limit PROTOCOL_TCP
       tcp-header-size
+      ( self D: mac-addr local-0 local-1 local-2 local-3 )
+      ( remote-0 remote-1 remote-2 remote-3 hop-limit )
+      ( protocol bytes )
 
       [ debug? ] [if]
         [: cr ." About to send TCP packet without MSS: " .s ;]
         debug-hook execute
       [then]
 
-      ( self D: mac-addr remote-0 remote-1 remote-2 remote-3 hop-limit )
-      ( protocol bytes )
-      [: { remote-0 remote-1 remote-2 remote-3
-        remote-port local-port seq ack window flags self buf }
+      [:
+        { seq ack window flags self buf }
+        { local-0 local-1 local-2 local-3 local-port }
+        { remote-0 remote-1 remote-2 remote-3 remote-port }
 
         [ debug? ] [if]
           [: cr ." Preparing TCP packet without MSS: " .s ;]
@@ -3498,7 +3671,7 @@ begin-module net-ipv6
         flags buf tcp-flags c!
         window rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
-        self intf-ipv6-addr@
+        local-0 local-1 local-2 local-3
         remote-0 remote-1 remote-2 remote-3 PROTOCOL_TCP buf tcp-header-size
         0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
@@ -3508,16 +3681,22 @@ begin-module net-ipv6
         [then]
         
         true
-      ;] 10 pick construct-and-send-ipv6-packet drop
+      ;] 14 pick construct-and-send-ipv6-packet-with-src-addr not if
+        2drop 2drop 2drop 2drop 2drop 2drop 2drop drop
+      then
     ; define send-ipv6-basic-tcp
 
     \ Send an IPv6 TCP packet with an MSS field
     :noname
-      ( remote-0 remote-1 remote-2 remote-3 remote-port local-port seq ack )
+      ( remote-0 remote-1 remote-2 remote-3 remote-port )
+      ( local-0 local-1 local-2 local-3 local-port seq ack )
       ( window flags D: mac-addr self -- )
-      -rot 12 pick 12 pick 12 pick 12 pick default-hop-limit PROTOCOL_TCP
+
+      -rot 11 pick 11 pick 11 pick 11 pick
+      20 pick 20 pick 20 pick 20 pick default-hop-limit PROTOCOL_TCP
       tcp-header-size 8 +
-      ( self D: mac-addr remote-0 remote-1 remote-2 remote-3 hop-limit )
+      ( self D: mac-addr local-0 local-1 local-2 local-3 )
+      ( remote-0 remote-1 remote-2 remote-3 hop-limit )
       ( protocol bytes )
 
       [ debug? ] [if]
@@ -3525,8 +3704,10 @@ begin-module net-ipv6
         debug-hook execute
       [then]
       
-      [: { remote-0 remote-1 remote-2 remote-3
-        remote-port local-port seq ack window flags self buf }
+      [:
+        { seq ack window flags self buf }
+        { local-0 local-1 local-2 local-3 local-port }
+        { remote-0 remote-1 remote-2 remote-3 remote-port }
 
         [ debug? ] [if]
           [: cr ." Preparing TCP packet with MSS: " .s ;]
@@ -3546,7 +3727,7 @@ begin-module net-ipv6
         rev ] literal
         buf tcp-header-size + !
         [ $01010100 rev ] literal buf tcp-header-size + 4 + !
-        self intf-ipv6-addr@
+        local-0 local-1 local-2 local-3
         remote-0 remote-1 remote-2 remote-3 PROTOCOL_TCP
         buf tcp-header-size 8 + 0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
@@ -3556,13 +3737,22 @@ begin-module net-ipv6
         [then]
         
         true
-      ;] 10 pick construct-and-send-ipv6-packet drop
+      ;] 14 pick construct-and-send-ipv6-packet-with-src-addr not if
+        2drop 2drop 2drop 2drop 2drop 2drop 2drop drop
+      then
     ; define send-ipv6-tcp-with-mss
     
     \ Process an IPv6 TCP SYN+ACK packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
+    :noname
+      { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-syn-ack-packet before: " depth . ;] debug-hook execute
+      
+      src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+      addr bytes self find-connect-ipv6-endpoint not if
+        drop src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+        addr bytes self send-ipv6-rst-for-packet
         exit
       then
       { endpoint }
@@ -3583,6 +3773,7 @@ begin-module net-ipv6
           endpoint init-tcp-stream
         then
         endpoint endpoint-ipv6-remote@
+        endpoint endpoint-local-ipv6-addr@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
@@ -3594,11 +3785,20 @@ begin-module net-ipv6
         endpoint reset-endpoint-refresh
         endpoint self put-ready-endpoint
       ;] endpoint with-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-syn-ack-packet after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-syn-ack-packet
 
     \ Process an IPv6 ACK packet
-    :noname ( src-0 src-1 src-2 src-3 addr bytes self -- )
+    :noname
+      ( src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- )
       { addr bytes self }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-packet before: " depth 8 - . ;] debug-hook execute
+
       addr bytes self find-connect-ipv6-endpoint not if
         drop exit
       then
@@ -3642,12 +3842,23 @@ begin-module net-ipv6
         then
         endpoint start-endpoint-timeout
       ;] endpoint with-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-packet after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-packet
 
     \ Process an IPv6 FIN+ACK packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint not if
-        drop src-0 src-1 src-2 src-3 addr bytes self send-ipv6-rst-for-packet
+    :noname
+      { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-fin-ack-packet before: " depth . ;] debug-hook execute
+
+      src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+      addr bytes self find-connect-ipv6-endpoint not if
+        drop src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+        addr bytes self send-ipv6-rst-for-packet
         exit
       then
       { endpoint }
@@ -3672,10 +3883,18 @@ begin-module net-ipv6
           endpoint wake-endpoint
         then
       ;] endpoint with-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-fin-ack-packet after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-fin-ack-packet
 
     \ Process an IPv6 ACK packet in the general case
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-basic-ack before: " depth . ;] debug-hook execute
+
       addr full-tcp-header-size { header-size }
       addr header-size + bytes header-size -
       addr tcp-flags c@ TCP_PSH and 0<>
@@ -3686,6 +3905,7 @@ begin-module net-ipv6
       endpoint endpoint-ack-in
       endpoint endpoint-send-ack? if
         endpoint endpoint-ipv6-remote@
+        endpoint endpoint-local-ipv6-addr@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
@@ -3696,11 +3916,19 @@ begin-module net-ipv6
         endpoint endpoint-ack-sent
         endpoint reset-endpoint-refresh
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-basic-ack after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-basic-ack
 
     \ Process an IPv6 ACK packet in TCP_SYN_SENT state
     :noname ( addr bytes endpoint self -- )
       [: { addr bytes endpoint self }
+
+        \ DEBUG
+        \ [: cr ." process-ipv6-ack-syn-sent before: " depth . ;] debug-hook execute
+
         addr tcp-seq-no @ rev 1+
         addr bytes tcp-mss@ not if
           drop [ max-ipv6-packet-size ipv6-header-size -
@@ -3709,6 +3937,7 @@ begin-module net-ipv6
         addr tcp-window-size h@ rev16
         endpoint init-tcp-stream
         endpoint endpoint-ipv6-remote@
+        endpoint endpoint-local-ipv6-addr@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
@@ -3719,93 +3948,187 @@ begin-module net-ipv6
         TCP_ESTABLISHED endpoint endpoint-tcp-state!
         addr bytes endpoint self process-ipv6-basic-ack
         endpoint self put-ready-endpoint
+
+        \ DEBUG
+        \ [: cr ." process-ipv6-ack-syn-sent after: " depth . ;] debug-hook execute
+
       ;] 2 pick with-endpoint
     ; define process-ipv6-ack-syn-sent
     
     \ Process an IPv6 ACK packet in TCP_SYN_RECEIVED state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-syn-received before: " depth . ;] debug-hook execute
+
       TCP_ESTABLISHED endpoint endpoint-tcp-state!
       addr bytes endpoint self process-ipv6-basic-ack
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-syn-received after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-syn-received
     
     \ Process an IPv6 ACK packet in TCP_ESTABLISHED state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-established before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self process-ipv6-basic-ack
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-established after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-established
     
     \ Process an IPv6 ACK packet in TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-wait-1 before: " depth . ;] debug-hook execute
+
       addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ 1+ = if
         TCP_FIN_WAIT_2 endpoint endpoint-tcp-state!
       else
         addr bytes endpoint self process-ipv6-basic-ack
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-wait-1 after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-fin-wait-1
     
     \ Process an IPv6 ACK packet in TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-wait-2: " depth . ;] debug-hook execute
+
       \ addr bytes endpoint self process-ipv6-basic-ack
     ; define process-ipv6-ack-fin-wait-2
     
     \ Process an IPv6 ACK packet in TCP_CLOSE_WAIT state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-close-wait before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self process-ipv6-basic-ack
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-close-wait after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-close-wait
     
     \ Process an IPv6 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
+      
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-last-ack before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self process-ipv6-basic-ack
       addr tcp-ack-no @ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
         endpoint self put-ready-endpoint
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-last-ack after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-last-ack
 
     \ Process an errant IPv6 ACK packet
     :noname { addr bytes endpoint self -- }
-      endpoint endpoint-ipv6-remote@ drop addr bytes
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst-for-ack before: " depth . ;] debug-hook execute
+
+      endpoint endpoint-ipv6-remote@ drop
+      endpoint endpoint-local-ipv6-addr@ addr bytes
       self send-ipv6-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-rst-for-ack after: " depth . ;] debug-hook execute
+
     ; define send-ipv6-rst-for-ack
 
     \ Process an IPv6 FIN packet for a TCP_ESTABLISHED state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-established before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSE_WAIT endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-established after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-fin-established
 
     \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_1 state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-fin-wait-1 before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-fin-wait-1 after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-fin-fin-wait-1
 
     \ Process an IPv6 FIN/ACK packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-fin-wait-2 before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-ack-fin-fin-wait-2 after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-ack-fin-fin-wait-2
 
     \ Process an unexpected IPv6 FIN packet
     :noname { addr bytes endpoint self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-unexpected-fin before: " depth . ;] debug-hook execute
+
       addr bytes endpoint self send-ipv6-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
       addr tcp-seq-no @ rev endpoint self add-time-wait
       endpoint self put-ready-endpoint
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-unexpected-fin after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
     :noname { addr bytes endpoint self -- }
+      
+      \ DEBUG
+      \ [: cr ." send-ipv6-fin-reply-ack before: " depth . ;] debug-hook execute
+
       endpoint endpoint-ipv6-remote@
+      endpoint endpoint-local-ipv6-addr@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1+
       addr tcp-seq-no @ rev 1+
@@ -3814,11 +4137,21 @@ begin-module net-ipv6
       \      [ TCP_FIN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
       self send-ipv6-basic-tcp
+
+      \ DEBUG
+      \ [: cr ." send-ipv6-fin-reply-ack after: " depth . ;] debug-hook execute
+
     ; define send-ipv6-fin-reply-ack
     
     \ Process an IPv6 RST packet
-    :noname { src-0 src-1 src-2 src-3 addr bytes self -- }
-      src-0 src-1 src-2 src-3 addr bytes self find-connect-ipv6-endpoint if
+    :noname
+      { src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 addr bytes self -- }
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-rst-packet before: " depth . ;] debug-hook execute
+
+      src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3
+      addr bytes self find-connect-ipv6-endpoint if
         { endpoint }
         addr bytes self endpoint
         [: { addr bytes self endpoint }
@@ -3835,6 +4168,10 @@ begin-module net-ipv6
       else
         drop
       then
+
+      \ DEBUG
+      \ [: cr ." process-ipv6-rst-packet after: " depth . ;] debug-hook execute
+
     ; define process-ipv6-rst-packet
 
     \ Process an IPv6 UDP packet
@@ -4722,7 +5059,7 @@ begin-module net-ipv6
       then { D: mac-addr }
       max-endpoints 0 ?do
         self intf-endpoints <ipv6-endpoint> class-size i * + { endpoint }
-        src-port a0 a1 a2 a3 dest-port mac-addr endpoint
+        self intf-ipv6-addr@ src-port a0 a1 a2 a3 dest-port mac-addr endpoint
         try-ipv6-connect-endpoint if
           endpoint self [: { endpoint self }
             rng::random endpoint endpoint-init-local-seq!
@@ -4784,6 +5121,7 @@ begin-module net-ipv6
           time-wait time-wait-start-time @ time-wait-timeout + < if
             time-wait time-wait-remote-ipv6-addr ipv6-unaligned@
             time-wait time-wait-remote-port h@
+            time-wait time-wait-local-ipv6-addr ipv6-unaligned@
             time-wait time-wait-local-port h@
             time-wait time-wait-local-seq @
             time-wait time-wait-ack @
@@ -4877,6 +5215,7 @@ begin-module net-ipv6
       [: { state endpoint self }
         state endpoint endpoint-tcp-state!
         endpoint endpoint-ipv6-remote@
+        endpoint endpoint-local-ipv6-addr@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
@@ -4976,11 +5315,17 @@ begin-module net-ipv6
 
     \ Send a data ACK packet
     :noname ( addr bytes push? endpoint self -- )
+
+      \ DEBUG
+      \ [: cr ." send-data-ack before: " depth 5 - . ;] debug-hook execute
+
       over endpoint-remote-mac-addr@
-      3 pick endpoint-ipv6-remote@ drop
+      3 pick endpoint-local-ipv6-addr@
+      7 pick endpoint-ipv6-remote@ drop
       default-hop-limit PROTOCOL_TCP
-      11 pick tcp-header-size +
+      15 pick tcp-header-size +
       ( addr bytes push? endpoint self D: mac-addr )
+      ( local-0 local-1 local-2 local-3 )
       ( remote-0 remote-1 remote-2 remote-3 hop-limit protocol bytes )
       [: { addr bytes push? endpoint self buf }
         endpoint endpoint-local-port@ rev16 buf tcp-src-port h!
@@ -4994,7 +5339,7 @@ begin-module net-ipv6
         endpoint endpoint-local-window@ rev16 buf tcp-window-size h!
         0 buf tcp-urgent-ptr h!
         addr buf tcp-header-size + bytes move
-        self intf-ipv6-addr@
+        endpoint endpoint-local-ipv6-addr@
         endpoint endpoint-ipv6-remote@ drop
         PROTOCOL_TCP buf tcp-header-size bytes + 0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
@@ -5006,7 +5351,13 @@ begin-module net-ipv6
           ;] debug-hook execute
         [then]
         true
-      ;] 10 pick construct-and-send-ipv6-packet drop
+      ;] 14 pick construct-and-send-ipv6-packet-with-src-addr not if
+        2drop 2drop drop
+      then
+
+      \ DEBUG
+      \ [: cr ." send-data-ack after: " depth . ;] debug-hook execute
+
     ; define send-data-ack
 
     \ Apply DHCP data
@@ -5829,6 +6180,9 @@ begin-module net-ipv6
     \ Refresh address validity
     :noname { self -- }
       self intf-dhcpv6-set? @ if
+        \ DEBUG
+        \ [: cr ." dhcpv6 validity before: " depth . ;] debug-hook execute
+        
         self [: { self }
           systick::systick-counter { current-time }
           self intf-dhcpv6-valid-time @ current-time - 0< if
@@ -5839,8 +6193,16 @@ begin-module net-ipv6
             1 0 0 0 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
           then
         ;] self addr-lock with-lock
+
+        \ DEBUG
+        \ [: cr ." dhcpv6 validity after: " depth . ;] debug-hook execute
+
       then
       self deprecated-count @ 0> if
+
+        \ DEBUG
+        \ [: cr ." deprecated validity before: " depth . ;] debug-hook execute
+
         self [: { self }
           systick::systick-counter { current-time }
           0 { index }
@@ -5862,6 +6224,10 @@ begin-module net-ipv6
             then
           repeat
         ;] self addr-lock with-lock
+
+        \ DEBUG
+        \ [: cr ." deprecated validity after: " depth . ;] debug-hook execute
+
       then
     ; define refresh-valid
     
@@ -5881,6 +6247,7 @@ begin-module net-ipv6
             state TCP_SYN_RECEIVED = or
             state TCP_CLOSE_WAIT = or if
               endpoint endpoint-ipv6-remote@
+              endpoint endpoint-local-ipv6-addr@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
               state TCP_SYN_RECEIVED = if 1- then
@@ -5956,6 +6323,10 @@ begin-module net-ipv6
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
         bytes ipv6-header-size >= if
+
+          \ DEBUG
+          \ [: cr ." check addr before: " depth . ;] debug-hook execute
+
           addr ipv6-dest-addr ipv6-unaligned@
           self ip-interface @ ipv6-addr-listen? if
             src-mac-addr addr ipv6-src-addr ipv6-unaligned@
@@ -5969,12 +6340,24 @@ begin-module net-ipv6
                   over + dump
                 ;] debug-hook execute
               [then]
+
+              \ DEBUG
+              \ [: cr ." handle packet before: " depth . ;] debug-hook execute
+
               self ip-interface @ process-ipv6-packet
             else
               2drop 2drop 2drop 2drop 2drop 2drop 2drop
+
+              \ DEBUG
+              \ [: cr ." payload not found after: " depth . ;] debug-hook execute
+
             then
           then
         then
+
+        \ DEBUG
+        \ [: cr ." handle packet after: " depth . ;] debug-hook execute
+
       else
         addr ethh-ether-type h@ rev16 { ether-type }
         addr ethh-source-mac mac@ { D: src-mac-addr }
