@@ -165,8 +165,8 @@ begin-module net-config
   \ IPv6 router discovery interval
   50000 value router-discovery-interval
   
-  \ IPv4 discover attempts
-  100000 value dhcp-discover-timeout
+  \ DHCP discovery timeout
+  200000 value dhcp-discover-timeout
 
   \ Default DHCP renewal time
   86400 10000 * 2 / value default-dhcp-renew-interval

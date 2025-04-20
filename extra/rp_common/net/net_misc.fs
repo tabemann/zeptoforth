@@ -94,6 +94,9 @@ begin-module net-misc
   \ The DHCPv6 link-local multicast address
   : DHCPV6_LINK_LOCAL_MULTICAST $00010002 $0 $0 $FF020000 ;
 
+  \ The DHCPv6 site-local multicast address
+  : DHCPV6_SITE_LOCAL_MULTICAST $00010003 $0 $0 $FF050000 ;
+
   \ The all-nodes link-local multicast address
   : ALL_NODES_LINK_LOCAL_MULTICAST $1 $0 $0 $FF020000 ;
 
