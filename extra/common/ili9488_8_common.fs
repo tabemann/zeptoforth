@@ -210,6 +210,10 @@ begin-module ili9488-8-common
 
       self dim@ { cols rows }
       0 cols 0 rows self ili9488-8-window!
+
+      \ This may be a no-op
+      true self backlight!
+      
     ; define init-ili9488-8
 
     \ Send a command to the ILI9488-8
