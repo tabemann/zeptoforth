@@ -988,6 +988,35 @@ This gets the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2
 
 This toggles the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.
 
+### `simple-enc28j60-net-ipv4`
+
+The `simple-enc28j60-net-ipv4` module contains the following class:
+
+#### `<simple-enc28j60-net-ipv4>`
+
+The `<simple-enc28j60-net-ipv4>` class encapsulates an ENC28J60 driver and a zeptoIPv4 network stack while simplifying their configuration.
+
+It has the following constructor:
+
+##### `new`
+( int-pin spi-pin spi-num D: mac-addr duplex -- )
+
+This instantiates an `<simple-enc28j60-net-ipv4>` instance with MAC address *mac-addr* (or the default address if `default-mac-addr` is supplied), using the SPI interface block number *spi-num* and GPIO number *spi-pin* and the next three in sequence.  The interrupt signal uses GPIO number *int-pin* (which does not have to be adjacent to the SPI connections).  Full duplex is used if *duplex* is true.
+
+The class will use the GPIO interrupt for processor core 1, and the DMA interrupt.  Note that currently zeptoforth does not have a mechanism for allowing multiple users of the same interrupt, so applications may not use these interrupts while the ENC28J60 is in use.
+
+The ENC28J60 does not implement duplex mode negotiation, and appears to a conforming port as a half duplex device.  Specify full duplex if the device is connected to a switch that is full duplex only (as is the case for some low cost switches), or to a port that has been explicitly configured as full duplex.  Otherwise use half duplex mode.
+
+It has the following methods:
+
+##### `enable-mac`
+( D: d-mac-addr self -- )
+Enable the specified MAC address.   See the documentation for `enc28j60-runner::enc28j60-enable-mac` for more detail.
+
+##### `set-duplex`
+( full-duplex self -- )
+Set half or full duplex mode.   See the documentation for `enc28j60-runner::enc28j60-set-duplex` for more detail.
+
 ### `net-misc`
 
 The `net-misc` module contains a number of internal and convenience words, notably:

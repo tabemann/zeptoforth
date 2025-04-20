@@ -1004,6 +1004,33 @@
 </section>
 </section>
 </section>
+<section id="simple-enc28j60-net-ipv4">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-enc28j60-net-ipv4</span></code><a class="headerlink" href="#simple-enc28j60-net-ipv4" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-enc28j60-net-ipv4</span></code> module contains the following class:</p>
+<section id="id72">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code><a class="headerlink" href="#id72" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code> class encapsulates an ENC28J60 driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
+<p>It has the following constructor:</p>
+<section id="id73">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id73" title="Link to this heading">¶</a></h4>
+<p>( int-pin spi-pin spi-num D: mac-addr duplex – )</p>
+<p>This instantiates an <code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code> instance with MAC address <em>mac-addr</em> (or the default address if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> is supplied), using the SPI interface block number <em>spi-num</em> and GPIO number <em>spi-pin</em> and the next three in sequence.  The interrupt signal uses GPIO number <em>int-pin</em> (which does not have to be adjacent to the SPI connections).  Full duplex is used if <em>duplex</em> is true.</p>
+<p>The class will use the GPIO interrupt for processor core 1, and the DMA interrupt.  Note that currently zeptoforth does not have a mechanism for allowing multiple users of the same interrupt, so applications may not use these interrupts while the ENC28J60 is in use.</p>
+<p>The ENC28J60 does not implement duplex mode negotiation, and appears to a conforming port as a half duplex device.  Specify full duplex if the device is connected to a switch that is full duplex only (as is the case for some low cost switches), or to a port that has been explicitly configured as full duplex.  Otherwise use half duplex mode.</p>
+<p>It has the following methods:</p>
+</section>
+<section id="enable-mac">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-mac</span></code><a class="headerlink" href="#enable-mac" title="Link to this heading">¶</a></h4>
+<p>( D: d-mac-addr self – )
+Enable the specified MAC address.   See the documentation for <code class="docutils literal notranslate"><span class="pre">enc28j60-runner::enc28j60-enable-mac</span></code> for more detail.</p>
+</section>
+<section id="set-duplex">
+<h4><code class="docutils literal notranslate"><span class="pre">set-duplex</span></code><a class="headerlink" href="#set-duplex" title="Link to this heading">¶</a></h4>
+<p>( full-duplex self – )
+Set half or full duplex mode.   See the documentation for <code class="docutils literal notranslate"><span class="pre">enc28j60-runner::enc28j60-set-duplex</span></code> for more detail.</p>
+</section>
+</section>
+</section>
 <section id="net-misc">
 <h2><code class="docutils literal notranslate"><span class="pre">net-misc</span></code><a class="headerlink" href="#net-misc" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">net-misc</span></code> module contains a number of internal and convenience words, notably:</p>
@@ -1139,6 +1166,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enc28j60.html">ENC28J60 Words</a></li>
 </ul>
 
 <div class="relations">

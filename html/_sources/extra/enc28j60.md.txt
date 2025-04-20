@@ -1,0 +1,47 @@
+# ENC28J60 Words
+
+A driver for the ENC28J60 10Base-T Ethernet chip is included with zeptoforth.  This device uses a SPI interface plus an interrupt line.  The external API for this device is provided by the `<enc28j60-runner>` class in the `enc28j60-runner` module.  This class exposes a frame interface as well as a few control words.
+
+### `enc28j60-runner`
+
+The `enc28j60-runner` module contains the following constant:
+
+##### `default-mac-addr`
+( -- D: default-mac-addr )
+
+This is a token when provided to the `<enc28j60-runner>` class when instatiated indicates that the default MAC address is to be used.  The default MAC address is derived from the Raspberry Pico 64-bit unique ID, with the `AA:00:01` OUI.
+
+The `enc28j60-runner` module contains the following class:
+
+#### `<enc28j60-runner>`
+
+The `<enc28j60-runner>` class has the constructor:
+
+##### `new`
+( int-pin spi-pin spi-num D: mac-addr -- )
+
+This instantiates an `<enc28j60-runner>` instance with MAC address *mac-addr* (or the default address if `default-mac-addr` is supplied), using the SPI interface block number *spi-num* and GPIO number *spi-pin* and the next three in sequence.  The interrupt signal uses GPIO number *int-pin* (which does not have to be adjacent to the SPI connections).
+
+The class will use the GPIO interrupt for processor core 1, and the DMA interrupt.  Note that currently zeptoforth does not have a mechanism for allowing multiple users of the same interrupt, so applications may not use these interrupts while the ENC28J60 is in use.
+
+The `<enc28j60-runner>` class has the following methods:
+
+##### `init-enc28j60-runner`
+( self -- )
+Initialize the runner class.
+
+##### `run-enc28j60`
+( self -- )
+Start the runner task.  Once this is done the device starts receiving packets, and is able to process transmit requests.
+
+##### `enc28j60-enable-mac`
+( D: d-mac-addr self -- )
+Enable a MAC address.  Normally this is done for multicast addresses, though the device also accepts unicast addresses.  This uses a hash filter with a 64 entry hash bitmap, so other addresses than the one requested may also match.  The application may need to verify the destination MAC address field in received packets to filter out such spurious matches.
+
+##### `enc28j60-set-duplex`
+( full-duplex self -- )
+Set half or full duplex mode (true value for *full-duplex* sets full duplex mode).  Note that the ENC28J60 does not implement standard duplex negotiation or advertisement.  If connected to a port that expects negotiation, it will appear as a half duplex interface.  Some low cost Ethernet switches support only full duplex.
+
+The default setting is full duplex.
+
+
