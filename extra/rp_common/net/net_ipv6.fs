@@ -4399,6 +4399,13 @@ begin-module net-ipv6
           addr icmpv6-ra-retrans-time unaligned@ rev ?dup if
             self neighbor-retrans-time !
           then
+          [ debug? ] [if]
+            self use-dhcpv6-other? @ self use-dhcpv6? @
+            [:
+              cr ." Use stateful DHCPv6: " if ." yes" else ." no" then
+              cr ." Use stateless DHCPv6: " if ." yes" else ." no" then
+            ;] debug-hook execute
+          [then]
           addr icmpv6-ra-header-size + { cur-addr }
           bytes icmpv6-ra-header-size - { cur-size }
           OPTION_PREFIX_INFO cur-addr cur-size find-icmpv6-opt if
@@ -5325,7 +5332,7 @@ begin-module net-ipv6
 \      $FFFFFFFFFFFF.
 \      DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ dhcpv6-client-port
+      self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
       [ dhcpv6-header-size 26 + ] literal [: { self buf }
         [ debug? ] [if]
@@ -5370,7 +5377,7 @@ begin-module net-ipv6
       dhcpv6-wait-reply self dhcp-discover-state !
       self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ dhcpv6-client-port
+      self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
       [ dhcpv6-header-size 48 + ] literal self dhcp-server-duid-len @ +
       [: { self buf }
@@ -5430,7 +5437,7 @@ begin-module net-ipv6
       dhcpv6-wait-reply self dhcp-discover-state !
       self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ dhcpv6-client-port
+      self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
       [ dhcpv6-header-size 48 + ] literal self dhcp-server-duid-len @ +
       [: { self buf }
@@ -5491,7 +5498,7 @@ begin-module net-ipv6
       0 self dhcp-server-duid-len !
       self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ dhcpv6-client-port
+      self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
       [ dhcpv6-header-size 44 + ] literal
       [: { self buf }
@@ -5548,7 +5555,7 @@ begin-module net-ipv6
       dhcpv6-wait-reply self dhcp-discover-state !
       self
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
-      self intf-ipv6-addr@ dhcpv6-client-port
+      self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
       [ dhcpv6-header-size 30 + ] literal self dhcp-server-duid-len @ +
       [: { self buf }
