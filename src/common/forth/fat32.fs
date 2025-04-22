@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2024 Travis Bemann
+\ Copyright (c) 2022-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -108,8 +108,8 @@ begin-module fat32
     \ The current directory reference
     user current-dir-ref
     
-    \ The FAT32 lock
-    lock-size buffer: fat32-lock
+    \ The sector scratchpad lock
+    lock-size buffer: sector-scratchpad-lock
     
     \ The only supported sector size
     512 constant sector-size
@@ -285,6 +285,12 @@ begin-module fat32
 
       \ The last open directory
       cell member last-open-dir
+
+      \ The FAT32 filesystem lock
+      lock-size member fat32-lock
+
+      \ Execute with the FAT32 lock acquired
+      method with-fat32-lock ( fs -- )
       
       \ Read the FAT32 filesystem info sector
       method read-info-sector ( fs -- )
@@ -1007,7 +1013,7 @@ begin-module fat32
     ;
     
     \ Initialize the FAT32 layer
-    : init-fat32 ( -- ) fat32-lock init-lock ;
+    : init-fat32 ( -- ) sector-scratchpad-lock init-lock ;
 
   end-module
 
@@ -1037,14 +1043,14 @@ begin-module fat32
         sector-scratchpad sector-size 0 fill
         $AA55 sector-scratchpad $1FE + h!
         sector-scratchpad sector-size 0 mbr mbr-device @ block!
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define format-mbr
     
     :noname ( mbr -- valid? )
       [:
         >r sector-scratchpad sector-size 0 r> mbr-device @ block@
         sector-scratchpad $1FE + h@ $AA55 =
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define mbr-valid?
     
     :noname ( partition index mbr -- )
@@ -1055,7 +1061,7 @@ begin-module fat32
         sector-scratchpad $04 + c@ over partition-type !
         sector-scratchpad $08 + @ over partition-first-sector !
         sector-scratchpad $0C + @ swap partition-sectors !
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define partition@
     
     :noname ( partition index mbr -- )
@@ -1067,7 +1073,7 @@ begin-module fat32
         2 pick partition-first-sector @ sector-scratchpad $08 + !
         rot partition-sectors @ sector-scratchpad $0C + !
         >r sector-scratchpad $10 rot $10 * $1BE + 0 r> mbr-device @ block-part!
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define partition!
     
   end-implement
@@ -1081,6 +1087,7 @@ begin-module fat32
   <fat32-fs> begin-implement
     :noname ( partition device fs -- )
       dup <object>->new
+      dup fat32-lock init-lock
       tuck fat32-device !
       0 over first-open-file !
       0 over last-open-file !
@@ -1098,10 +1105,23 @@ begin-module fat32
         sector-scratchpad $02A + h@ 0= averts x-fs-version-not-supported
         sector-scratchpad $02C + @ r@ root-dir-cluster !
         sector-scratchpad $030 + h@ r@ info-sector ! r>
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
       read-info-sector
     ; define new
-    
+
+    \ Destructor
+    :noname ( fs -- )
+      dup fat32-lock claim-lock
+      dup first-open-file @ 0<> over first-open-dir @ 0<> or if
+        fat32-lock release-lock
+        ['] x-open ?raise
+      then
+      <object>->destroy
+    ; define destroy
+
+    \ Execute with the FAT32 lock acquired
+    :noname ( xt fs -- ) fat32-lock with-lock ; define with-fat32-lock
+
     :noname ( dir fs -- )
       2dup swap <fat32-dir> swap init-object
       2dup swap dir-fs !
@@ -1129,7 +1149,7 @@ begin-module fat32
             dir current-dir clone-dir
           then
         then
-      ;] fat32-lock with-lock
+      ;] over with-fat32-lock
     ; define current-dir@
     
     :noname ( c-addr u xt op-xt fs -- )
@@ -1207,7 +1227,7 @@ begin-module fat32
         sector-scratchpad $1FC + @ $AA550000 = averts x-bad-info-sector
         sector-scratchpad $1E8 + @ r@ cluster-count@ min r@ free-cluster-count !
         sector-scratchpad $1EC + @ r> recent-allocated-cluster !
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define read-info-sector
     
     :noname ( fs -- )
@@ -1216,7 +1236,7 @@ begin-module fat32
         r@ free-cluster-count @ sector-scratchpad $1E8 + !
         r@ recent-allocated-cluster @ sector-scratchpad $1EC + !
         sector-scratchpad sector-size r@ info-sector @ r@ first-sector @ + r> fat32-device @ block!
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define write-info-sector
     
     :noname ( cluster fat fs -- link )
@@ -1225,7 +1245,7 @@ begin-module fat32
         swap sector-size 4 / umod swap ( index sector )
         sector-scratchpad sector-size rot r> fat32-device @ block@ ( index )
         cells sector-scratchpad + @ 
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define fat@
     
     :noname ( link cluster fat fs -- )
@@ -1237,7 +1257,7 @@ begin-module fat32
         $F0000000 and rot $0FFFFFFF and or ( sector index new-link )
         swap cells sector-scratchpad + ! ( sector )
         sector-scratchpad sector-size rot r> fat32-device @ block!
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define fat!
     
     :noname ( link cluster fs -- )
@@ -1279,65 +1299,79 @@ begin-module fat32
     ; define cluster-count@
     
     :noname ( fs -- cluster )
-      >r r@ recent-allocated-cluster @
-      dup -1 = if drop 2 else 1+ then
-      r> dup cluster-count@ 2 + 2 pick ?do
-        i over 0 swap fat@ free-cluster? if
-          2drop i unloop exit
-        then
-      loop
-      swap 2 ?do
-        i over 0 swap fat@ free-cluster? if
-          drop i unloop exit
-        then
-      loop
-      drop ['] x-no-clusters-free ?raise
+      [:
+        >r r@ recent-allocated-cluster @
+        dup -1 = if drop 2 else 1+ then
+        r> dup cluster-count@ 2 + 2 pick ?do
+          i over 0 swap fat@ free-cluster? if
+            2drop i unloop exit
+          then
+        loop
+        swap 2 ?do
+          i over 0 swap fat@ free-cluster? if
+            drop i unloop exit
+          then
+        loop
+        drop ['] x-no-clusters-free ?raise
+      ;] over with-fat32-lock
     ; define find-free-cluster
     
     :noname ( fs -- cluster )
-      >r r@ find-free-cluster
-      end-cluster-mark over r@ all-fat!
-      dup r@ recent-allocated-cluster !
-      -1 r@ free-cluster-count +!
-      r> write-info-sector
+      [:
+        >r r@ find-free-cluster
+        end-cluster-mark over r@ all-fat!
+        dup r@ recent-allocated-cluster !
+        -1 r@ free-cluster-count +!
+        r> write-info-sector
+      ;] over with-fat32-lock
     ; define allocate-cluster
     
     :noname ( cluster fs -- cluster' )
-      dup allocate-cluster ( cluster fs cluster' )
-      dup >r -rot all-fat! r>
+      [:
+        dup allocate-cluster ( cluster fs cluster' )
+        dup >r -rot all-fat! r>
+      ;] over with-fat32-lock
     ; define allocate-link-cluster
     
     :noname ( cluster fs -- )
-      >r free-cluster-mark swap r@ all-fat!
-      1 r@ free-cluster-count +!
-      r> write-info-sector
+      [:
+        >r free-cluster-mark swap r@ all-fat!
+        1 r@ free-cluster-count +!
+        r> write-info-sector
+      ;] over with-fat32-lock
     ; define free-cluster
     
     :noname ( cluster fs -- )
-      >r begin
-        dup 0 r@ fat@
-        swap r@ free-cluster
-        dup link-cluster? if cluster-link false else drop true then
-      until
-      rdrop
+      [:
+        >r begin
+          dup 0 r@ fat@
+          swap r@ free-cluster
+          dup link-cluster? if cluster-link false else drop true then
+        until
+        rdrop
+      ;] over with-fat32-lock
     ; define free-cluster-chain
     
     :noname ( cluster fs -- )
-      >r 0 r@ fat@
-      dup link-cluster? if cluster-link r@ free-cluster-chain else drop then
-      rdrop
+      [:
+        >r 0 r@ fat@
+        dup link-cluster? if cluster-link r@ free-cluster-chain else drop then
+        rdrop
+      ;] over with-fat32-lock
     ; define free-cluster-tail
     
-    :noname { index cluster fs -- index cluster | -1 -1 }
-      begin index fs dir-cluster-entry-count@ >= while
-        fs dir-cluster-entry-count@ negate +to index
-        cluster 0 fs fat@ dup link-cluster? if
-          cluster-link to cluster
-        else
-          drop -1 -1 exit
-        then
-      repeat
-      index cluster
+    :noname ( index cluster fs -- index cluster | -1 -1 )
+      [: { index cluster fs }
+        begin index fs dir-cluster-entry-count@ >= while
+          fs dir-cluster-entry-count@ negate +to index
+          cluster 0 fs fat@ dup link-cluster? if
+            cluster-link to cluster
+          else
+            drop -1 -1 exit
+          then
+        repeat
+        index cluster
+      ;] over with-fat32-lock
     ; define find-entry 
     
     :noname ( entry index cluster fs -- )
@@ -1351,7 +1385,7 @@ begin-module fat32
         sector-scratchpad sector-size rot r> fat32-device @ block@
         [ sector-size entry-size / ] literal umod entry-size *
         sector-scratchpad + swap buffer>entry
-      ;] fat32-lock with-lock
+      ;] sector-scratchpad-lock with-lock
     ; define entry@
     
     :noname ( entry index cluster fs -- )
@@ -1365,7 +1399,7 @@ begin-module fat32
         [ sector-size entry-size / ] literal umod entry-size * ( entry offset )
         sector-scratchpad + swap entry>buffer ( )
         sector-scratchpad sector-size r> r> swap fat32-device @ block! ( )
-      ;] fat32-lock with-lock ( )
+      ;] sector-scratchpad-lock with-lock ( )
     ; define entry!
     
     :noname ( fs -- count )
@@ -1373,98 +1407,108 @@ begin-module fat32
     ; define dir-cluster-entry-count@
 
     :noname ( c-addr u cluster fs -- index cluster )
-      2swap ( cluster fs c-addr u ) [: ( cluster fs name )
-        <fat32-entry> [: ( cluster fs name entry )
-          2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
-            dup >r find-entry r> ( name entry index cluster fs )
-            over -1 <> averts x-entry-not-found
-            2over 2over entry@
-            3 pick short-file-name c@ dup $00 <> averts x-entry-not-found
-            $E5 <> if ( name entry index cluster fs )
-              4 pick 8 5 pick short-file-name 8 equal-case-strings? if
-                4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
-                  drop 2swap 2drop exit
+      [:
+        2swap ( cluster fs c-addr u ) [: ( cluster fs name )
+          <fat32-entry> [: ( cluster fs name entry )
+            2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
+              dup >r find-entry r> ( name entry index cluster fs )
+              over -1 <> averts x-entry-not-found
+              2over 2over entry@
+              3 pick short-file-name c@ dup $00 <> averts x-entry-not-found
+              $E5 <> if ( name entry index cluster fs )
+                4 pick 8 5 pick short-file-name 8 equal-case-strings? if
+                  4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
+                    drop 2swap 2drop exit
+                  then
                 then
               then
-            then
-            rot 1+ -rot
-          again
-        ;] with-object
-      ;] convert-name
+              rot 1+ -rot
+            again
+          ;] with-object
+        ;] convert-name
+      ;] over with-fat32-lock
     ; define lookup-entry
 
     :noname ( c-addr u cluster fs -- exists? )
-      2swap ( cluster fs c-addr u ) [: ( cluster fs name )
-        <fat32-entry> [: ( cluster fs name entry )
-          2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
-            dup >r find-entry r> ( name entry index cluster fs )
-            over -1 = if
-              drop 2drop 2drop false exit
-            then
-            2over 2over entry@
-            3 pick short-file-name c@ dup $00 = if
-              2drop 2drop 2drop false exit
-            then
-            $E5 <> if ( name entry index cluster fs )
-              4 pick 8 5 pick short-file-name 8 equal-case-strings? if
-                4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
-                  drop 2drop 2drop true exit
+      [:
+        2swap ( cluster fs c-addr u ) [: ( cluster fs name )
+          <fat32-entry> [: ( cluster fs name entry )
+            2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
+              dup >r find-entry r> ( name entry index cluster fs )
+              over -1 = if
+                drop 2drop 2drop false exit
+              then
+              2over 2over entry@
+              3 pick short-file-name c@ dup $00 = if
+                2drop 2drop 2drop false exit
+              then
+              $E5 <> if ( name entry index cluster fs )
+                4 pick 8 5 pick short-file-name 8 equal-case-strings? if
+                  4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
+                    drop 2drop 2drop true exit
+                  then
                 then
               then
-            then
-            rot 1+ -rot
-          again
-        ;] with-object
-      ;] convert-name
+              rot 1+ -rot
+            again
+          ;] with-object
+        ;] convert-name
+      ;] over with-fat32-lock
     ; define entry-exists?
 
     :noname ( cluster fs -- index cluster )
-      0 -rot
-      begin
-        dup >r find-entry r>
-        <fat32-entry> [: ( index cluster fs entry )
-          dup 4 pick 4 pick 4 pick entry@
-          dup short-file-name c@ $00 = if
-            drop 3dup expand-dir true
-          else
-            short-file-name c@ $E5 = if
-              true
+      [:
+        0 -rot
+        begin
+          dup >r find-entry r>
+          <fat32-entry> [: ( index cluster fs entry )
+            dup 4 pick 4 pick 4 pick entry@
+            dup short-file-name c@ $00 = if
+              drop 3dup expand-dir true
             else
-              rot 1+ -rot false
+              short-file-name c@ $E5 = if
+                true
+              else
+                rot 1+ -rot false
+              then
             then
-          then
+          ;] with-object
+        until ( index cluster fs )
+        <fat32-entry> [: ( index cluster fs entry )
+          dup init-blank-entry ( index cluster fs entry )
+          swap 2swap rot ( entry index cluster fs )
+          2 pick 2 pick 2>r ( entry index cluster fs )
+          entry! 2r> ( index cluster )
         ;] with-object
-      until ( index cluster fs )
-      <fat32-entry> [: ( index cluster fs entry )
-        dup init-blank-entry ( index cluster fs entry )
-        swap 2swap rot ( entry index cluster fs )
-        2 pick 2 pick 2>r ( entry index cluster fs )
-        entry! 2r> ( index cluster )
-      ;] with-object
+      ;] over with-fat32-lock
     ; define allocate-entry
     
     :noname ( index cluster fs -- )
-      <fat32-entry> [:
-        dup 4 pick 4 pick 4 pick entry@
-        dup mark-entry-deleted
-        3 pick 3 pick 3 pick entry!
-        2drop drop
-      ;] with-object
+      [:
+        <fat32-entry> [:
+          dup 4 pick 4 pick 4 pick entry@
+          dup mark-entry-deleted
+          3 pick 3 pick 3 pick entry!
+          2drop drop
+        ;] with-object
+      ;] over with-fat32-lock
     ; define delete-entry
     
     :noname ( index cluster fs -- )
-      rot 1+ over cluster-sectors @ sector-size * entry-size u/ umod -rot
-      2 pick 0= if
-        rot drop dup -rot allocate-link-cluster ( fs cluster )
-        <fat32-entry> [: ( fs cluster entry )
-          dup init-end-entry -rot 0 -rot swap ( entry index cluster fs ) entry!
-        ;] with-object
-      else
-        <fat32-entry> [:
-          swap >r swap >r swap >r dup init-end-entry
-          r> r> r> entry!
-        ;] with-object
-      then
+      [:
+        rot 1+ over cluster-sectors @ sector-size * entry-size u/ umod -rot
+        2 pick 0= if
+          rot drop dup -rot allocate-link-cluster ( fs cluster )
+          <fat32-entry> [: ( fs cluster entry )
+            dup init-end-entry -rot 0 -rot swap ( entry index cluster fs ) entry!
+          ;] with-object
+        else
+          <fat32-entry> [:
+            swap >r swap >r swap >r dup init-end-entry
+            r> r> r> entry!
+          ;] with-object
+        then
+      ;] over with-fat32-lock
     ; define expand-dir
 
     :noname ( index cluster fs -- )
@@ -1482,27 +1526,31 @@ begin-module fat32
     ; define update-entry-date-time
 
     \ Get the open count for a file
-    :noname { start-cluster self -- count }
-      0 { count }
-      self first-open-file @ begin ?dup while
-        dup file-start-cluster @ start-cluster = if
-          1 +to count
-        then
-        file-next-open @
-      repeat
-      count
+    :noname ( start-cluster self -- count )
+      [: { start-cluster self }
+        0 { count }
+        self first-open-file @ begin ?dup while
+          dup file-start-cluster @ start-cluster = if
+            1 +to count
+          then
+          file-next-open @
+        repeat
+        count
+      ;] over with-fat32-lock
     ; define file-open-count
 
     \ Get the open count for a directory
-    :noname { start-cluster self -- count }
-      0 { count }
-      self first-open-dir @ begin ?dup while
-        dup dir-start-cluster @ start-cluster = if
-          1 +to count
-        then
-        dir-next-open @
-      repeat
-      count
+    :noname ( start-cluster self -- count )
+      [: { start-cluster self }
+        0 { count }
+        self first-open-dir @ begin ?dup while
+          dup dir-start-cluster @ start-cluster = if
+            1 +to count
+          then
+          dir-next-open @
+        repeat
+        count
+      ;] over with-fat32-lock
     ; define dir-open-count
     
   end-implement
@@ -1524,9 +1572,11 @@ begin-module fat32
       0 swap file-current-cluster-index !
     ; define new
 
-    :noname { self -- }
-      self file-open @ if self close-file then
-      self <object>->destroy
+    :noname ( self -- )
+      [: { self }
+        self file-open @ if self close-file then
+        self <object>->destroy
+      ;] over file-fs @ with-fat32-lock
     ; define destroy
 
     :noname { new-file self -- }
@@ -1541,35 +1591,39 @@ begin-module fat32
       self file-current-cluster-index @ new-file file-current-cluster-index !
     ; define clone-file
     
-    :noname { self -- }
-      self file-open @ averts x-not-open
-      self file-prev-open @ ?dup if
-        self file-next-open @ swap file-next-open !
-      else
-        self file-next-open @ self file-fs @ first-open-file !
-      then
-      self file-next-open @ ?dup if
-        self file-prev-open @ swap file-prev-open !
-      else
-        self file-prev-open @ self file-fs @ last-open-file !
-      then
-      0 self file-prev-open !
-      0 self file-next-open !
-      false self file-open !
+    :noname ( self -- )
+      [: { self }
+        self file-open @ averts x-not-open
+        self file-prev-open @ ?dup if
+          self file-next-open @ swap file-next-open !
+        else
+          self file-next-open @ self file-fs @ first-open-file !
+        then
+        self file-next-open @ ?dup if
+          self file-prev-open @ swap file-prev-open !
+        else
+          self file-prev-open @ self file-fs @ last-open-file !
+        then
+        0 self file-prev-open !
+        0 self file-next-open !
+        false self file-open !
+      ;] over file-fs @ with-fat32-lock
     ; define close-file
     
-    :noname { self -- }
-      self file-open @ not averts x-open
-      self file-fs @ first-open-file @ ?dup if
+    :noname ( self -- )
+      [: { self }
+        self file-open @ not averts x-open
+        self file-fs @ first-open-file @ ?dup if
         self over file-prev-open !
-        self file-next-open !
-      else
-        self self file-fs @ last-open-file !
-        0 self file-next-open !
-      then
-      self self file-fs @ first-open-file !
-      0 self file-prev-open !
-      true self file-open !
+          self file-next-open !
+        else
+          self self file-fs @ last-open-file !
+          0 self file-next-open !
+        then
+        self self file-fs @ first-open-file !
+        0 self file-prev-open !
+        true self file-open !
+      ;] over file-fs @ with-fat32-lock
     ; define register-file
         
     :noname ( c-addr u file -- bytes )
@@ -1818,9 +1872,11 @@ begin-module fat32
       0 swap dir-current-cluster-index !
     ; define new
 
-    :noname { self -- }
-      self dir-open @ if self close-dir then
-      self <object>->destroy
+    :noname ( self -- )
+      [: { self }
+        self dir-open @ if self close-dir then
+        self <object>->destroy
+      ;] over dir-fs @ with-fat32-lock
     ; define destroy
     
     :noname { new-dir self -- }
@@ -1835,35 +1891,39 @@ begin-module fat32
       self dir-current-cluster-index @ new-dir dir-current-cluster-index !
     ; define clone-dir
 
-    :noname { self -- }
-      self dir-open @ averts x-not-open
-      self dir-prev-open @ ?dup if
-        self dir-next-open @ swap dir-next-open !
-      else
-        self dir-next-open @ self dir-fs @ first-open-dir !
-      then
-      self dir-next-open @ ?dup if
-        self dir-prev-open @ swap dir-prev-open !
-      else
-        self dir-prev-open @ self dir-fs @ last-open-dir !
-      then
-      0 self dir-prev-open !
-      0 self dir-next-open !
-      false self dir-open !
+    :noname ( self -- )
+      [: { self }
+        self dir-open @ averts x-not-open
+        self dir-prev-open @ ?dup if
+          self dir-next-open @ swap dir-next-open !
+        else
+          self dir-next-open @ self dir-fs @ first-open-dir !
+        then
+        self dir-next-open @ ?dup if
+          self dir-prev-open @ swap dir-prev-open !
+        else
+          self dir-prev-open @ self dir-fs @ last-open-dir !
+        then
+        0 self dir-prev-open !
+        0 self dir-next-open !
+        false self dir-open !
+      ;] over dir-fs @ with-fat32-lock
     ; define close-dir
     
-    :noname { self -- }
-      self dir-open @ not averts x-open
-      self dir-fs @ first-open-dir @ ?dup if
-        self over dir-prev-open !
-        self dir-next-open !
-      else
-        self self dir-fs @ last-open-dir !
-        0 self dir-next-open !
-      then
-      self self dir-fs @ first-open-dir !
-      0 self dir-prev-open !
-      true self dir-open !
+    :noname ( self -- )
+      [: { self }
+        self dir-open @ not averts x-open
+        self dir-fs @ first-open-dir @ ?dup if
+          self over dir-prev-open !
+          self dir-next-open !
+        else
+          self self dir-fs @ last-open-dir !
+          0 self dir-next-open !
+        then
+        self self dir-fs @ first-open-dir !
+        0 self dir-prev-open !
+        true self dir-open !
+      ;] over dir-fs @ with-fat32-lock
     ; define register-dir
     
     :noname ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
