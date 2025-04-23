@@ -2497,6 +2497,18 @@ begin-module net-ipv6
       \ Address lock
       lock-size member addr-lock
 
+      \ Auxiliary task
+      cell member aux-task
+
+      \ Auxiliary task lock
+      lock-size member aux-lock
+      
+      \ DHCPv6 discovery semaphore
+      sema-size member dhcpv6-discover-sema
+
+      \ DHCPv6 discovery success flag
+      cell member dhcpv6-discover-success?
+      
       \ Remove an IPv6 address from the deprecated IPv6 addresses
       method remove-deprecated-ipv6-addr
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
@@ -2797,6 +2809,9 @@ begin-module net-ipv6
       method detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
       ( valid-time target-0 target-1 target-2 target-3 self -- success? )
 
+      \ Run the auxiliary task
+      method run-aux-task ( self -- )
+
     end-module
     
     \ Get the IPv6 address
@@ -2964,6 +2979,10 @@ begin-module net-ipv6
       self dhcp-lock init-lock
       self addr-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
+      0 self aux-task !
+      self aux-lock init-lock
+      no-sema-limit 0 self dhcpv6-discover-sema init-sema
+      false self dhcpv6-discover-success? !
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
       self time-wait-list-lock init-lock
@@ -5281,10 +5300,9 @@ begin-module net-ipv6
         self use-dhcpv6? @ if
           systick::systick-counter self dhcp-discover-start !
           self ['] send-dhcpv6-solicit self dhcp-lock with-lock
-          self dhcp-sema take
-          self discovered-valid-time @
-          self discovered-ipv6-addr ipv6-unaligned@
-          self detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
+          self run-aux-task
+          self dhcpv6-discover-sema take
+          self dhcpv6-discover-success? @
         else
           success?
         then
@@ -5292,6 +5310,26 @@ begin-module net-ipv6
         success?
       then
     ; define discover-ipv6-addr
+
+    \ Run the auxiliary task
+    :noname ( self -- )
+      [: { self }
+        self aux-task @ 0= if
+          self 1 [: { self }
+            begin
+              self dhcp-sema take
+              self discovered-valid-time @
+              self discovered-ipv6-addr ipv6-unaligned@
+              self detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
+              self dhcpv6-discover-success? !
+              self dhcpv6-discover-sema give
+            again
+          ;] 512 256 768 0 task::spawn-on-core self aux-task !
+          c" net-aux" self aux-task @ task::task-name!
+          self aux-task @ task::run
+        then
+      ;] over aux-lock with-lock
+    ; define run-aux-task
 
     \ Start DNS discovery
     :noname { self -- }
