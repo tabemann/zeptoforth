@@ -26,6 +26,9 @@ begin-module picocalc-keys
   sema import
   i2c import
 
+  \ PicoCalc attributes
+  0 bit constant ATTR_CTRL
+
   \ PicoCalc special keys
   $B1 constant KEY_ESC
   $81 constant KEY_F1
@@ -54,17 +57,26 @@ begin-module picocalc-keys
     \ PicoCalc keyboard I2C device
     0 constant picocalc-keys-i2c-device
 
+    \ PicoCalc keyboard I2C SDA GPIO
+    9 constant picocalc-keys-sda-pin
+
+    \ PicoCalc keyboard I2C SCL GPIO
+    10 constant picocalc-keys-scl-pin
+
     \ PicoCalc keyboard I2C address
     $1F constant picocalc-keys-i2c-addr
 
+    \ PicoCalc keyboard I2C baud; note that I2C for the keyboard is slow
+    10000 constant picocalc-keys-i2c-baud
+    
     \ PicoCalc keyboard interval in ticks
     10 constant picocalc-keys-interval
 
     \ PicoCalc keyboard priority
     0 constant picocalc-keys-priority
 
-    \ Picocalc keyboard timeout
-    10 constant picocalc-keys-timeout
+    \ Picocalc keyboard timeout in ticks
+    5000 constant picocalc-keys-timeout
 
     \ PicoCalc keyboard buffer size
     256 constant picocalc-keys-buf-size
@@ -133,7 +145,7 @@ begin-module picocalc-keys
     method picocalc-keys>? ( self -- read? )
     
     \ Read a key
-    method picocalc-keys> ( self -- ctrl? key )
+    method picocalc-keys> ( self -- attributes key )
 
     \ Get whether control is currently pressed
     method picocalc-keys-ctrl? ( self -- ctrl? )
@@ -170,6 +182,12 @@ begin-module picocalc-keys
     :noname { self -- }
       self picocalc-keys-destroy-sema ungive
       false picocalc-keys-ready-destroy !
+      picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
+      picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
+      picocalc-keys-i2c-device master-i2c
+      picocalc-keys-i2c-baud picocalc-keys-i2c-device i2c-clock!
+      picocalc-keys-i2c-device 7-bit-i2c-addr
+      picocalc-keys-i2c-device enable-i2c
       picocalc-keys-interval picocalc-keys-priority
       self ['] handle-picocalc-keys-alarm
       self picocalc-keys-alarm set-alarm-delay-default
@@ -183,7 +201,7 @@ begin-module picocalc-keys
     ; define picocalc-keys>?
     
     \ Read a key
-    :noname ( self -- ctrl? key )
+    :noname ( self -- attributes key )
       self picocalc-keys-destroy-sema ungive
       self picocalc-keys-sema take
       self picocalc-keys-try-destroy @ if
@@ -192,7 +210,7 @@ begin-module picocalc-keys
       [: { self }
         self picocalc-keys-read-index @ { read-index }
         read-index 7 and bit self picocalc-keys-ctrl-buf read-index 3 rshift
-        bit@
+        bit@ ATTR_CTRL and
         read-index self picocalc-keys-key-buf + c@
         read-index 1+ [ picocalc-keys-buf-size 1- ] literal and
         self picocalc-keys-read-index !
