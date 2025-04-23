@@ -298,14 +298,10 @@ begin-module picocalc-term
       term-width y * x + { offset }
       offset self chars-buf + c@ { c }
       c 0= if bl to c then
+      offset self fg-color + c@ get-color
+      offset self bk-color + c@ get-color
       x self cursor-x @ = y self cursor-y @ = and
-      self cursor-visible @ and if
-        offset self bk-color + c@ get-color
-        offset self fg-color + c@ get-color
-      else
-        offset self fg-color + c@ get-color
-        offset self bk-color + c@ get-color
-      then
+      self cursor-visible @ and if swap then
       { char-fg-color char-bk-color }
       char-width x * char-height y * { display-x display-y }
       char-bk-color display-x display-y char-width char-heigh
