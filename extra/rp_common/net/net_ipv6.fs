@@ -5334,7 +5334,7 @@ begin-module net-ipv6
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 26 + ] literal [: { self buf }
+      [ dhcpv6-header-size 42 + ] literal [: { self buf }
         [ debug? ] [if]
           [: cr ." Constructing DHCPV6 SOLICIT" ;] debug-hook execute
         [then]
@@ -5352,13 +5352,18 @@ begin-module net-ipv6
         [ DUID_LL rev16 ] literal buf 4 + hunaligned!
         [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
         self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
-        [ 2 rev16 ] literal buf 16 + hunaligned!
+        [ OPTION_IA_NA rev16 ] literal buf 14 + hunaligned!
+        [ 12 rev16 ] literal buf 16 + hunaligned!
+        0 buf 18 + unaligned!
+        0 buf 22 + unaligned!
+        0 buf 26 + unaligned!
+        [ OPTION_ELAPSED_TIME rev16 ] literal buf 30 + hunaligned!
+        [ 2 rev16 ] literal buf 32 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        rev16 buf 18 + hunaligned!
-        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
-        [ 2 rev16 ] literal buf 22 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        rev16 buf 34 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 36 + hunaligned!
+        [ 2 rev16 ] literal buf 38 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 40 + hunaligned!
         [ debug? ] [if]
           [: cr ." Constructed DHCPv6 SOLICIT packet" ;] debug-hook execute
         [then]
