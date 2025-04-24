@@ -3416,7 +3416,7 @@ begin-module net-ipv6
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
 
@@ -3619,7 +3619,7 @@ begin-module net-ipv6
         0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
@@ -3675,7 +3675,7 @@ begin-module net-ipv6
         buf tcp-header-size 8 + 0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
@@ -5372,7 +5372,9 @@ begin-module net-ipv6
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 42 + ] literal [: { self buf }
+      [ dhcpv6-header-size 26 + ] literal
+      self use-dhcpv6-other? @ not if 16 + then
+      [: { self buf }
         [ debug? ] [if]
           [: cr ." Constructing DHCPV6 SOLICIT" ;] debug-hook execute
         [then]
@@ -5390,18 +5392,20 @@ begin-module net-ipv6
         [ DUID_LL rev16 ] literal buf 4 + hunaligned!
         [ HTYPE_ETHERNET rev16 ] literal buf 6 + hunaligned!
         self intf-mac-addr@ buf 8 + mac!
-        [ OPTION_IA_NA rev16 ] literal buf 14 + hunaligned!
-        [ 12 rev16 ] literal buf 16 + hunaligned!
-        0 buf 18 + unaligned!
-        0 buf 22 + unaligned!
-        0 buf 26 + unaligned!
-        [ OPTION_ELAPSED_TIME rev16 ] literal buf 30 + hunaligned!
-        [ 2 rev16 ] literal buf 32 + hunaligned!
+        [ OPTION_ELAPSED_TIME rev16 ] literal buf 14 + hunaligned!
+        [ 2 rev16 ] literal buf 16 + hunaligned!
         systick::systick-counter self dhcp-discover-start @ - 100 / $FFFF min
-        rev16 buf 34 + hunaligned!
-        [ OPTION_ORO rev16 ] literal buf 36 + hunaligned!
-        [ 2 rev16 ] literal buf 38 + hunaligned!
-        [ OPTION_SOL_MAX_RT rev16 ] literal buf 40 + hunaligned!
+        rev16 buf 18 + hunaligned!
+        [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
+        [ 2 rev16 ] literal buf 22 + hunaligned!
+        [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        self use-dhcpv6-other? @ not if
+          [ OPTION_IA_NA rev16 ] literal buf 26 + hunaligned!
+          [ 12 rev16 ] literal buf 28 + hunaligned!
+          0 buf 30 + unaligned!
+          0 buf 34 + unaligned!
+          0 buf 38 + unaligned!
+        then
         [ debug? ] [if]
           [: cr ." Constructed DHCPv6 SOLICIT packet" ;] debug-hook execute
         [then]
@@ -6104,7 +6108,11 @@ begin-module net-ipv6
         self [: { endpoint self }
           endpoint endpoint-refresh-ready? if
             endpoint endpoint-tcp-state@ { state }
-            [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " state . [then]
+            [ debug? tcp-log? or ] [if]
+              state
+              endpoint self intf-endpoints - <ipv6-endpoint> class-size /
+              [: cr ." ENDPOINT " . ." STATE: " . ;] debug-hook execute
+            [then]
             state TCP_ESTABLISHED =
             state TCP_SYN_RECEIVED = or
             state TCP_CLOSE_WAIT = or if
@@ -6128,6 +6136,7 @@ begin-module net-ipv6
               state TCP_SYN_SENT = if
                 endpoint reset-endpoint-local-port
                 endpoint endpoint-ipv6-remote@
+                endpoint endpoint-local-ipv6-addr@
                 endpoint endpoint-local-port@
                 endpoint endpoint-init-local-seq@ 1+
                 endpoint endpoint-init-local-seq!
@@ -6221,8 +6230,8 @@ begin-module net-ipv6
     \ Handle a refresh
     :noname ( self -- )
       ip-interface @ refresh-interface
-    ; define handle-refresh
-    
+    ; define handle-refresh  
+  
   end-implement
   
 end-module
