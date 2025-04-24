@@ -2497,6 +2497,18 @@ begin-module net-ipv6
       \ Address lock
       lock-size member addr-lock
 
+      \ Auxiliary task
+      cell member aux-task
+
+      \ Auxiliary task lock
+      lock-size member aux-lock
+      
+      \ DHCPv6 discovery semaphore
+      sema-size member dhcpv6-discover-sema
+
+      \ DHCPv6 discovery success flag
+      cell member dhcpv6-discover-success?
+      
       \ Remove an IPv6 address from the deprecated IPv6 addresses
       method remove-deprecated-ipv6-addr
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
@@ -2797,6 +2809,9 @@ begin-module net-ipv6
       method detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
       ( valid-time target-0 target-1 target-2 target-3 self -- success? )
 
+      \ Run the auxiliary task
+      method run-aux-task ( self -- )
+
     end-module
     
     \ Get the IPv6 address
@@ -2964,6 +2979,10 @@ begin-module net-ipv6
       self dhcp-lock init-lock
       self addr-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
+      0 self aux-task !
+      self aux-lock init-lock
+      no-sema-limit 0 self dhcpv6-discover-sema init-sema
+      false self dhcpv6-discover-success? !
       0 self endpoint-queue-index !
       systick::systick-counter self time-wait-interval-start !
       self time-wait-list-lock init-lock
@@ -3397,7 +3416,7 @@ begin-module net-ipv6
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
 
@@ -3600,7 +3619,7 @@ begin-module net-ipv6
         0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
@@ -3656,7 +3675,7 @@ begin-module net-ipv6
         buf tcp-header-size 8 + 0 tcp-checksum
         compute-ipv6-checksum rev16 buf tcp-checksum h!
 
-        [ debug? ] [if]
+        [ debug? tcp-log? or ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
@@ -5281,10 +5300,9 @@ begin-module net-ipv6
         self use-dhcpv6? @ if
           systick::systick-counter self dhcp-discover-start !
           self ['] send-dhcpv6-solicit self dhcp-lock with-lock
-          self dhcp-sema take
-          self discovered-valid-time @
-          self discovered-ipv6-addr ipv6-unaligned@
-          self detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
+          self run-aux-task
+          self dhcpv6-discover-sema take
+          self dhcpv6-discover-success? @
         else
           success?
         then
@@ -5292,6 +5310,26 @@ begin-module net-ipv6
         success?
       then
     ; define discover-ipv6-addr
+
+    \ Run the auxiliary task
+    :noname ( self -- )
+      [: { self }
+        self aux-task @ 0= if
+          self 1 [: { self }
+            begin
+              self dhcp-sema take
+              self discovered-valid-time @
+              self discovered-ipv6-addr ipv6-unaligned@
+              self detect-duplicate-and-set-intf-dhcpv6-ipv6-addr
+              self dhcpv6-discover-success? !
+              self dhcpv6-discover-sema give
+            again
+          ;] 512 256 768 0 task::spawn-on-core self aux-task !
+          c" net-aux" self aux-task @ task::task-name!
+          self aux-task @ task::run
+        then
+      ;] over aux-lock with-lock
+    ; define run-aux-task
 
     \ Start DNS discovery
     :noname { self -- }
@@ -5334,7 +5372,9 @@ begin-module net-ipv6
       DHCPV6_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       self intf-link-local-ipv6-addr@ dhcpv6-client-port
       DHCPV6_LINK_LOCAL_MULTICAST dhcpv6-server-port
-      [ dhcpv6-header-size 26 + ] literal [: { self buf }
+      [ dhcpv6-header-size 26 + ] literal
+      self use-dhcpv6-other? @ not if 16 + then
+      [: { self buf }
         [ debug? ] [if]
           [: cr ." Constructing DHCPV6 SOLICIT" ;] debug-hook execute
         [then]
@@ -5359,6 +5399,13 @@ begin-module net-ipv6
         [ OPTION_ORO rev16 ] literal buf 20 + hunaligned!
         [ 2 rev16 ] literal buf 22 + hunaligned!
         [ OPTION_SOL_MAX_RT rev16 ] literal buf 24 + hunaligned!
+        self use-dhcpv6-other? @ not if
+          [ OPTION_IA_NA rev16 ] literal buf 26 + hunaligned!
+          [ 12 rev16 ] literal buf 28 + hunaligned!
+          0 buf 30 + unaligned!
+          0 buf 34 + unaligned!
+          0 buf 38 + unaligned!
+        then
         [ debug? ] [if]
           [: cr ." Constructed DHCPv6 SOLICIT packet" ;] debug-hook execute
         [then]
@@ -6061,7 +6108,11 @@ begin-module net-ipv6
         self [: { endpoint self }
           endpoint endpoint-refresh-ready? if
             endpoint endpoint-tcp-state@ { state }
-            [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " state . [then]
+            [ debug? tcp-log? or ] [if]
+              state
+              endpoint self intf-endpoints - <ipv6-endpoint> class-size /
+              [: cr ." ENDPOINT " . ." STATE: " . ;] debug-hook execute
+            [then]
             state TCP_ESTABLISHED =
             state TCP_SYN_RECEIVED = or
             state TCP_CLOSE_WAIT = or if
@@ -6085,6 +6136,7 @@ begin-module net-ipv6
               state TCP_SYN_SENT = if
                 endpoint reset-endpoint-local-port
                 endpoint endpoint-ipv6-remote@
+                endpoint endpoint-local-ipv6-addr@
                 endpoint endpoint-local-port@
                 endpoint endpoint-init-local-seq@ 1+
                 endpoint endpoint-init-local-seq!
@@ -6178,8 +6230,8 @@ begin-module net-ipv6
     \ Handle a refresh
     :noname ( self -- )
       ip-interface @ refresh-interface
-    ; define handle-refresh
-    
+    ; define handle-refresh  
+  
   end-implement
   
 end-module

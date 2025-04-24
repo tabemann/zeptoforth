@@ -26,6 +26,9 @@ begin-module net-config
 
   \ Are we debugging?
   false constant debug?
+
+  \ Dump outgoing TCP packets
+  false constant tcp-log?
   
   \ DHCP logging
   false value dhcp-log?
@@ -109,7 +112,7 @@ begin-module net-config
   2 value syn-sent-refresh-timeout-multiplier
 
   \ SYN_SENT maximum refresh count
-  3 value syn-sent-max-refreshes
+  4 value syn-sent-max-refreshes
 
   \ SYN_RECEIVED initial refresh timeout
   1000 value syn-ack-sent-init-refresh-timeout
@@ -118,10 +121,10 @@ begin-module net-config
   2 value syn-ack-sent-refresh-timeout-multiplier
 
   \ SYN_RECEIVED maximum refresh count
-  3 value syn-ack-sent-max-refreshes
+  4 value syn-ack-sent-max-refreshes
 
   \ ESTABLISHED initial refresh timeout
-  500 value established-init-refresh-timeout
+  1000 value established-init-refresh-timeout
 
   \ ESTABLISHED refresh timeout multplication factor
   2 value established-refresh-timeout-multiplier
@@ -142,7 +145,7 @@ begin-module net-config
   3 value fin-wait-1-max-refreshes
 
   \ LAST_ACK initial refresh timeout
-  1000 value last-ack-init-refresh-timeout
+  2500 value last-ack-init-refresh-timeout
 
   \ LAST_ACK refresh timeout multiplication factor
   2 value last-ack-refresh-timeout-multiplier
