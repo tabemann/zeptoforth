@@ -83,6 +83,11 @@ begin-module picocalc-term
     \ The output stream-size
     256 constant output-stream-size
 
+    \ Attributes
+    0 bit constant attr-bold
+    1 bit constant attr-dim
+    2 bit constant attr-underline
+
     \ The terminal colors
     create term-colors
     0 0 0 rgb8 c, \ black
@@ -102,6 +107,29 @@ begin-module picocalc-term
     128 256 256 rgb8 c, \ b-cyan
     256 256 256 rgb8 c, \ b-white
 
+    \ Modify the foreground color based on attributes
+    : modify-color { color-const attr -- color-const' }
+      attr attr-bold and if
+        color-const ansi-term::black >=
+        color-const ansi-term::white <= and if
+          color-const ansi-term::black - ansi-term::b-black +
+        else
+          color-const
+        then
+      else
+        attr attr-dim and if
+          color-const ansi-term::b-black >=
+          color-const ansi-term::b-white <= and if
+            color-const ansi-term::b-black - ansi-term::black +
+          else
+            color-const
+          then
+        else
+          color-const
+        then
+      then
+    ;
+    
     \ Get the color index
     : color-index { color-const -- index }
       color-const ansi-term::black >=
@@ -122,6 +150,16 @@ begin-module picocalc-term
       color-index term-colors + c@
     ;
     
+    \ Character constants
+    $09 constant tab
+    $7F constant delete
+    $0A constant linefeed
+    $0D constant return
+    $08 constant backspace
+
+    \ Tab size (note as implemented this must be a power of two)
+    8 constant tab-size
+
   end-module> import
 
   \ PicoCalc terminal class
@@ -155,6 +193,9 @@ begin-module picocalc-term
       
       \ The background color
       cell member bk-color
+
+      \ The attributes
+      cell member attrs
       
       \ The cursor x coordinate
       cell member cursor-x
@@ -204,9 +245,30 @@ begin-module picocalc-term
       \ Draw the cursor
       member draw-cursor ( self -- )
 
+      \ Clear the cursor
+      member clear-cursor ( self -- )
+
       \ Draw a character
       method draw-char ( x y self -- )
       
+      \ Scroll up by a number of lines
+      method scroll-up ( lines self -- )
+
+      \ Handle a carriage return
+      method handle-return ( self -- )
+
+      \ Handle a linefeed
+      method handle-linefeed ( self -- )
+
+      \ Handle a backspace
+      method handle-backspace ( self -- )
+
+      \ Handle a tab
+      method handle-tab ( self -- )
+
+      \ Handle an ordinary character
+      method handle-char ( c self -- )
+
     end-module
 
     \ Initialize the PicoCalc terminal
@@ -260,6 +322,7 @@ begin-module picocalc-term
       ansi-term::black fill
       ansi-term::white self fg-color !
       ansi-term::black self bk-color !
+      0 attrs !
       0 self cursor-x !
       0 self cursor-y !
       true self cursor-visible !
@@ -278,11 +341,84 @@ begin-module picocalc-term
     \ Run the PicoCalc terminal
     :noname { self -- }
       begin self try-destroy @ not while
-        
+        false { updated }
+        0 { W^ buf }
+        buf 1 self output-stream recv-stream-no-block 0<> if
+          updated not if
+            self term-lock claim-lock
+            true to updated
+          then
+          buf c@ case
+            return of self handle-return endof
+            linefeed of self handle-linefeed endof
+            backspace of self handle-backspace endof
+            tab of self handle-tab endof
+            dup self handle-char
+          endcase
+        else
+          updated if
+            intf-display update-display
+            self term-lock release-lock
+          then
+        then
       repeat
       self destroy-sema give
     ; define run-term
 
+    \ Handle a carriage return
+    :noname { self -- }
+      self clear-cursor
+      0 self cursor-x !
+      self draw-cursor
+    ; define handle-return
+    
+    \ Handle a linefeed
+    :noname { self -- }
+      self cursor-y @ term-height 1- < if
+        self clear-cursor
+        1 self cursor-y +!
+        self draw-cursor
+      else
+        1 self scroll-up
+      then
+    ; define handle-linefeed
+    
+    \ Handle a backspace
+    :noname { self -- }
+      self clear-cursor
+      -1 self cursor-x +!
+      self cursor-x @ 0< if
+        term-width 1- self cursor-x !
+        self cursor-y @ 1- 0 max self cursor-y !
+      then
+      self draw-cursor
+    ; define handle-backspace
+
+    \ Handle a tab
+    :noname { self -- }
+      self cursor-x @ 1+ tab-size align term-width min self cursor-x @ - 0 ?do
+        bl self handle-char
+      then
+    ; define handle-tab
+    
+    \ Handle an ordinary character
+    :noname { c self -- }
+      self clear-cursor
+      self cursor-x @ self cursor-y @ { x y }
+      x term-width = if
+        0 to x
+        y term-height 1- >= if 1 self scroll-up else y 1+ to y then
+      then
+      x 1+ self cursor-x !
+      term-width y * x + { offset }
+      c self chars-buf offset + c!
+      self attrs @ self attrs-buf offset + c!
+      self fg-color @ self fg-colors-buf offset + c!
+      self bk-color @ self bk-colors-buf offset + c!
+      x y draw-char
+      self draw-cursor
+    ; define handle-char
+    
     \ Carry out an operation with the PicoCalc terminal locked
     :noname ( xt self -- )
       term-lock with-lock
@@ -293,22 +429,51 @@ begin-module picocalc-term
       self cursor-x @ self cursor-y @ draw-char
     ; define draw-cursor
 
+    \ Clear the cursor
+    :noname { self -- }
+      self cursor-visible @ { saved-cursor-visible }
+      false self cursor-visible !
+      self draw-cursor
+      saved-cursor-visible self cursor-visible !
+    ; define clear-cursor
+    
     \ Draw a character
     :noname { x y self -- }
       term-width y * x + { offset }
       offset self chars-buf + c@ { c }
+      offset self attrs-buf + c@ { attr }
       c 0= if bl to c then
-      offset self fg-color + c@ get-color
-      offset self bk-color + c@ get-color
+      offset self fg-colors-buf + c@
+      offset self bk-colors-buf + c@
       x self cursor-x @ = y self cursor-y @ = and
       self cursor-visible @ and if swap then
-      { char-fg-color char-bk-color }
+      get-color swap attr modify-color get-color
+      { char-bk-color char-fg-color }
       char-width x * char-height y * { display-x display-y }
-      char-bk-color display-x display-y char-width char-heigh
+      char-bk-color display-x display-y char-width char-height
       self display-intf draw-rect-const
       char-fg-color c display-x display-y
       self display-intf simple-font-6x8::a-simple-font-6x8 draw-char-to-pixmap8
+      attr attr-underline and if
+        char-fg-color display-x display-y char-height 1- + char-width 1
+        self display-intf draw-rect-const
+      then
     ; define draw-char
+
+    \ Scroll up by a number of lines
+    :noname { lines self -- }
+      lines term-height min to lines
+      self clear-cursor
+      lines [ char-height display-width * ] literal * { pixels }
+      self display-buf pixels + self display-buf
+      [ display-width display-height * ] literal pixels - move
+      [ term-height char-height * ] literal lines char-height * - { fill-y }
+      self bk-color @ get-color
+      0 fill-y display-width display-height fill-y self intf-display
+      draw-rect-const
+      self draw-cursor
+      self display-intf set-dirty
+    ; define scroll-up
 
   end-implement
   
