@@ -149,6 +149,14 @@ begin-module picocalc-term
     : get-color ( color-const -- color )
       color-index term-colors + c@
     ;
+
+    \ Convert a control character
+    : convert-control { c -- c' }
+      c $20 >= c $3F <= and if c $20 - exit then
+      c $40 >= c $5F <= and if c $40 - exit then
+      c $60 >= c $7F <= and if c $60 - exit then
+      c
+    ;
     
     \ Character constants
     $09 constant tab
@@ -254,6 +262,12 @@ begin-module picocalc-term
       \ Scroll up by a number of lines
       method scroll-up ( lines self -- )
 
+      \ Handle input
+      method handle-input ( self -- )
+
+      \ Handle output
+      method handle-output ( self -- )
+      
       \ Handle a carriage return
       method handle-return ( self -- )
 
@@ -269,6 +283,15 @@ begin-module picocalc-term
       \ Handle an ordinary character
       method handle-char ( c self -- )
 
+      \ Input a string
+      method input-string ( c-addr u self -- )
+
+      \ Handle break
+      method handle-break ( self -- )
+
+      \ Handle control-break
+      method handle-control-break ( self -- )
+      
     end-module
 
     \ Initialize the PicoCalc terminal
@@ -341,6 +364,108 @@ begin-module picocalc-term
     \ Run the PicoCalc terminal
     :noname { self -- }
       begin self try-destroy @ not while
+        self handle-input
+        self handle-output
+        pause
+      repeat
+      self destroy-sema give
+    ; define run-term
+
+    \ Handle input
+    :noname { self -- }
+      begin self key-intf picocalc-keys>? while
+        self key-intf picocalc-keys> { attrs W^ c }
+        attrs 0= if
+          attention? @ if
+            c c@ KEY_ESC = if $1B c c! then
+            c c@ $80 < if c c@ [: attention-hook @ ?execute ;] try drop then
+          else
+            c c@ case
+              KEY_ESC of s\" \x1B" self input-string 100 ms endof
+              KEY_F1 of s\" \x1B\x4F\x50" self input-string endof
+              KEY_F2 of s\" \x1B\x4F\x51" self input-string endof
+              KEY_F3 of s\" \x1B\x4F\x52" self input-string endof
+              KEY_F4 of s\" \x1B\x4F\x53" self input-string endof
+              KEY_F5 of s\" \x1B\x5B\x31\x35\x7E" self input-string endof
+              KEY_F6 of s\" \x1B\x5B\x31\x37\x7E" self input-string endof
+              KEY_F7 of s\" \x1B\x5B\x31\x38\x7E" self input-string endof
+              KEY_F8 of s\" \x1B\x5B\x31\x39\x7E" self input-string endof
+              KEY_F9 of s\" \x1B\x5B\x32\x30\x7E" self input-string endof
+              KEY_F10 of s\" \x1B\x5B\x32\x31\x7E" self input-string endof
+              KEY_UP of s\" \x1B\x5B\x41" self input-string endof
+              KEY_DOWN of s\" \x1B\x5B\x42" self input-string endof
+              KEY_RIGHT of s\" \x1B\x5B\x43" self input-string endof
+              KEY_LEFT of s\" \x1B\x5B\x44" self input-string endof
+              KEY_BREAK of self handle-break endof
+              KEY_INSERT of s\" \x1B\x5B\x32\x7E" self input-string endof
+              KEY_HOME of s\" \x1B\x5B\x48" self input-string endof
+              KEY_END of s\" \x1B\x5B\x46" self input-string endof
+              KEY_PUP of s\" \x1B\x5B\x35\x7E" self input-string endof
+              KEY_PDOWN of s\" \x1B\x5B\x36\x7E" self input-string endof
+              c 1 self input-string
+            endcase
+          then
+        else
+          attention? @ if
+            c c@ KEY_ESC = if $1B c c! then
+            c c@ $80 < if
+              c c@ convert-control [: attention-hook @ ?execute ;] try drop
+            then
+          else
+            c c@ case
+              KEY_ESC of s\" \x1B" self input-string 100 ms endof
+              KEY_F1 of s\" \x1B\x5B\x31\x3B\x35\x50" self input-string endof
+              KEY_F2 of s\" \x1B\x5B\x31\x3B\x35\x51" self input-string endof
+              KEY_F3 of s\" \x1B\x5B\x31\x3B\x35\x52" self input-string endof
+              KEY_F4 of s\" \x1B\x5B\x31\x3B\x35\x53" self input-string endof
+              KEY_F5 of
+                s\" \x1B\x5B\x31\x35\x3B\x35\x7E" self input-string
+              endof
+              KEY_F6 of
+                s\" \x1B\x5B\x31\x37\x3B\x35\x7E" self input-string
+              endof
+              KEY_F7 of
+                s\" \x1B\x5B\x31\x38\x3B\x35\x7E" self input-string
+              endof
+              KEY_F8 of
+                s\" \x1B\x5B\x31\x39\x3B\x35\x7E" self input-string
+              endof
+              KEY_F9 of
+                s\" \x1B\x5B\x32\x30\x3B\x35\x7E" self input-string
+              endof
+              KEY_F10 of
+                s\" \x1B\x5B\x32\x31\x3B\x35\x7E" self input-string
+              endof
+              KEY_UP of s\" \x1B\x5B\x31\x3B\x35\x41" self input-string endof
+              KEY_DOWN of s\" \x1B\x5B\x31\x3B\x35\x42" self input-string endof
+              KEY_RIGHT of s\" \x1B\x5B\x31\x3B\x35\x43" self input-string endof
+              KEY_LEFT of s\" \x1B\x5B\x31\x3B\x35\x44" self input-string endof
+              KEY_BREAK of self handle-control-break endof
+              KEY_INSERT of s\" \x1B\x5B\x32\x3B\x35\x7E" self input-string endof
+              KEY_HOME of s\" \x1B\x5B\x31\x3B\x35\x48" self input-string endof
+              KEY_END of s\" \x1B\x5B\x31\x3B\x35\x46" self input-string endof
+              KEY_PUP of s\" \x1B\x5B\x35\x3B\x35\x7E" self input-string endof
+              KEY_PDOWN of s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string endof
+              c c@ convert-control c c! c 1 self input-string
+            endcase
+          then
+        then
+      repeat
+    ; define handle-input
+
+    \ Handle break
+    :noname { self -- }
+      [: attention-start-hook @ ?execute ;] try drop
+    ; define handle-break
+
+    \ Handle control-break
+    :noname { self -- }
+      reboot
+    ; define handle-control-break
+    
+    \ Handle output
+    :noname { self -- }
+      begin
         false { updated }
         0 { W^ buf }
         buf 1 self output-stream recv-stream-no-block 0<> if
@@ -355,16 +480,17 @@ begin-module picocalc-term
             tab of self handle-tab endof
             dup self handle-char
           endcase
+          false
         else
           updated if
             intf-display update-display
             self term-lock release-lock
           then
+          true
         then
-      repeat
-      self destroy-sema give
-    ; define run-term
-
+      until
+    ; define handle-output
+    
     \ Handle a carriage return
     :noname { self -- }
       self clear-cursor
@@ -474,6 +600,12 @@ begin-module picocalc-term
       self draw-cursor
       self display-intf set-dirty
     ; define scroll-up
+
+    \ Input a string
+    :noname ( c-addr u self -- )
+      [: input-stream send-stream-no-block ;] try
+      ?dup if dup ['] x-would-block = if 2drop 2drop else ?raise then then
+    ; define input-string
 
   end-implement
   
