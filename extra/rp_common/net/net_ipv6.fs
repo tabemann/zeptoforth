@@ -5760,7 +5760,7 @@ begin-module net-ipv6
           dup self dhcp-server-duid-len !
           self dhcp-server-duid swap move
         else
-          exit
+          2drop exit
         then
       else
         2drop exit
