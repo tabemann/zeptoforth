@@ -1,10 +1,10 @@
 # Building and Using zeptoIP
 
-zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W. It is designed to enable communication by zeptoforth via WiFi. It has versions for both IPv4 and IPv6, which are largely separate but share some common code. These will be referred to as zeptoIPv4 and zeptoIPv6 respectively when it is needed to disambiguate the two. Also, while it is originally implemented specifically for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W, it unofficially supports some other boards such as the Pimoroni Pico Plus 2 W, and it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
+zeptoIP is an IP stack for zeptoforth. It is at the present layered on top of a CYW43439 driver for WiFi on the Raspberry Pi Pico W and Raspberry Pi Pico 2 W along with an ENC28J60 driver for directly interfacing with Ethernet. It has versions for both IPv4 and IPv6, which are largely separate but share some common code. These will be referred to as zeptoIPv4 and zeptoIPv6 respectively when it is needed to disambiguate the two. Also, while the CYW43439 driver is originally implemented specifically for the Raspberry Pi Pico W and Raspberry Pi Pico 2 W, it unofficially supports some other boards such as the Pimoroni Pico Plus 2 W.
 
-zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space. This is not an issue on the Raspberry Pi Pico 2 W, where a standard `rp2350` platform build will do.
+The CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space. This is not an issue on the Raspberry Pi Pico 2 W, where a standard `rp2350` platform build will do.
 
-Note that zeptoIP and the CYW43439 driver normally live on core 1 of the RP2040 and RP2350, so it is a good idea to leave these cores be and run one's user code on core 0.
+Note that zeptoIP, the CYW43439, and the ENC28J60 driver normally live on core 1 of the RP2040 and RP2350, so it is a good idea to leave these cores be and run one's user code on core 0.
 
 For examples of demos involving zeptoIPv4, there are:
 
@@ -18,10 +18,10 @@ For examples of demos involving zeptoIPv4, there are:
 For examples of demos involving zeptoIPv6, there are:
 
 * `test/rp_common/pico_w_net_ipv6_http_led.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_led.fs`
-* `test/rp_common/pico_w_net_ipv6_http_download.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download.fs`
+* `test/rp_common/pico_w_net_ipv6_http_download.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download.fs` (note that there have been issues connecting to its example of `http://www.google.com/` over IPv6)
 * `test/rp_common/pico_w_net_ipv6_udp.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_udp.fs`
 
-Directions for use of the individual demos are included therein.
+Directions for use of the individual demos are included therein. These examples are all writtey for the CYW43439 driver.
 
 ## Uploading the CYW43439 firmware
 
@@ -37,13 +37,33 @@ Note that this will be faster if one uses a USB CDC console device rather than a
 
 ## Building the CYW43439 driver and zeptoIP
 
-Once one has uploaded the CYW43439 firmware, both the CYW43439 driver and zeptoIP may be built together by executing:
+Once one has uploaded the CYW43439 firmware, both the CYW43439 driver and zeptoIPv4 may be built together by executing:
 
 ```
 utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
 ```
 
+The same can be done for the CYW43439 driver and zeptoIPv6 with:
+
+```
+utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/pico_w_net_ipv6_all.fs
+```
+
 Note that once this is complete one must reboot the board prior to using zeptoIP or the CYW43439 driver. On the first reboot there likely will be a noticeable delay before the board responds, as it will be generating new entries in the flash dictionary index, which is stored in flash.
+
+## Building the ENC28J60 driver and zeptoIP
+
+The process for installing the ENC28J60 driver is similar to the CYW43439 driver except no firmware for the ENC28J60 needs to be uploaded, and one uses the following to install the ENC28J60 driver and zeptoIPv4:
+
+```
+utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/enc28j60_net_ipv4_all.fs
+```
+
+The same can be done for the ENC28J60 driver and zeptoIPv6 with:
+
+```
+utils/codeload3.sh -B 115200 -p <your console tty device> serial extra/rp_common/enc28j60_net_ipv6_all.fs
+```
 
 ## Bringing up zeptoIP and the CYW43439 driver
 
@@ -195,6 +215,27 @@ my-interface dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " net-misc::ip
 ```
 
 Manually configuring an IPv6 interface is similar to manually configuring an IPv4 interface, except that IPv6 addresses are used instead of IPv4 addresses, and an IPv6 prefix and prefix length are used instead of an IPv4 netmask.
+
+## Bringing up the ENC28J60 driver and zeptoIP
+
+Bringing up the ENC28J60 driver and zeptoIP is similar to bringing up CYW43439 driver and zeptoIP, except one uses `simple-enc28j60-net-ipv4::<simple-enc28j60-net-ipv4>` for zeptoIPv4 or `simple-enc28j60-net-ipv6::<simple-enc28j60-net-ipv6>` for zeptoIPv6 as follows (for zeptoIPv4; replace references to `ipv4` with `ipv6` for zeptoIPv6):
+
+```
+simple-enc28j60-net-ipv4 import
+
+<simple-enc28j60-net-ipv4> class-size buffer: my-enc28j60-net
+0 value my-interface
+
+int-pin spi-pin spi-device mac-address duplex <simple-enc28j60-net-ipv4> my-enc28j60-net init-project
+my-enc28j60-net init-net
+my-enc28j60-net net-interface@ to my-interface
+```
+
+where `int-pin` is the interrupt pin GPIO index, `spi-pin` is the first GPIO index of four pins for the SPI interface, `spi-device` is the SPI interface index, `mac-address` is a double-cell value for the MAC address for the Ethernet interface, and `duplex` is whether the Ethernet interface is full-duplex (consult with your switch to determine whether it is full or half-duplex).
+
+Note that the ENC28J60 driver currently monopolizes the GPIO and DMA interrupt vectors, even though this may change in the future.
+
+After this point the only differences between bringing up the ENC28J60 and the CYW43439 with zeptoIP is that there is no setting a country or connecting to an AP.
 
 ## Using zeptoIP
 

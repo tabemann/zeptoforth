@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann, Paul Koning
+\ Copyright (c) 2023-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@ compile-to-flash
 marker erase-net
 
 #include extra/rp_common/enc28j60/enc28j60_all.fs
-#include extra/rp_common/net/net_ipv4_all.fs
-#include extra/rp_common/simple_enc28j60_net_ipv4.fs
+#include extra/rp_common/net/net_ipv6_all.fs
+#include extra/rp_common/simple_enc28j60_net_ipv6.fs
 
 compile-to-ram

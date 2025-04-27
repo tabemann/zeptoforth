@@ -31,7 +31,6 @@ begin-module enc28j60-runner
   lock import
   task import
   sema import
-  net-misc import
   closure import
   pin import
   gpio import
