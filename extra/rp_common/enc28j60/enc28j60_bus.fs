@@ -35,7 +35,10 @@ begin-module enc28j60-bus
   dma-internal import
   gpio import
   gpio-internal import
-  net-misc import
+  armv6m import
+
+  \ Reverse byte order in a 32-bit value
+  : rev ( x -- x' ) [inlined] code[ r6 r6 rev_,_ ]code ;
 
   \ TEMP bugfix -- fixed in release 1.11.1
   rp2040? [if]

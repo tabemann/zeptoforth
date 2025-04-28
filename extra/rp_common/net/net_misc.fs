@@ -678,8 +678,8 @@ begin-module net-misc
   
   \ Strip an Ethernet header
   : strip-ethernet-header { addr bytes -- addr' bytes' }
-    addr cyw43-structs::ethernet-header-size +
-    bytes cyw43-structs::ethernet-header-size - 0 max
+    addr ethernet-header-size +
+    bytes ethernet-header-size - 0 max
   ;
   
   \ Compute a checksum

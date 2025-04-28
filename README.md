@@ -80,7 +80,7 @@ There is also support for loadable extras not included in any builds:
 * Single-cell S15.16 fixed-point numeric support
 * Complex numbers built on top of single-precision hardware floating point
 * A profiler
-* An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
+* An IPv4 stack and an IPv6 stack for the Raspberry Pi Pico W, the Raspberry Pi Pico 2 W, and the ENC28J60 10 Mbit Ethernet interface attached to the RP2040 and RP2350 (aka 'zeptoIPv4` and `zeptoIPv6`); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
 * A text editor for use with files in FAT32 filesystems (aka 'zeptoed'); for more information consult `docs/extra/zeptoed.md`.
 * An SNTP (Simple Network Time Protocol) implementation for use with zeptoIP
 * Bitmaps (in `extra/common/bitmap.fs`)
