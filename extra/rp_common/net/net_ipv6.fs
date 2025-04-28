@@ -2933,7 +2933,7 @@ begin-module net-ipv6
       loop
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self intf-ipv6-prefix ipv6-unaligned!
-      true intf-autonomous? !
+      true self intf-autonomous? !
       systick::systick-counter self discovered-valid-time !
       0 0 0 0 self discovered-ipv6-addr ipv6-unaligned!
       128 self intf-ipv6-prefix-len !
