@@ -201,7 +201,7 @@ begin-module picocalc-keys
     ; define picocalc-keys>?
     
     \ Read a key
-    :noname ( self -- attributes key )
+    :noname { self -- attributes key }
       self picocalc-keys-destroy-sema ungive
       self picocalc-keys-sema take
       self picocalc-keys-try-destroy @ if

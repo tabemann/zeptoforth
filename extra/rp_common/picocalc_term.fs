@@ -23,9 +23,10 @@ begin-module picocalc-term
   oo import
   pixmap8 import
   pixmap8-internal import
-  simple-font-6x8
+  font import
+  simple-font-6x8 import
   ili9488-8-common import
-  ili9488-spi-8 import
+  ili9488-8-spi import
   picocalc-keys import
   task import
   lock import
@@ -259,19 +260,21 @@ begin-module picocalc-term
       output-recv-buf-size cell align member output-recv-buf
 
       \ The console input data structure
-      console-internal::console-stream-data-size member console-input-data
+      console-internal::console-stream-data-size cell align
+      member console-input-data
 
       \ The console output data structure
-      console-internal::console-out-stream-data-size member console-output-data
+      console-internal::console-out-stream-data-size cell align
+      member console-output-data
 
       \ Run the terminal
       method run-term ( self -- )
 
       \ Draw the cursor
-      member draw-cursor ( self -- )
+      method draw-cursor ( self -- )
 
       \ Clear the cursor
-      member clear-cursor ( self -- )
+      method clear-cursor ( self -- )
 
       \ Draw a character
       method draw-char ( x y self -- )
@@ -485,7 +488,7 @@ begin-module picocalc-term
       default-bk-color fill
       default-fg-color self fg-color !
       default-bk-color self bk-color !
-      0 attrs !
+      0 self attrs !
       0 self cursor-x !
       0 self cursor-y !
       true self cursor-visible !
@@ -624,7 +627,7 @@ begin-module picocalc-term
           false
         else
           updated if
-            intf-display update-display
+            display-intf update-display
             self term-lock release-lock
           then
           true
@@ -654,7 +657,7 @@ begin-module picocalc-term
                 loop
                 found if
                   self output-recv-buf found-size self parse-escape
-                  found-size self output-stream skip-stream-no-block drop
+                  found-size self output-stream skip-stream drop
                 then
                 found
               else
@@ -878,8 +881,8 @@ begin-module picocalc-term
       term-height self cursor-y @ 1+ ?do
         term-width 0 ?do
           term-width j * i + { offset }
-          fg-color self fg-color-buf offset + c!
-          bk-color self bk-color-buf offset + c!
+          fg-color self fg-colors-buf offset + c!
+          bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
           i j self draw-char
         loop
@@ -893,8 +896,8 @@ begin-module picocalc-term
       self cursor-y @ 0 ?do
         term-width 0 ?do
           term-width j * i + { offset }
-          fg-color self fg-color-buf offset + c!
-          bk-color self bk-color-buf offset + c!
+          fg-color self fg-colors-buf offset + c!
+          bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
           i j self draw-char
         loop
@@ -908,8 +911,8 @@ begin-module picocalc-term
       term-height 0 ?do
         term-width 0 ?do
           term-width j * i + { offset }
-          fg-color self fg-color-buf offset + c!
-          bk-color self bk-color-buf offset + c!
+          fg-color self fg-colors-buf offset + c!
+          bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
           i j self draw-char
         loop
@@ -936,8 +939,8 @@ begin-module picocalc-term
       self cursor-y @ { y }
       self cursor-x @ 0 ?do
         term-width y * i + { offset }
-        fg-color self fg-color-buf offset + c!
-        bk-color self bk-color-buf offset + c!
+        fg-color self fg-colors-buf offset + c!
+        bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
         i y self draw-char
       loop
@@ -950,8 +953,8 @@ begin-module picocalc-term
       self cursor-y @ { y }
       term-width self cursor-x @ ?do
         term-width y * i + { offset }
-        fg-color self fg-color-buf offset + c!
-        bk-color self bk-color-buf offset + c!
+        fg-color self fg-colors-buf offset + c!
+        bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
         i y self draw-char
       loop
@@ -964,8 +967,8 @@ begin-module picocalc-term
       self cursor-y @ { y }
       term-width 0 ?do
         term-width y * i + { offset }
-        fg-color self fg-color-buf offset + c!
-        bk-color self bk-color-buf offset + c!
+        fg-color self fg-colors-buf offset + c!
+        bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
         i y self draw-char
       loop
@@ -1027,8 +1030,8 @@ begin-module picocalc-term
       over ansi-term::white ansi-term::background <= and if
         self handle-bk-color exit
       then
-      dup ansi-term::b-black ansi-term::b-background >=
-      over ansi-term::b-white ansi-term::b-background <= and if
+      dup ansi-term::b-black ansi-term::background >=
+      over ansi-term::b-white ansi-term::background <= and if
         self handle-bk-color exit
       then
       case
@@ -1140,7 +1143,7 @@ begin-module picocalc-term
     :noname { self -- }
       self cursor-x @ 1+ tab-size align term-width min self cursor-x @ - 0 ?do
         bl self handle-char
-      then
+      loop
     ; define handle-tab
     
     \ Handle an ordinary character
@@ -1212,7 +1215,7 @@ begin-module picocalc-term
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 fill-y display-width display-height fill-y - self intf-display
+      0 fill-y display-width display-height fill-y - self display-intf
       draw-rect-const
       self draw-cursor
       self display-intf set-dirty
@@ -1227,7 +1230,7 @@ begin-module picocalc-term
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 0 display-width fill-y self intf-display draw-rect-const
+      0 0 display-width fill-y self display-intf draw-rect-const
       self draw-cursor
       self display-intf set-dirty
     ; define scroll-down
@@ -1248,7 +1251,7 @@ begin-module picocalc-term
     \ Initialize the PicoCalc terminal
     : init-shared-term ( -- )
       <picocalc-term> shared-term init-object
-      shared-term init-picocalc-term
+      shared-term init-term
     ;
     initializer init-shared-term
 
