@@ -101,21 +101,21 @@ begin-module picocalc-term
     \ The terminal colors
     create term-colors
     0 0 0 rgb8 c, \ black
-    223 0 0 rgb8 c, \ red
-    0 223 0 rgb8 c, \ green
-    223 223 0 rgb8 c, \ yellow
+    191 0 0 rgb8 c, \ red
+    0 191 0 rgb8 c, \ green
+    191 191 0 rgb8 c, \ yellow
     0 0 191 rgb8 c, \ blue
-    223 0 191 rgb8 c, \ magenta
-    0 223 191 rgb8 c, \ cyan
-    223 223 191 rgb8 c, \ white
-    128 128 128 rgb8 c, \ b-black
-    256 128 128 rgb8 c, \ b-red
-    128 256 128 rgb8 c, \ b-green
-    256 256 128 rgb8 c, \ b-yellow
-    128 128 256 rgb8 c, \ b-blue
-    256 128 256 rgb8 c, \ b-magenta
-    128 256 256 rgb8 c, \ b-cyan
-    256 256 256 rgb8 c, \ b-white
+    191 0 191 rgb8 c, \ magenta
+    0 191 191 rgb8 c, \ cyan
+    191 191 191 rgb8 c, \ white
+    63 63 63 rgb8 c, \ b-black
+    255 0 0 rgb8 c, \ b-red
+    0 255 0 rgb8 c, \ b-green
+    255 255 0 rgb8 c, \ b-yellow
+    0 0 255 rgb8 c, \ b-blue
+    255 0 255 rgb8 c, \ b-magenta
+    0 255 255 rgb8 c, \ b-cyan
+    255 255 255 rgb8 c, \ b-white
 
     \ Modify the foreground color based on attributes
     : modify-color { color-const attr -- color-const' }
