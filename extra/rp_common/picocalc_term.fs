@@ -83,11 +83,21 @@ begin-module picocalc-term
     \ The output stream-size
     256 constant output-stream-size
 
+    \ The input receive buffer size
+    64 constant output-recv-buf-size
+
     \ Attributes
     0 bit constant attr-bold
     1 bit constant attr-dim
     2 bit constant attr-underline
+    3 bit constant attr-reverse
 
+    \ The default foreground color
+    ansi-term::white constant default-fg-color
+
+    \ The default background color
+    ansi-term::black constant default-bk-color
+    
     \ The terminal colors
     create term-colors
     0 0 0 rgb8 c, \ black
@@ -159,6 +169,7 @@ begin-module picocalc-term
     ;
     
     \ Character constants
+    $1B constant escape
     $09 constant tab
     $7F constant delete
     $0A constant linefeed
@@ -168,6 +179,9 @@ begin-module picocalc-term
     \ Tab size (note as implemented this must be a power of two)
     8 constant tab-size
 
+    \ Escape character timeout in ticks
+    2500 constant escape-timeout
+    
   end-module> import
 
   \ PicoCalc terminal class
@@ -241,6 +255,9 @@ begin-module picocalc-term
       \ The output stream
       output-stream-size stream-size member output-stream
 
+      \ The input receive buffer
+      output-recv-buf-size cell align member output-recv-buf
+
       \ The console input data structure
       console-internal::console-stream-data-size member console-input-data
 
@@ -258,15 +275,138 @@ begin-module picocalc-term
 
       \ Draw a character
       method draw-char ( x y self -- )
-      
+
       \ Scroll up by a number of lines
       method scroll-up ( lines self -- )
+
+      \ Scroll down by a number of lines
+      method scroll-down ( lines self -- )
 
       \ Handle input
       method handle-input ( self -- )
 
       \ Handle output
       method handle-output ( self -- )
+
+      \ Handle an escape
+      method handle-escape ( self -- )
+      
+      \ Parse an escape
+      method parse-escape ( addr bytes self -- )
+
+      \ Parse a decimal number in a string
+      method parse-dec ( default addr bytes self -- u size found? )
+      
+      \ Handle showing the cursor
+      method handle-show-cursor ( self -- )
+
+      \ Handle hiding the cursor
+      method handle-hide-cursor ( self -- )
+
+      \ Handle saving the cursor
+      method handle-save-cursor ( self -- )
+
+      \ Handle restoring the cursor
+      method handle-restore-cursor ( self -- )
+
+      \ Handle querying the cursor position
+      method handle-query-cursor-position ( self -- )
+
+      \ Handle moving the cursor up
+      method handle-cursor-up ( addr bytes self -- )
+
+      \ Handle moving the cursor down
+      method handle-cursor-down ( addr bytes self -- )
+
+      \ Handle moving the cursor forward
+      method handle-cursor-forward ( addr bytes self -- )
+
+      \ Handle moving the cursor back
+      method handle-cursor-back ( addr bytes self -- )
+
+      \ Handle moving the cursor to the start of a following line
+      method handle-cursor-next-line ( addr bytes self -- )
+
+      \ Handle moving the cursor to the start of a preceding line
+      method handle-cursor-prev-line ( addr bytes self -- )
+
+      \ Handle moving the cursor to a column
+      method handle-horiz-abs ( addr bytes self -- )
+
+      \ Handle setting the cursor position
+      method handle-cursor-pos ( addr bytes self -- )
+
+      \ Handle erasing in the display
+      method handle-erase-in-display ( addr bytes self -- )
+
+      \ Handle erasing down
+      method handle-erase-down ( self -- )
+
+      \ Handle erasing up
+      method handle-erase-up ( self -- )
+
+      \ Handle erasing the screen
+      method handle-erase-screen ( self -- )
+    
+      \ Handle erasing in the line
+      method handle-erase-in-line ( addr bytes self -- )
+
+      \ Handle erasing to the right
+      method handle-erase-right ( self -- )
+
+      \ Handle erasing to the left
+      method handle-erase-left ( self -- )
+
+      \ Handle erasing the current line
+      method handle-erase-line ( self -- )
+
+      \ Handle scrolling up
+      method handle-scroll-up ( addr bytes self -- )
+
+      \ Handle scrolling down
+      method handle-scroll-down ( addr bytes self -- )
+
+      \ Parse the text color and style
+      method parse-color-style ( addr bytes self -- )
+      
+      \ Handle setting the text color and style
+      method handle-color-style ( style self -- )
+
+      \ Handle setting the foreground color
+      method handle-fg-color ( color self -- )
+
+      \ Handle setting the background color
+      method handle-bk-color ( color self -- )
+
+      \ Handle resetting the color and stle
+      method handle-reset-color-style ( self -- )
+
+      \ Handle setting bold style
+      method handle-bold ( self -- )
+
+      \ Handle setting dim style
+      method handle-dim ( self -- )
+
+      \ Handle setting underlined style
+      method handle-underline ( self -- )
+
+      \ Handle setting reversed style
+      method handle-reverse ( self -- )
+
+      \ Handle setting normal style
+      method handle-normal ( self -- )
+
+      \ Handle setting non-underlined style
+      method handle-not-underline ( self -- )
+
+      \ Handle setting non-reversed style
+      method handle-not-reverse ( self -- )
+
+      \ Handle setting the default foreground color
+      method handle-default-fg-color ( self -- )
+
+      \ Handle setting the default background color
+      method handle-default-bk-color ( self -- )
       
       \ Handle a carriage return
       method handle-return ( self -- )
@@ -340,11 +480,11 @@ begin-module picocalc-term
       self chars-buf [ term-width term-height * ] literal 0 fill
       self attrs-buf [ term-width term-height * ] literal 0 fill
       self fg-colors-buf [ term-width term-height * ] literal
-      ansi-term::white fill
+      default-fg-color fill
       self bk-colors-buf [ term-width term-height * ] literal
-      ansi-term::black fill
-      ansi-term::white self fg-color !
-      ansi-term::black self bk-color !
+      default-bk-color fill
+      default-fg-color self fg-color !
+      default-bk-color self bk-color !
       0 attrs !
       0 self cursor-x !
       0 self cursor-y !
@@ -474,6 +614,7 @@ begin-module picocalc-term
             true to updated
           then
           buf c@ case
+            escape of self handle-escape endof
             return of self handle-return endof
             linefeed of self handle-linefeed endof
             backspace of self handle-backspace endof
@@ -490,7 +631,482 @@ begin-module picocalc-term
         then
       until
     ; define handle-output
+
+    \ Handle an escape
+    :noname ( self -- )
+      [: { self }
+        systick::systick-counter { start-time }
+        begin
+          [: { self }
+            self output-recv-buf output-recv-buf-size
+            self output-stream peek-stream { size }
+            size 0> if
+              self output-recv-buf c@ [char] [ = if
+                false 0 { found found-size }
+                size 0 ?do
+                  self output-recv-buf i + c@
+                  dup [char] A >= over [char] Z <= and
+                  swap dup [char] a >= swap [char] z <= and or  if
+                    i 1+ to found-size
+                    true to found
+                    leave
+                  then
+                loop
+                found if
+                  self output-recv-buf found-size self parse-escape
+                  found-size self output-stream skip-stream-no-block drop
+                then
+                found
+              else
+                true
+              then
+            else
+              false
+            then
+          ;]
+          escape-timeout systick::systick-counter start-time - - 0 max
+          task::with-timeout
+        until
+      ;] try dup ['] task::x-timed-out = if 2drop 0 then ?raise
+    ; define handle-escape
+
+    \ Parse an escape
+    :noname { addr bytes self -- }
+      addr bytes s" [?25h" equal-strings? if self handle-show-cursor exit then
+      addr bytes s" [?25l" equal-strings? if self handle-hide-cursor exit then
+      addr bytes s" [s" equal-strings? if self handle-save-cursor exit then
+      addr bytes s" [u" equal-strings? if self handle-restore-cursor exit then
+      addr bytes s" [6n" equal-strings? if
+        self handle-query-cursor-position exit
+      then
+      addr bytes 1- + c@ { last-char }
+      last-char [char] = if addr bytes self handle-cursor-up exit then
+      last-char [char] B = if addr bytes self handle-cursor-down exit then
+      last-char [char] C = if addr bytes self handle-cursor-forward exit then
+      last-char [char] D = if addr bytes self handle-cursor-back exit then
+      last-char [char] E = if addr bytes self handle-cursor-next-line exit then
+      last-char [char] F = if addr bytes self handle-cursor-prev-line exit then
+      last-char [char] G = if addr bytes self handle-horiz-abs exit then
+      last-char [char] H = if addr bytes self handle-cursor-pos exit then
+      last-char [char] J = if addr bytes self handle-erase-in-display exit then
+      last-char [char] K = if addr bytes self handle-erase-in-line exit then
+      last-char [char] S = if addr bytes self handle-scroll-up exit then
+      last-char [char] T = if addr bytes self handle-scroll-down exit then
+      last-char [char] f = if addr bytes self handle-cursor-pos exit then
+      last-char [char] m = if addr bytes self parse-color-style exit then
+    ; define parse-escape
+
+    \ Parse a decimal number in a string
+    :noname { default addr bytes self -- u size }
+      0 true { offset searching? }
+      begin offset bytes < searching? and while
+        addr offset + c@ dup [char] 0 >= swap [char] 9 <= and if
+          1 +to offset
+        else
+          false to searching?
+        then
+      repeat
+      offset 0<> if
+        addr offset parse-integer drop offset
+      else
+        default 0
+      then
+    ; define parse-dec
+
+    \ Handle showing the cursor
+    :noname { self -- }
+      true self cursor-visible !
+      self draw-cursor
+    ; define handle-show-cursor
     
+    \ Handle hiding the cursor
+    :noname { self -- }
+      self clear-cursor
+      false self cursor-visible !
+    ; define handle-hide-cursor
+    
+    \ Handle saving the cursor
+    :noname { self -- }
+      self cursor-x @ self saved-cursor-x !
+      self cursor-y @ self saved-cursor-y !
+    ; define handle-save-cursor
+    
+    \ Handle restoring the cursor
+    :noname { self -- }
+      self clear-cursor
+      self saved-cursor-x @ self cursor-x !
+      self saved-cursor-y @ self cursor-y !
+      self draw-cursor
+    ; define handle-restore-cursor
+    
+    \ Handle querying the cursor position
+    :noname ( self -- )
+      base @ { saved-base }
+      [: { self }
+        10 base !
+        escape self output-recv-buf c!
+        [char] [ self output-recv-buf 1+ c!
+        self output-recv-buf 2 + self cursor-y @ 1+ format-integer nip { size }
+        [char] ; self output-recv-buf size 2 + + c!
+        self output-recv-buf size 3 + + self cursor-x @ 1+ format-integer nip
+        +to size
+        [char] R self output-recv-buf size 2 + + c!
+        self output-recv-buf size 3 + self input-string
+      ;] try
+      saved-base base !
+      ?raise
+    ; define handle-query-cursor-position
+    
+    \ Handle moving the cursor up
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        negate self cursor-y @ + 0 max self cursor-y !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-up
+    
+    \ Handle moving the cursor down
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        self cursor-y @ + [ term-height 1- ] literal min self cursor-y !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-down
+    
+    \ Handle moving the cursor forward
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        self cursor-x @ + [ term-width 1- ] literal min self cursor-x !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-forward
+    
+    \ Handle moving the cursor back
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        negate self cursor-x @ + 0 max self cursor-x !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-back
+    
+    \ Handle moving the cursor to the start of a following line
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        0 self cursor-x !
+        self cursor-y @ + [ term-height 1- ] literal min self cursor-y !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-next-line
+    
+    \ Handle moving the cursor to the start of a preceding line
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        0 self cursor-x !
+        negate self cursor-y @ + 0 max self cursor-y !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-cursor-prev-line
+    
+    \ Handle moving the cursor to a column
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self clear-cursor
+        1- 0 max [ term-width 1- ] literal min self cursor-x !
+        self draw-cursor
+      else
+        drop
+      then
+    ; define handle-horiz-abs
+    
+    \ Handle setting the cursor position
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec { row row-bytes }
+      addr 1+ row-bytes + c@ [char] ; = if
+        1 addr 2 + row-bytes + bytes 2 - row-bytes - self parse-dec
+        { col col-bytes }
+        bytes 2 - row-bytes - col-bytes - 1 = if
+          self clear-cursor
+          col 1- 0 max [ term-width 1- ] literal min self cursor-x !
+          row 1- 0 max [ term-height 1- ] literal min self cursor-y !
+          self draw-cursor
+        then
+      else
+        bytes 1- row-bytes - 1 = if
+          self clear-cursor
+          0 self cursor-x !
+          row 1- 0 max [ term-height 1- ] literal min self cursor-y !
+          self draw-cursor
+        then
+      then
+    ; define handle-cursor-pos
+    
+    \ Handle erasing in the display
+    :noname { addr bytes self -- }
+      0 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        case
+          0 of self handle-erase-down endof
+          1 of self handle-erase-up endof
+          2 of self handle-erase-screen endof
+        endcase
+      else
+        drop
+      then
+    ; define handle-erase-in-display
+
+    \ Handle erasing down
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      term-height self cursor-y @ 1+ ?do
+        term-width 0 ?do
+          term-width j * i + { offset }
+          fg-color self fg-color-buf offset + c!
+          bk-color self bk-color-buf offset + c!
+          0 self attrs-buf offset + c!
+          i j self draw-char
+        loop
+      loop
+    ; define handle-erase-down
+
+    \ Handle erasing up
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      self cursor-y @ 0 ?do
+        term-width 0 ?do
+          term-width j * i + { offset }
+          fg-color self fg-color-buf offset + c!
+          bk-color self bk-color-buf offset + c!
+          0 self attrs-buf offset + c!
+          i j self draw-char
+        loop
+      loop
+    ; define handle-erase-up
+
+    \ Handle erasing the screen
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      term-height 0 ?do
+        term-width 0 ?do
+          term-width j * i + { offset }
+          fg-color self fg-color-buf offset + c!
+          bk-color self bk-color-buf offset + c!
+          0 self attrs-buf offset + c!
+          i j self draw-char
+        loop
+      loop
+    ; define handle-erase-screen
+    
+    \ Handle erasing in the line
+    :noname { addr bytes self -- }
+      0 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        case
+          0 of self handle-erase-right endof
+          1 of self handle-erase-left endof
+          2 of self handle-erase-line endof
+        endcase
+      else
+        drop
+      then
+    ; define handle-erase-in-line
+
+    \ Handle erasing to the right
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      self cursor-y @ { y }
+      self cursor-x @ 0 ?do
+        term-width y * i + { offset }
+        fg-color self fg-color-buf offset + c!
+        bk-color self bk-color-buf offset + c!
+        0 self attrs-buf offset + c!
+        i y self draw-char
+      loop
+    ; define handle-erase-right
+
+    \ Handle erasing to the left
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      self cursor-y @ { y }
+      term-width self cursor-x @ ?do
+        term-width y * i + { offset }
+        fg-color self fg-color-buf offset + c!
+        bk-color self bk-color-buf offset + c!
+        0 self attrs-buf offset + c!
+        i y self draw-char
+      loop
+    ; define handle-erase-left
+
+    \ Handle erasing the current line
+    :noname { self -- }
+      self fg-color @ { fg-color }
+      self bk-color @ { bk-color }
+      self cursor-y @ { y }
+      term-width 0 ?do
+        term-width y * i + { offset }
+        fg-color self fg-color-buf offset + c!
+        bk-color self bk-color-buf offset + c!
+        0 self attrs-buf offset + c!
+        i y self draw-char
+      loop
+    ; define handle-erase-line
+    
+    \ Handle scrolling up
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self scroll-up
+      else
+        drop
+      then
+    ; define handle-scroll-up
+    
+    \ Handle scrolling down
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
+        self scroll-down
+      else
+        drop
+      then
+    ; define handle-scroll-down
+    
+    \ Parse the text color and style
+    :noname { addr bytes self -- }
+      1 +to addr
+      -1 +to bytes
+      addr bytes { valid-addr valid-bytes }
+      begin valid-bytes 0> while
+        0 valid-addr valid-bytes self parse-dec { style style-bytes }
+        style-bytes valid-bytes 1- < if
+          addr style-bytes + c@ [char] ; <> if exit then
+          1 +to style-bytes
+        then
+        style-bytes +to valid-addr
+        style-bytes negate +to valid-bytes
+      repeat
+      begin bytes 0> while
+        0 addr bytes self parse-dec { style style-bytes }
+        style-bytes valid-bytes 1- < if
+          1 +to style-bytes
+        then
+        style-bytes +to addr
+        style-bytes negate +to bytes
+        style self handle-color-style
+      repeat
+    ; define parse-color-style
+
+    \ Handle setting the text color and style
+    :noname { style self -- }
+      style
+      dup ansi-term::black >= over ansi-term::white <= and if
+        self handle-fg-color exit
+      then
+      dup ansi-term::b-black >= over ansi-term::b-white <= and if
+        self handle-fg-color exit
+      then
+      dup ansi-term::black ansi-term::background >=
+      over ansi-term::white ansi-term::background <= and if
+        self handle-bk-color exit
+      then
+      dup ansi-term::b-black ansi-term::b-background >=
+      over ansi-term::b-white ansi-term::b-background <= and if
+        self handle-bk-color exit
+      then
+      case
+        0 of self handle-reset-color-style endof
+        1 of self handle-bold endof
+        2 of self handle-dim endof
+        4 of self handle-underline endof
+        7 of self handle-reverse endof
+        22 of self handle-normal endof
+        24 of self handle-not-underline endof
+        27 of self handle-not-reverse endof
+        38 of self handle-default-fg-color endof
+        49 of self handle-default-bk-color endof
+      endcase
+    ; define handle-color-style
+    
+    \ Handle setting the foreground color
+    :noname { color self -- }
+      color self fg-color !
+    ; define handle-fg-color
+
+    \ Handle setting the background color
+    :noname { color self -- }
+      color ansi-term::ansi-term-internal::background-offset - self bk-color !
+    ; define handle-bk-color
+
+    \ Handle resetting the color and stle
+    :noname { self -- }
+      self handle-normal
+      self handle-default-fg-color
+      self handle-default-bk-color
+    ; define handle-reset-color-style
+
+    \ Handle setting bold style
+    :noname { self -- }
+      attr-bold self attrs bis!
+    ; define handle-bold
+
+    \ Handle setting dim style
+    :noname { self -- }
+      attr-dim self attrs bis!
+    ; define handle-dim
+
+    \ Handle setting underlined style
+    :noname { self -- }
+      attr-underline self attrs bis!
+    ; define handle-underline
+
+    \ Handle setting reversed style
+    :noname { self -- }
+      attr-reverse self attrs bis!
+    ; define handle-reverse
+
+    \ Handle setting normal style
+    :noname { self -- }
+      0 self attrs !
+    ; define handle-normal
+
+    \ Handle setting non-underlined style
+    :noname { self -- }
+      attr-underline self attrs bic!
+    ; define handle-not-underline
+
+    \ Handle setting non-reversed style
+    :noname { self -- }
+      attr-reverse self attrs bic!
+    ; define handle-not-reverse
+
+    \ Handle setting the default foreground color
+    :noname { self -- }
+      default-fg-color self fg-color !
+    ; define handle-default-fg-color
+
+    \ Handle setting the default background color
+    :noname { self -- }
+      default-bk-color self bk-color !
+    ; define handle-default-bk-color
+
     \ Handle a carriage return
     :noname { self -- }
       self clear-cursor
@@ -573,6 +1189,7 @@ begin-module picocalc-term
       offset self bk-colors-buf + c@
       x self cursor-x @ = y self cursor-y @ = and
       self cursor-visible @ and if swap then
+      attr attr-reverse and if swap then
       get-color swap attr modify-color get-color
       { char-bk-color char-fg-color }
       char-width x * char-height y * { display-x display-y }
@@ -595,11 +1212,25 @@ begin-module picocalc-term
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 fill-y display-width display-height fill-y self intf-display
+      0 fill-y display-width display-height fill-y - self intf-display
       draw-rect-const
       self draw-cursor
       self display-intf set-dirty
     ; define scroll-up
+
+    \ Scroll down by a number of lines
+    :noname { lines self -- }
+      lines term-height min to lines
+      self clear-cursor
+      lines [ char-height display-width * ] literal * { pixels }
+      self display-buf self display-buf pixels +
+      [ display-width display-height * ] literal pixels - move
+      [ term-height char-height * ] literal lines char-height * - { fill-y }
+      self bk-color @ get-color
+      0 0 display-width fill-y self intf-display draw-rect-const
+      self draw-cursor
+      self display-intf set-dirty
+    ; define scroll-down
 
     \ Input a string
     :noname ( c-addr u self -- )
