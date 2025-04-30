@@ -189,7 +189,7 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device 7-bit-i2c-addr
       picocalc-keys-i2c-device enable-i2c
       picocalc-keys-interval picocalc-keys-priority
-      self ['] handle-picocalc-keys-alarm
+      self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default
     ; define init-picocalc-keys
         
@@ -237,7 +237,7 @@ begin-module picocalc-keys
           then
         ;] picocalc-keys-timeout task::with-timeout
         picocalc-keys-interval picocalc-keys-priority
-        self ['] handle-picocalc-keys-alarm
+        self [: drop handle-picocalc-keys-alarm ;]
         self picocalc-keys-alarm set-alarm-delay-default        
       else
         true self picocalc-keys-ready-destroy !

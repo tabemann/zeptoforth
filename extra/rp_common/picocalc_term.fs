@@ -1171,7 +1171,7 @@ begin-module picocalc-term
 
     \ Draw the cursor
     :noname { self -- }
-      self cursor-x @ self cursor-y @ draw-char
+      self cursor-x @ self cursor-y @ self draw-char
     ; define draw-cursor
 
     \ Clear the cursor
