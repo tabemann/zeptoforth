@@ -435,7 +435,10 @@ begin-module picocalc-term
       \ Handle control-break
       method handle-control-break ( self -- )
       
-    end-module
+      \ Flush terminal output
+      method flush-term ( self -- )
+
+  end-module
 
     \ Initialize the PicoCalc terminal
     method init-term ( self -- )
@@ -1241,6 +1244,14 @@ begin-module picocalc-term
       ?dup if dup ['] x-would-block = if 2drop 2drop else ?raise then then
     ; define input-string
 
+    \ Flush terminal output
+    :noname { self -- }
+      self console-output-data console-internal::console-io-flush
+      begin self output-stream stream-empty? not while
+        pause-reschedule-last
+      repeat
+    ; define flush-term
+
   end-implement
   
   \ The PicoCalc terminal
@@ -1267,8 +1278,7 @@ begin-module picocalc-term
   : with-term-output ( xt -- )
     shared-term console-output-data console-internal::console-io swap
     shared-term console-output-data console-internal::console-io? swap
-    shared-term console-output-data console-internal::console-io-flush swap
-    with-output
+    shared-term ['] flush-term swap with-output
     shared-term console-output-data
     console-internal::flush-console-stream-output
   ;
@@ -1277,8 +1287,7 @@ begin-module picocalc-term
   : with-term-error-output ( xt -- )
     shared-term console-output-data console-internal::console-io swap
     shared-term console-output-data console-internal::console-io? swap
-    shared-term console-output-data console-internal::console-io-flush swap
-    with-error-output
+    shared-term ['] flush-term swap with-error-output
     shared-term console-output-data
     console-internal::flush-console-stream-output    
   ;
@@ -1289,14 +1298,12 @@ begin-module picocalc-term
     shared-term console-input-data console-internal::console-io? key?-hook !
     shared-term console-output-data console-internal::console-io emit-hook !
     shared-term console-output-data console-internal::console-io? emit?-hook !
-    shared-term console-output-data console-internal::console-io-flush
-    flush-console-hook !
+    shared-term ['] flush-term flush-console-hook !
     shared-term console-output-data console-internal::console-io
     error-emit-hook !
     shared-term console-output-data console-internal::console-io?
     error-emit?-hook !
-    shared-term console-output-data console-internal::console-io-flush
-    error-flush-console-hook !
+    shared-term ['] flush-term error-flush-console-hook !
   ;
   
 end-module
