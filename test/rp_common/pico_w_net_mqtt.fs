@@ -25,7 +25,7 @@ begin-module mqtt-demo
   pico-w-cyw43-net-ipv4 import
   cyw43-control import
   net import
-  net-ipv4
+  net-ipv4 import
   endpoint-process import
   net-consts import
   mqtt import
