@@ -17,7 +17,7 @@
   <section id="gpio-words">
 <h1>GPIO Words</h1>
 <p>A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO’s, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
-<p>A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.</p>
+<p>A GPIO API is also provided for the RP2040 and RP2350; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">gpio</span></code>.</p>
 <section id="stm32-words">
 <h2>STM32 Words</h2>
@@ -307,37 +307,73 @@
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_IN</span></code></h4>
 <p>GPIO input register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
+<section id="gpio-hi-in">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_IN</span></code></h4>
+<p>High GPIO input register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
+</section>
 <section id="gpio-out">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT</span></code></h4>
 <p>GPIO output register; each bit corresponds to the GPIO with an index equal to its position</p>
+</section>
+<section id="gpio-hi-out">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OUT</span></code></h4>
+<p>High GPIO output register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
 </section>
 <section id="gpio-out-set">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_SET</span></code></h4>
 <p>GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
+<section id="gpio-hi-out-set">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OUT_SET</span></code></h4>
+<p>High GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
+</section>
 <section id="gpio-out-clr">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_CLR</span></code></h4>
 <p>GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position</p>
+</section>
+<section id="gpio-hi-out-clr">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OUT_CLR</span></code></h4>
+<p>High GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
 </section>
 <section id="gpio-out-xor">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_XOR</span></code></h4>
 <p>GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
+<section id="gpio-hi-out-xor">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OUT_XOR</span></code></h4>
+<p>High GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
+</section>
 <section id="gpio-oe">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE</span></code></h4>
 <p>GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position</p>
+</section>
+<section id="gpio-hi-oe">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OE</span></code></h4>
+<p>High GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
 </section>
 <section id="gpio-oe-set">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_SET</span></code></h4>
 <p>GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
+<section id="gpio-hi-oe-set">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OE_SET</span></code></h4>
+<p>High GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
+</section>
 <section id="gpio-oe-clr">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_CLR</span></code></h4>
 <p>GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
+<section id="gpio-hi-oe-clr">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OE_CLR</span></code></h4>
+<p>High GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
+</section>
 <section id="gpio-oe-xor">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_XOR</span></code></h4>
 <p>GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position</p>
+</section>
+<section id="gpio-hi-oe-xor">
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_HI_OE_XOR</span></code></h4>
+<p>High GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)</p>
 </section>
 <section id="gpio-status-irqtoproc">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_IRQTOPROC&#64;</span></code></h4>
