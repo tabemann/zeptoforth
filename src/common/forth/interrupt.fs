@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,23 @@ begin-module interrupt
   \ NVIC interrupt priority register base register
   NVIC_Base $300 + constant NVIC_IPR_Base
 
+  begin-module interrupt-internal
+    
+    \ The bitmap of set vectors
+    vector-count 8 align 3 rshift buffer: vector!-bitmap
+
+    commit-flash
+
+    \ The bitmap of vectors the hook applies to
+    vector-count 8 align 3 rshift buffer: vector!-hook-bitmap
+
+  end-module> import
+
+  commit-flash
+  
+  \ The set vector hook
+  variable vector!-hook
+
   commit-flash
 
   \ Get the current interrupt (0 for none)
@@ -67,16 +84,55 @@ begin-module interrupt
   \ Are we in an interrupt?
   : in-interrupt? ( -- in-interrupt? ) current-interrupt 0<> ;
   
+  \ Get vector hook bitmap
+  : vector!-hook-bitmap@ ( vector-index -- flag )
+    dup 0> over vector-count < or averts x-invalid-vector
+    dup 7 and bit swap 3 rshift vector!-hook-bitmap + cbit@
+  ;
+
+  \ Get vector hook bitmap
+  : vector!-bitmap@ ( vector-index -- flag )
+    dup 0> over vector-count < or averts x-invalid-vector
+    dup 7 and bit swap 3 rshift vector!-bitmap + cbit@
+  ;
+
   \ Set an interrupt vector
   : vector! ( xt vector-index -- )
-    dup 0 > over vector-count < or averts x-invalid-vector
+    dup 0> over vector-count < or averts x-invalid-vector
+    [ cpu-count 0> ] [if] internal::hold-core [then]
+    disable-int
+    dup 7 and bit over 3 rshift vector!-hook-bitmap + cbit@
+    vector!-hook @ 0<> and if
+      vector!-hook @ try
+      enable-int
+      [ cpu-count 0> ] [if] internal::release-core [then]
+      ?raise
+      exit
+    then
+    dup 7 and bit over 3 rshift vector!-bitmap + 2dup cbit@
+    if 2drop else cbis! then
+    swap 1+ swap cells vector-table + !
+    enable-int
+    [ cpu-count 0> ] [if] internal::release-core [then]
+  ;
+
+  \ Forcibly set an interrupt vector
+  : force-vector! ( xt vector-index -- )
+    dup 0> over vector-count < or averts x-invalid-vector
     swap 1+ swap cells vector-table + !
   ;
 
   \ Get an interrupt vector
   : vector@ ( vector-index -- xt )
-    dup 0 > over vector-count < or averts x-invalid-vector
+    dup 0> over vector-count < or averts x-invalid-vector
     cells vector-table + @ 1-
+  ;
+
+  \ Set vector hook bitmap
+  : vector!-hook-bitmap! ( flag vector-index -- )
+    dup 0> over vector-count < or averts x-invalid-vector
+    dup 7 and bit swap 3 rshift vector!-hook-bitmap +
+    rot if cbis! else cbic! then
   ;
 
   \ Get the active interrupt
@@ -180,7 +236,7 @@ begin-module interrupt
     dup 32 / cells NVIC_IABR_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
-  begin-module interrupt-internal
+  continue-module interrupt-internal
 
     \ Create an address for a priority index
     : NVIC_IPR_IP_addr ( u -- addr ) 3 bic NVIC_IPR_Base + ;
@@ -193,7 +249,18 @@ begin-module interrupt
     \ Create a mask for a priority index
     : NVIC_IPR_IP_mask ( u -- mask ) NVIC_IPR_IP_shift $FF swap lshift ;
 
-  end-module> import
+    \ Initialize vector! hook
+    : init-vector! ( -- )
+      0 vector!-hook !
+      vector!-bitmap [ vector-count 8 align 3 rshift ] literal 0 fill
+      vector!-hook-bitmap [ vector-count 8 align 3 rshift ] literal 0 fill
+    ;
+
+    commit-flash
+
+    initializer init-vector!
+    
+  end-module
 
   commit-flash
   
@@ -209,6 +276,8 @@ begin-module interrupt
     swap NVIC_IPR_IP_shift rshift
   ;
 
+
+  
 end-module
 
 end-compress-flash

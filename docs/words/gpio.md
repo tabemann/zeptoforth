@@ -2,7 +2,7 @@
 
 A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO's, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO's, so as to make them more user-friendly while not limiting the programmer's capabilities.
 
-A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.
+A GPIO API is also provided for the RP2040 and RP2350; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.
 
 These words are in `gpio`.
 
@@ -292,37 +292,73 @@ Pad index for SWD
 
 GPIO input register; each bit corresponds to the GPIO with an index equal to its position
 
+##### `GPIO_HI_IN`
+
+High GPIO input register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
+
 ##### `GPIO_OUT`
 
 GPIO output register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_HI_OUT`
+
+High GPIO output register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
 
 ##### `GPIO_OUT_SET`
 
 GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position
 
+##### `GPIO_HI_OUT_SET`
+
+High GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
+
 ##### `GPIO_OUT_CLR`
 
 GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_HI_OUT_CLR`
+
+High GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
 
 ##### `GPIO_OUT_XOR`
 
 GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position
 
+##### `GPIO_HI_OUT_XOR`
+
+High GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
+
 ##### `GPIO_OE`
 
 GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_HI_OE`
+
+High GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
 
 ##### `GPIO_OE_SET`
 
 GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position
 
+##### `GPIO_HI_OE_SET`
+
+High GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
+
 ##### `GPIO_OE_CLR`
 
 GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position
 
+##### `GPIO_HI_OE_CLR`
+
+High GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
+
 ##### `GPIO_OE_XOR`
 
 GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_HI_OE_XOR`
+
+High GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position plus 32 (RP2350 only)
 
 ##### `GPIO_STATUS_IRQTOPROC@`
 ( index -- flag )
