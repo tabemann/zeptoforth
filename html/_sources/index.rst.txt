@@ -37,6 +37,7 @@ Zeptoforth Documentation
    words/simple_fat32
    words/fat32_tools
    words/interrupt
+   words/int_overload
    words/multicore
    words/watchdog
    words/dev_tools

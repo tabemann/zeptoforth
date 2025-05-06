@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Interrupt Overloading Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="interrupt-overloading-words">
+<h1>Interrupt Overloading Words</h1>
+<p>Interrupt overloading in an optional mechanism to enable multiple handlers to simultaneously share a single interrupt vector. It involves installing an <em>adapter</em> in the interrupt vector which calls the other handlers. Any preexisting interrupt handler is transferred to being the <em>base handler</em> of the adapter, which is always executed last out of all the handlers.</p>
+<p>Both handlers and adapters can be uninstalled. Uninstalling a handler just disables that single handler while uninstalling the first adapter installed for a vector disables all handlers except for the base handler for that vector, which is reinstalled directly in the vector if present.</p>
+<p>Note that if the user attempts to install more than one adapter on a single vector, only the first adapter is used, and all subsequent adapters are inactive. Inactive adapters have no effect on installing handlers, and uninstalling them is a no-op.</p>
+<section id="int-overload">
+<h2><code class="docutils literal notranslate"><span class="pre">int-overload</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">int-overload</span></code> module contains the following words:</p>
+<section id="x-no-int-adapter">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-int-adapter</span></code></h3>
+<p>( – )</p>
+<p>The no interrupt adapter available exception.</p>
+</section>
+<section id="int-overload-size">
+<h3><code class="docutils literal notranslate"><span class="pre">int-overload-size</span></code></h3>
+<p>( – bytes )</p>
+<p>The size of an interrupt handler structure in bytes.</p>
+</section>
+<section id="int-adapter-size">
+<h3><code class="docutils literal notranslate"><span class="pre">int-adapter-size</span></code></h3>
+<p>( – bytes )</p>
+<p>The size of an interrupt adapter structure in bytes.</p>
+</section>
+<section id="register-int-overload">
+<h3><code class="docutils literal notranslate"><span class="pre">register-int-overload</span></code></h3>
+<p>( xt vector-index addr – )</p>
+<p>Register an interrupt handler structure <em>addr</em> with an interrupt handler execution token <em>xt</em> for interrupt vector <em>vector-index</em>. If <em>vector-index</em> is out of range <code class="docutils literal notranslate"><span class="pre">interrupt::x-invalid-vector</span></code> is raised. If no interrupt adapter is installed for <em>vector-index</em> <code class="docutils literal notranslate"><span class="pre">x-no-int-adapter</span></code> is raised.</p>
+</section>
+<section id="unregister-int-overload">
+<h3><code class="docutils literal notranslate"><span class="pre">unregister-int-overload</span></code></h3>
+<p>( addr – )</p>
+<p>Unregister an interrupt handler structure <em>addr</em>. After this point its associated interrupt handler will be removed.</p>
+</section>
+<section id="register-int-adapter">
+<h3><code class="docutils literal notranslate"><span class="pre">register-int-adapter</span></code></h3>
+<p>( vector-index addr – )</p>
+<p>Register an interrupt adapter structure <em>addr</em> for interrupt vector <em>vector-index</em>. If <em>vector-index</em> is out of range <code class="docutils literal notranslate"><span class="pre">interrupt::x-invalid-vector</span></code> is raised. If an interrupt adapter is already registered for <em>vector-index</em> then the interrupt adapter structure <em>addr</em> will be inactive.</p>
+</section>
+<section id="unregister-int-adapter">
+<h3><code class="docutils literal notranslate"><span class="pre">unregister-int-adapter</span></code></h3>
+<p>( addr – )</p>
+<p>Unregister an interrupt adapter structure <em>addr</em>. If there are interrupt handlers other than the base handler associated with this structure they are removed. A base handler associated with this structure is restored as the interrupt handler for the interrupt vector associated with this interrupt handler. Note that if this interrupt adapter is inactive this is a no-op.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
