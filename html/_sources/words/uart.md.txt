@@ -4,11 +4,11 @@ There are a number of words for controlling UART's available on each of the supp
 
 Note that *uart* values as mentioned below vary between the different supported platforms. The following applies:
 
-* On the RP2040 and RP2350 the available *uart* values are 0 and 1, with 0 corresponding to the console.
-* On the STM32F411 the available *uart* values are 1, 2, and 6, with 2 corresponding to the console.
-* On the STM32F407 the available *uart* values are 1 through 6, with 2 corresponding to the console.
-* On the STM32L476 the available *uart* values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.
-* On the STM32F746 the available *uart* values are 1 through 8, with 1 corresponding to the console.
+* On the RP2040 and RP2350 the available *uart* values are 0 and 1, with 0 corresponding to the default serial console.
+* On the STM32F411 the available *uart* values are 1, 2, and 6, with 2 corresponding to the default serial console.
+* On the STM32F407 the available *uart* values are 1 through 6, with 2 corresponding to the default serial console.
+* On the STM32L476 the available *uart* values are 1 through 5, with 2 corresponding to the default serial console. Note that LPUART1 is not currently supported.
+* On the STM32F746 the available *uart* values are 1 through 8, with 1 corresponding to the default serial console.
 
 Note that the RP2350 supports optional CTS and RTS flow control.
 
@@ -40,6 +40,21 @@ Execute *xt* with a UART disabled, re-enabling it afterwards if it was previousl
 ( baud uart -- )
 
 Set the baud of a UART.
+
+##### `uart-console`
+( uart -- )
+
+Set the current task's console to a be a UART. Child tasks will inherit this console.
+
+##### `uart-special-enabled!`
+( enabled uart -- )
+
+Set whether special character handling is enabled for a UART. This is disabled by default for UART's other than the default serial console.
+
+##### `uart-special-enabled@`
+( uart -- enabled )
+
+Get whether special character handling is enabled for a UART.
 
 ##### `>uart`
 ( c uart -- )

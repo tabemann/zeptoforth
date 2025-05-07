@@ -37,11 +37,11 @@
 <p>There are a number of words for controlling UART’s available on each of the supported microcontrollers on top of the console <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">key</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">key?</span></code> words. These are as follows:</p>
 <p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
-<li><p>On the RP2040 and RP2350 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
-<li><p>On the STM32F411 the available <em>uart</em> values are 1, 2, and 6, with 2 corresponding to the console.</p></li>
-<li><p>On the STM32F407 the available <em>uart</em> values are 1 through 6, with 2 corresponding to the console.</p></li>
-<li><p>On the STM32L476 the available <em>uart</em> values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.</p></li>
-<li><p>On the STM32F746 the available <em>uart</em> values are 1 through 8, with 1 corresponding to the console.</p></li>
+<li><p>On the RP2040 and RP2350 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the default serial console.</p></li>
+<li><p>On the STM32F411 the available <em>uart</em> values are 1, 2, and 6, with 2 corresponding to the default serial console.</p></li>
+<li><p>On the STM32F407 the available <em>uart</em> values are 1 through 6, with 2 corresponding to the default serial console.</p></li>
+<li><p>On the STM32L476 the available <em>uart</em> values are 1 through 5, with 2 corresponding to the default serial console. Note that LPUART1 is not currently supported.</p></li>
+<li><p>On the STM32F746 the available <em>uart</em> values are 1 through 8, with 1 corresponding to the default serial console.</p></li>
 </ul>
 <p>Note that the RP2350 supports optional CTS and RTS flow control.</p>
 <section id="uart">
@@ -72,23 +72,38 @@
 <p>( baud uart – )</p>
 <p>Set the baud of a UART.</p>
 </section>
+<section id="uart-console">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-console</span></code><a class="headerlink" href="#uart-console" title="Link to this heading">¶</a></h3>
+<p>( uart – )</p>
+<p>Set the current task’s console to a be a UART. Child tasks will inherit this console.</p>
+</section>
+<section id="uart-special-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-special-enabled!</span></code><a class="headerlink" href="#uart-special-enabled" title="Link to this heading">¶</a></h3>
+<p>( enabled uart – )</p>
+<p>Set whether special character handling is enabled for a UART. This is disabled by default for UART’s other than the default serial console.</p>
+</section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">uart-special-enabled&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>( uart – enabled )</p>
+<p>Get whether special character handling is enabled for a UART.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <p>( c uart – )</p>
 <p>Emit a byte to a UART.</p>
 </section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <p>( uart – c )</p>
 <p>Read a byte from a UART.</p>
 </section>
-<section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a UART is ready to emit a byte.</p>
 </section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a byte is ready to be read from a UART.</p>
 </section>
@@ -211,6 +226,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -258,10 +274,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
 </ul>
 
 <div class="relations">
