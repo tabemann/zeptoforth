@@ -1,5 +1,5 @@
 \ Copyright (c) 2013? Matthias Koch
-\ Copyright (c) 2020-2024 Travis Bemann
+\ Copyright (c) 2020-2025 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,6 +43,15 @@ begin-module uart
 
   begin-module uart-internal
 
+    \ Alternate UART special enabled bitmap
+    variable alt-uart-special-enabled
+
+    \ Console UART user variable
+    user base-console-uart
+
+    \ Saved task-init-hook
+    variable saved-task-init-hook
+  
     \ Validate a UART
     : validate-uart ( uart -- ) 2 u< averts x-invalid-uart ;
 
@@ -120,6 +129,12 @@ begin-module uart
 
     \ UART1 vector index
     uart1-irq 16 + constant uart1-vector
+
+    \ Control-C
+    $03 constant ctrl-c
+
+    \ Control-T
+    $14 constant ctrl-t
 
     \ Some constants for initalization
     6 bit 5 bit or constant UART_8N1 \ Set the UART to be in 8N1 mode
@@ -222,9 +237,26 @@ begin-module uart
     \ Handle IO
     : handle-uart1-io ( -- )
       begin
-	uart1-rx-full? not if
+        uart1-rx-full? not if
 	  UART1_UARTFR_RXFE@ not if
-	    UART1_UARTDR_DATA@ write-uart1-rx false
+            UART1_UARTDR_DATA@
+            [ 1 bit ] literal alt-uart-special-enabled bit@ if
+              dup ctrl-c = if
+                drop reboot false
+              else
+                attention? @ if
+                  attention-hook @ execute false
+                else
+                  dup ctrl-t = if
+                    drop attention-start-hook @ execute false
+                  else
+                    write-uart1-rx false
+                  then
+                then
+              then
+            else
+              write-uart1-rx false
+            then
 	  else
 	    true
 	  then
@@ -571,12 +603,46 @@ begin-module uart
       console::with-error-output
     ;] with-aligned-allot
   ;
+
+  \ Set the console to a UART
+  : uart-console ( uart -- )
+    dup validate-uart
+    base-console-uart !
+    [: base-console-uart @ uart> ;] key-hook !
+    [: base-console-uart @ uart>? ;] key?-hook !
+    [: base-console-uart @ >uart ;] dup emit-hook ! error-emit-hook !
+    [: base-console-uart @ >uart? ;] dup emit?-hook ! error-emit?-hook !
+    [: base-console-uart @ flush-uart ;]
+    dup flush-console-hook ! error-flush-console-hook !
+  ;
+  
+  \ Set the alternate UART special enabled bitmap
+  : uart-special-enabled! ( enabled uart -- )
+    dup validate-uart
+    dup 0= if drop uart-special-enabled ! exit then
+    bit alt-uart-special-enabled rot if bis! else bic! then
+  ;
+
+  \ Get the alternate UART special enabled bitmap
+  : uart-special-enabled@ ( uart -- enabled )
+    dup validate-uart
+    dup 0= if drop uart-special-enabled @ exit then
+    bit alt-uart-special-enabled bit@
+  ;
   
 end-module> import
 
 \ Init
 : init ( -- )
   init
+  0 uart-internal::alt-uart-special-enabled !
+  -1 uart-internal::base-console-uart !
+  task::task-init-hook @ uart-internal::saved-task-init-hook !
+  [:
+    uart-internal::base-console-uart @
+    over ['] uart-internal::base-console-uart task::for-task!
+    uart-internal::saved-task-init-hook @ ?dup if execute else drop then
+  ;] task::task-init-hook !
   uart-internal::init-uart1
 ;
 

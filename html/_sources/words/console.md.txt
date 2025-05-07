@@ -117,6 +117,12 @@ Call *xt* with `emit` and `emit?` redirected for output to the file at the speci
 
 The following words are in the `uart` module:
 
+##### `uart-console`
+( uart -- )
+
+Set the current task's console to a be a UART. Child tasks will inherit this console.
+
+
 ##### `with-uart-input`
 ( uart xt -- )
 
