@@ -36,7 +36,7 @@ begin-module uart
   
   begin-module uart-internal
 
-    \ Alternate UART special enabled
+    \ Alternate UART special enabled bitmap
     variable alt-uart-special-enabled
   
     \ Console UART user variable
