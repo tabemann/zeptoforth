@@ -99,13 +99,13 @@ begin-module interrupt
   \ Set an interrupt vector
   : vector! ( xt vector-index -- )
     dup 0> over vector-count < or averts x-invalid-vector
-    [ cpu-count 0> ] [if] internal::hold-core [then]
+    [ cpu-count 1 > ] [if] internal::hold-core [then]
     disable-int
     dup 7 and bit over 3 rshift vector!-hook-bitmap + cbit@
     vector!-hook @ 0<> and if
       vector!-hook @ try
       enable-int
-      [ cpu-count 0> ] [if] internal::release-core [then]
+      [ cpu-count 1 > ] [if] internal::release-core [then]
       ?raise
       exit
     then
@@ -113,7 +113,7 @@ begin-module interrupt
     if 2drop else cbis! then
     swap 1+ swap cells vector-table + !
     enable-int
-    [ cpu-count 0> ] [if] internal::release-core [then]
+    [ cpu-count 1 > ] [if] internal::release-core [then]
   ;
 
   \ Forcibly set an interrupt vector
