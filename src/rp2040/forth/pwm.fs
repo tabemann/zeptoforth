@@ -26,7 +26,7 @@ begin-module pwm
   pin import
 
   \ Out of range PWM index
-  : x-out-of-range-pwm ." out of ramge PWM slice" cr ;
+  : x-out-of-range-pwm ." out of range PWM slice" cr ;
 
   \ Out of range clock divisor
   : x-out-of-range-clock-div ." out of range clock divisor" cr ;
