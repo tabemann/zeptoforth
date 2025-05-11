@@ -38,6 +38,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * A disassembler
 * SysTick support
 * User-reconfigurable processor exception vector support
+* Optional processor exception vector overloading
 * Interrupt-driven serial IO
 * Optional USB CDC console IO (on the RP2040 and RP2350)
 * Rebooting via control-C on the console
