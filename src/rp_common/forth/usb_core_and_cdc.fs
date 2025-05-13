@@ -89,19 +89,11 @@ begin-module usb-core
     \ USB_EP0_MAX
     $40 c,
 
-    \ Temporarily using Raspberry Pi pico-sdk VID:PID as pid.codes VID:PID has
-    \ not been granted yet.
-    \ USB_VENDOR_ID
-    $8A c, $2E c,
-    \ USB_PRODUCT_ID
-    $0A c, $00 c,
-
-    \ Requested PID CCCC
     \ https://github.com/pidcodes/pidcodes.github.com/pull/1024
     \ USB_VENDOR_ID
-    \ $09 c, $12 c,
+    $09 c, $12 c,
     \ USB_PRODUCT_ID
-    \ $CC c, $CC c,
+    $CC c, $CC c,
   
     \ USB_PRODUCT_BCD
     $00 c, $02 c,
