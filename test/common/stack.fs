@@ -26,13 +26,6 @@ forth set-current
 \ The stack fail hook
 variable stack-fail-hook
 
-compiling-to-flash? not [if]
-
-  \ Initialize the stack fail hook
-  0 stack-fail-hook !
-
-[then]
-
 \ Stack fail exception
 : x-stack-fail ( -- ) space ." stack test failure" cr ;
 
@@ -45,29 +38,42 @@ compiling-to-flash? not [if]
 \ the stack fail hook on failure, this also raises an exception if the stack
 \ size was unexpected, as the stack will be in an unknown state.
 : }t ( yn ... y1 xn .. x1 count -- ) ( R: old-sp -- )
-  >r sp@ r> r> r> swap >r over >r swap 2 cells * - <> if
+  >r sp@ r> r> r> swap >r over >r swap
+  dup 0> if 2 cells else cell then * - <> if
     stack-fail-hook @ ?execute ['] x-stack-fail ?raise
   else
-    r> ( ??? count ) begin
+    r> ( ??? count )
+    dup 0< if negate 0 ?do 0 loop exit then
+    begin
       dup 0>
     while
-      dup 1+ roll rot = if
-	1 -
-      else
-	stack-fail-hook @ ?execute 1-
-      then
+      dup 1+ roll rot <> if stack-fail-hook @ ?execute then 1-
     repeat
   then
+  drop
 ;
 
-compiling-to-flash? [if]
+\ Test the stack depth after executing code and return the stack to its
+\ original depth without checking the values on the stack (useful for testing
+\ words for which the values put on the stack are not necessarily known); note
+\ that in addition to calling the stack fail hook on failure, this also raises
+\ an exception if the stack size was unexpected, as the stack will be in an
+\ unknown state.
+: }t-depth ( yn ... y1 count -- ) ( R: old-sp -- )
+  >r sp@ r> r> r> swap >r over >r swap cells - <> if
+    stack-fail-hook @ ?execute ['] x-stack-fail ?raise
+  else
+    r> ( ??? count )
+    dup 0< if negate 0 ?do 0 loop exit then
+    begin dup 0> while nip 1- repeat
+  then
+  drop
+;
 
-  \ Initialize
-  : init ( -- )
-    init
-    0 stack-fail-hook !
-  ;
-
-[then]
+\ Initialize the stack fail hook
+: init-stack-fail-hook ( -- )
+  0 stack-fail-hook !
+;
+initializer init-stack-fail-hook
 
 set-current set-order
