@@ -44,6 +44,7 @@ This is a `value` containing whether files saved by zeptoed will use CRLF endlin
 
 zeptoed has the following key mappings; all other non-control characters will be inserted at the cursor:
 
+* Control-?: Display online help
 * Enter: Insert a newline with indentation to match the indentation of the preceding line, unless prompted in the minibuffer, where then the prompt is responded to, or while searching, where then searching is ended.
 * Tab: Indent the current line or the current selection by one indentation incremnt.
 * Shift-Tab: Unindent the current lien or the current selection by one indentation increment. Note that tabs may be automatically converted to spaces in the process.

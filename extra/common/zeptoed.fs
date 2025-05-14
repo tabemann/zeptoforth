@@ -33,6 +33,61 @@
 \ Save files with CRLF newlines
 false value zeptoed-save-crlf-enabled
 
+begin-module zeptoed-help
+
+  \ Parse a line of help
+  : %% ( -- )
+    source + source drop >parse @ + ?do i c@ c, loop $0A c,
+    source nip >parse !
+  ;  
+
+  \ Online help
+  create help-content
+  %% zeptoed Online Help
+  %% 
+  %% Control-?        Display this online help
+  %% Return           Insert an endline
+  %% Tab              Insert an indentation, or indent selected text
+  %% Shift-Tab        Remove an indentation, or deindent selected text
+  %% Control-Meta-Tab Insert a tab character
+  %% Backspace        Delete backward one character, or delete selected text
+  %% Delete           Delete forward one character, or delete selected text
+  %% Up               Move up one line
+  %% Down             Move down one line
+  %% Forward          Move forward one character
+  %% Backward         Move backward one character
+  %% Page Up          Move up a significant portion of a screen
+  %% Page Down        Move down a significant portion of a screen
+  %% Home             Move to the top of the document
+  %% End              Move to the end of the document
+  %% Control-Space    Start a selection, or clear the current selection
+  %% Control-A        Move to the start of line (note that one may have to enter
+  %%                  this twice with some terminal emulators)
+  %% Control-E        Move to the end of the line
+  %% Control-F        Move forward one character
+  %% Control-B        Move backward one character
+  %% Control-N        Move to the next buffer
+  %% Control-P        Move to the previous buffer
+  %% Control-O        Open a file, creating it if necessary, in a new buffer
+  %% Control-R        Search forward
+  %% Control-Meta-R   Search backward  
+  %% Control-V        Exit
+  %% Control-W        Write the current buffer to the current file
+  %% Control-Meta-W   Write the current buffer into a specified file, changing
+  %%                  the current buffer's path  
+  %% Control-X        Revert the current buffer from file
+  %% Control-Meta-X   Close the current buffer
+  %% Control-K        Cut the current selection into the clipboard
+  %% Control-Meta-K   Copy the current selection into the clipboard  
+  %% Control-Y        Paste the current clipboard
+  %% Control-Z        Undo the most recent change
+  %% Control-L        Refresh the display
+  %% F1               Disable autoindent
+  %% F2               Enable autoindent
+  here help-content - cell align, constant help-content-bytes
+  
+end-module
+
 begin-module zeptoed-internal
 
   oo import
@@ -68,6 +123,7 @@ begin-module zeptoed-internal
   $18 constant ctrl-x
   $19 constant ctrl-y
   $1A constant ctrl-z
+  $1F constant ctrl-?
 
   \ Character entry mode
   0 constant insert-mode
@@ -750,8 +806,22 @@ begin-module zeptoed-internal
     
   end-class
 
+  \ Normal buffer class
+  <buffer> begin-class <normal-buffer>
+
+    \ Handle write
+    method handle-write ( buffer -- )
+
+    \ Handle change file path
+    method handle-change-file-path ( buffer -- )
+
+    \ Handle revert
+    method handle-revert ( buffer -- )
+    
+  end-class
+  
   \ File buffer class
-  <buffer> begin-class <file-buffer>
+  <normal-buffer> begin-class <file-buffer>
 
     \ The file being edited
     <fat32-file> class-size member buffer-file
@@ -784,20 +854,16 @@ begin-module zeptoed-internal
     \ Write out a file
     method write-buffer-to-file ( buffer -- )
 
-    \ Handle change file path
-    method handle-change-file-path ( buffer -- )
-
     \ Actal do change file path
     method do-change-file-path ( buffer -- )
 
-    \ Handle write
-    method handle-write ( buffer -- )
-
-    \ Handle revert
-    method handle-revert ( buffer -- )
-    
   end-class
 
+  \ Static buffer class
+  <normal-buffer> begin-class <static-buffer>
+    
+  end-class
+  
   \ Minibuffer class
   <buffer> begin-class <minibuffer>
 
@@ -865,6 +931,9 @@ begin-module zeptoed-internal
     \ Minibuffer
     cell member editor-minibuffer
 
+    \ Help buffer
+    cell member editor-help
+    
     \ Are we in the minibuffer?
     cell member editor-in-minibuffer
 
@@ -1023,6 +1092,9 @@ begin-module zeptoed-internal
 
     \ Handle editor close
     method handle-editor-close ( editor -- )
+
+    \ Handle help
+    method handle-help ( editor -- )
     
     \ Handle a special key
     method handle-special ( editor -- )
@@ -3370,12 +3442,16 @@ begin-module zeptoed-internal
 
   end-implement
 
+  \ Implement the normal buffer
+  <normal-buffer> begin-implement
+  end-implement
+  
   \ Implement the file buffer
   <file-buffer> begin-implement
 
     \ Constructor
     :noname { path-addr path-bytes heap editor buffer -- }
-      path-addr path-bytes heap editor buffer <buffer>->new
+      path-addr path-bytes heap editor buffer <normal-buffer>->new
       0 buffer file-buffer-exception !
       false buffer file-buffer-accessed !
       false buffer buffer-file-open !
@@ -3394,7 +3470,7 @@ begin-module zeptoed-internal
         buffer buffer-file destroy
         false buffer buffer-file-open !
       then
-      buffer <buffer>->destroy
+      buffer <normal-buffer>->destroy
     ; define destroy
 
     \ Buffer file is valid
@@ -3573,6 +3649,73 @@ begin-module zeptoed-internal
       then
     ; define handle-revert
     
+  end-implement
+
+  \ Implement static buffers
+  <static-buffer> begin-implement
+
+    \ Constructor
+    :noname { data-addr data-bytes name-addr name-bytes heap editor buffer -- }
+      name-addr name-bytes heap editor buffer <normal-buffer>->new
+      data-addr data-bytes buffer buffer-edit-cursor insert-data
+      buffer buffer-edit-cursor go-to-start
+    ; define new
+    
+    \ Enter a character into the buffer
+    :noname { c buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode = if
+        c buffer do-search-forward exit
+      then
+      buffer buffer-char-entry-mode @ search-backward-mode = if
+        c buffer do-search-backward exit
+      then
+    ; define handle-insert
+
+    \ Enter a newline into the buffer
+    :noname { buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode =
+      buffer buffer-char-entry-mode @ search-backward-mode = or if
+        insert-mode buffer buffer-char-entry-mode !
+      then
+    ; define handle-newline
+
+    \ Backspace in the buffer
+    :noname { buffer -- }
+      buffer buffer-char-entry-mode @ search-forward-mode =
+      buffer buffer-char-entry-mode @ search-backward-mode = or if
+        buffer do-search-delete
+      then
+    ; define handle-delete
+
+    \ Delete in the buffer
+    :noname { buffer -- }
+      buffer leave-search
+    ; define handle-delete-forward
+
+    \ Kill a range in the buffer
+    :noname ( buffer -- ) drop ; define handle-kill
+
+    \ Paste in the buffer
+    :noname ( buffer -- ) drop ; define handle-paste
+
+    \ Undo in the buffer
+    :noname ( buffer -- ) drop ; define handle-undo
+    
+    \ Indent in buffer
+    :noname ( buffer -- ) drop ; define handle-indent
+
+    \ Unindent in buffer
+    :noname ( buffer -- ) drop ; define handle-unindent
+
+    \ Handle write
+    :noname ( buffer -- ) drop ; define handle-write
+
+    \ Handle change file path
+    :noname ( buffer -- ) drop ; define handle-change-file-path
+
+    \ Handle revert
+    :noname ( buffer -- ) drop ; define handle-revert
+
   end-implement
   
   \ Implement the minibuffer
@@ -3771,6 +3914,24 @@ begin-module zeptoed-internal
       then
     ; define handle-undo
 
+    \ Indent in buffer
+    :noname ( buffer -- )
+      dup minibuffer-read-only @ not if
+        <buffer>->handle-indent
+      else
+        drop
+      then
+    ; define handle-indent
+
+    \ Unindent in buffer
+    :noname ( buffer -- )
+      dup minibuffer-read-only @ not if
+        <buffer>->handle-unindent
+      else
+        drop
+      then
+    ; define handle-unindent
+
   end-implement
   
   \ Implement the clipboard
@@ -3858,6 +4019,7 @@ begin-module zeptoed-internal
       buffer editor editor-last !
       buffer editor editor-current !
       minibuffer editor editor-minibuffer !
+      0 editor editor-help !
       false editor editor-in-minibuffer !
       false editor editor-exit !
       false editor editor-searching !
@@ -4357,6 +4519,31 @@ begin-module zeptoed-internal
       editor refresh-editor
     ; define handle-editor-refresh
 
+    \ Display editor help
+    :noname { editor -- }
+      editor editor-in-minibuffer @ not if
+        editor editor-help @ 0= if
+          <static-buffer> class-size editor editor-heap @ allocate { help }
+          help editor editor-help !
+          zeptoed-help::help-content zeptoed-help::help-content-bytes
+          s" <HELP>" editor editor-heap @ editor
+          <static-buffer> help init-object
+          editor editor-current @ { current }
+          current buffer-next @ 0= if
+            help editor editor-last !
+          else
+            help current buffer-next @ buffer-prev !
+          then
+          current buffer-next @ help buffer-next !
+          current help buffer-prev !
+          help current buffer-next !
+        then
+        editor editor-help @ editor editor-current !
+        editor editor-help @ refresh-display
+        editor display-search-text
+      then
+    ; define handle-help
+    
     \ Handle editor close
     :noname { editor -- }
       editor editor-in-minibuffer @ not if
@@ -4366,6 +4553,9 @@ begin-module zeptoed-internal
           editor ['] do-editor-close
           editor editor-minibuffer @ set-prompt
         else
+          editor editor-current @ editor editor-help @ = if
+            0 editor editor-help !
+          then
           editor editor-current @ editor close-editor-buffer
         then
       then
@@ -4511,11 +4701,11 @@ begin-module zeptoed-internal
             ctrl-v of editor handle-editor-exit endof
             ctrl-w of editor handle-editor-write endof
             ctrl-x of editor handle-editor-revert endof
-            \	    ctrl-u of handle-editor-insert-row endof
             ctrl-k of editor handle-editor-kill endof
             ctrl-y of editor handle-editor-paste endof
             ctrl-z of editor handle-editor-undo endof
             ctrl-l of editor handle-editor-refresh endof
+            ctrl-? of editor handle-help endof
             escape of editor handle-escape endof
           endcase
           depth 0< if ." *** " then \ DEBUG
@@ -4561,6 +4751,8 @@ end-implement
       then
       editor [: { editor }
         editor refresh-editor
+        s" Enter Control-? to display online help"
+        editor editor-minibuffer @ set-message
         editor editor-loop
       ;] try
       editor destroy
