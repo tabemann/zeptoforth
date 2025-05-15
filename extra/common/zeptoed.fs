@@ -3063,6 +3063,7 @@ begin-module zeptoed-internal
             else
               s\" \x5C " { addr bytes }
               addr bytes cursor0 insert-data
+              bytes cursor0 offset@ buffer add-delete-undo
               select-diff 0> buffer buffer-select-enabled @ and if
                 bytes buffer buffer-select-cursor adjust-offset
               else
@@ -3136,6 +3137,7 @@ begin-module zeptoed-internal
                   comment-bytes negate buffer buffer-edit-cursor adjust-offset
                 then
                 comment-bytes 1- cursor0 adjust-offset
+                cursor0 offset@ dup comment-bytes - tuck buffer add-insert-undo
                 comment-bytes cursor0 delete-data
                 comment-bytes negate +to end-offset
                 buffer dirty-buffer
