@@ -75,7 +75,7 @@
 <h2>Key mappings<a class="headerlink" href="#key-mappings" title="Link to this heading">¶</a></h2>
 <p>zeptoed has the following key mappings; all other non-control characters will be inserted at the cursor:</p>
 <ul class="simple">
-<li><p>Control-?: Display online help</p></li>
+<li><p>Control-?: Display online help.</p></li>
 <li><p>Enter: Insert a newline with indentation to match the indentation of the preceding line, unless prompted in the minibuffer, where then the prompt is responded to, or while searching, where then searching is ended.</p></li>
 <li><p>Tab: Indent the current line or the current selection by one indentation incremnt.</p></li>
 <li><p>Shift-Tab: Unindent the current lien or the current selection by one indentation increment. Note that tabs may be automatically converted to spaces in the process.</p></li>
@@ -100,6 +100,8 @@
 <li><p>Control-O: Open a buffer with the specified file path; if a file with that path exists it is loaded, otherwise it is created.</p></li>
 <li><p>Control-R: Begin searching forward, if not already searching forward, and if already searching forward, skip to the next string to search for if there is one.</p></li>
 <li><p>Control-Meta-R: Begin searching backward, if not already searching backward, and if already searching backward, skip to the previous string to search for if there is one.</p></li>
+<li><p>Control-U: Comment current line, or comment selected text.</p></li>
+<li><p>Control-Meta-U: Uncomment current line, or uncomment selected text.</p></li>
 <li><p>Control-V: Exit; note that if dirty buffers exist, the user will be prompted whether they wish to exit.</p></li>
 <li><p>Control-W: Write the current buffer to its file and mark it clean.</p></li>
 <li><p>Control-Meta-W: Select another file and write the current buffer into it, creating it if it did not exist and overwriting its contents if it did, and set the current buffer to point to it; the current buffer will be marked as clean.</p></li>
