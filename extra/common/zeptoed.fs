@@ -72,6 +72,8 @@ begin-module zeptoed-help
   %% Control-R        Search forward
   %% Control-Meta-R   Search backward  
   %% Control-V        Exit
+  %% Control-U        Comment current line, or comment selected text
+  %% Control-Meta-U   Uncomment current line, or uncomment selected text
   %% Control-W        Write the current buffer to the current file
   %% Control-Meta-W   Write the current buffer into a specified file, changing
   %%                  the current buffer's path  
@@ -564,6 +566,9 @@ begin-module zeptoed-internal
     \ Continue searching backward
     method edit-cursor-continue-backward ( addr count buffer -- )
 
+    \ Find comment offset in text between cursors
+    method cursors-comment-offset ( cursor0 cursor1 buffer -- offset )
+    
     \ Add character to search text
     method add-search-text-char ( c buffer -- )
 
@@ -717,6 +722,12 @@ begin-module zeptoed-internal
     \ Unindent in buffer
     method do-unindent ( buffer -- )
 
+    \ Comment in buffer
+    method do-comment ( buffer -- )
+
+    \ Uncomment in buffer
+    method do-uncomment ( buffer -- )
+
     \ Search forward by one character
     method do-search-forward ( c buffer -- )
 
@@ -803,6 +814,12 @@ begin-module zeptoed-internal
 
     \ Disable autoindent
     method handle-disable-autoindent ( buffer -- )
+
+    \ Comment text
+    method handle-comment ( buffer -- )
+
+    \ Uncomment text
+    method handle-uncomment ( buffer -- )
     
   end-class
 
@@ -1081,6 +1098,12 @@ begin-module zeptoed-internal
     \ Handle editor unindent
     method handle-editor-unindent ( editor -- )
 
+    \ Handle editor comment
+    method handle-editor-comment ( editor -- )
+
+    \ Handle editor uncomment
+    method handle-editor-uncomment ( editor -- )
+    
     \ Handle editor enable autoindent
     method handle-editor-enable-autoindent ( editor -- )
 
@@ -1874,6 +1897,42 @@ begin-module zeptoed-internal
         if cursor buffer buffer-edit-cursor copy-cursor then
       ;] with-object
     ; define edit-cursor-continue-backward
+
+    \ Find comment offset in text between cursors
+    :noname ( cursor0 cursor1 buffer -- offset )
+      dup buffer-dyn-buffer <cursor> [:
+        over buffer-dyn-buffer <cursor> [:
+          { cursor0 cursor1 buffer cursor0' cursor1' }
+          cursor0 cursor0' copy-cursor
+          cursor1 cursor1' copy-cursor
+          [: newline = ;] cursor0' find-prev
+          [: newline = ;] cursor1' find-next
+          cursor1' offset@ { end-offset }
+          -1 { offset }
+          0 { line-offset }
+          begin cursor0' offset@ end-offset < while
+            cursor0' buffer cursor-at { c }
+            c bl = if
+              1 cursor0' adjust-offset
+              1 +to line-offset
+            else
+              c tab = if
+                1 cursor0' adjust-offset
+                line-offset 1+ zeptoed-tab-size umod zeptoed-tab-size -
+                +to line-offset
+              else
+                offset 0>= if line-offset offset min else line-offset then
+                to offset
+                0 to line-offset
+                [: newline = ;] cursor0' find-next
+                1 cursor0' adjust-offset
+              then
+            then
+          repeat
+          offset 0>= if offset else 0 then
+        ;] with-object
+      ;] with-object
+    ; define cursors-comment-offset
 
     \ Add character to search text
     :noname ( c buffer -- )
@@ -2964,6 +3023,136 @@ begin-module zeptoed-internal
       then
     ; define do-unindent
 
+    \ Comment in buffer
+    :noname ( buffer -- )
+      dup buffer-dyn-buffer <cursor> [:
+        over buffer-dyn-buffer <cursor> [: { buffer cursor0 cursor1 }
+          buffer buffer-select-cursor offset@
+          buffer buffer-edit-cursor offset@ - { select-diff }
+          buffer buffer-select-enabled @ if
+            select-diff 0< if
+              buffer buffer-select-cursor cursor0 copy-cursor
+              buffer buffer-edit-cursor cursor1 copy-cursor
+            else
+              buffer buffer-edit-cursor cursor0 copy-cursor
+              buffer buffer-select-cursor cursor1 copy-cursor
+            then
+          else
+            buffer buffer-edit-cursor cursor0 copy-cursor
+            buffer buffer-edit-cursor cursor1 copy-cursor
+          then
+          [: newline = ;] cursor0 find-prev
+          [: newline = ;] cursor1 find-next
+          cursor0 cursor1 buffer cursors-comment-offset { comment-offset }
+          0 { current-offset }
+          cursor1 offset@ { end-offset }
+          begin cursor0 offset@ end-offset <= while
+            cursor0 buffer cursor-at { c }
+            current-offset comment-offset <
+            c newline <> and
+            cursor0 offset@ end-offset <> and if
+              c tab = if
+                current-offset 1+ zeptoed-tab-size umod zeptoed-tab-size -
+                +to current-offset
+                1 cursor0 adjust-offset
+              else
+                \ This should always be a space
+                1 +to current-offset
+                1 cursor0 adjust-offset
+              then
+            else
+              s\" \x5C " { addr bytes }
+              addr bytes cursor0 insert-data
+              select-diff 0> buffer buffer-select-enabled @ and if
+                bytes buffer buffer-select-cursor adjust-offset
+              else
+                bytes buffer buffer-edit-cursor adjust-offset
+              then
+              bytes +to end-offset
+              buffer dirty-buffer
+              [: newline = ;] cursor0 find-next
+              1 cursor0 adjust-offset
+              0 to current-offset
+              cursor0 offset@ buffer buffer-dyn-buffer dyn-buffer-len@ = if
+                exit
+              then
+            then
+          repeat
+        ;] with-object
+      ;] with-object
+    ; define do-comment
+
+    \ Uncomment in buffer
+    :noname ( buffer -- )
+      dup buffer-dyn-buffer <cursor> [:
+        over buffer-dyn-buffer <cursor> [: { buffer cursor0 cursor1 }
+          buffer buffer-select-cursor offset@
+          buffer buffer-edit-cursor offset@ - { select-diff }
+          buffer buffer-select-enabled @ if
+            select-diff 0< if
+              buffer buffer-select-cursor cursor0 copy-cursor
+              buffer buffer-edit-cursor cursor1 copy-cursor
+            else
+              buffer buffer-edit-cursor cursor0 copy-cursor
+              buffer buffer-select-cursor cursor1 copy-cursor
+            then
+          else
+            buffer buffer-edit-cursor cursor0 copy-cursor
+            buffer buffer-edit-cursor cursor1 copy-cursor
+          then
+          [: newline = ;] cursor0 find-prev
+          [: newline = ;] cursor1 find-next
+          false { remove-comment? }
+          1 { comment-bytes }
+          cursor1 offset@ { end-offset }
+          begin cursor0 offset@ end-offset < while
+            cursor0 buffer cursor-at { c }
+            c $5C = if
+              1 cursor0 adjust-offset
+              cursor0 offset@ end-offset < if
+                cursor0 buffer cursor-at to c
+                c bl = if
+                  true to remove-comment?
+                  2 to comment-bytes
+                else
+                  c tab = if
+                    true to remove-comment?
+                  else
+                    c newline = if
+                      true to remove-comment?
+                    else
+                      [: newline = ;] cursor0 find-next
+                      1 cursor0 adjust-offset
+                    then
+                  then
+                then
+              else
+                true to remove-comment?
+              then
+              remove-comment? if
+                select-diff 0> buffer buffer-select-enabled @ and if
+                  comment-bytes negate buffer buffer-select-cursor adjust-offset
+                else
+                  comment-bytes negate buffer buffer-edit-cursor adjust-offset
+                then
+                comment-bytes 1- cursor0 adjust-offset
+                comment-bytes cursor0 delete-data
+                comment-bytes negate +to end-offset
+                buffer dirty-buffer
+                [: newline = ;] cursor0 find-next
+                1 cursor0 adjust-offset
+                false to remove-comment?
+                1 to comment-bytes
+              then
+            else
+              c bl = c tab = or not if [: newline = ;] cursor0 find-next then
+              1 cursor0 adjust-offset
+            then
+          repeat
+        ;] with-object
+      ;] with-object
+    ; define do-uncomment
+    
     \ Search forward by one character
     :noname { c buffer -- }
       c buffer add-search-text-char
@@ -3388,6 +3577,22 @@ begin-module zeptoed-internal
       buffer refresh-display
     ; define handle-unindent
 
+    \ Comment in buffer
+    :noname { buffer -- }
+      buffer leave-search
+      buffer do-comment
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-comment
+
+    \ Uncomment in buffer
+    :noname { buffer -- }
+      buffer leave-search
+      buffer do-uncomment
+      buffer update-display drop
+      buffer refresh-display
+    ; define handle-uncomment
+
     \ Start finding forward
     :noname { buffer -- }
       buffer searching? { buffer-searching? }
@@ -3707,6 +3912,12 @@ begin-module zeptoed-internal
     \ Unindent in buffer
     :noname ( buffer -- ) drop ; define handle-unindent
 
+    \ Comment in buffer
+    :noname ( buffer -- ) drop ; define handle-comment
+
+    \ Uncomment in buffer
+    :noname ( buffer -- ) drop ; define handle-uncomment
+    
     \ Handle write
     :noname ( buffer -- ) drop ; define handle-write
 
@@ -3931,6 +4142,24 @@ begin-module zeptoed-internal
         drop
       then
     ; define handle-unindent
+
+    \ Comment in buffer
+    :noname ( buffer -- )
+      dup minibuffer-read-only @ not if
+        <buffer>->handle-comment
+      else
+        drop
+      then
+    ; define handle-comment
+
+    \ Uncomment in buffer
+    :noname ( buffer -- )
+      dup minibuffer-read-only @ not if
+        <buffer>->handle-uncomment
+      else
+        drop
+      then
+    ; define handle-uncomment
 
   end-implement
   
@@ -4477,6 +4706,26 @@ begin-module zeptoed-internal
       editor display-search-text
     ; define handle-editor-unindent
 
+    \ Handle editor comment
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-comment
+      else
+        editor editor-current @ handle-comment
+      then
+      editor display-search-text
+    ; define handle-editor-comment
+
+    \ Handle editor uncomment
+    :noname { editor -- }
+      editor editor-in-minibuffer @ if
+        editor editor-minibuffer @ handle-uncomment
+      else
+        editor editor-current @ handle-uncomment
+      then
+      editor display-search-text
+    ; define handle-editor-uncomment
+
     \ Handle editor find forward
     :noname { editor -- }
       editor editor-in-minibuffer @ if
@@ -4668,6 +4917,7 @@ begin-module zeptoed-internal
         ctrl-w of editor handle-editor-change-file-path endof
         ctrl-x of editor handle-editor-close endof
         ctrl-r of editor handle-editor-search-backward endof
+        ctrl-u of editor handle-editor-uncomment endof
         [char] [ of editor handle-special endof
         [char] O of
           get-key case
@@ -4698,6 +4948,7 @@ begin-module zeptoed-internal
             ctrl-p of editor handle-editor-prev endof
             ctrl-o of editor handle-editor-new endof
             ctrl-r of editor handle-editor-search-forward endof
+            ctrl-u of editor handle-editor-comment endof
             ctrl-v of editor handle-editor-exit endof
             ctrl-w of editor handle-editor-write endof
             ctrl-x of editor handle-editor-revert endof
