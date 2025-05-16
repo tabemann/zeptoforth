@@ -595,6 +595,9 @@ begin-module zeptoed-internal
 
     \ Get the number of rows between two cursors
     method rows-between-cursors ( cursor0 cursor1 buffer -- rows )
+
+    \ Adjust a cursor but keep it on the same line
+    method adjust-offset-same-line ( bytes cursor buffer -- )
     
     \ Update the display
     method update-display ( buffer -- update? )
@@ -2254,7 +2257,28 @@ begin-module zeptoed-internal
         rows
       ;] with-object
     ; define rows-between-cursors
-    
+
+    \ Adjust a cursor but keep it on the same line
+    :noname { bytes cursor buffer -- }
+      bytes 0< if
+        begin bytes 0< cursor offset@ 0> and while
+          0 { W^ c }
+          c 1 cursor read-data-before-w/o-move drop c@ newline = if exit then
+          -1 cursor adjust-offset
+          1 +to bytes
+        repeat
+      else
+        buffer buffer-dyn-buffer dyn-buffer-len@ { len }
+        begin bytes 0> cursor offset@ len < and while
+          0 { W^ c }
+          c 1 cursor read-data-w/o-move drop
+          c c@ newline = if exit then
+          1 cursor adjust-offset
+          -1 +to bytes
+        repeat
+      then
+    ; define adjust-offset-same-line
+
     \ Update the display
     :noname { buffer -- update? }
       buffer buffer-edit-cursor { edit-cursor }
@@ -3132,9 +3156,11 @@ begin-module zeptoed-internal
               then
               remove-comment? if
                 select-diff 0> buffer buffer-select-enabled @ and if
-                  comment-bytes negate buffer buffer-select-cursor adjust-offset
+                  comment-bytes negate buffer buffer-select-cursor
+                  buffer adjust-offset-same-line
                 else
-                  comment-bytes negate buffer buffer-edit-cursor adjust-offset
+                  comment-bytes negate buffer buffer-edit-cursor
+                  buffer adjust-offset-same-line
                 then
                 comment-bytes 1- cursor0 adjust-offset
                 cursor0 offset@ dup comment-bytes - tuck buffer add-insert-undo
