@@ -1293,7 +1293,7 @@ begin-module picocalc-term
   ;
 
   \ Set the current console to a PicoCalc terminal
-  : term-console { term -- }
+  : term-console ( -- )
     shared-term console-input-data console-internal::console-io key-hook !
     shared-term console-input-data console-internal::console-io? key?-hook !
     shared-term console-output-data console-internal::console-io emit-hook !
