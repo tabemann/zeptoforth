@@ -87,6 +87,9 @@ begin-module picocalc-term
     \ The input receive buffer size
     64 constant output-recv-buf-size
 
+    \ Characters
+    $0A constant newline
+    
     \ Attributes
     0 bit constant attr-bold
     1 bit constant attr-dim
@@ -527,6 +530,7 @@ begin-module picocalc-term
             c c@ $80 < if c c@ [: attention-hook @ ?execute ;] try drop then
           else
             c c@ case
+              newline of s\" \r" self input-string endof
               KEY_ESC of s\" \x1B" self input-string 100 ms endof
               KEY_F1 of s\" \x1B\x4F\x50" self input-string endof
               KEY_F2 of s\" \x1B\x4F\x51" self input-string endof
@@ -545,6 +549,7 @@ begin-module picocalc-term
               KEY_BREAK of self handle-break endof
               KEY_INSERT of s\" \x1B\x5B\x32\x7E" self input-string endof
               KEY_HOME of s\" \x1B\x5B\x48" self input-string endof
+              KEY_DEL of s\" \x1B\x5B\x33\x7E" self input-string endof
               KEY_END of s\" \x1B\x5B\x46" self input-string endof
               KEY_PUP of s\" \x1B\x5B\x35\x7E" self input-string endof
               KEY_PDOWN of s\" \x1B\x5B\x36\x7E" self input-string endof
@@ -589,6 +594,7 @@ begin-module picocalc-term
               KEY_BREAK of self handle-control-break endof
               KEY_INSERT of s\" \x1B\x5B\x32\x3B\x35\x7E" self input-string endof
               KEY_HOME of s\" \x1B\x5B\x31\x3B\x35\x48" self input-string endof
+              KEY_DEL of s\" \x1B\x5B\x33\x3B\x35\x7E" self input-string endof
               KEY_END of s\" \x1B\x5B\x31\x3B\x35\x46" self input-string endof
               KEY_PUP of s\" \x1B\x5B\x35\x3B\x35\x7E" self input-string endof
               KEY_PDOWN of s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string endof

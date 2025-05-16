@@ -48,6 +48,7 @@ begin-module picocalc-keys
   $D0 constant KEY_BREAK
   $D1 constant KEY_INSERT
   $D2 constant KEY_HOME
+  $D4 constant KEY_DEL
   $D5 constant KEY_END
   $D6 constant KEY_PUP
   $D7 constant KEY_PDOWN
