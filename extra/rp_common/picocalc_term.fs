@@ -640,6 +640,13 @@ begin-module picocalc-term
     :noname { self -- }
       begin self key-intf picocalc-keys>? while
         self key-intf picocalc-keys> { attrs c }
+
+        \ DEBUG
+        attrs c [:
+          ." <" h.2 ." :" h.2 space flush-console
+        ;] console::with-serial-output
+        \ END DEBUG
+
         attrs 0= if
           c self handle-normal-key
         else
@@ -670,6 +677,11 @@ begin-module picocalc-term
             self term-lock claim-lock
             true to updated
           then
+
+          \ DEBUG
+          buf c@ [: ." >" h.2 space flush-console ;] console::with-serial-output
+          \ END DEBUG
+          
           buf c@ case
             escape of self handle-escape endof
             return of self handle-return endof
