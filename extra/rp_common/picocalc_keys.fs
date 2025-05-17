@@ -201,7 +201,7 @@ begin-module picocalc-keys
     \ Initialize the PicoCalc keyboard
     :noname { self -- }
       self picocalc-keys-destroy-sema ungive
-      false picocalc-keys-ready-destroy !
+      false self picocalc-keys-ready-destroy !
       picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
       picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
       picocalc-keys-sda-pin pull-up-pin

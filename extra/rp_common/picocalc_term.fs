@@ -487,7 +487,7 @@ begin-module picocalc-term
       self term-lock init-lock
       no-sema-limit 1 self destroy-sema init-sema
       input-stream-size self input-stream init-stream
-      output-stream-size self output-stream output-stream
+      output-stream-size self output-stream init-stream
       self input-stream self console-input-data
       console-internal::init-console-stream-input
       self output-stream self console-output-data
