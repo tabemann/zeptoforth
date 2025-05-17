@@ -265,11 +265,15 @@ begin-module picocalc-keys
           ;] picocalc-keys-timeout task::with-timeout
         ;] try
         ?dup if
-          self picocalc-error-displayed @ not if
-            [:
-              display-red execute display-normal flush-console
-            ;] console::with-serial-output
-            true self picocalc-error-displayed !
+          dup ['] x-i2c-target-noack <> if
+            self picocalc-error-displayed @ not if
+              [:
+                display-red execute display-normal flush-console
+              ;] console::with-serial-output
+              true self picocalc-error-displayed !
+            else
+              drop
+            then
           else
             drop
           then
