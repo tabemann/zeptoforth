@@ -1226,7 +1226,7 @@ begin-module picocalc-term
       self attrs @ self attrs-buf offset + c!
       self fg-color @ self fg-colors-buf offset + c!
       self bk-color @ self bk-colors-buf offset + c!
-      x y draw-char
+      x y self draw-char
       self draw-cursor
     ; define handle-char
     
