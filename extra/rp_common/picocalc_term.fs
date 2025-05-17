@@ -94,7 +94,7 @@ begin-module picocalc-term
     3 bit constant attr-reverse
 
     \ The default foreground color
-    ansi-term::white constant default-fg-color
+    ansi-term::b-green constant default-fg-color
 
     \ The default background color
     ansi-term::black constant default-bk-color
