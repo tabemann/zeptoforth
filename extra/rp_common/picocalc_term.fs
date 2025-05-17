@@ -185,6 +185,19 @@ begin-module picocalc-term
 
     \ Escape character timeout in ticks
     2500 constant escape-timeout
+
+    \ Flag for if the welcome message has been displayed on the screen yet
+    false value picocalc-welcome-displayed
+
+    \ Picocalc welcome message
+    : picocalc-welcome ( -- )
+      cr ." Welcome to zeptoforth on the PicoCalc"
+      cr ." Built for " kernel-platform type
+      cr ." Version " kernel-version type
+      cr ." On " kernel-date type
+      cr ." zeptoforth comes with ABSOLUTELY NO WARRANTY"
+      cr ." For details type `license' "
+    ;
     
   end-module> import
 
@@ -1342,6 +1355,10 @@ begin-module picocalc-term
     shared-term console-output-data console-internal::console-io?
     error-emit?-hook !
     shared-term ['] flush-term error-flush-console-hook !
+    picocalc-welcome-displayed not if
+      picocalc-welcome
+      true to picocalc-welcome-displayed
+    then
   ;
   
 end-module
