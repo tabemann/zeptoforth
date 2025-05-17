@@ -78,6 +78,9 @@ begin-module picocalc-term
     \ Display RST pin
     15 constant display-rst-pin
 
+    \ Do we invert the display
+    true constant display-invert
+    
     \ The input stream size
     256 constant input-stream-size
 
@@ -461,7 +464,8 @@ begin-module picocalc-term
     :noname { self -- }
       self <object>->new
       display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
-      display-rst-pin self display-buf display-width display-height
+      display-rst-pin
+      display-invert self display-buf display-width display-height
       display-spi-device <ili9488-8-spi> self display-intf init-object
       <picocalc-keys> self key-intf init-object
       0 self term-task !

@@ -31,6 +31,7 @@ begin-module ili9488-8-common
     \ ILI9488 registers
     $01 constant REG_SWRESET
     $11 constant REG_SLPOUT
+    $20 constant REG_INVOFF
     $21 constant REG_INVON
     $29 constant REG_DISPON
     $2A constant REG_CASET
@@ -85,8 +86,8 @@ begin-module ili9488-8-common
 
     continue-module ili9488-8-common-internal
       
-      \ Rotate setting
-      cell member ili9488-8-rotate
+      \ Inversion enabled setting
+      cell member ili9488-8-invert
 
       \ Column offset
       cell member ili9488-8-col-offset
@@ -146,8 +147,9 @@ begin-module ili9488-8-common
   <ili9488-8-common> begin-implement
 
     \ Constructor
-    :noname { dc cs buf cols rows self -- }
+    :noname { dc cs invert buf cols rows self -- }
       buf cols rows self <pixmap8>->new
+      invert self ili9488-8-invert !
       dc self ili9488-8-dc-pin !
       cs self ili9488-8-cs-pin !
       0 self ili9488-8-col-offset !
@@ -196,6 +198,12 @@ begin-module ili9488-8-common
 
       $F0 s\" \xC3" self cmd-args>ili9488-8
       $F0 s\" \x96" self cmd-args>ili9488-8
+
+      self ili9488-8-invert @ if
+        REG_INVON self cmd>ili9488-8
+      else
+        REG_INVOFF self cmd>ili9488-8
+      then
       
       REG_TEON s\" \x00" self cmd-args>ili9488-8
       REG_SLPOUT self cmd>ili9488-8

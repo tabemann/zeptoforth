@@ -61,8 +61,8 @@ begin-module ili9488-8-spi
 
     \ Constructor
     :noname
-      { din sck dc cs reset buf cols rows device self -- }
-      dc cs buf cols rows self <ili9488-8-common>->new
+      { din sck dc cs reset invert buf cols rows device self -- }
+      dc cs invert buf cols rows self <ili9488-8-common>->new
       device self ili9488-8-device !
       reset self ili9488-8-reset-pin !
 
