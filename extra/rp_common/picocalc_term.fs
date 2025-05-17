@@ -201,6 +201,10 @@ begin-module picocalc-term
     
   end-module> import
 
+  : *depth* ( c -- )
+    [: space emit space depth . flush-console ;] console::with-serial-output
+  ;
+  
   \ PicoCalc terminal class
   <object> begin-class <picocalc-term>
 
@@ -693,7 +697,7 @@ begin-module picocalc-term
           false
         else
           updated if
-            display-intf update-display
+            self display-intf update-display
             self term-lock release-lock
           then
           true
