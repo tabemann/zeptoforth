@@ -25,6 +25,7 @@ begin-module picocalc-keys
   lock import
   sema import
   i2c import
+  pin import
 
   \ PicoCalc attributes
   0 bit constant ATTR_CTRL
@@ -57,7 +58,7 @@ begin-module picocalc-keys
   begin-module picocalc-keys-internal
 
     \ PicoCalc keyboard I2C device
-    0 constant picocalc-keys-i2c-device
+    1 constant picocalc-keys-i2c-device
 
     \ PicoCalc keyboard I2C SDA GPIO
     6 constant picocalc-keys-sda-pin
@@ -199,6 +200,8 @@ begin-module picocalc-keys
       false picocalc-keys-ready-destroy !
       picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
       picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
+      picocalc-keys-sda-pin pull-up-pin
+      picocalc-keys-scl-pin pull-up-pin
       picocalc-keys-i2c-device master-i2c
       picocalc-keys-i2c-baud picocalc-keys-i2c-device i2c-clock!
       picocalc-keys-i2c-device 7-bit-i2c-addr
