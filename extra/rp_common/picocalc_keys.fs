@@ -60,10 +60,10 @@ begin-module picocalc-keys
     0 constant picocalc-keys-i2c-device
 
     \ PicoCalc keyboard I2C SDA GPIO
-    9 constant picocalc-keys-sda-pin
+    6 constant picocalc-keys-sda-pin
 
     \ PicoCalc keyboard I2C SCL GPIO
-    10 constant picocalc-keys-scl-pin
+    7 constant picocalc-keys-scl-pin
 
     \ PicoCalc keyboard I2C address
     $1F constant picocalc-keys-i2c-addr
