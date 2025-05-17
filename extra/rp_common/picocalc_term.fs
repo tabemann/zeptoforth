@@ -639,7 +639,7 @@ begin-module picocalc-term
     \ Handle input
     :noname { self -- }
       begin self key-intf picocalc-keys>? while
-        self key-intf picocalc-keys> { attrs W^ c }
+        self key-intf picocalc-keys> { attrs c }
         attrs 0= if
           c self handle-normal-key
         else
