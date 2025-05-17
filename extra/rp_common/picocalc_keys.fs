@@ -205,6 +205,7 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device master-i2c
       picocalc-keys-i2c-baud picocalc-keys-i2c-device i2c-clock!
       picocalc-keys-i2c-device 7-bit-i2c-addr
+      picocalc-keys-i2c-addr picocalc-keys-i2c-device i2c-target-addr!
       picocalc-keys-i2c-device enable-i2c
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
@@ -249,9 +250,8 @@ begin-module picocalc-keys
     :noname { self -- }
       self picocalc-keys-try-destroy @ not if
         self [: { self }
-          picocalc-keys-i2c-addr picocalc-keys-i2c-device i2c-target-addr!
           PICOCALC_KEY { W^ buf }
-          buf 1 picocalc-keys-i2c-device >i2c-restart 1 = if
+          buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
             0 buf !
             buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
               buf @ self handle-picocalc-key
