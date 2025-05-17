@@ -87,9 +87,6 @@ begin-module picocalc-term
     \ The input receive buffer size
     64 constant output-recv-buf-size
 
-    \ Characters
-    $0A constant newline
-    
     \ Attributes
     0 bit constant attr-bold
     1 bit constant attr-dim
@@ -288,6 +285,12 @@ begin-module picocalc-term
       \ Scroll down by a number of lines
       method scroll-down ( lines self -- )
 
+      \ Handle a normal key
+      method handle-normal-key ( c self -- )
+
+      \ Handle a control key
+      method handle-ctrl-key ( c self -- )
+      
       \ Handle input
       method handle-input ( self -- )
 
@@ -520,86 +523,111 @@ begin-module picocalc-term
       self destroy-sema give
     ; define run-term
 
+    \ Handle a normal key
+    :noname { c self -- }
+      attention? @ if
+        c KEY_ESC = if $1B to key then
+        c $80 < if c [: attention-hook @ ?execute ;] try drop then
+      else
+        c linefeed = if s\" \r" self input-string exit then
+        c backspace = if s\" \x7F" self input-string exit then
+        c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
+        c KEY_F1 = if s\" \x1B\x4F\x50" self input-string exit then
+        c KEY_F2 = if s\" \x1B\x4F\x51" self input-string exit then
+        c KEY_F3 = if s\" \x1B\x4F\x52" self input-string exit then
+        c KEY_F4 = if s\" \x1B\x4F\x53" self input-string exit then
+        c KEY_F5 = if s\" \x1B\x5B\x31\x35\x7E" self input-string exit then
+        c KEY_F6 = if s\" \x1B\x5B\x31\x37\x7E" self input-string exit then
+        c KEY_F7 = if s\" \x1B\x5B\x31\x38\x7E" self input-string exit then
+        c KEY_F8 = if s\" \x1B\x5B\x31\x39\x7E" self input-string exit then
+        c KEY_F9 = if s\" \x1B\x5B\x32\x30\x7E" self input-string exit then
+        c KEY_F10 = if s\" \x1B\x5B\x32\x31\x7E" self input-string exit then
+        c KEY_UP = if s\" \x1B\x5B\x41" self input-string exit then
+        c KEY_DOWN = if s\" \x1B\x5B\x42" self input-string exit then
+        c KEY_RIGHT = if s\" \x1B\x5B\x43" self input-string exit then
+        c KEY_LEFT = if s\" \x1B\x5B\x44" self input-string exit then
+        c KEY_BREAK = if self handle-break exit then
+        c KEY_INSERT = if s\" \x1B\x5B\x32\x7E" self input-string exit then
+        c KEY_HOME = if s\" \x1B\x5B\x48" self input-string exit then
+        c KEY_DEL = if s\" \x1B\x5B\x33\x7E" self input-string exit then
+        c KEY_END = if s\" \x1B\x5B\x46" self input-string exit then
+        c KEY_PUP = if s\" \x1B\x5B\x35\x7E" self input-string exit then
+        c KEY_PDOWN = if s\" \x1B\x5B\x36\x7E" self input-string exit then
+        c { W^ c } c 1 self input-string
+      then
+    ; define handle-normal-key
+
+    \ Handle a control key
+    :noname { c self -- }
+      attention? @ if
+        c KEY_ESC = if $1B to key then
+        c $80 < if
+          c convert-control [: attention-hook @ ?execute ;] try drop
+        then
+      else
+        c linefeed = if s\" \r" self input-string exit then
+        c backspace = if s\" \x08" self input-string exit then
+        c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
+        c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x35\x50" self input-string exit then
+        c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x35\x51" self input-string exit then
+        c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x35\x52" self input-string exit then
+        c KEY_F4 = if s\" \x1B\x5B\x31\x3B\x35\x53" self input-string exit then
+        c KEY_F5 = if
+          s\" \x1B\x5B\x31\x35\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_F6 = if
+          s\" \x1B\x5B\x31\x37\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_F7 = if
+          s\" \x1B\x5B\x31\x38\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_F8 = if
+          s\" \x1B\x5B\x31\x39\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_F9 = if
+          s\" \x1B\x5B\x32\x30\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_F10 = if
+          s\" \x1B\x5B\x32\x31\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_UP = if
+          s\" \x1B\x5B\x31\x3B\x35\x41" self input-string exit
+        then
+        c KEY_DOWN = if
+          s\" \x1B\x5B\x31\x3B\x35\x42" self input-string exit
+        then
+        c KEY_RIGHT = if
+          s\" \x1B\x5B\x31\x3B\x35\x43" self input-string exit
+        then
+        c KEY_LEFT = if
+          s\" \x1B\x5B\x31\x3B\x35\x44" self input-string exit
+        then
+        c KEY_BREAK = if self handle-control-break exit then
+        c KEY_INSERT = if
+          s\" \x1B\x5B\x32\x3B\x35\x7E" self input-string exit
+        then
+        c KEY_HOME = if
+          s\" \x1B\x5B\x31\x3B\x35\x48" self input-string exit
+        then
+        c KEY_DEL = if s\" \x1B\x5B\x33\x3B\x35\x7E" self input-string exit then
+        c KEY_END = if s\" \x1B\x5B\x31\x3B\x35\x46" self input-string exit then
+        c KEY_PUP = if s\" \x1B\x5B\x35\x3B\x35\x7E" self input-string exit then
+        c KEY_PDOWN = if
+          s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string exit
+        then
+        c convert-control { W^ c } c 1 self input-string
+      then
+    ; define handle-ctrl-key
+    
     \ Handle input
     :noname { self -- }
       begin self key-intf picocalc-keys>? while
         self key-intf picocalc-keys> { attrs W^ c }
         attrs 0= if
-          attention? @ if
-            c c@ KEY_ESC = if $1B c c! then
-            c c@ $80 < if c c@ [: attention-hook @ ?execute ;] try drop then
-          else
-            c c@ case
-              newline of s\" \r" self input-string endof
-              KEY_ESC of s\" \x1B" self input-string 100 ms endof
-              KEY_F1 of s\" \x1B\x4F\x50" self input-string endof
-              KEY_F2 of s\" \x1B\x4F\x51" self input-string endof
-              KEY_F3 of s\" \x1B\x4F\x52" self input-string endof
-              KEY_F4 of s\" \x1B\x4F\x53" self input-string endof
-              KEY_F5 of s\" \x1B\x5B\x31\x35\x7E" self input-string endof
-              KEY_F6 of s\" \x1B\x5B\x31\x37\x7E" self input-string endof
-              KEY_F7 of s\" \x1B\x5B\x31\x38\x7E" self input-string endof
-              KEY_F8 of s\" \x1B\x5B\x31\x39\x7E" self input-string endof
-              KEY_F9 of s\" \x1B\x5B\x32\x30\x7E" self input-string endof
-              KEY_F10 of s\" \x1B\x5B\x32\x31\x7E" self input-string endof
-              KEY_UP of s\" \x1B\x5B\x41" self input-string endof
-              KEY_DOWN of s\" \x1B\x5B\x42" self input-string endof
-              KEY_RIGHT of s\" \x1B\x5B\x43" self input-string endof
-              KEY_LEFT of s\" \x1B\x5B\x44" self input-string endof
-              KEY_BREAK of self handle-break endof
-              KEY_INSERT of s\" \x1B\x5B\x32\x7E" self input-string endof
-              KEY_HOME of s\" \x1B\x5B\x48" self input-string endof
-              KEY_DEL of s\" \x1B\x5B\x33\x7E" self input-string endof
-              KEY_END of s\" \x1B\x5B\x46" self input-string endof
-              KEY_PUP of s\" \x1B\x5B\x35\x7E" self input-string endof
-              KEY_PDOWN of s\" \x1B\x5B\x36\x7E" self input-string endof
-              c 1 self input-string
-            endcase
-          then
+          c self handle-normal-key
         else
-          attention? @ if
-            c c@ KEY_ESC = if $1B c c! then
-            c c@ $80 < if
-              c c@ convert-control [: attention-hook @ ?execute ;] try drop
-            then
-          else
-            c c@ case
-              KEY_ESC of s\" \x1B" self input-string 100 ms endof
-              KEY_F1 of s\" \x1B\x5B\x31\x3B\x35\x50" self input-string endof
-              KEY_F2 of s\" \x1B\x5B\x31\x3B\x35\x51" self input-string endof
-              KEY_F3 of s\" \x1B\x5B\x31\x3B\x35\x52" self input-string endof
-              KEY_F4 of s\" \x1B\x5B\x31\x3B\x35\x53" self input-string endof
-              KEY_F5 of
-                s\" \x1B\x5B\x31\x35\x3B\x35\x7E" self input-string
-              endof
-              KEY_F6 of
-                s\" \x1B\x5B\x31\x37\x3B\x35\x7E" self input-string
-              endof
-              KEY_F7 of
-                s\" \x1B\x5B\x31\x38\x3B\x35\x7E" self input-string
-              endof
-              KEY_F8 of
-                s\" \x1B\x5B\x31\x39\x3B\x35\x7E" self input-string
-              endof
-              KEY_F9 of
-                s\" \x1B\x5B\x32\x30\x3B\x35\x7E" self input-string
-              endof
-              KEY_F10 of
-                s\" \x1B\x5B\x32\x31\x3B\x35\x7E" self input-string
-              endof
-              KEY_UP of s\" \x1B\x5B\x31\x3B\x35\x41" self input-string endof
-              KEY_DOWN of s\" \x1B\x5B\x31\x3B\x35\x42" self input-string endof
-              KEY_RIGHT of s\" \x1B\x5B\x31\x3B\x35\x43" self input-string endof
-              KEY_LEFT of s\" \x1B\x5B\x31\x3B\x35\x44" self input-string endof
-              KEY_BREAK of self handle-control-break endof
-              KEY_INSERT of s\" \x1B\x5B\x32\x3B\x35\x7E" self input-string endof
-              KEY_HOME of s\" \x1B\x5B\x31\x3B\x35\x48" self input-string endof
-              KEY_DEL of s\" \x1B\x5B\x33\x3B\x35\x7E" self input-string endof
-              KEY_END of s\" \x1B\x5B\x31\x3B\x35\x46" self input-string endof
-              KEY_PUP of s\" \x1B\x5B\x35\x3B\x35\x7E" self input-string endof
-              KEY_PDOWN of s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string endof
-              c c@ convert-control c c! c 1 self input-string
-            endcase
+          attrs ATTR_CTRL = if
+            c self handle-ctrl-key
           then
         then
       repeat
@@ -1197,8 +1225,8 @@ begin-module picocalc-term
       offset self chars-buf + c@ { c }
       offset self attrs-buf + c@ { attr }
       c 0= if bl to c then
-      offset self fg-colors-buf + c@
       offset self bk-colors-buf + c@
+      offset self fg-colors-buf + c@
       x self cursor-x @ = y self cursor-y @ = and
       self cursor-visible @ and if swap then
       attr attr-reverse and if swap then

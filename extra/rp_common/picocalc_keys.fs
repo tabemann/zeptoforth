@@ -28,6 +28,7 @@ begin-module picocalc-keys
 
   \ PicoCalc attributes
   0 bit constant ATTR_CTRL
+  1 bit constant ATTR_ALT
 
   \ PicoCalc special keys
   $B1 constant KEY_ESC
@@ -91,6 +92,12 @@ begin-module picocalc-keys
     \ Control is now not held
     $A503 constant PICOCALC_CTRL_NOT_HELD
 
+    \ Alt is now held
+    $A102 constant PICOCALC_ALT_HELD
+
+    \ Alt is now not held
+    $A103 constant PICOCALC_ALT_NOT_HELD
+
   end-module> import
 
   \ The PicoCalc keyboard class
@@ -119,11 +126,14 @@ begin-module picocalc-keys
       \ Is control currently pressed
       cell member picocalc-keys-ctrl-held
 
+      \ Is alt currently pressed
+      cell member picocalc-keys-alt-held
+
       \ The PicoCalc keyboard key circular buffer
       picocalc-keys-buf-size member picocalc-keys-key-buf
 
-      \ The PicoCalc keyboard control pressed circular buffer
-      picocalc-keys-buf-size 8 / member picocalc-keys-ctrl-buf
+      \ The PicoCalc keyboard key attribute circular buffer
+      picocalc-keys-buf-size member picocalc-keys-attr-buf
 
       \ The PicoCalc keyboard circular buffer read index
       cell member picocalc-keys-read-index
@@ -150,6 +160,9 @@ begin-module picocalc-keys
 
     \ Get whether control is currently pressed
     method picocalc-keys-ctrl? ( self -- ctrl? )
+
+    \ Get whether alt is currently pressed
+    method picocalc-keys-alt? ( self -- alt? )
     
   end-class
 
@@ -164,8 +177,9 @@ begin-module picocalc-keys
       false self picocalc-keys-try-destroy !
       true self picocalc-keys-ready-destroy !
       false self picocalc-keys-ctrl-held !
+      false self picocalc-keys-alt-held !
       self picocalc-keys-key-buf picocalc-keys-buf-size 0 fill
-      self picocalc-keys-ctrl-buf [ picocalc-keys-buf-size 8 / ] literal 0 fill
+      self picocalc-keys-attr-buf picocalc-keys-buf-size 0 fill
       0 self picocalc-keys-read-index !
       0 self picocalc-keys-write-index !
     ; define new
@@ -210,8 +224,7 @@ begin-module picocalc-keys
       then
       [: { self }
         self picocalc-keys-read-index @ { read-index }
-        read-index 7 and bit self picocalc-keys-ctrl-buf read-index 3 rshift
-        bit@ ATTR_CTRL and
+        read-index self picocalc-keys-attr-buf + c@
         read-index self picocalc-keys-key-buf + c@
         read-index 1+ [ picocalc-keys-buf-size 1- ] literal and
         self picocalc-keys-read-index !
@@ -223,6 +236,11 @@ begin-module picocalc-keys
     :noname ( self -- ctrl? )
       picocalc-keys-ctrl-held @
     ; define picocalc-keys-ctrl?
+
+    \ Get whether alt is currently pressed
+    :noname ( self -- alt? )
+      picocalc-keys-alt-held @
+    ; define picocalc-keys-alt?
 
     \ Handle an alarm
     :noname { self -- }
@@ -255,14 +273,22 @@ begin-module picocalc-keys
           false self picocalc-keys-ctrl-held ! exit
         then
       then
+      keycode PICOCALC_ALT_HELD = if
+        true self picocalc-keys-alt-held ! exit
+      else
+        keycode PICOCALC_ALT_NOT_HELD = if
+          false self picocalc-keys-alt-held ! exit
+        then
+      then
       self picocalc-keys-write-index @ { write-index }
       write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
       self picocalc-keys-read-index @ = if exit then
       keycode $FF and 1 = if
         keycode 8 rshift
         self picocalc-keys-key-buf write-index + c!
-        self picocalc-keys-ctrl-held @ write-index 7 and bit and
-        self picocalc-keys-ctrl-buf write-index 3 rshift + bis!
+        self picocalc-keys-ctrl-held @ ATTR_CTRL and
+        self picocalc-keys-alt-held @ ATTR_ALT and or
+        self picocalc-keys-attr-buf write-index + c!
         write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
         self picocalc-keys-write-index !
         self picocalc-keys-sema give
