@@ -1225,8 +1225,8 @@ begin-module picocalc-term
       offset self chars-buf + c@ { c }
       offset self attrs-buf + c@ { attr }
       c 0= if bl to c then
-      offset self bk-colors-buf + c@
       offset self fg-colors-buf + c@
+      offset self bk-colors-buf + c@
       x self cursor-x @ = y self cursor-y @ = and
       self cursor-visible @ and if swap then
       attr attr-reverse and if swap then
