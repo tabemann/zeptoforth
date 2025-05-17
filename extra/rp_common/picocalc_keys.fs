@@ -130,6 +130,9 @@ begin-module picocalc-keys
       \ Is alt currently pressed
       cell member picocalc-keys-alt-held
 
+      \ Has an error been displayed
+      cell member picocalc-error-displayed
+
       \ The PicoCalc keyboard key circular buffer
       picocalc-keys-buf-size member picocalc-keys-key-buf
 
@@ -179,6 +182,7 @@ begin-module picocalc-keys
       true self picocalc-keys-ready-destroy !
       false self picocalc-keys-ctrl-held !
       false self picocalc-keys-alt-held !
+      false self picocalc-error-displayed !
       self picocalc-keys-key-buf picocalc-keys-buf-size 0 fill
       self picocalc-keys-attr-buf picocalc-keys-buf-size 0 fill
       0 self picocalc-keys-read-index !
@@ -249,15 +253,28 @@ begin-module picocalc-keys
     \ Handle an alarm
     :noname { self -- }
       self picocalc-keys-try-destroy @ not if
-        self [: { self }
-          PICOCALC_KEY { W^ buf }
-          buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
-            0 buf !
-            buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
-              buf @ self handle-picocalc-key
+        self [:
+          [: { self }
+            PICOCALC_KEY { W^ buf }
+            buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
+              0 buf !
+              buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
+                buf @ self handle-picocalc-key
+              then
             then
+          ;] picocalc-keys-timeout task::with-timeout
+        ;] try
+        ?dup if
+          self picocalc-error-displayed @ not if
+            [:
+              display-red execute display-normal flush-console
+            ;] console::with-serial-output
+            true self picocalc-error-displayed !
+          else
+            drop
           then
-        ;] picocalc-keys-timeout task::with-timeout
+          drop
+        then
         picocalc-keys-interval picocalc-keys-priority
         self [: drop handle-picocalc-keys-alarm ;]
         self picocalc-keys-alarm set-alarm-delay-default        
