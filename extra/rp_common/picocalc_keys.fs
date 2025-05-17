@@ -287,16 +287,20 @@ begin-module picocalc-keys
     \ Handle a key
     :noname { keycode self -- }
       keycode PICOCALC_CTRL_HELD = if
+        led::green led::toggle-led
         true self picocalc-keys-ctrl-held ! exit
       else
         keycode PICOCALC_CTRL_NOT_HELD = if
+          led::green led::toggle-led
           false self picocalc-keys-ctrl-held ! exit
         then
       then
       keycode PICOCALC_ALT_HELD = if
+        led::green led::toggle-led
         true self picocalc-keys-alt-held ! exit
       else
         keycode PICOCALC_ALT_NOT_HELD = if
+          led::green led::toggle-led
           false self picocalc-keys-alt-held ! exit
         then
       then
@@ -304,6 +308,7 @@ begin-module picocalc-keys
       write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
       self picocalc-keys-read-index @ = if exit then
       keycode $FF and 1 = if
+        led::green led::toggle-led
         keycode 8 rshift
         self picocalc-keys-key-buf write-index + c!
         self picocalc-keys-ctrl-held @ ATTR_CTRL and
