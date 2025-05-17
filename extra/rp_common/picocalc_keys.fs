@@ -230,13 +230,13 @@ begin-module picocalc-keys
       self picocalc-keys-try-destroy @ if
         self picocalc-keys-destroy-sema give false 0 exit
       then
-      [: { self }
+      self [: { self }
         self picocalc-keys-read-index @ { read-index }
         read-index self picocalc-keys-attr-buf + c@
         read-index self picocalc-keys-key-buf + c@
         read-index 1+ [ picocalc-keys-buf-size 1- ] literal and
         self picocalc-keys-read-index !
-      ;] over picocalc-keys-lock with-lock
+      ;] self picocalc-keys-lock with-lock
       self picocalc-keys-destroy-sema give
     ; define picocalc-keys>
 
