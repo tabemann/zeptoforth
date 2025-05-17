@@ -167,6 +167,9 @@ begin-module picocalc-keys
 
     \ Get whether alt is currently pressed
     method picocalc-keys-alt? ( self -- alt? )
+
+    \ Inject a keycode
+    method inject-picocalc-keycode ( keycode self -- )
     
   end-class
 
@@ -289,41 +292,48 @@ begin-module picocalc-keys
     ; define handle-picocalc-keys-alarm
 
     \ Handle a key
-    :noname { keycode self -- }
-      keycode PICOCALC_CTRL_HELD = if
-        led::green led::toggle-led
-        true self picocalc-keys-ctrl-held ! exit
-      else
-        keycode PICOCALC_CTRL_NOT_HELD = if
+    :noname ( keycode self -- )
+      [: { keycode self }
+        keycode PICOCALC_CTRL_HELD = if
           led::green led::toggle-led
-          false self picocalc-keys-ctrl-held ! exit
+          true self picocalc-keys-ctrl-held ! exit
+        else
+          keycode PICOCALC_CTRL_NOT_HELD = if
+            led::green led::toggle-led
+            false self picocalc-keys-ctrl-held ! exit
+          then
         then
-      then
-      keycode PICOCALC_ALT_HELD = if
-        led::green led::toggle-led
-        true self picocalc-keys-alt-held ! exit
-      else
-        keycode PICOCALC_ALT_NOT_HELD = if
+        keycode PICOCALC_ALT_HELD = if
           led::green led::toggle-led
-          false self picocalc-keys-alt-held ! exit
+          true self picocalc-keys-alt-held ! exit
+        else
+          keycode PICOCALC_ALT_NOT_HELD = if
+            led::green led::toggle-led
+            false self picocalc-keys-alt-held ! exit
+          then
         then
-      then
-      self picocalc-keys-write-index @ { write-index }
-      write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
-      self picocalc-keys-read-index @ = if exit then
-      keycode $FF and 1 = if
-        led::green led::toggle-led
-        keycode 8 rshift
-        self picocalc-keys-key-buf write-index + c!
-        self picocalc-keys-ctrl-held @ ATTR_CTRL and
-        self picocalc-keys-alt-held @ ATTR_ALT and or
-        self picocalc-keys-attr-buf write-index + c!
+        self picocalc-keys-write-index @ { write-index }
         write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
-        self picocalc-keys-write-index !
-        self picocalc-keys-sema give
-      then
+        self picocalc-keys-read-index @ = if exit then
+        keycode $FF and 1 = if
+          led::green led::toggle-led
+          keycode 8 rshift
+          self picocalc-keys-key-buf write-index + c!
+          self picocalc-keys-ctrl-held @ ATTR_CTRL and
+          self picocalc-keys-alt-held @ ATTR_ALT and or
+          self picocalc-keys-attr-buf write-index + c!
+          write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
+          self picocalc-keys-write-index !
+          self picocalc-keys-sema give
+        then
+      ;] over picocalc-keys-lock with-lock
     ; define handle-picocalc-key
-    
+
+    \ Inject a keycode
+    :noname ( keycode self -- )
+      handle-picocalc-key
+    ; define inject-picocalc-keycode
+
   end-implement
   
 end-module

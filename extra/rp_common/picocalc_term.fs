@@ -464,13 +464,16 @@ begin-module picocalc-term
       \ Flush terminal output
       method flush-term ( self -- )
 
-  end-module
+    end-module
 
     \ Initialize the PicoCalc terminal
     method init-term ( self -- )
-
+    
     \ Carry out an operation with the PicoCalc terminal locked
     method with-term ( xt self -- )
+
+    \ Inject a keycode
+    method inject-keycode ( keycode self -- )
     
   end-class
 
@@ -533,6 +536,11 @@ begin-module picocalc-term
       self term-task-mailbox 1 self term-task @ config-notify
       self term-task @ run
     ; define init-term
+
+    \ Inject a keycode
+    :noname ( keycode self -- )
+      key-intf inject-picocalc-keycode
+    ; define inject-keycode
 
     \ Run the PicoCalc terminal
     :noname { self -- }
