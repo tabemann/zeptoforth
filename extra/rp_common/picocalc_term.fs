@@ -710,7 +710,7 @@ begin-module picocalc-term
       [: { self }
         systick::systick-counter { start-time }
         begin
-          [: { self }
+          self [: { self }
             self output-recv-buf output-recv-buf-size
             self output-stream peek-stream { size }
             size 0> if
@@ -745,6 +745,10 @@ begin-module picocalc-term
 
     \ Parse an escape
     :noname { addr bytes self -- }
+
+      \ DEBUG
+      addr bytes [: over + dump flush-console ;] console::with-serial-output
+      
       addr bytes s" [?25h" equal-strings? if self handle-show-cursor exit then
       addr bytes s" [?25l" equal-strings? if self handle-hide-cursor exit then
       addr bytes s" [s" equal-strings? if self handle-save-cursor exit then
@@ -753,7 +757,8 @@ begin-module picocalc-term
         self handle-query-cursor-position exit
       then
       addr bytes 1- + c@ { last-char }
-      last-char [char] = if addr bytes self handle-cursor-up exit then
+
+      last-char [char] A = if addr bytes self handle-cursor-up exit then
       last-char [char] B = if addr bytes self handle-cursor-down exit then
       last-char [char] C = if addr bytes self handle-cursor-forward exit then
       last-char [char] D = if addr bytes self handle-cursor-back exit then
@@ -1069,17 +1074,25 @@ begin-module picocalc-term
       addr bytes { valid-addr valid-bytes }
       begin valid-bytes 0> while
         0 valid-addr valid-bytes self parse-dec { style style-bytes }
-        style-bytes valid-bytes 1- < if
-          addr style-bytes + c@ [char] ; <> if exit then
+        style-bytes 0= valid-bytes 1 = and if
           1 +to style-bytes
+        else
+          style-bytes valid-bytes 1- < if
+            valid-addr style-bytes + c@ [char] ; <> if exit then
+            1 +to style-bytes
+          then
         then
         style-bytes +to valid-addr
         style-bytes negate +to valid-bytes
       repeat
       begin bytes 0> while
         0 addr bytes self parse-dec { style style-bytes }
-        style-bytes valid-bytes 1- < if
+        style-bytes 0= bytes 1 = and if
           1 +to style-bytes
+        else
+          style-bytes bytes 1- < if
+            1 +to style-bytes
+          then
         then
         style-bytes +to addr
         style-bytes negate +to bytes
@@ -1345,7 +1358,7 @@ begin-module picocalc-term
   : with-term-output ( xt -- )
     shared-term console-output-data console-internal::console-io swap
     shared-term console-output-data console-internal::console-io? swap
-    shared-term ['] flush-term swap with-output
+    [: shared-term flush-term ;] swap with-output
     shared-term console-output-data
     console-internal::flush-console-stream-output
   ;
@@ -1354,23 +1367,24 @@ begin-module picocalc-term
   : with-term-error-output ( xt -- )
     shared-term console-output-data console-internal::console-io swap
     shared-term console-output-data console-internal::console-io? swap
-    shared-term ['] flush-term swap with-error-output
+    [: shared-term flush-term ;] swap with-error-output
     shared-term console-output-data
     console-internal::flush-console-stream-output    
   ;
 
   \ Set the current console to a PicoCalc terminal
   : term-console ( -- )
+    flush-console
     shared-term console-input-data console-internal::console-io key-hook !
     shared-term console-input-data console-internal::console-io? key?-hook !
     shared-term console-output-data console-internal::console-io emit-hook !
     shared-term console-output-data console-internal::console-io? emit?-hook !
-    shared-term ['] flush-term flush-console-hook !
+    [: shared-term flush-term ;] flush-console-hook !
     shared-term console-output-data console-internal::console-io
     error-emit-hook !
     shared-term console-output-data console-internal::console-io?
     error-emit?-hook !
-    shared-term ['] flush-term error-flush-console-hook !
+    [: shared-term flush-term ;] error-flush-console-hook !
     picocalc-welcome-displayed not if
       picocalc-welcome
       true to picocalc-welcome-displayed
