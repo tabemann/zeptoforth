@@ -83,8 +83,14 @@ begin-module picocalc-keys
     \ PicoCalc keyboard channel element count
     256 constant picocalc-keys-chan-count
 
-    \ PicoCalc keyboard register
+    \ PicoCalc keyboard count register
+    4 constant PICOCALC_COUNT
+    
+    \ PicoCalc keyboard key register
     9 constant PICOCALC_KEY
+
+    \ PicoCalc keyboard count mask
+    $1F constant PICOCALC_COUNT_MASK
 
     \ Control is now held
     $A502 constant PICOCALC_CTRL_HELD
@@ -120,6 +126,9 @@ begin-module picocalc-keys
       \ Has a command been sent
       cell member picocalc-sent-command
 
+      \ Are we going to get a key
+      cell member picocalc-get-key
+
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
 
@@ -127,11 +136,17 @@ begin-module picocalc-keys
       method handle-exception ( xt self -- )
       
       \ Send a command
-      method send-command ( self -- )
+      method send-command ( command self -- success? )
 
       \ Receive a reply
-      method recv-reply ( self -- )
+      method recv-reply ( self -- data success? )
 
+      \ Handle getting a count
+      method get-count ( self -- )
+      
+      \ Handle getting a key
+      method get-key ( self -- )
+      
       \ Handle an alarm
       method handle-picocalc-keys-alarm ( self -- )
 
@@ -169,6 +184,7 @@ begin-module picocalc-keys
       false self picocalc-keys-alt-held !
       false self picocalc-error-displayed !
       false self picocalc-sent-command !
+      false self picocalc-get-key !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
 
@@ -224,39 +240,66 @@ begin-module picocalc-keys
     ; define handle-exception
 
     \ Send a command
-    :noname { self -- }
-      self [:
-        [: { self }
-          PICOCALC_KEY { W^ buf }
-          buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
-            true self picocalc-sent-command !
-          then
+    :noname { command self -- success? }
+      command self [:
+        [: { W^ buf self }
+          buf 1 picocalc-keys-i2c-device >i2c-stop 1 =
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
-      ?dup if self handle-exception drop then
+      ?dup if self handle-exception drop false then
     ; define send-command
 
     \ Receive a reply
-    :noname { self -- }
+    :noname { self -- data success? }
       self [:
         [: { self }
           0 { W^ buf }
           buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
-            buf h@ self handle-picocalc-key
-            false self picocalc-sent-command !
+            buf h@ true
+          else
+            0 false
           then
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
-      ?dup if self handle-exception drop then
+      ?dup if self handle-exception drop 0 false then
     ; define recv-reply
+
+    \ Handle getting a count
+    :noname { self -- }
+      self picocalc-sent-command @ not if
+        PICOCALC_COUNT self send-command if
+          true self picocalc-sent-command !
+        then
+      else
+        self recv-reply if
+          PICOCALC_COUNT_MASK and 0> if true self picocalc-get-key ! then
+          false self picocalc-sent-command !
+        else
+          drop
+        then
+      then
+    ; define get-count
+
+    \ Handle getting a key
+    :noname { self -- }
+      self picocalc-sent-command @ not if
+        PICOCALC_KEY self send-command if
+          true self picocalc-sent-command !
+        then
+      else
+        self recv-reply if
+          self handle-picocalc-key
+          false self picocalc-sent-command !
+          false self picocalc-get-key !
+        else
+          drop
+        then
+      then
+    ; define get-key
     
     \ Handle an alarm
     :noname { self -- }
-      self picocalc-sent-command @ not if
-        self send-command
-      else
-        self recv-reply
-      then
+      self picocalc-get-key @ not if self get-count else get-key then
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default        
