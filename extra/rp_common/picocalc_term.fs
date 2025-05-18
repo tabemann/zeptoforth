@@ -721,9 +721,9 @@ begin-module picocalc-term
         self key-intf picocalc-keys> { attrs c }
 
         \ DEBUG
-        attrs c [:
-          ." <" h.2 ." :" h.2 space flush-console
-        ;] console::with-serial-output
+        \ attrs c [:
+        \   ." <" h.2 ." :" h.2 space flush-console
+        \ ;] console::with-serial-output
         \ END DEBUG
 
         attrs 0= if

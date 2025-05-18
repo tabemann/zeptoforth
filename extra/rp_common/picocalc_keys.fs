@@ -117,9 +117,18 @@ begin-module picocalc-keys
       \ Has an error been displayed
       cell member picocalc-error-displayed
 
+      \ Has a command been sent
+      cell member picocalc-sent-command
+
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
-      
+
+      \ Send a command
+      method send-command ( self -- )
+
+      \ Receive a reply
+      method recv-reply ( self -- )
+
       \ Handle an alarm
       method handle-picocalc-keys-alarm ( self -- )
 
@@ -156,6 +165,7 @@ begin-module picocalc-keys
       false self picocalc-keys-ctrl-held !
       false self picocalc-keys-alt-held !
       false self picocalc-error-displayed !
+      false self picocalc-sent-command !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
 
@@ -197,16 +207,13 @@ begin-module picocalc-keys
       picocalc-keys-alt-held @
     ; define picocalc-keys-alt?
 
-    \ Handle an alarm
+    \ Send a command
     :noname { self -- }
       self [:
         [: { self }
           PICOCALC_KEY { W^ buf }
           buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
-            0 buf !
-            buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
-              buf @ self handle-picocalc-key
-            then
+            true self picocalc-sent-command !
           then
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
@@ -225,6 +232,40 @@ begin-module picocalc-keys
         then
         drop
       then
+    ; define send-command
+
+    \ Receive a reply
+    :noname { self -- }
+      self [:
+        [: { self }
+          0 { W^ buf }
+          buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
+            buf h@ self handle-picocalc-key
+            false self picocalc-sent-command !
+          then
+        ;] picocalc-keys-timeout task::with-timeout
+      ;] try
+      ?dup if
+        dup ['] x-i2c-target-noack <> if
+          self picocalc-error-displayed @ not if
+            [:
+              display-red execute display-normal flush-console
+            ;] console::with-serial-output
+            true self picocalc-error-displayed !
+          else
+            drop
+          then
+        else
+          drop
+        then
+        drop
+      then
+    ; define recv-reply
+    
+    \ Handle an alarm
+    :noname { self -- }
+      self picocalc-sent-command @ not if self send-command then
+      self picocalc-sent-command @ if self recv-reply then
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default        
