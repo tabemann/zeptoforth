@@ -72,10 +72,7 @@ begin-module picocalc-keys
     10000 constant picocalc-keys-i2c-baud
     
     \ PicoCalc keyboard interval in ticks
-    10 constant picocalc-keys-interval
-
-    \ PicoCalc keyboard delay in milliseconds
-    16 constant picocalc-keys-delay
+    160 constant picocalc-keys-interval
 
     \ PicoCalc keyboard priority
     0 constant picocalc-keys-priority
@@ -214,7 +211,6 @@ begin-module picocalc-keys
     :noname { self -- }
       self [:
         [: { self }
-          picocalc-keys-delay ms
           PICOCALC_KEY { W^ buf }
           buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
             true self picocalc-sent-command !
@@ -243,7 +239,6 @@ begin-module picocalc-keys
       self [:
         [: { self }
           0 { W^ buf }
-          picocalc-keys-delay ms
           buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
             buf h@ self handle-picocalc-key
             false self picocalc-sent-command !
@@ -269,8 +264,11 @@ begin-module picocalc-keys
     
     \ Handle an alarm
     :noname { self -- }
-      self picocalc-sent-command @ not if self send-command then
-      self picocalc-sent-command @ if self recv-reply then
+      self picocalc-sent-command @ not if
+        self send-command
+      else
+        self recv-reply
+      then
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default        
