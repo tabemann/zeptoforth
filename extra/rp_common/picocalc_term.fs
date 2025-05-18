@@ -20,13 +20,23 @@
 
 begin-module picocalc-term
 
+  true constant use-st7789v?
+
   oo import
   pixmap8 import
   pixmap8-internal import
   font import
-  simple-font-6x8 import
-  ili9488-8-common import
-  ili9488-8-spi import
+
+  use-st7789v? not [if]
+    simple-font-6x8 import
+    ili9488-8-common import
+    ili9488-8-spi import
+  [else]
+    simple-font import
+    st7789v-8-common import
+    st7789v-8-spi import
+  [then]
+
   picocalc-keys import
   task import
   lock import
@@ -37,10 +47,18 @@ begin-module picocalc-term
   begin-module picocalc-term-internal
 
     \ Initialize the 6x8 simple font
-    initializer simple-font-6x8::init-simple-font-6x8
+    use-st7789v? not [if]
+      initializer init-simple-font-6x8
+    [else]
+      initializer init-simple-font
+    [then]
 
     \ Font character with
-    6 constant char-width
+    use-st7789v? not [if]
+      6 constant char-width
+    [else]
+      7 constant char-width
+    [then]
 
     \ Font character height
     8 constant char-height
@@ -49,8 +67,12 @@ begin-module picocalc-term
     320 constant display-width
     
     \ Display height
-    320 constant display-height
-
+    use-st7789v? not [if]
+      320 constant display-height
+    [else]
+      240 constant display-height
+    [then]
+    
     \ Terminal width
     display-width char-width / constant term-width
 
@@ -58,28 +80,56 @@ begin-module picocalc-term
     display-height char-height / constant term-height
 
     \ Display SPI device
-    1 constant display-spi-device
+    use-st7789v? not [if]
+      1 constant display-spi-device
+    [else]
+      0 constant display-spi-device
+    [then]
 
     \ Display SCK pin
-    10 constant display-spi-sck-pin
+    use-st7789v? not [if]
+      10 constant display-spi-sck-pin
+    [else]
+      18 constant display-spi-sck-pin
+    [then]
 
     \ Display TX pin
-    11 constant display-spi-tx-pin
-
-    \ Display RX pin
-    12 constant display-spi-rx-pin
+    use-st7789v? not [if]
+      11 constant display-spi-tx-pin
+    [else]
+      19 constant display-spi-tx-pin
+    [then]
 
     \ Display CS pin
-    13 constant display-spi-cs-pin
+    use-st7789v? not [if]
+      13 constant display-spi-cs-pin
+    [else]
+      21 constant display-spi-cs-pin
+    [then]
 
     \ Display DC pin
-    14 constant display-dc-pin
+    use-st7789v? not [if]
+      14 constant display-dc-pin
+    [else]
+      13 constant display-dc-pin
+    [then]
 
     \ Display RST pin
-    15 constant display-rst-pin
+    use-st7789v? not [if]
+      15 constant display-rst-pin
+    [else]
+      12 constant display-rst-pin
+    [then]
 
+    \ Display backlight pin
+    use-st7789v? [if]
+      11 constant display-bl-pin
+    [then]
+    
     \ Do we invert the display
-    true constant display-invert
+    use-st7789v? not [if]
+      true constant display-invert
+    [then]
     
     \ The input stream size
     256 constant input-stream-size
@@ -89,6 +139,9 @@ begin-module picocalc-term
 
     \ The input receive buffer size
     64 constant output-recv-buf-size
+
+    \ Output limit
+    term-width term-height 2 / * constant output-limit
 
     \ Attributes
     0 bit constant attr-bold
@@ -211,7 +264,8 @@ begin-module picocalc-term
     continue-module picocalc-term-internal
       
       \ The display
-      <ili9488-8-spi> class-size member display-intf
+      use-st7789v? not [if] <ili9488-8-spi> [else] <st7789v-8-spi> [then]
+      class-size member display-intf
       
       \ The display buffer
       display-width display-height pixmap8-buf-size member display-buf
@@ -483,10 +537,19 @@ begin-module picocalc-term
     \ Constructor
     :noname { self -- }
       self <object>->new
-      display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
-      display-rst-pin
-      display-invert self display-buf display-width display-height
-      display-spi-device <ili9488-8-spi> self display-intf init-object
+
+      [ use-st7789v? not ] [if]
+        display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
+        display-rst-pin
+        display-invert self display-buf display-width display-height
+        display-spi-device <ili9488-8-spi> self display-intf init-object
+      [else]
+        display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
+        display-bl-pin display-rst-pin
+        self display-buf false display-width display-height
+        display-spi-device <st7789v-8-spi> self display-intf init-object
+      [then]
+      
       <picocalc-keys> self key-intf init-object
       0 self term-task !
       0 self term-task-mailbox !
@@ -681,17 +744,22 @@ begin-module picocalc-term
     
     \ Handle output
     :noname { self -- }
+      false { updated }
+      output-limit { countdown }
       begin
-        false { updated }
         0 { W^ buf }
-        buf 1 self output-stream recv-stream-no-block 0<> if
+        countdown 0> if
+          buf 1 self output-stream recv-stream-no-block 0<>
+        else
+          false
+        then if
           updated not if
             self term-lock claim-lock
             true to updated
           then
 
           \ DEBUG
-          buf c@ [: ." >" h.2 space flush-console ;] console::with-serial-output
+\          buf c@ [: ." >" h.2 space flush-console ;] console::with-serial-output
           \ END DEBUG
           
           buf c@ case
@@ -702,6 +770,9 @@ begin-module picocalc-term
             tab of self handle-tab endof
             dup self handle-char
           endcase
+
+          -1 +to countdown
+          
           false
         else
           updated if
@@ -755,7 +826,8 @@ begin-module picocalc-term
     :noname { addr bytes self -- }
 
       \ DEBUG
-      addr bytes [: over + dump flush-console ;] console::with-serial-output
+      \      addr bytes [: over + dump flush-console ;] console::with-serial-output
+      \ END DEBUG
       
       addr bytes s" [?25h" equal-strings? if self handle-show-cursor exit then
       addr bytes s" [?25l" equal-strings? if self handle-hide-cursor exit then
@@ -836,8 +908,8 @@ begin-module picocalc-term
         [char] ; self output-recv-buf size 2 + + c!
         self output-recv-buf size 3 + + self cursor-x @ 1+ format-integer nip
         +to size
-        [char] R self output-recv-buf size 2 + + c!
-        self output-recv-buf size 3 + self input-string
+        [char] R self output-recv-buf size 3 + + c!
+        self output-recv-buf size 4 + + self input-string
       ;] try
       saved-base base !
       ?raise
@@ -964,6 +1036,7 @@ begin-module picocalc-term
       term-height self cursor-y @ 1+ ?do
         term-width 0 ?do
           term-width j * i + { offset }
+          0 self chars-buf offset + c!
           fg-color self fg-colors-buf offset + c!
           bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
@@ -979,6 +1052,7 @@ begin-module picocalc-term
       self cursor-y @ 0 ?do
         term-width 0 ?do
           term-width j * i + { offset }
+          0 self chars-buf offset + c!
           fg-color self fg-colors-buf offset + c!
           bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
@@ -994,6 +1068,7 @@ begin-module picocalc-term
       term-height 0 ?do
         term-width 0 ?do
           term-width j * i + { offset }
+          0 self chars-buf offset + c!
           fg-color self fg-colors-buf offset + c!
           bk-color self bk-colors-buf offset + c!
           0 self attrs-buf offset + c!
@@ -1022,6 +1097,7 @@ begin-module picocalc-term
       self cursor-y @ { y }
       self cursor-x @ 0 ?do
         term-width y * i + { offset }
+        0 self chars-buf offset + c!
         fg-color self fg-colors-buf offset + c!
         bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
@@ -1036,6 +1112,7 @@ begin-module picocalc-term
       self cursor-y @ { y }
       term-width self cursor-x @ ?do
         term-width y * i + { offset }
+        0 self chars-buf offset + c!
         fg-color self fg-colors-buf offset + c!
         bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
@@ -1050,6 +1127,7 @@ begin-module picocalc-term
       self cursor-y @ { y }
       term-width 0 ?do
         term-width y * i + { offset }
+        0 self chars-buf offset + c!
         fg-color self fg-colors-buf offset + c!
         bk-color self bk-colors-buf offset + c!
         0 self attrs-buf offset + c!
@@ -1149,7 +1227,7 @@ begin-module picocalc-term
       color ansi-term::ansi-term-internal::background-offset - self bk-color !
     ; define handle-bk-color
 
-    \ Handle resetting the color and stle
+    \ Handle resetting the color and style
     :noname { self -- }
       self handle-normal
       self handle-default-fg-color
@@ -1239,12 +1317,14 @@ begin-module picocalc-term
     
     \ Handle an ordinary character
     :noname { c self -- }
+      c $20 < c $7E > or if exit then
       self clear-cursor
       self cursor-x @ self cursor-y @ { x y }
       x term-width = if
         0 to x
         y term-height 1- >= if 1 self scroll-up else y 1+ to y then
       then
+      y self cursor-y !
       x 1+ self cursor-x !
       term-width y * x + { offset }
       c self chars-buf offset + c!
@@ -1275,6 +1355,7 @@ begin-module picocalc-term
     
     \ Draw a character
     :noname { x y self -- }
+      x term-width > y term-height > or if exit then
       term-width y * x + { offset }
       offset self chars-buf + c@ { c }
       offset self attrs-buf + c@ { attr }
@@ -1290,7 +1371,13 @@ begin-module picocalc-term
       char-bk-color display-x display-y char-width char-height
       self display-intf draw-rect-const
       char-fg-color c display-x display-y
-      self display-intf simple-font-6x8::a-simple-font-6x8 draw-char-to-pixmap8
+
+      [ use-st7789v? not ] [if]
+        self display-intf a-simple-font-6x8 draw-char-to-pixmap8
+      [else]
+        self display-intf a-simple-font draw-char-to-pixmap8
+      [then]
+      
       attr attr-underline and if
         char-fg-color display-x display-y char-height 1- + char-width 1
         self display-intf draw-rect-const
@@ -1301,12 +1388,33 @@ begin-module picocalc-term
     :noname { lines self -- }
       lines term-height min to lines
       self clear-cursor
+      lines term-width * { chars }
+
+      self chars-buf chars + self chars-buf
+      [ term-width term-height * ] literal chars - move
+      self chars-buf [ term-width term-height * ] literal chars - + chars 0 fill
+
+      self attrs-buf chars + self attrs-buf
+      [ term-width term-height * ] literal chars - move
+      self attrs-buf [ term-width term-height * ] literal chars - + chars 0 fill
+
+      self fg-colors-buf chars + self fg-colors-buf
+      [ term-width term-height * ] literal chars - move
+      self fg-colors-buf [ term-width term-height * ] literal chars - + chars
+      self fg-color @ fill
+
+      self bk-colors-buf chars + self bk-colors-buf
+      [ term-width term-height * ] literal chars - move
+      self bk-colors-buf [ term-width term-height * ] literal chars - + chars
+      self bk-color @ fill
+
       lines [ char-height display-width * ] literal * { pixels }
       self display-buf pixels + self display-buf
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 fill-y display-width display-height fill-y - self display-intf
+      0 fill-y [ term-width char-width * ] literal
+      [ term-height char-height * ] literal fill-y - self display-intf
       draw-rect-const
       self draw-cursor
       self display-intf set-dirty
@@ -1316,12 +1424,33 @@ begin-module picocalc-term
     :noname { lines self -- }
       lines term-height min to lines
       self clear-cursor
+      lines term-width * { chars }
+
+      self chars-buf self chars-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self chars-buf [ term-width term-height * ] literal chars - 0 fill
+
+      self attrs-buf self attrs-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self attrs-buf [ term-width term-height * ] literal chars - 0 fill
+
+      self fg-colors-buf self fg-colors-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self fg-colors-buf [ term-width term-height * ] literal chars -
+      self fg-color @ fill
+
+      self bk-colors-buf self bk-colors-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self bk-colors-buf [ term-width term-height * ] literal chars -
+      self bk-color @ fill
+
       lines [ char-height display-width * ] literal * { pixels }
       self display-buf self display-buf pixels +
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 0 display-width fill-y self display-intf draw-rect-const
+      0 0 [ term-width char-width * ] literal fill-y self display-intf
+      draw-rect-const
       self draw-cursor
       self display-intf set-dirty
     ; define scroll-down
