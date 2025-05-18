@@ -122,7 +122,7 @@ begin-module picocalc-keys
 
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
-      
+
       \ Handle an exception
       method handle-exception ( xt self -- )
       
@@ -212,6 +212,7 @@ begin-module picocalc-keys
 
     \ Handle an exception
     :noname { xt self -- }
+      xt if 4 0 ?do led::green led::toggle-led 63 ms loop then
       xt ['] x-i2c-target-noack <> if
         self picocalc-error-displayed @ not if
           xt [:
