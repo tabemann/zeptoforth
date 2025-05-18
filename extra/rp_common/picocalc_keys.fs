@@ -205,9 +205,9 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device 7-bit-i2c-addr
       picocalc-keys-i2c-addr picocalc-keys-i2c-device i2c-target-addr!
       picocalc-keys-i2c-device enable-i2c
-      picocalc-keys-interval picocalc-keys-priority
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
+      picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default
     ; define init-picocalc-keys
