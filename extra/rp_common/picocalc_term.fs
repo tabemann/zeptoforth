@@ -913,7 +913,7 @@ begin-module picocalc-term
         self output-recv-buf size 3 + + self cursor-x @ 1+ format-integer nip
         +to size
         [char] R self output-recv-buf size 3 + + c!
-        self output-recv-buf size 4 + + self input-string
+        self output-recv-buf size 4 + self input-string
       ;] try
       saved-base base !
       ?raise
