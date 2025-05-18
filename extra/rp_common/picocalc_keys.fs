@@ -83,6 +83,9 @@ begin-module picocalc-keys
     \ PicoCalc keyboard channel element count
     256 constant picocalc-keys-chan-count
 
+    \ PicoCalc reset delay in milliseconds
+    100 constant picocalc-rst-delay
+    
     \ PicoCalc keyboard reset command
     8 constant PICOCALC_RST
     
@@ -129,8 +132,8 @@ begin-module picocalc-keys
       \ Has a command been sent
       cell member picocalc-sent-command
 
-      \ Are we going to get a key
-      cell member picocalc-get-key
+      \ Are we going to get a key count
+      cell member picocalc-get-key-count
 
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
@@ -187,7 +190,7 @@ begin-module picocalc-keys
       false self picocalc-keys-alt-held !
       false self picocalc-error-displayed !
       false self picocalc-sent-command !
-      false self picocalc-get-key !
+      0 self picocalc-get-key-count !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
 
@@ -204,6 +207,7 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device enable-i2c
       picocalc-keys-interval picocalc-keys-priority
       PICOCALC_RST self send-command drop
+      picocalc-rst-delay ms
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default
     ; define init-picocalc-keys
@@ -276,7 +280,7 @@ begin-module picocalc-keys
         then
       else
         self recv-reply if
-          PICOCALC_COUNT_MASK and 0> if true self picocalc-get-key ! then
+          PICOCALC_COUNT_MASK and ?dup if self picocalc-get-key-count ! then
           false self picocalc-sent-command !
         else
           drop
@@ -294,7 +298,7 @@ begin-module picocalc-keys
         self recv-reply if
           self handle-picocalc-key
           false self picocalc-sent-command !
-          false self picocalc-get-key !
+          -1 self picocalc-get-key-count +!
         else
           drop
         then
@@ -303,7 +307,7 @@ begin-module picocalc-keys
     
     \ Handle an alarm
     :noname { self -- }
-      self picocalc-get-key @ not if self get-count else get-key then
+      self picocalc-get-key-count @ 0= if self get-count else get-key then
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default        
