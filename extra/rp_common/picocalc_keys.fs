@@ -122,7 +122,10 @@ begin-module picocalc-keys
 
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
-
+      
+      \ Handle an exception
+      method handle-exception ( xt self -- )
+      
       \ Send a command
       method send-command ( self -- )
 
@@ -207,6 +210,18 @@ begin-module picocalc-keys
       picocalc-keys-alt-held @
     ; define picocalc-keys-alt?
 
+    \ Handle an exception
+    :noname { xt self -- }
+      xt ['] x-i2c-target-noack <> if
+        self picocalc-error-displayed @ not if
+          xt [:
+            display-red execute display-normal flush-console
+          ;] console::with-serial-output
+          true self picocalc-error-displayed !
+        then
+      then
+    ; define handle-exception
+
     \ Send a command
     :noname { self -- }
       self [:
@@ -217,21 +232,7 @@ begin-module picocalc-keys
           then
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
-      ?dup if
-        dup ['] x-i2c-target-noack <> if
-          self picocalc-error-displayed @ not if
-            [:
-              display-red execute display-normal flush-console
-            ;] console::with-serial-output
-            true self picocalc-error-displayed !
-          else
-            drop
-          then
-        else
-          drop
-        then
-        drop
-      then
+      ?dup if self handle-exception drop then
     ; define send-command
 
     \ Receive a reply
@@ -245,21 +246,7 @@ begin-module picocalc-keys
           then
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
-      ?dup if
-        dup ['] x-i2c-target-noack <> if
-          self picocalc-error-displayed @ not if
-            [:
-              display-red execute display-normal flush-console
-            ;] console::with-serial-output
-            true self picocalc-error-displayed !
-          else
-            drop
-          then
-        else
-          drop
-        then
-        drop
-      then
+      ?dup if self handle-exception drop then
     ; define recv-reply
     
     \ Handle an alarm
