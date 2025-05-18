@@ -74,6 +74,9 @@ begin-module picocalc-keys
     \ PicoCalc keyboard interval in ticks
     10 constant picocalc-keys-interval
 
+    \ PicoCalc keyboard delay in milliseconds
+    16 constant picocalc-keys-delay
+
     \ PicoCalc keyboard priority
     0 constant picocalc-keys-priority
 
@@ -239,6 +242,7 @@ begin-module picocalc-keys
       self [:
         [: { self }
           0 { W^ buf }
+          picocalc-keys-delay ms
           buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
             buf h@ self handle-picocalc-key
             false self picocalc-sent-command !

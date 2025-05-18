@@ -140,6 +140,9 @@ begin-module picocalc-term
     \ The input receive buffer size
     64 constant output-recv-buf-size
 
+    \ Input limit
+    64 constant input-limit
+    
     \ Output limit
     term-width term-height 2 / * constant output-limit
 
@@ -717,7 +720,8 @@ begin-module picocalc-term
     
     \ Handle input
     :noname { self -- }
-      begin self key-intf picocalc-keys>? while
+      input-limit { counter }
+      begin self key-intf picocalc-keys>? counter 0> and while
         self key-intf picocalc-keys> { attrs c }
 
         \ DEBUG
@@ -733,6 +737,8 @@ begin-module picocalc-term
             c self handle-ctrl-key
           then
         then
+
+        -1 +to counter
       repeat
     ; define handle-input
 
