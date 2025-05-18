@@ -20,7 +20,7 @@
 
 begin-module picocalc-term
 
-  true constant use-st7789v?
+  false constant use-st7789v?
 
   oo import
   pixmap8 import
@@ -1170,6 +1170,7 @@ begin-module picocalc-term
         then
         style-bytes +to valid-addr
         style-bytes negate +to valid-bytes
+        valid-bytes 1 = if 0 to valid-bytes then
       repeat
       begin bytes 0> while
         0 addr bytes self parse-dec { style style-bytes }
@@ -1183,6 +1184,7 @@ begin-module picocalc-term
         style-bytes +to addr
         style-bytes negate +to bytes
         style self handle-color-style
+        style-bytes 1 = if 0 to bytes then
       repeat
     ; define parse-color-style
 
@@ -1511,7 +1513,6 @@ begin-module picocalc-term
 
   \ Set the current console to a PicoCalc terminal
   : term-console ( -- )
-    flush-console
     shared-term console-input-data console-internal::console-io key-hook !
     shared-term console-input-data console-internal::console-io? key?-hook !
     shared-term console-output-data console-internal::console-io emit-hook !
