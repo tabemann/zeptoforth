@@ -74,8 +74,8 @@ begin-module picocalc-keys
     \ PicoCalc keyboard I2C baud; note that I2C for the keyboard is slow
     10000 constant picocalc-keys-i2c-baud
     
-    \ PicoCalc keyboard interval in ticks
-    160 constant picocalc-keys-interval
+    \ PicoCalc keyboard interval in milliseconds
+    16 constant picocalc-keys-interval
 
     \ PicoCalc keyboard priority
     0 constant picocalc-keys-priority
@@ -168,8 +168,8 @@ begin-module picocalc-keys
       \ Handle getting a key
       method get-key ( self -- )
       
-      \ Handle an alarm
-      method handle-picocalc-keys-alarm ( self -- )
+      \ Run handling keys
+      method run-keys ( self -- )
 
       \ Handle a key
       method handle-picocalc-key ( keycode self -- )
@@ -226,9 +226,9 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device enable-i2c
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
-      picocalc-keys-interval picocalc-keys-priority
-      self [: drop handle-picocalc-keys-alarm ;]
-      self picocalc-keys-alarm set-alarm-delay-default
+      self 1 ['] run-keys 320 128 512 task::spawn { keys-task }
+      c" keys" keys-task task::task-name!
+      keys-task task::run
     ; define init-picocalc-keys
         
     \ Are there keys to read?
@@ -358,19 +358,23 @@ begin-module picocalc-keys
       then
     ; define get-key
     
-    \ Handle an alarm
+    \ Run handling keys
     :noname { self -- }
-      emulate-keys? { emulate }
-      emulate self picocalc-already-emulate @ xor if
-        false self picocalc-sent-command !
-        0 self picocalc-get-key-count !
-        emulate self picocalc-already-emulate !
-      then
-      self picocalc-get-key-count @ 0= if self get-count else self get-key then
-      picocalc-keys-interval picocalc-keys-priority
-      self [: drop handle-picocalc-keys-alarm ;]
-      self picocalc-keys-alarm set-alarm-delay-default        
-    ; define handle-picocalc-keys-alarm
+      begin
+        emulate-keys? { emulate }
+        emulate self picocalc-already-emulate @ xor if
+          false self picocalc-sent-command !
+          0 self picocalc-get-key-count !
+          emulate self picocalc-already-emulate !
+        then
+        self picocalc-get-key-count @ 0= if
+          self get-count
+        else
+          self get-key
+        then
+        picocalc-keys-interval ms
+      again
+    ; define run-keys
 
     \ Handle a key
     :noname { keycode self -- }
