@@ -214,6 +214,7 @@ begin-module picocalc-keys
     :noname { self -- }
       self [:
         [: { self }
+          picocalc-keys-delay ms
           PICOCALC_KEY { W^ buf }
           buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
             true self picocalc-sent-command !
