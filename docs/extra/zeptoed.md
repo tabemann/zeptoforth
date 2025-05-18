@@ -44,7 +44,7 @@ This is a `value` containing whether files saved by zeptoed will use CRLF endlin
 
 zeptoed has the following key mappings; all other non-control characters will be inserted at the cursor:
 
-* Control-?: Display online help
+* Control-?: Display online help.
 * Enter: Insert a newline with indentation to match the indentation of the preceding line, unless prompted in the minibuffer, where then the prompt is responded to, or while searching, where then searching is ended.
 * Tab: Indent the current line or the current selection by one indentation incremnt.
 * Shift-Tab: Unindent the current lien or the current selection by one indentation increment. Note that tabs may be automatically converted to spaces in the process.
@@ -69,6 +69,8 @@ zeptoed has the following key mappings; all other non-control characters will be
 * Control-O: Open a buffer with the specified file path; if a file with that path exists it is loaded, otherwise it is created.
 * Control-R: Begin searching forward, if not already searching forward, and if already searching forward, skip to the next string to search for if there is one.
 * Control-Meta-R: Begin searching backward, if not already searching backward, and if already searching backward, skip to the previous string to search for if there is one.
+* Control-U: Comment current line, or comment selected text.
+* Control-Meta-U: Uncomment current line, or uncomment selected text.
 * Control-V: Exit; note that if dirty buffers exist, the user will be prompted whether they wish to exit.
 * Control-W: Write the current buffer to its file and mark it clean.
 * Control-Meta-W: Select another file and write the current buffer into it, creating it if it did not exist and overwriting its contents if it did, and set the current buffer to point to it; the current buffer will be marked as clean.
