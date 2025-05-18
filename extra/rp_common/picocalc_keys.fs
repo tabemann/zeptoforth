@@ -21,7 +21,7 @@
 begin-module picocalc-keys
 
   oo import
-  alarm import
+  task import
   chan import
   i2c import
   pin import
@@ -120,9 +120,6 @@ begin-module picocalc-keys
 
     continue-module picocalc-keys-internal
       
-      \ The PicoCalc keyboard alarm
-      alarm-size member picocalc-keys-alarm
-
       \ Is control currently pressed
       cell member picocalc-keys-ctrl-held
 
@@ -226,9 +223,9 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device enable-i2c
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
-      self 1 ['] run-keys 320 128 512 task::spawn { keys-task }
-      c" keys" keys-task task::task-name!
-      keys-task task::run
+      self 1 ['] run-keys 320 128 512 spawn { keys-task }
+      c" keys" keys-task task-name!
+      keys-task run
     ; define init-picocalc-keys
         
     \ Are there keys to read?
@@ -277,7 +274,7 @@ begin-module picocalc-keys
             true exit
           then
           buf 1 picocalc-keys-i2c-device >i2c-stop 1 =
-        ;] picocalc-keys-timeout task::with-timeout
+        ;] picocalc-keys-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop false then
     ; define send-command
@@ -320,7 +317,7 @@ begin-module picocalc-keys
           else
             0 false
           then
-        ;] picocalc-keys-timeout task::with-timeout
+        ;] picocalc-keys-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop 0 false then
     ; define recv-reply
