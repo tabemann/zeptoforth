@@ -83,6 +83,9 @@ begin-module picocalc-keys
     \ PicoCalc keyboard channel element count
     256 constant picocalc-keys-chan-count
 
+    \ PicoCalc keyboard reset command
+    8 constant PICOCALC_RST
+    
     \ PicoCalc keyboard count register
     4 constant PICOCALC_COUNT
     
@@ -200,6 +203,7 @@ begin-module picocalc-keys
       picocalc-keys-i2c-addr picocalc-keys-i2c-device i2c-target-addr!
       picocalc-keys-i2c-device enable-i2c
       picocalc-keys-interval picocalc-keys-priority
+      PICOCALC_RST self send-command drop
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default
     ; define init-picocalc-keys
