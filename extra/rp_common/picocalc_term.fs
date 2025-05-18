@@ -623,6 +623,7 @@ begin-module picocalc-term
       else
         c linefeed = if s\" \r" self input-string exit then
         c backspace = if s\" \x7F" self input-string exit then
+        c tab = if s\" \x09" self input-string exit then
         c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
         c KEY_F1 = if s\" \x1B\x4F\x50" self input-string exit then
         c KEY_F2 = if s\" \x1B\x4F\x51" self input-string exit then
@@ -645,7 +646,7 @@ begin-module picocalc-term
         c KEY_END = if s\" \x1B\x5B\x46" self input-string exit then
         c KEY_PUP = if s\" \x1B\x5B\x35\x7E" self input-string exit then
         c KEY_PDOWN = if s\" \x1B\x5B\x36\x7E" self input-string exit then
-        c { W^ c } c 1 self input-string
+        c $20 >= c $7F < and if c { W^ c } c 1 self input-string then
       then
     ; define handle-normal-key
 
@@ -659,6 +660,7 @@ begin-module picocalc-term
       else
         c linefeed = if s\" \r" self input-string exit then
         c backspace = if s\" \x08" self input-string exit then
+        c tab = if s\" \x09" self input-string exit then
         c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
         c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x35\x50" self input-string exit then
         c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x35\x51" self input-string exit then
@@ -707,7 +709,9 @@ begin-module picocalc-term
         c KEY_PDOWN = if
           s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string exit
         then
-        c convert-control { W^ c } c 1 self input-string
+        c $20 >= c $7F < and if
+          c convert-control { W^ c } c 1 self input-string
+        then
       then
     ; define handle-ctrl-key
     
