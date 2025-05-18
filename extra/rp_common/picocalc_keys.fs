@@ -26,6 +26,9 @@ begin-module picocalc-keys
   i2c import
   pin import
 
+  \ Are we emulating the keyboard using the serial port
+  false value emulate-keys?
+  
   \ PicoCalc attributes
   0 bit constant ATTR_CTRL
   1 bit constant ATTR_ALT
@@ -85,7 +88,7 @@ begin-module picocalc-keys
 
     \ PicoCalc reset delay in milliseconds
     100 constant picocalc-rst-delay
-    
+
     \ PicoCalc keyboard reset command
     8 constant PICOCALC_RST
     
@@ -134,6 +137,18 @@ begin-module picocalc-keys
 
       \ Are we going to get a key count
       cell member picocalc-get-key-count
+
+      \ Are already emulated
+      cell member picocalc-already-emulate
+      
+      \ Are we emulating
+      cell member picocalc-emulate
+      
+      \ Are we emulating getting key count
+      cell member picocalc-emulate-get-count
+
+      \ Are we emulating getting a key
+      cell member picocalc-emulate-get-key
 
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
@@ -191,6 +206,10 @@ begin-module picocalc-keys
       false self picocalc-error-displayed !
       false self picocalc-sent-command !
       0 self picocalc-get-key-count !
+      false self picocalc-already-emulate !
+      false self picocalc-emulate !
+      false self picocalc-emulate-get-count !
+      false self picocalc-emulate-get-key !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
 
@@ -251,6 +270,12 @@ begin-module picocalc-keys
     :noname { command self -- success? }
       command self [:
         [: { W^ buf self }
+          emulate-keys? self picocalc-emulate @ or if
+            buf c@ PICOCALC_RST <> self picocalc-emulate !
+            buf c@ PICOCALC_COUNT = self picocalc-emulate-get-count !
+            buf c@ PICOCALC_KEY = self picocalc-emulate-get-key !
+            true exit
+          then
           buf 1 picocalc-keys-i2c-device >i2c-stop 1 =
         ;] picocalc-keys-timeout task::with-timeout
       ;] try
@@ -261,6 +286,34 @@ begin-module picocalc-keys
     :noname { self -- data success? }
       self [:
         [: { self }
+          self picocalc-emulate @ if
+            self picocalc-emulate-get-count @ if
+              false self picocalc-emulate-get-count !
+              [: key? ;] console::with-serial-input if
+                1 true
+              else
+                false self picocalc-emulate !
+                0 true
+              then
+            else
+              self picocalc-emulate-get-key @ if
+                false self picocalc-emulate !
+                false self picocalc-emulate-get-key !
+                [: key? ;] console::with-serial-input if
+                  [: key ;] console::with-serial-input
+                  dup $0D = if drop $0A then
+                  dup $7F = if drop $08 then
+                  8 lshift $01 or true
+                else
+                  0 true
+                then
+              else
+                false self picocalc-emulate !
+                0 true
+              then
+            then
+            exit
+          then
           0 { W^ buf }
           buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
             buf h@ true
@@ -307,7 +360,13 @@ begin-module picocalc-keys
     
     \ Handle an alarm
     :noname { self -- }
-      self picocalc-get-key-count @ 0= if self get-count else get-key then
+      emulate-keys? { emulate }
+      emulate self picocalc-already-emulate @ xor if
+        false self picocalc-sent-command !
+        0 self picocalc-get-key-count !
+        emulate self picocalc-already-emulate !
+      then
+      self picocalc-get-key-count @ 0= if self get-count else self get-key then
       picocalc-keys-interval picocalc-keys-priority
       self [: drop handle-picocalc-keys-alarm ;]
       self picocalc-keys-alarm set-alarm-delay-default        
