@@ -22,8 +22,7 @@ begin-module picocalc-keys
 
   oo import
   alarm import
-  lock import
-  sema import
+  chan import
   i2c import
   pin import
 
@@ -81,8 +80,8 @@ begin-module picocalc-keys
     \ Picocalc keyboard timeout in ticks
     5000 constant picocalc-keys-timeout
 
-    \ PicoCalc keyboard buffer size
-    256 constant picocalc-keys-buf-size
+    \ PicoCalc keyboard channel element count
+    256 constant picocalc-keys-chan-count
 
     \ PicoCalc keyboard register
     9 constant PICOCALC_KEY
@@ -105,25 +104,10 @@ begin-module picocalc-keys
   <object> begin-class <picocalc-keys>
 
     continue-module picocalc-keys-internal
-
-      \ The PicoCalc keyboard lock
-      lock-size member picocalc-keys-lock
-
-      \ The PicoCalc keyboard semaphore
-      sema-size member picocalc-keys-sema
-
-      \ The PicoCalc keyboard destruction semaphore
-      sema-size member picocalc-keys-destroy-sema
       
       \ The PicoCalc keyboard alarm
       alarm-size member picocalc-keys-alarm
 
-      \ Are we attempting to destroy the PicoCalc keyboard
-      cell member picocalc-keys-try-destroy
-
-      \ Are we ready to destroy the PicoCalc keyboard
-      cell member picocalc-keys-ready-destroy
-      
       \ Is control currently pressed
       cell member picocalc-keys-ctrl-held
 
@@ -133,18 +117,9 @@ begin-module picocalc-keys
       \ Has an error been displayed
       cell member picocalc-error-displayed
 
-      \ The PicoCalc keyboard key circular buffer
-      picocalc-keys-buf-size member picocalc-keys-key-buf
-
-      \ The PicoCalc keyboard key attribute circular buffer
-      picocalc-keys-buf-size member picocalc-keys-attr-buf
-
-      \ The PicoCalc keyboard circular buffer read index
-      cell member picocalc-keys-read-index
-
-      \ The PicoCalc keyboard circular buffer write index
-      cell member picocalc-keys-write-index
-
+      \ The channel of pressed keys
+      2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
+      
       \ Handle an alarm
       method handle-picocalc-keys-alarm ( self -- )
 
@@ -178,33 +153,14 @@ begin-module picocalc-keys
     \ Constructor
     :noname { self -- }
       self <object>->new
-      self picocalc-keys-lock init-lock
-      no-sema-limit 0 self picocalc-keys-sema init-sema
-      no-sema-limit 1 self picocalc-keys-destroy-sema init-sema
-      false self picocalc-keys-try-destroy !
-      true self picocalc-keys-ready-destroy !
       false self picocalc-keys-ctrl-held !
       false self picocalc-keys-alt-held !
       false self picocalc-error-displayed !
-      self picocalc-keys-key-buf picocalc-keys-buf-size 0 fill
-      self picocalc-keys-attr-buf picocalc-keys-buf-size 0 fill
-      0 self picocalc-keys-read-index !
-      0 self picocalc-keys-write-index !
+      2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
-
-    \ Destructor
-    :noname { self -- }
-      true self picocalc-keys-try-destroy !
-      begin self picocalc-keys-ready-destroy @ until
-      self picocalc-keys-sema broadcast
-      self picocalc-keys-destroy-sema take
-      self <object>->destroy
-    ; define destroy
 
     \ Initialize the PicoCalc keyboard
     :noname { self -- }
-      self picocalc-keys-destroy-sema ungive
-      false self picocalc-keys-ready-destroy !
       picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
       picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
       picocalc-keys-sda-pin pull-up-pin
@@ -221,26 +177,14 @@ begin-module picocalc-keys
         
     \ Are there keys to read?
     :noname ( self -- read? )
-      [: { self }
-        self picocalc-keys-read-index @ self picocalc-keys-write-index @ <>
-      ;] over picocalc-keys-lock with-lock
+      picocalc-keys-chan chan-empty? not
     ; define picocalc-keys>?
     
     \ Read a key
     :noname { self -- attributes key }
-      self picocalc-keys-destroy-sema ungive
-      self picocalc-keys-sema take
-      self picocalc-keys-try-destroy @ if
-        self picocalc-keys-destroy-sema give false 0 exit
-      then
-      self [: { self }
-        self picocalc-keys-read-index @ { read-index }
-        read-index self picocalc-keys-attr-buf + c@
-        read-index self picocalc-keys-key-buf + c@
-        read-index 1+ [ picocalc-keys-buf-size 1- ] literal and
-        self picocalc-keys-read-index !
-      ;] self picocalc-keys-lock with-lock
-      self picocalc-keys-destroy-sema give
+      0 { W^ buf }
+      begin buf 2 self picocalc-keys-chan recv-chan 2 = until
+      buf h@ dup $FF and swap 8 rshift
     ; define picocalc-keys>
 
     \ Get whether control is currently pressed
@@ -255,78 +199,66 @@ begin-module picocalc-keys
 
     \ Handle an alarm
     :noname { self -- }
-      self picocalc-keys-try-destroy @ not if
-        self [:
-          [: { self }
-            PICOCALC_KEY { W^ buf }
-            buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
-              0 buf !
-              buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
-                buf @ self handle-picocalc-key
-              then
+      self [:
+        [: { self }
+          PICOCALC_KEY { W^ buf }
+          buf 1 picocalc-keys-i2c-device >i2c-stop 1 = if
+            0 buf !
+            buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
+              buf @ self handle-picocalc-key
             then
-          ;] picocalc-keys-timeout task::with-timeout
-        ;] try
-        ?dup if
-          dup ['] x-i2c-target-noack <> if
-            self picocalc-error-displayed @ not if
-              [:
-                display-red execute display-normal flush-console
-              ;] console::with-serial-output
-              true self picocalc-error-displayed !
-            else
-              drop
-            then
+          then
+        ;] picocalc-keys-timeout task::with-timeout
+      ;] try
+      ?dup if
+        dup ['] x-i2c-target-noack <> if
+          self picocalc-error-displayed @ not if
+            [:
+              display-red execute display-normal flush-console
+            ;] console::with-serial-output
+            true self picocalc-error-displayed !
           else
             drop
           then
+        else
           drop
         then
-        picocalc-keys-interval picocalc-keys-priority
-        self [: drop handle-picocalc-keys-alarm ;]
-        self picocalc-keys-alarm set-alarm-delay-default        
-      else
-        true self picocalc-keys-ready-destroy !
-        self picocalc-keys-destroy-sema give
+        drop
       then
+      picocalc-keys-interval picocalc-keys-priority
+      self [: drop handle-picocalc-keys-alarm ;]
+      self picocalc-keys-alarm set-alarm-delay-default        
     ; define handle-picocalc-keys-alarm
 
     \ Handle a key
-    :noname ( keycode self -- )
-      [: { keycode self }
-        keycode PICOCALC_CTRL_HELD = if
+    :noname { keycode self -- }
+      keycode PICOCALC_CTRL_HELD = if
+        led::green led::toggle-led
+        true self picocalc-keys-ctrl-held ! exit
+      else
+        keycode PICOCALC_CTRL_NOT_HELD = if
           led::green led::toggle-led
-          true self picocalc-keys-ctrl-held ! exit
-        else
-          keycode PICOCALC_CTRL_NOT_HELD = if
-            led::green led::toggle-led
-            false self picocalc-keys-ctrl-held ! exit
-          then
+          false self picocalc-keys-ctrl-held ! exit
         then
-        keycode PICOCALC_ALT_HELD = if
+      then
+      keycode PICOCALC_ALT_HELD = if
+        led::green led::toggle-led
+        true self picocalc-keys-alt-held ! exit
+      else
+        keycode PICOCALC_ALT_NOT_HELD = if
           led::green led::toggle-led
-          true self picocalc-keys-alt-held ! exit
-        else
-          keycode PICOCALC_ALT_NOT_HELD = if
-            led::green led::toggle-led
-            false self picocalc-keys-alt-held ! exit
-          then
+          false self picocalc-keys-alt-held ! exit
         then
-        self picocalc-keys-write-index @ { write-index }
-        write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
-        self picocalc-keys-read-index @ = if exit then
+      then
+      self picocalc-keys-chan chan-full? not if
         keycode $FF and 1 = if
           led::green led::toggle-led
-          keycode 8 rshift
-          self picocalc-keys-key-buf write-index + c!
+          keycode $FF00 and
           self picocalc-keys-ctrl-held @ ATTR_CTRL and
-          self picocalc-keys-alt-held @ ATTR_ALT and or
-          self picocalc-keys-attr-buf write-index + c!
-          write-index 1+ [ picocalc-keys-buf-size 1- ] literal and
-          self picocalc-keys-write-index !
-          self picocalc-keys-sema give
+          self picocalc-keys-alt-held @ ATTR_ALT and or or { W^ buf }
+          buf 2 self picocalc-keys-chan send-chan
         then
-      ;] over picocalc-keys-lock with-lock
+      then
     ; define handle-picocalc-key
 
     \ Inject a keycode
