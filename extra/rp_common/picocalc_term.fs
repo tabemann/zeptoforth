@@ -1184,7 +1184,7 @@ begin-module picocalc-term
         style-bytes +to addr
         style-bytes negate +to bytes
         style self handle-color-style
-        style-bytes 1 = if 0 to bytes then
+        bytes 1 = if 0 to bytes then
       repeat
     ; define parse-color-style
 
@@ -1214,7 +1214,7 @@ begin-module picocalc-term
         22 of self handle-normal endof
         24 of self handle-not-underline endof
         27 of self handle-not-reverse endof
-        38 of self handle-default-fg-color endof
+        39 of self handle-default-fg-color endof
         49 of self handle-default-bk-color endof
       endcase
     ; define handle-color-style
