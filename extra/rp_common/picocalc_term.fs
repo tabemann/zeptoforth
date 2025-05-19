@@ -336,14 +336,6 @@ begin-module picocalc-term
       \ The input receive buffer
       output-recv-buf-size cell align member output-recv-buf
 
-      \ The console input data structure
-      console-internal::console-stream-data-size cell align
-      member console-input-data
-
-      \ The console output data structure
-      console-internal::console-out-stream-data-size cell align
-      member console-output-data
-
       \ Run the terminal
       method run-term ( self -- )
 
@@ -518,9 +510,6 @@ begin-module picocalc-term
       \ Handle control-break
       method handle-control-break ( self -- )
       
-      \ Flush terminal output
-      method flush-term ( self -- )
-
     end-module
 
     \ Initialize the PicoCalc terminal
@@ -531,6 +520,21 @@ begin-module picocalc-term
 
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
+
+    \ Test the output stream for room for a byte
+    method >term? ( self -- room? )
+
+    \ Enqueue a byte to the output stream
+    method >term ( c self -- )
+
+    \ Test the input stream for availability of a byte
+    method term>? ( self -- available? )
+
+    \ Dequeue a byte from the input stream
+    method term> ( self -- c )
+
+    \ Flush the output stream
+    method flush-term ( self -- )
     
   end-class
 
@@ -561,10 +565,6 @@ begin-module picocalc-term
       no-sema-limit 1 self destroy-sema init-sema
       input-stream-size self input-stream init-stream
       output-stream-size self output-stream init-stream
-      self input-stream self console-input-data
-      console-internal::init-console-stream-input
-      self output-stream self console-output-data
-      console-internal::init-console-stream-output
     ; define new
 
     \ Destructor
@@ -1473,9 +1473,30 @@ begin-module picocalc-term
       ?dup if dup ['] x-would-block = if 2drop 2drop else ?raise then then
     ; define input-string
 
+    \ Test the output stream for room for a byte
+    :noname ( self -- room )
+      output-stream stream-full? not
+    ; define >term?
+
+    \ Enqueue a byte to the output stream
+    :noname { W^ c self -- }
+      c 1 self output-stream send-stream
+    ; define >term
+
+    \ Test the input stream for availability of a byte
+    :noname ( self -- available? )
+      input-stream stream-empty? not
+    ; define term>?
+
+    \ Dequeue a byte from the input stream
+    :noname { self -- c }
+      0 { W^ buf }
+      buf 1 self input-stream recv-stream drop
+      buf c@
+    ; define term>
+
     \ Flush terminal output
     :noname { self -- }
-      self console-output-data console-internal::console-io-flush
       begin self output-stream stream-empty? not while
         pause-reschedule-last
       repeat
@@ -1499,39 +1520,34 @@ begin-module picocalc-term
 
   \ Set the current input to a PicoCalc terminal within an xt
   : with-term-input ( xt -- )
-    shared-term console-input-data console-internal::console-io
-    shared-term console-input-data console-internal::console-io? rot with-input
+    [: shared-term >term ;] [: shared-term >term? ;] rot with-input
   ;
 
   \ Set the current output to a PicoCalc terminal within an xt
   : with-term-output ( xt -- )
-    shared-term console-output-data console-internal::console-io swap
-    shared-term console-output-data console-internal::console-io? swap
+    [: shared-term term> ;] swap
+    [: shared-term term>? ;] swap
     [: shared-term flush-term ;] swap with-output
-    shared-term console-output-data
-    console-internal::flush-console-stream-output
+    shared-term flush-term
   ;
 
   \ Set the current error output to a PicoCalc terminal within an xt
   : with-term-error-output ( xt -- )
-    shared-term console-output-data console-internal::console-io swap
-    shared-term console-output-data console-internal::console-io? swap
+    [: shared-term term> ;] swap
+    [: shared-term term>? ;] swap
     [: shared-term flush-term ;] swap with-error-output
-    shared-term console-output-data
-    console-internal::flush-console-stream-output    
+    shared-term flush-term
   ;
 
   \ Set the current console to a PicoCalc terminal
   : term-console ( -- )
-    shared-term console-input-data console-internal::console-io key-hook !
-    shared-term console-input-data console-internal::console-io? key?-hook !
-    shared-term console-output-data console-internal::console-io emit-hook !
-    shared-term console-output-data console-internal::console-io? emit?-hook !
+    [: shared-term term> ;] key-hook !
+    [: shared-term term>? ;] key?-hook !
+    [: shared-term >term ;] emit-hook !
+    [: shared-term >term? ;] emit?-hook !
     [: shared-term flush-term ;] flush-console-hook !
-    shared-term console-output-data console-internal::console-io
-    error-emit-hook !
-    shared-term console-output-data console-internal::console-io?
-    error-emit?-hook !
+    [: shared-term >term ;] error-emit-hook !
+    [: shared-term >term? ;] error-emit?-hook !
     [: shared-term flush-term ;] error-flush-console-hook !
     picocalc-welcome-displayed not if
       picocalc-welcome
