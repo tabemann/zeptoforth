@@ -537,8 +537,17 @@ begin-module picocalc-term
     \ Initialize the PicoCalc terminal
     method init-term ( self -- )
     
-    \ Carry out an operation with the PicoCalc terminal locked
-    method with-term ( xt self -- )
+    \ Carry out an operation with the PicoCalc terminal locked. Note that
+    \ executing operations that print to the PicoCalc terminal should be avoided
+    \ because they may block indefinitely.
+    method do-with-term-lock ( xt self -- )
+
+    \ Carry out an operation against the PicoCalc terminal's display with the
+    \ PicoCalc terminal locked. It is highly recommended that the user update
+    \ the terminal's display or graphics drawn to it may not be displayed. Note
+    \ that executing operations that print to the PicoCalc terminal should be
+    \ avoided because they may block indefinitely.
+    method do-with-term-display ( xt self -- ) \ xt: ( display -- )
 
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
@@ -1341,10 +1350,21 @@ begin-module picocalc-term
       x y self draw-char
     ; define handle-char
     
-    \ Carry out an operation with the PicoCalc terminal locked
+    \ Carry out an operation with the PicoCalc terminal locked. Note that
+    \ executing operations that print to the PicoCalc terminal should be avoided
+    \ because they may block indefinitely.
     :noname ( xt self -- )
       term-lock with-lock
-    ; define with-term
+    ; define do-with-term-lock
+
+    \ Carry out an operation against the PicoCalc terminal's display with the
+    \ PicoCalc terminal locked. It is highly recommended that the user update
+    \ the terminal's display or graphics drawn to it may not be displayed. Note
+    \ that executing operations that print to the PicoCalc terminal should be
+    \ avoided because they may block indefinitely.
+    :noname ( xt self -- ) \ xt: ( display -- )
+      [: display-intf swap execute ;] over do-with-term-lock
+    ; define do-with-term-display
 
     \ Draw the cursor
     :noname { self -- }
@@ -1423,8 +1443,7 @@ begin-module picocalc-term
       [ display-width display-height * ] literal pixels - move
       [ term-height char-height * ] literal lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 fill-y [ term-width char-width * ] literal
-      [ term-height char-height * ] literal fill-y - self display-intf
+      0 fill-y display-width display-height fill-y - self display-intf
       draw-rect-const
       self display-intf set-dirty
     ; define scroll-up
@@ -1455,9 +1474,9 @@ begin-module picocalc-term
       lines [ char-height display-width * ] literal * { pixels }
       self display-buf self display-buf pixels +
       [ display-width display-height * ] literal pixels - move
-      [ term-height char-height * ] literal lines char-height * - { fill-y }
+      display-height lines char-height * - { fill-y }
       self bk-color @ get-color
-      0 0 [ term-width char-width * ] literal fill-y self display-intf
+      0 0 display-width fill-y self display-intf
       draw-rect-const
       self display-intf set-dirty
     ; define scroll-down
@@ -1550,4 +1569,27 @@ begin-module picocalc-term
     then
   ;
   
+  \ Carry out an operation with the PicoCalc terminal locked. Note that
+  \ executing operations that print to the PicoCalc terminal should be avoided
+  \ because they may block indefinitely.
+  : with-term-lock ( xt -- ) shared-term do-with-term-lock ;
+  
+  \ Carry out an operation against the PicoCalc terminal's display with the
+  \ PicoCalc terminal locked. It is highly recommended that the user update
+  \ the terminal's display or graphics drawn to it may not be displayed. Note
+  \ that executing operations that print to the PicoCalc terminal should be
+  \ avoided because they may block indefinitely.
+  : with-term-display ( xt self -- ) \ xt: ( display -- )
+    shared-term do-with-term-display
+  ;
+
+  \ Get the terminal pixel dimensions
+  : term-pixels-dim@ ( -- width height ) display-width display-height ;
+
+  \ Get the terminal dimensions in characters
+  : term-dim@ ( -- width height ) term-width term-height ;
+
+  \ Get the terminal character dimensions
+  : term-char-dim@ ( -- width height ) char-width char-height ;
+
 end-module
