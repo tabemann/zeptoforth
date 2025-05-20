@@ -21,6 +21,9 @@
 begin-module picocalc-term
 
   false constant use-st7789v?
+  false constant use-5x8-font?
+  true constant use-6x8-font?
+  false constant use-7x8-font?
 
   oo import
   pixmap8 import
@@ -28,13 +31,21 @@ begin-module picocalc-term
   font import
 
   use-st7789v? not [if]
-    simple-font-6x8 import
     ili9488-8-common import
     ili9488-8-spi import
   [else]
-    simple-font import
     st7789v-8-common import
     st7789v-8-spi import
+  [then]
+
+  use-5x8-font? [if]
+    simple-font-5x8 import
+  [then]
+  use-6x8-font? [if]
+    simple-font-6x8 import
+  [then]
+  use-7x8-font? [if]
+    simple-font import
   [then]
 
   picocalc-keys import
@@ -46,17 +57,25 @@ begin-module picocalc-term
   
   begin-module picocalc-term-internal
 
-    \ Initialize the 6x8 simple font
-    use-st7789v? not [if]
+    \ Initialize the font
+    use-5x8-font? [if]
+      initializer init-simple-font-5x8
+    [then]
+    use-6x8-font? [if]
       initializer init-simple-font-6x8
-    [else]
+    [then]
+    use-7x8-font? [if]
       initializer init-simple-font
     [then]
 
     \ Font character with
-    use-st7789v? not [if]
+    use-5x8-font? [if]
+      5 constant char-width
+    [then]
+    use-6x8-font? [if]
       6 constant char-width
-    [else]
+    [then]
+    use-7x8-font? [if]
       7 constant char-width
     [then]
 
@@ -1355,15 +1374,15 @@ begin-module picocalc-term
       get-color swap attr modify-color get-color
       { char-bk-color char-fg-color }
       char-width x * char-height y * { display-x display-y }
+
       char-bk-color display-x display-y char-width char-height
       self display-intf draw-rect-const
-      char-fg-color c display-x display-y
-
-      [ use-st7789v? not ] [if]
-        self display-intf a-simple-font-6x8 draw-char-to-pixmap8
-      [else]
-        self display-intf a-simple-font draw-char-to-pixmap8
-      [then]
+      
+      char-fg-color c display-x display-y self display-intf
+      [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+      [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
+      [ use-7x8-font? ] [if] a-simple-font [then]
+      draw-char-to-pixmap8
       
       attr attr-underline and if
         char-fg-color display-x display-y char-height 1- + char-width 1
