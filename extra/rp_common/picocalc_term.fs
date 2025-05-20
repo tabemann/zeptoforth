@@ -345,6 +345,9 @@ begin-module picocalc-term
       \ Clear the cursor
       method clear-cursor ( self -- )
 
+      \ Draw a character with or without a cursor
+      method draw-char-with-cursor ( cursor? x y self -- )
+    
       \ Draw a character
       method draw-char ( x y self -- )
 
@@ -765,6 +768,7 @@ begin-module picocalc-term
         then if
           updated not if
             self term-lock claim-lock
+            self clear-cursor
             true to updated
           then
 
@@ -786,6 +790,7 @@ begin-module picocalc-term
           false
         else
           updated if
+            self draw-cursor
             self display-intf update-display
             self term-lock release-lock
           then
@@ -884,12 +889,10 @@ begin-module picocalc-term
     \ Handle showing the cursor
     :noname { self -- }
       true self cursor-visible !
-      self draw-cursor
     ; define handle-show-cursor
     
     \ Handle hiding the cursor
     :noname { self -- }
-      self clear-cursor
       false self cursor-visible !
     ; define handle-hide-cursor
     
@@ -901,10 +904,8 @@ begin-module picocalc-term
     
     \ Handle restoring the cursor
     :noname { self -- }
-      self clear-cursor
       self saved-cursor-x @ self cursor-x !
       self saved-cursor-y @ self cursor-y !
-      self draw-cursor
     ; define handle-restore-cursor
     
     \ Handle querying the cursor position
@@ -928,9 +929,7 @@ begin-module picocalc-term
     \ Handle moving the cursor up
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         negate self cursor-y @ + 0 max self cursor-y !
-        self draw-cursor
       else
         drop
       then
@@ -939,9 +938,7 @@ begin-module picocalc-term
     \ Handle moving the cursor down
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         self cursor-y @ + [ term-height 1- ] literal min self cursor-y !
-        self draw-cursor
       else
         drop
       then
@@ -950,9 +947,7 @@ begin-module picocalc-term
     \ Handle moving the cursor forward
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         self cursor-x @ + [ term-width 1- ] literal min self cursor-x !
-        self draw-cursor
       else
         drop
       then
@@ -961,9 +956,7 @@ begin-module picocalc-term
     \ Handle moving the cursor back
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         negate self cursor-x @ + 0 max self cursor-x !
-        self draw-cursor
       else
         drop
       then
@@ -972,10 +965,8 @@ begin-module picocalc-term
     \ Handle moving the cursor to the start of a following line
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         0 self cursor-x !
         self cursor-y @ + [ term-height 1- ] literal min self cursor-y !
-        self draw-cursor
       else
         drop
       then
@@ -984,10 +975,8 @@ begin-module picocalc-term
     \ Handle moving the cursor to the start of a preceding line
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         0 self cursor-x !
         negate self cursor-y @ + 0 max self cursor-y !
-        self draw-cursor
       else
         drop
       then
@@ -996,9 +985,7 @@ begin-module picocalc-term
     \ Handle moving the cursor to a column
     :noname { addr bytes self -- }
       1 addr 1+ bytes 1- self parse-dec bytes 2 - = if
-        self clear-cursor
         1- 0 max [ term-width 1- ] literal min self cursor-x !
-        self draw-cursor
       else
         drop
       then
@@ -1011,17 +998,13 @@ begin-module picocalc-term
         1 addr 2 + row-bytes + bytes 2 - row-bytes - self parse-dec
         { col col-bytes }
         bytes 2 - row-bytes - col-bytes - 1 = if
-          self clear-cursor
           col 1- 0 max [ term-width 1- ] literal min self cursor-x !
           row 1- 0 max [ term-height 1- ] literal min self cursor-y !
-          self draw-cursor
         then
       else
         bytes 1- row-bytes - 1 = if
-          self clear-cursor
           0 self cursor-x !
           row 1- 0 max [ term-height 1- ] literal min self cursor-y !
-          self draw-cursor
         then
       then
     ; define handle-cursor-pos
@@ -1293,17 +1276,13 @@ begin-module picocalc-term
 
     \ Handle a carriage return
     :noname { self -- }
-      self clear-cursor
       0 self cursor-x !
-      self draw-cursor
     ; define handle-return
     
     \ Handle a linefeed
     :noname { self -- }
       self cursor-y @ term-height 1- < if
-        self clear-cursor
         1 self cursor-y +!
-        self draw-cursor
       else
         1 self scroll-up
       then
@@ -1311,13 +1290,11 @@ begin-module picocalc-term
     
     \ Handle a backspace
     :noname { self -- }
-      self clear-cursor
       -1 self cursor-x +!
       self cursor-x @ 0< if
         term-width 1- self cursor-x !
         self cursor-y @ 1- 0 max self cursor-y !
       then
-      self draw-cursor
     ; define handle-backspace
 
     \ Handle a tab
@@ -1330,7 +1307,6 @@ begin-module picocalc-term
     \ Handle an ordinary character
     :noname { c self -- }
       c $20 < c $7E > or if exit then
-      self clear-cursor
       self cursor-x @ self cursor-y @ { x y }
       x term-width = if
         0 to x
@@ -1344,7 +1320,6 @@ begin-module picocalc-term
       self fg-color @ self fg-colors-buf offset + c!
       self bk-color @ self bk-colors-buf offset + c!
       x y self draw-char
-      self draw-cursor
     ; define handle-char
     
     \ Carry out an operation with the PicoCalc terminal locked
@@ -1354,7 +1329,7 @@ begin-module picocalc-term
 
     \ Draw the cursor
     :noname { self -- }
-      self cursor-x @ self cursor-y @ self draw-char
+      true self cursor-x @ self cursor-y @ self draw-char-with-cursor
     ; define draw-cursor
 
     \ Clear the cursor
@@ -1364,9 +1339,9 @@ begin-module picocalc-term
       self draw-cursor
       saved-cursor-visible self cursor-visible !
     ; define clear-cursor
-    
-    \ Draw a character
-    :noname { x y self -- }
+
+    \ Draw a character with or without a cursor
+    :noname { cursor? x y self -- }
       x term-width > y term-height > or if exit then
       term-width y * x + { offset }
       offset self chars-buf + c@ { c }
@@ -1375,7 +1350,7 @@ begin-module picocalc-term
       offset self fg-colors-buf + c@
       offset self bk-colors-buf + c@
       x self cursor-x @ = y self cursor-y @ = and
-      self cursor-visible @ and if swap then
+      self cursor-visible @ and cursor? and if swap then
       attr attr-reverse and if swap then
       get-color swap attr modify-color get-color
       { char-bk-color char-fg-color }
@@ -1394,12 +1369,16 @@ begin-module picocalc-term
         char-fg-color display-x display-y char-height 1- + char-width 1
         self display-intf draw-rect-const
       then
+    ; define draw-char-with-cursor
+    
+    \ Draw a character
+    :noname { x y self -- }
+      false x y self draw-char-with-cursor
     ; define draw-char
 
     \ Scroll up by a number of lines
     :noname { lines self -- }
       lines term-height min to lines
-      self clear-cursor
       lines term-width * { chars }
 
       self chars-buf chars + self chars-buf
@@ -1428,14 +1407,12 @@ begin-module picocalc-term
       0 fill-y [ term-width char-width * ] literal
       [ term-height char-height * ] literal fill-y - self display-intf
       draw-rect-const
-      self draw-cursor
       self display-intf set-dirty
     ; define scroll-up
 
     \ Scroll down by a number of lines
     :noname { lines self -- }
       lines term-height min to lines
-      self clear-cursor
       lines term-width * { chars }
 
       self chars-buf self chars-buf chars +
@@ -1463,7 +1440,6 @@ begin-module picocalc-term
       self bk-color @ get-color
       0 0 [ term-width char-width * ] literal fill-y self display-intf
       draw-rect-const
-      self draw-cursor
       self display-intf set-dirty
     ; define scroll-down
 
