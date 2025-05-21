@@ -66,3 +66,50 @@ Then, after the PicoCalc has rebooted, execute the following at the zeptoforth R
     true to picocalc-keys::emulate-keys? picocalc-term::term-console
 
 This will result in input to the serial console being handled as if it were typed on the PicoCalc's keyboard. Note, however, that only non-control ASCII characters, newlines, and backspaces are currently emulated, so you will not be able to enter control characters or keys such as arrow or function keys.
+
+## Drawing to the screen of a PicoCalc
+
+The PicoCalc terminal emulator exposes a display that can be drawn to with `picocalc-term::with-term-display` ( xt -- ) where xt has the signature ( ??? display -- ??? ). An example routine to do so is:
+
+    begin-module picocalc-hello
+      
+      picocalc-term import
+      oo import
+      pixmap8 import
+      font import
+      rng import
+    
+      use-st7789v? not [if]
+        ili9488-8-common import
+      [else]
+        st7789v-8-common import
+      [then]
+    
+      use-5x8-font? [if]
+        simple-font-5x8 import
+      [then]
+      use-6x8-font? [if]
+        simple-font-6x8 import
+      [then]
+      use-7x8-font? [if]
+        simple-font import
+      [then]
+      
+      : hello ( r g b x y -- )
+        [: { r g b x y display }
+          r g b rgb8 s" Hello, world!" x y display
+          [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+          [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
+          [ use-7x8-font? ] [if] a-simple-font [then]
+          draw-string-to-pixmap8
+          display update-display
+        ;] with-term-display
+      ;
+    
+    end-module
+
+In this example routine, `picocalc-hello::hello` ( r g b x y -- ), `with-term-display` calls a quotation which takes the color (with elements from 0 to 255) and the (x, y) coordinate of the upper left-hand corner of the "Hello, world!" string to draw and draws that string with the specified coordinate and color on the display with the selected font.
+
+Afterwards, it calls `update-display` to copy the updated portion of the framebuffer to the display. Note that `update-display` is specific to the class `ili9488-8-common::<ili9488-8-common>` or `st7789v-8-common::<st7789v-8-common>` and does not belong to a shared superclass, so one will have to specifically import `ili9488-8-common` or `st7789v-8-common` depending on whether an actual PicoCalc is in use or not, respectively.
+
+Note that `picocalc-term::with-term-display` locks the terminal emulator within the xt that it calls, so do not execute any code that may output text with `emit`, `type`, `.`, `."`, `.s`, `h.8`, or like within this xt as it may block forever because the output stream used by the terminal emulator is not emptied while it is locked and thus may become full.
