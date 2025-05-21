@@ -20,10 +20,10 @@
 
 begin-module picocalc-term
 
-  true constant use-st7789v?
+  false constant use-st7789v?
   false constant use-5x8-font?
-  false constant use-6x8-font?
-  true constant use-7x8-font?
+  true constant use-6x8-font?
+  false constant use-7x8-font?
 
   oo import
   pixmap8 import
