@@ -300,6 +300,7 @@ begin-module picocalc-keys
                   [: key ;] console::with-serial-input
                   dup $0D = if drop $0A then
                   dup $7F = if drop $08 then
+                  dup $1B = if drop KEY_ESC then
                   8 lshift $01 or true
                 else
                   0 true
