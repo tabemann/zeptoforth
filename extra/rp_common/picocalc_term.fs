@@ -20,10 +20,10 @@
 
 begin-module picocalc-term
 
-  false constant use-st7789v?
+  true constant use-st7789v?
   false constant use-5x8-font?
-  true constant use-6x8-font?
-  false constant use-7x8-font?
+  false constant use-6x8-font?
+  true constant use-7x8-font?
 
   oo import
   pixmap8 import
@@ -1116,7 +1116,7 @@ begin-module picocalc-term
       self fg-color @ { fg-color }
       self bk-color @ { bk-color }
       self cursor-y @ { y }
-      self cursor-x @ 0 ?do
+      term-width self cursor-x @ ?do
         term-width y * i + { offset }
         0 self chars-buf offset + c!
         fg-color self fg-colors-buf offset + c!
@@ -1131,7 +1131,7 @@ begin-module picocalc-term
       self fg-color @ { fg-color }
       self bk-color @ { bk-color }
       self cursor-y @ { y }
-      term-width self cursor-x @ ?do
+      self cursor-x @ 0 ?do
         term-width y * i + { offset }
         0 self chars-buf offset + c!
         fg-color self fg-colors-buf offset + c!
