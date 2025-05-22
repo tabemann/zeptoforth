@@ -21,9 +21,20 @@
 begin-module picocalc-term-common
 
   false constant use-st7789v?
-  false constant use-5x8-font?
-  true constant use-6x8-font?
-  false constant use-7x8-font?
+
+  \ Select fonts automatically based on what fonts are loaded
+  defined? simple-font-5x8 constant use-5x8-font?
+  defined? simple-font-6x8 use-5x8-font? not and constant use-6x8-font?
+  defined? simple-font use-5x8-font? not and use-6x8-font? not and
+  constant use-7x8-font?
+
+  \ Ensure that at least one font is available
+  : font-test ( -- )
+    use-5x8-font? use-6x8-font? or use-7x8-font? or not if
+      [: ." no font is available" cr ;] ?raise
+    then
+  ;
+  font-test
 
   oo import
   picocalc-keys import

@@ -49,7 +49,7 @@ Note however that the text-only PicoCalc terminal emulator is markedly slower, e
 
 Note, however, that one may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel and 7x8-pixel fonts. A 5x8-pixel font may be desired if one wants the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if one thinks that the default 6x8-pixel font is too small.
 
-To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, or if one is installing a text-only terminal emulator, `extra/common/ili9488_spi_text_5x8_font_all.fs` or `extra/common/ili9488_spi_text_7x8_font_all.fs`, and prior to loading edit `extra/rp_common/picocalc_term_common.fs` to set `use-5x8-font?` or `use-7x8-font?` to `true` and `use-6x8-font?` to `false` (note that only one of these three may be set to `true` at a time).
+To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, or if one is installing a text-only terminal emulator, `extra/common/ili9488_spi_text_5x8_font_all.fs` or `extra/common/ili9488_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
 
 ## Rebooting/interrupting your PicoCalc
 
