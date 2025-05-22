@@ -84,7 +84,8 @@ This will result in input to the serial console being handled as if it were type
 The graphical (but not text-only) PicoCalc terminal emulator exposes a display that can be drawn to with `picocalc-term::with-term-display` ( xt -- ) where xt has the signature ( ??? display -- ??? ). An example routine to do so is:
 
     begin-module picocalc-hello
-      
+
+      picocalc-term-common import
       picocalc-term import
       oo import
       pixmap8 import
