@@ -439,13 +439,12 @@ begin-module st7789v-text-common
       bk-color-buf offset + c@ convert-8-to-16 { bk-color }
       font-row char-rows 1- <> if
         begin col cols < while
-          text-col text-row
           c font-col font-row the-font raw-char-pixel@ if
-            self fg-color-addr
+            fg-color
           else
-            self bk-color-addr
+            bk-color
           then
-          c@ convert-8-to-16 col 1 lshift line-buf + h!
+          col 1 lshift line-buf + h!
           1 +to col
           1 +to font-col
           font-col char-cols = if
@@ -463,13 +462,12 @@ begin-module st7789v-text-common
         0 { col }
         text-col text-row self raw-underlined@ { underlined }
         begin col cols < while
-          text-col text-row
           c font-col font-row the-font raw-char-pixel@ underlined or if
-            self fg-color-addr
+            fg-color
           else
-            self bk-color-addr
+            bk-color
           then
-          c@ convert-8-to-16 col 1 lshift line-buf + h!
+          col 1 lshift line-buf + h!
           1 +to col
           1 +to font-col
           font-col char-cols = if
