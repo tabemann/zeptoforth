@@ -19,7 +19,8 @@
 \ SOFTWARE.
 
 begin-module picocalc-hello
-  
+
+  picocalc-term-common import
   picocalc-term import
   oo import
   pixmap8 import
