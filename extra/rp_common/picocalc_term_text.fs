@@ -23,17 +23,16 @@ begin-module picocalc-term
   oo import
   picocalc-term-common import
   picocalc-term-common-internal import
-  pixmap8 import
-  pixmap8-internal import
+  text8 import
   font import
   console import
 
   use-st7789v? not [if]
-    ili9488-8-common import
-    ili9488-8-spi import
+    ili9488-text-common import
+    ili9488-text-spi import
   [else]
-    st7789v-8-common import
-    st7789v-8-spi import
+    st7789v-text-common import
+    st7789v-text-spi import
   [then]
 
   use-5x8-font? [if]
@@ -52,20 +51,13 @@ begin-module picocalc-term
     begin-module picocalc-term-internal
       
       \ The display
-      use-st7789v? not [if] <ili9488-8-spi> [else] <st7789v-8-spi> [then]
+      use-st7789v? not [if] <ili9488-text-spi> [else] <st7789v-text-spi> [then]
       class-size member display-intf
       
       \ The display buffer
-      display-width display-height pixmap8-buf-size member display-buf
-      
+      term-width term-height text8-buf-size member display-buf
+
     end-module> import
-    
-    \ Carry out an operation against the PicoCalc terminal's display with the
-    \ PicoCalc terminal locked. It is highly recommended that the user update
-    \ the terminal's display or graphics drawn to it may not be displayed. Note
-    \ that executing operations that print to the PicoCalc terminal should be
-    \ avoided because they may block indefinitely.
-    method do-with-term-display ( xt self -- ) \ xt: ( display -- )
     
   end-class
 
@@ -76,23 +68,30 @@ begin-module picocalc-term
     :noname { self -- }
       self <picocalc-term-common>->new
 
+      [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+      [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
+      [ use-7x8-font? ] [if] a-simple-font [then] { the-font }
+
       [ use-st7789v? not ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
-        display-rst-pin
-        display-invert self display-buf display-width display-height
-        display-spi-device <ili9488-8-spi> self display-intf init-object
+        display-rst-pin display-invert
+        the-font self display-buf term-width term-height
+        display-width display-height
+        display-spi-device <ili9488-text-spi> self display-intf init-object
       [else]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-bl-pin display-rst-pin
-        self display-buf false display-width display-height
-        display-spi-device <st7789v-8-spi> self display-intf init-object
+        the-font self display-buf false term-width term-height
+        display-width display-height
+        display-spi-device <st7789v-text-spi> self display-intf init-object
       [then]
     ; define new
-
+    
     \ Initialize the PicoCalc terminal
     :noname { self -- }
       self <picocalc-term-common>->init-term
-      self display-intf clear-pixmap
+      self display-intf clear-display
+      self display-intf clear-text
       self draw-cursor
       self display-intf update-display
       self start-term-task
@@ -100,16 +99,7 @@ begin-module picocalc-term
 
     \ Update the display
     :noname ( self -- ) display-intf update-display ; define do-update-display
-
-    \ Carry out an operation against the PicoCalc terminal's display with the
-    \ PicoCalc terminal locked. It is highly recommended that the user update
-    \ the terminal's display or graphics drawn to it may not be displayed. Note
-    \ that executing operations that print to the PicoCalc terminal should be
-    \ avoided because they may block indefinitely.
-    :noname ( xt self -- ) \ xt: ( display -- )
-      [: display-intf swap execute ;] over do-with-term-lock
-    ; define do-with-term-display
-
+    
     \ Draw a character with or without a cursor
     :noname { cursor? x y self -- }
       x term-width > y term-height > or if exit then
@@ -123,88 +113,25 @@ begin-module picocalc-term
       self cursor-visible @ and cursor? and if swap then
       attr attr-reverse and if swap then
       get-color swap attr modify-color get-color
-      { char-bk-color char-fg-color }
-      char-width x * char-height y * { display-x display-y }
-
-      char-bk-color display-x display-y char-width char-height
-      self display-intf draw-rect-const
-      
-      char-fg-color c display-x display-y self display-intf
-      [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
-      [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
-      [ use-7x8-font? ] [if] a-simple-font [then]
-      draw-char-to-pixmap8
-      
-      attr attr-underline and if
-        char-fg-color display-x display-y char-height 1- + char-width 1
-        self display-intf draw-rect-const
-      then
+      swap c -rot
+      attr attr-underline and 0<>
+      x y self display-intf whole-char!
     ; define draw-char-with-cursor
 
     \ Scroll up by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
-
-      self chars-buf chars + self chars-buf
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - + chars 0 fill
-
-      self attrs-buf chars + self attrs-buf
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - + chars 0 fill
-
-      self fg-colors-buf chars + self fg-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars - + chars
-      self fg-color @ fill
-
-      self bk-colors-buf chars + self bk-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars - + chars
-      self bk-color @ fill
-
-      lines [ char-height display-width * ] literal * { pixels }
-      self display-buf pixels + self display-buf
-      [ display-width display-height * ] literal pixels - move
-      [ term-height char-height * ] literal lines char-height * - { fill-y }
-      self bk-color @ get-color
-      0 fill-y display-width display-height fill-y - self display-intf
-      draw-rect-const
-      self display-intf set-dirty
+      lines self display-intf text8::scroll-up
+      term-height dup lines - ?do
+        term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
+      loop
     ; define scroll-up
 
     \ Scroll down by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
-
-      self chars-buf self chars-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - 0 fill
-
-      self attrs-buf self attrs-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - 0 fill
-
-      self fg-colors-buf self fg-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars -
-      self fg-color @ fill
-
-      self bk-colors-buf self bk-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars -
-      self bk-color @ fill
-
-      lines [ char-height display-width * ] literal * { pixels }
-      self display-buf self display-buf pixels +
-      [ display-width display-height * ] literal pixels - move
-      display-height lines char-height * - { fill-y }
-      self bk-color @ get-color
-      0 0 display-width fill-y self display-intf
-      draw-rect-const
-      self display-intf set-dirty
+      lines self display-intf text8::scroll-down
+      lines 0 ?do
+        term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
+      loop
     ; define scroll-down
 
   end-implement
@@ -264,16 +191,7 @@ begin-module picocalc-term
   \ executing operations that print to the PicoCalc terminal should be avoided
   \ because they may block indefinitely.
   : with-term-lock ( xt -- ) shared-term do-with-term-lock ;
-  
-  \ Carry out an operation against the PicoCalc terminal's display with the
-  \ PicoCalc terminal locked. It is highly recommended that the user update
-  \ the terminal's display or graphics drawn to it may not be displayed. Note
-  \ that executing operations that print to the PicoCalc terminal should be
-  \ avoided because they may block indefinitely.
-  : with-term-display ( xt self -- ) \ xt: ( display -- )
-    shared-term do-with-term-display
-  ;
-  
+
   \ Get the terminal pixel dimensions
   : term-pixels-dim@ ( -- width height )
     picocalc-term-common::term-pixels-dim@

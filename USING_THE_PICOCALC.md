@@ -17,6 +17,7 @@ Third, if one is using a shell prompt one should execute the following commands 
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/ili9488_spi_8_6x8_font_all.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_keys.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term_common.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
 
@@ -27,17 +28,28 @@ If you are using zeptocom.js, one should do the following:
 - Set the working directory to the root of the zeptoforth directory tree.
 - Upload extra/common/ili9488_spi_8_6x8_font_all.fs.
 - Upload extra/rp_common/picocalc_key.fs.
+- Upload extra/rp_common/picocalc_term_common.fs
 - Upload extra/rp_common/picocalc_term.fs.
 - Issue initializer picocalc-term::term-console.
 - Issue 'reboot'.
 
 After these steps your PicoCalc will be ready for use!
 
+## Text-only terminal emulators
+
+While the above directions provides 8-bit RGB graphics and is relatively fast, it has the downside that a lot of memory is used for the framebuffer, which may prove problematic if one wants to use an RP2040 (e.g. Raspberry Pi Pico, Raspberry Pi Pico W) board, and especially if one wants to use zeptoIP (as zeptoIP by itself is very memory-costly) or zeptoed (as zeptoed requires a good-sized amount of memory for storage of text in memory).
+
+Luckily, there is a less memory-expensive option available! This is the text-only PicoCalc terminal emulator. This only stores the 8-bit text and its attributes in memory, so it uses far less RAM than the graphical PicoCalc terminal emulator.
+
+To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/ili9488_spi_text_5x8_font_all.fs`, `extra/common/ili9488_spi_text_6x8_font_all.fs`, or `extra/common/ili9488_spi_text_7x8_font_all.fs` for `extra/common/ili9488_spi_8_6x8_font_all.fs` (see 'Font selection' below).
+
+Note however that the text-only PicoCalc terminal emulator is markedly slower, especially in scrolling, than the graphical PicoCalc terminal emulator because it has to redraw each character when updating the screen rather than merely converting an 8-bit RGB pixmap to 16-bit RGB and sending it to the screen, which is significantly simpler and thus faster. Currently hardware scrolling is not supported, even though it may be supported in the future.
+
 ## Font selection
 
 Note, however, that one may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel and 7x8-pixel fonts. A 5x8-pixel font may be desired if one wants the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if one thinks that the default 6x8-pixel font is too small.
 
-To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, and prior to loading edit `extra/rp_common/picocalc_term.fs` to set `use-5x8-font?` or `use-7x8-font?` to `true` and `use-6x8-font?` to `false` (note that only one of these three may be set to `true` at a time).
+To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, or if one is installing a text-only terminal emulator, `extra/common/ili9488_spi_text_5x8_font_all.fs` or `extra/common/ili9488_spi_text_7x8_font_all.fs`, and prior to loading edit `extra/rp_common/picocalc_term_common.fs` to set `use-5x8-font?` or `use-7x8-font?` to `true` and `use-6x8-font?` to `false` (note that only one of these three may be set to `true` at a time).
 
 ## Rebooting/interrupting your PicoCalc
 
@@ -69,7 +81,7 @@ This will result in input to the serial console being handled as if it were type
 
 ## Drawing to the screen of a PicoCalc
 
-The PicoCalc terminal emulator exposes a display that can be drawn to with `picocalc-term::with-term-display` ( xt -- ) where xt has the signature ( ??? display -- ??? ). An example routine to do so is:
+The graphical (but not text-only) PicoCalc terminal emulator exposes a display that can be drawn to with `picocalc-term::with-term-display` ( xt -- ) where xt has the signature ( ??? display -- ??? ). An example routine to do so is:
 
     begin-module picocalc-hello
       
