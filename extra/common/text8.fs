@@ -196,14 +196,23 @@ begin-module text8
       col 0>= row 0>= and
       col self text-cols @ < and row self text-rows @ < and if
         self text-cols @ row * col + { offset }
-        c self text-char-buf @ offset + c!
-        fg-color self text-fg-color-buf @ offset + c!
-        bk-color self text-bk-color-buf @ offset + c!
-        col $7 and bit
+        self text-char-buf @ offset + { char-addr }
+        self text-fg-color-buf @ offset + { fg-color-addr }
+        self text-bk-color-buf @ offset + { bk-color-addr }
+        col $7 and bit { underline-bit }
         self text-underline-buf @ col 3 rshift +
-        self text-cols @ 8 align 3 rshift row * +
-        underlined? if cbis! else cbic! then
-        col row self dirty-char
+        self text-cols @ 8 align 3 rshift row * + { underline-addr }
+        underlined? 0<> to underlined?
+        c char-addr c@ <>
+        fg-color fg-color-addr c@ <> or
+        bk-color bk-color-addr c@ <> or
+        underline-bit underline-addr cbit@ underlined? xor or if
+          c char-addr c!
+          fg-color fg-color-addr c!
+          bk-color bk-color-addr c!
+          underline-bit underline-addr underlined? if cbis! else cbic! then
+          col row self dirty-char
+        then
       else
         0
       then
@@ -223,8 +232,11 @@ begin-module text8
     :noname { c col row self -- }
       col 0>= row 0>= and
       col self text-cols @ < and row self text-rows @ < and if
-        c col row self char-addr c!
-        col row self dirty-char
+        col row self char-addr { addr }
+        addr c@ c <> if
+          c addr c!
+          col row self dirty-char
+        then
       then
     ; define char!
 
@@ -242,8 +254,11 @@ begin-module text8
     :noname { color col row self -- }
       col 0>= row 0>= and
       col self text-cols @ < and row self text-rows @ < and if
-        color col row self fg-color-addr c!
-        col row self dirty-char
+        col row self fg-color-addr { addr }
+        addr c@ color <> if
+          color addr c!
+          col row self dirty-char
+        then
       then
     ; define fg-color!
 
@@ -261,8 +276,11 @@ begin-module text8
     :noname { color col row self -- }
       col 0>= row 0>= and
       col self text-cols @ < and row self text-rows @ < and if
-        color col row self bk-color-addr c!
-        col row self dirty-char
+        col row self bk-color-addr { addr }
+        addr c@ color <> if
+          color addr c!
+          col row self dirty-char
+        then
       then
     ; define bk-color!
 
@@ -288,11 +306,14 @@ begin-module text8
     :noname { underlined? col row self -- }
       col 0>= row 0>= and
       col self text-cols @ < and row self text-rows @ < and if
-        col $7 and bit
+        col $7 and bit { bits }
         self text-underline-buf @ col 3 rshift +
-        self text-cols @ 8 align 3 rshift row * +
-        underlined? if cbis! else cbic! then
-        col row self dirty-char
+        self text-cols @ 8 align 3 rshift row * + { addr }
+        underlined? 0<> to underlined?
+        bits addr cbit@ underlined? xor if
+          bits addr underlined? if cbis! else cbic! then
+          col row self dirty-char
+        then
       then
     ; define underlined!
 
