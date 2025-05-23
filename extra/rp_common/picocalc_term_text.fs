@@ -120,15 +120,60 @@ begin-module picocalc-term
 
     \ Scroll up by a number of lines
     :noname { lines self -- }
+      lines term-height min to lines
+      lines term-width * { chars }
+
       lines self display-intf text8::scroll-up
-      term-height dup lines - ?do
+
+      self chars-buf chars + self chars-buf
+      [ term-width term-height * ] literal chars - move
+      self chars-buf [ term-width term-height * ] literal chars - + chars
+      $20 fill
+
+      self attrs-buf chars + self attrs-buf
+      [ term-width term-height * ] literal chars - move
+      self attrs-buf [ term-width term-height * ] literal chars - + chars 0 fill
+
+      self fg-colors-buf chars + self fg-colors-buf
+      [ term-width term-height * ] literal chars - move
+      self fg-colors-buf [ term-width term-height * ] literal chars - + chars
+      self fg-color @ fill
+
+      self bk-colors-buf chars + self bk-colors-buf
+      [ term-width term-height * ] literal chars - move
+      self bk-colors-buf [ term-width term-height * ] literal chars - + chars
+      self bk-color @ fill
+      
+      term-height dup lines - ?do        
         term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
       loop
     ; define scroll-up
 
     \ Scroll down by a number of lines
     :noname { lines self -- }
+      lines term-height min to lines
+      lines term-width * { chars }
+
       lines self display-intf text8::scroll-down
+
+      self chars-buf self chars-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self chars-buf [ term-width term-height * ] literal chars - $20 fill
+
+      self attrs-buf self attrs-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self attrs-buf [ term-width term-height * ] literal chars - 0 fill
+
+      self fg-colors-buf self fg-colors-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self fg-colors-buf [ term-width term-height * ] literal chars -
+      self fg-color @ fill
+
+      self bk-colors-buf self bk-colors-buf chars +
+      [ term-width term-height * ] literal chars - move
+      self bk-colors-buf [ term-width term-height * ] literal chars -
+      self bk-color @ fill
+      
       lines 0 ?do
         term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
       loop

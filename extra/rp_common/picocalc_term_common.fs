@@ -20,7 +20,8 @@
 
 begin-module picocalc-term-common
 
-  false constant use-st7789v?
+  defined? st7789v-8-common defined? st7789v-text-common or
+  constant use-st7789v?
 
   \ Select fonts automatically based on what fonts are loaded
   defined? simple-font-5x8 constant use-5x8-font?
@@ -442,6 +443,9 @@ begin-module picocalc-term-common
       \ Handle erasing in the display
       method handle-erase-in-display ( addr bytes self -- )
 
+      \ Erase a character
+      method erase-char ( x y self -- )
+
       \ Handle erasing down
       method handle-erase-down ( self -- )
 
@@ -581,7 +585,7 @@ begin-module picocalc-term-common
       self term-lock init-lock
       input-stream-size self input-stream init-stream
       output-stream-size self output-stream init-stream
-      self chars-buf [ term-width term-height * ] literal 0 fill
+      self chars-buf [ term-width term-height * ] literal $20 fill
       self attrs-buf [ term-width term-height * ] literal 0 fill
       self fg-colors-buf [ term-width term-height * ] literal
       default-fg-color fill
@@ -1139,51 +1143,41 @@ begin-module picocalc-term-common
       then
     ; define handle-erase-in-display
 
+    \ Erase a character
+    :noname { x y self -- }
+      term-width y * x + { offset }
+      $20 self chars-buf offset + dup { char-addr } c@ <>
+      0 self attrs-buf offset + dup { attrs-addr } c@ <> or
+      self fg-color @ dup { fg-color }
+      self fg-colors-buf offset + dup { fg-color-addr } c@ <> or
+      self bk-color @ dup { bk-color }
+      self bk-colors-buf offset + dup { bk-color-addr } c@ <> or if
+        $20 char-addr c!
+        fg-color fg-color-addr c!
+        bk-color bk-color-addr c!
+        0 attrs-addr c!
+        x y self draw-char
+      then
+    ; define erase-char
+    
     \ Handle erasing down
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       term-height self cursor-y @ 1+ ?do
-        term-width 0 ?do
-          term-width j * i + { offset }
-          0 self chars-buf offset + c!
-          fg-color self fg-colors-buf offset + c!
-          bk-color self bk-colors-buf offset + c!
-          0 self attrs-buf offset + c!
-          i j self draw-char
-        loop
+        term-width 0 ?do i j self erase-char loop
       loop
     ; define handle-erase-down
 
     \ Handle erasing up
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       self cursor-y @ 0 ?do
-        term-width 0 ?do
-          term-width j * i + { offset }
-          0 self chars-buf offset + c!
-          fg-color self fg-colors-buf offset + c!
-          bk-color self bk-colors-buf offset + c!
-          0 self attrs-buf offset + c!
-          i j self draw-char
-        loop
+        term-width 0 ?do i j self erase-char loop
       loop
     ; define handle-erase-up
 
     \ Handle erasing the screen
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       term-height 0 ?do
-        term-width 0 ?do
-          term-width j * i + { offset }
-          0 self chars-buf offset + c!
-          fg-color self fg-colors-buf offset + c!
-          bk-color self bk-colors-buf offset + c!
-          0 self attrs-buf offset + c!
-          i j self draw-char
-        loop
+        term-width 0 ?do i j self erase-char loop
       loop
     ; define handle-erase-screen
     
@@ -1202,47 +1196,20 @@ begin-module picocalc-term-common
 
     \ Handle erasing to the right
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       self cursor-y @ { y }
-      term-width self cursor-x @ ?do
-        term-width y * i + { offset }
-        0 self chars-buf offset + c!
-        fg-color self fg-colors-buf offset + c!
-        bk-color self bk-colors-buf offset + c!
-        0 self attrs-buf offset + c!
-        i y self draw-char
-      loop
+      term-width self cursor-x @ ?do i y self erase-char loop
     ; define handle-erase-right
 
     \ Handle erasing to the left
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       self cursor-y @ { y }
-      self cursor-x @ 0 ?do
-        term-width y * i + { offset }
-        0 self chars-buf offset + c!
-        fg-color self fg-colors-buf offset + c!
-        bk-color self bk-colors-buf offset + c!
-        0 self attrs-buf offset + c!
-        i y self draw-char
-      loop
+      self cursor-x @ 0 ?do i y self erase-char loop
     ; define handle-erase-left
 
     \ Handle erasing the current line
     :noname { self -- }
-      self fg-color @ { fg-color }
-      self bk-color @ { bk-color }
       self cursor-y @ { y }
-      term-width 0 ?do
-        term-width y * i + { offset }
-        0 self chars-buf offset + c!
-        fg-color self fg-colors-buf offset + c!
-        bk-color self bk-colors-buf offset + c!
-        0 self attrs-buf offset + c!
-        i y self draw-char
-      loop
+      term-width 0 ?do i y self erase-char loop
     ; define handle-erase-line
     
     \ Handle scrolling up
@@ -1432,11 +1399,19 @@ begin-module picocalc-term-common
       y self cursor-y !
       x 1+ self cursor-x !
       term-width y * x + { offset }
-      c self chars-buf offset + c!
-      self attrs @ self attrs-buf offset + c!
-      self fg-color @ self fg-colors-buf offset + c!
-      self bk-color @ self bk-colors-buf offset + c!
-      x y self draw-char
+      c self chars-buf offset + dup { char-addr } c@ <>
+      self attrs @ dup { this-attrs }
+      self attrs-buf offset + dup { attrs-addr } c@ <> or
+      self fg-color @ dup { this-fg-color }
+      self fg-colors-buf offset + dup { fg-color-addr } c@ <> or
+      self bk-color @ dup { this-bk-color }
+      self bk-colors-buf offset + dup { bk-color-addr } c@ <> or if
+        c char-addr c!
+        this-attrs attrs-addr c!
+        this-fg-color fg-color-addr c!
+        this-bk-color bk-color-addr c!
+        x y self draw-char
+      then
     ; define handle-char
     
     \ Carry out an operation with the PicoCalc terminal locked. Note that

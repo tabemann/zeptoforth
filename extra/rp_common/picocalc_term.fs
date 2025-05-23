@@ -148,7 +148,8 @@ begin-module picocalc-term
 
       self chars-buf chars + self chars-buf
       [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - + chars 0 fill
+      self chars-buf [ term-width term-height * ] literal chars - + chars
+      $20 fill
 
       self attrs-buf chars + self attrs-buf
       [ term-width term-height * ] literal chars - move
@@ -181,7 +182,7 @@ begin-module picocalc-term
 
       self chars-buf self chars-buf chars +
       [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - 0 fill
+      self chars-buf [ term-width term-height * ] literal chars - $20 fill
 
       self attrs-buf self attrs-buf chars +
       [ term-width term-height * ] literal chars - move
