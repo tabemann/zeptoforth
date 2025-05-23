@@ -378,6 +378,12 @@ begin-module picocalc-term-common
 
       \ Handle a control key
       method handle-ctrl-key ( c self -- )
+
+      \ Handle an alt key
+      method handle-alt-key ( c self -- )
+
+      \ Handle a control-alt key
+      method handle-ctrl-alt-key ( c self -- )
       
       \ Handle input
       method handle-input ( self -- )
@@ -618,7 +624,6 @@ begin-module picocalc-term-common
       else
         c linefeed = if s\" \r" self input-string exit then
         c backspace = if s\" \x7F" self input-string exit then
-        c tab = if s\" \x09" self input-string exit then
         c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
         c KEY_F1 = if s\" \x1B\x4F\x50" self input-string exit then
         c KEY_F2 = if s\" \x1B\x4F\x51" self input-string exit then
@@ -641,7 +646,7 @@ begin-module picocalc-term-common
         c KEY_END = if s\" \x1B\x5B\x46" self input-string exit then
         c KEY_PUP = if s\" \x1B\x5B\x35\x7E" self input-string exit then
         c KEY_PDOWN = if s\" \x1B\x5B\x36\x7E" self input-string exit then
-        c $20 >= c $7F < and if c { W^ c } c 1 self input-string then
+        c $7F < if c { W^ c } c 1 self input-string then
       then
     ; define handle-normal-key
 
@@ -655,8 +660,7 @@ begin-module picocalc-term-common
       else
         c linefeed = if s\" \r" self input-string exit then
         c backspace = if s\" \x08" self input-string exit then
-        c tab = if s\" \x09" self input-string exit then
-        c KEY_ESC = if s\" \x1B" self input-string 100 ms exit then
+        c KEY_ESC = if s\" \x00" self input-string 100 ms exit then
         c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x35\x50" self input-string exit then
         c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x35\x51" self input-string exit then
         c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x35\x52" self input-string exit then
@@ -704,12 +708,128 @@ begin-module picocalc-term-common
         c KEY_PDOWN = if
           s\" \x1B\x5B\x36\x3B\x35\x7E" self input-string exit
         then
-        c $20 >= c $7F < and if
+        c $7F < if
           c convert-control { W^ c } c 1 self input-string
         then
       then
     ; define handle-ctrl-key
-    
+
+    \ Handle an alt key
+    :noname { c self -- }
+      attention? @ not if
+        c linefeed = if s\" \r" self input-string exit then
+        c backspace = if s\" \x1B\x7F" self input-string exit then
+        c KEY_ESC = if s\" \x1B\x1B" self input-string 100 ms exit then
+        c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x35\x50" self input-string exit then
+        c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x35\x51" self input-string exit then
+        c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x35\x52" self input-string exit then
+        c KEY_F4 = if s\" \x1B\x5B\x31\x3B\x35\x53" self input-string exit then
+        c KEY_F5 = if
+          s\" \x1B\x5B\x31\x35\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_F6 = if
+          s\" \x1B\x5B\x31\x37\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_F7 = if
+          s\" \x1B\x5B\x31\x38\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_F8 = if
+          s\" \x1B\x5B\x31\x39\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_F9 = if
+          s\" \x1B\x5B\x32\x30\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_F10 = if
+          s\" \x1B\x5B\x32\x31\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_UP = if
+          s\" \x1B\x5B\x31\x3B\x33\x41" self input-string exit
+        then
+        c KEY_DOWN = if
+          s\" \x1B\x5B\x31\x3B\x33\x42" self input-string exit
+        then
+        c KEY_RIGHT = if
+          s\" \x1B\x5B\x31\x3B\x33\x43" self input-string exit
+        then
+        c KEY_LEFT = if
+          s\" \x1B\x5B\x31\x3B\x33\x44" self input-string exit
+        then
+        c KEY_BREAK = if self handle-break exit then
+        c KEY_INSERT = if
+          s\" \x1B\x5B\x32\x3B\x33\x7E" self input-string exit
+        then
+        c KEY_HOME = if
+          s\" \x1B\x5B\x31\x3B\x33\x48" self input-string exit
+        then
+        c KEY_DEL = if s\" \x1B\x5B\x33\x3B\x33\x7E" self input-string exit then
+        c KEY_END = if s\" \x1B\x5B\x31\x3B\x33\x46" self input-string exit then
+        c KEY_PUP = if s\" \x1B\x5B\x35\x3B\x33\x7E" self input-string exit then
+        c KEY_PDOWN = if
+          s\" \x1B\x5B\x36\x3B\x33\x7E" self input-string exit
+        then
+        c $7F < if c 8 lshift $1B or { W^ c } c 2 self input-string then
+      then
+    ; define handle-alt-key
+
+    \ Handle a control-alt key
+    :noname { c self -- }
+      attention? @ not if
+        c linefeed = if s\" \x1B\r" self input-string exit then
+        c backspace = if s\" \x1B\x08" self input-string exit then
+        c KEY_ESC = if s\" \x1B\x00" self input-string 100 ms exit then
+        c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x37\x50" self input-string exit then
+        c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x37\x51" self input-string exit then
+        c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x37\x52" self input-string exit then
+        c KEY_F4 = if s\" \x1B\x5B\x31\x3B\x37\x53" self input-string exit then
+        c KEY_F5 = if
+          s\" \x1B\x5B\x31\x35\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_F6 = if
+          s\" \x1B\x5B\x31\x37\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_F7 = if
+          s\" \x1B\x5B\x31\x38\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_F8 = if
+          s\" \x1B\x5B\x31\x39\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_F9 = if
+          s\" \x1B\x5B\x32\x30\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_F10 = if
+          s\" \x1B\x5B\x32\x31\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_UP = if
+          s\" \x1B\x5B\x31\x3B\x37\x41" self input-string exit
+        then
+        c KEY_DOWN = if
+          s\" \x1B\x5B\x31\x3B\x37\x42" self input-string exit
+        then
+        c KEY_RIGHT = if
+          s\" \x1B\x5B\x31\x3B\x37\x43" self input-string exit
+        then
+        c KEY_LEFT = if
+          s\" \x1B\x5B\x31\x3B\x37\x44" self input-string exit
+        then
+        c KEY_BREAK = if self handle-control-break exit then
+        c KEY_INSERT = if
+          s\" \x1B\x5B\x32\x3B\x37\x7E" self input-string exit
+        then
+        c KEY_HOME = if
+          s\" \x1B\x5B\x31\x3B\x37\x48" self input-string exit
+        then
+        c KEY_DEL = if s\" \x1B\x5B\x33\x3B\x37\x7E" self input-string exit then
+        c KEY_END = if s\" \x1B\x5B\x31\x3B\x37\x46" self input-string exit then
+        c KEY_PUP = if s\" \x1B\x5B\x35\x3B\x37\x7E" self input-string exit then
+        c KEY_PDOWN = if
+          s\" \x1B\x5B\x36\x3B\x37\x7E" self input-string exit
+        then
+        c $7F < if
+          c convert-control 8 lshift $1B or { W^ c } c 2 self input-string
+        then
+      then
+    ; define handle-ctrl-alt-key
+
     \ Handle input
     :noname { self -- }
       input-limit { counter }
@@ -727,6 +847,14 @@ begin-module picocalc-term-common
         else
           attrs ATTR_CTRL = if
             c self handle-ctrl-key
+          else
+            attrs ATTR_ALT = if
+              c self handle-alt-key
+            else
+              attrs [ ATTR_CTRL ATTR_ALT or ] literal = if
+                c self handle-ctrl-alt-key
+              then
+            then
           then
         then
 
