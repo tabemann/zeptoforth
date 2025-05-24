@@ -64,32 +64,51 @@ begin-module st7789v-8-common
     $2B constant REG_RASET
     $CC constant REG_PWMFRSEL
 
-    \ Convert an 8-bit color row to a 16-bit color row
-    : convert-8-to-16 ( row-addr-8 row-addr-16 cols )
+    \ Convert an 8-bit color to a 16-bit color
+    : do-convert-8-to-16 ( rgb8 -- rgb16 )
       code[
-      r4 1 push
-      r0 1 dp ldm
-      r1 1 dp ldm
-      mark<
-      0 r6 cmp_,#_
-      gt bc>
-      r6 1 dp ldm
-      r4 pc 2 pop
-      >mark
-      0 r1 r2 ldrb_,[_,#_]
-      6 r2 r3 lsrs_,_,#_  \ Blue, 7:6
+      6 tos r3 lsrs_,_,#_  \ Blue, 7:6
       11 r3 r3 lsls_,_,#_ \ to 12:11 (bits 10:8 are zero)
-      26 r2 r4 lsls_,_,#_ \ Green, 6:3
+      26 tos r4 lsls_,_,#_ \ Green, 6:3
       29 r4 r4 lsrs_,_,#_ \ to 2:0 (bits 15:13 are zero)
       r4 r3 orrs_,_
-      29 r2 r4 lsls_,_,#_ \ Red, 2:0
+      29 tos r4 lsls_,_,#_ \ Red, 2:0
       24 r4 r4 lsrs_,_,#_ \ to 7:5 (bits 4:3 are zero)
       r4 r3 orrs_,_
-      0 r0 r3 strh_,[_,#_]
-      1 r1 adds_,#_
-      2 r0 adds_,#_
-      1 r6 subs_,#_
-      b<
+      r3 tos movs_,_
+      ]code
+    ;
+
+    \ Generate a color lookup table
+    : create-8-to-16-lookup ( -- ) 256 0 ?do i do-convert-8-to-16 h, loop ;
+
+    \ The color lookup table
+    create 8-to-16-lookup create-8-to-16-lookup cell align,
+
+    \ Convert an 8-bit color row to a 16-bit color row
+    : convert-8-to-16 ( row-addr-8 row-addr-16 cols )
+      8-to-16-lookup
+      code[
+      r0 1 dp ldm
+      r1 1 dp ldm
+      r2 1 dp ldm
+      1 r0 r3 lsls_,_,#_
+      r3 r1 r1 adds_,_,_
+      0 r0 cmp_,#_
+      ne bc>
+      tos 1 dp ldm
+      pc 1 pop
+      >mark
+      mark<
+      2 r1 subs_,#_
+      1 r0 subs_,#_
+      r0 r2 r3 ldrb_,[_,_]
+      1 r3 r3 lsls_,_,#_
+      r3 tos r3 ldrh_,[_,_]
+      0 r1 r3 strh_,[_,#_]
+      0 r0 cmp_,#_
+      ne bc<
+      tos 1 dp ldm
       ]code
     ;
     
