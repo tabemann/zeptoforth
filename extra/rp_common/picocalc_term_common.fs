@@ -168,7 +168,7 @@ begin-module picocalc-term-common
     64 constant input-limit
     
     \ Output limit
-    term-width term-height 2 / * constant output-limit
+    term-width term-height * 2 / 3 * constant output-limit
 
     \ Attributes
     0 bit constant attr-bold
