@@ -77,8 +77,8 @@ begin-module picocalc-keys
     \ PicoCalc keyboard interval in milliseconds
     16 constant picocalc-keys-interval
 
-    \ PicoCalc keyboard priority
-    0 constant picocalc-keys-priority
+    \ PicoCalc emulated keyboard interval in milliseconds
+    8 constant emulate-picocalc-keys-interval
 
     \ Picocalc keyboard timeout in ticks
     5000 constant picocalc-keys-timeout
@@ -370,7 +370,11 @@ begin-module picocalc-keys
         else
           self get-key
         then
-        picocalc-keys-interval ms
+        emulate-keys? not if
+          picocalc-keys-interval ms
+        else
+          emulate-picocalc-keys-interval ms
+        then
       again
     ; define run-keys
 

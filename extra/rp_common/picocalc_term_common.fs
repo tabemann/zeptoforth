@@ -165,7 +165,7 @@ begin-module picocalc-term-common
     64 constant output-recv-buf-size
 
     \ Input limit
-    64 constant input-limit
+    8 constant input-limit
     
     \ Output limit
     term-width term-height * 2 / 3 * constant output-limit
