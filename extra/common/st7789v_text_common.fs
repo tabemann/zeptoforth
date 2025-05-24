@@ -433,26 +433,27 @@ begin-module st7789v-text-common
       self text-bk-color-buf @ { bk-color-buf }
       0 { col }
       start-col char-cols u/mod { font-col text-col }
+      font-row 3 rshift the-font font-internal::font-bitmap
+      bitmap-internal::page-addr { page }
+      font-row 7 and bit { font-bit }
       text-cols text-row * text-col + { offset }
-      char-buf offset + c@ { c }
+      char-buf offset + c@ the-font font-internal::find-char-col page + { addr }
       fg-color-buf offset + c@ convert-8-to-16 { fg-color }
       bk-color-buf offset + c@ convert-8-to-16 { bk-color }
       font-row char-rows 1- <> if
         begin col cols < while
-          c font-col font-row the-font raw-char-pixel@ if
-            fg-color
-          else
-            bk-color
-          then
+          addr c@ font-bit and if fg-color else bk-color then
           col 1 lshift line-buf + h!
           1 +to col
           1 +to font-col
+          1 +to addr
           font-col char-cols = if
             0 to font-col
             1 +to text-col
             1 +to offset
             text-col text-cols < if
-              char-buf offset + c@ to c
+              char-buf offset + c@ the-font font-internal::find-char-col page +
+              to addr
               fg-color-buf offset + c@ convert-8-to-16 to fg-color
               bk-color-buf offset + c@ convert-8-to-16 to bk-color
             then
@@ -462,11 +463,7 @@ begin-module st7789v-text-common
         0 { col }
         text-col text-row self raw-underlined@ { underlined }
         begin col cols < while
-          c font-col font-row the-font raw-char-pixel@ underlined or if
-            fg-color
-          else
-            bk-color
-          then
+          addr c@ font-bit and 0<> underlined or if fg-color else bk-color then
           col 1 lshift line-buf + h!
           1 +to col
           1 +to font-col
@@ -475,7 +472,8 @@ begin-module st7789v-text-common
             1 +to text-col
             1 +to offset
             text-col text-cols < if
-              char-buf offset + c@ to c
+              char-buf offset + c@ the-font font-internal::find-char-col page +
+              to addr
               fg-color-buf offset + c@ convert-8-to-16 to fg-color
               bk-color-buf offset + c@ convert-8-to-16 to bk-color
               text-col text-row self raw-underlined@ to underlined
