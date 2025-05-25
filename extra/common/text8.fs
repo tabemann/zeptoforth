@@ -213,8 +213,6 @@ begin-module text8
           underline-bit underline-addr underlined? if cbis! else cbic! then
           col row self dirty-char
         then
-      else
-        0
       then
     ; define whole-char!
 
