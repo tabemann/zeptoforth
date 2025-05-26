@@ -135,7 +135,7 @@ continue-module usb
 
     \ Flush the USB CDC console
     : usb-flush-console ( -- )
-      begin tx-empty? not if pause-wo-reschedule then until
+      begin tx-empty? dup not if pause-wo-reschedule then until
     ;
 
     \ Switch to USB console
