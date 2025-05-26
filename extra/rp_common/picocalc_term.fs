@@ -201,7 +201,7 @@ begin-module picocalc-term
       lines [ char-height display-width * ] literal * { pixels }
       self display-buf self display-buf pixels +
       [ display-width display-height * ] literal pixels - move
-      display-height lines char-height * - { fill-y }
+      display-height term-height lines - char-height * - { fill-y }
       self bk-color @ get-color
       0 0 display-width fill-y self display-intf
       draw-rect-const
