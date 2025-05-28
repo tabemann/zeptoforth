@@ -33,7 +33,7 @@ begin-module ili9488-8-spi
   begin-module ili9488-8-spi-internal
 
     \ Maximum SPI clock
-    25_000_000 constant max-clock
+    62_500_000 constant max-clock
 
     \ Is this an RP2040 or RP2350?
     : rp? chip nip $7270 = ;
