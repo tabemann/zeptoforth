@@ -32,8 +32,11 @@ begin-module st7789v-8-spi
 
   begin-module st7789v-8-spi-internal
 
-    \ Maximum PIO clock
+    \ Maximum SPI clock
     32_000_000 constant max-clock
+
+    \ Is this an RP2040 or RP2350?
+    : rp? chip nip $7270 = ;
 
   end-module> import
   
@@ -47,6 +50,10 @@ begin-module st7789v-8-spi
       \ Reset pin
       cell member st7789v-8-reset-pin
 
+      \ DMA channels
+      cell member st7789v-8-dma0
+      cell member st7789v-8-dma1
+      
       \ Reset the ST7789V-8
       method reset-st7789v-8 ( self -- )
       
@@ -80,6 +87,11 @@ begin-module st7789v-8-spi
       false false device motorola-spi
       device enable-spi
 
+      [ rp? ] [if]
+        dma-pool::allocate-dma self st7789v-8-dma0 !
+        dma-pool::allocate-dma self st7789v-8-dma1 !
+      [then]
+
       true self backlight!
       self reset-st7789v-8
       self st7789v-8-common-internal::init-st7789v-8
@@ -88,6 +100,10 @@ begin-module st7789v-8-spi
 
     \ Destructor
     :noname { self -- }
+      [ rp? ] [if]
+        self st7789v-8-dma0 @ dma-pool::free-dma
+        self st7789v-8-dma1 @ dma-pool::free-dma
+      [then]
       self <st7789v-8-common>->destroy
     ; define destroy
     
@@ -108,7 +124,12 @@ begin-module st7789v-8-spi
 
     \ Write blocking data
     :noname { addr count self -- }
-      addr count self st7789v-8-device @ buffer>spi      
+      [ rp? ] [if]
+        addr count self st7789v-8-dma0 @ self st7789v-8-dma1 @
+        self st7789v-8-device @ buffer>spi-raw-dma drop
+      [else]
+        addr count self st7789v-8-device @ buffer>spi
+      [then]
     ; define >st7789v-8
 
     \ Update the ST7789V device

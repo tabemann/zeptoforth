@@ -30,8 +30,11 @@ begin-module ili9488-text-spi
 
   begin-module ili9488-text-spi-internal
 
-    \ Maximum PIO clock
+    \ Maximum SPI clock
     25_000_000 constant max-clock
+
+    \ Is this an RP2040 or RP2350?
+    : rp? chip nip $7270 = ;
 
   end-module> import
   
@@ -44,6 +47,10 @@ begin-module ili9488-text-spi
       
       \ Reset pin
       cell member ili9488-text-reset-pin
+
+      \ DMA channels
+      cell member ili9488-text-dma0
+      cell member ili9488-text-dma1
 
       \ Reset the ILI9488-TEXT
       method reset-ili9488-text ( self -- )
@@ -77,6 +84,11 @@ begin-module ili9488-text-spi
       false false device motorola-spi
       device enable-spi
 
+      [ rp? ] [if]
+        dma-pool::allocate-dma self ili9488-text-dma0 !
+        dma-pool::allocate-dma self ili9488-text-dma1 !
+      [then]
+
       self reset-ili9488-text
       self ili9488-text-common-internal::init-ili9488-text
       0 phys-cols 0 phys-rows
@@ -85,6 +97,10 @@ begin-module ili9488-text-spi
 
     \ Destructor
     :noname { self -- }
+      [ rp? ] [if]
+        self ili9488-text-dma0 @ dma-pool::free-dma
+        self ili9488-text-dma1 @ dma-pool::free-dma
+      [then]
       self <ili9488-text-common>->destroy
     ; define destroy
     
@@ -100,7 +116,12 @@ begin-module ili9488-text-spi
 
     \ Write blocking data
     :noname { addr count self -- }
-      addr count self ili9488-text-device @ buffer>spi      
+      [ rp? ] [if]
+        addr count self ili9488-text-dma0 @ self ili9488-text-dma1 @
+        self ili9488-text-device @ buffer>spi-raw-dma drop
+      [else]
+        addr count self ili9488-text-device @ buffer>spi
+      [then]
     ; define >ili9488-text
 
     \ Update the ILI9488 device
