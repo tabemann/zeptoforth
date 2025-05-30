@@ -104,50 +104,50 @@ begin-module picocalc-term-common
     display-height char-height / constant term-height
 
     \ Display SPI device
-    use-st7789v? not [if]
+    \ use-st7789v? not [if]
       1 constant display-spi-device
-    [else]
-      0 constant display-spi-device
-    [then]
+    \ [else]
+    \   0 constant display-spi-device
+    \ [then]
 
     \ Display SCK pin
-    use-st7789v? not [if]
+\    use-st7789v? not [if]
       10 constant display-spi-sck-pin
-    [else]
-      18 constant display-spi-sck-pin
-    [then]
+    \ [else]
+    \   18 constant display-spi-sck-pin
+    \ [then]
 
     \ Display TX pin
-    use-st7789v? not [if]
+    \ use-st7789v? not [if]
       11 constant display-spi-tx-pin
-    [else]
-      19 constant display-spi-tx-pin
-    [then]
+    \ [else]
+    \   19 constant display-spi-tx-pin
+    \ [then]
 
     \ Display CS pin
-    use-st7789v? not [if]
+    \ use-st7789v? not [if]
       13 constant display-spi-cs-pin
-    [else]
-      21 constant display-spi-cs-pin
-    [then]
+    \ [else]
+    \   21 constant display-spi-cs-pin
+    \ [then]
 
     \ Display DC pin
-    use-st7789v? not [if]
+    \ use-st7789v? not [if]
       14 constant display-dc-pin
-    [else]
-      13 constant display-dc-pin
-    [then]
+    \ [else]
+    \   13 constant display-dc-pin
+    \ [then]
 
     \ Display RST pin
-    use-st7789v? not [if]
+    \ use-st7789v? not [if]
       15 constant display-rst-pin
-    [else]
-      12 constant display-rst-pin
-    [then]
+    \ [else]
+    \   12 constant display-rst-pin
+    \ [then]
 
     \ Display backlight pin
     use-st7789v? [if]
-      11 constant display-bl-pin
+      12 constant display-bl-pin
     [then]
     
     \ Do we invert the display
