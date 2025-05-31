@@ -1517,11 +1517,19 @@ begin-module fat32
 
     :noname ( cluster fs -- )
       [:
-        <fat32-entry> [: { cluster fs entry }
-          entry init-end-entry
-          fs cluster-sectors @ sector-size * entry-size u/ { entries }
-          entries 0 ?do entry i cluster fs entry! loop
-        ;] with-object
+        [:
+          <fat32-entry> [: { cluster fs entry }
+            cluster fs cluster>sector { start-sector }
+            entry init-end-entry
+            [ sector-size entry-size u/ ] literal 0 ?do
+              sector-scratch-pad i entry-size * + entry entry>buffer
+            loop
+            fs cluster-sectors @ 0 ?do
+              sector-scratchpad sector-size start-sector i +
+              fs fat32-device @ block!
+            loop
+          ;] with-object
+        ;] sector-scratchpad-lock with-lock
       ;] over with-fat32-lock
     ; define init-dir-cluster
 
