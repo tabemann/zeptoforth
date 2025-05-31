@@ -1522,7 +1522,7 @@ begin-module fat32
             cluster fs cluster>sector { start-sector }
             entry init-end-entry
             [ sector-size entry-size u/ ] literal 0 ?do
-              sector-scratch-pad i entry-size * + entry entry>buffer
+              sector-scratchpad i entry-size * + entry entry>buffer
             loop
             fs cluster-sectors @ 0 ?do
               sector-scratchpad sector-size start-sector i +
