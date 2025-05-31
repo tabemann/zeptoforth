@@ -2295,9 +2295,7 @@ begin-module fat32
       dup dir-start-cluster @ over dir-fs @ allocate-entry ( parent-dir dir child-index child-cluster )
       <fat32-entry> [: ( parent-dir dir child-index child-cluster entry )
         4 roll dir-start-cluster @
-        4 pick dir-fs @ root-dir-cluster @ over = if
-          drop 3 pick dir-fs @ root-dir-cluster @
-        then
+        4 pick dir-fs @ root-dir-cluster @ over = if drop 0 then
         swap ( dir child-index child-cluster start-cluster entry )
         s" .." rot ( dir child-index child-cluster start-cluster c-addr u entry )
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
