@@ -159,7 +159,7 @@ begin-module ntc
   ;
   
   \ Set up thermistor's constants (a, b, c)
-  : setup-abc ( D:a-val D:b-val D:c-val ntc -- )
+  : setup-abc ( D: a-val D: b-val D: c-val ntc -- )
     [ debug? ] [if] s" -> setup-abc" dbg [then]
     \ c-val
     dup >r c-val 2!
@@ -171,7 +171,7 @@ begin-module ntc
   ;
   
   \ Set up input voltage and resistance
-  : setup-therm ( f:vin f:r0 ntc -- )
+  : setup-therm ( f: vin f: r0 ntc -- )
     [ debug? ] [if] s" -> setup-therm" dbg [then]
     dup >r r0 2!
     0,0 r@ vout 2!
@@ -180,7 +180,7 @@ begin-module ntc
     [ debug? ] [if] s" <- setup-therm" cr.s [then]
   ;
     
-  \ Measuring temperature
+  \ Measure temperature
   : ntc@ ( ntc -- )  
     [ debug? ] [if] s" -> ntc@" dbg [then]
     dup >r
@@ -193,7 +193,7 @@ begin-module ntc
   ;
   
   \ Put temperatures to stack
-  : temp@ ( ntc -- f:kelvin f:celsius ) { ntc-local -- }
+  : temp@ ( ntc -- f: kelvin f: celsius ) { ntc-local -- }
     [ debug? ] [if] s" -> temp@" dbg [then]
     ntc-local k-val 2@
     ntc-local c-val 2@
