@@ -271,7 +271,7 @@ begin-module picocalc-term
   \ the terminal's display or graphics drawn to it may not be displayed. Note
   \ that executing operations that print to the PicoCalc terminal should be
   \ avoided because they may block indefinitely.
-  : with-term-display ( xt self -- ) \ xt: ( display -- )
+  : with-term-display ( xt -- ) \ xt: ( display -- )
     shared-term do-with-term-display
   ;
   
