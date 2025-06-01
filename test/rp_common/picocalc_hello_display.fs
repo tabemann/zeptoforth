@@ -25,7 +25,7 @@ begin-module picocalc-hello
   oo import
   pixmap8 import
   font import
-  rng import
+  tinymt32 import
 
   use-st7789v? not [if]
     ili9488-8-common import
@@ -52,6 +52,18 @@ begin-module picocalc-hello
       draw-string-to-pixmap8
       display update-display
     ;] with-term-display
+  ;
+
+  tinymt32-size buffer: my-tinymt
+  false value my-tinymt-inited?
+
+  : random ( -- )
+    my-tinymt-inited? not if
+      rng::random my-tinymt tinymt32-init
+      my-tinymt tinymt32-prepare-example
+      true to my-tinymt-inited?
+    then
+    my-tinymt tinymt32-generate-uint32
   ;
 
   : random-hellos { n -- }
