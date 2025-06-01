@@ -29,6 +29,13 @@ begin-module picocalc-term-common
   defined? simple-font use-5x8-font? not and use-6x8-font? not and
   constant use-7x8-font?
 
+  \ Select a core to use for the PicoCalc tasks
+  defined? picocalc-tasks-core [if]
+    picocalc-tasks-core constant picocalc-tasks-core
+  [else]
+    1 constant picocalc-tasks-core
+  [then]
+
   \ Ensure that at least one font is available
   : font-test ( -- )
     use-5x8-font? use-6x8-font? or use-7x8-font? or not if
@@ -603,8 +610,9 @@ begin-module picocalc-term-common
 
     \ Start the terminal emulator task
     :noname { self -- }
-      self key-intf init-picocalc-keys
-      self 1 ['] run-term 1024 256 1024 spawn self term-task !
+      picocalc-tasks-core self key-intf init-picocalc-keys
+      self 1 ['] run-term 1024 256 1024 picocalc-tasks-core spawn-on-core
+      self term-task !
       c" term" self term-task @ task-name!
       self term-task-mailbox 1 self term-task @ config-notify
       self term-task @ run

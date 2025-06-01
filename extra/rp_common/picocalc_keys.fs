@@ -174,7 +174,7 @@ begin-module picocalc-keys
     end-module
 
     \ Initialize the PicoCalc keyboard
-    method init-picocalc-keys ( self -- )
+    method init-picocalc-keys ( core self -- )
     
     \ Are there keys to read?
     method picocalc-keys>? ( self -- read? )
@@ -211,7 +211,7 @@ begin-module picocalc-keys
     ; define new
 
     \ Initialize the PicoCalc keyboard
-    :noname { self -- }
+    :noname { core self -- }
       picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
       picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
       picocalc-keys-sda-pin pull-up-pin
@@ -223,7 +223,7 @@ begin-module picocalc-keys
       picocalc-keys-i2c-device enable-i2c
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
-      self 1 ['] run-keys 320 128 512 spawn { keys-task }
+      self 1 ['] run-keys 320 128 512 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
     ; define init-picocalc-keys
