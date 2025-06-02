@@ -4,7 +4,7 @@ There is an optional driver for thermistors of type NTC.
 
 An NTC thermistor is a thermal component that changes its resistance in response to temperature - higher the temperature, lower the resistance. This property can be utilized to measure temperature. However, the Raspberry Pi Pico can only measure voltage through its ADC input. To measure resistance, we need to use a voltage divider circuit:
 
-<pre>
+```
   Pi Pico 3V3 -------+
    (3V3 - Pin36)     |
                      R0 - Resistor, R0 = RT at 25ºC
@@ -15,8 +15,7 @@ An NTC thermistor is a thermal component that changes its resistance in response
                      |
   Pi Pico GND -------+
    (GND - Pin28)
-
-</pre>
+```
 
 Since the resistance change is non-linear with temperature variation, the temperature can be calculated using two methods:
 - Steinhart-Hart equation
