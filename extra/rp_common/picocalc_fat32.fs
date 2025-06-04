@@ -58,22 +58,26 @@ continue-module fat32-tools
     oo import
     block-dev import
     simple-fat32 import
-    
-    \ Our SD card SPI device
-    0 constant sd-spi-device
 
-    \ Our SD card RX pin
-    16 constant sd-rx-pin
+    continue-module fat32-tools-internal
+      
+      \ Our SD card SPI device
+      0 constant sd-spi-device
+      
+      \ Our SD card RX pin
+      16 constant sd-rx-pin
+      
+      \ Our SD card Chip Select pin
+      17 constant sd-cs-pin
+      
+      \ Our SD card SCK pin
+      18 constant sd-sck-pin
 
-    \ Our SD card Chip Select pin
-    17 constant sd-cs-pin
+      \ Our SD card TX pin
+      19 constant sd-tx-pin
 
-    \ Our SD card SCK pin
-    18 constant sd-sck-pin
-
-    \ Our SD card TX pin
-    19 constant sd-tx-pin
-
+    end-module
+      
     \ Our SD card FAT32 filesystem
     <simple-fat32-fs> class-size buffer: sd-fs@
 
@@ -82,13 +86,17 @@ continue-module fat32-tools
       sd-fs@ current-fs!
     ;
 
-    \ Initialize the SD card FAT32
-    : init-sd-fs ( -- )
-      sd-sck-pin sd-tx-pin sd-rx-pin sd-cs-pin sd-spi-device
-      <simple-fat32-fs> sd-fs@ init-object
-      true sd-fs@ write-through!
-    ;
-    initializer init-sd-fs
+    continue-module fat32-tools-internal
+      
+      \ Initialize the SD card FAT32
+      : init-sd-fs ( -- )
+        sd-sck-pin sd-tx-pin sd-rx-pin sd-cs-pin sd-spi-device
+        <simple-fat32-fs> sd-fs@ init-object
+        true sd-fs@ write-through!
+      ;
+      initializer init-sd-fs
+
+    end-module
     
   [then]
 

@@ -1,14 +1,16 @@
 # Using zeptoforth on the PicoCalc
 
-There is driver and terminal emulator support in this branch for the PicoCalc. This will enable one to use the keyboard and display of a PicoCalc without requiring the use of a terminal emulator on a PC. Note that this is currently beta quality, and may still have outstanding issues. Also, currently the Alt key is not supported beyond the baked-in support provided by the STM32 keyboard controller itself.
+There is driver and terminal emulator support in this branch for the PicoCalc. This will enable one to use the keyboard, display, and FAT32 filesystems in on-board flash, SD cards, and, if one is using a Pimoroni Pico Plus 2 or Pico Plus 2 W, the board's PSRAM (not the PicoCalc's carrier board PSRAM mind you, which is unsupported) of a PicoCalc without requiring the use of a terminal emulator on a PC. Note that this is currently beta quality, and may still have outstanding issues.
 
-## Installation
+## zeptoforth installation and preparation
 
 First, one must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `full` build (_not_ a `full_usb` build) on the RP2040 or RP2350 board in your PicoCalc. Note that a `full` build is needed because the PicoCalc redirects UART0 to an ACM device on its USB-C port, and it is highly recommended that one use the USB-C port on the PicoCalc for extended usage rather than the USB port on the RP2040 or RP2350 board itself as there have been reports of battery overcharging in such extended usage of the board's USB port (some even recommend removing the batteries from one's PicoCalc prior to applying power to the board's USB port).
 
 Second, one must pull the [picocalc-devel branch](https://github.com/tabemann/zeptoforth/tree/picocalc-devel) of the zeptoforth repository. As you are reading this you may have already done so.
 
-Third, if one is using a shell prompt one should execute the following commands from the root of the zeptoforth directory tree:
+## PicoCalc terminal emulator installation
+
+Then, if one is using a shell prompt one should execute the following commands from the root of the zeptoforth directory tree:
 
     $ TTY=<your tty device> # Replace <your tty device> with your actual TTY device
     $ echo 'compile-to-flash' > prefix.fs
@@ -24,16 +26,18 @@ Third, if one is using a shell prompt one should execute the following commands 
 If you are using zeptocom.js, one should do the following:
 
 - Connect to the TTY device for the PicoCalc. The connection settings can be left at their defaults for zeptoforth.
-- Issue compile-to-flash.
+- Issue `compile-to-flash`.
 - Set the working directory to the root of the zeptoforth directory tree.
-- Upload extra/common/ili9488_spi_8_6x8_font_all.fs.
-- Upload extra/rp_common/picocalc_key.fs.
-- Upload extra/rp_common/picocalc_term_common.fs
-- Upload extra/rp_common/picocalc_term.fs.
-- Issue initializer picocalc-term::term-console.
+- Upload `extra/common/ili9488_spi_8_6x8_font_all.fs`.
+- Upload `extra/rp_common/picocalc_key.fs`.
+- Upload `extra/rp_common/picocalc_term_common.fs`
+- Upload `extra/rp_common/picocalc_term.fs`.
+- Issue `initializer picocalc-term::term-console`.
 - Issue 'reboot'.
 
 After these steps your PicoCalc will be ready for use!
+
+However, read further before you do the above because below are instructions for things such as installing the text-only terminal emulator, selecting alternate fonts, installing FAT32 support, and installing the text editor zeptoed.
 
 ## Text-only terminal emulators
 
@@ -51,19 +55,165 @@ Note, however, that one may want to select a font other than the default 6x8-pix
 
 To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, or if one is installing a text-only terminal emulator, `extra/common/ili9488_spi_text_5x8_font_all.fs` or `extra/common/ili9488_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
 
+## Installing FAT32 support
+
+There is optional support for FAT32 filesystems in on-board flash (using block storage as a backend), on one's SD card, and, if one is using a Pimoroni Pico Plus 2 or Pico Plus 2 W, as a RAM disk in PSRAM.
+
+To enable support for FAT32 filesystems in on-board flash, with the serial console enabled, execute the following at the shell prompt at the base of the zeptoforth directory tree:
+
+    $ utils/codeload3.sh -B 115200 -p <your tty device> serial extra/common/setup_blocks_fat32.fs
+
+or with zeptocom.js upload `extra/common/setup_blocks_fat32.fs`.
+
+There is no need to specify compiling to flash, and actually initially the board should be in its default of compiling to RAM.
+
+This will automatically reboot your PicoCalc; note that if one is using `utils/codeload3.sh` an error about not finding the TTY device may appear at the end ─ please ignore this error.
+
+Note that if this is the first time one is setting up a FAT32 filesystem in block storage and one is using a Pimoroni Pico Plus 2 or Pico Plus 2 W with an `rp2350_16mib` build I highly suggest using zeptocom.js to do so, to avoid timeout issues with `utils/codeload3.sh` (as zeptocom.js does not use a timeout). This is because the first time one does this the block storage is first erased and then a FAT32 filesystem is initialized in it, which takes a good bit of time due to the 14 MiB size of the filesystem.
+
+Afterwards, if one is using a Pimoroni Pico Plus 2 or Pico Plus 2 W, it is highly recommended that one set up support for a FAT32 filesystem in PSRAM as a RAM disk. This is accomplished by, with the serial console enabled, executing the following at the shell prompt at the base of the zeptoforth directory tree:
+
+    $ utils/codeload3.sh -B 115200 -p <your tty device> serial extra/rp2350/setup_pico_plus_2_psram_fat32.fs
+
+or with zeptocom.js upload `extra/rp2350/setup_pico_plus_2_psram_fat32.fs`.
+
+Finally, with the serial console enabled, execute the following at the shell prompt at the base of the zeptoforth directory tree:
+
+    $ utils/codeload3.sh -B 115200 -p <your tty device> serial extra/rp_common/picocalc_fat32.fs
+
+or with zeptocom.js upload `extra/rp_common/picocalc_fat32.fs`.
+
+Note that if you do _not_ want to install support for FAT32 filesystems on the SD card (as this will cause a hang on boot if the SD card is not inserted, is not initialized to having a FAT32 filesystem as the first partition, is corrupt, or is a traditional SD (not SDHC or SDXC) card), you can disable SD card support by before you execute the above connecting to your PicoCalc's serial console with a terminal emulator and executing the following:
+
+    compile-to-flash
+    true constant no-sd-fs
+    reboot
+
+## Using FAT32 filesystems
+
+Once you have installed FAT32 support any or all of the following words will be created in the `fat32-tools` module depending on your particular configuration:
+
+- `blocks-fs@` ( -- fs )
+- `blocks-fs:` ( -- )
+- `sd-fs@` ( -- fs )
+- `sd-fs:` ( -- )
+- `psram-fs@` ( -- fs )
+- `psram-fs:` ( -- )
+
+`blocks-fs@`, `sd-fs@`, and `psram-fs@` return FAT32 filesystem objects.
+
+`blocks-fs:`, `sd-fs:`, and `psram-fs:` change the current filesystem.
+
+`blocks-fs@` and `blocks-fs:` pertain to the FAT32 filesystem in block storage in on-board flash, and are available if `extra/common/setup_blocks_fat32.fs` has been installed.
+
+`sd-fs@` and `sd-fs:` pertain to the FAT32 filesystem on the SD card inserted into the PicoCalc, and are available if `no-sd-fs` has not been defined.
+
+`psram-fs@` and `psram-fs:` pertain to the FAT32 filesystem in PSRAM on a Pimoroni Pico Plus 2 or Pico Plus 2 W, and are available if `extra/rp2350/setup_pico_plus_2_psram_fat32.fs` has been installed.
+
+Note that you will likely want to import the `fat32-tools` module prior to use with the following at the REPL:
+
+    fat32-tools import
+
+You may even want to persistently import it on boot with:
+
+    compile-to-flash
+    : init-import-fat32-tools fat32-tools import ;
+    initializer init-import-fat32-tools
+    reboot
+
+For more information on how to use `fat32-tools` consult the [`fat32-tools` documentation](https://github.com/tabemann/zeptoforth/blob/master/docs/words/fat32_tools.md).
+
 ## Rebooting/interrupting your PicoCalc
 
 An important note is that to reboot your PicoCalc without power-cycling it, press Control-Break (Control-Shift-Escape). This is used in the place of the Control-C used at the serial or USB CDC consoles, which is handled like a normal Control-C character by the PicoCalc terminal emulator.
 
-Similarly, the attention key is mapped to Break (Shift-Escape). This is used in t he place of the Control-T used at the serial or USB CDC consoles. Like Control-C, Control-T is handled like a normal control character by the PicoCalc terminal emulator. One important note, though, is that there appears to be a bug in Break followed by `z` to send an exception to the main task, as this currently sometimes causes a crash.
+Similarly, the attention key is mapped to Break (Shift-Escape). This is used in t he place of the Control-T used at the serial or USB CDC consoles. Like Control-C, Control-T is handled like a normal control character by the PicoCalc terminal emulator.
 
 Unlike Control-C and Control-T at the serial and USB CDC consoles, Control-Break and Break are handled by ordinary tasks, so if there has been a crash, the processor is stuck in a critical section, or a task with a higher priority than the keyboard driver or terminal emulator tasks is executing without reliquishing control of the processor Control-Break or Break may not work. In this event, the only real way to regain control of your PicoCalc is to power-cycle it.
 
+## Switching between consoles
+
+Once you have your PicoCalc set up to boot into the PicoCalc terminal emulator, you may wonder how to get back to the serial console, in order to do things like upload code from or transfer files to or from your computer. This can be accomplished with:
+
+    serial::serial-console
+
+Then you may wonder how to get back to the PicoCalc terminal emulator without rebooting. This can be accomplished with:
+
+    picocalc-term::term-console
+
+Last but not least, if you were one of the misguided people who installed a `full_usb` build on your PicoCalc, you can switch to the USB CDC console with:
+
+    usb::usb-console
+
+## Editing the current line
+
+You may perhaps want to be able to edit code on the current line beyond merely backspacing, and you likely will want history as well. These are available to you! All you have to do is enter at the REPL:
+
+    enable-line
+
+The interface that is available is very similar to that of GNU Readline, albeit somewhat simplified (e.g. there is no searching in history).
+
+One important note is that by default uploading code with `utils/codeload3.sh` or zeptocom.js will _not_ work while the line editor is enabled. Therefore, if one wants to upload code either disable it with:
+
+    disable-line
+
+or put it into mass upload mode with F1. To exit out of mass upload mode enter F2 as the first key on a line.
+
+To persistently boot into the line editor execute:
+
+    compile-to-flash
+    initializer enable-line
+    reboot
+
+For information on the line editor, consult [its documentation](https://github.com/tabemann/zeptoforth/blob/master/docs/words/line.md).
+
+## Editing text in files
+
+Once you have FAT32 filesystem(s) set up, you may wonder what the next step is. That next step is `zeptoed`, which is a screen-oriented multi-buffer text editor for zeptoforth which can be used on the PicoCalc.
+
+To load zeptoed on your PicoCalc execute the following at a shell prompt at the root of the zeptoforth directory tree:
+
+    $ TTY=<your tty device> # Replace <your tty device> with your actual TTY device
+    $ echo 'compile-to-flash' > prefix.fs
+    $ echo 'reboot' > suffix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/zeptoed_all.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
+
+or do the following with zeptocom.js:
+
+- Connect to the TTY device for the PicoCalc. The connection settings can be left at their defaults for zeptoforth.
+- Issue `compile-to-flash`.
+- Set the working directory to the root of the zeptoforth directory tree.
+- Upload `extra/common/zeptoed_all.fs`.
+- Issue 'reboot'.
+
+You can then invoke zeptoed with `zeptoed` ( path-addr path-bytes -- ) or, for short, `zed` ( path-addr path-bytes -- ) where *path-addr* *path-bytes* refers to a string literal denoting the path of the file in the current filesystem.
+
+For more information on using zeptoed consult its online help or [the zeptoed documentation](https://github.com/tabemann/zeptoforth/blob/master/docs/extra/zeptoed.md).
+
+One important note, though, is one is using the graphical terminal emulator on an RP2040 (e.g. a Raspberry Pi Pico) there will not be enough RAM available for the default heap size for zeptoed, so starting zeptoed will result in a crash. As a result, adjust the heap size prior to starting zeptoed with:
+
+    <desired heap size> to zeptoed-heap-size
+
+To figure out a heap size to use execute:
+
+    unused
+
+which will output, amongst other things, the amount of RAM available in the RAM dictionary for the main task. Use this amount of RAM minus about 10 KiB as a rule of thumb for the maximum heap size supported.
+
+Note that you can adjust `zeptoed-heap-size` multiple times in a session as you load more code and data into RAM. Also note that it does not by default persist across boots; to make it persist execute:
+
+    compile-to-flash
+    : init-zeptoed-heap-size <desired heap size> to zeptoed-heap-size ;
+    initializer init-zeptoed-heap-size
+    reboot
+
 ## Development status
 
-Also note that some things currently may not work as expected ─ when I tried out the line editor I noticed some minor display issues with it that I have yet to adequately characterize, edit assumes a screen wider than 64 characters currently, and some other issues have been reported with it on the PicoCalc as well, words assumes a screen of at least 80 characters wide and will line wrap with rather un-cosmetic results, the copyright notice and license displayed by license likewise is hard-formatted to 80 characters wide, zeptoed relies on Meta (Alt) key combos that are not yet supported by the terminal emulator, and the zeptoed help is hard-formatted to 80 characters wide.
+Also note that some things currently may not work as expected ─ edit assumes a screen wider than 64 characters currently, and some other issues have been reported with it on the PicoCalc as well, words assumes a screen of at least 80 characters wide and will line wrap with rather un-cosmetic results, the copyright notice and license displayed by license likewise is hard-formatted to 80 characters wide, and the zeptoed help is hard-formatted to 80 characters wide.
 
- However, I would say that zeptoforth's PicoCalc spport is still already very functional, especially since I do not yet have a PicoCalc in my possession and have been relying on the help of others who already possess PicoCalcs along with compile-time selection of an ST7789V display (which I do own) and runtime-selectable limited PicoCalc keyboard emulation (however the emulation is partial as it does not currently emulate many of the keys on the actual PicoCalc).
+However, I would say that zeptoforth's PicoCalc spport is still already very functional, especially since I do not yet have a PicoCalc in my possession and have been relying on the help of others who already possess PicoCalcs along with compile-time selection of an ST7789V display (which I do own) and runtime-selectable limited PicoCalc keyboard emulation (however the emulation is partial as it does not currently directly emulate many of the keys on the actual PicoCalc, rather passing through the characters entered from one's terminal emulator connected to one's board via the serial console).
 
 If you do decide to try out zeptoforth on your PicoCalc, please give feedback on what works, what doesn't work, what suggestions you have, and even just the fact that you opted to try it. This will be extremely helpful in furthering the development of zeptoforth support for the PicoCalc.
 
