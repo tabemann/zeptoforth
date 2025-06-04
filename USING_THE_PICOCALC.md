@@ -41,13 +41,13 @@ However, read further before you do the above because below are instructions for
 
 ## Text-only terminal emulators
 
-While the above directions provides 8-bit RGB graphics and is relatively fast, it has the downside that a lot of memory is used for the framebuffer, which may prove problematic if one wants to use an RP2040 (e.g. Raspberry Pi Pico, Raspberry Pi Pico W) board, and especially if one wants to use zeptoIP (as zeptoIP by itself is very memory-costly) or zeptoed (as zeptoed requires a good-sized amount of memory for storage of text in memory).
+While the above directions provides 8-bit RGB graphics and is relatively fast, it has the downside that a lot of memory is used for the framebuffer, which may prove problematic if you want to use an RP2040 (e.g. Raspberry Pi Pico, Raspberry Pi Pico W) board, and especially if you want to use zeptoIP (as zeptoIP by itself is very memory-costly) or zeptoed (as zeptoed requires a good-sized amount of memory for storage of text in memory).
 
 Luckily, there is a less memory-expensive option available! This is the text-only PicoCalc terminal emulator. This only stores the 8-bit text and its attributes in memory, so it uses far less RAM than the graphical PicoCalc terminal emulator.
 
 To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/ili9488_spi_text_5x8_font_all.fs`, `extra/common/ili9488_spi_text_6x8_font_all.fs`, or `extra/common/ili9488_spi_text_7x8_font_all.fs` for `extra/common/ili9488_spi_8_6x8_font_all.fs` (see 'Font selection' below).
 
-Note however that the text-only PicoCalc terminal emulator is markedly slower, especially in scrolling, than the graphical PicoCalc terminal emulator because it has to redraw each character when updating the screen rather than merely converting an 8-bit RGB pixmap to 16-bit RGB and sending it to the screen, which is significantly simpler and thus faster. Currently hardware scrolling is not supported, even though it may be supported in the future.
+Note however that the text-only PicoCalc terminal emulator is a bit slower in scrolling than the graphical PicoCalc terminal emulator because it has to redraw each character when updating the screen rather than merely moving the pixel data in th e framebuffer and then converting an 8-bit RGB pixmap to 16-bit RGB and sending it to the screen, which is simpler and thus faster. Currently hardware scrolling is not supported, even though it may be supported in the future.
 
 ## Font selection
 
