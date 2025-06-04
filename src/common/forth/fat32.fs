@@ -367,6 +367,9 @@ begin-module fat32
       \ Expand a directory by one entry
       method expand-dir ( index cluster fs -- )
 
+      \ Fill a directory cluster with end entries
+      method init-dir-cluster ( cluster fs -- )
+
       \ Update a directory entry's modification date
       method update-entry-date-time ( index cluster fs -- )
 
@@ -1499,6 +1502,7 @@ begin-module fat32
         rot 1+ over cluster-sectors @ sector-size * entry-size u/ umod -rot
         2 pick 0= if
           rot drop dup -rot allocate-link-cluster ( fs cluster )
+          2dup swap init-dir-cluster ( fs cluster )
           <fat32-entry> [: ( fs cluster entry )
             dup init-end-entry -rot 0 -rot swap ( entry index cluster fs ) entry!
           ;] with-object
@@ -1510,6 +1514,24 @@ begin-module fat32
         then
       ;] over with-fat32-lock
     ; define expand-dir
+
+    :noname ( cluster fs -- )
+      [:
+        [:
+          <fat32-entry> [: { cluster fs entry }
+            cluster fs cluster>sector { start-sector }
+            entry init-end-entry
+            [ sector-size entry-size u/ ] literal 0 ?do
+              sector-scratchpad i entry-size * + entry entry>buffer
+            loop
+            fs cluster-sectors @ 0 ?do
+              sector-scratchpad sector-size start-sector i +
+              fs fat32-device @ block!
+            loop
+          ;] with-object
+        ;] sector-scratchpad-lock with-lock
+      ;] over with-fat32-lock
+    ; define init-dir-cluster
 
     :noname ( index cluster fs -- )
       <fat32-entry> [:
@@ -2230,6 +2252,7 @@ begin-module fat32
       2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
       over dir-parent-index ! ( c-addr u dir )
       dup dir-fs @ allocate-cluster ( c-addr u dir dir-cluster )
+      2dup swap dir-fs@ init-dir-cluster ( c-addr u dir dir-cluster )
       <fat32-entry> [: ( c-addr u dir dir-cluster entry )
         dup >r init-end-entry r> ( c-addr u dir dir-cluster entry )
         0 2 pick 4 pick dir-fs @ entry! ( c-addr u dir dir-cluster )
@@ -2271,7 +2294,9 @@ begin-module fat32
       dup dir-open @ averts x-not-open
       dup dir-start-cluster @ over dir-fs @ allocate-entry ( parent-dir dir child-index child-cluster )
       <fat32-entry> [: ( parent-dir dir child-index child-cluster entry )
-        4 roll dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
+        4 roll dir-start-cluster @
+        4 pick dir-fs @ root-dir-cluster @ over = if drop 0 then
+        swap ( dir child-index child-cluster start-cluster entry )
         s" .." rot ( dir child-index child-cluster start-cluster c-addr u entry )
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
         -rot 3 roll dir-fs @ entry! ( )
@@ -2287,7 +2312,9 @@ begin-module fat32
         dup >r swap 2 pick dir-parent-cluster @ 3 pick dir-fs @ ( dir entry entry-index entry-cluster fs )
         entry@
         r@ entry-dir? averts x-entry-not-dir
-        r> first-cluster@ swap 2dup dir-start-cluster ! dir-current-cluster ! ( )
+        r> first-cluster@
+        dup 0= if drop dup dir-fs @ root-dir-cluster @ then
+        swap 2dup dir-start-cluster ! dir-current-cluster ! ( )
       ;] with-object
       self register-dir
     ; define do-open-dir
