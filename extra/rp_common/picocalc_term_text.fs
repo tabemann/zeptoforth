@@ -256,5 +256,11 @@ begin-module picocalc-term
 
   \ Get visual bell enabled
   : visual-bell-enabled@ ( -- enabled ) shared-term do-visual-bell-enabled@ ;
+  
+  \ Set audible bell enabled
+  : audible-bell-enabled! ( enabled -- ) shared-term do-audible-bell-enabled! ;
+
+  \ Get audible bell enabled
+  : audible-bell-enabled@ ( -- enabled ) shared-term do-audible-bell-enabled@ ;
 
 end-module

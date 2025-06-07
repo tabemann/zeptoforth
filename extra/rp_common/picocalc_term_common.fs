@@ -30,8 +30,8 @@ begin-module picocalc-term-common
   constant use-7x8-font?
 
   \ Select a core to use for the PicoCalc tasks
-  defined? picocalc-tasks-core [if]
-    picocalc-tasks-core constant picocalc-tasks-core
+  defined? select-picocalc-tasks-core [if]
+    select-picocalc-tasks-core constant picocalc-tasks-core
   [else]
     1 constant picocalc-tasks-core
   [then]
@@ -46,6 +46,7 @@ begin-module picocalc-term-common
 
   oo import
   picocalc-keys import
+  picocalc-sound import
   task import
   lock import
   stream import
@@ -349,6 +350,9 @@ begin-module picocalc-term-common
       \ Visual bell enabled
       cell member visual-bell-enabled
 
+      \ Audible bell enabled
+      cell member audible-bell-enabled
+
       \ The terminal lock
       lock-size member term-lock
 
@@ -577,7 +581,13 @@ begin-module picocalc-term-common
 
     \ Carry out getting visual bell enabled
     method do-visual-bell-enabled@ ( self -- enabled )
-    
+
+    \ Carry out setting audible bell enabled
+    method do-audible-bell-enabled! ( enabled self -- )
+
+    \ Carry out getting audible bell enabled
+    method do-audible-bell-enabled@ ( self -- enabled )
+
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
 
@@ -623,6 +633,7 @@ begin-module picocalc-term-common
       default-fg-color self fg-color !
       default-bk-color self bk-color !
       false self visual-bell-enabled !
+      false self audible-bell-enabled !
       0 self attrs !
       0 self cursor-x !
       0 self cursor-y !
@@ -1448,6 +1459,7 @@ begin-module picocalc-term-common
 
     \ Handle a bell
     :noname { self -- }
+      self audible-bell-enabled @ if beep then
       self visual-bell-enabled @ if self display-bell then
     ; define handle-bell
 
@@ -1480,6 +1492,16 @@ begin-module picocalc-term-common
       visual-bell-enabled @
     ; define do-visual-bell-enabled@
     
+    \ Carry out setting audible bell enabled
+    :noname ( enabled self -- )
+      audible-bell-enabled !
+    ; define do-audible-bell-enabled!
+
+    \ Carry out getting audible bell enabled
+    :noname ( self -- enabled )
+      audible-bell-enabled @
+    ; define do-audible-bell-enabled@
+
     \ Draw the cursor
     :noname { self -- }
       true self cursor-x @ self cursor-y @ self draw-char-with-cursor

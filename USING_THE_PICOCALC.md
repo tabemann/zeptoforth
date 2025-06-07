@@ -21,6 +21,7 @@ Then, if you are using a shell prompt you should execute the following commands 
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/ili9488_spi_8_6x8_font_all.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_keys.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_sound.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term_common.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
@@ -31,7 +32,8 @@ If you are using zeptocom.js, you should do the following:
 - Issue `compile-to-flash`.
 - Set the working directory to the root of the zeptoforth directory tree.
 - Upload `extra/common/ili9488_spi_8_6x8_font_all.fs`.
-- Upload `extra/rp_common/picocalc_key.fs`.
+- Upload `extra/rp_common/picocalc_keys.fs`.
+- Upload `extra/rp_common/picocalc_sound.fs`.
 - Upload `extra/rp_common/picocalc_term_common.fs`
 - Upload `extra/rp_common/picocalc_term.fs`.
 - Issue `initializer picocalc-term::term-console`.
@@ -162,7 +164,9 @@ You can permanently disable the generation of BEL characters by `bel`, and thus 
     initializer init-disable-bel
     reboot
 
-By default the PicoCalc terminal emulator ignores these BEL characters. However, _visual bells_ can be enabled by executing:
+By default the PicoCalc terminal emulator ignores these BEL characters. However, _visual bells_ and _audible_bells_ can be enabled so these BEL characters can alert you.
+
+Visual bells can be enabled by executing:
 
     true picocalc-term::visual-bell-enabled!
 
@@ -175,7 +179,18 @@ You can permanently enable visual bells through executing:
     initializer init-enable-visual-bell
     reboot
 
-One thing that is not yet implemented but which will be implemented in the future is _audible bells_. This will consist of a beep emitted by the speakers on the PicoCalc when a BEL character is output on the PicoCalc terminal emulator console. Like the visual bells these will be disabled by default as these may annoy some.
+Audible bells can similarly be enabled by executing:
+
+    true picocalc-term::audible-bell-enabled!
+
+These audible bells consist of momentarily generating a beep from the PicoCalc's speakers when a BEL character is output on the PicoCalc terminal emulator console. This may also be annoying to some, hence why it is disabled by default.
+
+You can permanently enable audible bells through executing:
+
+    compile-to-flash
+    : init-enable-audible-bell true picocalc-term::audible-bell-enabled! ;
+    initializer init-enable-audible-bell
+    reboot
 
 ## Editing the current line
 
@@ -308,3 +323,13 @@ In this example routine, `picocalc-hello::hello` ( r g b x y -- ), `with-term-di
 Afterwards, it calls `update-display` to copy the updated portion of the framebuffer to the display. Note that `update-display` is specific to the class `ili9488-8-common::<ili9488-8-common>` or `st7789v-8-common::<st7789v-8-common>` and does not belong to a shared superclass, so you will have to specifically import `ili9488-8-common` or `st7789v-8-common` depending on whether an actual PicoCalc is in use or not, respectively.
 
 Note that `picocalc-term::with-term-display` locks the terminal emulator within the xt that it calls, so do not execute any code that may output text with `emit`, `type`, `.`, `."`, `.s`, `h.8`, or like within this xt as it may block forever because the output stream used by the terminal emulator is not emptied while it is locked and thus may become full.
+
+## Playing sound on the PicoCalc
+
+Currently only generating fixed tones for durations is supported by the PicoCalc. These can be generated through calling `picocalc-sound::play-tone-for-duration` ( duration-in-ticks D: pitch-in-hz -- ). The pitch is a S31.32 fixed-point value in Hz, which can be specified via the `x,y` notation, e.g. `1047,0` is C6.
+
+Note that this word is _not_ blocking; it will return immediately even though the tone will play for the set duration in ticks (which are 100 microsecond increments).
+
+Multiple layered tones are supported, up to 8 tones at once. Note that the tone that will expire the soonest is the one which will play at any given moment.
+
+For convenience's sake, a `picocalc-sound::beep` word is provided, which generates a 1397 Hz, i.e. F6, tone for 125 milliseconds. This word is used internally to implement the audible bell.
