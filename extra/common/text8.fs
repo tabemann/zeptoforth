@@ -127,6 +127,9 @@ begin-module text8
     \ Scroll down a number of lines (note that this will *not* fill in the new
     \ lines)
     method scroll-down ( lines text -- )
+
+    \ Invert the text
+    method invert-text ( text -- )
     
   end-class
 
@@ -347,6 +350,20 @@ begin-module text8
       then
     ; define scroll-down
 
+    \ Invert the text
+    :noname { self -- }
+      self text-rows @ self text-cols @ * { chars }
+      chars self text-fg-color-buf @ + { end-addr }
+      self text-fg-color-buf @
+      begin dup end-addr < while dup c@ $FF xor over c! 1+ repeat
+      drop
+      chars self text-bk-color-buf @ + to end-addr
+      self text-bk-color-buf @
+      begin dup end-addr < while dup c@ $FF xor over c! 1+ repeat
+      drop
+      self set-dirty
+    ; define invert-text
+    
   end-implement
   
 end-module

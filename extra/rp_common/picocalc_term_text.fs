@@ -179,6 +179,9 @@ begin-module picocalc-term
       loop
     ; define scroll-down
 
+    \ Invert the display
+    :noname { self -- } self display-intf invert-text ; define invert-display
+    
   end-implement
   
   \ The PicoCalc terminal
@@ -247,5 +250,11 @@ begin-module picocalc-term
 
   \ Get the terminal character dimensions
   : term-char-dim@ ( -- width height ) picocalc-term-common::term-char-dim@ ;
+
+  \ Set visual bell enabled
+  : visual-bell-enabled! ( enabled -- ) shared-term do-visual-bell-enabled! ;
+
+  \ Get visual bell enabled
+  : visual-bell-enabled@ ( -- enabled ) shared-term do-visual-bell-enabled@ ;
 
 end-module

@@ -208,6 +208,15 @@ begin-module picocalc-term
       self display-intf set-dirty
     ; define scroll-down
 
+    \ Invert the display
+    :noname { self -- }
+      [ display-width display-height * ] literal self display-buf + { end-addr }
+      self display-buf
+      begin dup end-addr < while dup c@ $FF xor over c! 1+ repeat
+      drop
+      self display-intf set-dirty
+    ; define invert-display
+    
   end-implement
   
   \ The PicoCalc terminal
@@ -286,4 +295,10 @@ begin-module picocalc-term
   \ Get the terminal character dimensions
   : term-char-dim@ ( -- width height ) picocalc-term-common::term-char-dim@ ;
 
+  \ Set visual bell enabled
+  : visual-bell-enabled! ( enabled -- ) shared-term do-visual-bell-enabled! ;
+
+  \ Get visual bell enabled
+  : visual-bell-enabled@ ( -- enabled ) shared-term do-visual-bell-enabled@ ;
+  
 end-module

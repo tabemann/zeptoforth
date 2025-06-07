@@ -266,6 +266,7 @@ begin-module picocalc-term-common
     $0A constant linefeed
     $0D constant return
     $08 constant backspace
+    $07 constant bell
 
     \ Tab size (note as implemented this must be a power of two)
     8 constant tab-size
@@ -273,6 +274,9 @@ begin-module picocalc-term-common
     \ Escape character timeout in ticks
     2500 constant escape-timeout
 
+    \ Visual bell time in milliseconds
+    63 constant visual-bell-ms
+    
     \ Flag for if the welcome message has been displayed on the screen yet
     false value picocalc-welcome-displayed
 
@@ -342,6 +346,9 @@ begin-module picocalc-term-common
       \ The terminal task mailbox
       cell member term-task-mailbox
 
+      \ Visual bell enabled
+      cell member visual-bell-enabled
+
       \ The terminal lock
       lock-size member term-lock
 
@@ -381,6 +388,12 @@ begin-module picocalc-term-common
       \ Scroll down by a number of lines
       method scroll-down ( lines self -- )
 
+      \ Display a bell
+      method display-bell ( self -- )
+
+      \ Invert the display
+      method invert-display ( self -- )
+      
       \ Handle a normal key
       method handle-normal-key ( c self -- )
 
@@ -401,6 +414,9 @@ begin-module picocalc-term-common
 
       \ Handle an escape
       method handle-escape ( self -- )
+
+      \ Handle a bell
+      method handle-bell ( self -- )
       
       \ Parse an escape
       method parse-escape ( addr bytes self -- )
@@ -556,6 +572,12 @@ begin-module picocalc-term-common
     \ because they may block indefinitely.
     method do-with-term-lock ( xt self -- )
 
+    \ Carry out setting visual bell enabled
+    method do-visual-bell-enabled! ( enabled self -- )
+
+    \ Carry out getting visual bell enabled
+    method do-visual-bell-enabled@ ( self -- enabled )
+    
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
 
@@ -600,6 +622,7 @@ begin-module picocalc-term-common
       default-bk-color fill
       default-fg-color self fg-color !
       default-bk-color self bk-color !
+      false self visual-bell-enabled !
       0 self attrs !
       0 self cursor-x !
       0 self cursor-y !
@@ -911,6 +934,7 @@ begin-module picocalc-term-common
             linefeed of self handle-linefeed endof
             backspace of self handle-backspace endof
             tab of self handle-tab endof
+            bell of self handle-bell endof
             dup self handle-char
           endcase
 
@@ -1421,6 +1445,23 @@ begin-module picocalc-term-common
         x y self draw-char
       then
     ; define handle-char
+
+    \ Handle a bell
+    :noname { self -- }
+      self visual-bell-enabled @ if self display-bell then
+    ; define handle-bell
+
+    \ Display a visual bell
+    :noname { self -- }
+      self draw-cursor
+      self do-update-display
+      self invert-display
+      self do-update-display
+      visual-bell-ms ms
+      self invert-display
+      self do-update-display
+      self clear-cursor
+    ; define display-bell
     
     \ Carry out an operation with the PicoCalc terminal locked. Note that
     \ executing operations that print to the PicoCalc terminal should be avoided
@@ -1429,6 +1470,16 @@ begin-module picocalc-term-common
       term-lock with-lock
     ; define do-with-term-lock
 
+    \ Carry out setting visual bell enabled
+    :noname ( enabled self -- )
+      visual-bell-enabled !
+    ; define do-visual-bell-enabled!
+
+    \ Carry out getting visual bell enabled
+    :noname ( self -- enabled )
+      visual-bell-enabled @
+    ; define do-visual-bell-enabled@
+    
     \ Draw the cursor
     :noname { self -- }
       true self cursor-x @ self cursor-y @ self draw-char-with-cursor

@@ -147,6 +147,36 @@ Last but not least, if you were one of the misguided people who installed a `ful
 
     usb::usb-console
 
+## Bells!
+
+zeptoforth by default generates BEL characters by default when `abort` gets called, e.g. by an uncaught exception in the main task. The word which generates these BEL's is `bel`.
+
+This behavior has a master control in `bel-enabled`, which defaults to `true`. It can be disabled by executing:
+
+    false bel-enabled !
+
+You can permanently disable the generation of BEL characters by `bel`, and thus `abort`, by executing:
+
+    compile-to-flash
+    : init-disable-bel false bel-enabled ! ;
+    initializer init-disable-bel
+    reboot
+
+By default the PicoCalc terminal emulator ignores these BEL characters. However, _visual bells_ can be enabled by executing:
+
+    true picocalc-term::visual-bell-enabled!
+
+These visual bells consist of momentarily inverting the screen when a BEL character is output on the PicoCalc terminal emulator console. This may be annoying to some, hence why it is disabled by default.
+
+You can permanently enable visual bells through executing:
+
+    compile-to-flash
+    : init-enable-visual-bell true picocalc-term::visual-bell-enabled! ;
+    initializer init-enable-visual-bell
+    reboot
+
+One thing that is not yet implemented but which will be implemented in the future is _audible bells_. This will consist of a beep emitted by the speakers on the PicoCalc when a BEL character is output on the PicoCalc terminal emulator console. Like the visual bells these will be disabled by default as these may annoy some.
+
 ## Editing the current line
 
 You may perhaps want to be able to edit code on the current line beyond merely backspacing, and you likely will want history as well. These are available to you! All you have to do is enter at the REPL:
