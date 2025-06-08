@@ -252,7 +252,6 @@ begin-module picocalc-keys
 
     \ Handle an exception
     :noname { xt self -- }
-      xt if 4 0 ?do led::green led::toggle-led 63 ms loop then
       xt ['] x-i2c-target-noack <> if
         self picocalc-error-displayed @ not if
           xt [:
@@ -381,26 +380,21 @@ begin-module picocalc-keys
     \ Handle a key
     :noname { keycode self -- }
       keycode PICOCALC_CTRL_HELD = if
-        led::green led::toggle-led
         true self picocalc-keys-ctrl-held ! exit
       else
         keycode PICOCALC_CTRL_NOT_HELD = if
-          led::green led::toggle-led
           false self picocalc-keys-ctrl-held ! exit
         then
       then
       keycode PICOCALC_ALT_HELD = if
-        led::green led::toggle-led
         true self picocalc-keys-alt-held ! exit
       else
         keycode PICOCALC_ALT_NOT_HELD = if
-          led::green led::toggle-led
           false self picocalc-keys-alt-held ! exit
         then
       then
       self picocalc-keys-chan chan-full? not if
         keycode $FF and 1 = if
-          led::green led::toggle-led
           keycode $FF00 and
           self picocalc-keys-ctrl-held @ ATTR_CTRL and
           self picocalc-keys-alt-held @ ATTR_ALT and or or { W^ buf }
