@@ -332,4 +332,4 @@ Note that this word is _not_ blocking; it will return immediately even though th
 
 Multiple layered tones are supported, up to 8 tones at once. Note that the tone that will expire the soonest is the one which will play at any given moment.
 
-For convenience's sake, a `picocalc-sound::beep` word is provided, which generates a 1397 Hz, i.e. F6, tone for 125 milliseconds. This word is used internally to implement the audible bell.
+For convenience's sake, a `picocalc-sound::beep` word is provided, which generates a 1245 Hz, i.e. D6#, tone for 125 milliseconds. This word is used internally to implement the audible bell.

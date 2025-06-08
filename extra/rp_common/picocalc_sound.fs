@@ -48,10 +48,10 @@ begin-module picocalc-sound
     end-structure
 
     \ Beep duration in ticks
-    1250 constant beep-duration-ticks
+    1250 value beep-duration-ticks
 
-    \ Beep pitch in Hz (F6 specifically )
-    1397,0 2constant beep-pitch
+    \ Beep pitch in Hz (D6# specifically)
+    1245,0 2value beep-pitch
     
     \ The PWM index for sound
     5 constant sound-pwm-index
