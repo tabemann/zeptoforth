@@ -103,7 +103,7 @@ begin-module turtle
 
     \ Convert an angle
     : convert-angle ( angle -- D: real-angle )
-      s>f [ pi 180,0 f/ swap ] literal literal f*
+      s>f 180,0 f/ pi f*
       [ pi 2,0 f/ swap ] literal literal d+
     ;
 
