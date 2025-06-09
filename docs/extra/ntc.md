@@ -59,4 +59,38 @@ Put temperatures to stack.
 
 Dump `ntc` structure.
 
+### `ntc-internal`
+
+##### `ntc-size`
+
+The structure contains necessary data for temperature measurement (e.g., input voltage, resistance value, etc.). The measured voltage and the temperature calculated from it are also stored here.
+
+``` 
+begin-structure ntc-size
+  \ ADC peripheral 
+  field: ntc-adc
+  \ Channel of ADC
+  field: ntc-chan
+  \ Pin for ADC
+  field: ntc-pin
+  \ A value
+  2field: a-val
+  \ B value
+  2field: b-val
+  \ C value
+  2field: c-val
+  \ Input voltage
+  2field: vin
+  \ Output voltage
+  2field: vout
+  \ Resistence of R0
+  2field: r0
+  \ Resistance of Thermistor
+  2field: rt
+  \ Temperature in Kelvin
+  2field: kelvin
+  \ Temperature in Celsius
+  2field: celsius
+end-structure
+```
 

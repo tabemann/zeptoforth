@@ -40,10 +40,13 @@ begin-module ntc-demo
 
   ntc import
 
-  ntc-size buffer: my-ntc
+  continue-module ntc-internal
+    ntc-size buffer: my-ntc
+  end-module
 
   begin-module ntc-demo-internal
 
+    ntc-internal import
     \ Check calculation, result must be 25 ºC
     : calc-check ( D: B-val D: R0 -- ) { D: B-val D: R0 -- }
       0,0 B-val 0,0 my-ntc setup-abc
@@ -122,7 +125,7 @@ begin-module ntc-demo
   \ Demo - measuring test using thermistor NRMR105F3950B1F
   \ ADC = 0, chanel = 0, pin = 26, R0 = 100000, B-value = 3950
   : demo-100k
-    0 0 26 3950,0 100000,0 measure-demo
+    0 0 26 3950,0 100510,0 measure-demo
   ;
   
   \ Current demo 

@@ -23,25 +23,7 @@
 begin-module ntc
 
   adc import
-  
-  false constant debug?
-  
-  begin-structure ntc-size
-    field: ntc-adc
-    field: ntc-chan
-    field: ntc-pin
-    field: cnt
-    2field: a-val
-    2field: b-val
-    2field: c-val
-    2field: vin
-    2field: vout
-    2field: r0
-    2field: rt
-    2field: k-val
-    2field: c-val
-  end-structure
-  
+
   begin-module ntc-internal
   
     ansi-term import
@@ -59,13 +41,43 @@ begin-module ntc
       cr type bl emit .s 
       none color-effect!
     ;
-    
+
+    \ Enable/disbale debug messages
+    false constant debug?
+       
     \ t0 constant, 25ºC in ºK  = 25 + 273.15
     298,15 2constant t0-const
 
     \ Constant to convert analog value to digital  
     4096,0 2constant adc-const 
-    
+ 
+    begin-structure ntc-size
+      \ ADC peripheral 
+      field: ntc-adc
+      \ Channel of ADC
+      field: ntc-chan
+      \ Pin for ADC
+      field: ntc-pin
+      \ A value
+      2field: a-val
+      \ B value
+      2field: b-val
+      \ C value
+      2field: c-val
+      \ Input voltage
+      2field: vin
+      \ Output voltage
+      2field: vout
+      \ Resistence of R0
+      2field: r0
+      \ Resistance of thermistor
+      2field: rt
+      \ Temperature in Kelvin
+      2field: kelvin
+      \ Temperature in Celsius
+      2field: celsius
+    end-structure
+      
     \ Initialize ADC
     : ntc-init ( ntc -- )
       [ debug? ] [if] s" -> ntc-init" dbg [then]
@@ -115,7 +127,7 @@ begin-module ntc
       r@ rt 2@ ln 3,0 f** r@ c-val 2@ f*
       d+ d+
       1,0 2swap f/
-      r> k-val 2!
+      r> kelvin 2!
     
       [ debug? ] [if] s" <- temp-k," cr.s [then]
     ;
@@ -130,7 +142,7 @@ begin-module ntc
       r@ rt 2@ r@ r0 2@ f/ ln 
       f* d+
       1,0 2swap f/
-      r> k-val 2!
+      r> kelvin 2!
       [ debug? ] [if] s" <- temp-k" cr.s [then]
     ;
   
@@ -138,9 +150,9 @@ begin-module ntc
     : temp-c ( ntc -- )
       [ debug? ] [if] s" -> temp-c" dbg [then]
       dup >r
-      k-val 2@
+      kelvin 2@
       273,15 d-
-      r> c-val 2!
+      r> celsius 2!
       [ debug? ] [if] s" <- temp-c" cr.s [then]
     ;
     
@@ -195,8 +207,8 @@ begin-module ntc
   \ Put temperatures to stack
   : temp@ ( ntc -- f: kelvin f: celsius ) { ntc-local -- }
     [ debug? ] [if] s" -> temp@" dbg [then]
-    ntc-local k-val 2@
-    ntc-local c-val 2@
+    ntc-local kelvin 2@
+    ntc-local celsius 2@
     [ debug? ] [if] s" <- temp@" cr.s [then]
   ;
 
