@@ -25,6 +25,8 @@ begin-module spiral
   5,0 sqrt 1,0 d+ 2,0 f/ 2constant golden-ratio
   
   : draw-spiral { D: m iters -- }
+    getxy { start-x start-y }
+    getheading { start-heading }
     iters 0 ?do
       m golden-ratio f* { D: n }
       m round-zero { m' }
@@ -37,6 +39,10 @@ begin-module spiral
       90 left
       n m d- to m
     loop
+    penup
+    start-x start-y setxy
+    start-heading setheading
+    pendown
   ;
 
 end-module
