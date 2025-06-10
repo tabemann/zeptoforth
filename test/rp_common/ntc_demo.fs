@@ -40,9 +40,7 @@ begin-module ntc-demo
 
   ntc import
 
-  continue-module ntc-internal
-    ntc-size buffer: my-ntc
-  end-module
+  ntc-size buffer: my-ntc
 
   begin-module ntc-demo-internal
 
