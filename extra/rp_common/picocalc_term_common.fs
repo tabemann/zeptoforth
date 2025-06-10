@@ -283,12 +283,7 @@ begin-module picocalc-term-common
 
     \ Picocalc welcome message
     : picocalc-welcome ( -- )
-      cr ." Welcome to zeptoforth on the PicoCalc"
-      cr ." Built for " kernel-platform type
-      cr ." Version " kernel-version type
-      cr ." On " kernel-date type
-      cr ." zeptoforth comes with ABSOLUTELY NO WARRANTY"
-      cr ." For details type `license' "
+      cr ." *** zeptoforth on the PicoCalc ***"
     ;
     
   end-module> import
