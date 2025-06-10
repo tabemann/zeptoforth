@@ -52,18 +52,14 @@ begin-module ili9488-8-common
     $E1 constant REG_NGAMCTRL
     
     \ Convert an 8-bit color to a 16-bit color
-    : do-convert-8-to-16 ( rgb8 -- rgb16 )
-      code[
-      6 tos r3 lsrs_,_,#_  \ Blue, 7:6
-      11 r3 r3 lsls_,_,#_ \ to 12:11 (bits 10:8 are zero)
-      26 tos r4 lsls_,_,#_ \ Green, 6:3
-      29 r4 r4 lsrs_,_,#_ \ to 2:0 (bits 15:13 are zero)
-      r4 r3 orrs_,_
-      29 tos r4 lsls_,_,#_ \ Red, 2:0
-      24 r4 r4 lsrs_,_,#_ \ to 7:5 (bits 4:3 are zero)
-      r4 r3 orrs_,_
-      r3 tos movs_,_
-      ]code
+    : do-convert-8-to-16 { color8 -- color16 }
+      color8 $C0 and dup $40 and 0<> $3F and or { b }
+      color8 $38 and 2 lshift dup $20 and 0<> $1F and or { g }
+      color8 $07 and 5 lshift dup $20 and 0<> $1F and or { r }
+      b 3 rshift 8 lshift
+      g 5 rshift or
+      g 2 rshift $7 and 13 lshift or
+      r $F8 and or
     ;
 
     \ Generate a color lookup table
