@@ -20,7 +20,7 @@ Then, if you are using a shell prompt you should execute the following commands 
     $ echo 'reboot' >> suffix.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/ili9488_spi_8_6x8_font_all.fs
-    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_keys.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_bios.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_sound.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term_common.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term.fs
@@ -32,7 +32,7 @@ If you are using zeptocom.js, you should do the following:
 - Issue `compile-to-flash`.
 - Set the working directory to the root of the zeptoforth directory tree.
 - Upload `extra/common/ili9488_spi_8_6x8_font_all.fs`.
-- Upload `extra/rp_common/picocalc_keys.fs`.
+- Upload `extra/rp_common/picocalc_bios.fs`.
 - Upload `extra/rp_common/picocalc_sound.fs`.
 - Upload `extra/rp_common/picocalc_term_common.fs`
 - Upload `extra/rp_common/picocalc_term.fs`.
@@ -272,7 +272,7 @@ For those such as myself who do not yet possess a PicoCalc, some measures may be
 
 Then, after the PicoCalc has rebooted, execute the following at the zeptoforth REPL via the serial console as a single line of code:
 
-    true to picocalc-keys::emulate-keys? picocalc-term::term-console
+    true to picocalc-bios::emulate-keys? picocalc-term::term-console
 
 This will result in input to the serial console being handled as if it were typed on the PicoCalc's keyboard. Note, however, that only non-control ASCII characters, newlines, and backspaces are currently emulated, so you will not be able to enter control characters or keys such as arrow or function keys.
 

@@ -45,7 +45,7 @@ begin-module picocalc-term-common
   font-test
 
   oo import
-  picocalc-keys import
+  picocalc-bios import
   picocalc-sound import
   task import
   lock import
@@ -298,7 +298,7 @@ begin-module picocalc-term-common
     continue-module picocalc-term-common-internal
 
       \ The keyboard
-      <picocalc-keys> class-size member key-intf
+      <picocalc-bios> class-size member bios-intf
 
       \ The character matrix
       term-width term-height * cell align member chars-buf
@@ -613,7 +613,7 @@ begin-module picocalc-term-common
 
     \ Initialize the PicoCalc terminal
     :noname { self -- }
-      <picocalc-keys> self key-intf init-object
+      <picocalc-bios> self bios-intf init-object
       0 self term-task !
       0 self term-task-mailbox !
       self term-lock init-lock
@@ -639,7 +639,7 @@ begin-module picocalc-term-common
 
     \ Start the terminal emulator task
     :noname { self -- }
-      picocalc-tasks-core self key-intf init-picocalc-keys
+      picocalc-tasks-core self bios-intf init-picocalc-bios
       self 1 ['] run-term 1024 256 1024 picocalc-tasks-core spawn-on-core
       self term-task !
       c" term" self term-task @ task-name!
@@ -649,7 +649,7 @@ begin-module picocalc-term-common
 
     \ Inject a keycode
     :noname ( keycode self -- )
-      key-intf inject-picocalc-keycode
+      bios-intf inject-picocalc-keycode
     ; define inject-keycode
 
     \ Run the PicoCalc terminal
@@ -874,8 +874,8 @@ begin-module picocalc-term-common
     \ Handle input
     :noname { self -- }
       input-limit { counter }
-      begin self key-intf picocalc-keys>? counter 0> and while
-        self key-intf picocalc-keys> { attrs c }
+      begin self bios-intf picocalc-keys>? counter 0> and while
+        self bios-intf picocalc-keys> { attrs c }
 
         \ DEBUG
         \ attrs c [:

@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module picocalc-keys
+begin-module picocalc-bios
 
   oo import
   task import
@@ -57,7 +57,7 @@ begin-module picocalc-keys
   $D6 constant KEY_PUP
   $D7 constant KEY_PDOWN
   
-  begin-module picocalc-keys-internal
+  begin-module picocalc-bios-internal
 
     \ PicoCalc keyboard I2C device
     1 constant picocalc-keys-i2c-device
@@ -116,9 +116,9 @@ begin-module picocalc-keys
   end-module> import
 
   \ The PicoCalc keyboard class
-  <object> begin-class <picocalc-keys>
+  <object> begin-class <picocalc-bios>
 
-    continue-module picocalc-keys-internal
+    continue-module picocalc-bios-internal
       
       \ Is control currently pressed
       cell member picocalc-keys-ctrl-held
@@ -173,8 +173,8 @@ begin-module picocalc-keys
 
     end-module
 
-    \ Initialize the PicoCalc keyboard
-    method init-picocalc-keys ( core self -- )
+    \ Initialize the PicoCalc BIOS support
+    method init-picocalc-bios ( core self -- )
     
     \ Are there keys to read?
     method picocalc-keys>? ( self -- read? )
@@ -193,7 +193,7 @@ begin-module picocalc-keys
     
   end-class
 
-  <picocalc-keys> begin-implement
+  <picocalc-bios> begin-implement
 
     \ Constructor
     :noname { self -- }
@@ -210,7 +210,7 @@ begin-module picocalc-keys
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
     ; define new
 
-    \ Initialize the PicoCalc keyboard
+    \ Initialize the PicoCalc BIOS support
     :noname { core self -- }
       picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
       picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
@@ -226,7 +226,7 @@ begin-module picocalc-keys
       self 1 ['] run-keys 320 128 512 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
-    ; define init-picocalc-keys
+    ; define init-picocalc-bios
         
     \ Are there keys to read?
     :noname ( self -- read? )
