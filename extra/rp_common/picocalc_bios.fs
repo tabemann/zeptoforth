@@ -59,29 +59,29 @@ begin-module picocalc-bios
   
   begin-module picocalc-bios-internal
 
-    \ PicoCalc keyboard I2C device
-    1 constant picocalc-keys-i2c-device
+    \ PicoCalc BIOS I2C device
+    1 constant picocalc-bios-i2c-device
 
-    \ PicoCalc keyboard I2C SDA GPIO
-    6 constant picocalc-keys-sda-pin
+    \ PicoCalc BIOS I2C SDA GPIO
+    6 constant picocalc-bios-sda-pin
 
-    \ PicoCalc keyboard I2C SCL GPIO
-    7 constant picocalc-keys-scl-pin
+    \ PicoCalc BIOS I2C SCL GPIO
+    7 constant picocalc-bios-scl-pin
 
-    \ PicoCalc keyboard I2C address
-    $1F constant picocalc-keys-i2c-addr
+    \ PicoCalc BIOS I2C address
+    $1F constant picocalc-bios-i2c-addr
 
-    \ PicoCalc keyboard I2C baud; note that I2C for the keyboard is slow
-    10000 constant picocalc-keys-i2c-baud
+    \ PicoCalc BIOS I2C baud; note that I2C for the BIOS is slow
+    10000 constant picocalc-bios-i2c-baud
     
-    \ PicoCalc keyboard interval in milliseconds
-    16 constant picocalc-keys-interval
+    \ PicoCalc BIOS interval in milliseconds
+    16 constant picocalc-bios-interval
 
-    \ PicoCalc emulated keyboard interval in milliseconds
-    8 constant emulate-picocalc-keys-interval
+    \ PicoCalc emulated BIOS interval in milliseconds
+    8 constant emulate-picocalc-bios-interval
 
-    \ Picocalc keyboard timeout in ticks
-    5000 constant picocalc-keys-timeout
+    \ Picocalc BIOS timeout in ticks
+    5000 constant picocalc-bios-timeout
 
     \ PicoCalc keyboard channel element count
     256 constant picocalc-keys-chan-count
@@ -212,15 +212,15 @@ begin-module picocalc-bios
 
     \ Initialize the PicoCalc BIOS support
     :noname { core self -- }
-      picocalc-keys-i2c-device picocalc-keys-sda-pin i2c-pin
-      picocalc-keys-i2c-device picocalc-keys-scl-pin i2c-pin
-      picocalc-keys-sda-pin pull-up-pin
-      picocalc-keys-scl-pin pull-up-pin
-      picocalc-keys-i2c-device master-i2c
-      picocalc-keys-i2c-baud picocalc-keys-i2c-device i2c-clock!
-      picocalc-keys-i2c-device 7-bit-i2c-addr
-      picocalc-keys-i2c-addr picocalc-keys-i2c-device i2c-target-addr!
-      picocalc-keys-i2c-device enable-i2c
+      picocalc-bios-i2c-device picocalc-bios-sda-pin i2c-pin
+      picocalc-bios-i2c-device picocalc-bios-scl-pin i2c-pin
+      picocalc-bios-sda-pin pull-up-pin
+      picocalc-bios-scl-pin pull-up-pin
+      picocalc-bios-i2c-device master-i2c
+      picocalc-bios-i2c-baud picocalc-bios-i2c-device i2c-clock!
+      picocalc-bios-i2c-device 7-bit-i2c-addr
+      picocalc-bios-i2c-addr picocalc-bios-i2c-device i2c-target-addr!
+      picocalc-bios-i2c-device enable-i2c
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
       self 1 ['] run-keys 320 128 512 core spawn-on-core { keys-task }
@@ -272,8 +272,8 @@ begin-module picocalc-bios
             buf c@ PICOCALC_KEY = self picocalc-emulate-get-key !
             true exit
           then
-          buf 1 picocalc-keys-i2c-device >i2c-stop 1 =
-        ;] picocalc-keys-timeout with-timeout
+          buf 1 picocalc-bios-i2c-device >i2c-stop 1 =
+        ;] picocalc-bios-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop false then
     ; define send-command
@@ -312,12 +312,12 @@ begin-module picocalc-bios
             exit
           then
           0 { W^ buf }
-          buf 2 picocalc-keys-i2c-device i2c-stop> 2 = if
+          buf 2 picocalc-bios-i2c-device i2c-stop> 2 = if
             buf h@ true
           else
             0 false
           then
-        ;] picocalc-keys-timeout with-timeout
+        ;] picocalc-bios-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop 0 false then
     ; define recv-reply
@@ -370,9 +370,9 @@ begin-module picocalc-bios
           self get-key
         then
         emulate-keys? not if
-          picocalc-keys-interval ms
+          picocalc-bios-interval ms
         else
-          emulate-picocalc-keys-interval ms
+          emulate-picocalc-bios-interval ms
         then
       again
     ; define run-keys
