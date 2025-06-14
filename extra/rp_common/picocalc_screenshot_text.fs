@@ -461,8 +461,70 @@ begin-module picocalc-screenshot
         writer write-color-table
         display writer write-pixels
         writer close-writer
-      ;] picocalc-term::with-term-display
+      ;] with-term-display
     ;] with-object
   ;
+
+  continue-module picocalc-screenshot-internal
+
+    \ The filesystem to use for screenshots
+    variable screenshot-fs
+
+    \ The pathname to use for screenshots
+    256 buffer: screenshot-path
+
+  end-module
+
+  \ Set the screenshot filesystem
+  : screenshot-fs! ( fs -- ) screenshot-fs ! ;
+
+  \ Get the screenshot filesystem
+  : screenshot-fs@ ( -- fs ) screenshot-fs @ ;
+
+  \ Path too long exception
+  : x-path-too-long ( -- ) ." path too long" cr ;
+
+  \ Set the screenshot path
+  : screenshot-path! { path-addr path-bytes -- }
+    path-bytes 256 u< averts x-path-too-long
+    path-bytes screenshot-path c!
+    path-addr screenshot-path 1+ path-bytes move
+  ;
+  
+  \ Get the screenshot path
+  : screenshot-path@ ( -- path-addr path-bytes ) screenshot-path count ;
+  
+  continue-module picocalc-screenshot-internal
+    
+    \ Initialize taking screenshot
+    : init-screenshot ( -- )
+      s" /SCREEN" screenshot-path!
+      [ defined? sd-fs: ] [if]
+        fat32-tools::sd-fs@ screenshot-fs!
+      [else]
+        [ defined? psram-fs: ] [if]
+          fat32-tools::psram-fs@ screenshot-fs!
+        [else]
+          [ defined? blocks-fs: ] [if]
+            fat32-tools::blocks-fs@ screenshot-fs!
+          [else]
+            0 screenshot-fs!
+          [then]
+        [then]
+      [then]
+      [:
+        [:
+          screenshot-fs@ { fs }
+          fs if
+            screenshot-path@ fs ['] take-screenshot try-and-display-error 0<> if
+              drop 2drop
+            then
+          then
+        ;] console::with-serial-error-output
+      ;] screenshot-hook!
+    ;
+    initializer init-screenshot
+
+  end-module
   
 end-module

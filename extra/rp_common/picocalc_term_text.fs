@@ -288,4 +288,10 @@ begin-module picocalc-term
   \ Get audible bell enabled
   : audible-bell-enabled@ ( -- enabled ) shared-term do-audible-bell-enabled@ ;
 
+  \ Set the screenshot hook
+  : screenshot-hook! ( xt -- ) shared-term do-screenshot-hook! ;
+
+  \ Get the screenshot hook
+  : screenshot-hook@ ( -- xt ) shared-term do-screenshot-hook@ ;
+
 end-module

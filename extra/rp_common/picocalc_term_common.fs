@@ -285,6 +285,29 @@ begin-module picocalc-term-common
     : picocalc-welcome ( -- )
       cr ." *** zeptoforth on the PicoCalc ***"
     ;
+
+    \ Saved attention hook
+    variable saved-attention-hook
+
+    \ Screenshot flag
+    variable take-screenshot?
+
+    \ The attention handler
+    : do-attention ( -- )
+      dup [char] s = if
+        drop false attention? ! true take-screenshot? !
+      else
+        saved-attention-hook @ execute
+      then
+    ;
+    
+    \ Initialize screenshots
+    : init-take-screenshots ( -- )
+      false take-screenshot? !
+      attention-hook @ saved-attention-hook !
+      ['] do-attention attention-hook !
+    ;
+    initializer init-take-screenshots
     
   end-module> import
 
@@ -348,6 +371,9 @@ begin-module picocalc-term-common
       \ Audible bell enabled
       cell member audible-bell-enabled
 
+      \ Screenshot hook
+      cell member screenshot-hook
+
       \ The terminal lock
       lock-size member term-lock
 
@@ -368,6 +394,9 @@ begin-module picocalc-term-common
 
       \ Update the display
       method do-update-display ( self -- )
+
+      \ Take a screenshot
+      method handle-screenshot ( self -- )
       
       \ Draw the cursor
       method draw-cursor ( self -- )
@@ -583,6 +612,12 @@ begin-module picocalc-term-common
     \ Carry out getting audible bell enabled
     method do-audible-bell-enabled@ ( self -- enabled )
 
+    \ Carry out setting the screenshot hook
+    method do-screenshot-hook! ( xt self -- )
+
+    \ Carry out getting the screenshot hook
+    method do-screenshot-hook@ ( self -- xt )
+
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
 
@@ -609,22 +644,9 @@ begin-module picocalc-term-common
     \ Constructor
     :noname { self -- }
       self <object>->new
-    ; define new
-
-    \ Initialize the PicoCalc terminal
-    :noname { self -- }
-      <picocalc-bios> self bios-intf init-object
       0 self term-task !
       0 self term-task-mailbox !
-      self term-lock init-lock
-      input-stream-size self input-stream init-stream
-      output-stream-size self output-stream init-stream
-      self chars-buf [ term-width term-height * ] literal $20 fill
-      self attrs-buf [ term-width term-height * ] literal 0 fill
-      self fg-colors-buf [ term-width term-height * ] literal
-      default-fg-color fill
-      self bk-colors-buf [ term-width term-height * ] literal
-      default-bk-color fill
+      0 self screenshot-hook !
       default-fg-color self fg-color !
       default-bk-color self bk-color !
       false self visual-bell-enabled !
@@ -635,6 +657,20 @@ begin-module picocalc-term-common
       true self cursor-visible !
       0 self saved-cursor-x !
       0 self saved-cursor-y !
+    ; define new
+
+    \ Initialize the PicoCalc terminal
+    :noname { self -- }
+      <picocalc-bios> self bios-intf init-object
+      self term-lock init-lock
+      input-stream-size self input-stream init-stream
+      output-stream-size self output-stream init-stream
+      self chars-buf [ term-width term-height * ] literal $20 fill
+      self attrs-buf [ term-width term-height * ] literal 0 fill
+      self fg-colors-buf [ term-width term-height * ] literal
+      default-fg-color fill
+      self bk-colors-buf [ term-width term-height * ] literal
+      default-bk-color fill
     ; define init-term
 
     \ Start the terminal emulator task
@@ -654,9 +690,23 @@ begin-module picocalc-term-common
 
     \ Run the PicoCalc terminal
     :noname { self -- }
-      begin self handle-input self handle-output pause again
+      begin
+        take-screenshot? @ if self handle-screenshot then
+        self handle-input self handle-output pause
+      again
     ; define run-term
 
+    \ Take a screenshot
+    :noname { self -- }
+      self invert-display
+      self do-update-display
+      visual-bell-ms ms
+      self invert-display
+      self do-update-display
+      self screenshot-hook @ ?execute
+      false take-screenshot? !
+    ; define handle-screenshot
+    
     \ Handle a normal key
     :noname { c self -- }
       attention? @ if
@@ -1496,6 +1546,16 @@ begin-module picocalc-term-common
     :noname ( self -- enabled )
       audible-bell-enabled @
     ; define do-audible-bell-enabled@
+
+    \ Carry out setting the screenshot hook
+    :noname ( xt self -- )
+      screenshot-hook !
+    ; define do-screenshot-hook!
+
+    \ Carry out getting the screenshot hook
+    :noname ( self -- xt )
+      screenshot-hook @
+    ; define do-screenshot-hook@
 
     \ Draw the cursor
     :noname { self -- }
