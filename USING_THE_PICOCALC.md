@@ -189,7 +189,7 @@ If using zeptocom.js, precede uploading the source file with `compile-to-flash` 
 
 In all these cases you must have zeptoforth REPL on the serial console, which can be reached with executing `serial::serial-console` at the REPL; once you are done return the PicoCalc terminal emulator, if desired, with `picocalc-term::term-console`.
 
-Do this after loading `extra/rp_common/picocalc_fat32.fs` for best results, as if this is done it will default to using the SD card FAT32 filesystem first, if configured, or the on-board flash storage FAT32 filesystem second, if configured, or the PSRAM FAT32 filesystem third.
+Do this after loading `extra/rp_common/picocalc_fat32.fs` for best results, as if this is done it will default to using the SD card FAT32 filesystem first, if configured, or the PSRAM FAT32 filesystem second, if configured, or the on-board flash storage FAT32 filesystem third, if configured.
 
 If this is not done it will require the user to specify a FAT32 filesystem with `picocalc-screenshot::screenshot-fs!` ( fs -- ) before being able to take screenshots.
 
