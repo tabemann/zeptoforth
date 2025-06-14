@@ -59,6 +59,13 @@ begin-module picocalc-term
 
     end-module> import
     
+    \ Carry out an operation against the PicoCalc terminal's display with the
+    \ PicoCalc terminal locked. It is highly recommended that the user update
+    \ the terminal's display or text drawn to it may not be displayed. Note
+    \ that executing operations that print to the PicoCalc terminal should be
+    \ avoided because they may block indefinitely.
+    method do-with-term-display ( xt self -- ) \ xt: ( display -- )
+
   end-class
 
   \ Implement PicoCalc terminal class
@@ -100,6 +107,15 @@ begin-module picocalc-term
     \ Update the display
     :noname ( self -- ) display-intf update-display ; define do-update-display
     
+    \ Carry out an operation against the PicoCalc terminal's display with the
+    \ PicoCalc terminal locked. It is highly recommended that the user update
+    \ the terminal's display or text drawn to it may not be displayed. Note
+    \ that executing operations that print to the PicoCalc terminal should be
+    \ avoided because they may block indefinitely.
+    :noname ( xt self -- ) \ xt: ( display -- )
+      [: display-intf swap execute ;] over do-with-term-lock
+    ; define do-with-term-display
+
     \ Draw a character with or without a cursor
     :noname { cursor? x y self -- }
       x term-width > y term-height > or if exit then
@@ -239,6 +255,15 @@ begin-module picocalc-term
   \ executing operations that print to the PicoCalc terminal should be avoided
   \ because they may block indefinitely.
   : with-term-lock ( xt -- ) shared-term do-with-term-lock ;
+
+  \ Carry out an operation against the PicoCalc terminal's display with the
+  \ PicoCalc terminal locked. It is highly recommended that the user update
+  \ the terminal's display or text drawn to it may not be displayed. Note
+  \ that executing operations that print to the PicoCalc terminal should be
+  \ avoided because they may block indefinitely.
+  : with-term-display ( xt -- ) \ xt: ( display -- )
+    shared-term do-with-term-display
+  ;
 
   \ Get the terminal pixel dimensions
   : term-pixels-dim@ ( -- width height )
