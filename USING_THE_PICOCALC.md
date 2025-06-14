@@ -2,6 +2,12 @@
 
 There is driver and terminal emulator support in this branch for the PicoCalc. This will enable you to use the keyboard, display, and FAT32 filesystems in on-board flash, SD cards, and, if you are using a Pimoroni Pico Plus 2 or Pico Plus 2 W, the board's PSRAM (not the PicoCalc's carrier board PSRAM mind you, which is unsupported) of a PicoCalc without requiring the use of a terminal emulator on a PC. Note that this is currently beta quality, and may still have outstanding issues.
 
+## A note about modules and namespaces
+
+In the file below module paths of the form `foo::bar`, where `bar` is a word in the wordlist/module `foo`, are frequently used. In all these cases, alternatively the wordlist/module, e.g. `foo`, can be imported with `foo import` and then the second word `bar` can be referenced directly. Note that with `import` _all_ words in, say, `foo` are imported into the current namespace.
+
+Also note that these paths can be chained, e.g. `foo::bar::baz`, where `baz` is a word in the wordlist/module `foo::bar`, where in turn `bar` is a wordlist/module in the wordlist/module `foo`.
+
 ## zeptoforth installation and preparation
 
 First, you must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `full` build (_not_ a `full_usb` build) on the RP2040 or RP2350 board in your PicoCalc. Note that a `full` build is needed because the PicoCalc redirects UART0 to an ACM device on its USB-C port, and it is highly recommended that you use the USB-C port on the PicoCalc for extended usage rather than the USB port on the RP2040 or RP2350 board itself as there have been reports of battery overcharging in such extended usage of the board's USB port (some even recommend removing the batteries from your PicoCalc prior to applying power to the board's USB port).
@@ -148,6 +154,52 @@ Then you may wonder how to get back to the PicoCalc terminal emulator without re
 Last but not least, if you were one of the misguided people who installed a `full_usb` build on your PicoCalc, you can switch to the USB CDC console with:
 
     usb::usb-console
+
+## Taking screenshots
+
+Screenshots can be taken by first loading `extra/rp_common/picocalc_screenshot.fs` for the graphical PicoCalc terminal emulator or `extra/rp_common/picocalc_screenshot_text.fs` for the text-only PicoCalc terminal emulator with the following at a shell prompt in the root of the zeptoforth source tree:
+
+    $ utils/codeload3.sh -B 115200 -p <your tty device> serial extra/rp_common/picocalc_screenshot.fs
+
+or:
+
+    $ utils/codeload3.sh -B 115200 -p <your tty device> serial extra/rp_common/picocalc_screenshot_text.fs
+
+or otherwise upload them with zeptocom.js.
+
+If you want these to be loaded permanently execute the following at a shell prompt in the root of the zeptoforth source tree:
+
+    $ TTY=<your tty device>
+    $ echo 'compile-to-flash' > prefix.fs
+    $ echo 'reboot' > suffix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_screenshot.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
+
+or:
+
+    $ TTY=<your tty device>
+    $ echo 'compile-to-flash' > prefix.fs
+    $ echo 'reboot' > suffix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_screenshot_text.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
+
+If using zeptocom.js, precede uploading the source file with `compile-to-flash` and follow it with `reboot.
+
+In all these cases you must have zeptoforth REPL on the serial console, which can be reached with executing `serial::serial-console` at the REPL; once you are done return the PicoCalc terminal emulator, if desired, with `picocalc-term::term-console`.
+
+Do this after loading `extra/rp_common/picocalc_fat32.fs` for best results, as if this is done it will default to using the SD card FAT32 filesystem first, if configured, or the on-board flash storage FAT32 filesystem second, if configured, or the PSRAM FAT32 filesystem third.
+
+If this is not done it will require the user to specify a FAT32 filesystem with `picocalc-screenshot::screenshot-fs!` ( fs -- ) before being able to take screenshots.
+
+The path for the directory in which screenshots will be `/SCREEN` by default. It can be changed with `picocalc-screenshot::screenshot-path!` ( path-addr path-bytes -- ).
+
+Once all this is done, you will be able to take screenshots by entering Attention (on the PicoCalc terminal emulator Break (Shift-Escape), on the serial console Control-T) followed by 's'. The fact that you have done this successfully will be signified by flashing the display prior to actually taking the screenshot. There will be a short moment where the PicoCalc terminal emulator will not be responsive afterwards while it actually saves the screenshot to file.
+
+The screenshots will be saved in the selected directory, which will be created (but not its parent directory, which must exist), as an 8-bit RLE BMP file with afilename in the format `SCRxxxxx.BMP`, where `xxxxx` is a 5-digit decimal number starting at `00000` and counting upwards.
+
+Alternatively, screenshots can be taken with `picocalc-screenshot::take-screenshot` ( path-addr path-bytes fs -- ). This is the actual word that implements the taking of screenshots. Note that when this word is executed directly the display is _not_ flashed.
 
 ## Bells!
 
