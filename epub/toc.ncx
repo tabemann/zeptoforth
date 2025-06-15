@@ -6190,9 +6190,9 @@
         </navPoint>
         <navPoint id="navPoint1031" playOrder="983">
           <navLabel>
-            <text>RP2040 only words</text>
+            <text>RP2040 and RP2350 only words</text>
           </navLabel>
-          <content src="words/adc.xhtml#rp2040-only-words" />  
+          <content src="words/adc.xhtml#rp2040-and-rp2350-only-words" />  
         </navPoint>
         <navPoint id="navPoint1032" playOrder="984">
           <navLabel>
