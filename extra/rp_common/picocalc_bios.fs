@@ -527,7 +527,7 @@ begin-module picocalc-bios
 
     \ Set the backlight
     :noname { val self -- val' }
-      PICOCALC_BACKLIGHT WRITE_BIT or val 8 lshift or self request
+      PICOCALC_BACKLIGHT WRITE_BIT or val $FF and 8 lshift or self request
     ; define set-backlight
 
     \ Read the backlight
@@ -537,7 +537,7 @@ begin-module picocalc-bios
     
     \ Set the keyboard backlight
     :noname { val self -- val' }
-      PICOCALC_KBD_BACKLIGHT WRITE_BIT or val 8 lshift or self request
+      PICOCALC_KBD_BACKLIGHT WRITE_BIT or val $FF and 8 lshift or self request
     ; define set-kbd-backlight
 
     \ Read the keyboard backlight
