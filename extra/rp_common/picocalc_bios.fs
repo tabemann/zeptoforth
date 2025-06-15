@@ -23,6 +23,7 @@ begin-module picocalc-bios
   oo import
   task import
   chan import
+  rchan import
   i2c import
   pin import
 
@@ -89,15 +90,27 @@ begin-module picocalc-bios
     \ PicoCalc reset delay in milliseconds
     100 constant picocalc-rst-delay
 
-    \ PicoCalc keyboard reset command
-    8 constant PICOCALC_RST
-    
     \ PicoCalc keyboard count register
     4 constant PICOCALC_COUNT
+
+    \ PicoCalc backlight register
+    5 constant PICOCALC_BACKLIGHT
+    
+    \ PicoCalc BIOS reset command
+    8 constant PICOCALC_RST
     
     \ PicoCalc keyboard key register
     9 constant PICOCALC_KEY
 
+    \ PicoCalc keyboard backlight register
+    10 constant PICOCALC_KBD_BACKLIGHT
+
+    \ PicoCalc battery register
+    11 constant PICOCALC_BATTERY
+
+    \ Write bit
+    $80 constant WRITE_BIT
+    
     \ PicoCalc keyboard count mask
     $1F constant PICOCALC_COUNT_MASK
 
@@ -147,11 +160,29 @@ begin-module picocalc-bios
       \ Are we emulating getting a key
       cell member picocalc-emulate-get-key
 
+      \ Are we emulating reading the battery
+      cell member picocalc-emulate-read-battery
+
+      \ Are we emulating a write
+      cell member picocalc-emulate-write
+      
+      \ Are we emulating the backlight
+      cell member picocalc-emulate-backlight
+      
+      \ Are we emulating the keyboard backlight
+      cell member picocalc-emulate-kbd-backlight
+
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
 
+      \ The reply channel for controlling the BIOS
+      rchan-size member picocalc-bios-rchan
+
       \ Handle an exception
       method handle-exception ( xt self -- )
+
+      \ Handle a request
+      method handle-request ( self -- )
       
       \ Send a command
       method send-command ( command self -- success? )
@@ -164,6 +195,9 @@ begin-module picocalc-bios
       
       \ Handle getting a key
       method get-key ( self -- )
+
+      \ Implement a delay
+      method do-delay ( self -- )
       
       \ Run handling keys
       method run-keys ( self -- )
@@ -171,6 +205,9 @@ begin-module picocalc-bios
       \ Handle a key
       method handle-picocalc-key ( keycode self -- )
 
+      \ Issue a request
+      method request ( request self -- reply )
+      
     end-module
 
     \ Initialize the PicoCalc BIOS support
@@ -189,7 +226,22 @@ begin-module picocalc-bios
     method picocalc-keys-alt? ( self -- alt? )
 
     \ Inject a keycode
-    method inject-picocalc-keycode ( keycode self -- )
+    method inject-keycode ( keycode self -- )
+
+    \ Read the battery
+    method read-battery ( self -- val )
+
+    \ Set the backlight
+    method set-backlight ( val self -- val' )
+
+    \ Read the backlight
+    method read-backlight ( self -- val )
+    
+    \ Set the keyboard backlight
+    method set-kbd-backlight ( val self -- val' )
+
+    \ Read the keyboard backlight
+    method read-kbd-backlight ( self -- val )
     
   end-class
 
@@ -207,7 +259,12 @@ begin-module picocalc-bios
       false self picocalc-emulate !
       false self picocalc-emulate-get-count !
       false self picocalc-emulate-get-key !
+      false self picocalc-emulate-read-battery !
+      false self picocalc-emulate-write !
+      false self picocalc-emulate-backlight !
+      false self picocalc-emulate-kbd-backlight !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
+      self picocalc-bios-rchan init-rchan
     ; define new
 
     \ Initialize the PicoCalc BIOS support
@@ -267,9 +324,18 @@ begin-module picocalc-bios
       command self [:
         [: { W^ buf self }
           emulate-keys? self picocalc-emulate @ or if
+            self picocalc-emulate-write @ if
+              false self picocalc-emulate-write ! true exit
+            then
+            buf c@ WRITE_BIT and if true self picocalc-emulate-write ! then
+            WRITE_BIT buf cbic!
             buf c@ PICOCALC_RST <> self picocalc-emulate !
             buf c@ PICOCALC_COUNT = self picocalc-emulate-get-count !
             buf c@ PICOCALC_KEY = self picocalc-emulate-get-key !
+            buf c@ PICOCALC_BATTERY = self picocalc-emulate-read-battery !
+            buf c@ PICOCALC_BACKLIGHT = self picocalc-emulate-backlight !
+            buf c@ PICOCALC_KBD_BACKLIGHT =
+            self picocalc-emulate-kbd-backlight !
             true exit
           then
           buf 1 picocalc-bios-i2c-device >i2c-stop 1 =
@@ -292,8 +358,8 @@ begin-module picocalc-bios
                 0 true
               then
             else
+              false self picocalc-emulate !
               self picocalc-emulate-get-key @ if
-                false self picocalc-emulate !
                 false self picocalc-emulate-get-key !
                 [: key? ;] console::with-serial-input if
                   [: key ;] console::with-serial-input
@@ -305,8 +371,20 @@ begin-module picocalc-bios
                   0 true
                 then
               else
-                false self picocalc-emulate !
-                0 true
+                self picocalc-emulate-read-battery @ if
+                  false self picocalc-emulate-read-battery ! 100
+                else
+                  self picocalc-emulate-backlight @ if
+                    false self picocalc-emulate-backlight ! 100
+                  else
+                    self picocalc-emulate-kbd-backlight @ if
+                      false self picocalc-emulate-kbd-backlight ! 100
+                    else
+                      0
+                    then
+                  then
+                then
+                true
               then
             then
             exit
@@ -322,6 +400,22 @@ begin-module picocalc-bios
       ?dup if self handle-exception drop 0 false then
     ; define recv-reply
 
+    \ Handle a request
+    :noname { self -- }
+      0 { W^ buffer }
+      buffer cell self picocalc-bios-rchan recv-rchan-no-block 0> if
+        begin buffer c@ self send-command until
+        self do-delay
+        buffer c@ WRITE_BIT and if
+          begin buffer 1+ c@ self send-command until
+          self do-delay
+        then
+        begin self recv-reply ?dup if swap buffer ! else nip then until
+        buffer cell self picocalc-bios-rchan reply-rchan
+        self do-delay
+      then
+    ; define handle-request
+    
     \ Handle getting a count
     :noname { self -- }
       self picocalc-sent-command @ not if
@@ -364,19 +458,30 @@ begin-module picocalc-bios
           0 self picocalc-get-key-count !
           emulate self picocalc-already-emulate !
         then
+        self picocalc-sent-command @ not if
+          self ['] handle-request try dup ['] x-would-block = if
+            2drop 0
+          then
+          ?raise
+        then
         self picocalc-get-key-count @ 0= if
           self get-count
         else
           self get-key
         then
-        emulate-keys? not if
-          picocalc-bios-interval ms
-        else
-          emulate-picocalc-bios-interval ms
-        then
+        self do-delay
       again
     ; define run-keys
 
+    \ Implement a delay
+    :noname { self -- }
+      emulate-keys? not if
+        picocalc-bios-interval ms
+      else
+        emulate-picocalc-bios-interval ms
+      then
+    ; define do-delay
+    
     \ Handle a key
     :noname { keycode self -- }
       keycode PICOCALC_CTRL_HELD = if
@@ -406,7 +511,39 @@ begin-module picocalc-bios
     \ Inject a keycode
     :noname ( keycode self -- )
       handle-picocalc-key
-    ; define inject-picocalc-keycode
+    ; define inject-keycode
+
+    \ Issue a request
+    :noname { W^ send-buffer self -- reply }
+      0 { W^ recv-buffer }
+      send-buffer cell recv-buffer cell self picocalc-bios-rchan
+      send-rchan 0> if recv-buffer @ else 0 then
+    ; define request
+
+    \ Read the battery
+    :noname { self -- val }
+      PICOCALC_BATTERY self request
+    ; define read-battery
+
+    \ Set the backlight
+    :noname { val self -- val' }
+      PICOCALC_BACKLIGHT WRITE_BIT or val 8 lshift or self request
+    ; define set-backlight
+
+    \ Read the backlight
+    :noname { self -- val }
+      PICOCALC_BACKLIGHT self request
+    ; define read-backlight
+    
+    \ Set the keyboard backlight
+    :noname { val self -- val' }
+      PICOCALC_KBD_BACKLIGHT WRITE_BIT or val 8 lshift or self request
+    ; define set-kbd-backlight
+
+    \ Read the keyboard backlight
+    :noname { self -- val }
+      PICOCALC_KBD_BACKLIGHT self request
+    ; define read-kbd-backlight
 
   end-implement
   

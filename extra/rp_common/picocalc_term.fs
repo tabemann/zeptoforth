@@ -294,7 +294,22 @@ begin-module picocalc-term
 
   \ Get the terminal character dimensions
   : term-char-dim@ ( -- width height ) picocalc-term-common::term-char-dim@ ;
+  
+  \ Read the battery
+  : read-battery ( -- val ) shared-term do-read-battery ;
 
+  \ Set the backlight
+  : set-backlight ( val -- val' ) shared-term do-set-backlight ;
+  
+  \ Read the backlight
+  : read-backlight ( -- val ) shared-term do-read-backlight ;
+  
+  \ Set the keyboard backlight
+  : set-kbd-backlight ( val -- val' ) shared-term do-set-kbd-backlight ;
+  
+  \ Read the keyboard backlight
+  : read-kbd-backlight ( -- val ) shared-term do-read-kbd-backlight ;
+  
   \ Set visual bell enabled
   : visual-bell-enabled! ( enabled -- ) shared-term do-visual-bell-enabled! ;
 

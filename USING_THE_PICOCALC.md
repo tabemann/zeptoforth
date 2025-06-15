@@ -244,6 +244,37 @@ You can permanently enable audible bells through executing:
     initializer init-enable-audible-bell
     reboot
 
+## Managing the BIOS
+
+zeptoforth on the PicoCalc has the capability to interface with the STM32 microcontroller which manages the battery, display backlight, and keyboard backlight of the PicoCalc, also known as the BIOS.
+
+For this purpose there are the following words in the `picocalc-term` module, for both the graphical and the text-only PicoCalc terminal emulators:
+
+### `read-battery`
+( -- battery-level )
+
+Read the battery level.
+
+### `set-backlight`
+( desired-backlight-level -- actual-backlight-level )
+
+Set the backlight level.
+
+### `read-backlight`
+( -- backlight-level )
+
+Read the backlight level.
+
+### `set-kbd-backlight`
+( desired-kbd-backlight-level -- actual-kbd-backlight-level )
+
+Set the keyboard backlight level.
+
+### `read-kbd-backlight`
+( -- kbd-backlight-level )
+
+Read the keyboard backlight level.
+
 ## Editing the current line
 
 You may perhaps want to be able to edit code on the current line beyond merely backspacing, and you likely will want history as well. These are available to you! All you have to do is enter at the REPL:

@@ -621,6 +621,21 @@ begin-module picocalc-term-common
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
 
+    \ Read the battery
+    method do-read-battery ( self -- val )
+
+    \ Set the backlight
+    method do-set-backlight ( val self -- val' )
+
+    \ Read the backlight
+    method do-read-backlight ( self -- val )
+    
+    \ Set the keyboard backlight
+    method do-set-kbd-backlight ( val self -- val' )
+
+    \ Read the keyboard backlight
+    method do-read-kbd-backlight ( self -- val )
+
     \ Test the output stream for room for a byte
     method >term? ( self -- room? )
 
@@ -685,8 +700,33 @@ begin-module picocalc-term-common
 
     \ Inject a keycode
     :noname ( keycode self -- )
-      bios-intf inject-picocalc-keycode
+      bios-intf picocalc-bios::inject-keycode
     ; define inject-keycode
+
+    \ Read the battery
+    :noname ( self -- val )
+      bios-intf picocalc-bios::read-battery
+    ; define do-read-battery
+
+    \ Set the backlight
+    :noname ( val self -- val' )
+      bios-intf picocalc-bios::set-backlight
+    ; define do-set-backlight
+
+    \ Read the backlight
+    :noname ( self -- val )
+      bios-intf picocalc-bios::read-backlight
+    ; define do-read-backlight
+    
+    \ Set the keyboard backlight
+    :noname ( val self -- val' )
+      bios-intf picocalc-bios::set-kbd-backlight
+    ; define do-set-kbd-backlight
+
+    \ Read the keyboard backlight
+    :noname ( self -- val )
+      bios-intf picocalc-bios::read-kbd-backlight
+    ; define do-read-kbd-backlight
 
     \ Run the PicoCalc terminal
     :noname { self -- }
