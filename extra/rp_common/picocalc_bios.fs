@@ -375,10 +375,10 @@ begin-module picocalc-bios
                   false self picocalc-emulate-read-battery ! 100
                 else
                   self picocalc-emulate-backlight @ if
-                    false self picocalc-emulate-backlight ! 100
+                    false self picocalc-emulate-backlight ! 255
                   else
                     self picocalc-emulate-kbd-backlight @ if
-                      false self picocalc-emulate-kbd-backlight ! 100
+                      false self picocalc-emulate-kbd-backlight ! 255
                     else
                       0
                     then
