@@ -118,6 +118,9 @@ begin-module gpio
   \ SWD index
   31 constant PAD_SWD
 
+  \ IO IRQ BANK0
+  13 constant IO_IRQ_BANK0
+
   \ GPIO input register
   SIO_BASE $004 + constant GPIO_IN
   
