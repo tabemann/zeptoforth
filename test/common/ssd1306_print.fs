@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2024 Travis Bemann
+\ Copyright (c) 2022-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -106,7 +106,7 @@ begin-module ssd1306-print
     : do-update-ssd1306 ( -- )
       begin
         0 wait-notify drop
-        [: render-st7735s-text ;] my-lock with-lock
+        [: render-ssd1306-text ;] my-lock with-lock
         62 ms
       again
     ;
