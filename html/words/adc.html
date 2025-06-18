@@ -34,7 +34,7 @@
             
   <section id="analog-digital-converter-words">
 <h1>Analog-Digital Converter Words<a class="headerlink" href="#analog-digital-converter-words" title="Link to this heading">¶</a></h1>
-<p>Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040 and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and, using STMicroelectronics’ numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.</p>
+<p>Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040, RP2350, and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and RP2350 and, using STMicroelectronics’ numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.</p>
 <section id="adc">
 <h2><code class="docutils literal notranslate"><span class="pre">adc</span></code><a class="headerlink" href="#adc" title="Link to this heading">¶</a></h2>
 <section id="all-platforms">
@@ -62,7 +62,7 @@
 <section id="default-adc">
 <h4><code class="docutils literal notranslate"><span class="pre">default-adc</span></code><a class="headerlink" href="#default-adc" title="Link to this heading">¶</a></h4>
 <p>( – adc )</p>
-<p>The default ADC on a platform. On the RP2040 this is 0, on the other supported platforms it is 1.</p>
+<p>The default ADC on a platform. On the RP2040 and RP2350 this is 0, on the other supported platforms it is 1.</p>
 </section>
 <section id="temp-adc-chan">
 <h4><code class="docutils literal notranslate"><span class="pre">temp-adc-chan</span></code><a class="headerlink" href="#temp-adc-chan" title="Link to this heading">¶</a></h4>
@@ -90,8 +90,8 @@
 <p>The invalid ADC channel exception.</p>
 </section>
 </section>
-<section id="rp2040-only-words">
-<h3>RP2040 only words<a class="headerlink" href="#rp2040-only-words" title="Link to this heading">¶</a></h3>
+<section id="rp2040-and-rp2350-only-words">
+<h3>RP2040 and RP2350 only words<a class="headerlink" href="#rp2040-and-rp2350-only-words" title="Link to this heading">¶</a></h3>
 <section id="pin-adc-chan">
 <h4><code class="docutils literal notranslate"><span class="pre">pin-adc-chan</span></code><a class="headerlink" href="#pin-adc-chan" title="Link to this heading">¶</a></h4>
 <p>( pin – channel )</p>
@@ -224,6 +224,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -271,10 +272,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
 </ul>
 
 <div class="relations">

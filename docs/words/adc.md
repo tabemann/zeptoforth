@@ -1,6 +1,6 @@
 # Analog-Digital Converter Words
 
-Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040 and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and, using STMicroelectronics' numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.
+Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040, RP2350, and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and RP2350 and, using STMicroelectronics' numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.
 
 ### `adc`
 
@@ -29,7 +29,7 @@ Configure *pin* for use with *adc*.
 ##### `default-adc`
 ( -- adc )
 
-The default ADC on a platform. On the RP2040 this is 0, on the other supported platforms it is 1.
+The default ADC on a platform. On the RP2040 and RP2350 this is 0, on the other supported platforms it is 1.
 
 ##### `temp-adc-chan`
 ( -- channel )
@@ -56,7 +56,7 @@ The invalid ADC exception.
 
 The invalid ADC channel exception.
 
-#### RP2040 only words
+#### RP2040 and RP2350 only words
 
 ##### `pin-adc-chan`
 ( pin -- channel )
