@@ -201,19 +201,18 @@ begin-module snow-wind
     [: clear-snow ;] with-term-display
     systick-counter { start-systick }
     begin key? not while
-      start-systick [: { start-systick display }
-        systick-counter { new-systick }
-        new-systick start-systick - s>f my-delay s>f f/ { D: interval }
-        new-systick to start-systick
+      systick-counter { new-systick }
+      new-systick start-systick - s>f my-delay s>f f/ { D: interval }
+      new-systick to start-systick
+      [: { display }
         display draw-snow
         my-accumulate if free-snow then
         display erase-snow
-        my-accumulate not if free-snow then
-        interval snow-fall
-        interval adjust-wind
-        interval new-flake? if init-flake then
-        start-systick
-      ;] with-term-display to start-systick
+      ;] with-term-display
+      my-accumulate not if free-snow then
+      interval snow-fall
+      interval adjust-wind
+      interval new-flake? if init-flake then
     repeat
     [: clear-snow ;] with-term-display
     key drop
@@ -226,19 +225,18 @@ begin-module snow-wind
     0 [:
       systick-counter { start-systick }
       begin continue-run? @ while
-        start-systick [: { start-systick display }
-          systick-counter { new-systick }
-          new-systick start-systick - s>f my-delay s>f f/ { D: interval }
-          new-systick to start-systick
+        systick-counter { new-systick }
+        new-systick start-systick - s>f my-delay s>f f/ { D: interval }
+        new-systick to start-systick
+        [: { display }
           display draw-snow
           my-accumulate if free-snow then
           display erase-snow
-          my-accumulate not if free-snow then
-          interval snow-fall
-          interval adjust-wind
-          interval new-flake? if init-flake then
-          start-systick
-        ;] with-term-display to start-systick
+        ;] with-term-display
+        my-accumulate not if free-snow then
+        interval snow-fall
+        interval adjust-wind
+        interval new-flake? if init-flake then
       repeat
       [: clear-snow ;] with-term-display
     ;] my-task-pool spawn-from-task-pool run
