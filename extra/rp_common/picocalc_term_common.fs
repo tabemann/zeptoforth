@@ -738,11 +738,13 @@ begin-module picocalc-term-common
 
     \ Take a screenshot
     :noname { self -- }
-      self invert-display
-      self do-update-display
-      visual-bell-ms ms
-      self invert-display
-      self do-update-display
+      self [: { self }
+        self invert-display
+        self do-update-display
+        visual-bell-ms ms
+        self invert-display
+        self do-update-display
+      ;] self do-with-term-lock
       self screenshot-hook @ ?execute
       false take-screenshot? !
     ; define handle-screenshot
