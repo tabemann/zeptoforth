@@ -94,7 +94,7 @@ begin-module snow-wind
   : init-snow ( -- )
     random my-prng tinymt32-init
     my-prng tinymt32-prepare-example
-    320 128 512 1 my-task-pool init-task-pool
+    1024 128 1024 1 my-task-pool init-task-pool
     true to inited?
   ;
 
