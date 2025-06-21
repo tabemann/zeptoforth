@@ -204,15 +204,15 @@ begin-module snow-wind
       systick-counter { new-systick }
       new-systick start-systick - s>f my-delay s>f f/ { D: interval }
       new-systick to start-systick
-      [: { display }
+      interval [: { D: interval display }
+        display erase-snow
+        my-accumulate not if free-snow then
+        interval snow-fall
+        interval adjust-wind
+        interval new-flake? if init-flake then
         display draw-snow
         my-accumulate if free-snow then
-        display erase-snow
       ;] with-term-display
-      my-accumulate not if free-snow then
-      interval snow-fall
-      interval adjust-wind
-      interval new-flake? if init-flake then
     repeat
     [: clear-snow ;] with-term-display
     key drop
@@ -228,15 +228,15 @@ begin-module snow-wind
         systick-counter { new-systick }
         new-systick start-systick - s>f my-delay s>f f/ { D: interval }
         new-systick to start-systick
-        [: { display }
+        interval [: { D: interval display }
+          display erase-snow
+          my-accumulate not if free-snow then
+          interval snow-fall
+          interval adjust-wind
+          interval new-flake? if init-flake then
           display draw-snow
           my-accumulate if free-snow then
-          display erase-snow
         ;] with-term-display
-        my-accumulate not if free-snow then
-        interval snow-fall
-        interval adjust-wind
-        interval new-flake? if init-flake then
       repeat
       [: clear-snow ;] with-term-display
     ;] my-task-pool spawn-from-task-pool run
