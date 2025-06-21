@@ -28,7 +28,7 @@ begin-module picocalc-hello
   tinymt32 import
 
   use-st7789v? not [if]
-    ili9488-8-common import
+    st7365p-8-common import
   [else]
     st7789v-8-common import
   [then]

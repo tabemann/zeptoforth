@@ -25,7 +25,7 @@ Then, if you are using a shell prompt you should execute the following commands 
     $ echo 'initializer picocalc-term::term-console' > suffix.fs
     $ echo 'reboot' >> suffix.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial prefix.fs
-    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/ili9488_spi_8_6x8_font_all.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/common/st7365p_spi_8_6x8_font_all.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_bios.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_sound.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term_common.fs
@@ -37,7 +37,7 @@ If you are using zeptocom.js, you should do the following:
 - Connect to the TTY device for the PicoCalc. The connection settings can be left at their defaults for zeptoforth.
 - Issue `compile-to-flash`.
 - Set the working directory to the root of the zeptoforth directory tree.
-- Upload `extra/common/ili9488_spi_8_6x8_font_all.fs`.
+- Upload `extra/common/st7365p_spi_8_6x8_font_all.fs`.
 - Upload `extra/rp_common/picocalc_bios.fs`.
 - Upload `extra/rp_common/picocalc_sound.fs`.
 - Upload `extra/rp_common/picocalc_term_common.fs`
@@ -55,7 +55,7 @@ While the above directions provides 8-bit RGB graphics and is relatively fast, i
 
 Luckily, there is a less memory-expensive option available! This is the text-only PicoCalc terminal emulator. This only stores the 8-bit text and its attributes in memory, so it uses far less RAM than the graphical PicoCalc terminal emulator.
 
-To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/ili9488_spi_text_5x8_font_all.fs`, `extra/common/ili9488_spi_text_6x8_font_all.fs`, or `extra/common/ili9488_spi_text_7x8_font_all.fs` for `extra/common/ili9488_spi_8_6x8_font_all.fs` (see 'Font selection' below).
+To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/st7365p_spi_text_5x8_font_all.fs`, `extra/common/st7365p_spi_text_6x8_font_all.fs`, or `extra/common/st7365p_spi_text_7x8_font_all.fs` for `extra/common/st7365p_spi_8_6x8_font_all.fs` (see 'Font selection' below).
 
 Note however that the text-only PicoCalc terminal emulator is a bit slower in scrolling than the graphical PicoCalc terminal emulator because it has to redraw each character when updating the screen rather than merely moving the pixel data in th e framebuffer and then converting an 8-bit RGB pixmap to 16-bit RGB and sending it to the screen, which is simpler and thus faster. Currently hardware scrolling is not supported, even though it may be supported in the future.
 
@@ -63,7 +63,7 @@ Note however that the text-only PicoCalc terminal emulator is a bit slower in sc
 
 Note, however, that you may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel and 7x8-pixel fonts. A 5x8-pixel font may be desired if you want the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if you think that the default 6x8-pixel font is too small.
 
-To do so, in the steps above substitute `extra/common/ili9488_spi_8_5x8_font_all.fs` or `extra/common/ili9488_spi_8_7x8_font_all.fs`, or if you are installing a text-only terminal emulator, `extra/common/ili9488_spi_text_5x8_font_all.fs` or `extra/common/ili9488_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
+To do so, in the steps above substitute `extra/common/st7365p_spi_8_5x8_font_all.fs` or `extra/common/st7365p_spi_8_7x8_font_all.fs`, or if you are installing a text-only terminal emulator, `extra/common/st7365p_spi_text_5x8_font_all.fs` or `extra/common/st7365p_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
 
 ## Installing FAT32 support
 
@@ -351,7 +351,7 @@ I hope you enjoy trying out zeptoforth on your PicoCalc!
 
 ## Emulating a PicoCalc
 
-For those such as myself who do not yet possess a PicoCalc, some measures may be taken in its place. The PicoCalc terminal emulator can support an SPI ST7789V display in the place of the SPI ILI9488 display used by the PicoCalc. When loading the code into flash substitute `extra/common/ili9488_spi_8_5x8_font_all.fs`, `extra/common/ili9488_spi_8_6x8_font_all.fs`, or `extra/common/ili9488_spi_8_7x8_font_all.fs` with `extra/common/st7789v_spi_8_5x8_font_all.fs`, `extra/common/st7789v_spi_8_6x8_font_all.fs`, or `extra/common/st7789v_spi_8_7x8_font_all.fs`. Also, prior to loading edit `extra/rp_common/picocalc_term.fs` to set the GPIO selections for your particular setup. Also, omit sending `initializer picocalc-term::term-console` to the board in the PicoCalc.
+For those such as myself who do not yet possess a PicoCalc, some measures may be taken in its place. The PicoCalc terminal emulator can support an SPI ST7789V display in the place of the SPI ST7365P display used by the PicoCalc. When loading the code into flash substitute `extra/common/st7365p_spi_8_5x8_font_all.fs`, `extra/common/st7365p_spi_8_6x8_font_all.fs`, or `extra/common/st7365p_spi_8_7x8_font_all.fs` with `extra/common/st7789v_spi_8_5x8_font_all.fs`, `extra/common/st7789v_spi_8_6x8_font_all.fs`, or `extra/common/st7789v_spi_8_7x8_font_all.fs`. Also, prior to loading edit `extra/rp_common/picocalc_term.fs` to set the GPIO selections for your particular setup. Also, omit sending `initializer picocalc-term::term-console` to the board in the PicoCalc.
 
 Then, after the PicoCalc has rebooted, execute the following at the zeptoforth REPL via the serial console as a single line of code:
 
@@ -373,7 +373,7 @@ The graphical (but not text-only) PicoCalc terminal emulator exposes a display t
       rng import
     
       use-st7789v? not [if]
-        ili9488-8-common import
+        st7365p-8-common import
       [else]
         st7789v-8-common import
       [then]
@@ -403,7 +403,7 @@ The graphical (but not text-only) PicoCalc terminal emulator exposes a display t
 
 In this example routine, `picocalc-hello::hello` ( r g b x y -- ), `with-term-display` calls a quotation which takes the color (with elements from 0 to 255) and the (x, y) coordinate of the upper left-hand corner of the "Hello, world!" string to draw and draws that string with the specified coordinate and color on the display with the selected font.
 
-Afterwards, it calls `update-display` to copy the updated portion of the framebuffer to the display. Note that `update-display` is specific to the class `ili9488-8-common::<ili9488-8-common>` or `st7789v-8-common::<st7789v-8-common>` and does not belong to a shared superclass, so you will have to specifically import `ili9488-8-common` or `st7789v-8-common` depending on whether an actual PicoCalc is in use or not, respectively.
+Afterwards, it calls `update-display` to copy the updated portion of the framebuffer to the display. Note that `update-display` is specific to the class `st7365p-8-common::<st7365p-8-common>` or `st7789v-8-common::<st7789v-8-common>` and does not belong to a shared superclass, so you will have to specifically import `st7365p-8-common` or `st7789v-8-common` depending on whether an actual PicoCalc is in use or not, respectively.
 
 Note that `picocalc-term::with-term-display` locks the terminal emulator within the xt that it calls, so do not execute any code that may output text with `emit`, `type`, `.`, `."`, `.s`, `h.8`, or like within this xt as it may block forever because the output stream used by the terminal emulator is not emptied while it is locked and thus may become full.
 

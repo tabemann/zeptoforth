@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ili9488-8-common
+begin-module st7365p-8-common
 
   oo import
   pixmap8 import
@@ -26,9 +26,9 @@ begin-module ili9488-8-common
   pin import
   armv6m import
 
-  begin-module ili9488-8-common-internal
+  begin-module st7365p-8-common-internal
 
-    \ ILI9488 registers
+    \ ST7365P registers
     $01 constant REG_SWRESET
     $11 constant REG_SLPOUT
     $20 constant REG_INVOFF
@@ -97,56 +97,56 @@ begin-module ili9488-8-common
     
   end-module> import
   
-  <pixmap8> begin-class <ili9488-8-common>
+  <pixmap8> begin-class <st7365p-8-common>
 
-    continue-module ili9488-8-common-internal
+    continue-module st7365p-8-common-internal
       
       \ Inversion enabled setting
-      cell member ili9488-8-invert
+      cell member st7365p-8-invert
 
       \ Column offset
-      cell member ili9488-8-col-offset
+      cell member st7365p-8-col-offset
 
       \ Row offset
-      cell member ili9488-8-row-offset
+      cell member st7365p-8-row-offset
 
       \ DC pin
-      cell member ili9488-8-dc-pin
+      cell member st7365p-8-dc-pin
 
       \ CS pin
-      cell member ili9488-8-cs-pin
+      cell member st7365p-8-cs-pin
 
       \ Dirty rectangle start column
-      cell member ili9488-8-dirty-start-col
+      cell member st7365p-8-dirty-start-col
 
       \ Dirty rectangle end column
-      cell member ili9488-8-dirty-end-col
+      cell member st7365p-8-dirty-end-col
 
       \ Dirty rectangle start row
-      cell member ili9488-8-dirty-start-row
+      cell member st7365p-8-dirty-start-row
 
       \ Dirty rectangle end row
-      cell member ili9488-8-dirty-end-row
+      cell member st7365p-8-dirty-end-row
 
-      \ Initialize the ILI9488-8
-      method init-ili9488-8 ( self -- )
+      \ Initialize the ST7365P-8
+      method init-st7365p-8 ( self -- )
 
       \ Write blocking data
-      method >ili9488-8 ( addr count self -- )
+      method >st7365p-8 ( addr count self -- )
 
-      \ Send a command to the ILI9488-8
-      method cmd>ili9488-8 ( cmd self -- )
+      \ Send a command to the ST7365P-8
+      method cmd>st7365p-8 ( cmd self -- )
 
-      \ Send a command with arguments to the ILI9488-8
-      method cmd-args>ili9488-8 ( cmd addr count self -- )
+      \ Send a command with arguments to the ST7365P-8
+      method cmd-args>st7365p-8 ( cmd addr count self -- )
 
-      \ Send a byte of data to the ILI9488-8
-      method data>ili9488-8 ( data self -- )
+      \ Send a byte of data to the ST7365P-8
+      method data>st7365p-8 ( data self -- )
 
-      \ Set the ILI9488-8 window
-      method ili9488-8-window! ( start-col end-col start-row end-row self -- )
+      \ Set the ST7365P-8 window
+      method st7365p-8-window! ( start-col end-col start-row end-row self -- )
 
-      \ Update a rectangular space on the ILI9488 device
+      \ Update a rectangular space on the ST7365P device
       method update-area ( start-col end-col start-row end-row self -- )
       
     end-module
@@ -154,21 +154,21 @@ begin-module ili9488-8-common
     \ Set the backlight (this may be a no-op)
     method backlight! ( backlight self -- )
 
-    \ Update the ILI9488-8 device
+    \ Update the ST7365P-8 device
     method update-display ( self -- )
     
   end-class
 
-  <ili9488-8-common> begin-implement
+  <st7365p-8-common> begin-implement
 
     \ Constructor
     :noname { dc cs invert buf cols rows self -- }
       buf cols rows self <pixmap8>->new
-      invert self ili9488-8-invert !
-      dc self ili9488-8-dc-pin !
-      cs self ili9488-8-cs-pin !
-      0 self ili9488-8-col-offset !
-      0 self ili9488-8-row-offset !
+      invert self st7365p-8-invert !
+      dc self st7365p-8-dc-pin !
+      cs self st7365p-8-cs-pin !
+      0 self st7365p-8-col-offset !
+      0 self st7365p-8-row-offset !
       dc output-pin
       cs output-pin
       high dc pin!
@@ -180,125 +180,125 @@ begin-module ili9488-8-common
       self <object>->destroy
     ; define destroy
     
-    \ Initialize the ILI9488-8
+    \ Initialize the ST7365P-8
     :noname { self -- }
-      REG_SWRESET self cmd>ili9488-8
+      REG_SWRESET self cmd>st7365p-8
 
       150 ms
 
-      REG_SLPOUT self cmd>ili9488-8
+      REG_SLPOUT self cmd>st7365p-8
 
       500 ms
 
-      $F0 s\" \xC3" self cmd-args>ili9488-8
-      $F0 s\" \x96" self cmd-args>ili9488-8
-      REG_MADCTL s\" \x48" self cmd-args>ili9488-8
-      REG_COLMOD s\" \x65" self cmd-args>ili9488-8
-      REG_FRMCTR1 s\" \xA0" self cmd-args>ili9488-8
-      REG_INVCTR s\" \x00" self cmd-args>ili9488-8
-      REG_ETMOD s\" \xC6" self cmd-args>ili9488-8
-      REG_CECTRL1 s\" \x02\xE0" self cmd-args>ili9488-8
-      REG_PWCTR1 s\" \x80\x06" self cmd-args>ili9488-8
-      REG_PWCTR2 s\" \x15" self cmd-args>ili9488-8
-      REG_PWCTR3 s\" \xA7" self cmd-args>ili9488-8
-      REG_VMCTR1 s\" \x04" self cmd-args>ili9488-8
-      $E8 s\" \x40\x8A\x00\x00\x29\x19\xAA\x33" self cmd-args>ili9488-8
+      $F0 s\" \xC3" self cmd-args>st7365p-8
+      $F0 s\" \x96" self cmd-args>st7365p-8
+      REG_MADCTL s\" \x48" self cmd-args>st7365p-8
+      REG_COLMOD s\" \x65" self cmd-args>st7365p-8
+      REG_FRMCTR1 s\" \xA0" self cmd-args>st7365p-8
+      REG_INVCTR s\" \x00" self cmd-args>st7365p-8
+      REG_ETMOD s\" \xC6" self cmd-args>st7365p-8
+      REG_CECTRL1 s\" \x02\xE0" self cmd-args>st7365p-8
+      REG_PWCTR1 s\" \x80\x06" self cmd-args>st7365p-8
+      REG_PWCTR2 s\" \x15" self cmd-args>st7365p-8
+      REG_PWCTR3 s\" \xA7" self cmd-args>st7365p-8
+      REG_VMCTR1 s\" \x04" self cmd-args>st7365p-8
+      $E8 s\" \x40\x8A\x00\x00\x29\x19\xAA\x33" self cmd-args>st7365p-8
       REG_PGAMCTRL
       s\" \xF0\x06\x0F\x05\x04\x20\x37\x33\x4C\x37\x13\x14\x2B\x31"
-      self cmd-args>ili9488-8
+      self cmd-args>st7365p-8
       REG_NGAMCTRL
       s\" \xF0\x11\x1B\x11\x0F\x0A\x37\x43\x4C\x37\x13\x13\x2C\x32"
-      self cmd-args>ili9488-8
+      self cmd-args>st7365p-8
 
 
-      $F0 s\" \xC3" self cmd-args>ili9488-8
-      $F0 s\" \x96" self cmd-args>ili9488-8
+      $F0 s\" \xC3" self cmd-args>st7365p-8
+      $F0 s\" \x96" self cmd-args>st7365p-8
 
-      self ili9488-8-invert @ if
-        REG_INVON self cmd>ili9488-8
+      self st7365p-8-invert @ if
+        REG_INVON self cmd>st7365p-8
       else
-        REG_INVOFF self cmd>ili9488-8
+        REG_INVOFF self cmd>st7365p-8
       then
       
-      REG_TEON s\" \x00" self cmd-args>ili9488-8
-      REG_SLPOUT self cmd>ili9488-8
+      REG_TEON s\" \x00" self cmd-args>st7365p-8
+      REG_SLPOUT self cmd>st7365p-8
 
       120 ms
       
-      REG_DISPON self cmd>ili9488-8
+      REG_DISPON self cmd>st7365p-8
 
       120 ms
       
-      \ REG_INVON self cmd>ili9488-8
+      \ REG_INVON self cmd>st7365p-8
 
       self dim@ { cols rows }
-      0 cols 0 rows self ili9488-8-window!
+      0 cols 0 rows self st7365p-8-window!
 
       \ This may be a no-op
       true self backlight!
       
-    ; define init-ili9488-8
+    ; define init-st7365p-8
 
-    \ Send a command to the ILI9488-8
+    \ Send a command to the ST7365P-8
     :noname { W^ cmd self -- }
-      low self ili9488-8-dc-pin @ pin!
-      low self ili9488-8-cs-pin @ pin!
-      cmd 1 self >ili9488-8
-      high self ili9488-8-cs-pin @ pin!
-    ; define cmd>ili9488-8
+      low self st7365p-8-dc-pin @ pin!
+      low self st7365p-8-cs-pin @ pin!
+      cmd 1 self >st7365p-8
+      high self st7365p-8-cs-pin @ pin!
+    ; define cmd>st7365p-8
 
-    \ Send a command with arguments to the ILI9488-8
+    \ Send a command with arguments to the ST7365P-8
     :noname { W^ cmd addr count self -- }
-      low self ili9488-8-dc-pin @ pin!
-      low self ili9488-8-cs-pin @ pin!
-      cmd 1 self >ili9488-8
-      high self ili9488-8-dc-pin @ pin!
-      addr count self >ili9488-8
-      high self ili9488-8-cs-pin @ pin!
-    ; define cmd-args>ili9488-8
+      low self st7365p-8-dc-pin @ pin!
+      low self st7365p-8-cs-pin @ pin!
+      cmd 1 self >st7365p-8
+      high self st7365p-8-dc-pin @ pin!
+      addr count self >st7365p-8
+      high self st7365p-8-cs-pin @ pin!
+    ; define cmd-args>st7365p-8
 
     \ Set the entire display to be dirty
     :noname { self -- }
-      0 self ili9488-8-dirty-start-col !
-      self pixmap-cols @ self ili9488-8-dirty-end-col !
-      0 self ili9488-8-dirty-start-row !
-      self pixmap-rows @ self ili9488-8-dirty-end-row !
+      0 self st7365p-8-dirty-start-col !
+      self pixmap-cols @ self st7365p-8-dirty-end-col !
+      0 self st7365p-8-dirty-start-row !
+      self pixmap-rows @ self st7365p-8-dirty-end-row !
     ; define set-dirty
 
     \ Clear dirty rectangle
     :noname { self -- }
-      0 self ili9488-8-dirty-start-col !
-      0 self ili9488-8-dirty-end-col !
-      0 self ili9488-8-dirty-start-row !
-      0 self ili9488-8-dirty-end-row !
+      0 self st7365p-8-dirty-start-col !
+      0 self st7365p-8-dirty-end-col !
+      0 self st7365p-8-dirty-start-row !
+      0 self st7365p-8-dirty-end-row !
     ; define clear-dirty
     
-    \ Get whether an ILI9488-8 device is dirty
+    \ Get whether an ST7365P-8 device is dirty
     :noname { self -- dirty? }
-      self ili9488-8-dirty-start-col @ self ili9488-8-dirty-end-col @ <>
-      self ili9488-8-dirty-start-row @ self ili9488-8-dirty-end-row @ <> and
+      self st7365p-8-dirty-start-col @ self st7365p-8-dirty-end-col @ <>
+      self st7365p-8-dirty-start-row @ self st7365p-8-dirty-end-row @ <> and
     ; define dirty?
   
-    \ Dirty a pixel on an ILI9488-8 device
+    \ Dirty a pixel on an ST7365P-8 device
     :noname { col row self -- }
       self dirty? if
-        row self ili9488-8-dirty-start-row @ min
-        self ili9488-8-dirty-start-row !
-        row 1+ self ili9488-8-dirty-end-row @ max
-        self ili9488-8-dirty-end-row !
-        col self ili9488-8-dirty-start-col @ min
-        self ili9488-8-dirty-start-col !
-        col 1+ self ili9488-8-dirty-end-col @ max
-        self ili9488-8-dirty-end-col !
+        row self st7365p-8-dirty-start-row @ min
+        self st7365p-8-dirty-start-row !
+        row 1+ self st7365p-8-dirty-end-row @ max
+        self st7365p-8-dirty-end-row !
+        col self st7365p-8-dirty-start-col @ min
+        self st7365p-8-dirty-start-col !
+        col 1+ self st7365p-8-dirty-end-col @ max
+        self st7365p-8-dirty-end-col !
       else
-        row self ili9488-8-dirty-start-row !
-        row 1+ self ili9488-8-dirty-end-row !
-        col self ili9488-8-dirty-start-col !
-        col 1+ self ili9488-8-dirty-end-col !
+        row self st7365p-8-dirty-start-row !
+        row 1+ self st7365p-8-dirty-end-row !
+        col self st7365p-8-dirty-start-col !
+        col 1+ self st7365p-8-dirty-end-col !
       then
     ; define dirty-pixel
 
-    \ Dirty an area on an ILI9488-8 device
+    \ Dirty an area on an ST7365P-8 device
     :noname { start-col end-col start-row end-row self -- }
       start-col end-col < start-row end-row < and if
         start-col start-row self dirty-pixel
@@ -306,12 +306,12 @@ begin-module ili9488-8-common
       then
     ; define dirty-area
     
-    \ Set the ILI9488-8 window
+    \ Set the ST7365P-8 window
     :noname { start-col end-col start-row end-row self -- }
-      self ili9488-8-col-offset @ +to start-col
-      self ili9488-8-col-offset @ 1- +to end-col
-      self ili9488-8-row-offset @ +to start-row
-      self ili9488-8-row-offset @ 1- +to end-row
+      self st7365p-8-col-offset @ +to start-col
+      self st7365p-8-col-offset @ 1- +to end-col
+      self st7365p-8-row-offset @ +to start-row
+      self st7365p-8-row-offset @ 1- +to end-row
       0 0 { W^ col-values W^ row-values }
       start-col 8 rshift col-values c!
       start-col col-values 1 + c!
@@ -321,39 +321,39 @@ begin-module ili9488-8-common
       start-row row-values 1 + c!
       end-row 8 rshift row-values 2 + c!
       end-row row-values 3 + c!
-      REG_CASET col-values 4 self cmd-args>ili9488-8
-      REG_RASET row-values 4 self cmd-args>ili9488-8
-    ; define ili9488-8-window!
+      REG_CASET col-values 4 self cmd-args>st7365p-8
+      REG_RASET row-values 4 self cmd-args>st7365p-8
+    ; define st7365p-8-window!
 
-    \ Update a rectangular space on the ILI9488 device
+    \ Update a rectangular space on the ST7365P device
     :noname { start-col end-col start-row end-row self -- }
-      start-col end-col start-row end-row self ili9488-8-window!
-      low self ili9488-8-dc-pin @ pin!
-      low self ili9488-8-cs-pin @ pin!
+      start-col end-col start-row end-row self st7365p-8-window!
+      low self st7365p-8-dc-pin @ pin!
+      low self st7365p-8-cs-pin @ pin!
       REG_RAMWR { W^ cmd }
-      cmd 1 self >ili9488-8
-      high self ili9488-8-dc-pin @ pin!
+      cmd 1 self >st7365p-8
+      high self st7365p-8-dc-pin @ pin!
       end-row start-row ?do
         self start-col i end-col start-col - dup 1 lshift [:
           { self start-col row cols line-buf }
           start-col row self pixel-addr line-buf cols convert-8-to-16
-          line-buf cols 1 lshift self >ili9488-8
+          line-buf cols 1 lshift self >st7365p-8
         ;] with-aligned-allot
       loop
-      high self ili9488-8-cs-pin @ pin!
+      high self st7365p-8-cs-pin @ pin!
     ; define update-area
 
     \ Set the backlight (this may be a no-op)
     :noname { backlight self -- }
     ; define backlight!
 
-    \ Update the ILI9488 device
+    \ Update the ST7365P device
     :noname { self -- }
       self dirty? if 
-        self ili9488-8-dirty-start-col @
-        self ili9488-8-dirty-end-col @
-        self ili9488-8-dirty-start-row @
-        self ili9488-8-dirty-end-row @
+        self st7365p-8-dirty-start-col @
+        self st7365p-8-dirty-end-col @
+        self st7365p-8-dirty-start-row @
+        self st7365p-8-dirty-end-row @
         self update-area
         self clear-dirty
       then

@@ -24,8 +24,8 @@ begin-module turtle
   picocalc-term import
   pixmap8 import
   pixmap8-utils import
-  defined? ili9488-8-common [if]
-    ili9488-8-common import
+  defined? st7365p-8-common [if]
+    st7365p-8-common import
   [else]
     defined? st7789v-8-common [if]
       st7789v-8-common import

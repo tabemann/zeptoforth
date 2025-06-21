@@ -25,4 +25,4 @@
 #include extra/common/pixmap8_utils.fs
 #include extra/common/font.fs
 #include extra/common/simple_font_6x8.fs
-#include extra/common/ili9488_spi_8.fs
+#include extra/common/st7365p_spi_8.fs

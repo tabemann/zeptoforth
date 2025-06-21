@@ -18,19 +18,17 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/common/ili9488_8_common.fs
+#include extra/common/st7365p_text_common.fs
 
-begin-module ili9488-8-spi
+begin-module st7365p-text-spi
 
   oo import
-  pixmap8 import
-  pixmap8-internal import
   pin import
   spi import
   armv6m import
-  ili9488-8-common import
+  st7365p-text-common import
 
-  begin-module ili9488-8-spi-internal
+  begin-module st7365p-text-spi-internal
 
     \ Maximum SPI clock
     62_500_000 constant max-clock
@@ -40,38 +38,41 @@ begin-module ili9488-8-spi
 
   end-module> import
   
-  <ili9488-8-common> begin-class <ili9488-8-spi>
+  <st7365p-text-common> begin-class <st7365p-text-spi>
 
-    continue-module ili9488-8-spi-internal
+    continue-module st7365p-text-spi-internal
 
       \ SPI device
-      cell member ili9488-8-device
+      cell member st7365p-text-device
       
       \ Reset pin
-      cell member ili9488-8-reset-pin
+      cell member st7365p-text-reset-pin
 
       \ DMA channels
-      cell member ili9488-8-dma0
-      cell member ili9488-8-dma1
-      
-      \ Reset the ILI9488-8
-      method reset-ili9488-8 ( self -- )
+      cell member st7365p-text-dma0
+      cell member st7365p-text-dma1
+
+      \ Reset the ST7365P-TEXT
+      method reset-st7365p-text ( self -- )
       
     end-module
 
-    \ Update the ILI9488-8 device
+    \ Update the ST7365P-TEXT device
     method update-display ( self -- )
     
   end-class
 
-  <ili9488-8-spi> begin-implement
+  <st7365p-text-spi> begin-implement
 
     \ Constructor
     :noname
-      { din sck dc cs reset invert buf cols rows device self -- }
-      dc cs invert buf cols rows self <ili9488-8-common>->new
-      device self ili9488-8-device !
-      reset self ili9488-8-reset-pin !
+      { device self }
+      { invert the-font buf cols rows phys-cols phys-rows -- }
+      { din sck dc cs reset }
+      dc cs invert the-font buf cols rows phys-cols phys-rows self
+      <st7365p-text-common>->new
+      device self st7365p-text-device !
+      reset self st7365p-text-reset-pin !
 
       reset output-pin
       low reset pin!
@@ -84,47 +85,48 @@ begin-module ili9488-8-spi
       device enable-spi
 
       [ rp? ] [if]
-        dma-pool::allocate-dma self ili9488-8-dma0 !
-        dma-pool::allocate-dma self ili9488-8-dma1 !
+        dma-pool::allocate-dma self st7365p-text-dma0 !
+        dma-pool::allocate-dma self st7365p-text-dma1 !
       [then]
 
-      self reset-ili9488-8
-      self ili9488-8-common-internal::init-ili9488-8
-      0 cols 0 rows self ili9488-8-common-internal::ili9488-8-window!
+      self reset-st7365p-text
+      self st7365p-text-common-internal::init-st7365p-text
+      0 phys-cols 0 phys-rows
+      self st7365p-text-common-internal::st7365p-text-window!
     ; define new
 
     \ Destructor
     :noname { self -- }
       [ rp? ] [if]
-        self ili9488-8-dma0 @ dma-pool::free-dma
-        self ili9488-8-dma1 @ dma-pool::free-dma
+        self st7365p-text-dma0 @ dma-pool::free-dma
+        self st7365p-text-dma1 @ dma-pool::free-dma
       [then]
-      self <ili9488-8-common>->destroy
+      self <st7365p-text-common>->destroy
     ; define destroy
     
-    \ Reset the ILI9488-8
+    \ Reset the ST7365P-TEXT
     :noname { self -- }
-      high self ili9488-8-reset-pin @ pin!
+      high self st7365p-text-reset-pin @ pin!
       200 ms
-      low self ili9488-8-reset-pin @ pin!
+      low self st7365p-text-reset-pin @ pin!
       200 ms
-      high self ili9488-8-reset-pin @ pin!
+      high self st7365p-text-reset-pin @ pin!
       200 ms
-    ; define reset-ili9488-8
+    ; define reset-st7365p-text
 
     \ Write blocking data
     :noname { addr count self -- }
       [ rp? ] [if]
-        addr count self ili9488-8-dma0 @ self ili9488-8-dma1 @
-        self ili9488-8-device @ buffer>spi-raw-dma drop
+        addr count self st7365p-text-dma0 @ self st7365p-text-dma1 @
+        self st7365p-text-device @ buffer>spi-raw-dma drop
       [else]
-        addr count self ili9488-8-device @ buffer>spi
+        addr count self st7365p-text-device @ buffer>spi
       [then]
-    ; define >ili9488-8
+    ; define >st7365p-text
 
-    \ Update the ILI9488 device
+    \ Update the ST7365P device
     :noname { self -- }
-      self ili9488-8-common::update-display
+      self st7365p-text-common::update-display
     ; define update-display
 
   end-implement

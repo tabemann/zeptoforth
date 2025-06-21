@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ili9488-text-common
+begin-module st7365p-text-common
 
   oo import
   bitmap import
@@ -28,9 +28,9 @@ begin-module ili9488-text-common
   pin import
   armv6m import
 
-  begin-module ili9488-text-common-internal
+  begin-module st7365p-text-common-internal
 
-    \ ILI9488 registers
+    \ ST7365P registers
     $01 constant REG_SWRESET
     $11 constant REG_SLPOUT
     $20 constant REG_INVOFF
@@ -72,65 +72,65 @@ begin-module ili9488-text-common
     
   end-module> import
   
-  <text8> begin-class <ili9488-text-common>
+  <text8> begin-class <st7365p-text-common>
 
-    continue-module ili9488-text-common-internal
+    continue-module st7365p-text-common-internal
 
       \ The font
-      cell member ili9488-text-font
+      cell member st7365p-text-font
 
       \ The physical number of columns
-      cell member ili9488-text-phys-cols
+      cell member st7365p-text-phys-cols
       
       \ The physical number of rows
-      cell member ili9488-text-phys-rows
+      cell member st7365p-text-phys-rows
 
       \ Inversion enabled setting
-      cell member ili9488-text-invert
+      cell member st7365p-text-invert
 
       \ Column offset
-      cell member ili9488-text-col-offset
+      cell member st7365p-text-col-offset
 
       \ Row offset
-      cell member ili9488-text-row-offset
+      cell member st7365p-text-row-offset
 
       \ DC pin
-      cell member ili9488-text-dc-pin
+      cell member st7365p-text-dc-pin
 
       \ CS pin
-      cell member ili9488-text-cs-pin
+      cell member st7365p-text-cs-pin
 
       \ Dirty rectangle start column
-      cell member ili9488-text-dirty-start-col
+      cell member st7365p-text-dirty-start-col
 
       \ Dirty rectangle end column
-      cell member ili9488-text-dirty-end-col
+      cell member st7365p-text-dirty-end-col
 
       \ Dirty rectangle start row
-      cell member ili9488-text-dirty-start-row
+      cell member st7365p-text-dirty-start-row
 
       \ Dirty rectangle end row
-      cell member ili9488-text-dirty-end-row
+      cell member st7365p-text-dirty-end-row
 
-      \ Initialize the ILI9488-text
-      method init-ili9488-text ( self -- )
+      \ Initialize the ST7365P-text
+      method init-st7365p-text ( self -- )
 
       \ Write blocking data
-      method >ili9488-text ( addr count self -- )
+      method >st7365p-text ( addr count self -- )
 
-      \ Send a command to the ILI9488-text
-      method cmd>ili9488-text ( cmd self -- )
+      \ Send a command to the ST7365P-text
+      method cmd>st7365p-text ( cmd self -- )
 
-      \ Send a command with arguments to the ILI9488-text
-      method cmd-args>ili9488-text ( cmd addr count self -- )
+      \ Send a command with arguments to the ST7365P-text
+      method cmd-args>st7365p-text ( cmd addr count self -- )
 
-      \ Send a byte of data to the ILI9488-text
-      method data>ili9488-text ( data self -- )
+      \ Send a byte of data to the ST7365P-text
+      method data>st7365p-text ( data self -- )
 
-      \ Set the ILI9488-text window
-      method ili9488-text-window! ( start-col end-col start-row end-row self -- )
+      \ Set the ST7365P-text window
+      method st7365p-text-window! ( start-col end-col start-row end-row self -- )
 
-      \ Update a rectangular space on the ILI9488 device
+      \ Update a rectangular space on the ST7365P device
       method update-area ( start-col end-col start-row end-row self -- )
 
       \ Populate a row
@@ -144,27 +144,27 @@ begin-module ili9488-text-common
     \ Set the backlight (this may be a no-op)
     method backlight! ( backlight self -- )
 
-    \ Update the ILI9488-text device
+    \ Update the ST7365P-text device
     method update-display ( self -- )
 
-    \ Clear the ILI9488-text device
+    \ Clear the ST7365P-text device
     method clear-display ( self -- )
     
   end-class
 
-  <ili9488-text-common> begin-implement
+  <st7365p-text-common> begin-implement
 
     \ Constructor
     :noname { dc cs invert the-font buf cols rows phys-cols phys-rows self -- }
       buf cols rows self <text8>->new
-      phys-cols self ili9488-text-phys-cols !
-      phys-rows self ili9488-text-phys-rows !
-      the-font self ili9488-text-font !
-      invert self ili9488-text-invert !
-      dc self ili9488-text-dc-pin !
-      cs self ili9488-text-cs-pin !
-      0 self ili9488-text-col-offset !
-      0 self ili9488-text-row-offset !
+      phys-cols self st7365p-text-phys-cols !
+      phys-rows self st7365p-text-phys-rows !
+      the-font self st7365p-text-font !
+      invert self st7365p-text-invert !
+      dc self st7365p-text-dc-pin !
+      cs self st7365p-text-cs-pin !
+      0 self st7365p-text-col-offset !
+      0 self st7365p-text-row-offset !
       dc output-pin
       cs output-pin
       high dc pin!
@@ -176,125 +176,125 @@ begin-module ili9488-text-common
       self <object>->destroy
     ; define destroy
     
-    \ Initialize the ILI9488-text
+    \ Initialize the ST7365P-text
     :noname { self -- }
-      REG_SWRESET self cmd>ili9488-text
+      REG_SWRESET self cmd>st7365p-text
 
       150 ms
 
-      REG_SLPOUT self cmd>ili9488-text
+      REG_SLPOUT self cmd>st7365p-text
 
       500 ms
 
-      $F0 s\" \xC3" self cmd-args>ili9488-text
-      $F0 s\" \x96" self cmd-args>ili9488-text
-      REG_MADCTL s\" \x48" self cmd-args>ili9488-text
-      REG_COLMOD s\" \x65" self cmd-args>ili9488-text
-      REG_FRMCTR1 s\" \xA0" self cmd-args>ili9488-text
-      REG_INVCTR s\" \x00" self cmd-args>ili9488-text
-      REG_ETMOD s\" \xC6" self cmd-args>ili9488-text
-      REG_CECTRL1 s\" \x02\xE0" self cmd-args>ili9488-text
-      REG_PWCTR1 s\" \x80\x06" self cmd-args>ili9488-text
-      REG_PWCTR2 s\" \x15" self cmd-args>ili9488-text
-      REG_PWCTR3 s\" \xA7" self cmd-args>ili9488-text
-      REG_VMCTR1 s\" \x04" self cmd-args>ili9488-text
-      $E8 s\" \x40\x8A\x00\x00\x29\x19\xAA\x33" self cmd-args>ili9488-text
+      $F0 s\" \xC3" self cmd-args>st7365p-text
+      $F0 s\" \x96" self cmd-args>st7365p-text
+      REG_MADCTL s\" \x48" self cmd-args>st7365p-text
+      REG_COLMOD s\" \x65" self cmd-args>st7365p-text
+      REG_FRMCTR1 s\" \xA0" self cmd-args>st7365p-text
+      REG_INVCTR s\" \x00" self cmd-args>st7365p-text
+      REG_ETMOD s\" \xC6" self cmd-args>st7365p-text
+      REG_CECTRL1 s\" \x02\xE0" self cmd-args>st7365p-text
+      REG_PWCTR1 s\" \x80\x06" self cmd-args>st7365p-text
+      REG_PWCTR2 s\" \x15" self cmd-args>st7365p-text
+      REG_PWCTR3 s\" \xA7" self cmd-args>st7365p-text
+      REG_VMCTR1 s\" \x04" self cmd-args>st7365p-text
+      $E8 s\" \x40\x8A\x00\x00\x29\x19\xAA\x33" self cmd-args>st7365p-text
       REG_PGAMCTRL
       s\" \xF0\x06\x0F\x05\x04\x20\x37\x33\x4C\x37\x13\x14\x2B\x31"
-      self cmd-args>ili9488-text
+      self cmd-args>st7365p-text
       REG_NGAMCTRL
       s\" \xF0\x11\x1B\x11\x0F\x0A\x37\x43\x4C\x37\x13\x13\x2C\x32"
-      self cmd-args>ili9488-text
+      self cmd-args>st7365p-text
 
 
-      $F0 s\" \xC3" self cmd-args>ili9488-text
-      $F0 s\" \x96" self cmd-args>ili9488-text
+      $F0 s\" \xC3" self cmd-args>st7365p-text
+      $F0 s\" \x96" self cmd-args>st7365p-text
 
-      self ili9488-text-invert @ if
-        REG_INVON self cmd>ili9488-text
+      self st7365p-text-invert @ if
+        REG_INVON self cmd>st7365p-text
       else
-        REG_INVOFF self cmd>ili9488-text
+        REG_INVOFF self cmd>st7365p-text
       then
       
-      REG_TEON s\" \x00" self cmd-args>ili9488-text
-      REG_SLPOUT self cmd>ili9488-text
+      REG_TEON s\" \x00" self cmd-args>st7365p-text
+      REG_SLPOUT self cmd>st7365p-text
 
       120 ms
       
-      REG_DISPON self cmd>ili9488-text
+      REG_DISPON self cmd>st7365p-text
 
       120 ms
 
       self char-dim@ { char-cols char-rows }
       self dim@ { cols rows }
-      0 char-cols cols * 0 char-rows rows * self ili9488-text-window!
+      0 char-cols cols * 0 char-rows rows * self st7365p-text-window!
 
       \ This may be a no-op
       true self backlight!
       
-    ; define init-ili9488-text
+    ; define init-st7365p-text
 
-    \ Send a command to the ILI9488-text
+    \ Send a command to the ST7365P-text
     :noname { W^ cmd self -- }
-      low self ili9488-text-dc-pin @ pin!
-      low self ili9488-text-cs-pin @ pin!
-      cmd 1 self >ili9488-text
-      high self ili9488-text-cs-pin @ pin!
-    ; define cmd>ili9488-text
+      low self st7365p-text-dc-pin @ pin!
+      low self st7365p-text-cs-pin @ pin!
+      cmd 1 self >st7365p-text
+      high self st7365p-text-cs-pin @ pin!
+    ; define cmd>st7365p-text
 
-    \ Send a command with arguments to the ILI9488-text
+    \ Send a command with arguments to the ST7365P-text
     :noname { W^ cmd addr count self -- }
-      low self ili9488-text-dc-pin @ pin!
-      low self ili9488-text-cs-pin @ pin!
-      cmd 1 self >ili9488-text
-      high self ili9488-text-dc-pin @ pin!
-      addr count self >ili9488-text
-      high self ili9488-text-cs-pin @ pin!
-    ; define cmd-args>ili9488-text
+      low self st7365p-text-dc-pin @ pin!
+      low self st7365p-text-cs-pin @ pin!
+      cmd 1 self >st7365p-text
+      high self st7365p-text-dc-pin @ pin!
+      addr count self >st7365p-text
+      high self st7365p-text-cs-pin @ pin!
+    ; define cmd-args>st7365p-text
 
     \ Set the entire display to be dirty
     :noname { self -- }
       self dim@ { cols rows }
-      0 self ili9488-text-dirty-start-col !
-      cols self ili9488-text-dirty-end-col !
-      0 self ili9488-text-dirty-start-row !
-      rows self ili9488-text-dirty-end-row !
+      0 self st7365p-text-dirty-start-col !
+      cols self st7365p-text-dirty-end-col !
+      0 self st7365p-text-dirty-start-row !
+      rows self st7365p-text-dirty-end-row !
     ; define set-dirty
 
     \ Clear dirty rectangle
     :noname { self -- }
-      0 self ili9488-text-dirty-start-col !
-      0 self ili9488-text-dirty-end-col !
-      0 self ili9488-text-dirty-start-row !
-      0 self ili9488-text-dirty-end-row !
+      0 self st7365p-text-dirty-start-col !
+      0 self st7365p-text-dirty-end-col !
+      0 self st7365p-text-dirty-start-row !
+      0 self st7365p-text-dirty-end-row !
     ; define clear-dirty
     
-    \ Get whether an ILI9488-text device is dirty
+    \ Get whether an ST7365P-text device is dirty
     :noname { self -- dirty? }
-      self ili9488-text-dirty-start-col @ self ili9488-text-dirty-end-col @ <>
-      self ili9488-text-dirty-start-row @ self ili9488-text-dirty-end-row @ <> and
+      self st7365p-text-dirty-start-col @ self st7365p-text-dirty-end-col @ <>
+      self st7365p-text-dirty-start-row @ self st7365p-text-dirty-end-row @ <> and
     ; define dirty?
   
-    \ Dirty a character on an ILI9488-text device
+    \ Dirty a character on an ST7365P-text device
     :noname { col row self -- }
       self dirty? if
-        row self ili9488-text-dirty-start-row @ min
-        self ili9488-text-dirty-start-row !
-        row 1+ self ili9488-text-dirty-end-row @ max
-        self ili9488-text-dirty-end-row !
-        col self ili9488-text-dirty-start-col @ min
-        self ili9488-text-dirty-start-col !
-        col 1+ self ili9488-text-dirty-end-col @ max
-        self ili9488-text-dirty-end-col !
+        row self st7365p-text-dirty-start-row @ min
+        self st7365p-text-dirty-start-row !
+        row 1+ self st7365p-text-dirty-end-row @ max
+        self st7365p-text-dirty-end-row !
+        col self st7365p-text-dirty-start-col @ min
+        self st7365p-text-dirty-start-col !
+        col 1+ self st7365p-text-dirty-end-col @ max
+        self st7365p-text-dirty-end-col !
       else
-        row self ili9488-text-dirty-start-row !
-        row 1+ self ili9488-text-dirty-end-row !
-        col self ili9488-text-dirty-start-col !
-        col 1+ self ili9488-text-dirty-end-col !
+        row self st7365p-text-dirty-start-row !
+        row 1+ self st7365p-text-dirty-end-row !
+        col self st7365p-text-dirty-start-col !
+        col 1+ self st7365p-text-dirty-end-col !
       then
     ; define dirty-char
 
-    \ Dirty an area on an ILI9488-text device
+    \ Dirty an area on an ST7365P-text device
     :noname { start-col end-col start-row end-row self -- }
       start-col end-col < start-row end-row < and if
         start-col start-row self dirty-char
@@ -302,12 +302,12 @@ begin-module ili9488-text-common
       then
     ; define dirty-area
     
-    \ Set the ILI9488-text window
+    \ Set the ST7365P-text window
     :noname { start-col end-col start-row end-row self -- }
-      self ili9488-text-col-offset @ +to start-col
-      self ili9488-text-col-offset @ 1- +to end-col
-      self ili9488-text-row-offset @ +to start-row
-      self ili9488-text-row-offset @ 1- +to end-row
+      self st7365p-text-col-offset @ +to start-col
+      self st7365p-text-col-offset @ 1- +to end-col
+      self st7365p-text-row-offset @ +to start-row
+      self st7365p-text-row-offset @ 1- +to end-row
       0 0 { W^ col-values W^ row-values }
       start-col 8 rshift col-values c!
       start-col col-values 1 + c!
@@ -317,36 +317,36 @@ begin-module ili9488-text-common
       start-row row-values 1 + c!
       end-row 8 rshift row-values 2 + c!
       end-row row-values 3 + c!
-      REG_CASET col-values 4 self cmd-args>ili9488-text
-      REG_RASET row-values 4 self cmd-args>ili9488-text
-    ; define ili9488-text-window!
+      REG_CASET col-values 4 self cmd-args>st7365p-text
+      REG_RASET row-values 4 self cmd-args>st7365p-text
+    ; define st7365p-text-window!
 
-    \ Update a rectangular space on the ILI9488 device
+    \ Update a rectangular space on the ST7365P device
     :noname { start-col end-col start-row end-row self -- }
       self char-dim@ { char-cols char-rows }
       start-col char-cols * to start-col
       end-col char-cols * to end-col
       start-row char-rows * to start-row
       end-row char-rows * to end-row
-      start-col end-col start-row end-row self ili9488-text-window!
-      low self ili9488-text-dc-pin @ pin!
-      low self ili9488-text-cs-pin @ pin!
+      start-col end-col start-row end-row self st7365p-text-window!
+      low self st7365p-text-dc-pin @ pin!
+      low self st7365p-text-cs-pin @ pin!
       REG_RAMWR { W^ cmd }
-      cmd 1 self >ili9488-text
-      high self ili9488-text-dc-pin @ pin!
+      cmd 1 self >st7365p-text
+      high self st7365p-text-dc-pin @ pin!
       end-row start-row ?do
         self start-col i end-col start-col - dup 1 lshift [:
           { self start-col row cols line-buf }
           start-col row cols line-buf self populate-row
-          line-buf cols 1 lshift self >ili9488-text
+          line-buf cols 1 lshift self >st7365p-text
         ;] with-aligned-allot
       loop
-      high self ili9488-text-cs-pin @ pin!
+      high self st7365p-text-cs-pin @ pin!
     ; define update-area
     
     \ Populate a row
     :noname { start-col row cols line-buf self -- }
-      self ili9488-text-font @ { the-font }
+      self st7365p-text-font @ { the-font }
       self dim@ { text-cols text-rows }
       self char-dim@ { char-cols char-rows }
       row char-rows u/mod { font-row text-row }
@@ -405,26 +405,26 @@ begin-module ili9488-text-common
       then
     ; define populate-row
 
-    \ Clear the ILI9488-text device
+    \ Clear the ST7365P-text device
     :noname { self -- }
-      self ili9488-text-phys-cols @ { cols }
-      self ili9488-text-phys-rows @ { rows }
-      0 cols 0 rows self ili9488-text-window!
-      low self ili9488-text-dc-pin @ pin!
-      low self ili9488-text-cs-pin @ pin!
+      self st7365p-text-phys-cols @ { cols }
+      self st7365p-text-phys-rows @ { rows }
+      0 cols 0 rows self st7365p-text-window!
+      low self st7365p-text-dc-pin @ pin!
+      low self st7365p-text-cs-pin @ pin!
       REG_RAMWR { W^ cmd }
-      cmd 1 self >ili9488-text
-      high self ili9488-text-dc-pin @ pin!
+      cmd 1 self >st7365p-text
+      high self st7365p-text-dc-pin @ pin!
       self rows cols dup 1 lshift [: { self rows cols line-buf }
         line-buf cols 1 lshift 0 fill
-        rows 0 ?do line-buf cols 1 lshift self >ili9488-text loop
+        rows 0 ?do line-buf cols 1 lshift self >st7365p-text loop
       ;] with-allot
-      high self ili9488-text-cs-pin @ pin!
+      high self st7365p-text-cs-pin @ pin!
     ; define clear-display
 
     \ Get the character dimensions
     :noname { self -- cols rows }
-      self ili9488-text-font @ { the-font }
+      self st7365p-text-font @ { the-font }
       the-font char-cols @ the-font char-rows @
     ; define char-dim@
 
@@ -432,13 +432,13 @@ begin-module ili9488-text-common
     :noname { backlight self -- }
     ; define backlight!
 
-    \ Update the ILI9488 device
+    \ Update the ST7365P device
     :noname { self -- }
       self dirty? if 
-        self ili9488-text-dirty-start-col @
-        self ili9488-text-dirty-end-col @
-        self ili9488-text-dirty-start-row @
-        self ili9488-text-dirty-end-row @
+        self st7365p-text-dirty-start-col @
+        self st7365p-text-dirty-end-col @
+        self st7365p-text-dirty-start-row @
+        self st7365p-text-dirty-end-row @
         self update-area
         self clear-dirty
       then

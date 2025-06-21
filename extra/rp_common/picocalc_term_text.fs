@@ -28,8 +28,8 @@ begin-module picocalc-term
   console import
 
   use-st7789v? not [if]
-    ili9488-text-common import
-    ili9488-text-spi import
+    st7365p-text-common import
+    st7365p-text-spi import
   [else]
     st7789v-text-common import
     st7789v-text-spi import
@@ -51,7 +51,7 @@ begin-module picocalc-term
     begin-module picocalc-term-internal
       
       \ The display
-      use-st7789v? not [if] <ili9488-text-spi> [else] <st7789v-text-spi> [then]
+      use-st7789v? not [if] <st7365p-text-spi> [else] <st7789v-text-spi> [then]
       class-size member display-intf
       
       \ The display buffer
@@ -84,7 +84,7 @@ begin-module picocalc-term
         display-rst-pin display-invert
         the-font self display-buf term-width term-height
         display-width display-height
-        display-spi-device <ili9488-text-spi> self display-intf init-object
+        display-spi-device <st7365p-text-spi> self display-intf init-object
       [else]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-bl-pin display-rst-pin

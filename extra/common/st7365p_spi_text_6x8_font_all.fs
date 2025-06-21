@@ -23,5 +23,5 @@
 #include extra/common/bitmap_utils.fs
 #include extra/common/text8.fs
 #include extra/common/font.fs
-#include extra/common/simple_font.fs
-#include extra/common/ili9488_spi_text.fs
+#include extra/common/simple_font_6x8.fs
+#include extra/common/st7365p_spi_text.fs

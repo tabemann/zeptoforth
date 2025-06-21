@@ -32,8 +32,8 @@ begin-module snow-wind
   task-pool import
   
   use-st7789v? not [if]
-    ili9488-8-common import
-    ili9488-8-spi import
+    st7365p-8-common import
+    st7365p-8-spi import
   [else]
     st7789v-8-common import
     st7789v-8-spi import
