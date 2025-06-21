@@ -691,7 +691,7 @@ begin-module picocalc-term-common
     \ Start the terminal emulator task
     :noname { self -- }
       picocalc-tasks-core self bios-intf init-picocalc-bios
-      self 1 ['] run-term 1024 256 1024 picocalc-tasks-core spawn-on-core
+      self 1 ['] run-term 1536 256 1536 picocalc-tasks-core spawn-on-core
       self term-task !
       c" term" self term-task @ task-name!
       self term-task-mailbox 1 self term-task @ config-notify

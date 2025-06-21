@@ -280,7 +280,7 @@ begin-module picocalc-bios
       picocalc-bios-i2c-device enable-i2c
       PICOCALC_RST self send-command drop
       picocalc-rst-delay ms
-      self 1 ['] run-keys 320 128 512 core spawn-on-core { keys-task }
+      self 1 ['] run-keys 320 128 768 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
     ; define init-picocalc-bios
