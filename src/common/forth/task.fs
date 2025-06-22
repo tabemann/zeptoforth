@@ -1743,7 +1743,7 @@ begin-module task
       free-end @ swap -
       swap 4 align swap tuck task-rstack-size h!
       swap 4 align swap tuck task-stack-size h!
-      swap 4 align swap tuck task-dict-size !
+      swap 4 align next-user-space 4 align + swap tuck task-dict-size !
       dup dup task-dict-size @ - free-end !
     ;] critical-with-all-core-spinlock
   ;
