@@ -450,7 +450,7 @@ Get output state for GPIO
 ##### `GPIO_CTRL_FUNCSEL@`
 ( index -- function )
 
-Set the function select for GPIO
+Get the function select for GPIO
 
 ##### `INTR_GPIO_EDGE_LOW!`
 ( index -- )
