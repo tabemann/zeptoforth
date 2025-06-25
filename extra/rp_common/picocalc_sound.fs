@@ -167,7 +167,7 @@ begin-module picocalc-sound
       0 sound-pwm-index pwm-counter-compare-b!
       0 1 sound-pwm-index pwm-clock-div!
       sound-pwm-index bit enable-pwm
-      self 1 ['] run-sound 256 128 768 core spawn-on-core { sound-task }
+      self 1 ['] run-sound 512 128 768 core spawn-on-core { sound-task }
       c" sound" sound-task task-name!
       sound-task run
     ; define init-sound
