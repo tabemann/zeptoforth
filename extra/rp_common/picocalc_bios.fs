@@ -184,11 +184,17 @@ begin-module picocalc-bios
       \ Handle a request
       method handle-request ( self -- )
       
-      \ Send a command
-      method send-command ( command self -- success? )
+      \ Send an 8-bit command
+      method send-command8 ( command self -- success? )
 
-      \ Receive a reply
-      method recv-reply ( self -- data success? )
+      \ Send a 16-bit command
+      method send-command16 ( command self -- success? )
+
+      \ Receive an 8-bit reply
+      method recv-reply8 ( self -- data success? )
+      
+      \ Receive a 16-bit reply
+      method recv-reply16 ( self -- data success? )
 
       \ Handle getting a count
       method get-count ( self -- )
@@ -278,13 +284,13 @@ begin-module picocalc-bios
       picocalc-bios-i2c-device 7-bit-i2c-addr
       picocalc-bios-i2c-addr picocalc-bios-i2c-device i2c-target-addr!
       picocalc-bios-i2c-device enable-i2c
-      PICOCALC_RST self send-command drop
+      PICOCALC_RST self send-command8 drop
       picocalc-rst-delay ms
       self 1 ['] run-keys 512 128 768 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
     ; define init-picocalc-bios
-        
+    
     \ Are there keys to read?
     :noname ( self -- read? )
       picocalc-keys-chan chan-empty? not
@@ -319,7 +325,7 @@ begin-module picocalc-bios
       then
     ; define handle-exception
 
-    \ Send a command
+    \ Send an 8-bit command
     :noname { command self -- success? }
       command self [:
         [: { W^ buf self }
@@ -342,9 +348,34 @@ begin-module picocalc-bios
         ;] picocalc-bios-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop false then
-    ; define send-command
+    ; define send-command8
 
-    \ Receive a reply
+    \ Send a 16-bit command
+    :noname { command self -- success? }
+      command self [:
+        [: { W^ buf self }
+          emulate-keys? self picocalc-emulate @ or if
+            self picocalc-emulate-write @ if
+              false self picocalc-emulate-write ! true exit
+            then
+            buf c@ WRITE_BIT and if true self picocalc-emulate-write ! then
+            WRITE_BIT buf cbic!
+            buf c@ PICOCALC_RST <> self picocalc-emulate !
+            buf c@ PICOCALC_COUNT = self picocalc-emulate-get-count !
+            buf c@ PICOCALC_KEY = self picocalc-emulate-get-key !
+            buf c@ PICOCALC_BATTERY = self picocalc-emulate-read-battery !
+            buf c@ PICOCALC_BACKLIGHT = self picocalc-emulate-backlight !
+            buf c@ PICOCALC_KBD_BACKLIGHT =
+            self picocalc-emulate-kbd-backlight !
+            true exit
+          then
+          buf 2 picocalc-bios-i2c-device >i2c-stop 2 =
+        ;] picocalc-bios-timeout with-timeout
+      ;] try
+      ?dup if self handle-exception drop false then
+    ; define send-command16
+
+    \ Receive a 16-bit reply
     :noname { self -- data success? }
       self [:
         [: { self }
@@ -398,19 +429,75 @@ begin-module picocalc-bios
         ;] picocalc-bios-timeout with-timeout
       ;] try
       ?dup if self handle-exception drop 0 false then
-    ; define recv-reply
+    ; define recv-reply16
+
+    \ Receive an 8-bit reply
+    :noname { self -- data success? }
+      self [:
+        [: { self }
+          self picocalc-emulate @ if
+            self picocalc-emulate-get-count @ if
+              false self picocalc-emulate-get-count !
+              [: key? ;] console::with-serial-input if
+                1 true
+              else
+                false self picocalc-emulate !
+                0 true
+              then
+            else
+              false self picocalc-emulate !
+              self picocalc-emulate-get-key @ if
+                false self picocalc-emulate-get-key !
+                [: key? ;] console::with-serial-input if
+                  [: key ;] console::with-serial-input
+                  dup $0D = if drop $0A then
+                  dup $7F = if drop $08 then
+                  dup $1B = if drop KEY_ESC then
+                  8 lshift $01 or true
+                else
+                  0 true
+                then
+              else
+                self picocalc-emulate-read-battery @ if
+                  false self picocalc-emulate-read-battery ! 100
+                else
+                  self picocalc-emulate-backlight @ if
+                    false self picocalc-emulate-backlight ! 255
+                  else
+                    self picocalc-emulate-kbd-backlight @ if
+                      false self picocalc-emulate-kbd-backlight ! 255
+                    else
+                      0
+                    then
+                  then
+                then
+                true
+              then
+            then
+            exit
+          then
+          0 { W^ buf }
+          buf 1 picocalc-bios-i2c-device i2c-stop> 1 = if
+            buf c@ true
+          else
+            0 false
+          then
+        ;] picocalc-bios-timeout with-timeout
+      ;] try
+      ?dup if self handle-exception drop 0 false then
+    ; define recv-reply8
 
     \ Handle a request
     :noname { self -- }
       0 { W^ buffer }
       buffer cell self picocalc-bios-rchan recv-rchan-no-block 0> if
-        begin buffer c@ self send-command until
-        self do-delay
         buffer c@ WRITE_BIT and if
-          begin buffer 1+ c@ self send-command until
-          self do-delay
+          begin buffer h@ self send-command16 until
+        else
+          begin buffer c@ self send-command8 until
         then
-        begin self recv-reply ?dup if swap buffer ! else nip then until
+        self do-delay
+        begin self recv-reply8 ?dup if swap buffer ! else nip then until
         buffer cell self picocalc-bios-rchan reply-rchan
         self do-delay
       then
@@ -419,11 +506,11 @@ begin-module picocalc-bios
     \ Handle getting a count
     :noname { self -- }
       self picocalc-sent-command @ not if
-        PICOCALC_COUNT self send-command if
+        PICOCALC_COUNT self send-command8 if
           true self picocalc-sent-command !
         then
       else
-        self recv-reply if
+        self recv-reply16 if
           PICOCALC_COUNT_MASK and ?dup if self picocalc-get-key-count ! then
           false self picocalc-sent-command !
         else
@@ -435,11 +522,11 @@ begin-module picocalc-bios
     \ Handle getting a key
     :noname { self -- }
       self picocalc-sent-command @ not if
-        PICOCALC_KEY self send-command if
+        PICOCALC_KEY self send-command8 if
           true self picocalc-sent-command !
         then
       else
-        self recv-reply if
+        self recv-reply16 if
           self handle-picocalc-key
           false self picocalc-sent-command !
           -1 self picocalc-get-key-count +!
