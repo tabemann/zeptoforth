@@ -173,7 +173,7 @@ begin-module ntc
   ;
   
   \ Set up thermistor's constants (a, b, c)
-  : setup-abc ( D: a-val D: b-val D: c-val ntc -- )
+  : setup-abc ( f: a-val f: b-val f: c-val ntc -- )
     [ debug? ] [if] s" -> setup-abc" dbg [then]
     \ c-val
     dup >r c-val 2!
@@ -195,15 +195,15 @@ begin-module ntc
   ;
     
   \ Measure temperature
-  : ntc@ ( ntc -- )  
-    [ debug? ] [if] s" -> ntc@" dbg [then]
+  : measure-ntc ( ntc -- )  
+    [ debug? ] [if] s" -> measure-ntc" dbg [then]
     dup >r
     ntc-init
     r@ ntc-adc@
     r@ calc-r
     r@ temp-k? if r@ temp-k, else r@ temp-k then
     r> temp-c
-    [ debug? ] [if] s" <- ntc@" cr.s [then]
+    [ debug? ] [if] s" <- measure-ntc" cr.s [then]
   ;
   
   \ Put temperatures to stack

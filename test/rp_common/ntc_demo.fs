@@ -46,7 +46,7 @@ begin-module ntc-demo
 
     ntc-internal import
     \ Check calculation, result must be 25 ºC
-    : calc-check ( D: B-val D: R0 -- ) { D: B-val D: R0 -- }
+    : calc-check ( f: B-val f: R0 -- ) { f: B-val f: R0 -- }
       0,0 B-val 0,0 my-ntc setup-abc
       3,3 R0 my-ntc setup-therm
       \ Force set value of rt (without reading value from ADC)
@@ -87,13 +87,13 @@ begin-module ntc-demo
     ;
   
     \ Demo with measuring
-    : measure-demo ( adc chan pin D: B-val D: R0 -- ) 
-      { adc chan pin D: B-val D: R0 -- }
+    : measure-demo ( adc chan pin f: B-val f: R0 -- ) 
+      { adc chan pin f: B-val f: R0 -- }
       adc 0 pin my-ntc setup-adc
       0,0 B-val 0,0 my-ntc setup-abc
       3,3 R0 my-ntc setup-therm
 
-      my-ntc ntc@ my-ntc temp@
+      my-ntc measure-ntc my-ntc temp@
      
       cr ." Thermistor " R0 f. ." Ω at 25 ºC demo" 
       cr ." Celsius: " f.
