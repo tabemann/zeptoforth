@@ -76,7 +76,7 @@ begin-module picocalc-bios
     10000 constant picocalc-bios-i2c-baud
     
     \ PicoCalc BIOS interval in milliseconds
-    16 constant picocalc-bios-interval
+    24 constant picocalc-bios-interval
 
     \ PicoCalc emulated BIOS interval in milliseconds
     8 constant emulate-picocalc-bios-interval
@@ -190,9 +190,6 @@ begin-module picocalc-bios
       \ Send a 16-bit command
       method send-command16 ( command self -- success? )
 
-      \ Receive an 8-bit reply
-      method recv-reply8 ( self -- data success? )
-      
       \ Receive a 16-bit reply
       method recv-reply16 ( self -- data success? )
 
@@ -403,13 +400,16 @@ begin-module picocalc-bios
                 then
               else
                 self picocalc-emulate-read-battery @ if
-                  false self picocalc-emulate-read-battery ! 100
+                  false self picocalc-emulate-read-battery !
+                  [ PICOCALC_BATTERY 100 8 lshift or ] literal
                 else
                   self picocalc-emulate-backlight @ if
-                    false self picocalc-emulate-backlight ! 255
+                    false self picocalc-emulate-backlight !
+                    [ PICOCALC_BACKLIGHT 255 8 lshift or ] literal
                   else
                     self picocalc-emulate-kbd-backlight @ if
-                      false self picocalc-emulate-kbd-backlight ! 255
+                      false self picocalc-emulate-kbd-backlight !
+                      [ PICOCALC_KBD_BACKLIGHT 255 8 lshift or ] literal
                     else
                       0
                     then
@@ -431,74 +431,24 @@ begin-module picocalc-bios
       ?dup if self handle-exception drop 0 false then
     ; define recv-reply16
 
-    \ Receive an 8-bit reply
-    :noname { self -- data success? }
-      self [:
-        [: { self }
-          self picocalc-emulate @ if
-            self picocalc-emulate-get-count @ if
-              false self picocalc-emulate-get-count !
-              [: key? ;] console::with-serial-input if
-                1 true
-              else
-                false self picocalc-emulate !
-                0 true
-              then
-            else
-              false self picocalc-emulate !
-              self picocalc-emulate-get-key @ if
-                false self picocalc-emulate-get-key !
-                [: key? ;] console::with-serial-input if
-                  [: key ;] console::with-serial-input
-                  dup $0D = if drop $0A then
-                  dup $7F = if drop $08 then
-                  dup $1B = if drop KEY_ESC then
-                  8 lshift $01 or true
-                else
-                  0 true
-                then
-              else
-                self picocalc-emulate-read-battery @ if
-                  false self picocalc-emulate-read-battery ! 100
-                else
-                  self picocalc-emulate-backlight @ if
-                    false self picocalc-emulate-backlight ! 255
-                  else
-                    self picocalc-emulate-kbd-backlight @ if
-                      false self picocalc-emulate-kbd-backlight ! 255
-                    else
-                      0
-                    then
-                  then
-                then
-                true
-              then
-            then
-            exit
-          then
-          0 { W^ buf }
-          buf 1 picocalc-bios-i2c-device i2c-stop> 1 = if
-            buf c@ true
-          else
-            0 false
-          then
-        ;] picocalc-bios-timeout with-timeout
-      ;] try
-      ?dup if self handle-exception drop 0 false then
-    ; define recv-reply8
-
     \ Handle a request
     :noname { self -- }
-      0 { W^ buffer }
-      buffer cell self picocalc-bios-rchan recv-rchan-no-block 0> if
-        buffer c@ WRITE_BIT and if
-          begin buffer h@ self send-command16 until
+      0 0 { W^ send-buffer W^ recv-buffer }
+      send-buffer cell self picocalc-bios-rchan recv-rchan-no-block 0> if
+        send-buffer c@ WRITE_BIT and if
+          begin send-buffer h@ self send-command16 until
         else
-          begin buffer c@ self send-command8 until
+          begin send-buffer c@ self send-command8 until
         then
         self do-delay
-        begin self recv-reply8 ?dup if swap buffer ! else nip then until
-        buffer cell self picocalc-bios-rchan reply-rchan
+        begin
+          self recv-reply16 dup if
+            swap 8 rshift recv-buffer !
+          else
+            nip
+          then
+        until
+        recv-buffer cell self picocalc-bios-rchan reply-rchan
         self do-delay
       then
     ; define handle-request
