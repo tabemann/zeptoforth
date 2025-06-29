@@ -611,9 +611,6 @@ begin-module cyw43-control
       
     ; define wait-for-cyw43-join
 
-    \ Echo a character
-    : echo [: ." *" emit ." * " ;] usb::with-usb-output ;
-    
     \ Start an AP
     :noname
       ssid-info-with-index-size [: { siwi }
