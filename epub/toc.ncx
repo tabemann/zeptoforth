@@ -16727,14 +16727,14 @@
       </navPoint>
       <navPoint id="navPoint2787" playOrder="2560">
         <navLabel>
-          <text>ntp</text>
+          <text>ntp-ipv4 and ntp-ipv6</text>
         </navLabel>
-        <content src="extra/ntp.xhtml#ntp" />  
+        <content src="extra/ntp.xhtml#ntp-ipv4-and-ntp-ipv6" />  
         <navPoint id="navPoint2788" playOrder="2560">
           <navLabel>
-            <text>ntp</text>
+            <text>ntp-ipv4 and ntp-ipv6</text>
           </navLabel>
-          <content src="extra/ntp.xhtml#ntp" />  
+          <content src="extra/ntp.xhtml#ntp-ipv4-and-ntp-ipv6" />  
         </navPoint>
         <navPoint id="navPoint2789" playOrder="2561">
           <navLabel>
@@ -16744,7 +16744,7 @@
         </navPoint>
         <navPoint id="navPoint2790" playOrder="2562">
           <navLabel>
-            <text>&lt;ntp&gt;</text>
+            <text>&lt;ntp-ipv4&gt; and &lt;ntp-ipv6&gt;</text>
           </navLabel>
           <content src="extra/ntp.xhtml#id1" />  
         </navPoint>
