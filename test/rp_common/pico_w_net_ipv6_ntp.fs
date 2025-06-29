@@ -31,7 +31,7 @@
 \ 
 \ Then execute from the base directory of zeptoforth:
 \ 
-\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv6_all.fs
 \
 \ Afterwards, if you had not already installed the CYW43439 firmware, driver,
 \ and zeptoIP, make sure to reboot zeptoforth, either by executing:
@@ -42,14 +42,14 @@
 \ 
 \ Use instructions
 \ 
-\ 1. Load extra/rp2040/net/net_ntp_ipv4.fs if using an RP2040 or
-\    extra/rp2350/net/net_ntp_ipv4.fs if using an RP2350 (relative to the base
+\ 1. Load extra/rp2040/net/net_ntp_ipv6.fs if using an RP2040 or
+\    extra/rp2350/net/net_ntp_ipv6.fs if using an RP2350 (relative to the base
 \    directory of zeptoforth) and then this code into RAM on a zeptoforth
 \    install where zeptoIP has already been installed using a terminal which
 \    supports zeptoforth, e.g. zeptocom.js or e4thcom in noforth mode.
 \ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
 \
-\ This will start an NTP client pointed at pool.ntp.org and regularly report
+\ This will start an NTP client pointed at 2.pool.ntp.org and regularly report
 \ the time.
 
 begin-module pico-w-net-ntp
@@ -63,29 +63,29 @@ begin-module pico-w-net-ntp
   net-consts import
   net-config import
   net import
-  net-ipv4 import
+  net-ipv6 import
   endpoint-process import
-  simple-cyw43-net-ipv4 import
-  pico-w-cyw43-net-ipv4 import
-  ntp-ipv4 import
+  simple-cyw43-net-ipv6 import
+  pico-w-cyw43-net-ipv6 import
+  ntp-ipv6 import
   rtc import
 
-  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv6> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
   
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  <ntp-ipv4> class-size buffer: my-ntp
+  <ntp-ipv6> class-size buffer: my-ntp
 
   \ Initialize the test
   : init-test ( -- )
-    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv6> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
-    my-interface @ <ntp-ipv4> my-ntp init-object
+    my-interface @ <ntp-ipv6> my-ntp init-object
     my-ntp my-cyw43-net net-endpoint-process@ add-endpoint-handler
   ;
 
@@ -113,14 +113,36 @@ begin-module pico-w-net-ntp
     EVENT_DISASSOC my-cyw43-control @ cyw43-control::enable-cyw43-event
     EVENT_DISASSOC_IND my-cyw43-control @ cyw43-control::enable-cyw43-event
     my-cyw43-net run-net-process
-    cr ." Discovering IPv4 address..."
-    my-interface @ discover-ipv4-addr
-    my-interface @ intf-ipv4-addr@ cr ." IPv4 address: " ipv4.
-    my-interface @ intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
-    my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
-    my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
+    cr ." Discovering IPv6 address..."
+    cr ." Autoconfiguring link-local IPv6 address... "
+    my-interface @ autoconfigure-link-local-ipv6-addr if
+      ." Success"
+    else
+      ." Failure"
+    then
+    cr ." Discovering IPv6 router..."
+    my-interface @ discover-ipv6-router
+    cr ." Discovering IPv6 address..."
+    my-interface @ discover-ipv6-addr if
+      ." Success"
+    else
+      ." Failure"
+    then
+    my-interface @ intf-ipv6-addr@ cr ." Primary IPv6 address: " ipv6.
+    my-interface @ intf-link-local-ipv6-addr@
+    cr ." Link-local IPv6 address: " ipv6.
+    my-interface @ intf-slaac-ipv6-addr@ cr ." SLAAC IPv6 address: " ipv6.
+    my-interface @ intf-dhcpv6-ipv6-addr@ cr ." DHCPv6 IPv6 address: " ipv6.
+    my-interface @ intf-ipv6-prefix@ cr ." IPv6 prefix: " ipv6.
+    my-interface @ intf-autonomous@ cr ." Autonomous: "
+    if ." yes" else ." no" then
+    my-interface @ intf-ipv6-prefix-len@ cr ." IPv6 prefix length: " .
+    my-interface @ gateway-ipv6-addr@ cr ." Gateway IPv6 address: " ipv6.
+    cr ." Discovering IPv6 DNS server..."
+    my-interface @ discover-dns-ipv6-addr
+    my-interface @ dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " ipv6.
     my-cyw43-net toggle-pico-w-led
-    s" pool.ntp.org" ntp-port my-ntp init-ntp
+    s" 2.pool.ntp.org" ntp-port my-ntp init-ntp
     0 [:
       begin
         my-ntp time-set? if
