@@ -49,7 +49,7 @@
 \    supports zeptoforth, e.g. zeptocom.js or e4thcom in noforth mode.
 \ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
 \
-\ This will start an NTP client pointed at pool.ntp.org and regularly report
+\ This will start an NTP client pointed at 2.pool.ntp.org and regularly report
 \ the time.
 
 begin-module pico-w-net-ntp
@@ -142,7 +142,7 @@ begin-module pico-w-net-ntp
     my-interface @ discover-dns-ipv6-addr
     my-interface @ dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " ipv6.
     my-cyw43-net toggle-pico-w-led
-    s" pool.ntp.org" ntp-port my-ntp init-ntp
+    s" 2.pool.ntp.org" ntp-port my-ntp init-ntp
     0 [:
       begin
         my-ntp time-set? if

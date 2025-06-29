@@ -221,7 +221,7 @@ begin-module ntp-ipv6
       0. self ntp-start-time 2!
       0. self ntp-start-us 2!
       0 self ntp-server-dns-name-len !
-      320 128 1024 0 self ntp-alarm-task init-alarm-task
+      320 256 1024 0 self ntp-alarm-task init-alarm-task
     ; define new
 
     \ Initialize the NTP client
@@ -339,7 +339,7 @@ begin-module ntp-ipv6
 
     \ Send an NTP packet
     :noname { self -- }
-      self ntp-server-ipv6-addr ipv6-unaligned@ 0 0 0 0 ipv6= if
+      self ntp-server-ipv6-addr ipv6-unaligned@ 0 0 0 0 ipv6= not if
         self ntp-reschedule @ not if
           self ntp-endpoint @ 0= if
             EPHEMERAL_PORT self ntp-interface @ allocate-udp-listen-endpoint if
