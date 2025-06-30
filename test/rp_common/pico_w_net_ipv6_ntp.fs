@@ -48,9 +48,14 @@
 \    install where zeptoIP has already been installed using a terminal which
 \    supports zeptoforth, e.g. zeptocom.js or e4thcom in noforth mode.
 \ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
-\
+\ 
 \ This will start an NTP client pointed at 2.pool.ntp.org and regularly report
 \ the time.
+\ 
+\ 3. Execute pico-w-net-ntp::display-ntp-times
+\ 
+\ This will display the current time once every second once a time has been
+\ acquired through NTP.
 
 begin-module pico-w-net-ntp
   
@@ -143,19 +148,20 @@ begin-module pico-w-net-ntp
     my-interface @ dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " ipv6.
     my-cyw43-net toggle-pico-w-led
     s" 2.pool.ntp.org" ntp-port my-ntp init-ntp
-    0 [:
-      begin
-        my-ntp time-set? if
-          my-ntp current-time@ f.
-          date-time-size [: { date-time }
-            date-time date-time@ date-time date-time. space
-          ;] with-aligned-allot
-        then
-        1000 ms
-      again
-    ;] 512 128 512 task::spawn
-    c" ntp-display" over task::task-name!
-    task::run
+  ;
+
+  \ Display the current time repeatedly
+  : display-ntp-times ( -- )
+    begin key? not while
+      my-ntp time-set? if
+        cr my-ntp current-time@ f.
+        date-time-size [: { date-time }
+          date-time date-time@ date-time date-time.
+        ;] with-aligned-allot
+      then
+      1000 ms
+    repeat
+    key drop
   ;
 
 end-module
