@@ -2,6 +2,10 @@
 
 A driver for CYW43xxx WiFi chips is included with zeptoforth. The external API for controlling them is provided by the `<cyw43-control>` class in the `cyw43-control` module. This class exposes a frame interface and a means of retrieving WiFi interface events.
 
+The constant `select-rx-frame-count` specifies the multiple of the Ethernet frame size used for the CYW43xxx receive frame buffer when it exists. This constant, when it exists, must be globally visible, must be in the flash dictionary, and must exist prior to compiling the source code for the CYW43xxx driver.
+
+The constant `select-tx-frame-count` specifies the multiple of the Ethernet frame size used for the CYW43xxx transmit frame buffer when it exists. This constant, when it exists, must be globally visible, must be in the flash dictionary, and must exist prior to compiling the source code for the CYW43xxx driver.
+
 ### `cyw43-control`
 
 The `cyw43-control` module contains the following constant:
