@@ -4016,6 +4016,7 @@ begin-module net-ipv6
     :noname
       { hop-limit protocol addr bytes self -- }
       { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
+\      [: cr ." +++ process-ipv6-udp-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       bytes udp-header-size >= if
         [ debug? ] [if]
           addr udp-total-len h@ rev16 bytes
@@ -4068,10 +4069,12 @@ begin-module net-ipv6
           if unloop exit then
         loop
       then
+\      [: cr ." --- process-ipv6-udp-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-udp-packet
 
     \ Process an IPv6 DNS response packet
     :noname { addr bytes self -- }
+\      [: cr ." +++ process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       bytes dns-header-size < if exit then
       addr bytes { all-addr all-bytes }
       addr dns-ident hunaligned@ rev16 { ident }
@@ -4098,10 +4101,12 @@ begin-module net-ipv6
         -1 +to qdcount
       repeat
       addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
+\      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-dns-packet
 
     \ Process IPv6 DNS response packet answers
     :noname { addr bytes all-addr all-bytes ancount ident self -- }
+\      [: cr ." +++ process-ipv6-dns-answers " depth . ;] debug-hook execute \ DEPTH DEBUG
       begin ancount 0> bytes 0> and while
         addr bytes { saved-addr saved-bytes }
         addr bytes skip-dns-name to bytes to addr
@@ -4120,7 +4125,7 @@ begin-module net-ipv6
               self dns-resolve-sema broadcast
               self dns-resolve-sema give
             else
-              2drop 2drop 2drop 2drop
+              2drop 2drop drop
             then
           ;] with-allot
           exit
@@ -4130,12 +4135,14 @@ begin-module net-ipv6
           -1 +to ancount
         then
       repeat
+\      [: cr ." --- process-ipv6-dns-answers " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-dns-answers
     
     \ Process an ICMPv6 packet
     :noname
       { hop-limit protocol addr bytes self -- }
       { D: src-mac-addr src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 }
+\      [: cr ." +++ process-icmpv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       bytes icmp-header-size >= if
         src-0 src-1 src-2 src-3 dest-0 dest-1 dest-2 dest-3 PROTOCOL_ICMPV6
         addr bytes 0 icmp-checksum compute-ipv6-checksum
@@ -4173,10 +4180,12 @@ begin-module net-ipv6
           endof
         endcase
       then
+\      [: cr ." --- process-icmpv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-icmpv6-packet
 
     \ Send an ICMPv6 neighbor solicit packet
     :noname { target-0 target-1 target-2 target-3 self -- }
+\      [: cr ." +++ send-icmpv6-neighbor-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
       target-0 target-1 target-2 target-3 self
       target-0 target-1 target-2 target-3 solicit-node-link-local-multicast
       ipv6-multicast-mac-addr
@@ -4213,10 +4222,12 @@ begin-module net-ipv6
           [: cr ." Sending neighbor solicit" ;] debug-hook execute
         [then]
       ;] self construct-and-send-ipv6-packet-with-src-addr drop
+\      [: cr ." --- send-icmpv6-neighbor-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-icmpv6-neighbor-solicit
 
     \ Send an ICMPv6 router solicit package
     :noname { self -- }
+\      [: cr ." +++ send-icmpv6-router-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
       self
       ALL_ROUTERS_LINK_LOCAL_MULTICAST ipv6-multicast-mac-addr
       ALL_ROUTERS_LINK_LOCAL_MULTICAST
@@ -4251,12 +4262,14 @@ begin-module net-ipv6
           [: cr ." Sending router solicit" ;] debug-hook execute
         [then]
       ;] self construct-and-send-ipv6-packet drop
+\      [: cr ." --- send-icmpv6-router-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-icmpv6-router-solicit
     
     \ Process an ICMPv6 echo request packet
     :noname
       { dest-0 dest-1 dest-2 dest-3 hop-limit addr bytes self -- }
       { D: src-mac-addr src-0 src-1 src-2 src-3 }
+\      [: cr ." +++ process-icmpv6-echo-request-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       bytes icmp-header-size < if exit then
 
       dest-0 dest-1 dest-2 dest-3 ipv6-addr-multicast? if exit then
@@ -4285,11 +4298,13 @@ begin-module net-ipv6
       ;] self construct-and-send-ipv6-packet-with-src-addr not if
         2drop 2drop 2drop 2drop 2drop drop
       then
+\      [: cr ." --- process-icmpv6-echo-request-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-icmpv6-echo-request-packet
 
     \ Process an ICMPv6 neighbor solicit packet
     :noname
       { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- }
+\      [: cr ." +++ process-icmpv6-neighbor-solicit-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Processing neighbor solicit" ;] debug-hook execute
       [then]
@@ -4364,11 +4379,13 @@ begin-module net-ipv6
           [: cr ." Sending neighbor advertise" ;] debug-hook execute
         [then]
       ;] self construct-and-send-ipv6-packet-with-src-addr drop
+\      [: cr ." --- process-icmpv6-neighbor-solicit-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-icmpv6-neighbor-solicit-packet
 
     \ Process an ICMPv6 neighbor advertise packet
     :noname
       { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- }
+\      [: cr ." +++ process-icmpv6-neighbor-advertise-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Processing neighbor advertise" ;] debug-hook execute
       [then]
@@ -4384,6 +4401,7 @@ begin-module net-ipv6
       addr bytes validate-icmpv6-opt not if exit then
       src-mac-addr target-0 target-1 target-2 target-3
       self process-ipv6-mac-addr
+\      [: cr ." --- process-icmpv6-neighbor-advertise-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-icmpv6-neighbor-advertise-packet
 
     \ Process an ICMPv6 router advertise packet
@@ -4391,6 +4409,7 @@ begin-module net-ipv6
       ( D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self -- )
       [:
         { D: src-mac-addr src-0 src-1 src-2 src-3 hop-limit addr bytes self }
+\        [: cr ." +++ process-icmpv6-router-advertise-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
         [ debug? ] [if]
           [: cr ." Processing router advertise" ;] debug-hook execute
         [then]
@@ -4473,6 +4492,7 @@ begin-module net-ipv6
             [: cr ." Not handling router advertise" ;] debug-hook execute
           [then]
         then
+\        [: cr ." --- process-icmpv6-router-advertise-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       ;] over router-discovery-lock with-lock
     ; define process-icmpv6-router-advertise-packet
 
@@ -4539,13 +4559,16 @@ begin-module net-ipv6
       { self }
       { D: mac-addr dest-0 dest-1 dest-2 dest-3 hop-limit protocol bytes xt -- }
       ( ? sent? xt: ? buf -- ? send? )
+\      [: cr ." +++ construct-and-send-ipv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       mac-addr self intf-ipv6-addr ipv6-unaligned@
       dest-0 dest-1 dest-2 dest-3 hop-limit protocol bytes xt self
       construct-and-send-ipv6-packet-with-src-addr
+\      [: cr ." --- construct-and-send-ipv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define construct-and-send-ipv6-packet
 
     \ Resolve an IPv6 address's MAC address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- D: mac-addr success? }
+\      [: cr ." +++ resolve-ipv6-addr-mac-addr " depth . ;] debug-hook execute \ DEPTH DEBUG
       self intf-ipv6-prefix ipv6-unaligned@ dest-0 dest-1 dest-2 dest-3
       self intf-ipv6-prefix-len @ ipv6-addr-matches-prefix? not if
         self gateway-ipv6-addr ipv6-unaligned@
@@ -4580,10 +4603,12 @@ begin-module net-ipv6
         then
       repeat
       true
+\      [: cr ." --- resolve-ipv6-addr-mac-addr " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define resolve-ipv6-addr-mac-addr
 
     \ Resolve a DNS name's IPv6 address
     :noname { c-addr bytes self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 success? }
+\      [: cr ." +++ resolve-dns-ipv6-addr " depth . ;] debug-hook execute \ DEPTH DEBUG
       c-addr bytes validate-dns-name
       systick::systick-counter dns-resolve-interval - { tick }
       max-dns-resolve-attempts { attempts }
@@ -4616,16 +4641,20 @@ begin-module net-ipv6
           2drop 2drop drop false
         then
       until
+\      [: cr ." --- resolve-dns-ipv6-addr " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define resolve-dns-ipv6-addr
 
     \ Evict a DNS name's cache entry, forcing it to be re-resolved
     :noname { c-addr bytes self -- }
+\      [: cr ." +++ evict-dns " depth . ;] debug-hook execute \ DEPTH DEBUG
       c-addr bytes validate-dns-name
       c-addr bytes self dns-cache net-ipv6-internal::evict-dns
+\      [: cr ." --- evict-dns " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define evict-dns
 
     \ Send a DNS request packet
     :noname { c-addr bytes self -- }
+\      [: cr ." +++ send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
       c-addr bytes self dns-src-port
       self dns-server-ipv6-addr ipv6-unaligned@ dns-port
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
@@ -4645,6 +4674,7 @@ begin-module net-ipv6
         [ 1 rev16 ] literal buf dns-qbody-qclass hunaligned!
         true
       ;] self send-ipv6-udp-packet not if 2drop drop then
+\      [: cr ." --- send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-ipv6-dns-request
 
     \ Send a UDP packet with a specified source IPv6 address
@@ -4652,6 +4682,7 @@ begin-module net-ipv6
       { D: mac-addr src-0 src-1 src-2 src-3 src-port
       dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self -- }
       ( success? ) ( xt: ? buf -- ? sent? )
+\      [: cr ." +++ send-ipv6-udp-packet-raw " depth . ;] debug-hook execute \ DEPTH DEBUG
       src-0 src-1 src-2 src-3
       dest-0 dest-1 dest-2 dest-3
       src-port dest-port bytes xt self
@@ -4669,12 +4700,14 @@ begin-module net-ipv6
         PROTOCOL_UDP buf udp-header-size bytes + 0 udp-checksum
         compute-ipv6-checksum rev16 buf udp-checksum h!
       ;] self construct-and-send-ipv6-packet-with-src-addr
+\      [: cr ." --- send-ipv6-udp-packet-raw " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-ipv6-udp-packet-raw
 
     \ Send a UDP packet
     :noname
       { src-port dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self }
       ( -- success? )
+\      [: cr ." +++ send-ipv6-udp-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       dest-0 dest-1 dest-2 dest-3
       dest-0 dest-1 dest-2 dest-3 self resolve-ipv6-addr-mac-addr if
         src-port -rot dest-port -rot bytes -rot xt -rot self -rot
@@ -4693,6 +4726,7 @@ begin-module net-ipv6
       else
         2drop 2drop 2drop false
       then
+\      [: cr ." --- send-ipv6-udp-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-ipv6-udp-packet
 
     \ Claim the endpoint queue lock, and if an exception occurs, restore the
@@ -5324,7 +5358,7 @@ begin-module net-ipv6
               self dhcpv6-discover-success? !
               self dhcpv6-discover-sema give
             again
-          ;] 512 256 768 0 task::spawn-on-core self aux-task !
+          ;] 1024 256 1024 0 task::spawn-on-core self aux-task !
           c" net-aux" self aux-task @ task::task-name!
           self aux-task @ task::run
         then
@@ -5352,6 +5386,7 @@ begin-module net-ipv6
 
     \ Send a DHCPV6_SOLICIT message
     :noname { self -- }
+\      [: cr ." +++ send-dhcpv6-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Sending DHCPV6 SOLICIT" ;] debug-hook execute
       [then]
@@ -5414,10 +5449,12 @@ begin-module net-ipv6
       [ debug? ] [if]
         [: cr ." Waiting for DHCPV6 ADVERTISE" ;] debug-hook execute
       [then]
+\      [: cr ." --- send-dhcpv6-solicit " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-dhcpv6-solicit
 
     \ Send a DHCPV6_REQUEST packet
     :noname { self -- }
+\      [: cr ." +++ send-dhcpv6-request " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Sending DHCPV6 REQUEST" ;] debug-hook execute
       [then]
@@ -5474,10 +5511,12 @@ begin-module net-ipv6
         dhcpv6-wait-reply self dhcp-discover-state !
         systick::systick-counter self dhcp-discover-stage-start !
       then
+\      [: cr ." --- send-dhcpv6-request " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-dhcpv6-request
 
     \ Send a DHCP RENEW packet
     :noname { self -- }
+\      [: cr ." +++ send-dhcpv6-renew " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Sending DHCPV6 RENEW" ;] debug-hook execute
       [then]
@@ -5534,10 +5573,12 @@ begin-module net-ipv6
         dhcpv6-wait-reply self dhcp-discover-state !
         systick::systick-counter self dhcp-discover-stage-start !
       then
+\      [: cr ." --- send-dhcpv6-renew " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-dhcpv6-renew
 
     \ Send a DHCP REBIND packet
     :noname { self -- }
+\      [: cr ." +++ send-dhcpv6-rebind " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Sending DHCPV6 REBIND" ;] debug-hook execute
       [then]
@@ -5592,10 +5633,12 @@ begin-module net-ipv6
         dhcpv6-wait-reply self dhcp-discover-state !
         systick::systick-counter self dhcp-discover-stage-start !
       then
+\      [: cr ." --- send-dhcpv6-rebind " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-dhcpv6-rebind
     
     \ Send a DHCP INFORMATION REQUEST packet
     :noname { self -- }
+\      [: cr ." +++ send-dhcpv6-information-request " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Sending DHCPV6 INFORMATION REQUEST" ;] debug-hook execute
       [then]
@@ -5648,11 +5691,13 @@ begin-module net-ipv6
         dhcpv6-wait-info-reply self dhcp-discover-state !
         systick::systick-counter self dhcp-discover-stage-start !
       then
+\      [: cr ." --- send-dhcpv6-information-request " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-dhcpv6-information-request
 
     \ Process a DHCPv6 packet
     :noname ( addr bytes src-0 src-1 src-2 src-3 self -- )
       [: { addr bytes src-0 src-1 src-2 src-3 self }
+\        [: cr ." +++ process-dhcpv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
         bytes dhcpv6-header-size < if
           exit
         then
@@ -5747,10 +5792,12 @@ begin-module net-ipv6
           
         then
       ;] over dhcp-lock with-lock
+\      [: cr ." --- process-dhcpv6-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-dhcpv6-packet
 
     \ Process a DHCPv6 ADVERTISE packet
     :noname { addr bytes self -- }
+\      [: cr ." +++ process-dhcpv6-advertise " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Handling DHCPv6 ADVERTISE" ;] debug-hook execute
       [then]
@@ -5770,10 +5817,12 @@ begin-module net-ipv6
       else
         self send-dhcpv6-request
       then
+\      [: cr ." --- process-dhcpv6-advertise " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-dhcpv6-advertise
 
     \ Process a DHCPv6 REPLY packet
     :noname { addr bytes self -- }
+\      [: cr ." +++ process-dhcpv6-reply " depth . ;] debug-hook execute \ DEPTH DEBUG
       [ debug? ] [if]
         [: cr ." Handling DHCPv6 REPLY" ;] debug-hook execute
       [then]
@@ -5905,6 +5954,7 @@ begin-module net-ipv6
         [then]
         2drop
       then
+\      [: cr ." --- process-dhcpv6-reply " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-dhcpv6-reply
 
     \ Refresh DHCP rebinding
@@ -5916,6 +5966,7 @@ begin-module net-ipv6
           debug-hook execute
         [then]
         self send-dhcpv6-rebind
+\        [: cr ." === refresh-dhcpv6-rebinding " depth . ;] debug-hook execute \ DEPTH DEBUG
       then
     ; define refresh-dhcpv6-rebinding
     
@@ -5931,6 +5982,7 @@ begin-module net-ipv6
         [then]
         systick::systick-counter self dhcp-rebind-start !
         self send-dhcpv6-rebind
+\        [: cr ." === refresh-dhcpv6-renewing A " depth . ;] debug-hook execute \ DEPTH DEBUG
       else
         systick::systick-counter self dhcp-renew-start @ -
         self dhcp-renew-interval @ > if
@@ -5940,6 +5992,7 @@ begin-module net-ipv6
           [then]
           systick::systick-counter self dhcp-renew-start !
           self send-dhcpv6-renew
+\          [: cr ." === refresh-dhcpv6-renewing B " depth . ;] debug-hook execute \ DEPTH DEBUG
         then
       then
     ; define refresh-dhcpv6-renewing
@@ -5957,6 +6010,7 @@ begin-module net-ipv6
         [then]
         systick::systick-counter self dhcp-renew-start !
         self send-dhcpv6-renew
+\        [: cr ." === refresh-dhcpv6-discovered " depth . ;] debug-hook execute \ DEPTH DEBUG
       then
     ; define refresh-dhcpv6-discovered
 
@@ -5969,6 +6023,7 @@ begin-module net-ipv6
           [: cr ." Timeout, retrying DHCP SOLICIT" ;] debug-hook execute
         [then]
         self send-dhcpv6-solicit
+\        [: cr ." === refresh-dhcpv6-wait-advertise " depth . ;] debug-hook execute \ DEPTH DEBUG
       then
     ; define refresh-dhcpv6-wait-advertise
 
@@ -5981,6 +6036,7 @@ begin-module net-ipv6
           [: cr ." TImeout, retrying DHCP REQUEST" ;] debug-hook execute
         [then]
         self send-dhcpv6-request
+\        [: cr ." === refresh-dhcpv6-wait-reply " depth . ;] debug-hook execute \ DEPTH DEBUG
       then
     ; define refresh-dhcpv6-wait-reply
 
@@ -6005,6 +6061,7 @@ begin-module net-ipv6
           debug-hook execute
         [then]
         self send-dhcpv6-information-request
+\        [: cr ." === refresh-dhcpv6-wait-info-reply " depth . ;] debug-hook execute \ DEPTH DEBUG
       then
     ; define refresh-dhcpv6-wait-info-reply
 
@@ -6017,6 +6074,7 @@ begin-module net-ipv6
             self router-discovery? @ if
               self send-icmpv6-router-solicit
               systick::systick-counter self router-discovery-start !
+\              [: cr ." === refresh-router-discovery A " depth . ;] debug-hook execute \ DEPTH DEBUG
             then
           ;] over router-discovery-lock with-lock
         then
@@ -6029,6 +6087,7 @@ begin-module net-ipv6
                 self send-icmpv6-router-solicit
                 systick::systick-counter self router-discovery-start !
                 true self router-discovery? !
+\                [: cr ." === refresh-router-discovery B " depth . ;] debug-hook execute \ DEPTH DEBUG
               then
             ;] over router-discovery-lock with-lock
           then
