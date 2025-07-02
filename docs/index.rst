@@ -79,7 +79,9 @@ Zeptoforth Documentation
    extra/inter_fs_copy
    extra/profile
    extra/zeptoed
+   extra/picocalc
    extra/display
+   extra/text
    extra/text_display
    extra/font
    extra/bitmap_utils

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PicoCalc words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bitmaps and Displays" href="display.html" />
+    <link rel="prev" title="zeptoed" href="zeptoed.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="picocalc-words">
+<h1>PicoCalc words<a class="headerlink" href="#picocalc-words" title="Link to this heading">¶</a></h1>
+<p>zeptoforth has support for the PicoCalc, a device that provides a display, keyboard, speakers, and an SD card slot for boards that fit the pinout of a Raspberry Pi Pico 1 (including a Raspberry Pi Pico 1 W, Raspberry Pi Pico 2, Raspberry Pi Pico 2 W, Pimoroni Pico Plus 2, and Pimoroni Pico Plus 2 W). General directions as to the installation and use of zeptoforth on the PicoCalc are detailed in <code class="docutils literal notranslate"><span class="pre">USING_THE_PICOCALC.md</span></code> at the root of this directory tree. This file contains API documentation for the API exposed by the graphical and text-only PicoCalc terminal emulators.</p>
+<p>Note that the core that the PicoCalc tasks run on defaults to core 1 of the RP2040 or RP2350, but can be manually set by defining a globally-visible constant in flash named <code class="docutils literal notranslate"><span class="pre">select-picocalc-tasks-core</span></code> prior to compiling PicoCalc support. This is useful if you are also installing zeptoIP on your PicoCalc, as zeptoIP runs very CPU-heavy tasks on core 1 which will significantly slow down the PicoCalc terminal emulator if it is also running on core 1.</p>
+<section id="picocalc-term">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-term</span></code><a class="headerlink" href="#picocalc-term" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-term</span></code> module contains the following words:</p>
+<section id="with-term-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-term-lock</span></code><a class="headerlink" href="#with-term-lock" title="Link to this heading">¶</a></h3>
+<p>( xt – )</p>
+<p>Carry out an operation with the PicoCalc terminal locked. Note that executing operations that print to the PicoCalc terminal should be avoided because they may block indefinitely.</p>
+</section>
+<section id="with-term-display">
+<h3><code class="docutils literal notranslate"><span class="pre">with-term-display</span></code><a class="headerlink" href="#with-term-display" title="Link to this heading">¶</a></h3>
+<p>( xt – ) xt: ( display – )</p>
+<p>Carry out an operation against the PicoCalc terminal’s display with the PicoCalc terminal locked. It is highly recommended that the user update the terminal’s display or graphics drawn to it may not be displayed. Note that executing operations that print to the PicoCalc terminal should be avoided because they may block indefinitely.</p>
+</section>
+<section id="term-pixels-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-pixels-dim&#64;</span></code><a class="headerlink" href="#term-pixels-dim" title="Link to this heading">¶</a></h3>
+<p>( – width height )</p>
+<p>Get the terminal dimensions in pixels.</p>
+</section>
+<section id="term-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-dim&#64;</span></code><a class="headerlink" href="#term-dim" title="Link to this heading">¶</a></h3>
+<p>( – width height )</p>
+<p>Get the terminal dimensions in characters.</p>
+</section>
+<section id="term-char-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-char-dim&#64;</span></code><a class="headerlink" href="#term-char-dim" title="Link to this heading">¶</a></h3>
+<p>( – width height )</p>
+<p>Get the terminal character dimensions in pixels.</p>
+</section>
+<section id="read-battery">
+<h3><code class="docutils literal notranslate"><span class="pre">read-battery</span></code><a class="headerlink" href="#read-battery" title="Link to this heading">¶</a></h3>
+<p>( – battery-level )</p>
+<p>Read the battery level.</p>
+</section>
+<section id="set-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">set-backlight</span></code><a class="headerlink" href="#set-backlight" title="Link to this heading">¶</a></h3>
+<p>( desired-backlight-level – actual-backlight-level )</p>
+<p>Set the backlight level.</p>
+</section>
+<section id="read-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">read-backlight</span></code><a class="headerlink" href="#read-backlight" title="Link to this heading">¶</a></h3>
+<p>( – backlight-level )</p>
+<p>Read the backlight level.</p>
+</section>
+<section id="set-kbd-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">set-kbd-backlight</span></code><a class="headerlink" href="#set-kbd-backlight" title="Link to this heading">¶</a></h3>
+<p>( desired-kbd-backlight-level – actual-kbd-backlight-level )</p>
+<p>Set the keyboard backlight level.</p>
+</section>
+<section id="read-kbd-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">read-kbd-backlight</span></code><a class="headerlink" href="#read-kbd-backlight" title="Link to this heading">¶</a></h3>
+<p>( – kbd-backlight-level )</p>
+<p>Read the keyboard backlight level.</p>
+</section>
+<section id="visual-bell-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">visual-bell-enabled!</span></code><a class="headerlink" href="#visual-bell-enabled" title="Link to this heading">¶</a></h3>
+<p>( enabled – )</p>
+<p>Set visual bell enabled. This defaults to false.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">visual-bell-enabled&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>( – enabled )</p>
+<p>Get visual bell enabled. This defaults to false.</p>
+</section>
+<section id="audible-bell-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">audible-bell-enabled!</span></code><a class="headerlink" href="#audible-bell-enabled" title="Link to this heading">¶</a></h3>
+<p>( enabled – )</p>
+<p>Set audible bell enabled. This defaults to false.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">audible-bell-enabled&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>( – enabled )</p>
+<p>Get audible bell enabled. This defaults to false.</p>
+</section>
+<section id="screenshot-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-hook!</span></code><a class="headerlink" href="#screenshot-hook" title="Link to this heading">¶</a></h3>
+<p>( xt – )</p>
+<p>Set the screenshot hook. This defaults to 0, indicating no hook set.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-hook&#64;</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p>( – xt )</p>
+<p>Get the screenshot hook. This defaults to 0, indicating no hook set.</p>
+</section>
+</section>
+<section id="picocalc-sound">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-sound</span></code><a class="headerlink" href="#picocalc-sound" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-sound</span></code> module contains the following words:</p>
+<section id="play-tone">
+<h3><code class="docutils literal notranslate"><span class="pre">play-tone</span></code><a class="headerlink" href="#play-tone" title="Link to this heading">¶</a></h3>
+<p>( end-tick D: pitch – )</p>
+<p>Generate a tone of <em>pitch</em> (an S31.32 value in Hz) ending at <em>end-tick</em> relative to <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>, with ticks being 100 microsecond increments. Note that tones ending earlier override tones ending later, and a total of up to 8 tones are tracked at any one time.</p>
+</section>
+<section id="play-tone-for-duration">
+<h3><code class="docutils literal notranslate"><span class="pre">play-tone-for-duration</span></code><a class="headerlink" href="#play-tone-for-duration" title="Link to this heading">¶</a></h3>
+<p>( duration D: pitch – )</p>
+<p>Generate a tone of <em>pitch</em> (an S31.32 value in Hz) of <em>duration</em> ticks, with ticks being 100 microsecond increments. Note that tones ending earlier override tones ending later, and a total of up to 8 tones are tracked at any one time.</p>
+</section>
+<section id="beep">
+<h3><code class="docutils literal notranslate"><span class="pre">beep</span></code><a class="headerlink" href="#beep" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This is a convenience word to generate a 1245 Hz, i.e. D6#, tone for 125 milliseconds. This word is used internally to generate the audible bell.</p>
+</section>
+</section>
+<section id="picocalc-bios">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-bios</span></code><a class="headerlink" href="#picocalc-bios" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-bios</span></code> module contains the following words:</p>
+<section id="emulate-keys">
+<h3><code class="docutils literal notranslate"><span class="pre">emulate-keys?</span></code><a class="headerlink" href="#emulate-keys" title="Link to this heading">¶</a></h3>
+<p>( – flag )</p>
+<p>This is a <code class="docutils literal notranslate"><span class="pre">value</span></code> that defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code> that can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to enable emulating key presses using the serial console as input. This is primarily of use for testing PicoCalc support without using an actual PicoCalc.</p>
+</section>
+</section>
+<section id="picocalc-screenshot">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-screenshot</span></code><a class="headerlink" href="#picocalc-screenshot" title="Link to this heading">¶</a></h2>
+<p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_screenshoto.fs</span></code> makes the following words available in the <code class="docutils literal notranslate"><span class="pre">picocalc-screenshot</span></code> module:</p>
+<section id="screenshot-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs!</span></code><a class="headerlink" href="#screenshot-fs" title="Link to this heading">¶</a></h3>
+<p>( fs – )</p>
+<p>Set the FAT32 filesystem object for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This filesystem defaults to the SD card FAT32 filesystem first, if configured, or the PSRAM FAT32 filesystem second, if configured, or the on-board flash storage FAT32 filesystem third, if configured.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>( – fs )</p>
+<p>Get the FAT32 filesystem object for saving screenshots with the attention key combo.</p>
+</section>
+<section id="screenshot-path">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path!</span></code><a class="headerlink" href="#screenshot-path" title="Link to this heading">¶</a></h3>
+<p>( path-addr path-bytes – )</p>
+<p>Set the base path for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This path defaults to <code class="docutils literal notranslate"><span class="pre">/SCREEN</span></code>. Note that this directory will be automatically created if it does not exist when taking a screenshot with the console attention key combo, but its parent directorie(s) will not be automatically created.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path&#64;</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>( – path-addr path-bytes )</p>
+<p>Get the base path for saving screenshots with the attention key combo.</p>
+</section>
+<section id="take-screenshot">
+<h3><code class="docutils literal notranslate"><span class="pre">take-screenshot</span></code><a class="headerlink" href="#take-screenshot" title="Link to this heading">¶</a></h3>
+<p>( path-addr path-bytes fs – )</p>
+<p>This is the actual word that implements the taking of screenshots. Note that when this word is executed directly the display is <em>not</em> flashed unlike when taking a screenshot with the console attention key combo.</p>
+</section>
+</section>
+<section id="fat32-tools">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#fat32-tools" title="Link to this heading">¶</a></h2>
+<p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code> adds the following words to the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module:</p>
+<section id="blocks-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs&#64;</span></code><a class="headerlink" href="#blocks-fs" title="Link to this heading">¶</a></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs:</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="sd-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">sd-fs&#64;</span></code><a class="headerlink" href="#sd-fs" title="Link to this heading">¶</a></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">sd-fs:</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="psram-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">psram-fs&#64;</span></code><a class="headerlink" href="#psram-fs" title="Link to this heading">¶</a></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id8">
+<h3>`psram-fs:<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/int_overload.html">Interrupt Overloading Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PicoCalc words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text.html">Text display words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enc28j60.html">ENC28J60 Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="zeptoed.html" title="previous chapter">zeptoed</a></li>
+      <li>Next: <a href="display.html" title="next chapter">Bitmaps and Displays</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2025, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/extra/picocalc.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

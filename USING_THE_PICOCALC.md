@@ -8,6 +8,14 @@ In the file below module paths of the form `foo::bar`, where `bar` is a word in 
 
 Also note that these paths can be chained, e.g. `foo::bar::baz`, where `baz` is a word in the wordlist/module `foo::bar`, where in turn `bar` is a wordlist/module in the wordlist/module `foo`.
 
+## Notes to those new to the PicoCalc
+
+There are two important notes to keep in mind if you are new to the PicoCalc:
+
+The first is that the screen on the PicoCalc is very fragile, and if it becomes misaligned and the case of the PicoCalc is screwed down or its connector is improperly flexed it may easily be damaged. As a result, it is highly recommended you tape down (minding the light channel for the power LED) your screen when assembling your PicoCalc to prevent it from moving during assembly or when swapping out boards within the PicoCalc.
+
+The second is that the zeptoforth BIOS driver assumes that you have upgraded the firmware on the STM32 in your PicoCalc to the latest (i.e. 1.2 or newer) firmware. There is no good way of checking the version of the firmware, so it is recommended that you update the firmware first thing when assembling your PicoCalc. Directions to do so can be found [here](https://github.com/clockworkpi/PicoCalc/blob/master/wiki/Setting-Up-Arduino-Development-for-PicoCalc-keyboard.md).
+
 ## zeptoforth installation and preparation
 
 First, you must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `full` build (_not_ a `full_usb` build) on the RP2040 or RP2350 board in your PicoCalc. Note that a `full` build is needed because the PicoCalc redirects UART0 to an ACM device on its USB-C port, and it is highly recommended that you use the USB-C port on the PicoCalc for extended usage rather than the USB port on the RP2040 or RP2350 board itself as there have been reports of battery overcharging in such extended usage of the board's USB port (some even recommend removing the batteries from your PicoCalc prior to applying power to the board's USB port).
@@ -64,6 +72,10 @@ Note however that the text-only PicoCalc terminal emulator is a bit slower in sc
 Note, however, that you may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel and 7x8-pixel fonts. A 5x8-pixel font may be desired if you want the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if you think that the default 6x8-pixel font is too small.
 
 To do so, in the steps above substitute `extra/common/st7365p_spi_8_5x8_font_all.fs` or `extra/common/st7365p_spi_8_7x8_font_all.fs`, or if you are installing a text-only terminal emulator, `extra/common/st7365p_spi_text_5x8_font_all.fs` or `extra/common/st7365p_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
+
+## Core selection
+
+The core that the PicoCalc tasks run on defaults to core 1 of the RP2040 or RP2350, but can be manually set by defining a globally-visible constant in flash named `select-picocalc-tasks-core` prior to compiling PicoCalc support. This is useful if you are also installing zeptoIP on your PicoCalc, as zeptoIP runs very CPU-heavy tasks on core 1 which will significantly slow down the PicoCalc terminal emulator if it is also running on core 1.
 
 ## Installing FAT32 support
 
