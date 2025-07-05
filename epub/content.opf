@@ -12,8 +12,8 @@
     <dc:publisher>Travis Bemann</dc:publisher>
     <dc:rights>2020-2025, Travis Bemann</dc:rights>
     <dc:identifier id="unknown">unknown</dc:identifier>
-    <dc:date>2025-07-02T02:18:12Z</dc:date>
-    <meta property="dcterms:modified">2025-07-02T02:18:12Z</meta>
+    <dc:date>2025-07-05T04:11:21Z</dc:date>
+    <meta property="dcterms:modified">2025-07-05T04:11:21Z</meta>
     <meta property="ibooks:version"></meta>
     <meta property="ibooks:specified-fonts">true</meta>
     <meta property="ibooks:binding">true</meta>
@@ -116,8 +116,9 @@
     <item id="epub-91" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-92" href="words/uart.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-93" href="words/value.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-94" href="words/watchdog.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-95" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-94" href="words/voltage.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-95" href="words/watchdog.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-96" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
   </manifest>
   <spine toc="ncx" page-progression-direction="ltr">
     <itemref idref="epub-1" />
@@ -126,7 +127,7 @@
     <itemref idref="epub-62" />
     <itemref idref="epub-48" />
     <itemref idref="epub-42" />
-    <itemref idref="epub-95" />
+    <itemref idref="epub-96" />
     <itemref idref="epub-43" />
     <itemref idref="epub-86" />
     <itemref idref="epub-47" />
@@ -155,7 +156,7 @@
     <itemref idref="epub-61" />
     <itemref idref="epub-59" />
     <itemref idref="epub-68" />
-    <itemref idref="epub-94" />
+    <itemref idref="epub-95" />
     <itemref idref="epub-45" />
     <itemref idref="epub-34" />
     <itemref idref="epub-64" />
@@ -180,6 +181,7 @@
     <itemref idref="epub-91" />
     <itemref idref="epub-85" />
     <itemref idref="epub-40" />
+    <itemref idref="epub-94" />
     <itemref idref="epub-77" />
     <itemref idref="epub-32" />
     <itemref idref="epub-75" />
