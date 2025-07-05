@@ -26,7 +26,7 @@ usage() {
 }
 
 if [ "$#" -lt 3 ]; then
-    usage()
+    usage
     exit 1
 fi
 PLATFORM="$1"
@@ -38,7 +38,7 @@ elif [ "$3" = '6x8' ]; then
 elif [ "$3" = '7x8' ]; then
     FONT='7x8'
 else
-    usage()
+    usage
     exit 1
 fi
 if [ "$#" -ge 4 ]; then
@@ -47,7 +47,7 @@ if [ "$#" -ge 4 ]; then
     elif [ "$4" = 'graphical' ]; then
         TEXT_ONLY='graphical'
     else
-        usage()
+        usage
         exit 1
     fi
 else
@@ -59,7 +59,7 @@ if [ "$#" -ge 5 ]; then
     elif [ "$5" = 'not_pico_plus' ]; then
         PICO_PLUS='not_pico_plus'
     else
-        usage()
+        usage
         exit 1
     fi
 else
@@ -71,7 +71,7 @@ if [ "$#" -eq 6 ]; then
     elif [ "$6" = 'core_1' ]; then
         CORE=1
     else
-        usage()
+        usage
         exit 1
     fi
 else
