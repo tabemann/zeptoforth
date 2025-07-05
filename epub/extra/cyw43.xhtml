@@ -17,6 +17,8 @@
   <section id="cyw43xxx-words">
 <h1>CYW43xxx Words</h1>
 <p>A driver for CYW43xxx WiFi chips is included with zeptoforth. The external API for controlling them is provided by the <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module. This class exposes a frame interface and a means of retrieving WiFi interface events.</p>
+<p>The constant <code class="docutils literal notranslate"><span class="pre">select-rx-frame-count</span></code> specifies the multiple of the Ethernet frame size used for the CYW43xxx receive frame buffer when it exists. This constant, when it exists, must be globally visible, must be in the flash dictionary, and must exist prior to compiling the source code for the CYW43xxx driver.</p>
+<p>The constant <code class="docutils literal notranslate"><span class="pre">select-tx-frame-count</span></code> specifies the multiple of the Ethernet frame size used for the CYW43xxx transmit frame buffer when it exists. This constant, when it exists, must be globally visible, must be in the flash dictionary, and must exist prior to compiling the source code for the CYW43xxx driver.</p>
 <section id="cyw43-control">
 <h2><code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module contains the following constant:</p>

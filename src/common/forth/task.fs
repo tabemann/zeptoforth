@@ -134,6 +134,9 @@ begin-module task
     
     \ The task structure
     begin-structure task-size
+      \ Task start guard value
+      dup constant .task-start-guard field: task-start-guard
+
       \ Return stack size
       dup constant .task-rstack-size hfield: task-rstack-size
       
@@ -252,8 +255,8 @@ begin-module task
       \ Task floating point context
       dup constant .task-float32-ctx 4 cells +field task-float32-ctx
       
-      \ Task guard value
-      dup constant .task-guard field: task-guard
+      \ Task end guard value
+      dup constant .task-end-guard field: task-end-guard
       
     end-structure
 
@@ -1512,7 +1515,8 @@ begin-module task
       0 current-lock-held !
       0 over task-next !
       0 over task-prev !
-      task-guard-value over task-guard !
+      task-guard-value over task-start-guard !
+      task-guard-value over task-end-guard !
       dup main-task !
       dup first-task !
       dup last-task !
@@ -1608,7 +1612,8 @@ begin-module task
 	over ['] task-ram-here for-task!
 	0 over task-next !
         0 over task-prev !
-        task-guard-value over task-guard !
+        task-guard-value over task-start-guard !
+        task-guard-value over task-end-guard !
         task-init-hook @ ?dup if over swap execute then
 	dup >r init-aux-task-stack
 	r> ['] task-rstack-base for-task@
@@ -1727,7 +1732,8 @@ begin-module task
     next-user-space over task-dict-base @ + over ['] task-ram-here for-task!
     0 over task-next !
     0 over task-prev !
-    task-guard-value over task-guard !
+    task-guard-value over task-start-guard !
+    task-guard-value over task-end-guard !
     task-init-hook @ ?dup if over swap execute then
     swap >r >r
     begin dup 0<> while
@@ -1743,7 +1749,7 @@ begin-module task
       free-end @ swap -
       swap 4 align swap tuck task-rstack-size h!
       swap 4 align swap tuck task-stack-size h!
-      swap 4 align swap tuck task-dict-size !
+      swap 4 align next-user-space 4 align + swap tuck task-dict-size !
       dup dup task-dict-size @ - free-end !
     ;] critical-with-all-core-spinlock
   ;
@@ -2074,7 +2080,8 @@ begin-module task
       r> pendsv-return !
 
       current-task @ if
-        current-task @ task-guard @ task-guard-value <> if
+        current-task @ dup task-end-guard @ task-guard-value <>
+        swap task-start-guard @ task-guard-value <> or if
           exception::handle-panic
         then
       then

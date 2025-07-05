@@ -1,5 +1,5 @@
-\ Copyright (c) 2023-2024 Travis Bemann
-\
+\ Copyright (c) 2023-2025 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,17 +18,18 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ntp
+begin-module ntp-ipv4
 
   oo import
   net import
+  net-ipv4 import
   net-misc import
   net-consts import
   endpoint-process import
   alarm import
   rtc import
 
-  begin-module ntp-internal
+  begin-module ntp-ipv4-internal
 
     \ Initial NTP delay
     40000 constant init-ntp-poll-multiplier
@@ -118,9 +119,9 @@ begin-module ntp
   \ Default NTP port
   123 constant ntp-port
 
-  <endpoint-handler> begin-class <ntp>
+  <endpoint-handler> begin-class <ntp-ipv4>
 
-    continue-module ntp-internal
+    continue-module ntp-ipv4-internal
 
       \ The hostname of the NTP server
       max-dns-name-len cell align member ntp-server-dns-name
@@ -204,9 +205,9 @@ begin-module ntp
       
   end-class
 
-  <ntp> begin-implement
+  <ntp-ipv4> begin-implement
 
-    \ Construct an <ntp> instance
+    \ Construct an <ntp-ipv4> instance
     :noname { ip-interface self -- }
       self <endpoint-handler>->new
       ip-interface self ntp-interface !
@@ -276,9 +277,11 @@ begin-module ntp
       then
       timer::us-counter self ntp-start-us 2!
       true self ntp-time-set !
-      self ntp-start-time 2@ nip date-time-size [:
-        date-time-size [: { secs date-time current-date-time }
-          secs secs-between-1900-and-1970 - date-time convert-secs-since-1970
+      self ntp-start-time 2@ date-time-size [:
+        date-time-size [: { fract secs date-time current-date-time }
+          fract 0 1000. d* nip s>d
+          secs secs-between-1900-and-1970 - 0 1000. d* d+ { msecs }
+          msecs date-time convert-msecs-since-1970
           current-date-time date-time@
           date-time current-date-time date-time-equal? not if
             date-time date-time!

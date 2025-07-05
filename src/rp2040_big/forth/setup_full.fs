@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -59,6 +59,7 @@
 #include src/rp2040/forth/pwm.fs
 #include src/rp2040/forth/rtc.fs
 #include src/rp_common/forth/clocks.fs
+#include src/rp2040/forth/voltage.fs
 #include src/common/forth/full_extra.fs
 #include src/common/forth/blocks_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs

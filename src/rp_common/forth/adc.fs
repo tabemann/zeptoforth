@@ -106,13 +106,19 @@ begin-module adc
   : adc-pin ( adc pin -- )
     dup pin-internal::validate-pin
     [ rp2040? ] [if]
-      dup 26 >= swap 29 <= and averts x-pin-has-no-adc-chan
+      dup 26 >= over 29 <= and averts x-pin-has-no-adc-chan
     [then]
     [ rp2350? ] [if]
-      dup 26 >= over 29 <= and over 40 >= rot 47 <= and or
+      dup 26 >= over 29 <= and over 40 >= over 47 <= and or
       averts x-pin-has-no-adc-chan
     [then]
-    validate-adc
+    swap validate-adc
+    [ rp2350? ] [if] true over gpio::PADS_BANK0_ISO! [then]
+    true over gpio::PADS_BANK0_OD!
+    false over gpio::PADS_BANK0_IE!
+    false over gpio::PADS_BANK0_PUE!
+    false over gpio::PADS_BANK0_PDE!
+    [ rp2350? ] [if] false swap gpio::PADS_BANK0_ISO! [else] drop [then]
   ;
 
   \ Get the ADC channel for a pin

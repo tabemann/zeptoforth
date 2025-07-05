@@ -1,5 +1,5 @@
-\ Copyright (c) 2023-2024 Travis Bemann
-\
+\ Copyright (c) 2023-2025 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,17 +18,18 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module ntp
+begin-module ntp-ipv6
 
   oo import
   net import
+  net-ipv6 import
   net-misc import
   net-consts import
   endpoint-process import
   alarm import
   rtc import
 
-  begin-module ntp-internal
+  begin-module ntp-ipv6-internal
 
     \ Initial NTP delay
     40000 constant init-ntp-poll-multiplier
@@ -118,9 +119,9 @@ begin-module ntp
   \ Default NTP port
   123 constant ntp-port
 
-  <endpoint-handler> begin-class <ntp>
+  <endpoint-handler> begin-class <ntp-ipv6>
 
-    continue-module ntp-internal
+    continue-module ntp-ipv6-internal
 
       \ The hostname of the NTP server
       max-dns-name-len cell align member ntp-server-dns-name
@@ -128,8 +129,8 @@ begin-module ntp
       \ The name of the hostname of the NTP server
       cell member ntp-server-dns-name-len
       
-      \ The IPv4 address of the server to use
-      cell member ntp-server-ipv4-addr
+      \ The IPv6 address of the server to use
+      ipv6-addr-size member ntp-server-ipv6-addr
 
       \ The port of the server to use
       cell member ntp-server-port
@@ -204,13 +205,13 @@ begin-module ntp
       
   end-class
 
-  <ntp> begin-implement
+  <ntp-ipv6> begin-implement
 
-    \ Construct an <ntp> instance
+    \ Construct an <ntp-ipv6> instance
     :noname { ip-interface self -- }
       self <endpoint-handler>->new
       ip-interface self ntp-interface !
-      0 self ntp-server-ipv4-addr !
+      0 0 0 0 self ntp-server-ipv6-addr ipv6-unaligned!
       0 self ntp-endpoint !
       init-ntp-delay self ntp-delay !
       false self ntp-reschedule !
@@ -220,7 +221,7 @@ begin-module ntp
       0. self ntp-start-time 2!
       0. self ntp-start-us 2!
       0 self ntp-server-dns-name-len !
-      320 128 1024 0 self ntp-alarm-task init-alarm-task
+      320 256 1024 0 self ntp-alarm-task init-alarm-task
     ; define new
 
     \ Initialize the NTP client
@@ -276,11 +277,9 @@ begin-module ntp
       then
       timer::us-counter self ntp-start-us 2!
       true self ntp-time-set !
-      self ntp-start-time 2@ date-time-size [:
-        date-time-size [: { fract secs date-time current-date-time }
-          fract 0 1000. d* nip s>d
-          secs secs-between-1900-and-1970 - 0 1000. d* d+ { msecs }
-          msecs date-time convert-msecs-since-1970
+      self ntp-start-time 2@ nip date-time-size [:
+        date-time-size [: { secs date-time current-date-time }
+          secs secs-between-1900-and-1970 - date-time convert-secs-since-1970
           current-date-time date-time@
           date-time current-date-time date-time-equal? not if
             date-time date-time!
@@ -318,7 +317,7 @@ begin-module ntp
 
     \ Handle kiss-of-death
     :noname { self -- }
-      0 self ntp-server-ipv4-addr !
+      0 0 0 0 self ntp-server-ipv6-addr ipv6-unaligned!
       self ntp-endpoint @ self ntp-interface @ close-udp-endpoint
     ; define kiss-of-death
 
@@ -340,7 +339,7 @@ begin-module ntp
 
     \ Send an NTP packet
     :noname { self -- }
-      self ntp-server-ipv4-addr @ if
+      self ntp-server-ipv6-addr ipv6-unaligned@ 0 0 0 0 ipv6= not if
         self ntp-reschedule @ not if
           self ntp-endpoint @ 0= if
             EPHEMERAL_PORT self ntp-interface @ allocate-udp-listen-endpoint if
@@ -352,7 +351,7 @@ begin-module ntp
           self ntp-endpoint @ if
             self
             self ntp-endpoint @ endpoint-local-port@
-            self ntp-server-ipv4-addr @
+            self ntp-server-ipv6-addr ipv6-unaligned@
             self ntp-server-port @
             ntp-header-size
             [: { self buffer }
@@ -368,7 +367,7 @@ begin-module ntp
               0. buffer ntp-rx-timestamp 2beunaligned!
               self current-time@ buffer ntp-tx-timestamp 2beunaligned!
               true
-            ;] self ntp-interface @ send-ipv4-udp-packet drop
+            ;] self ntp-interface @ send-ipv6-udp-packet drop
           else
             drop
           then
@@ -381,11 +380,11 @@ begin-module ntp
     :noname { self -- }
       self ntp-server-dns-name self ntp-server-dns-name-len @
       2dup self ntp-interface @ evict-dns
-      self ntp-interface @ resolve-dns-ipv4-addr if
-        self ntp-server-ipv4-addr !
+      self ntp-interface @ resolve-dns-ipv6-addr if
+        self ntp-server-ipv6-addr ipv6-unaligned!
         self set-ntp-alarm
       else
-        drop
+        2drop 2drop
       then
       self set-ntp-lookup-alarm
     ; define lookup-ntp-addr

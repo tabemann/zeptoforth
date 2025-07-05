@@ -64,6 +64,7 @@ Zeptoforth Documentation
    words/tqueue
    words/systick
    words/clocks
+   words/voltage
    words/rng
    words/ansi_term
    words/qspi

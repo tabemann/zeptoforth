@@ -46,10 +46,18 @@ begin-module cyw43-runner
   1024 constant cyw43-log-shm-size
 
   \ Receive frame count
-  24 constant rx-frame-count
+  defined? select-rx-frame-count not [if]
+    24 constant rx-frame-count
+  [else]
+    select-rx-frame-count constant rx-frame-count
+  [then]
 
   \ Transmit frame count
-  16 constant tx-frame-count
+  defined? select-tx-frame-count not [if]
+    16 constant tx-frame-count
+  [else]
+    select-tx-frame-count constant tx-frame-count
+  [then]
 
   \ Event message count
   2 constant event-count
