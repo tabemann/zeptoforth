@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Voltage words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="voltage-words">
+<h1>Voltage words</h1>
+<p>There is support on the RP2040 and RP2350 for controlling the output voltage of the voltage regulator. The range of voltages normally supported is 850 mV to 1300 mV on the RP2040 and 550 mV to 1300 mV on the RP2350, but there is also an option to set an ‘unlimited’ voltage up to 3300 mV on the RP2350 at the risk of bricking your RP2350.</p>
+<p>Warning: setting a voltage above 1300 mV on your RP2350 may brick it!</p>
+<section id="voltage">
+<h2><code class="docutils literal notranslate"><span class="pre">voltage</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">voltage</span></code> module contains the following words:</p>
+<section id="x-unsupported-voltage">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unsupported-voltage</span></code></h3>
+<p>( – )</p>
+<p>This exception is raised if one attempts to set an out-of-range voltage. Note that attempting to set an in-range-voltage that is not one of the specific voltages supported will result in it getting rounded down a supported voltage.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">voltage&#64;</span></code></h3>
+<p>( – mvolts )</p>
+<p>Get the current output voltage of the voltage regulator in millivolts.</p>
+</section>
+<section id="set-voltage">
+<h3><code class="docutils literal notranslate"><span class="pre">set-voltage</span></code></h3>
+<p>( mvolts – )</p>
+<p>Set the current output voltage of the voltage regulator in millivolts, from 850 mV to 1300 mV on the RP2040 and 550 mV to 1300 mV on the RP2350.</p>
+<p>Attempting to set a voltage outside of one of these ranges will result in <code class="docutils literal notranslate"><span class="pre">x-unsupported-voltage</span></code> being raised. Attempting to set a voltage that is in one of these ranges which is not a specifically supported increment will result in it getting rounded down.</p>
+</section>
+<section id="set-voltage-unlimited">
+<h3><code class="docutils literal notranslate"><span class="pre">set-voltage-unlimited</span></code></h3>
+<p>( mvolts – )</p>
+<p>Set the current output voltage of the voltage regulator in millivolts, from 850 mV to 1300 mV on the RP2040 and 550 mV to 3300 mV on the RP2350. Note that on the RP2040 this is merely an alias for <code class="docutils literal notranslate"><span class="pre">set-voltage</span></code> and has no differences from it, existing only for the sake of compatibility with the RP2350 codebase.</p>
+<p>Attempting to set a voltage outside of one of these ranges will result in <code class="docutils literal notranslate"><span class="pre">x-unsupported-voltage</span></code> being raised. Attempting to set a voltage that is in one of these ranges which is not a specifically supported increment will result in it getting rounded down.</p>
+<p>Warning: you may brick your RP2350 by using this word if you set a voltage above 1300 mV, so use it with caution!</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
