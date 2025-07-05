@@ -46,7 +46,8 @@ begin-module ntc-demo
 
     ntc-internal import
     \ Check calculation, result must be 25 ºC
-    : calc-check ( f: B-val f: R0 -- ) { f: B-val f: R0 -- }
+    \ These values are in S31.32 format
+    : calc-check ( D: B-val D: R0 -- ) { D: B-val D: R0 -- }
       0,0 B-val 0,0 my-ntc setup-abc
       3,3 R0 my-ntc setup-therm
       \ Force set value of rt (without reading value from ADC)
@@ -86,9 +87,9 @@ begin-module ntc-demo
       calc-470 calc-1k calc-10k calc-100k
     ;
   
-    \ Demo with measuring
-    : measure-demo ( adc chan pin f: B-val f: R0 -- ) 
-      { adc chan pin f: B-val f: R0 -- }
+    \ Demo with measuring, B-val and R0 are in S31.32 format
+    : measure-demo ( adc chan pin D: B-val D: R0 -- ) 
+      { adc chan pin D: B-val D: R0 -- }
       adc 0 pin my-ntc setup-adc
       0,0 B-val 0,0 my-ntc setup-abc
       3,3 R0 my-ntc setup-therm

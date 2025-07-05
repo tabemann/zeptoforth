@@ -35,14 +35,14 @@ The `ntc` module contains the following words:
 Set up ADC.
 
 ##### `setup-abc` 
-( f: a-val f: b-val f: c-val ntc -- )
+( D: a-val D: b-val D: c-val ntc -- )
 
-Set up thermistor's parameters (values of a, b, c).
+Set up thermistor's parameters (values of a, b, c). These values are in S31.32 format
 
 ##### `setup-therm`
-( f: vin f: r0 ntc -- )
+( D: vin D: r0 ntc -- )
 
-Set up input voltage and resistance.
+Set up input voltage and resistance. These values are in S31.32 format.
 
 ##### `measure-ntc`
 ( ntc -- )  
@@ -50,9 +50,9 @@ Set up input voltage and resistance.
 Measure temperature.
 
 ##### `temp@`
-( ntc -- f: kelvin f: celsius )
+( ntc -- D: kelvin D: celsius )
 
-Put temperatures to stack.
+Put temperatures to stack. These values are in S31.32 format.
 
 ##### `dump-ntc`
 ( ntc -- )
