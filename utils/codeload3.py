@@ -44,6 +44,9 @@ import re
 import argparse
 import time
 
+# Whether to disable the timeout
+disableTimeout = False
+
 # hash for "\res MCU:" key-value pairs
 resources = {}
 
@@ -84,7 +87,7 @@ class ConnectSerial(Connection):
                 parity   = serial.PARITY_NONE,
                 stopbits = serial.STOPBITS_ONE,
                 bytesize = serial.EIGHTBITS,
-                timeout  = 5 )
+                timeout  = None if disableTimeout else 5 )
         except:
             print('Error: TTY device %s invalid' % ttydev)
             sys.exit(1)
@@ -114,7 +117,7 @@ class ConnectSerial(Connection):
                         parity   = serial.PARITY_NONE,
                         stopbits = serial.STOPBITS_ONE,
                         bytesize = serial.EIGHTBITS,
-                        timeout  = 5 )
+                        timeout  = None if disableTimeout else 5 )
                     self.refresh()
                 except:
                     print('Error: TTY device %s invalid' % ttydev)
@@ -338,6 +341,10 @@ if (args.method == "serial"):
 else:
     CN = ConnectDryRun()
 
+# Disable the timeout if extra/common/setup_blocks_fat32.fs is being uploaded
+if 'extra/common/setup_blocks_fat32.fs' in args.files:
+    disableTimeout = True
+    
 # Ze main
 for path in args.files:
     upload(path)
