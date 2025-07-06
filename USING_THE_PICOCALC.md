@@ -390,16 +390,6 @@ Note that you can adjust `zeptoed-heap-size` multiple times in a session as you 
     initializer init-zeptoed-heap-size
     reboot
 
-## Development status
-
-Also note that some things currently may not work as expected ─ edit assumes a screen wider than 64 characters currently, and some other issues have been reported with it on the PicoCalc as well, words assumes a screen of at least 80 characters wide and will line wrap with rather un-cosmetic results, the copyright notice and license displayed by license likewise is hard-formatted to 80 characters wide, and the zeptoed help is hard-formatted to 80 characters wide.
-
-However, I would say that zeptoforth's PicoCalc spport is still already very functional, especially since I do not yet have a PicoCalc in my possession and have been relying on the help of others who already possess PicoCalcs along with compile-time selection of an ST7789V display (which I do own) and runtime-selectable limited PicoCalc keyboard emulation (however the emulation is partial as it does not currently directly emulate many of the keys on the actual PicoCalc, rather passing through the characters entered from your terminal emulator connected to your board via the serial console).
-
-If you do decide to try out zeptoforth on your PicoCalc, please give feedback on what works, what doesn't work, what suggestions you have, and even just the fact that you opted to try it. This will be extremely helpful in furthering the development of zeptoforth support for the PicoCalc.
-
-I hope you enjoy trying out zeptoforth on your PicoCalc!
-
 ## Emulating a PicoCalc
 
 For those such as myself who do not yet possess a PicoCalc, some measures may be taken in its place. The PicoCalc terminal emulator can support an SPI ST7789V display in the place of the SPI ST7365P display used by the PicoCalc. When loading the code into flash substitute `extra/common/st7365p_spi_8_5x8_font_all.fs`, `extra/common/st7365p_spi_8_6x8_font_all.fs`, or `extra/common/st7365p_spi_8_7x8_font_all.fs` with `extra/common/st7789v_spi_8_5x8_font_all.fs`, `extra/common/st7789v_spi_8_6x8_font_all.fs`, or `extra/common/st7789v_spi_8_7x8_font_all.fs`. Also, prior to loading edit `extra/rp_common/picocalc_term.fs` to set the GPIO selections for your particular setup. Also, omit sending `initializer picocalc-term::term-console` to the board in the PicoCalc.
