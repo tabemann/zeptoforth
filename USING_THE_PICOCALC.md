@@ -1,6 +1,6 @@
 # Using zeptoforth on the PicoCalc
 
-There is driver and terminal emulator support in this branch for the PicoCalc. This will enable you to use the keyboard, display, and FAT32 filesystems in on-board flash, SD cards, and, if you are using a Pimoroni Pico Plus 2 or Pico Plus 2 W, the board's PSRAM (not the PicoCalc's carrier board PSRAM mind you, which is unsupported) of a PicoCalc without requiring the use of a terminal emulator on a PC. Note that this is currently beta quality, and may still have outstanding issues.
+There is driver and terminal emulator support in this branch for the PicoCalc. This will enable you to use the keyboard, display, and FAT32 filesystems in on-board flash, SD cards, and, if you are using a Pimoroni Pico Plus 2 or Pico Plus 2 W, the board's PSRAM (not the PicoCalc's carrier board PSRAM mind you, which is unsupported) of a PicoCalc without requiring the use of a terminal emulator on a PC.
 
 ## A note about modules and namespaces
 
@@ -16,13 +16,52 @@ The first is that the screen on the PicoCalc is very fragile, and if it becomes 
 
 The second is that the zeptoforth BIOS driver assumes that you have upgraded the firmware on the STM32 in your PicoCalc to the latest (i.e. 1.2 or newer) firmware. There is no good way of checking the version of the firmware, so it is recommended that you update the firmware first thing when assembling your PicoCalc. Directions to do so can be found [here](https://github.com/clockworkpi/PicoCalc/blob/master/wiki/Setting-Up-Arduino-Development-for-PicoCalc-keyboard.md).
 
-## zeptoforth installation and preparation
+## Automated zeptoforth installation from source
 
-First, you must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `full` build (_not_ a `full_usb` build) on the RP2040 or RP2350 board in your PicoCalc. Note that a `full` build is needed because the PicoCalc redirects UART0 to an ACM device on its USB-C port, and it is highly recommended that you use the USB-C port on the PicoCalc for extended usage rather than the USB port on the RP2040 or RP2350 board itself as there have been reports of battery overcharging in such extended usage of the board's USB port (some even recommend removing the batteries from your PicoCalc prior to applying power to the board's USB port).
+The instructions in this section pertain to if you are using the script `utils/build_picocalc.sh` to install zeptoforth on your PicoCalc.
+
+Unlike the instructions in the next section, these instructions assume you are using a Unix-like system and involve building zeptoforth, except for the kernel, from sources. This is more time-consuming, because zeptoforth outside of the kernel is built from the ground up, but at the same time is automated, such that when it is complete you will have a PicoCalc system ready for use without requiring further user interactions
+
+First, you must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `kernel` build (not a `full` or `full_usb` build ─ we will be building a `full` build on top of this `kernel` build) on your PicoCalc with an RP2040 or RP2350 board installed. Note that for new installations the `rp2040` platform is not recommended as it does not leave much flash dictionary space for user programs.
+
+If you already have a kernel installed and you merely want to reinstall a zeptoforth build with PicoCalc support on top of it, issue at the zeptoforth console:
+
+```
+erase-all
+```
+
+This will erase the entire flash dictionary of your board except for the kernel. Note that block storage in internal flash will not be touched (unless you select a different platform from your previously installed platform, where then it may be corrupted in the following installation process).
+
+Then execute, at a shell prompt at the root of the zeptoforth directory tree execute:
+
+```
+$ utils/build_picocalc.sh <platform> <port> <font> [<graphical?> [<pico-plus?> [<core>]]]
+```
+
+where:
+
+- `<platform>` is one of `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib`, matching the kernel you have installed on your PicoCalc
+- `<port>` is the tty device for the USB-C port on your PicoCalc connected internally to UART0 on the board in your PicoCalc.
+- `<font>` is one of `5x8`, `6x8`, or `7x8` for the font size in pixels; if you cannot choose `6x8` is recommended for best results
+- `<graphical?>` is an optional argument that may have values of `graphical` or `text`, to select the graphical PicoCalc terminal emulator or the text-only PicoCalc terminal emulator, respectively; this defaults to `graphical`. The main purpose of this argument is if you wish to save RAM you may want to select the text-only PicoCalc terminal emulator as the graphical PicoCalc terminal emulator uses large quantities of RAM space for its framebuffer; this is particularly a concern on the RP2040 as the graphical PicoCalc terminal emulator leaves little RAM space for user applications on it.
+- `<pico-plus?>` is an optional argument that may have values of `not_pico_plus`, if the target board is not a Pimoroni Pico Plus 2 or Pico Plus 2 W, or `pico_plus`, if the target board is a Pimoroni Pico Plus 2 or Pico Plus 2 W; this defaults to `not_pico_plus`. The effect of selecting `pico_plus` is to enable a FAT32 filesystem in PSRAM with the PSRAM Chip Select pin tied to GPIO 47.
+- `<core>` is an optional argument that may have values of `core_0`, for the zeptoforth PicoCalc tasks executing on core 0 of the RP2040 or RP2350, or `core_1`, for the zeptoforth PicoCalc tasks executing on core 1 of the RP2040 or RP2350; this defaults to `core_1`. The main purpose of this argument is to enable the zeptoforth PicoCalc tasks to execute on a different core than the zeptoIP frame handler and CYW43xxx driver tasks, if you wish to install zeptoIP on your board.
+
+Once you have done this the following will be installed on your PicoCalc:
+
+- a `full` build for the selected platform
+- a graphical or text-only PicoCalc terminal emulator, as selected
+- zeptoed, tools for transferring files with your PC, and tools for transferring files between filesystems, unless the platform is `rp2040` where these are omitted to save limited flash dictionary space
+- FAT32 filesystem support for the FAT32 filesystems in on-board flash (a.k.a. 'blocks'), on the SDHC card, and if a Pimoroni Pico Plus 2 or Pico Plus 2 W has been selected, in PSRAM
+- a screenshot tool as appropriate for the graphical or text-only PicoCalc terminal emulator
+
+When complete, your PicoCalc will reboot and be ready for use!
+
+## Manual zeptoforth installation and preparation
+
+First, you must download the [latest release of zeptoforth](https://github.com/tabemann/zeptoforth/releases) and install a `full` build (_not_ a `full_usb` build) on the RP2040 or RP2350 board in your PicoCalc. Note that a `full` build is needed because the PicoCalc redirects UART0 to an USB tty device on its USB-C port, and it is highly recommended that you use the USB-C port on the PicoCalc for extended usage rather than the USB port on the RP2040 or RP2350 board itself as there have been reports of battery overcharging in such extended usage of the board's USB port (some even recommend removing the batteries from your PicoCalc prior to applying power to the board's USB port).
 
 After flashing a `full` build to your RP2040 or RP2350 board, disconnect USB from the RP2040 or RP2350 board itself and connect USB to the USB-C port on your PicoCalc itself because the serial console that the `full` build defaults to will be redirected to your PicoCalc's USB-C port! If you do not do this, your PicoCalc will appear to be unresponsive and the steps discussed later in this document will fail!
-
-Second, you must pull the [picocalc-devel branch](https://github.com/tabemann/zeptoforth/tree/picocalc-devel) of the zeptoforth repository. As you are reading this you may have already done so.
 
 ## PicoCalc terminal emulator installation
 
