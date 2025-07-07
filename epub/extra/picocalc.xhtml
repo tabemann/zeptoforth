@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PicoCalc words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="picocalc-words">
+<h1>PicoCalc words</h1>
+<p>zeptoforth has support for the PicoCalc, a device that provides a display, keyboard, speakers, and an SD card slot for boards that fit the pinout of a Raspberry Pi Pico 1 (including a Raspberry Pi Pico 1 W, Raspberry Pi Pico 2, Raspberry Pi Pico 2 W, Pimoroni Pico Plus 2, and Pimoroni Pico Plus 2 W). General directions as to the installation and use of zeptoforth on the PicoCalc are detailed in <code class="docutils literal notranslate"><span class="pre">USING_THE_PICOCALC.md</span></code> at the root of this directory tree. This file contains API documentation for the API exposed by the graphical and text-only PicoCalc terminal emulators.</p>
+<p>Note that the core that the PicoCalc tasks run on defaults to core 1 of the RP2040 or RP2350, but can be manually set by defining a globally-visible constant in flash named <code class="docutils literal notranslate"><span class="pre">select-picocalc-tasks-core</span></code> prior to compiling PicoCalc support. This is useful if you are also installing zeptoIP on your PicoCalc, as zeptoIP runs very CPU-heavy tasks on core 1 which will significantly slow down the PicoCalc terminal emulator if it is also running on core 1.</p>
+<section id="picocalc-term">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-term</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-term</span></code> module contains the following words:</p>
+<section id="with-term-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-term-lock</span></code></h3>
+<p>( xt – )</p>
+<p>Carry out an operation with the PicoCalc terminal locked. Note that executing operations that print to the PicoCalc terminal should be avoided because they may block indefinitely.</p>
+</section>
+<section id="with-term-display">
+<h3><code class="docutils literal notranslate"><span class="pre">with-term-display</span></code></h3>
+<p>( xt – ) xt: ( display – )</p>
+<p>Carry out an operation against the PicoCalc terminal’s display with the PicoCalc terminal locked. It is highly recommended that the user update the terminal’s display or graphics drawn to it may not be displayed. Note that executing operations that print to the PicoCalc terminal should be avoided because they may block indefinitely.</p>
+</section>
+<section id="term-pixels-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-pixels-dim&#64;</span></code></h3>
+<p>( – width height )</p>
+<p>Get the terminal dimensions in pixels.</p>
+</section>
+<section id="term-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-dim&#64;</span></code></h3>
+<p>( – width height )</p>
+<p>Get the terminal dimensions in characters.</p>
+</section>
+<section id="term-char-dim">
+<h3><code class="docutils literal notranslate"><span class="pre">term-char-dim&#64;</span></code></h3>
+<p>( – width height )</p>
+<p>Get the terminal character dimensions in pixels.</p>
+</section>
+<section id="read-battery">
+<h3><code class="docutils literal notranslate"><span class="pre">read-battery</span></code></h3>
+<p>( – battery-level )</p>
+<p>Read the battery level.</p>
+</section>
+<section id="set-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">set-backlight</span></code></h3>
+<p>( desired-backlight-level – actual-backlight-level )</p>
+<p>Set the backlight level.</p>
+</section>
+<section id="read-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">read-backlight</span></code></h3>
+<p>( – backlight-level )</p>
+<p>Read the backlight level.</p>
+</section>
+<section id="set-kbd-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">set-kbd-backlight</span></code></h3>
+<p>( desired-kbd-backlight-level – actual-kbd-backlight-level )</p>
+<p>Set the keyboard backlight level.</p>
+</section>
+<section id="read-kbd-backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">read-kbd-backlight</span></code></h3>
+<p>( – kbd-backlight-level )</p>
+<p>Read the keyboard backlight level.</p>
+</section>
+<section id="visual-bell-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">visual-bell-enabled!</span></code></h3>
+<p>( enabled – )</p>
+<p>Set visual bell enabled. This defaults to false.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">visual-bell-enabled&#64;</span></code></h3>
+<p>( – enabled )</p>
+<p>Get visual bell enabled. This defaults to false.</p>
+</section>
+<section id="audible-bell-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">audible-bell-enabled!</span></code></h3>
+<p>( enabled – )</p>
+<p>Set audible bell enabled. This defaults to false.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">audible-bell-enabled&#64;</span></code></h3>
+<p>( – enabled )</p>
+<p>Get audible bell enabled. This defaults to false.</p>
+</section>
+<section id="screenshot-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-hook!</span></code></h3>
+<p>( xt – )</p>
+<p>Set the screenshot hook. This defaults to 0, indicating no hook set.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-hook&#64;</span></code></h3>
+<p>( – xt )</p>
+<p>Get the screenshot hook. This defaults to 0, indicating no hook set.</p>
+</section>
+</section>
+<section id="picocalc-sound">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-sound</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-sound</span></code> module contains the following words:</p>
+<section id="play-tone">
+<h3><code class="docutils literal notranslate"><span class="pre">play-tone</span></code></h3>
+<p>( end-tick D: pitch – )</p>
+<p>Generate a tone of <em>pitch</em> (an S31.32 value in Hz) ending at <em>end-tick</em> relative to <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>, with ticks being 100 microsecond increments. Note that tones ending earlier override tones ending later, and a total of up to 8 tones are tracked at any one time.</p>
+</section>
+<section id="play-tone-for-duration">
+<h3><code class="docutils literal notranslate"><span class="pre">play-tone-for-duration</span></code></h3>
+<p>( duration D: pitch – )</p>
+<p>Generate a tone of <em>pitch</em> (an S31.32 value in Hz) of <em>duration</em> ticks, with ticks being 100 microsecond increments. Note that tones ending earlier override tones ending later, and a total of up to 8 tones are tracked at any one time.</p>
+</section>
+<section id="beep">
+<h3><code class="docutils literal notranslate"><span class="pre">beep</span></code></h3>
+<p>( – )</p>
+<p>This is a convenience word to generate a 1245 Hz, i.e. D6#, tone for 125 milliseconds. This word is used internally to generate the audible bell.</p>
+</section>
+</section>
+<section id="picocalc-bios">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-bios</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">picocalc-bios</span></code> module contains the following words:</p>
+<section id="emulate-keys">
+<h3><code class="docutils literal notranslate"><span class="pre">emulate-keys?</span></code></h3>
+<p>( – flag )</p>
+<p>This is a <code class="docutils literal notranslate"><span class="pre">value</span></code> that defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code> that can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to enable emulating key presses using the serial console as input. This is primarily of use for testing PicoCalc support without using an actual PicoCalc.</p>
+</section>
+</section>
+<section id="picocalc-screenshot">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-screenshot</span></code></h2>
+<p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_screenshoto.fs</span></code> makes the following words available in the <code class="docutils literal notranslate"><span class="pre">picocalc-screenshot</span></code> module:</p>
+<section id="screenshot-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs!</span></code></h3>
+<p>( fs – )</p>
+<p>Set the FAT32 filesystem object for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This filesystem defaults to the SD card FAT32 filesystem first, if configured, or the PSRAM FAT32 filesystem second, if configured, or the on-board flash storage FAT32 filesystem third, if configured.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs&#64;</span></code></h3>
+<p>( – fs )</p>
+<p>Get the FAT32 filesystem object for saving screenshots with the attention key combo.</p>
+</section>
+<section id="screenshot-path">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path!</span></code></h3>
+<p>( path-addr path-bytes – )</p>
+<p>Set the base path for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This path defaults to <code class="docutils literal notranslate"><span class="pre">/SCREEN</span></code>. Note that this directory will be automatically created if it does not exist when taking a screenshot with the console attention key combo, but its parent directorie(s) will not be automatically created.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path&#64;</span></code></h3>
+<p>( – path-addr path-bytes )</p>
+<p>Get the base path for saving screenshots with the attention key combo.</p>
+</section>
+<section id="take-screenshot">
+<h3><code class="docutils literal notranslate"><span class="pre">take-screenshot</span></code></h3>
+<p>( path-addr path-bytes fs – )</p>
+<p>This is the actual word that implements the taking of screenshots. Note that when this word is executed directly the display is <em>not</em> flashed unlike when taking a screenshot with the console attention key combo.</p>
+</section>
+</section>
+<section id="fat32-tools">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code></h2>
+<p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code> adds the following words to the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module:</p>
+<section id="blocks-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs&#64;</span></code></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs:</span></code></h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="sd-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">sd-fs&#64;</span></code></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">sd-fs:</span></code></h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="psram-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">psram-fs&#64;</span></code></h3>
+<p>( – fs )</p>
+<p>This returns the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+<section id="id8">
+<h3>`psram-fs:</h3>
+<p>( – )</p>
+<p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

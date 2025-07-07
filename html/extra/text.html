@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Text display words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Text Displays" href="text_display.html" />
+    <link rel="prev" title="Bitmaps and Displays" href="display.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="text-display-words">
+<h1>Text display words<a class="headerlink" href="#text-display-words" title="Link to this heading">¶</a></h1>
+<p>The text-only PicoCalc terminal emulator exposes <em>text displays</em> that can be accessed directly via <code class="docutils literal notranslate"><span class="pre">picocalc-term::with-term-display</span></code>. These text displays inherit from the <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code> class, which implements a means of storing and fetching 8-bit characters with RGB332 color for the foreground and background and optional underlining. These text displays can often be accessed directly faster in a random-access fashion than generating ANSI terminal control characters to generate the equivalent characters.</p>
+<section id="text8">
+<h2><code class="docutils literal notranslate"><span class="pre">text8</span></code>:<a class="headerlink" href="#text8" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">text8</span></code> module contains the following words:</p>
+<section id="rgb8">
+<h3><code class="docutils literal notranslate"><span class="pre">rgb8</span></code>:<a class="headerlink" href="#rgb8" title="Link to this heading">¶</a></h3>
+<p>( r g b – color )</p>
+<p>A convenience word for constructing an RGB332 color from red, green, and blue components from 0 to 255.</p>
+</section>
+<section id="text8-buf-size">
+<h3><code class="docutils literal notranslate"><span class="pre">text8-buf-size</span></code><a class="headerlink" href="#text8-buf-size" title="Link to this heading">¶</a></h3>
+<p>( columns rows – bytes )</p>
+<p>Get the size of a <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer in bytes for a given number of columns and rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">text8</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> class has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Link to this heading">¶</a></h4>
+<p>( buffer columns rows text – )</p>
+<p>Construct a <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> object with the address of a buffer of the size returned by <code class="docutils literal notranslate"><span class="pre">text8-buf-size</span></code> for the given numbers of columns and rows, a number of columns, and a number of rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="dim">
+<h4><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code><a class="headerlink" href="#dim" title="Link to this heading">¶</a></h4>
+<p>( text – columns rows )</p>
+<p>Get text dimensions.</p>
+</section>
+<section id="clear-text">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-text</span></code><a class="headerlink" href="#clear-text" title="Link to this heading">¶</a></h4>
+<p>( text – )</p>
+<p>Clear the text.</p>
+</section>
+<section id="dirty">
+<h4><code class="docutils literal notranslate"><span class="pre">dirty?</span></code><a class="headerlink" href="#dirty" title="Link to this heading">¶</a></h4>
+<p>( text – dirty? )</p>
+<p>Get whether the text is dirty.</p>
+</section>
+<section id="whole-char">
+<h4><code class="docutils literal notranslate"><span class="pre">whole-char!</span></code><a class="headerlink" href="#whole-char" title="Link to this heading">¶</a></h4>
+<p>( c fg-color bk-color underlined? column row text – )</p>
+<p>Quickly write a whole character at once at a column and row.</p>
+</section>
+<section id="char">
+<h4><code class="docutils literal notranslate"><span class="pre">char&#64;</span></code><a class="headerlink" href="#char" title="Link to this heading">¶</a></h4>
+<p>( column row text – c )</p>
+<p>Get a character at a column and row.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">char!</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<p>( c column row text – )</p>
+<p>Set a character at a column and row.</p>
+</section>
+<section id="fg-color">
+<h4><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#fg-color" title="Link to this heading">¶</a></h4>
+<p>( column row text – color )</p>
+<p>Get a character’s foreground color at a column and row.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">fg-color!</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p>( color column row text – )</p>
+<p>Set a character’s foreground color at a column and row.</p>
+</section>
+<section id="bk-color">
+<h4><code class="docutils literal notranslate"><span class="pre">bk-color&#64;</span></code><a class="headerlink" href="#bk-color" title="Link to this heading">¶</a></h4>
+<p>( column row text – color )</p>
+<p>Get a character’s background color at a column and row.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">bk-color!</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<p>( color column row text – )</p>
+<p>Set a character’s background color at a column and row.</p>
+</section>
+<section id="underlined">
+<h4><code class="docutils literal notranslate"><span class="pre">underlined&#64;</span></code><a class="headerlink" href="#underlined" title="Link to this heading">¶</a></h4>
+<p>( column row text – underlined? )</p>
+<p>Get whether a character is underlined at a column and row.</p>
+</section>
+<section id="raw-underlined">
+<h4><code class="docutils literal notranslate"><span class="pre">raw-underlined&#64;</span></code><a class="headerlink" href="#raw-underlined" title="Link to this heading">¶</a></h4>
+<p>( column row text – underlined? )</p>
+<p>Get whether a character is underlined without testing for bounds.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">underlined!</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<p>( underlined? column row text – )</p>
+<p>Set whether a character is underlined at a column and row.</p>
+</section>
+<section id="scroll-up">
+<h4><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code><a class="headerlink" href="#scroll-up" title="Link to this heading">¶</a></h4>
+<p>( lines text – )</p>
+<p>Scroll up a number of lines (note that this will <em>not</em> fill in the new lines).</p>
+</section>
+<section id="scroll-down">
+<h4><code class="docutils literal notranslate"><span class="pre">scroll-down</span></code><a class="headerlink" href="#scroll-down" title="Link to this heading">¶</a></h4>
+<p>( lines text – )</p>
+<p>Scroll down a number of lines (note that this will <em>not</em> fill in the new lines).</p>
+</section>
+<section id="invert-text">
+<h4><code class="docutils literal notranslate"><span class="pre">invert-text</span></code><a class="headerlink" href="#invert-text" title="Link to this heading">¶</a></h4>
+<p>( text – )</p>
+<p>Invert the text.</p>
+</section>
+</section>
+</section>
+<section id="st7365p-text-common">
+<h2><code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code><a class="headerlink" href="#st7365p-text-common" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code> module contains the following class:</p>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<p>( dc-pin cs-pin invert the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> object for a given DC pin, CS pin, invert boolean, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="char-dim">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code><a class="headerlink" href="#char-dim" title="Link to this heading">¶</a></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="backlight">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#backlight" title="Link to this heading">¶</a></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="update-display">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#update-display" title="Link to this heading">¶</a></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="clear-display">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code><a class="headerlink" href="#clear-display" title="Link to this heading">¶</a></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="st7789v-text-common">
+<h2><code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code><a class="headerlink" href="#st7789v-text-common" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code> module contains the following class:</p>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<p>( dc-pin cs-pin backlight-pin the-font buffer round columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> object for a given DC pin, CS pin, backlight pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/int_overload.html">Interrupt Overloading Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picocalc.html">PicoCalc words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Text display words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enc28j60.html">ENC28J60 Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="display.html" title="previous chapter">Bitmaps and Displays</a></li>
+      <li>Next: <a href="text_display.html" title="next chapter">Text Displays</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2025, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/extra/text.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

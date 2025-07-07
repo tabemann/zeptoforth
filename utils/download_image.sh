@@ -22,8 +22,8 @@ set -e
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PORT=$1
-IMAGE=$2
+PORT="$1"
+IMAGE="$2"
 PROJECT=zeptoforth
 
 # Get the directory of this script, we need this for the venv setup.

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Text display words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="text-display-words">
+<h1>Text display words</h1>
+<p>The text-only PicoCalc terminal emulator exposes <em>text displays</em> that can be accessed directly via <code class="docutils literal notranslate"><span class="pre">picocalc-term::with-term-display</span></code>. These text displays inherit from the <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code> class, which implements a means of storing and fetching 8-bit characters with RGB332 color for the foreground and background and optional underlining. These text displays can often be accessed directly faster in a random-access fashion than generating ANSI terminal control characters to generate the equivalent characters.</p>
+<section id="text8">
+<h2><code class="docutils literal notranslate"><span class="pre">text8</span></code>:</h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">text8</span></code> module contains the following words:</p>
+<section id="rgb8">
+<h3><code class="docutils literal notranslate"><span class="pre">rgb8</span></code>:</h3>
+<p>( r g b – color )</p>
+<p>A convenience word for constructing an RGB332 color from red, green, and blue components from 0 to 255.</p>
+</section>
+<section id="text8-buf-size">
+<h3><code class="docutils literal notranslate"><span class="pre">text8-buf-size</span></code></h3>
+<p>( columns rows – bytes )</p>
+<p>Get the size of a <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer in bytes for a given number of columns and rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">text8</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> class has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( buffer columns rows text – )</p>
+<p>Construct a <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> object with the address of a buffer of the size returned by <code class="docutils literal notranslate"><span class="pre">text8-buf-size</span></code> for the given numbers of columns and rows, a number of columns, and a number of rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="dim">
+<h4><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code></h4>
+<p>( text – columns rows )</p>
+<p>Get text dimensions.</p>
+</section>
+<section id="clear-text">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-text</span></code></h4>
+<p>( text – )</p>
+<p>Clear the text.</p>
+</section>
+<section id="dirty">
+<h4><code class="docutils literal notranslate"><span class="pre">dirty?</span></code></h4>
+<p>( text – dirty? )</p>
+<p>Get whether the text is dirty.</p>
+</section>
+<section id="whole-char">
+<h4><code class="docutils literal notranslate"><span class="pre">whole-char!</span></code></h4>
+<p>( c fg-color bk-color underlined? column row text – )</p>
+<p>Quickly write a whole character at once at a column and row.</p>
+</section>
+<section id="char">
+<h4><code class="docutils literal notranslate"><span class="pre">char&#64;</span></code></h4>
+<p>( column row text – c )</p>
+<p>Get a character at a column and row.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">char!</span></code></h4>
+<p>( c column row text – )</p>
+<p>Set a character at a column and row.</p>
+</section>
+<section id="fg-color">
+<h4><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code></h4>
+<p>( column row text – color )</p>
+<p>Get a character’s foreground color at a column and row.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">fg-color!</span></code></h4>
+<p>( color column row text – )</p>
+<p>Set a character’s foreground color at a column and row.</p>
+</section>
+<section id="bk-color">
+<h4><code class="docutils literal notranslate"><span class="pre">bk-color&#64;</span></code></h4>
+<p>( column row text – color )</p>
+<p>Get a character’s background color at a column and row.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">bk-color!</span></code></h4>
+<p>( color column row text – )</p>
+<p>Set a character’s background color at a column and row.</p>
+</section>
+<section id="underlined">
+<h4><code class="docutils literal notranslate"><span class="pre">underlined&#64;</span></code></h4>
+<p>( column row text – underlined? )</p>
+<p>Get whether a character is underlined at a column and row.</p>
+</section>
+<section id="raw-underlined">
+<h4><code class="docutils literal notranslate"><span class="pre">raw-underlined&#64;</span></code></h4>
+<p>( column row text – underlined? )</p>
+<p>Get whether a character is underlined without testing for bounds.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">underlined!</span></code></h4>
+<p>( underlined? column row text – )</p>
+<p>Set whether a character is underlined at a column and row.</p>
+</section>
+<section id="scroll-up">
+<h4><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code></h4>
+<p>( lines text – )</p>
+<p>Scroll up a number of lines (note that this will <em>not</em> fill in the new lines).</p>
+</section>
+<section id="scroll-down">
+<h4><code class="docutils literal notranslate"><span class="pre">scroll-down</span></code></h4>
+<p>( lines text – )</p>
+<p>Scroll down a number of lines (note that this will <em>not</em> fill in the new lines).</p>
+</section>
+<section id="invert-text">
+<h4><code class="docutils literal notranslate"><span class="pre">invert-text</span></code></h4>
+<p>( text – )</p>
+<p>Invert the text.</p>
+</section>
+</section>
+</section>
+<section id="st7365p-text-common">
+<h2><code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code> module contains the following class:</p>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( dc-pin cs-pin invert the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> object for a given DC pin, CS pin, invert boolean, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="char-dim">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="backlight">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="update-display">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="clear-display">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="st7789v-text-common">
+<h2><code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code> module contains the following class:</p>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( dc-pin cs-pin backlight-pin the-font buffer round columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> object for a given DC pin, CS pin, backlight pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

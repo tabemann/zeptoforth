@@ -67,6 +67,9 @@ begin-module font
     \ Set a row in a character
     method char-row! ( xn ... x0 row c font -- )
 
+    \ Get a raw pixel for a character in a font
+    method raw-char-pixel@ ( c font-col font-row self -- pixel-set? )
+
     \ Draw a character onto a bitmap
     method draw-char ( c col row op bitmap font -- )
 
@@ -127,6 +130,13 @@ begin-module font
       drop
     ; define char-row!
 
+    \ Get a raw pixel for a character in a font
+    :noname { c font-col font-row self -- pixel-set? }
+      c self find-char-col +to font-col
+      font-row 3 rshift self font-bitmap bitmap-internal::page-addr font-col +
+      c@ font-row 7 and rshift 1 and 0<>
+    ; define raw-char-pixel@
+    
     \ Draw a character onto a bitmap
     :noname { c col row op bitmap self -- }
       c self min-char-index @ u< if self default-char-index @ to c then

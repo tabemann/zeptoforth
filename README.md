@@ -78,6 +78,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 
 There is also support for loadable extras not included in any builds:
 
+* Support for the ClockworkPi PicoCalc; for more information see `USING_THE_PICOCALC.md`
 * Single-cell S15.16 fixed-point numeric support
 * Complex numbers built on top of single-precision hardware floating point
 * A profiler

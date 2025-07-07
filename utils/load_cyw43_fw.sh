@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PORT=$1
-FW_IMAGE=$2
-CLM_IMAGE=$3
+PORT="$1"
+FW_IMAGE="$2"
+CLM_IMAGE="$3"
 
 ./utils/convert_bin.py cyw43-fw $FW_IMAGE cyw43_fw.fs
 ./utils/codeload3.py -B 115200 -p $PORT serial cyw43_fw.fs
