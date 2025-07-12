@@ -56,8 +56,8 @@ begin-module ansi-term
   22 constant normal
   04 constant underline
   24 constant underline-off
-  07 constant reverse
-  27 constant reverse-off
+  07 constant reverse-color
+  27 constant reverse-color-off
 
   \ Color constants
   30 constant black
