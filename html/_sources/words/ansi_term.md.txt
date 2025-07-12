@@ -165,6 +165,8 @@ The following are font effect constants:
 ##### `normal`
 ##### `underline`
 ##### `underline-off`
+##### `reverse-color`
+##### `reverse-color-off`
 
 The following are normal font color constants:
 
@@ -187,3 +189,7 @@ The following are bright font color constants:
 ##### `b-magenta`
 ##### `b-cyan`
 ##### `b-white`
+
+There is also the following special color constant that corresponds to the default color:
+
+##### `default-color`
