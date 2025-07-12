@@ -56,6 +56,8 @@ begin-module ansi-term
   22 constant normal
   04 constant underline
   24 constant underline-off
+  07 constant reverse
+  27 constant reverse-off
 
   \ Color constants
   30 constant black
@@ -74,20 +76,24 @@ begin-module ansi-term
   95 constant b-magenta
   96 constant b-cyan
   97 constant b-white
-
+  39 constant default-color
+  
   \ Not a color exception
   : x-not-color ( -- ) ." not a color" cr ;
 
   \ Create a background color
   : background { color -- color' }
     color black >= color white <= and
-    color b-black >= color b-white <= and or if
+    color b-black >= color b-white <= and or
+    color default-color = or if
       color background-offset +
     else
       color [ black background-offset + ] literal >=
       color [ white background-offset + ] literal <= and
       color [ b-black background-offset + ] literal >=
-      color [ b-white background-offset + ] literal <= and or averts x-not-color
+      color [ b-white background-offset + ] literal <= and or
+      color [ default-color background-offset + ] literal = or
+      averts x-not-color
       color
     then
   ;
