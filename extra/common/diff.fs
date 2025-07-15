@@ -182,10 +182,11 @@ begin-module diff
         file-diff slurp-file
         file-diff current-buffer-fill-size @ 0=
       until
-      file-diff diff-file tell-file { total-len }
-      file-diff current-offset @ total-len <> if
-        total-len file-diff current-offset !
-        1 file-diff current-line +!
+      file-diff diff-file tell-file file-diff current-offset !
+      file-diff diff-file file-size@ 0> if
+        -1 seek-end file-diff diff-file seek-file
+        file-diff slurp-file
+        file-diff diff-buffer c@ newline <> if 1 file-diff current-line +! then
       then
     ;
 
@@ -227,22 +228,27 @@ begin-module diff
           then
         then
       loop
-      diff file-diff0 current-buffer-fill-size @
-      diff file-diff1 current-buffer-fill-size @ <> if
+      diff file-diff0 current-buffer-fill-size @ { len0 }
+      diff file-diff1 current-buffer-fill-size @ { len1 }
+      diff file-diff0 diff-file tell-file
+      diff file-diff0 diff-file file-size@ =
+      diff file-diff1 diff-file tell-file
+      diff file-diff1 diff-file file-size@ = or if
         0 diff file-diff0 after-line-count !
         0 diff file-diff1 after-line-count !
-        diff file-diff0 current-buffer-fill-size @
-        diff file-diff1 current-buffer-fill-size @ > if
-          diff file-diff0 current-buffer-fill-size @
-          diff file-diff1 current-buffer-fill-size @ -
-          diff file-diff0 advance-end
+        len0 len1 > if
+          len0 len1 - diff file-diff0 advance-end
+          0 diff file-diff1 advance-end
         else
-          diff file-diff1 current-buffer-fill-size @
-          diff file-diff0 current-buffer-fill-size @ -
-          diff file-diff1 advance-end
+          0 diff file-diff0 advance-end
+          len1 len0 - diff file-diff1 advance-end
         then
-        true diff in-diff? !
-        true
+        len0 len1 <> if
+          true diff in-diff? !
+          true
+        else
+          diff in-diff? @
+        then
       else
         false
       then
@@ -250,8 +256,10 @@ begin-module diff
 
     \ Check if we are at the end of a file
     : check-for-end { diff -- end? }
-      diff file-diff0 current-offset @ diff file-diff0 file-size@ =
-      diff file-diff1 current-offset @ diff file-diff1 file-size@ = or
+      diff file-diff0 current-offset @
+      diff file-diff0 diff-file file-size@ =
+      diff file-diff1 current-offset @
+      diff file-diff1 diff-file file-size@ = or
     ;
 
     \ Transfer the last after lines to the before lines
