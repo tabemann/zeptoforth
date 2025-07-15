@@ -377,7 +377,7 @@ begin-module diff
   end-module> import
 
   \ Take a difference between two files which may exist on different filesystems
-  : inter-fs-diff ( D: path0 fs0 D: path1 fs1 -- )
+  : inter-fs-diff-files ( D: path0 fs0 D: path1 fs1 -- )
     diff-size [:
       { D: path0 fs0 D: path1 fs1 diff }
       diff file-diff0 diff-file path0 ['] clone-file
@@ -398,8 +398,9 @@ begin-module diff
   ;
 
   \ Take a difference between two files on the current filesystem
-  : diff { D: path0 D: path1 -- }
-    path0 fat32-tools::current-fs@ path1 fat32-tools::current-fs@ inter-fs-diff
+  : diff-files { D: path0 D: path1 -- }
+    path0 fat32-tools::current-fs@ path1 fat32-tools::current-fs@
+    inter-fs-diff-files
   ;
   
 end-module
