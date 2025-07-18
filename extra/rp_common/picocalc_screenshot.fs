@@ -255,6 +255,91 @@ begin-module picocalc-screenshot
       loop
     ;
 
+    \ Write a single RLE-compressed pixel
+    : write-pixel
+      { offset solid? last-color display writer buffer x y }
+      ( -- offset' solid?' last-color' )
+      x y display pixel@ dup { this-color } buffer offset + c!
+      -1 last-color = if this-color to last-color then
+      1 +to offset
+      false { written? }
+      
+      solid? this-color last-color <> and if
+        offset 3 > if
+          \ Write pixels of the same color and reset the differing pixel
+          \ to be the start of a new solid sequence of pixels
+          offset 1- writer c>writer
+          last-color writer c>writer
+          this-color buffer c!
+          1 to offset
+          true to solid?
+          this-color to last-color
+          true to written?
+        else
+          \ Simply set the sequence of pixels to not be solid
+          false to solid?
+        then
+      then
+
+      written? not if
+        solid? not if
+          offset 3 > if
+            buffer offset 2 - + c@ this-color =
+            buffer offset 3 - + c@ this-color = and if
+              offset 5 > if
+                \ Write a sequence of pixels in absolute mode
+                0 writer c>writer
+                offset 3 - writer c>writer
+                buffer offset 3 - writer buffer>writer
+                offset 3 - 1 and if 0 writer c>writer then \ Padding
+              else
+                offset 5 = if
+                  \ Write two pixels
+                  1 writer c>writer
+                  buffer c@ writer c>writer
+                  1 writer c>writer
+                  buffer 1+ c@ writer c>writer
+                else
+                  \ Write a single pixel
+                  1 writer c>writer
+                  buffer c@ writer c>writer
+                then
+              then
+              \ Set the sequence to be a solid sequence of three pixels
+              buffer 3 this-color fill
+              3 to offset
+              true to solid?
+              this-color to last-color
+              true to written?
+            then
+          then
+        then
+      then
+
+      written? not if
+        offset 255 = if
+          solid? if
+            \ Write 255 pixels of the same color
+            255 writer c>writer
+            last-color writer c>writer
+          else
+            \ Write 255 pixels in absolute mode
+            0 writer c>writer
+            255 writer c>writer
+            buffer 255 writer buffer>writer
+            0 writer c>writer \ Padding
+          then
+          \ Reset as an empty sequence of pixels
+          0 to offset
+          true to solid?
+          -1 to last-color
+        else
+        then
+      then
+      
+      offset solid? last-color
+    ;
+    
     \ Write RLE-compressed pixels
     : write-pixels ( display writer -- )
       255 [: { display writer buffer }
@@ -268,86 +353,8 @@ begin-module picocalc-screenshot
         then
         0 display-height 1- ?do
           display-width 0 ?do
-            i j display pixel@ dup { this-color } buffer offset + c!
-            -1 last-color = if this-color to last-color then
-            1 +to offset
-            false { written? }
-            
-            solid? this-color last-color <> and if
-              offset 3 > if
-                \ Write pixels of the same color and reset the differing pixel
-                \ to be the start of a new solid sequence of pixels
-                offset 1- writer c>writer
-                last-color writer c>writer
-                this-color buffer c!
-                1 to offset
-                true to solid?
-                this-color to last-color
-                true to written?
-              else
-                \ Simply set the sequence of pixels to not be solid
-                false to solid?
-              then
-            then
-
-            written? not if
-              solid? not if
-                offset 3 > if
-                  buffer offset 2 - + c@ this-color =
-                  buffer offset 3 - + c@ this-color = and if
-                    offset 5 > if
-                      \ Write a sequence of pixels in absolute mode
-                      0 writer c>writer
-                      offset 3 - writer c>writer
-                      buffer offset 3 - writer buffer>writer
-                      offset 3 - 1 and if 0 writer c>writer then \ Padding
-                    else
-                      offset 5 = if
-                        \ Write two pixels
-                        1 writer c>writer
-                        buffer c@ writer c>writer
-                        1 writer c>writer
-                        buffer 1+ c@ writer c>writer
-                      else
-                        \ Write a single pixel
-                        1 writer c>writer
-                        buffer c@ writer c>writer
-                      then
-                    then
-                    \ Set the sequence to be a solid sequence of three pixels
-                    buffer 3 this-color fill
-                    3 to offset
-                    true to solid?
-                    this-color to last-color
-                    true to written?
-                  then
-                then
-              then
-            then
-
-            written? not if
-              offset 255 = if
-                solid? if
-                  \ Write 255 pixels of the same color
-                  255 writer c>writer
-                  last-color writer c>writer
-                else
-                  \ Write 255 pixels in absolute mode
-                  0 writer c>writer
-                  255 writer c>writer
-                  buffer 255 writer buffer>writer
-                  0 writer c>writer \ Padding
-                then
-                \ Reset as an empty sequence of pixels
-                0 to offset
-                true to solid?
-                -1 to last-color
-              else
-              then
-            then
-
-\            j i [: ." (" (.) ." , " (.) ." ) " flush-console ;]
-\            console::with-serial-output
+            offset solid? last-color display writer buffer i j
+            write-pixel to last-color to solid? to offset
           loop
 
           offset 0> if
