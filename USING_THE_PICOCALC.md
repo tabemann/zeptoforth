@@ -70,6 +70,8 @@ The parameters are the same as for `utils/build_picocalc.sh` except:
 - `<fw>` is the path of the primary CYW43439 firmware.
 - `<fw-clm>` is the path of the CLM CYW43439 firmware.
 
+Note that `utils/build_picocalc_zeptoip.sh` defaults to the PicoCalc terminal emulator tasks being on core 0 rather than core 1 if a core is not specified because zeptoIP defaults to having CPU-heavy tasks on core 1.
+
 The primary and CLM CYW43439 firmware are non-free so are not in this repository. The primary firmware is mirrored [here](https://github.com/tabemann/cyw43-firmware/raw/master/cyw43439-firmware/43439A0.bin). The CLM firmware is mirrored [here](https://github.com/tabemann/cyw43-firmware/raw/master/cyw43439-firmware/43439A0_clm.bin).
 
 After this completes, everything installed with `utils/build_picocalc.sh` will be installed but the CYW43439 firmware and either zeptoIPv4 or zeptoIPv6 will also be installed.
