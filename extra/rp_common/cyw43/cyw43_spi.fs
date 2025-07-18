@@ -31,10 +31,20 @@ begin-module cyw43-spi
   begin-module cyw43-spi-internal
     
     \ SYSCFG base
-    $40004000 constant SYSCFG_BASE
+    rp2040? [if]
+      $40004000 constant SYSCFG_BASE
+    [then]
+    rp2350? [if]
+      $40008000 constant SYSCFG_BASE
+    [then]
 
     \ Input sync bypass
-    SYSCFG_BASE $0C + constant PROC_IN_SYNC_BYPASS
+    rp2040? [if]
+      SYSCFG_BASE $0C + constant PROC_IN_SYNC_BYPASS
+    [then]
+    rp2350? [if]
+      SYSCFG_BASE $04 + constant PROC_IN_SYNC_BYPASS
+    [then]
     
     \ The PIO program used for communicating
     0 constant SIDE_0

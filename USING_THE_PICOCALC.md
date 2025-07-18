@@ -32,7 +32,7 @@ erase-all
 
 This will erase the entire flash dictionary of your board except for the kernel. Note that block storage in internal flash will not be touched (unless you select a different platform from your previously installed platform, where then it may be corrupted in the following installation process).
 
-Then execute, at a shell prompt at the root of the zeptoforth directory tree execute:
+To build zeptoforth for the PicoCalc without zeptoIP, at a shell prompt at the root of the zeptoforth directory tree execute:
 
 ```
 $ utils/build_picocalc.sh <platform> <port> <font> [<graphical?> [<pico-plus?> [<core>]]]
@@ -40,9 +40,9 @@ $ utils/build_picocalc.sh <platform> <port> <font> [<graphical?> [<pico-plus?> [
 
 where:
 
-- `<platform>` is one of `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib`, matching the kernel you have installed on your PicoCalc
+- `<platform>` is one of `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib`, matching the kernel you have installed on your PicoCalc.
 - `<port>` is the tty device for the USB-C port on your PicoCalc connected internally to UART0 on the board in your PicoCalc.
-- `<font>` is one of `5x8`, `6x8`, or `7x8` for the font size in pixels; if you cannot choose `6x8` is recommended for best results
+- `<font>` is one of `5x8`, `6x8`, or `7x8` for the font size in pixels; if you cannot choose `6x8` is recommended for best results.
 - `<graphical?>` is an optional argument that may have values of `graphical` or `text`, to select the graphical PicoCalc terminal emulator or the text-only PicoCalc terminal emulator, respectively; this defaults to `graphical`. The main purpose of this argument is if you wish to save RAM you may want to select the text-only PicoCalc terminal emulator as the graphical PicoCalc terminal emulator uses large quantities of RAM space for its framebuffer; this is particularly a concern on the RP2040 as the graphical PicoCalc terminal emulator leaves little RAM space for user applications on it.
 - `<pico-plus?>` is an optional argument that may have values of `not_pico_plus`, if the target board is not a Pimoroni Pico Plus 2 or Pico Plus 2 W, or `pico_plus`, if the target board is a Pimoroni Pico Plus 2 or Pico Plus 2 W; this defaults to `not_pico_plus`. The effect of selecting `pico_plus` is to enable a FAT32 filesystem in PSRAM with the PSRAM Chip Select pin tied to GPIO 47.
 - `<core>` is an optional argument that may have values of `core_0`, for the zeptoforth PicoCalc tasks executing on core 0 of the RP2040 or RP2350, or `core_1`, for the zeptoforth PicoCalc tasks executing on core 1 of the RP2040 or RP2350; this defaults to `core_1`. The main purpose of this argument is to enable the zeptoforth PicoCalc tasks to execute on a different core than the zeptoIP frame handler and CYW43xxx driver tasks, if you wish to install zeptoIP on your board.
@@ -56,6 +56,25 @@ Once you have done this the following will be installed on your PicoCalc:
 - a screenshot tool as appropriate for the graphical or text-only PicoCalc terminal emulator
 
 When complete, your PicoCalc will reboot and be ready for use!
+
+To build zeptoforth for the PicoCalc _with_ zeptoIP, instead execute:
+
+
+```
+$ utils/build_picocalc_zeptoip.sh <platform> <port> <ipv> <fw> <fw-clm> <font> [<graphical?> [<pico-plus?> [<core>]]]
+```
+
+The parameters are the same as for `utils/build_picocalc.sh` except:
+
+- `<ipv>` is either `ipv4` or `ipv6` depending on whether you want to select zeptoIPv4 or zeptoIPv6.
+- `<fw>` is the path of the primary CYW43439 firmware.
+- `<fw-clm>` is the path of the CLM CYW43439 firmware.
+
+The primary and CLM CYW43439 firmware are non-free so are not in this repository. The primary firmware is mirrored [here](https://github.com/tabemann/cyw43-firmware/raw/master/cyw43439-firmware/43439A0.bin). The CLM firmware is mirrored [here](https://github.com/tabemann/cyw43-firmware/raw/master/cyw43439-firmware/43439A0_clm.bin).
+
+After this completes, everything installed with `utils/build_picocalc.sh` will be installed but the CYW43439 firmware and either zeptoIPv4 or zeptoIPv6 will also be installed.
+
+For more information on zeptoIP consult `BUILDING_AND_USING_ZEPTOIP.md`.
 
 ## Manual zeptoforth installation and preparation
 
