@@ -46,7 +46,7 @@
 #include src/rp_common/forth/led.fs
 #include src/common/forth/full_default.fs
 #include src/rp2040/forth/timer.fs
-#include src/rp_common/forth/rng.fs
+#include src/rp2040/forth/rng.fs
 #include src/rp2040_big/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
