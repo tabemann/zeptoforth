@@ -69,7 +69,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Best-effort fault recovery
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the RP2040)
 * A block editor (on the STM32F746 DISCOVERY board, the RP2040, and the RP2350)
-* Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)
+* Hardware random number generator support
 * Pseudorandom number generator support (using the TinyMT32 PRNG)
 * Programmable input/output support (on the RP2040 and the RP2350)
 * Watchdog support (on the RP2040 and the RP2350)
