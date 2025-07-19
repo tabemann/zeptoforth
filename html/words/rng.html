@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Random Number Generator Words &#8212; zeptoforth  documentation</title>
+    <title>Hardware Random Number Generator words &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
@@ -14,7 +14,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ANSI Terminal words" href="ansi_term.html" />
-    <link rel="prev" title="Pico clock control words" href="clocks.html" />
+    <link rel="prev" title="Voltage words" href="voltage.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -32,16 +32,17 @@
 
           <div class="body" role="main">
             
-  <section id="random-number-generator-words">
-<h1>Random Number Generator Words<a class="headerlink" href="#random-number-generator-words" title="Link to this heading">¶</a></h1>
-<p>Random number generators are initialized at boot time, and can be used as is afterwards. All currently supported platforms support random number generation.</p>
+  <section id="hardware-random-number-generator-words">
+<h1>Hardware Random Number Generator words<a class="headerlink" href="#hardware-random-number-generator-words" title="Link to this heading">¶</a></h1>
+<p>Hardware random number generators are initialized at boot time, and can be used as is afterwards. All currently supported platforms support hardware random number generation.</p>
+<p>Note that hardware random number generation can be <em>very</em> slow, so it is highly recommended that one use it to seed a pseudorandom number generator such as TinyMT32 rather than directly using it to generate random numbers in sequence.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">rng</span></code>:</p>
 <section id="rng">
 <h2><code class="docutils literal notranslate"><span class="pre">rng</span></code><a class="headerlink" href="#rng" title="Link to this heading">¶</a></h2>
 <section id="random">
 <h3><code class="docutils literal notranslate"><span class="pre">random</span></code><a class="headerlink" href="#random" title="Link to this heading">¶</a></h3>
 <p>( – u )</p>
-<p>Generate a random 32-bit value.</p>
+<p>Generate a random 32-bit value using a hardware entropy source.</p>
 </section>
 </section>
 </section>
@@ -97,6 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -123,7 +125,8 @@
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voltage.html">Voltage words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -137,24 +140,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text.html">Text display words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="clocks.html" title="previous chapter">Pico clock control words</a></li>
+      <li>Previous: <a href="voltage.html" title="previous chapter">Voltage words</a></li>
       <li>Next: <a href="ansi_term.html" title="next chapter">ANSI Terminal words</a></li>
   </ul></li>
 </ul>

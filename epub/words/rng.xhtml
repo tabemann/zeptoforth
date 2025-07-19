@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Random Number Generator Words</title>
+    <title>Hardware Random Number Generator words</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
   </head><body>
@@ -14,16 +14,17 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section id="random-number-generator-words">
-<h1>Random Number Generator Words</h1>
-<p>Random number generators are initialized at boot time, and can be used as is afterwards. All currently supported platforms support random number generation.</p>
+  <section id="hardware-random-number-generator-words">
+<h1>Hardware Random Number Generator words</h1>
+<p>Hardware random number generators are initialized at boot time, and can be used as is afterwards. All currently supported platforms support hardware random number generation.</p>
+<p>Note that hardware random number generation can be <em>very</em> slow, so it is highly recommended that one use it to seed a pseudorandom number generator such as TinyMT32 rather than directly using it to generate random numbers in sequence.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">rng</span></code>:</p>
 <section id="rng">
 <h2><code class="docutils literal notranslate"><span class="pre">rng</span></code></h2>
 <section id="random">
 <h3><code class="docutils literal notranslate"><span class="pre">random</span></code></h3>
 <p>( – u )</p>
-<p>Generate a random 32-bit value.</p>
+<p>Generate a random 32-bit value using a hardware entropy source.</p>
 </section>
 </section>
 </section>

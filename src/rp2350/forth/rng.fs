@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module rng
 
   interrupt import
@@ -209,9 +211,12 @@ begin-module rng
     begin
       [:
         pool-empty? not if read-pool true else false then
+        start-trng
       ;] trng-slock with-slock
-      dup not if start-trng pause-reschedule-last then
+      dup not if pause-reschedule-last then
     until
   ;
   
 end-module
+
+reboot

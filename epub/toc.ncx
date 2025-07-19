@@ -12216,12 +12216,12 @@
     </navPoint>
     <navPoint id="navPoint2035" playOrder="1886">
       <navLabel>
-        <text>Random Number Generator Words</text>
+        <text>Hardware Random Number Generator words</text>
       </navLabel>
       <content src="words/rng.xhtml" />  
       <navPoint id="navPoint2036" playOrder="1886">
         <navLabel>
-          <text>Random Number Generator Words</text>
+          <text>Hardware Random Number Generator words</text>
         </navLabel>
         <content src="words/rng.xhtml" />  
       </navPoint>
