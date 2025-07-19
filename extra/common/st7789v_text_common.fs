@@ -469,6 +469,7 @@ begin-module st7789v-text-common
           col 1 lshift line-buf + h!
           1 +to col
           1 +to font-col
+          1 +to addr
           font-col char-cols = if
             0 to font-col
             1 +to text-col
