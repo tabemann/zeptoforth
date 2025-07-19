@@ -95,3 +95,4 @@ Zeptoforth Documentation
    extra/ntp
    extra/cyw43
    extra/enc28j60
+   extra/ntc

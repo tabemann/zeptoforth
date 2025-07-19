@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>NTC thermistor Support</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ntc-thermistor-support">
+<h1>NTC thermistor Support</h1>
+<p>There is an optional driver for thermistors of type NTC.</p>
+<p>An NTC thermistor is a thermal component that changes its resistance in response to temperature - higher the temperature, lower the resistance. This property can be utilized to measure temperature. However, the Raspberry Pi Pico can only measure voltage through its ADC input. To measure resistance, we need to use a voltage divider circuit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">Pi</span> <span class="n">Pico</span> <span class="mi">3</span><span class="n">V3</span> <span class="o">-------+</span>
+   <span class="p">(</span><span class="mi">3</span><span class="n">V3</span> <span class="o">-</span> <span class="n">Pin36</span><span class="p">)</span>     <span class="o">|</span>
+                     <span class="n">R0</span> <span class="o">-</span> <span class="n">Resistor</span><span class="p">,</span> <span class="n">R0</span> <span class="o">=</span> <span class="n">RT</span> <span class="n">at</span> <span class="mi">25</span><span class="n">ºC</span>
+                     <span class="o">|</span>
+  <span class="n">Pi</span> <span class="n">Pico</span> <span class="n">ADC0</span> <span class="o">------+</span>
+   <span class="p">(</span><span class="n">GP26</span> <span class="o">-</span> <span class="n">Pin31</span><span class="p">)</span>    <span class="o">|</span>
+                     <span class="n">RT</span> <span class="o">-</span> <span class="n">Thermistor</span>
+                     <span class="o">|</span>
+  <span class="n">Pi</span> <span class="n">Pico</span> <span class="n">GND</span> <span class="o">-------+</span>
+   <span class="p">(</span><span class="n">GND</span> <span class="o">-</span> <span class="n">Pin28</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since the resistance change is non-linear with temperature variation, the temperature can be calculated using two methods:</p>
+<ul class="simple">
+<li><p>Steinhart-Hart equation</p></li>
+<li><p>B-parameter approximation.</p></li>
+</ul>
+<p>The driver determines which method to use for converting resistance to temperature based on the configured parameters.</p>
+<p>NTC support is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/ntc.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">test/rp_common/ntc_demo.fs</span></code>.</p>
+<section id="ntc">
+<h2><code class="docutils literal notranslate"><span class="pre">ntc</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ntc</span></code> module contains the following words:</p>
+<section id="setup-adc">
+<h3><code class="docutils literal notranslate"><span class="pre">setup-adc</span></code></h3>
+<p>( adc chan pin ntc – )</p>
+<p>Set up ADC.</p>
+</section>
+<section id="setup-abc">
+<h3><code class="docutils literal notranslate"><span class="pre">setup-abc</span></code></h3>
+<p>( D: a-val D: b-val D: c-val ntc – )</p>
+<p>Set up thermistor’s parameters (values of a, b, c). These values are in S31.32 format</p>
+</section>
+<section id="setup-therm">
+<h3><code class="docutils literal notranslate"><span class="pre">setup-therm</span></code></h3>
+<p>( D: vin D: r0 ntc – )</p>
+<p>Set up input voltage and resistance. These values are in S31.32 format.</p>
+</section>
+<section id="measure-ntc">
+<h3><code class="docutils literal notranslate"><span class="pre">measure-ntc</span></code></h3>
+<p>( ntc – )</p>
+<p>Measure temperature.</p>
+</section>
+<section id="temp">
+<h3><code class="docutils literal notranslate"><span class="pre">temp&#64;</span></code></h3>
+<p>( ntc – D: kelvin D: celsius )</p>
+<p>Put temperatures to stack. These values are in S31.32 format.</p>
+</section>
+<section id="dump-ntc">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-ntc</span></code></h3>
+<p>( ntc – )</p>
+<p>Dump <code class="docutils literal notranslate"><span class="pre">ntc</span></code> structure.</p>
+</section>
+<section id="ntc-size">
+<h3><code class="docutils literal notranslate"><span class="pre">ntc-size</span></code></h3>
+<p>The structure contains necessary data for temperature measurement (e.g., input voltage, resistance value, etc.). The measured voltage and the temperature calculated from it are also stored here.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

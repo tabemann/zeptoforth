@@ -17224,5 +17224,71 @@
         </navPoint>
       </navPoint>
     </navPoint>
+    <navPoint id="navPoint2870" playOrder="2626">
+      <navLabel>
+        <text>NTC thermistor Support</text>
+      </navLabel>
+      <content src="extra/ntc.xhtml" />  
+      <navPoint id="navPoint2871" playOrder="2626">
+        <navLabel>
+          <text>NTC thermistor Support</text>
+        </navLabel>
+        <content src="extra/ntc.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint2872" playOrder="2627">
+        <navLabel>
+          <text>ntc</text>
+        </navLabel>
+        <content src="extra/ntc.xhtml#ntc" />  
+        <navPoint id="navPoint2873" playOrder="2627">
+          <navLabel>
+            <text>ntc</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#ntc" />  
+        </navPoint>
+        <navPoint id="navPoint2874" playOrder="2628">
+          <navLabel>
+            <text>setup-adc</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#setup-adc" />  
+        </navPoint>
+        <navPoint id="navPoint2875" playOrder="2629">
+          <navLabel>
+            <text>setup-abc</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#setup-abc" />  
+        </navPoint>
+        <navPoint id="navPoint2876" playOrder="2630">
+          <navLabel>
+            <text>setup-therm</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#setup-therm" />  
+        </navPoint>
+        <navPoint id="navPoint2877" playOrder="2631">
+          <navLabel>
+            <text>measure-ntc</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#measure-ntc" />  
+        </navPoint>
+        <navPoint id="navPoint2878" playOrder="2632">
+          <navLabel>
+            <text>temp@</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#temp" />  
+        </navPoint>
+        <navPoint id="navPoint2879" playOrder="2633">
+          <navLabel>
+            <text>dump-ntc</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#dump-ntc" />  
+        </navPoint>
+        <navPoint id="navPoint2880" playOrder="2634">
+          <navLabel>
+            <text>ntc-size</text>
+          </navLabel>
+          <content src="extra/ntc.xhtml#ntc-size" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
   </navMap>
 </ncx>
