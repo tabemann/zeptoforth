@@ -13,8 +13,8 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Text Displays" href="text_display.html" />
-    <link rel="prev" title="zeptoed" href="zeptoed.html" />
+    <link rel="next" title="Text display words" href="text.html" />
+    <link rel="prev" title="PicoCalc words" href="picocalc.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -34,13 +34,13 @@
             
   <section id="bitmaps-and-displays">
 <h1>Bitmaps and Displays<a class="headerlink" href="#bitmaps-and-displays" title="Link to this heading">¶</a></h1>
-<p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code> there is optional code for supporting bitmap operations, and under <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306.fs</span></code> there is optional code for supporting I2C SSD1306-based displays. The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and is defined under the <code class="docutils literal notranslate"><span class="pre">ssd1306</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306</span></code>.</p>
+<p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code> there is optional code for supporting bitmap operations. Under <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306.fs</span></code> there is optional code for supporting I2C SSD1306-based displays, and similarly under <code class="docutils literal notranslate"><span class="pre">extra/common/ch1116.fs</span></code> there is optional code for supporting I2C CH1116-based displays. The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and is defined under the <code class="docutils literal notranslate"><span class="pre">ssd1306</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306.fs</span></code>, and similarly the <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and is defined under the <code class="docutils literal notranslate"><span class="pre">ch1116</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/ch1116.fs</span></code>.</p>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/pixmap16.fs</span></code> there is optional code for supporting 5-bit red, 6-bit green, 5-bit blue 16-bit pixmap operations, and under <code class="docutils literal notranslate"><span class="pre">extra/common/st7735s.fs</span></code> there is optional code for supporting SPI ST7735S-based displays with 16-bit color. The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">pixmap16</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/pixmap16.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class and is defined under the <code class="docutils literal notranslate"><span class="pre">st7735s</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/st7735s.fs</span></code>.</p>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/pixmap8.fs</span></code> there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations. Under <code class="docutils literal notranslate"><span class="pre">extra/common/st7735s_8.fs</span></code> there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers. Under <code class="docutils literal notranslate"><span class="pre">extra/rp_common/st7789v_parallel_8.fs</span></code> there is optional code for supporting parallel ST7789V-based displays using 8-bit backing buffers. Under <code class="docutils literal notranslate"><span class="pre">extra/common/st7789v_spi_8.fs</span></code> there is optional code for supporting SPI ST7789V-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">pixmap8</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/pixmap8.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">st7735s-8</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/st7735s_8.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">st7789v-8</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/st7789v_parallel_8.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">st7789v-8-spi</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/st7789v_spi_8.fs</span></code>. All of these classes inherit from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class is a general class for 5-bit red, 6-bit green, 5-bit blue 16-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class is a general class for 3-bit red, 3-bit green, 2-bit blue 8-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s-8>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class implements an SSD1306 device interface and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class implements an SSD1306 device interface and the <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> class implements a CH1116 device interface; they support all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class implements a 16-bit ST7735S device interface and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class implements a 16-bit ST7735S device interface with a 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffer and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class implements a 16-bit ST7735S device interface with fixed 16-bit foreground and background colors with a bitmap backing buffer and supports all the drawing operations implemented by the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> objects do not immediately update the display; rather the display must be manually after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.</p>
@@ -86,7 +86,7 @@
 <section id="id1">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is the base class for bitmaps. It can be used directly, e.g. for offscreen bitmaps, or through its subclass <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is the base class for bitmaps. It can be used directly, e.g. for offscreen bitmaps, or through its subclasses <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class includes the following constructor:</p>
 </section>
 <section id="new">
@@ -349,23 +349,54 @@
 <p>This sets the contrast of an SSD1306-based display to a value from 0 to 255.</p>
 </section>
 </section>
+<section id="ch1116">
+<h2><code class="docutils literal notranslate"><span class="pre">ch1116</span></code><a class="headerlink" href="#ch1116" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ch1116</span></code> module contains the following words:</p>
+<section id="ch1116-i2c-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">CH1116_I2C_ADDR</span></code><a class="headerlink" href="#ch1116-i2c-addr" title="Link to this heading">¶</a></h3>
+<p>( – i2c-addr )</p>
+<p>The default I2C address for CH1116-based displays, $3C.</p>
+</section>
+<section id="id24">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<p>( – class )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> class is the class for I2C CH1116-based displays. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id25">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
+<p>( pin0 pin1 buffer-addr columns rows i2c-addr i2c-device ch1116 – )</p>
+<p>This constructor initializes an I2C CH1116 display with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> instance being initialized, <em>ch1116</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ch1116&gt;</span></code> class includes the following methoda:</p>
+</section>
+<section id="id26">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<p>( ch1116 – )</p>
+<p>This updates the CH1116-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="id27">
+<h3><code class="docutils literal notranslate"><span class="pre">display-contrast!</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<p>( constrast ch1116 – )</p>
+<p>This sets the contrast of an CH1116-based display to a value from 0 to 255.</p>
+</section>
+</section>
 <section id="st7735s">
 <h2><code class="docutils literal notranslate"><span class="pre">st7735s</span></code><a class="headerlink" href="#st7735s" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7735s</span></code> module contains the following words:</p>
-<section id="id24">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<section id="id28">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class is the class for 5-bit red, 6-bit green, 5-bit blue 16-bit SPI ST7735S-based displays. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following constructor:</p>
 </section>
-<section id="id25">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
+<section id="id29">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
 <p>( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s – )</p>
 <p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following method:</p>
 </section>
-<section id="id26">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<section id="id30">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
 <p>( st7735s – )</p>
 <p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
@@ -378,25 +409,25 @@
 <section id="st7735s-8">
 <h2><code class="docutils literal notranslate"><span class="pre">st7735s-8</span></code><a class="headerlink" href="#st7735s-8" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7735s-8</span></code> module contains the following words:</p>
-<section id="id27">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<section id="id31">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class is the class for 16-bit SPI ST7735S-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class includes the following constructor:</p>
 </section>
-<section id="id28">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<section id="id32">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id32" title="Link to this heading">¶</a></h3>
 <p>( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s – )</p>
 <p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-8&gt;</span></code> class includes the following method:</p>
 </section>
-<section id="id29">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<section id="id33">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
 <p>( st7735s – )</p>
 <p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
-<section id="id30">
-<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
+<section id="id34">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
 <p>( backlight st7735s – )</p>
 <p>Set the on/off state of the ST7735S-based display’s backlight.</p>
 </section>
@@ -404,30 +435,30 @@
 <section id="st7735s-1">
 <h2><code class="docutils literal notranslate"><span class="pre">st7735s-1</span></code><a class="headerlink" href="#st7735s-1" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7735s-1</span></code> module contains the following words:</p>
-<section id="id31">
-<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<section id="id35">
+<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code><a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
 <p>( r g b – color )</p>
 <p>Create a 16-bit color with 5 bits for red, 6 bits for green, and 5 bits for blue from a red/green/blue triplet of values from 0 to 255 each.</p>
 </section>
-<section id="id32">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code><a class="headerlink" href="#id32" title="Link to this heading">¶</a></h3>
+<section id="id36">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code><a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class is the class for 16-bit SPI ST7735S-based displays with 5-bit red, 6-bit green, 5-bit blue foreground and background colors and bitmap backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s-1&gt;</span></code> class includes the following constructor:</p>
 </section>
-<section id="id33">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<section id="id37">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
 <p>( fg-color bg-color din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s – )</p>
 <p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, a 16-bit foreground color <em>fg-color</em>, a 16-bit background color <em>bg-color</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following method:</p>
 </section>
-<section id="id34">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
+<section id="id38">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
 <p>( st7735s – )</p>
 <p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
 </section>
-<section id="id35">
-<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<section id="id39">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
 <p>( backlight st7735s – )</p>
 <p>Set the on/off state of the ST7735S-based display’s backlight.</p>
 </section>
@@ -441,13 +472,13 @@
 <p>( bg-color st7735s – )</p>
 <p>Set the background color of the ST7735S-based display and dirty the display.</p>
 </section>
-<section id="id36">
-<h3><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
+<section id="id40">
+<h3><code class="docutils literal notranslate"><span class="pre">fg-color&#64;</span></code><a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
 <p>( st7735s – fg-color )</p>
 <p>Get the foreground color of the ST7735S-based display.</p>
 </section>
-<section id="id37">
-<h3><code class="docutils literal notranslate"><span class="pre">bg-color&#64;</span></code><a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<section id="id41">
+<h3><code class="docutils literal notranslate"><span class="pre">bg-color&#64;</span></code><a class="headerlink" href="#id41" title="Link to this heading">¶</a></h3>
 <p>( st7735s – bg-color )</p>
 <p>Get the background color of the ST7735S-based display.</p>
 </section>
@@ -455,43 +486,17 @@
 <section id="st7789v-8">
 <h2><code class="docutils literal notranslate"><span class="pre">st7789v-8</span></code><a class="headerlink" href="#st7789v-8" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7789v-8</span></code> module contains the following words:</p>
-<section id="id38">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code><a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
+<section id="id42">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code><a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code> class is the class for 16-bit parallel ST7789V-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code> class includes the following constructor:</p>
 </section>
-<section id="id39">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id39" title="Link to this heading">¶</a></h3>
+<section id="id43">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
 <p>( din-base-pin write-clk-pin read-clk-pin dc-pin cs-pin backlight-pin buffer-addr round? columns rows state-machine pio-device st7789v – )</p>
 <p>This constructor initializes a parallel ST7789V display at the PIO device <em>pio-device</em>, the PIO state machine <em>state-machine</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, whether the display is <em>round?</em>, the base DIN pin <em>din-base-pin</em> (note that there are 8 DIN pins with parallel ST7789V displays), the write CLK pin <em>write-clk-pin</em>, the read CLK in <em>read-clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code> instance being initialized, <em>st7789v</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8&gt;</span></code> class includes the following method:</p>
-</section>
-<section id="id40">
-<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id40" title="Link to this heading">¶</a></h3>
-<p>( st7789v – )</p>
-<p>This updates the ST7789V-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
-</section>
-<section id="id41">
-<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id41" title="Link to this heading">¶</a></h3>
-<p>( backlight st7789v – )</p>
-<p>Set the on/off state of the ST7789V-based display’s backlight.</p>
-</section>
-</section>
-<section id="st7789v-8-spi">
-<h2><code class="docutils literal notranslate"><span class="pre">st7789v-8-spi</span></code><a class="headerlink" href="#st7789v-8-spi" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-8-spi</span></code> module contains the following words:</p>
-<section id="id42">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code><a class="headerlink" href="#id42" title="Link to this heading">¶</a></h3>
-<p>( – class )</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class is the class for 16-bit SPI ST7789V-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class includes the following constructor:</p>
-</section>
-<section id="id43">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
-<p>( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr round? columns rows spi-device st7789v – )</p>
-<p>This constructor initializes an SPI ST7789V display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, whether the display is <em>round?</em>, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> instance being initialized, <em>st7789v</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class includes the following method:</p>
 </section>
 <section id="id44">
 <h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
@@ -500,6 +505,32 @@
 </section>
 <section id="id45">
 <h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
+<p>( backlight st7789v – )</p>
+<p>Set the on/off state of the ST7789V-based display’s backlight.</p>
+</section>
+</section>
+<section id="st7789v-8-spi">
+<h2><code class="docutils literal notranslate"><span class="pre">st7789v-8-spi</span></code><a class="headerlink" href="#st7789v-8-spi" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-8-spi</span></code> module contains the following words:</p>
+<section id="id46">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code><a class="headerlink" href="#id46" title="Link to this heading">¶</a></h3>
+<p>( – class )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class is the class for 16-bit SPI ST7789V-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id47">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id47" title="Link to this heading">¶</a></h3>
+<p>( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr round? columns rows spi-device st7789v – )</p>
+<p>This constructor initializes an SPI ST7789V display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, whether the display is <em>round?</em>, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> instance being initialized, <em>st7789v</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-8-spi&gt;</span></code> class includes the following method:</p>
+</section>
+<section id="id48">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code><a class="headerlink" href="#id48" title="Link to this heading">¶</a></h3>
+<p>( st7789v – )</p>
+<p>This updates the ST7789V-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="id49">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code><a class="headerlink" href="#id49" title="Link to this heading">¶</a></h3>
 <p>( backlight st7789v – )</p>
 <p>Set the on/off state of the ST7789V-based display’s backlight.</p>
 </section>
@@ -557,6 +588,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
@@ -583,7 +615,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
@@ -597,7 +630,9 @@
 <li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picocalc.html">PicoCalc words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text.html">Text display words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
@@ -609,14 +644,16 @@
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntc.html">NTC thermistor Support</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="zeptoed.html" title="previous chapter">zeptoed</a></li>
-      <li>Next: <a href="text_display.html" title="next chapter">Text Displays</a></li>
+      <li>Previous: <a href="picocalc.html" title="previous chapter">PicoCalc words</a></li>
+      <li>Next: <a href="text.html" title="next chapter">Text display words</a></li>
   </ul></li>
 </ul>
 </div>

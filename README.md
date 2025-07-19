@@ -89,6 +89,7 @@ There is also support for loadable extras not included in any builds:
 * 8-bit pixmaps (in `extra/common/pixmap8.fs`)
 * 16-bit pixmaps (in `extra/common/pixmap16.fs`)
 * SSD1306-based displays (in `extra/common/ssd1306.fs`)
+* CH1116-based displays (in `extra/common/ch1116.fs`)
 * ST7735S-based displays (in `extra/common/st7735s.fs` with 16-bit framebuffers and in `extra/common/st7735s_8.fs` with 8-bit framebuffers)
 * ST7789V-based displays (in `extra/rp_common/st7789v_parallel_8.fs` for parallel displays and `extra/common/st7789v_spi_8.fs` for SPI displays with 8-bit framebuffers)
 * Monospace, bitmap fonts (in `extra/common/font.fs`)

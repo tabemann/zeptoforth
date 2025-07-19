@@ -1,18 +1,18 @@
 # Bitmaps and Displays
 
-Under `extra/common/bitmap.fs` there is optional code for supporting bitmap operations, and under `extra/common/ssd1306.fs` there is optional code for supporting I2C SSD1306-based displays. The `<bitmap>` class is defined under the `bitmap` module in `extra/common/bitmap.fs`. The `<ssd1306>` class inherits from the `<bitmap>` class and is defined under the `ssd1306` module in `extra/common/ssd1306`.
+Under `extra/common/bitmap.fs` there is optional code for supporting bitmap operations. Under `extra/common/ssd1306.fs` there is optional code for supporting I2C SSD1306-based displays, and similarly under `extra/common/ch1116.fs` there is optional code for supporting I2C CH1116-based displays. The `<bitmap>` class is defined under the `bitmap` module in `extra/common/bitmap.fs`. The `<ssd1306>` class inherits from the `<bitmap>` class and is defined under the `ssd1306` module in `extra/common/ssd1306.fs`, and similarly the `<ch1116>` class inherits from the `<bitmap>` class and is defined under the `ch1116` module in `extra/common/ch1116.fs`.
 
 Under `extra/common/pixmap16.fs` there is optional code for supporting 5-bit red, 6-bit green, 5-bit blue 16-bit pixmap operations, and under `extra/common/st7735s.fs` there is optional code for supporting SPI ST7735S-based displays with 16-bit color. The `<pixmap16>` class is defined under the `pixmap16` module in `extra/common/pixmap16.fs`. The `<st7735s>` class inherits from the `<pixmap16>` class and is defined under the `st7735s` module in `extra/common/st7735s.fs`.
 
 Under `extra/common/pixmap8.fs` there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations. Under `extra/common/st7735s_8.fs` there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers. Under `extra/rp_common/st7789v_parallel_8.fs` there is optional code for supporting parallel ST7789V-based displays using 8-bit backing buffers. Under `extra/common/st7789v_spi_8.fs` there is optional code for supporting SPI ST7789V-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The `<pixmap8>` class is defined under the `pixmap8` module in `extra/common/pixmap8.fs`. The `<st7735s-8>` class is defined under the `st7735s-8` module in `extra/common/st7735s_8.fs`. The `<st7789v-8>` class is defined under the `st7789v-8` module in `extra/common/st7789v_parallel_8.fs`. The `<st7789v-8-spi>` class is defined under the `st7789v-8-spi` module in `extra/common/st7789v_spi_8.fs`. All of these classes inherit from the `<pixmap8>` class.
 
-The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. `<ssd1306>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
+The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. `<ssd1306>` and `<ch1116>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
 
 The `<pixmap16>` class is a general class for 5-bit red, 6-bit green, 5-bit blue 16-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
 
 The `<pixmap8>` class is a general class for 3-bit red, 3-bit green, 2-bit blue 8-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s-8>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
 
-The `<ssd1306>` class implements an SSD1306 device interface and supports all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<ssd1306>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+The `<ssd1306>` class implements an SSD1306 device interface and the `<ch1116>` class implements a CH1116 device interface; they support all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<ssd1306>` and `<ch1116>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
 The `<st7735s>` class implements a 16-bit ST7735S device interface and supports all the drawing operations implemented by the `<pixmap16>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
@@ -65,7 +65,7 @@ Get the size of a bitmap buffer in bytes for a given number of columsn and rows.
 ##### `<bitmap>`
 ( -- class )
 
-The `<bitmap>` class is the base class for bitmaps. It can be used directly, e.g. for offscreen bitmaps, or through its subclass `<ssd1306>`.
+The `<bitmap>` class is the base class for bitmaps. It can be used directly, e.g. for offscreen bitmaps, or through its subclasses `<ssd1306>` and `<ch1116>`.
 
 The `<bitmap>` class includes the following constructor:
 
@@ -339,6 +339,39 @@ This updates the SSD1306-based display with the current contents of its dirty re
 ( constrast ssd1306 -- )
 
 This sets the contrast of an SSD1306-based display to a value from 0 to 255.
+
+### `ch1116`
+
+The `ch1116` module contains the following words:
+
+##### `CH1116_I2C_ADDR`
+( -- i2c-addr )
+
+The default I2C address for CH1116-based displays, $3C.
+
+##### `<ch1116>`
+( -- class )
+
+The `<ch1116>` class is the class for I2C CH1116-based displays. It inherits from the `<bitmap>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<ch1116>` class includes the following constructor:
+
+##### `new`
+( pin0 pin1 buffer-addr columns rows i2c-addr i2c-device ch1116 -- )
+
+This constructor initializes an I2C CH1116 display with the SDA and SCK pins specified as GPIO pins *pin0* and *pin1* (it does not matter which is which), a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<bitmap>` instances), *columns* columns, *rows* rows, the I2C address *i2c-addr*, the I2C device index *i2c-device* (note that this must match the I2C device index for pins *pin0* and *pin1*), and the `<ch1116>` instance being initialized, *ch1116*.
+
+The `<ch1116>` class includes the following methoda:
+
+##### `update-display`
+( ch1116 -- )
+
+This updates the CH1116-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `display-contrast!`
+( constrast ch1116 -- )
+
+This sets the contrast of an CH1116-based display to a value from 0 to 255.
 
 ### `st7735s`
 
