@@ -1104,6 +1104,8 @@ begin-module i2c
   \ Set a pin to be an I2C pin
   : i2c-pin ( i2c pin -- )
     over validate-i2c
+    false over PADS_BANK0_PDE!
+    true over PADS_BANK0_PUE!
     false over PADS_BANK0_SLEWFAST!
     true over PADS_BANK0_SCHMITT!
     swap i2c-alternate swap alternate-pin

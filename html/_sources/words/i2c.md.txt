@@ -29,7 +29,7 @@ Get the alternate function for an I2C peripheral.
 ##### `i2c-pin`
 ( i2c pin -- )
 
-Configure a pin to be an I2C pin. Note that this does not set the pin to be pull-up even though an I2C pin must be pull-up so as to allow the user to provide their own pull-up resistor with a different resistance than the built-in pull up resistors in the RP2040 microcontroller.
+Configure a pin to be an I2C pin. In releases more recent than 1.14.1 this will set the pin to be an internal pull-up per the RP2040 and RP2350 datasheets/reference manuals. Previously it did not change the pull-up/pull-down configuration of the pin.
 
 ##### `master-i2c`
 ( i2c -- )

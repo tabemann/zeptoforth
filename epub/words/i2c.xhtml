@@ -43,7 +43,7 @@
 <section id="i2c-pin">
 <h3><code class="docutils literal notranslate"><span class="pre">i2c-pin</span></code></h3>
 <p>( i2c pin – )</p>
-<p>Configure a pin to be an I2C pin. Note that this does not set the pin to be pull-up even though an I2C pin must be pull-up so as to allow the user to provide their own pull-up resistor with a different resistance than the built-in pull up resistors in the RP2040 microcontroller.</p>
+<p>Configure a pin to be an I2C pin. In releases more recent than 1.14.1 this will set the pin to be an internal pull-up per the RP2040 and RP2350 datasheets/reference manuals. Previously it did not change the pull-up/pull-down configuration of the pin.</p>
 </section>
 <section id="master-i2c">
 <h3><code class="docutils literal notranslate"><span class="pre">master-i2c</span></code></h3>
