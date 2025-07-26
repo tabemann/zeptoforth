@@ -33,6 +33,11 @@ Get the terminal dimensions in characters.
 
 Get the terminal character dimensions in pixels.
 
+##### `term-font@`
+( -- font )
+
+Get the terminal font.
+
 ##### `read-battery`
 ( -- battery-level )
 

@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2023-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,48 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module picocalc-hello
-
-  picocalc-term-common import
-  picocalc-term import
-  oo import
-  pixmap8 import
-  font import
-  tinymt32 import
-
-  use-st7789v? not [if]
-    st7365p-8-common import
-  [else]
-    st7789v-8-common import
-  [then]
-
-  : hello ( r g b x y -- )
-    [: { r g b x y display }
-      r g b rgb8 s" Hello, world!" x y display term-font@
-      draw-string-to-pixmap8
-      display update-display
-    ;] with-term-display
-  ;
-
-  tinymt32-size buffer: my-tinymt
-  false value my-tinymt-inited?
-
-  : random ( -- )
-    my-tinymt-inited? not if
-      rng::random my-tinymt tinymt32-init
-      my-tinymt tinymt32-prepare-example
-      true to my-tinymt-inited?
-    then
-    my-tinymt tinymt32-generate-uint32
-  ;
-
-  : random-hellos { n -- }
-    term-pixels-dim@ { width height }
-    n 0 ?do
-      random $FF and random $FF and random $FF and
-      random 0 width s>f f* nip random 0 height s>f f* nip
-      hello
-    loop
-  ;
-  
-end-module
+#include extra/common/clip.fs
+#include extra/common/bitmap.fs
+#include extra/common/bitmap_utils.fs
+#include extra/common/pixmap8.fs
+#include extra/common/pixmap8_utils.fs
+#include extra/common/font.fs
+#include extra/common/simple_font_5x8_v2.fs
+#include extra/common/st7789v_spi_8.fs

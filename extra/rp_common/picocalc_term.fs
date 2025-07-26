@@ -39,6 +39,9 @@ begin-module picocalc-term
   use-5x8-font? [if]
     simple-font-5x8 import
   [then]
+  use-5x8-v2-font? [if]
+    simple-font-5x8-v2 import
+  [then]
   use-6x8-font? [if]
     simple-font-6x8 import
   [then]
@@ -131,6 +134,7 @@ begin-module picocalc-term
       
       char-fg-color c display-x display-y self display-intf
       [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+      [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
       [ use-7x8-font? ] [if] a-simple-font [then]
       draw-char-to-pixmap8
@@ -294,6 +298,9 @@ begin-module picocalc-term
 
   \ Get the terminal character dimensions
   : term-char-dim@ ( -- width height ) picocalc-term-common::term-char-dim@ ;
+
+  \ Get the terminal font
+  : term-font@ ( -- font ) picocalc-term-common::term-font@ ;
   
   \ Read the battery
   : read-battery ( -- val ) shared-term do-read-battery ;

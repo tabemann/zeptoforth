@@ -42,7 +42,7 @@ where:
 
 - `<platform>` is one of `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib`, matching the kernel you have installed on your PicoCalc.
 - `<port>` is the tty device for the USB-C port on your PicoCalc connected internally to UART0 on the board in your PicoCalc.
-- `<font>` is one of `5x8`, `6x8`, or `7x8` for the font size in pixels; if you cannot choose `6x8` is recommended for best results.
+- `<font>` is one of `5x8`, `5x8_v2`, `6x8`, or `7x8` for the font size in pixels; if you cannot choose `6x8` is recommended for best results unless you want a 64 character-wide display, where then `5x8_v2` is recommended.
 - `<graphical?>` is an optional argument that may have values of `graphical` or `text`, to select the graphical PicoCalc terminal emulator or the text-only PicoCalc terminal emulator, respectively; this defaults to `graphical`. The main purpose of this argument is if you wish to save RAM you may want to select the text-only PicoCalc terminal emulator as the graphical PicoCalc terminal emulator uses large quantities of RAM space for its framebuffer; this is particularly a concern on the RP2040 as the graphical PicoCalc terminal emulator leaves little RAM space for user applications on it.
 - `<pico-plus?>` is an optional argument that may have values of `not_pico_plus`, if the target board is not a Pimoroni Pico Plus 2 or Pico Plus 2 W, or `pico_plus`, if the target board is a Pimoroni Pico Plus 2 or Pico Plus 2 W; this defaults to `not_pico_plus`. The effect of selecting `pico_plus` is to enable a FAT32 filesystem in PSRAM with the PSRAM Chip Select pin tied to GPIO 47.
 - `<core>` is an optional argument that may have values of `core_0`, for the zeptoforth PicoCalc tasks executing on core 0 of the RP2040 or RP2350, or `core_1`, for the zeptoforth PicoCalc tasks executing on core 1 of the RP2040 or RP2350; this defaults to `core_1`. The main purpose of this argument is to enable the zeptoforth PicoCalc tasks to execute on a different core than the zeptoIP frame handler and CYW43xxx driver tasks, if you wish to install zeptoIP on your board.
@@ -123,15 +123,15 @@ While the above directions provides 8-bit RGB graphics and is relatively fast, i
 
 Luckily, there is a less memory-expensive option available! This is the text-only PicoCalc terminal emulator. This only stores the 8-bit text and its attributes in memory, so it uses far less RAM than the graphical PicoCalc terminal emulator.
 
-To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/st7365p_spi_text_5x8_font_all.fs`, `extra/common/st7365p_spi_text_6x8_font_all.fs`, or `extra/common/st7365p_spi_text_7x8_font_all.fs` for `extra/common/st7365p_spi_8_6x8_font_all.fs` (see 'Font selection' below).
+To install the text-only PicoCalc terminal emulator, execute the above steps except substitute `extra/rp_common/picocalc_term_text.fs` for `extra/rp_common/picocalc_term.fs` and one of `extra/common/st7365p_spi_text_5x8_font_all.fs`, `extra/common/st7365p_spi_text_5x8_v2_font_all.fs`, `extra/common/st7365p_spi_text_6x8_font_all.fs`, or `extra/common/st7365p_spi_text_7x8_font_all.fs` for `extra/common/st7365p_spi_8_6x8_font_all.fs` (see 'Font selection' below).
 
 Note however that the text-only PicoCalc terminal emulator is a bit slower in scrolling than the graphical PicoCalc terminal emulator because it has to redraw each character when updating the screen rather than merely moving the pixel data in th e framebuffer and then converting an 8-bit RGB pixmap to 16-bit RGB and sending it to the screen, which is simpler and thus faster. Currently hardware scrolling is not supported, even though it may be supported in the future.
 
 ## Font selection
 
-Note, however, that you may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel and 7x8-pixel fonts. A 5x8-pixel font may be desired if you want the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if you think that the default 6x8-pixel font is too small.
+Note, however, that you may want to select a font other than the default 6x8-pixel font. The other available fonts are 5x8-pixel, v2 5x8-pixel, and 7x8-pixel fonts. A v2 5x8-pixel font may be desired if you want the terminal emulator display to be 64 characters wide, while a 7x8-pixel font may be desired if you think that the default 6x8-pixel font is too small.
 
-To do so, in the steps above substitute `extra/common/st7365p_spi_8_5x8_font_all.fs` or `extra/common/st7365p_spi_8_7x8_font_all.fs`, or if you are installing a text-only terminal emulator, `extra/common/st7365p_spi_text_5x8_font_all.fs` or `extra/common/st7365p_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
+To do so, in the steps above substitute `extra/common/st7365p_spi_8_5x8_font_all.fs`, `extra/common/st7365p_spi_8_5x8_v2_font_all.fs`, or `extra/common/st7365p_spi_8_7x8_font_all.fs`, or if you are installing a text-only terminal emulator, `extra/common/st7365p_spi_text_5x8_font_all.fs`, `extra/common/st7365p_spi_text_5x8_v2_font_all.fs` or `extra/common/st7365p_spi_text_7x8_font_all.fs`. Note that if more than one of these fonts are available at a time the smallest font will be used.
 
 ## Core selection
 
@@ -413,7 +413,7 @@ Note that you can adjust `zeptoed-heap-size` multiple times in a session as you 
 
 ## Emulating a PicoCalc
 
-For those such as myself who do not yet possess a PicoCalc, some measures may be taken in its place. The PicoCalc terminal emulator can support an SPI ST7789V display in the place of the SPI ST7365P display used by the PicoCalc. When loading the code into flash substitute `extra/common/st7365p_spi_8_5x8_font_all.fs`, `extra/common/st7365p_spi_8_6x8_font_all.fs`, or `extra/common/st7365p_spi_8_7x8_font_all.fs` with `extra/common/st7789v_spi_8_5x8_font_all.fs`, `extra/common/st7789v_spi_8_6x8_font_all.fs`, or `extra/common/st7789v_spi_8_7x8_font_all.fs`. Also, prior to loading edit `extra/rp_common/picocalc_term.fs` to set the GPIO selections for your particular setup. Also, omit sending `initializer picocalc-term::term-console` to the board in the PicoCalc.
+For those such as myself who do not yet possess a PicoCalc, some measures may be taken in its place. The PicoCalc terminal emulator can support an SPI ST7789V display in the place of the SPI ST7365P display used by the PicoCalc. When loading the code into flash substitute `extra/common/st7365p_spi_8_5x8_font_all.fs`, `extra/common/st7365p_spi_8_5x8_v2_font_all.fs`, `extra/common/st7365p_spi_8_6x8_font_all.fs`, or `extra/common/st7365p_spi_8_7x8_font_all.fs` with `extra/common/st7789v_spi_8_5x8_font_all.fs`, `extra/common/st7789v_spi_8_5x8_v2_font_all.fs`, `extra/common/st7789v_spi_8_6x8_font_all.fs`, or `extra/common/st7789v_spi_8_7x8_font_all.fs`. Also, prior to loading edit `extra/rp_common/picocalc_term.fs` to set the GPIO selections for your particular setup. Also, omit sending `initializer picocalc-term::term-console` to the board in the PicoCalc.
 
 Then, after the PicoCalc has rebooted, execute the following at the zeptoforth REPL via the serial console as a single line of code:
 
@@ -440,22 +440,9 @@ The graphical (but not text-only) PicoCalc terminal emulator exposes a display t
         st7789v-8-common import
       [then]
     
-      use-5x8-font? [if]
-        simple-font-5x8 import
-      [then]
-      use-6x8-font? [if]
-        simple-font-6x8 import
-      [then]
-      use-7x8-font? [if]
-        simple-font import
-      [then]
-      
       : hello ( r g b x y -- )
         [: { r g b x y display }
-          r g b rgb8 s" Hello, world!" x y display
-          [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
-          [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
-          [ use-7x8-font? ] [if] a-simple-font [then]
+          r g b rgb8 s" Hello, world!" x y display term-font@
           draw-string-to-pixmap8
           display update-display
         ;] with-term-display

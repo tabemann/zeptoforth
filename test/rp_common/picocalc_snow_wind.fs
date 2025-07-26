@@ -42,6 +42,9 @@ begin-module snow-wind
   use-5x8-font? [if]
     simple-font-5x8 import
   [then]
+  use-5x8-v2-font? [if]
+    simple-font-5x8-v2 import
+  [then]
   use-6x8-font? [if]
     simple-font-6x8 import
   [then]
@@ -153,6 +156,7 @@ begin-module snow-wind
     [: { display flake }
       255 255 255 rgb8 [char] * flake flake-coord@ display
       [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+      [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
       [ use-7x8-font? ] [if] a-simple-font [then]
       draw-char-to-pixmap8
@@ -165,6 +169,7 @@ begin-module snow-wind
     [: { display flake }
       0 0 0 rgb8 [char] * flake flake-coord@ display
       [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+      [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
       [ use-7x8-font? ] [if] a-simple-font [then]
       draw-char-to-pixmap8

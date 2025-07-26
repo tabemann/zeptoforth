@@ -22,7 +22,7 @@ set -e
 # SOFTWARE.
 
 usage() {
-    echo "Usage: $0 <platform> <port> (ipv4 | ipv6) <fw> <fw_clm> (5x8 | 6x8 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1]"
+    echo "Usage: $0 <platform> <port> (ipv4 | ipv6) <fw> <fw_clm> (5x8 | 5x8_v2 | 6x8 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1]"
 }
 
 if [ "$#" -lt 6 ]; then
@@ -43,6 +43,8 @@ FW="$4"
 FW_CLM="$5"
 if [ "$6" = '5x8' ]; then
     FONT='5x8'
+elif [ "$6" = '5x8_v2' ]; then
+    FONT='5x8_v2'
 elif [ "$6" = '6x8' ]; then
     FONT='6x8'
 elif [ "$6" = '7x8' ]; then

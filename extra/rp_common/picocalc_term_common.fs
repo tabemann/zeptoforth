@@ -25,8 +25,11 @@ begin-module picocalc-term-common
 
   \ Select fonts automatically based on what fonts are loaded
   defined? simple-font-5x8 constant use-5x8-font?
-  defined? simple-font-6x8 use-5x8-font? not and constant use-6x8-font?
-  defined? simple-font use-5x8-font? not and use-6x8-font? not and
+  defined? simple-font-5x8-v2 use-5x8-font? not and constant use-5x8-v2-font?
+  defined? simple-font-6x8 use-5x8-font? not and use-5x8-v2-font? not and
+  constant use-6x8-font?
+  defined? simple-font use-5x8-font? not and use-5x8-v2-font? not and
+  use-6x8-font? not and
   constant use-7x8-font?
 
   \ Select a core to use for the PicoCalc tasks
@@ -38,7 +41,7 @@ begin-module picocalc-term-common
 
   \ Ensure that at least one font is available
   : font-test ( -- )
-    use-5x8-font? use-6x8-font? or use-7x8-font? or not if
+    use-5x8-font? use-5x8-v2-font? or use-6x8-font? or use-7x8-font? or not if
       [: ." no font is available" cr ;] ?raise
     then
   ;
@@ -54,6 +57,9 @@ begin-module picocalc-term-common
 
   use-5x8-font? [if]
     simple-font-5x8 import
+  [then]
+  use-5x8-v2-font? [if]
+    simple-font-5x8-v2 import
   [then]
   use-6x8-font? [if]
     simple-font-6x8 import
@@ -74,6 +80,9 @@ begin-module picocalc-term-common
     use-5x8-font? [if]
       initializer init-simple-font-5x8
     [then]
+    use-5x8-v2-font? [if]
+      initializer init-simple-font-5x8-v2
+    [then]
     use-6x8-font? [if]
       initializer init-simple-font-6x8
     [then]
@@ -82,7 +91,7 @@ begin-module picocalc-term-common
     [then]
 
     \ Font character with
-    use-5x8-font? [if]
+    use-5x8-font? use-5x8-v2-font? or [if]
       5 constant char-width
     [then]
     use-6x8-font? [if]
@@ -112,46 +121,22 @@ begin-module picocalc-term-common
     display-height char-height / constant term-height
 
     \ Display SPI device
-    \ use-st7789v? not [if]
-      1 constant display-spi-device
-    \ [else]
-    \   0 constant display-spi-device
-    \ [then]
+    1 constant display-spi-device
 
     \ Display SCK pin
-\    use-st7789v? not [if]
-      10 constant display-spi-sck-pin
-    \ [else]
-    \   18 constant display-spi-sck-pin
-    \ [then]
+    10 constant display-spi-sck-pin
 
     \ Display TX pin
-    \ use-st7789v? not [if]
-      11 constant display-spi-tx-pin
-    \ [else]
-    \   19 constant display-spi-tx-pin
-    \ [then]
+    11 constant display-spi-tx-pin
 
     \ Display CS pin
-    \ use-st7789v? not [if]
-      13 constant display-spi-cs-pin
-    \ [else]
-    \   21 constant display-spi-cs-pin
-    \ [then]
+    13 constant display-spi-cs-pin
 
     \ Display DC pin
-    \ use-st7789v? not [if]
-      14 constant display-dc-pin
-    \ [else]
-    \   13 constant display-dc-pin
-    \ [then]
+    14 constant display-dc-pin
 
     \ Display RST pin
-    \ use-st7789v? not [if]
-      15 constant display-rst-pin
-    \ [else]
-    \   12 constant display-rst-pin
-    \ [then]
+    15 constant display-rst-pin
 
     \ Display backlight pin
     use-st7789v? [if]
@@ -1663,4 +1648,12 @@ begin-module picocalc-term-common
   \ Get the terminal character dimensions
   : term-char-dim@ ( -- width height ) char-width char-height ;
 
+  \ Get the terminal font
+  : term-font@ ( -- font )
+    [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
+    [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
+    [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
+    [ use-7x8-font? ] [if] a-simple-font [then]
+  ;
+  
 end-module
