@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ The controls are:
-\
+\ 
 \ Up: Thrust
 \ Right: Turn right
 \ Left: Turn left
@@ -669,6 +669,7 @@ begin-module rocks
   ;
   
   2 constant init-lives
+  5 constant extra-life-wave
   
   : play-rocks ( -- )
     0 wave !
@@ -704,6 +705,7 @@ begin-module rocks
         asteroid-count 0=
       until
       1 wave +!
+      wave @ extra-life-wave umod 0= if 1 lives +! then
     again
   ;
   
