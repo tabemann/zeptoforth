@@ -639,7 +639,7 @@ begin-module rocks
   
   : empty-keys ( -- ) begin key? while key drop repeat ;
   
-  : handle-key ( -- )
+  : handle-key ( -- exit? )
     key? if
       key case
         escape of
@@ -650,7 +650,7 @@ begin-module rocks
                   [char] A of handle-thrust endof
                   [char] C of handle-turn-right endof
                   [char] D of handle-turn-left endof
-                  empty-keys swap
+                  empty-keys
                 endcase
               then
             else
