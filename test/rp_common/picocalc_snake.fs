@@ -347,6 +347,7 @@ begin-module snake
         then
       until
       ." *** GAME OVER ***" cr
+      empty-keys
     ;] with-object
   ;
 

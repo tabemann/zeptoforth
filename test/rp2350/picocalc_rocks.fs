@@ -700,6 +700,7 @@ begin-module rocks
           page
           ." *** GAME OVER ***" cr cr
           ." You survived " wave @ . ." waves" cr
+          empty-keys
           exit
         then
         asteroid-count 0=
