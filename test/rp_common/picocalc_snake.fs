@@ -327,7 +327,7 @@ begin-module snake
     then
   ;
   
-  125 constant snake-delay-ms
+  1875 constant snake-delay-ticks
   
   : play-snake ( -- )
     <world> [: { the-world }
@@ -336,9 +336,11 @@ begin-module snake
       the-world draw-world
       begin
         handle-key not if
+          systick::systick-counter { start-systick }
           the-world cycle-world { alive? }
           the-world draw-world
-          snake-delay-ms ms
+          start-systick snake-delay-ticks
+          task::current-task task::delay
           alive? not
         else
           drop true
