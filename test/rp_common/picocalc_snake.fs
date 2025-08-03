@@ -96,6 +96,9 @@ begin-module snake
     
   end-implement
   
+  4 constant min-snake-len
+  2 constant snake-len-incr
+  
   0 constant none
   1 constant up
   2 constant down
@@ -120,10 +123,13 @@ begin-module snake
     cell member snake-dir
     cell member snake-head-index
     cell member snake-tail-index
+    cell member snake-target-len
     max-snake-len cell align member snake-x
     max-snake-len cell align member snake-y
     
     method extend-snake ( dir snake -- alive? )
+    method grow-snake ( snake -- )
+    method shorten-snake ( snake -- )
     method push-snake-head ( x y snake -- )
     method drop-snake-tail ( snake -- )
     method snake-head@ ( snake -- x y )
@@ -139,6 +145,7 @@ begin-module snake
       none self snake-dir !
       0 self snake-head-index !
       0 self snake-tail-index !
+      min-snake-len self snake-target-len !
       x self snake-x c!
       y self snake-y c!
     ; define new
@@ -161,7 +168,17 @@ begin-module snake
         true
       then
     ; define extend-snake
- 
+    
+    :noname { self -- }
+      snake-len-incr self snake-target-len +!
+    ; define grow-snake
+    
+    :noname { self -- }
+      self snake-len@ self snake-target-len @ > if
+        self drop-snake-tail
+      then
+    ; define shorten-snake
+    
     :noname { x y self -- }
       self snake-head-index @ 1+ max-snake-len umod
       dup { index } self snake-head-index !
@@ -206,7 +223,6 @@ begin-module snake
   
   4 constant init-food-count
   100 constant food-chance \ Actually the reciprocal
-  4 constant min-snake-len
   0 255 0 rgb8 constant body-color
   255 255 0 rgb8 constant head-color
   255 0 0 rgb8 constant food-color
@@ -236,11 +252,10 @@ begin-module snake
       dir self the-snake extend-snake if
         self the-snake snake-head@ { x y }
         x y self the-food food-at? not if
-          self the-snake snake-len@ min-snake-len > if
-            self the-snake drop-snake-tail
-          then
+          self the-snake shorten-snake
         else
           x y self the-food eat-food
+          self the-snake grow-snake
         then
         food-chance random 0=
         self the-food food-count@ 0= or if
