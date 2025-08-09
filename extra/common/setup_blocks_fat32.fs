@@ -45,6 +45,8 @@ begin-module prepare-blocks-fat32
   
 end-module> import
 
+\ BE AWARE THAT THIS STEP CAN TAKE A LENGTHY AMOUNT OF TIME, ESPECIALLY WITH
+\ THE rp2350_16mib PLATFORM (E.G. WITH THE PIMORONI PICO PLUS 2)
 prepare
 
 compile-to-flash

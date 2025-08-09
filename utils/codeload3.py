@@ -334,6 +334,10 @@ if (args.tracefile):
 else:
     tracefile = False
 
+# Disable the timeout if extra/common/setup_blocks_fat32.fs is being uploaded
+if 'extra/common/setup_blocks_fat32.fs' in args.files:
+    disableTimeout = True
+    
 # Initalize transfer method with default destionation port
 if (args.method == "serial"):
     CN = ConnectSerial(args.port or '/dev/ttyUSB0', args.baud or 9600)
@@ -341,10 +345,6 @@ if (args.method == "serial"):
 else:
     CN = ConnectDryRun()
 
-# Disable the timeout if extra/common/setup_blocks_fat32.fs is being uploaded
-if 'extra/common/setup_blocks_fat32.fs' in args.files:
-    disableTimeout = True
-    
 # Ze main
 for path in args.files:
     upload(path)

@@ -45,10 +45,14 @@ begin-module zeptoed-help
   create help-content
   %% zeptoed Online Help
   %% 
+  %% Note that in the below 'Meta' is equivalent to 'Alt' on many keyboards.
+  %% 
   %% Control-?        Display this online help
   %% Return           Insert an endline
   %% Tab              Insert an indentation, or indent selected text
   %% Shift-Tab        Remove an indentation, or deindent selected text
+  %% Meta-T           Alternate key combo for removing an indentation, or
+  %%                  deindenting selected text
   %% Control-Meta-Tab Insert a tab character
   %% Backspace        Delete backward one character, or delete selected text
   %% Delete           Delete forward one character, or delete selected text
@@ -4941,6 +4945,8 @@ begin-module zeptoed-internal
     :noname { editor -- }
       get-key case
         tab of tab editor handle-editor-insert endof
+        [char] t of editor handle-editor-unindent endof
+        [char] T of editor handle-editor-unindent endof
         ctrl-k of editor handle-editor-copy endof
         ctrl-w of editor handle-editor-change-file-path endof
         ctrl-x of editor handle-editor-close endof
