@@ -105,6 +105,16 @@ begin-module snake
   3 constant left
   4 constant right
   
+  : opposite-dir ( dir -- dir' )
+    case
+      none of none endof
+      up of down endof
+      down of up endof
+      left of right endof
+      right of left endof
+    endcase
+  ;
+  
   : adjust-coord ( x y dir -- x' y' )
     case
       up of 1- endof
@@ -153,6 +163,9 @@ begin-module snake
     :noname { dir self -- alive? }
       dir none = if self snake-dir @ to dir then
       dir none <> if
+        dir opposite-dir self snake-dir @ = if
+          self snake-dir @ to dir
+        then
         dir self snake-dir !
         self snake-head@ dir adjust-coord { x y }
         x y in-bounds? if
