@@ -22,12 +22,11 @@
 
 VERSION=$1
 
-cp -r . ../zeptoforth-$VERSION
+mkdir ../zeptoforth-$VERSION
+rsync -aP --exclude=".git" --exclude="bin" ./ ../zeptoforth-$VERSION/
+mkdir ../zeptoforth-$VERSION/bin
+cp -r bin/$VERSION ../zeptoforth-$VERSION/bin
 cd ../zeptoforth-$VERSION
-mv bin/$VERSION bin-$VERSION
-rm -rf bin/*
-mv bin-$VERSION bin/$VERSION
-rm -rf .git
 rm -rf `find . -name 'screenlog.*'`
 make clean
 rm -rf `find . -name '*~'`
