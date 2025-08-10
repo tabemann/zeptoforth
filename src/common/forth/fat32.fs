@@ -102,6 +102,18 @@ begin-module fat32
   
   begin-module fat32-internal
 
+    \ Set a default date/time (i.e. midnight 1 Jan 1980)
+    : set-default-date-time { date-time -- }
+      1980 date-time date-time-year !
+      1 date-time date-time-month c!
+      1 date-time date-time-day c!
+      0 date-time date-time-hour c!
+      0 date-time date-time-minute c!
+      0 date-time date-time-second c!
+      0 date-time date-time-msec h!
+      date-time update-dotw
+    ;
+    
     \ The parent current directory
     variable parent-current-dir-var
 
@@ -2514,17 +2526,22 @@ begin-module fat32
     ; define create-date-time!
 
     :noname { date-time entry -- }
-      entry create-date h@ { date-field }
-      date-field 9 rshift 1980 + date-time date-time-year !
-      date-field 5 rshift $F and date-time date-time-month c!
-      date-field $1F and date-time date-time-day c!
-      entry create-time-coarse h@ { time-field }
-      time-field 11 rshift date-time date-time-hour c!
-      time-field 5 rshift $3F and date-time date-time-minute c!
-      time-field $1F and 2 *
-      entry create-time-fine c@ 100 / + date-time date-time-second c!
-      0 date-time date-time-msec h!
-      date-time update-dotw
+      date-time entry [: { date-time entry }
+        entry create-date h@ { date-field }
+        date-field 9 rshift 1980 + date-time date-time-year !
+        date-field 5 rshift $F and date-time date-time-month c!
+        date-field $1F and date-time date-time-day c!
+        entry create-time-coarse h@ { time-field }
+        time-field 11 rshift date-time date-time-hour c!
+        time-field 5 rshift $3F and date-time date-time-minute c!
+        time-field $1F and 2 *
+        entry create-time-fine c@ 100 / + date-time date-time-second c!
+        0 date-time date-time-msec h!
+        date-time update-dotw
+      ;] try dup ['] x-invalid-date-time = if
+        drop 2drop date-time set-default-date-time 0
+      then
+      ?raise
     ; define create-date-time@
 
     :noname { date-time entry -- }
@@ -2542,16 +2559,21 @@ begin-module fat32
     ; define modify-date-time!
 
     :noname { date-time entry -- }
-      entry modify-date h@ { date-field }
-      date-field 9 rshift 1980 + date-time date-time-year !
-      date-field 5 rshift $F and date-time date-time-month c!
-      date-field $1F and date-time date-time-day c!
-      entry modify-time-coarse h@ { time-field }
-      time-field 11 rshift date-time date-time-hour c!
-      time-field 5 rshift $3F and date-time date-time-minute c!
-      time-field $1F and 2 * date-time date-time-second c!
-      0 date-time date-time-msec h!
-      date-time update-dotw
+      date-time entry [: { date-time entry }
+        entry modify-date h@ { date-field }
+        date-field 9 rshift 1980 + date-time date-time-year !
+        date-field 5 rshift $F and date-time date-time-month c!
+        date-field $1F and date-time date-time-day c!
+        entry modify-time-coarse h@ { time-field }
+        time-field 11 rshift date-time date-time-hour c!
+        time-field 5 rshift $3F and date-time date-time-minute c!
+        time-field $1F and 2 * date-time date-time-second c!
+        0 date-time date-time-msec h!
+        date-time update-dotw
+      ;] try dup ['] x-invalid-date-time = if
+        drop 2drop date-time set-default-date-time 0
+      then
+      ?raise
     ; define modify-date-time@
     
   end-implement
