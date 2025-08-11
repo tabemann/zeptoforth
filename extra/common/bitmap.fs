@@ -21,6 +21,7 @@
 begin-module bitmap
 
   oo import
+  clip import
   armv6m import
 
   \ Get the size of a bitmap buffer in bytes for a given number of columns and
