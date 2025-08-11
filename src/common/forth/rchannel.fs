@@ -211,7 +211,7 @@ begin-module rchan
     dup rchan-recv-queue init-rchan-queue
     0 over rchan-reply-task !
     0 over rchan-reply-buf !
-    0 over rchan-reply-buf-size !
+    0 swap rchan-reply-buf-size !
   ;
 
   \ Send data on a bidirectional channel
