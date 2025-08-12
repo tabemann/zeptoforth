@@ -99,7 +99,7 @@ begin-module interrupt
   \ Set an interrupt vector
   : vector! ( xt vector-index -- )
     dup 0> over vector-count < or averts x-invalid-vector
-    [ cpu-count 1 > ] [if] internal::hold-core [then]
+    [ cpu-count 1 > ] [if] internal::force-core-wait [then]
     disable-int
     dup 7 and bit over 3 rshift vector!-hook-bitmap + cbit@
     vector!-hook @ 0<> and if

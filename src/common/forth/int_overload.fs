@@ -202,7 +202,7 @@ begin-module int-overload
       0 addr first-overload !
       addr to first-adapter
       addr addr int-adapter-handler ['] handle-interrupt bind
-      [ cpu-count 1 > ] [if] internal::hold-core [then]
+      [ cpu-count 1 > ] [if] internal::force-core-wait [then]
       disable-int
       addr next-adapter @ 0= vector-index vector!-bitmap@ and if
         vector-index vector@ addr

@@ -545,7 +545,7 @@ begin-module multicore
 
   \ Execute code with a core held
   : with-hold-core ( xt -- )
-    hold-core try release-core ?raise
+    force-core-wait try release-core ?raise
   ;
 
   \ Initialize core 1 ticks
