@@ -1,4 +1,4 @@
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -104,8 +104,33 @@ begin-module turtle
     \ Convert an angle
     : convert-angle ( angle -- D: real-angle )
       s>f 180,0 f/ pi f*
-      [ pi 2,0 f/ swap ] literal literal d+
     ;
+    
+    \ Degree sine
+    : dsin { angle -- D: sin }
+      begin angle 0< while 360 +to angle repeat
+      angle 360 mod 90 + to angle
+      angle 0= if 0,0 exit then
+      angle 45 = if
+        [ pi 0,25 f* sin swap ] literal literal exit
+      then
+      angle 90 = if 1,0 exit then
+      angle 135 = if
+        [ pi 0,75 f* sin swap ] literal literal exit
+      then
+      angle 180 = if 0,0 exit then
+      angle 225 = if
+        [ pi 1,25 f* sin swap ] literal literal exit
+      then
+      angle 270 = if -1,0 exit then
+      angle 315 = if
+        [ pi 1,75 f* sin swap ] literal literal exit
+      then
+      angle convert-angle sin
+    ;
+    
+    \ Degree cosine
+    : dcos ( angle -- D: cos ) 90 + dsin ;
 
     \ Convert a coordinate
     : convert-coord ( x y -- x' y' )
@@ -147,16 +172,14 @@ begin-module turtle
       x save-width 2 / - y save-height 2 / -
       0 0 save-width save-height my-display my-save draw-rect
       show-turtle? if
-        turtle-angle convert-angle { D: angle }
-        angle cos { D: angle-cos }
-        angle sin { D: angle-sin }
+        turtle-angle dcos { D: angle-cos }
+        turtle-angle dsin { D: angle-sin }
         angle-cos turtle-width 2 / s>f f* turtle-x d+ f>s { tip-x }
         angle-sin turtle-height 2 / s>f f* turtle-y d+ f>s { tip-y }
         angle-cos turtle-width -2 / s>f f* turtle-x d+ { D: base-x }
         angle-sin turtle-height -2 / s>f f* turtle-y d+ { D: base-y }
-        angle [ pi 0,5 f* swap ] literal literal d- { D: right-angle }
-        right-angle cos { D: right-angle-cos }
-        right-angle sin { D: right-angle-sin }
+        turtle-angle 90 - dcos { D: right-angle-cos }
+        turtle-angle 90 - dsin { D: right-angle-sin }
         right-angle-cos turtle-width 2 / s>f f* base-x d+ f>s { right-x }
         right-angle-sin turtle-height 2 / s>f f* base-y d+ f>s { right-y }
         right-angle-cos turtle-width -2 / s>f f* base-x d+ f>s { left-x }
@@ -179,8 +202,8 @@ begin-module turtle
   : forward { pixels -- }
     inited? not if true to inited? init-turtle then
     erase-turtle
-    turtle-angle convert-angle cos pixels s>f f* turtle-x d+ { D: dest-x }
-    turtle-angle convert-angle sin pixels s>f f* turtle-y d+ { D: dest-y }
+    turtle-angle dcos pixels s>f f* turtle-x d+ { D: dest-x }
+    turtle-angle dsin pixels s>f f* turtle-y d+ { D: dest-y }
     pen-down? if
       pen-size pen-color turtle-x f>s turtle-y f>s dest-x f>s dest-y f>s
       draw-line
