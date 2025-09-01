@@ -36,5 +36,6 @@ make html
 make epub
 rm -rf docs
 mv html docs
+rm -rf utils/zeptoforth_venv
 cd ..
 tar cfz zeptoforth-$VERSION.tar.gz zeptoforth-$VERSION
