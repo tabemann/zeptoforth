@@ -184,23 +184,28 @@ Get ID codes indicating the CPU make and model.
 * *chip1* of `$660002EA` indicates STM32F746.
 * *chip1* of `$6C0001DC` indicates STM32L476.
 
-##### `rp2040?`
-( -- flag )
-
-Get whether zeptoforth is built for RP2040. (Only available for `rp2040` and `rp2350`.)
-
-##### `rp2350?`
-( -- flag )
-
-Get whether zeptoforth is built for RP2350. (Only available for `rp2040` and `rp2350`.)
-
 ## RP2040 and RP2350 Words
 
 ### `forth`
 
 This word is in `forth`.
 
+##### `rp2040?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2040.
+
+##### `rp2350?`
+( -- flag )
+
+Get whether zeptoforth is built for RP2350.
+
 ##### `unique-id`
 ( -- d )
 
 Returns the 64-bit board unique ID value, as a double number.
+
+##### `chip-revision`
+( -- u )
+
+Get the REVISION field of the CHIP_ID register in the SYSINFO address space.

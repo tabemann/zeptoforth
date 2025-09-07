@@ -28,4 +28,27 @@ compile-to-flash
   chip $7270 = swap 2350 = and
 ;
 
+\ Set the search order to both FORTH and INTERNAL
+0 1 2 set-order
+
+\ Select INTERNAL module for new words
+1 set-current
+
+\ Base of SYSINFO address space
+$40000000 constant SYSINFO_BASE
+
+\ CHIP_ID register address
+SYSINFO_BASE $0 + constant SYSINFO_CHIP_ID
+
+\ CHIP_ID revision register LSB
+28 constant SYSINFO_CHIP_ID_REVISION_LSB
+
+\ Select FORTH module for new words
+0 set-current
+
+\ Get chip revision
+: chip-revision ( -- revision )
+  SYSINFO_CHIP_ID @ SYSINFO_CHIP_ID_REVISION_LSB rshift
+;
+
 reboot

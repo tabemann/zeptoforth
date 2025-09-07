@@ -199,26 +199,31 @@ built</p>
 <li><p><em>chip1</em> of <code class="docutils literal notranslate"><span class="pre">$6C0001DC</span></code> indicates STM32L476.</p></li>
 </ul>
 </section>
-<section id="rp2040">
-<h3><code class="docutils literal notranslate"><span class="pre">rp2040?</span></code></h3>
-<p>( – flag )</p>
-<p>Get whether zeptoforth is built for RP2040. (Only available for <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.)</p>
-</section>
-<section id="rp2350">
-<h3><code class="docutils literal notranslate"><span class="pre">rp2350?</span></code></h3>
-<p>( – flag )</p>
-<p>Get whether zeptoforth is built for RP2350. (Only available for <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> and <code class="docutils literal notranslate"><span class="pre">rp2350</span></code>.)</p>
-</section>
 </section>
 <section id="rp2040-and-rp2350-words">
 <h2>RP2040 and RP2350 Words</h2>
 <section id="id2">
 <h3><code class="docutils literal notranslate"><span class="pre">forth</span></code></h3>
 <p>This word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="rp2040">
+<h4><code class="docutils literal notranslate"><span class="pre">rp2040?</span></code></h4>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for RP2040.</p>
+</section>
+<section id="rp2350">
+<h4><code class="docutils literal notranslate"><span class="pre">rp2350?</span></code></h4>
+<p>( – flag )</p>
+<p>Get whether zeptoforth is built for RP2350.</p>
+</section>
 <section id="unique-id">
 <h4><code class="docutils literal notranslate"><span class="pre">unique-id</span></code></h4>
 <p>( – d )</p>
 <p>Returns the 64-bit board unique ID value, as a double number.</p>
+</section>
+<section id="chip-revision">
+<h4><code class="docutils literal notranslate"><span class="pre">chip-revision</span></code></h4>
+<p>( – u )</p>
+<p>Get the REVISION field of the CHIP_ID register in the SYSINFO address space.</p>
 </section>
 </section>
 </section>
