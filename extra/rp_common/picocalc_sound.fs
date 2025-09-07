@@ -275,10 +275,10 @@ begin-module picocalc-sound
       0 -1 { tick index }
       max-tone-count 0 ?do
         i cells self tone-end-ticks + @ { this-tick }
+        i 2 * cells self tone-pitches + 2@ { D: this-pitch }
         tick 0= this-tick current-tick - tick current-tick - < or if
-          i 2 * cells self tone-pitches + 2@ { D: this-pitch }
           this-pitch d0> if
-            tick current-tick - 0<= if
+            this-tick current-tick - 0<= if
               this-tick to tick
               i to index
             then
