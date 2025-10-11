@@ -230,6 +230,7 @@ begin-module picocalc-term
     
     \ Initialize the PicoCalc terminal
     : init-shared-term ( -- )
+      boot-delay-ms ms
       <picocalc-term> shared-term init-object
       shared-term init-term
     ;

@@ -262,6 +262,9 @@ begin-module picocalc-term-common
 
     \ Visual bell time in milliseconds
     63 constant visual-bell-ms
+
+    \ PicoCalc boot delay in milliseconds
+    63 constant boot-delay-ms
     
     \ Flag for if the welcome message has been displayed on the screen yet
     false value picocalc-welcome-displayed
