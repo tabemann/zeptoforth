@@ -88,7 +88,7 @@ begin-module picocalc-bios
     256 constant picocalc-keys-chan-count
 
     \ PicoCalc reset delay in milliseconds
-    100 constant picocalc-rst-delay
+\    100 constant picocalc-rst-delay
 
     \ PicoCalc keyboard count register
     4 constant PICOCALC_COUNT
@@ -281,8 +281,8 @@ begin-module picocalc-bios
       picocalc-bios-i2c-device 7-bit-i2c-addr
       picocalc-bios-i2c-addr picocalc-bios-i2c-device i2c-target-addr!
       picocalc-bios-i2c-device enable-i2c
-      PICOCALC_RST self send-command8 drop
-      picocalc-rst-delay ms
+\      PICOCALC_RST self send-command8 drop
+\      picocalc-rst-delay ms
       self 1 ['] run-keys 512 128 768 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
