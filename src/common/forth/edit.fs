@@ -165,14 +165,27 @@ begin-module edit-internal
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
 
+  \ Get whether to display borders on the sides and line numbers
+  : big-term? ( -- flag )
+    term-cols @ edit-state @ edit-terminal-columns @ min buffer-width 5 + >
+  ;
+  
   \ Initally draw the empty block editor
   : draw-empty ( -- )
     cr
-    [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
-    buffer-height 0 ?do
-      cr [char] | emit buffer-width 3 + 0 ?do space loop [char] | emit
-    loop
-    cr [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
+    big-term? if
+      [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
+      buffer-height 0 ?do
+        cr [char] | emit buffer-width 3 + 0 ?do space loop [char] | emit
+      loop
+      cr [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
+    else
+      buffer-width 0 ?do [char] - emit loop
+      buffer-height 0 ?do
+        cr buffer-width 0 ?do space loop
+      loop
+      cr buffer-width 0 ?do [char] - emit loop
+    then
   ;
 
   \ Actually draw a row of the block editor
@@ -180,8 +193,10 @@ begin-module edit-internal
     [:
       dup edit-state @ edit-start-row @ +
       edit-state @ edit-start-column @ go-to-coord
-      dup 9 < if space then
-      dup 1+ .
+      big-term? if
+        dup 9 < if space then
+        dup 1+ .
+      then
       0 swap get-row dup buffer-width + swap ?do
 	i c@ dup $20 >= over $7F <> and over unicode? not and if
 	  emit 1+
@@ -206,15 +221,22 @@ begin-module edit-internal
   \ Draw header
   : draw-header ( -- )
     [:
-      edit-state @ edit-start-row @ 1-
-      edit-state @ edit-start-column @ 1- go-to-coord
-      ." +-[ "
+      big-term? if
+        edit-state @ edit-start-row @ 1-
+        edit-state @ edit-start-column @ 1- go-to-coord
+        ." +-[ "
+      else
+        edit-state @ edit-start-row @ 1-
+        edit-state @ edit-start-column @ go-to-coord
+        ." -[ "
+      then
       edit-state @ edit-current @ id@ 0 <# #s #> dup >r type
       edit-state @ edit-current @ dirty? if
 	space [char] * emit r> 2 + >r
       then
       space ." ]"
-      buffer-width r> 2 + - 0 ?do [char] - emit loop
+      buffer-width r>
+      big-term? if 2 else 5 then + - 0 max 0 ?do [char] - emit loop
     ;] execute-hide-cursor
   ;
 
@@ -410,7 +432,8 @@ begin-module edit-internal
 
   \ Go to the current coordinate
   : go-to-current-coord ( -- )
-    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @ 3 +
+    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @
+    big-term? if 3 + then
     go-to-coord
   ;
 
@@ -668,13 +691,13 @@ begin-module edit-internal
   \ Configure the block editor
   : config-edit ( id -- )
     reset-ansi-term
+    get-terminal-size
+    edit-state @ edit-terminal-columns ! edit-state @ edit-terminal-rows !
     draw-empty
     get-cursor-position
     false edit-state @ edit-unicode-entered !
-    buffer-width 4 + - 0 max edit-state @ edit-start-column !
+    buffer-width big-term? if 4 + then - 0 max edit-state @ edit-start-column !
     buffer-height - 0 max edit-state @ edit-start-row !
-    get-terminal-size
-    edit-state @ edit-terminal-columns ! edit-state @ edit-terminal-rows !
     edit-state @ edit-start-row @ edit-state @ edit-cursor-row !
     edit-state @ edit-start-column @ edit-state @ edit-cursor-column !
     go-to-current-coord
@@ -688,8 +711,14 @@ begin-module edit-internal
 
   \ Leave the editor
   : leave-edit ( -- )
-    edit-state @ edit-start-row @ buffer-height +
-    edit-state @ edit-start-column @ buffer-width 4 + + go-to-coord
+    big-term? if
+      edit-state @ edit-start-row @ buffer-height +
+      edit-state @ edit-start-column @ buffer-width 4 + + go-to-coord
+    else
+      edit-state @ edit-start-row @ buffer-height +
+      edit-state @ edit-start-column @ buffer-width + go-to-coord
+      cr
+    then
     edit-state @ ram-here!
   ;
 

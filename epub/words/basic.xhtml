@@ -701,6 +701,16 @@ raised.</p>
 <p>( xt – c ) ( xt: addr bytes – addr’ bytes’ )</p>
 <p>Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a byte out of the buffer, unless the buffer length returned is shorter than a byte, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
 </section>
+<section id="term-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">term-cols!</span></code></h3>
+<p>( – addr )</p>
+<p>A variable containing the current terminal width in characters as used by <code class="docutils literal notranslate"><span class="pre">words</span></code>, <code class="docutils literal notranslate"><span class="pre">words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">dump</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-halfs</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-cells</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-ascii</span></code>, and <code class="docutils literal notranslate"><span class="pre">edit</span></code>. This variable defaults to a value of 80. Note that with <code class="docutils literal notranslate"><span class="pre">edit</span></code> this is only used to determine whether borders on the left and right and line numbers are displayed; it will not shrink the editor to less than 64 characters wide.</p>
+</section>
+<section id="words-col-width">
+<h3><code class="docutils literal notranslate"><span class="pre">words-col-width</span></code></h3>
+<p>( – addr )</p>
+<p>A variable containing the column width in characters as used by <code class="docutils literal notranslate"><span class="pre">words</span></code>, <code class="docutils literal notranslate"><span class="pre">words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup</span></code>, and <code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code>. This variable defaults to a value of 20.</p>
+</section>
 <section id="compress-flash">
 <h3><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code></h3>
 <p>( – )</p>

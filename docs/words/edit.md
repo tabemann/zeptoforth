@@ -24,6 +24,8 @@ Note that tabs (which are treated as being of two spaces wide due to the limited
 
 Note that block ids start from zero, unlike on many Forths where they traditionally started from one.
 
+Also note that the value of the variable `term-cols` in the `forth` module is used to determine whether to display borders on the left and right of the editor and line numbers, but will not cause the editor to be shrunk to less than 64 characters wide.
+
 ### `forth`
 
 The following words are in `forth`:

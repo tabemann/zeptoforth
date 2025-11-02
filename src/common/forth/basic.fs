@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2024 Travis Bemann
+\ Copyright (c) 2020-2025 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -1083,6 +1083,24 @@ commit-flash
 \ Commit to flash
 commit-flash
 
+\ Terminal columns variable
+variable term-cols
+
+\ Default terminal columns
+80 constant default-term-cols
+
+\ Commit to flash
+commit-flash
+
+\ Words column width
+variable words-col-width
+
+\ Default words column width
+20 constant default-words-col-width
+
+\ Commit to flash
+commit-flash
+
 \ Set the internal wordlist
 internal set-current
 
@@ -1366,19 +1384,20 @@ internal set-current
   cell ram-align,
 ;
 
-\ Actually print a string in one out of four columns, taking up more than one
+\ Actually print a string in columns of 20 characters, taking up more than one
 \ column if necessary
 : words-column ( b-addr bytes column1 -- column2 )
   over 0> if
-    over 20 / + 1+
-    dup 4 >= if
+    over words-col-width @ / + 1+
+    dup term-cols @ words-col-width @ / >= if
       drop 0
     then
     >r
     dup 0> if
       tuck type
       r@ 0<> if
-	20 mod 20 swap - begin dup 0> while 1- space repeat drop
+        words-col-width @ mod words-col-width @ swap -
+        begin dup 0> while 1- space repeat drop
       else
 	drop
       then
@@ -1395,7 +1414,7 @@ internal set-current
 \ Print a string in one out of four columns, taking up more than one column
 \ if necessary
 : words-column-wrap ( b-addr bytes column1 -- column2 )
-  4 over - 20 * 2 pick < if
+  term-cols @ words-col-width @ / over - words-col-width @ * 2 pick < if
     cr drop 0 words-column
   else
     words-column
@@ -1529,28 +1548,26 @@ forth set-current
 
 internal set-current
 
-\ Dump 16 bytes of ASCII
-: dump-ascii-16 ( c-addr u -- )
-  [char] | emit
-  dup 16 min 0 ?do
-    over i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
-  loop
-  dup 16 min 16 swap - 0 ?do
-    [char] . emit
-  loop
-  [char] | emit 2drop
+\ Get the number of bytes to dump
+: bytes-dump-count ( -- u )
+  term-cols @ [ 8 2 + 2 + 4 + ] literal - 0 max 2 arshift 4 max 16 min 3 bic
 ;
 
-\ Dump 64 bytes of ASCII
-: dump-ascii-64 ( c-addr u -- )
+\ Get the number of bytes of ASCII to dump
+: ascii-dump-count ( -- u )
+  term-cols @ [ 8 2 + 2 + ] literal - 0 max 64 min 3 bic
+;
+
+\ Actually dump bytes of ASCII
+: do-dump-ascii ( count c-addr u -- )
   [char] | emit
-  dup 64 min 0 ?do
+  dup 3 pick min 0 ?do
     over i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
   loop
-  dup 64 min 64 swap - 0 ?do
+  dup 3 pick min 3 pick swap - 0 ?do
     [char] . emit
   loop
-  [char] | emit 2drop
+  [char] | emit 2drop drop
 ;
 
 \ EVALUATE refill word
@@ -1562,8 +1579,8 @@ commit-flash
 \ Dump data as ASCII
 : dump-ascii-with-offset ( buffer-addr buffer-u offset-u -- )
   begin over 0> while
-    dup h.8 space space 2 pick 2 pick dump-ascii-64 cr
-    64 + rot 64 + rot 64 - 0 max rot
+    dup h.8 space space 2 pick 2 pick ascii-dump-count -rot do-dump-ascii cr
+    ascii-dump-count + rot ascii-dump-count + rot ascii-dump-count - 0 max rot
   repeat
   2drop drop
 ;
@@ -1579,28 +1596,35 @@ commit-flash
       ."  --"
     loop
     space
-    over 8 min 4 max 4 ?do
-      space 2 pick i + c@ h.2
-    loop
-    over 8 min 4 max 8 swap - 0 ?do
-      ."  --"
-    loop
-    space
-    over 12 min 8 max 8 ?do
-      space 2 pick i + c@ h.2
-    loop
-    over 12 min 8 max 12 swap - 0 ?do
-      ."  --"
-    loop
-    space
-    over 16 min 12 max 12 ?do
-      space 2 pick i + c@ h.2
-    loop
-    over 16 min 12 max 16 swap - 0 ?do
-      ."  --"
-    loop
-    space space 2 pick 2 pick dump-ascii-16 cr
-    16 + rot 16 + rot 16 - 0 max rot
+    bytes-dump-count 8 >= if
+      over 8 min 4 max 4 ?do
+        space 2 pick i + c@ h.2
+      loop
+      over 8 min 4 max 8 swap - 0 ?do
+        ."  --"
+      loop
+      space
+    then
+    bytes-dump-count 12 >= if
+      over 12 min 8 max 8 ?do
+        space 2 pick i + c@ h.2
+      loop
+      over 12 min 8 max 12 swap - 0 ?do
+        ."  --"
+      loop
+      space
+    then
+    bytes-dump-count 16 >= if
+      over 16 min 12 max 12 ?do
+        space 2 pick i + c@ h.2
+      loop
+      over 16 min 12 max 16 swap - 0 ?do
+        ."  --"
+      loop
+      space
+    then
+    space 2 pick 2 pick bytes-dump-count -rot do-dump-ascii cr
+    bytes-dump-count + rot bytes-dump-count + rot bytes-dump-count - 0 max rot
   repeat
   2drop drop
 ;
@@ -1608,36 +1632,43 @@ commit-flash
 \ Dump halfwords with an arbitrary offset
 : dump-halfs-with-offset ( buffer-addr buffer-u offset-u -- )
   begin over 0> while
-    dup h.8 space
+    dup h.8 space space
     over 4 min 0 ?do
-      space 2 pick i + h@ h.4
+      2 pick i + h@ h.4 space
     2 +loop
     over 4 min 4 swap - 0 ?do
-      ."  ----"
+      ." ----" space
     2 +loop
     space
-    over 8 min 4 max 4 ?do
-      space 2 pick i + h@ h.4
-    2 +loop
-    over 8 min 4 max 8 swap - 0 ?do
-      ."  ----"
-    2 +loop
-    space
-    over 12 min 8 max 8 ?do
-      space 2 pick i + h@ h.4
-    2 +loop
-    over 12 min 8 max 12 swap - 0 ?do
-      ."  ----"
-    2 +loop
-    space
-    over 16 min 12 max 12 ?do
-      space 2 pick i + h@ h.4
-    2 +loop
-    over 16 min 12 max 16 swap - 0 ?do
-      ."  ----"
-    2 +loop
-    space space 2 pick 2 pick dump-ascii-16 cr
-    16 + rot 16 + rot 16 - 0 max rot
+    bytes-dump-count 8 >= if
+      over 8 min 4 max 4 ?do
+        2 pick i + h@ h.4 space
+      2 +loop
+      over 8 min 4 max 8 swap - 0 ?do
+        ." ----" space
+      2 +loop
+      space
+    then
+    bytes-dump-count 12 >= if
+      over 12 min 8 max 8 ?do
+        2 pick i + h@ h.4 space
+      2 +loop
+      over 12 min 8 max 12 swap - 0 ?do
+        ." ----" space
+      2 +loop
+      space
+    then
+    bytes-dump-count 16 >= if
+      over 16 min 12 max 12 ?do
+        2 pick i + h@ h.4 space
+      2 +loop
+      over 16 min 12 max 16 swap - 0 ?do
+        ." ----" space
+      2 +loop
+      space
+    then
+    2 pick 2 pick bytes-dump-count -rot do-dump-ascii cr
+    bytes-dump-count + rot bytes-dump-count + rot bytes-dump-count - 0 max rot
   repeat
   2drop drop
 ;
@@ -1645,29 +1676,39 @@ commit-flash
 \ Dump cells with an arbitrary offset
 : dump-cells-with-offset ( buffer-addr buffer-u offset-u -- )
   begin over 0> while
-    dup h.8
+    dup h.8 space space
     over 0> if
-      space space 2 pick @ h.8
+      2 pick @ h.8
     else
-      ."   --------"
+      ." --------"
     then
-    over 4 > if
-      space space 2 pick 4 + @ h.8
-    else
-      ."   --------"
+    space space
+    bytes-dump-count 8 >= if
+      over 8 >= if
+        2 pick 4 + @ h.8
+      else
+        ." --------"
+      then
+      space space
     then
-    over 8 > if
-      space space 2 pick 8 + @ h.8
-    else
-      ."   --------"
+    bytes-dump-count 12 >= if
+      over 12 >= if
+        2 pick 8 + @ h.8
+      else
+        ." --------"
+      then
+      space space
     then
-    over 12 > if
-      space space 2 pick 12 + @ h.8
-    else
-      ."   --------"
+    bytes-dump-count 16 >= if
+      over 16 >= if
+        2 pick 12 + @ h.8
+      else
+        ." --------"
+      then
+      space space
     then
-    space space 2 pick 2 pick dump-ascii-16 cr
-    16 + rot 16 + rot 16 - 0 max rot
+    2 pick 2 pick bytes-dump-count -rot do-dump-ascii cr
+    bytes-dump-count + rot bytes-dump-count + rot bytes-dump-count - 0 max rot
   repeat
   2drop drop
 ;
@@ -2734,6 +2775,8 @@ commit-flash
   cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wake-counter !
+  default-term-cols term-cols !
+  default-words-col-width words-col-width !
   ['] drop wait-hook !
   ['] serial-emit error-emit-hook !
   ['] serial-emit? error-emit?-hook !

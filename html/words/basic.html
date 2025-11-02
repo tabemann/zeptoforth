@@ -719,6 +719,16 @@ raised.</p>
 <p>( xt – c ) ( xt: addr bytes – addr’ bytes’ )</p>
 <p>Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a byte out of the buffer, unless the buffer length returned is shorter than a byte, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
 </section>
+<section id="term-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">term-cols!</span></code><a class="headerlink" href="#term-cols" title="Link to this heading">¶</a></h3>
+<p>( – addr )</p>
+<p>A variable containing the current terminal width in characters as used by <code class="docutils literal notranslate"><span class="pre">words</span></code>, <code class="docutils literal notranslate"><span class="pre">words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">dump</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-halfs</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-cells</span></code>, <code class="docutils literal notranslate"><span class="pre">dump-ascii</span></code>, and <code class="docutils literal notranslate"><span class="pre">edit</span></code>. This variable defaults to a value of 80. Note that with <code class="docutils literal notranslate"><span class="pre">edit</span></code> this is only used to determine whether borders on the left and right and line numbers are displayed; it will not shrink the editor to less than 64 characters wide.</p>
+</section>
+<section id="words-col-width">
+<h3><code class="docutils literal notranslate"><span class="pre">words-col-width</span></code><a class="headerlink" href="#words-col-width" title="Link to this heading">¶</a></h3>
+<p>( – addr )</p>
+<p>A variable containing the column width in characters as used by <code class="docutils literal notranslate"><span class="pre">words</span></code>, <code class="docutils literal notranslate"><span class="pre">words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words</span></code>, <code class="docutils literal notranslate"><span class="pre">more-words-in</span></code>, <code class="docutils literal notranslate"><span class="pre">more-lookup</span></code>, and <code class="docutils literal notranslate"><span class="pre">more-lookup-in</span></code>. This variable defaults to a value of 20.</p>
+</section>
 <section id="compress-flash">
 <h3><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code><a class="headerlink" href="#compress-flash" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
@@ -2158,6 +2168,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -2184,7 +2195,8 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -2198,7 +2210,9 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text.html">Text display words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
@@ -2210,6 +2224,8 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntc.html">NTC thermistor Support</a></li>
 </ul>
 
 <div class="relations">

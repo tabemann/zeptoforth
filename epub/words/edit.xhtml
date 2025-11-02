@@ -38,6 +38,7 @@
 </ul>
 <p>Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.</p>
 <p>Note that block ids start from zero, unlike on many Forths where they traditionally started from one.</p>
+<p>Also note that the value of the variable <code class="docutils literal notranslate"><span class="pre">term-cols</span></code> in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module is used to determine whether to display borders on the left and right of the editor and line numbers, but will not cause the editor to be shrunk to less than 64 characters wide.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>

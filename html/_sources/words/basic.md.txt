@@ -688,6 +688,16 @@ Allot halfword-sized cell-aligned RAM temporarily and provide its address and si
 
 Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a byte out of the buffer, unless the buffer length returned is shorter than a byte, where then `x-insufficient-data` is raised.
 
+##### `term-cols!`
+( -- addr )
+
+A variable containing the current terminal width in characters as used by `words`, `words-in`, `lookup`, `lookup-in`, `more-words`, `more-words-in`, `more-lookup`, `more-lookup-in`, `dump`, `dump-halfs`, `dump-cells`, `dump-ascii`, and `edit`. This variable defaults to a value of 80. Note that with `edit` this is only used to determine whether borders on the left and right and line numbers are displayed; it will not shrink the editor to less than 64 characters wide.
+
+##### `words-col-width`
+( -- addr )
+
+A variable containing the column width in characters as used by `words`, `words-in`, `lookup`, `lookup-in`, `more-words`, `more-words-in`, `more-lookup`, and `more-lookup-in`. This variable defaults to a value of 20.
+
 ##### `compress-flash`
 ( -- )
 
