@@ -250,6 +250,7 @@ begin-module picocalc-term
     [: shared-term >term ;] error-emit-hook !
     [: shared-term >term? ;] error-emit?-hook !
     [: shared-term flush-term ;] error-flush-console-hook !
+    picocalc-term-common::term-dim@ drop term-cols !
     picocalc-welcome-displayed not if
       picocalc-welcome
       true to picocalc-welcome-displayed
