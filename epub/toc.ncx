@@ -850,7 +850,7 @@
         </navPoint>
         <navPoint id="navPoint141" playOrder="139">
           <navLabel>
-            <text>term-cols!</text>
+            <text>term-cols</text>
           </navLabel>
           <content src="words/basic.xhtml#term-cols" />  
         </navPoint>
