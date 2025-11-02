@@ -8,6 +8,11 @@ Note that the core that the PicoCalc tasks run on defaults to core 1 of the RP20
 
 The `picocalc-term` module contains the following words:
 
+##### `term-console`
+( -- )
+
+Select the PicoCalc terminal emulator as the console for the current task. If the PicoCalc welcome message has not been displayed yet, display it on the PicoCalc screen. Also, set `term-cols` to the width of the PicoCalc terminal emulator in characters.
+
 ##### `with-term-lock`
 ( xt -- )
 
