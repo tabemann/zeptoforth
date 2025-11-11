@@ -317,8 +317,8 @@ begin-module raytracing
       hx hy hz self plane-x @ self plane-y @ self plane-z @ vect- { cx cy cz }
       self plane-ax @ self plane-ay @ self plane-az @ cx cy cz dot { dx }
       self plane-bx @ self plane-by @ self plane-bz @ cx cy cz dot { dy }
-      dx self plane-tile-size @ v/ vfloor { dx' }
-      dy self plane-tile-size @ v/ vfloor { dy' }
+      dx self plane-tile-size @ v/ v>f64 floor { dx' }
+      dy self plane-tile-size @ v/ v>f64 floor { dy' }
       dx' 2 mod 0= dy' 2 mod 0= xor if
         self plane-r0 @ self plane-g0 @ self plane-b0 @
       else
@@ -328,7 +328,7 @@ begin-module raytracing
       hx hy hz lx' ly' lz'  vect- unit { lx ly lz }
       hx hy hz lx ly lz -1e0 vect* 0 find-entity nip nip not if
         self plane-nx @ self plane-ny @ self plane-nz @
-        lx ly lz dot 0e0 vmax 1e0 min { lambert }
+        lx ly lz dot 0e0 vmax 1e0 vmin { lambert }
         r g b lambert vect*
       else
         shadow-color
