@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module st7789v-raytracing
+begin-module raytracing
 
   oo import
   pixmap8 import
@@ -390,11 +390,18 @@ begin-module st7789v-raytracing
 
   \ Color dithering table
   create color-table
-  0.9e0 , 0.95e0 , 1e0 , 1.05e0 , 1.1e0 , 1.05e0 , 1e0 , 0.95e0 ,
-
+  0.8e0 , 1e0 , 1.2e0 , 1e0 , 0.8e0 , 1e0 , 1.2e0 , 1e0 ,
+  1e0 , 1.1e0 , 1e0 , 0.9e0 , 1e0 , 1.1e0 , 1e0 , 0.9e0 ,
+  1.2e0 , 1e0 , 0.8e0 , 1e0 , 1.2e0 , 1e0 , 0.8e0 , 1e0 ,
+  1e0 , 0.9e0 , 1e0 , 1.1e0 , 1e0 , 0.9e0 , 1e0 , 1.1e0 ,
+  0.8e0 , 1e0 , 1.2e0 , 1e0 , 0.8e0 , 1e0 , 1.2e0 , 1e0 ,
+  1e0 , 1.1e0 , 1e0 , 0.9e0 , 1e0 , 1.1e0 , 1e0 , 0.9e0 ,
+  1.2e0 , 1e0 , 0.8e0 , 1e0 , 1.2e0 , 1e0 , 0.8e0 , 1e0 ,
+  1e0 , 0.9e0 , 1e0 , 1.1e0 , 1e0 , 0.9e0 , 1e0 , 1.1e0 ,
+  
   \ Convert a color
   : convert-color { r g b x y -- color }
-    x 2 and y 2 and + cells color-table + @ { factor }
+    x 3 and y 3 and 8 * + cells color-table + @ { factor }
     r 255e0 v* factor v* vround-zero v>n 0 max 255 min
     g 255e0 v* factor v* vround-zero v>n 0 max 255 min
     b 255e0 v* factor v* vround-zero v>n 0 max 255 min rgb8
@@ -424,6 +431,8 @@ begin-module st7789v-raytracing
         display update-display
       ;] with-term-display
     loop
+    begin key? until
+    key drop
   ;
   
 end-module
