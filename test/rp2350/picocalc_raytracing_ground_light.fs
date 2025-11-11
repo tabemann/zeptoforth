@@ -214,7 +214,7 @@ begin-module raytracing
       { r g b }
       hx hy hz light-coord vect- unit { lx ly lz }
       hx hy hz lx ly lz -1e0 vect* 0 find-entity nip nip not if
-        nx ny nz lx ly lz dot 0e0 vmax 1e0 min { lambert }
+        nx ny nz lx ly lz dot 0e0 vmax 1e0 vmin { lambert }
         self mirror-sphere-r @
         self mirror-sphere-g @
         self mirror-sphere-b @ lambert vect*
