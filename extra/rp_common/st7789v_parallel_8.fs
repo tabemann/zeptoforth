@@ -30,6 +30,7 @@ begin-module st7789v-8
   dma import
   dma-pool import
   armv6m import
+  st7789v-8-common import
 
   begin-module st7789v-8-internal
 
@@ -50,7 +51,7 @@ begin-module st7789v-8
       8 SIDE_0 OUT_PINS out+,
 
       \ Pull and set SCK high
-      SIDE_1 PULL_BLOCK PULL_NOT_EMPTY pull+,
+      MOV_SRC_X SIDE_1 MOV_OP_NONE MOV_DEST_X mov+,
 
       \ Set the address to wrap to
       <wrap
@@ -153,6 +154,8 @@ begin-module st7789v-8
     \ Write blocking data over DMA
     :noname { addr count self -- }
 
+      cr ." addr: " addr h.8 ."  count: " count .
+
       \ Transfer data from the buffer, one byte at a time, to the PIO state
       \ machine's TXF register
       addr self st7789v-8-sm @ self st7789v-8-pio @ pio-registers::TXF count 1
@@ -160,8 +163,12 @@ begin-module st7789v-8
       self st7789v-8-pio @ PIO0 = if 0 else 1 then DREQ_PIO_TX
       self st7789v-8-dma-channel @ start-buffer>register-dma
 
+      ." ... "
+
       \ Spin until DMA completes
       self st7789v-8-dma-channel @ spin-wait-dma
+
+      ." done"
       
     ; define >st7789v-8
 
