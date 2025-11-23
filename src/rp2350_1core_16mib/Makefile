@@ -55,7 +55,7 @@ $(BIN): $(OBJ)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex
 
-$(OBJ): ../rp2350/*.s ../common/*.s ../m33/*.s
+$(OBJ): ../rp2350/*.s ../rp2350_1core/*.s ../common/*.s ../m33/*.s
 	mkdir -p $(ODIR)
 	$(AS) $(ASFLAGS) -o $@ ../rp2350_1core/zeptoforth.s
 

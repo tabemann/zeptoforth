@@ -55,7 +55,7 @@ $(BIN): $(OBJ)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex
 
-$(OBJ): *.s ../common/*.s ../m0/*.s
+$(OBJ): *.s ../rp2040/*.s ../common/*.s ../m0/*.s
 	mkdir -p $(ODIR)
 	$(AS) $(ASFLAGS) -o $@ zeptoforth.s
 
