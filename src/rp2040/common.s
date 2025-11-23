@@ -190,5 +190,3 @@ _pause:	ldr r0, =SIO_BASE + 0x000
 	.include "../common/strings.s"
 	.include "../m0/double.s"
 	.include "../m0/exception.s"
-	.include "../rp2040/multicore.s"
-	.include "../common/final.s"

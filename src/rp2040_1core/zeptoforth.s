@@ -19,10 +19,10 @@
 @ SOFTWARE.
 	
 	.syntax	unified
-	.cpu cortex-m33
+	.cpu cortex-m0
 	.thumb
 
-	.include "../rp2350/config.s"
-        .include "../rp2350/common.s"
-	.include "../rp2350/multicore.s"
+	.include "config.s"
+        .include "../rp2040/common.s"
+	.include "../rp2040_1core/multicore.s"
 	.include "../common/final.s"
