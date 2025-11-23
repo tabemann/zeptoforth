@@ -2,9 +2,7 @@
 
 Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO's (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.
 
-Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.
-
-Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between `src/rp2040/forth/multicore.fs` (on platforms other than RP2040 stubbed out in `src/common/forth/multicore.fs`) and `src/common/forth/task.fs`, with a bit of supporting functionality also in `src/common/forth/systick.fs` and `src/rp2040/forth/erase.fs`.
+Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between `src/rp2040/forth/multicore.fs` or `src/rp2350/forth/multicore.fs` (on platforms other than RP2040 and RP2350 stubbed out in `src/common/forth/multicore.fs`) and `src/common/forth/task.fs`, with a bit of supporting functionality also in `src/common/forth/systick.fs`, `src/rp2040/forth/erase.fs`, and `src/rp2350/forth/erase.fs`.
 
 ### `forth`
 
@@ -57,7 +55,7 @@ Core out of range exception, i.e. core index not in range 0 \<= core \< cpu-coun
 
 Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.
 
-In `src/rp2040/forth/multicore.fs`, in `multicore` on the `rp2040` platform, exists:
+In `src/rp2040/forth/multicore.fs`, in `multicore` on the `rp2040` platform and in `src/rp2350/forth/multicore.fs`, in `multicore` on the `rp2350` platform exists:
 
 ##### `sev`
 ( -- )
@@ -69,15 +67,6 @@ Signal an event to the other core.
 
 Wait for an event.
 
-##### `SIO_IRQ_PROC0`
-( -- irq )
-
-SIO processor 0 IRQ index, i.e. 15.
-
-##### `SIO_IRQ_PROC1`
-( -- irq )
-
-SIO processor 1 RIQ index, i.e. 16.
 
 ##### `FIFO_ST`
 ( -- addr )
@@ -307,3 +296,30 @@ Placeholder for attempting to launch an auxiliary core; this will always raise `
 
 This simply executes the provided *xt*.
 
+In `src/rp2040/forth/multicore.fs`, in `multicore` on the `rp2040` platform exists:
+
+##### `SIO_IRQ_PROC0`
+( -- irq )
+
+SIO processor 0 IRQ index, i.e. 15.
+
+##### `SIO_IRQ_PROC1`
+( -- irq )
+
+SIO processor 1 RIQ index, i.e. 16.
+
+In `src/rp2350/forth/multicore.fs`, in `multicore` on the `rp2350` platform exists:
+
+##### `SIO_IRQ_FIFO`
+( -- irq )
+
+SIO FIFO IRQ index, i.e. 25.
+
+In `rp2040_1core`, `rp2040_1core_big`, `rp2350_1core`, and `rp2350_1core_16mib` platforms exists:
+
+### `core1`
+
+##### `launch-core1`
+( code-addr rstack-addr vector-table-addr -- )
+
+Launch core 1 with a vector table at *vector-table-addr* (note that this is subject to restrictions upon valid vector table addresses imposed by the MCU), a stack address of *rstack-addr*, and a code address (without the lowest bit set) of *code-addr*. Note that no zeptoforth environment is provided for this code, which must initialize its own environment.
