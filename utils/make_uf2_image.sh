@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Copyright (c) 2020-2021 Travis Bemann
+# Copyright (c) 2020-2025 Travis Bemann
 # Copyright (c) 2023 Chris Salch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -54,10 +54,18 @@ screen_download_ihex_minidict ${PORT} ${TARGET}.minidict
 
 if [ ${PLATFORM} = 'rp2040_big' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+if [ ${PLATFORM} = 'rp2040_1core_big' ]; then
+    ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2040' ]; then
+    ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2040_1core' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2350' ]; then
     ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2350_1core' ]; then
+    ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2350_16mib' ]; then
+    ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2350_1core_16mib' ]; then
     ${DIR}/../src/rp2350/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 fi
