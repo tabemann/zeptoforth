@@ -95,7 +95,7 @@ begin-module core1
         2 of 1 endof
         3 of dup endof
         4 of over endof
-        5 of 2 pick 1+ endof
+        5 of 2 pick 1 or endof
       endcase
       fifo-push-confirm if 1 else i negate then
     +loop

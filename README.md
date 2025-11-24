@@ -170,6 +170,21 @@ The `rp2350` and `rp2350_16mib` platforms only differ in that the full 16 MiB of
 
 \* There is no cornerstone for STM32F411 builds, because a cornerstone would exhaust all the remaining flash space on these targets.
 
+## Single-Core RP2040 and RP2350 Platforms
+
+There exist single-core platforms of zeptoforth for the RP2040 and RP2350, specifically:
+
+* `rp2040_1core`
+* `rp2040_1core_big`
+* `rp2350_1core`
+* `rp2350_1core_16mib`
+
+These are functionally equivalent to their counterparts without `1core` in their names except that in these zeptoforth only executes on core 0 and attempting to start a zeptoforth task on core 1 will result in `multicore::x-core-out-of-range` being raised.
+
+These platforms specifically exist to enable running non-zeptoforth user applications on core 1 of an RP2040 or RP2350. This is carried out by executing `core1::launch-core` ( code-addr rstack-addr vector-table-addr -- ), which launches code starting at *code-addr* with SP set to *rstack-addr* and `VTOR` set to *vector-table-addr* (subject to restrictions upon valid VTOR addresses imposed by the processor). This code will execute on core 1 independent of the zeptoforth environment, and it is up to the user to arrange for any interaction with zeptoforth.
+
+Note that as these platforms are not anticipated to be used frequently, only the kernels for them are included with zeptoforth tarballs, and if the user wishes to use a non-kernel-only build for them it is up to them to build them from scratch.
+
 ## Setting Up On-board FAT32 Filesystems
 
 On RP2040, RP2350, and STM32F746 DISCOVERY boards there is support for FAT32 filesystems in block storage in on-board Quad SPI flash. Note that FAT32 filesystems must be initialized prior to use.
