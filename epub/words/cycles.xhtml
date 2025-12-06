@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cycle Counting</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="cycle-counting">
+<h1>Cycle Counting</h1>
+<p>On ARM Cortex-M4, ARM Cortex-M7, and ARM Cortex-M33 targets (i.e. all platforms supported other than RP2040 platforms) zeptoforth supports cycle counting in <code class="docutils literal notranslate"><span class="pre">full*</span></code> builds. Cycle counts are given as an unsigned 32-bit integer.</p>
+<section id="cycles">
+<h2><code class="docutils literal notranslate"><span class="pre">cycles</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">cycles</span></code> module contains the following words:</p>
+<section id="init-cycles">
+<h3><code class="docutils literal notranslate"><span class="pre">init-cycles</span></code></h3>
+<p>( – )</p>
+<p>Start counting cycles from zero on the current core. Note that this does not apply to any other cores.</p>
+</section>
+<section id="cycle-counter">
+<h3><code class="docutils literal notranslate"><span class="pre">cycle-counter</span></code></h3>
+<p>( – cycles )</p>
+<p>Get the current cycle count for the current core as an unsigned 32-bit integer. <code class="docutils literal notranslate"><span class="pre">init-cycles</span></code> must have been called previously on the current core or else this will return zero.</p>
+</section>
+<section id="wait-cycles">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-cycles</span></code></h3>
+<p>( cycles – )</p>
+<p>Wait a given number of cycles as a spinwait. Note that <code class="docutils literal notranslate"><span class="pre">init-cycles</span></code> must have been previously called on the current core or otherwise this word will not return.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
