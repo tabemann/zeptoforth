@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2023 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@
 #include src/common/forth/task.fs
 #include src/stm32f411/forth/led.fs
 #include src/common/forth/full_default.fs
+#include src/common/forth/cycles.fs
 #include src/stm32f411/forth/uart.fs
 #include src/stm32f411/forth/adc.fs
 #include src/stm32f411/forth/spi.fs
