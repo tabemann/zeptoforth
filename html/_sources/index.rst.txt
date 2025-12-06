@@ -29,6 +29,7 @@ Zeptoforth Documentation
    words/pwm
    words/rtc
    words/timer
+   words/cycles
    words/dma
    words/psram
    words/aon_timer
