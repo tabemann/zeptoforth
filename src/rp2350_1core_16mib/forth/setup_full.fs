@@ -50,6 +50,7 @@
 #include src/common/forth/full_default.fs
 #include src/rp2350/forth/timer.fs
 #include src/rp2350/forth/timer1.fs
+#include src/common/forth/cycles.fs
 #include src/rp2350/forth/rng.fs
 #include src/rp2350_16mib/forth/qspi.fs
 #include src/common/forth/block.fs
