@@ -592,6 +592,8 @@ _quit:	bl _rstack_base
         str r1, [r0]
         ldr r0, =current_unit_start
         str r1, [r0]
+        ldr r0, =postpone_literal_q
+        str r1, [r0]
         bl _prepare_prompt
 	ldr tos, =_main
 	bl _try

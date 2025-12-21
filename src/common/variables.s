@@ -85,7 +85,10 @@
 
 	@@ Whether there is a deferred literal
 	allot literal_deferred_q, 4
-	
+
+        @@ Whether to postpone a literal
+        allot postpone_literal_q, 4
+        
 	@@ The last word compiled
 	allot latest, 4
 

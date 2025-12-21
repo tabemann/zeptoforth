@@ -1084,8 +1084,31 @@ _compiled_tick:
 	define_word "postpone", visible_flag | immediate_flag | compiled_flag
 _postpone:
 	push {lr}
-	bl _token_word
-	ldr r0, [tos]
+        bl _token
+        cmp tos, #0
+        bne 1f
+        ldr tos, =_token_expected
+        bl _raise
+1:      movs r1, tos
+        ldr r0, [dp]
+        push {r0, r1}
+        bl _find
+        cmp tos, #0
+        bne 1f
+        pop {tos}
+        push_tos
+        pop {tos}
+        movs r1, #0
+        mvns r1, r0
+        ldr r0, =postpone_literal_q
+        str r1, [r0]
+        bl _parse_literal
+        movs r1, #0
+        ldr r0, =postpone_literal_q
+        str r1, [r0]
+        pop {pc}
+1:      add sp, sp, #8
+        ldr r0, [tos]
 	tst r0, #immediate_flag
 	beq 1f
 	tst r0, #inlined_flag
@@ -1130,7 +1153,14 @@ _comma_lit:
 	ldr r0, =-1
 	str r0, [r1]
 	pull_tos
-	pop {pc}
+        ldr r0, =postpone_literal_q
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        push_tos
+        ldr tos, =_comma_lit
+        bl _compile
+1:      pop {pc}
 	end_inlined
 
 	@@ Compile a literal
@@ -2143,6 +2173,8 @@ _init_variables:
 	movs r1, #0
 	ldr r0, =xon_xoff_enabled
 	str r1, [r0]
+        ldr r0, =postpone_literal_q
+        str r1, [r0]
 	ldr r1, =-1
 	ldr r0, =ack_nak_enabled
 	str r1, [r0]
