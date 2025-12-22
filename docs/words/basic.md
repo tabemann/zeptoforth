@@ -751,7 +751,7 @@ Compile a literal; note that if called from within a numeric literal parser whil
 ##### `literal`
 ( compile-time: x -- )
 
-Compile a literal
+Compile a literal; this is equivalent to `lit,` except that it is immediate.
 
 ##### `recurse`
 ( -- )
