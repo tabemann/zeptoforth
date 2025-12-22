@@ -741,12 +741,12 @@ Compiled tick
 ##### `postpone`
 ( compile-time: "name" -- )
 
-Postpone a word
+Postpone a word; note that from release 1.15.0 postponing literals is also supported.
 
 ##### `lit,`
 ( x -- )
 
-Compile a literal
+Compile a literal; note that if called from within a numeric literal parser while postponing a literal a call to `lit,` will then be postponed afterwards.
 
 ##### `literal`
 ( compile-time: x -- )
@@ -1483,9 +1483,14 @@ Parse the input buffer for the start of a token
 Parse the input buffer for the end of a token
 
 ##### `token`
-( "token" -- c-addr u )
+( "token" -- c-addr bytes )
 
-Parse a token
+Parse a token; the length returned is 0 if no token is available
+
+##### `token-ahead`
+( "token" -- c-addr bytes )
+
+Parse a token without advancing the parse location; the length returned is 0 if no token is available
 
 ##### `\`
 ( "comment\<NL>" -- )
@@ -1686,6 +1691,11 @@ Start conditional execution/compilation
 ( -- )
 
 Finish conditional execution/compilation
+
+##### `]]`
+( -- )
+
+Start postponing words and literals until `[[` is reached; note that this may cross multiple lines of code.
 
 ##### `hold`
 ( c -- )
