@@ -257,7 +257,7 @@ begin-module exception
     recover-from-fault
   ;
 
-  \ Handle a system manic
+  \ Handle a system panic
   : handle-panic ( -- )
     fault-hook @ ?execute
     collect-registers prepare-faulted-state
