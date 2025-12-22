@@ -1813,9 +1813,10 @@ commit-flash
   [immediate]
   [compile-only]
   begin
-    token-ahead dup if
+    token-ahead ?dup if
       s" [[" equal-strings? if token 2drop exit else postpone postpone then
     else
+      drop
       eval-eof @ ?dup if execute else true then
       if ['] x-token-expected ?raise else display-prompt refill then
     then
