@@ -1796,6 +1796,32 @@ commit-flash
 \ Print out multiple spaces
 : spaces ( u -- ) begin dup 0> while space 1- repeat drop ;
 
+\ Get the next token without advancing the input
+: token-ahead ( -- addr bytes | 0 0 )
+  >parse @ parse# < if
+    token-start dup token-end over - swap source drop + swap
+    dup 0= if nip 0 then
+  else
+    0 0
+  then
+;
+
+commit-flash
+
+\ Compile words and literals as POSTPONE'd until [[ is reached
+: ]] ( -- )
+  [immediate]
+  [compile-only]
+  begin
+    token-ahead dup if
+      s" [[" equal-strings? if token 2drop exit else postpone postpone then
+    else
+      eval-eof @ ?dup if execute else true then
+      if ['] x-token-expected ?raise else display-prompt refill then
+    then
+  again
+;
+
 \ Set up the wordlist
 wordlist constant esc-string
 commit-flash
