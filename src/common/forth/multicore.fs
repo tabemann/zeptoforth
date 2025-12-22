@@ -34,6 +34,9 @@ begin-module multicore
   \ Test and set spinlock index
   -1 constant test-set-spinlock
 
+  \ RTC spinlock
+  -1 constant rtc-spinlock
+  
   \ Spinlock out of range exception
   : x-spinlock-out-of-range ( -- ) ." spinlock out of range" cr ;
 

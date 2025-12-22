@@ -125,6 +125,7 @@ _pre_reboot:
 	ldr r2, [r0]
 	bics r2, r1
 	str r2, [r0]
+        .if cpu_count > 1
 	ldr r0, =FIFO_ST
 	ldr r1, =FIFO_ST_VLD
 2:	ldr r2, [r0]
@@ -132,6 +133,7 @@ _pre_reboot:
 	beq 2b
 	ldr r0, =FIFO_RD
 	ldr r0, [r0]
+        .endif
 	bx lr
 	end_inlined
 
@@ -283,5 +285,3 @@ _h_16:  push {lr}
 	.include "../common/strings.s"
 	.include "../m33/double.s"
 	.include "../m33/exception.s"
-	.include "../rp2350/multicore.s"
-	.include "../common/final.s"

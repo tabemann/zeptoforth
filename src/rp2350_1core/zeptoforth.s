@@ -22,7 +22,7 @@
 	.cpu cortex-m33
 	.thumb
 
-	.include "../rp2350/config.s"
+	.include "../rp2350_1core/config.s"
         .include "../rp2350/common.s"
-	.include "../rp2350/multicore.s"
+	.include "../rp2350_1core/multicore.s"
 	.include "../common/final.s"
