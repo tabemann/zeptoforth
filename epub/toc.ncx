@@ -16596,153 +16596,213 @@
     </navPoint>
     <navPoint id="navPoint2765" playOrder="2544">
       <navLabel>
+        <text>SHA-256</text>
+      </navLabel>
+      <content src="extra/sha256.xhtml" />  
+      <navPoint id="navPoint2766" playOrder="2544">
+        <navLabel>
+          <text>SHA-256</text>
+        </navLabel>
+        <content src="extra/sha256.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint2767" playOrder="2545">
+        <navLabel>
+          <text>sha-256</text>
+        </navLabel>
+        <content src="extra/sha256.xhtml#id1" />  
+        <navPoint id="navPoint2768" playOrder="2545">
+          <navLabel>
+            <text>sha-256</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#id1" />  
+        </navPoint>
+        <navPoint id="navPoint2769" playOrder="2546">
+          <navLabel>
+            <text>size-of-sha-256-hash</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#size-of-sha-256-hash" />  
+        </navPoint>
+        <navPoint id="navPoint2770" playOrder="2547">
+          <navLabel>
+            <text>sha-256-size</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#sha-256-size" />  
+        </navPoint>
+        <navPoint id="navPoint2771" playOrder="2548">
+          <navLabel>
+            <text>init-sha-256</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#init-sha-256" />  
+        </navPoint>
+        <navPoint id="navPoint2772" playOrder="2549">
+          <navLabel>
+            <text>write-sha-256</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#write-sha-256" />  
+        </navPoint>
+        <navPoint id="navPoint2773" playOrder="2550">
+          <navLabel>
+            <text>close-sha-256</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#close-sha-256" />  
+        </navPoint>
+        <navPoint id="navPoint2774" playOrder="2551">
+          <navLabel>
+            <text>calc-sha-256</text>
+          </navLabel>
+          <content src="extra/sha256.xhtml#calc-sha-256" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint2775" playOrder="2552">
+      <navLabel>
         <text>Turtle graphics</text>
       </navLabel>
       <content src="extra/turtle.xhtml" />  
-      <navPoint id="navPoint2766" playOrder="2544">
+      <navPoint id="navPoint2776" playOrder="2552">
         <navLabel>
           <text>Turtle graphics</text>
         </navLabel>
         <content src="extra/turtle.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2767" playOrder="2545">
+      <navPoint id="navPoint2777" playOrder="2553">
         <navLabel>
           <text>turtle</text>
         </navLabel>
         <content src="extra/turtle.xhtml#turtle" />  
-        <navPoint id="navPoint2768" playOrder="2545">
+        <navPoint id="navPoint2778" playOrder="2553">
           <navLabel>
             <text>turtle</text>
           </navLabel>
           <content src="extra/turtle.xhtml#turtle" />  
         </navPoint>
-        <navPoint id="navPoint2769" playOrder="2546">
+        <navPoint id="navPoint2779" playOrder="2554">
           <navLabel>
             <text>setpencolor</text>
           </navLabel>
           <content src="extra/turtle.xhtml#setpencolor" />  
         </navPoint>
-        <navPoint id="navPoint2770" playOrder="2547">
+        <navPoint id="navPoint2780" playOrder="2555">
           <navLabel>
             <text>setturtlecolor</text>
           </navLabel>
           <content src="extra/turtle.xhtml#setturtlecolor" />  
         </navPoint>
-        <navPoint id="navPoint2771" playOrder="2548">
+        <navPoint id="navPoint2781" playOrder="2556">
           <navLabel>
             <text>forward</text>
           </navLabel>
           <content src="extra/turtle.xhtml#forward" />  
         </navPoint>
-        <navPoint id="navPoint2772" playOrder="2549">
+        <navPoint id="navPoint2782" playOrder="2557">
           <navLabel>
             <text>backward</text>
           </navLabel>
           <content src="extra/turtle.xhtml#backward" />  
         </navPoint>
-        <navPoint id="navPoint2773" playOrder="2550">
+        <navPoint id="navPoint2783" playOrder="2558">
           <navLabel>
             <text>left</text>
           </navLabel>
           <content src="extra/turtle.xhtml#left" />  
         </navPoint>
-        <navPoint id="navPoint2774" playOrder="2551">
+        <navPoint id="navPoint2784" playOrder="2559">
           <navLabel>
             <text>right</text>
           </navLabel>
           <content src="extra/turtle.xhtml#right" />  
         </navPoint>
-        <navPoint id="navPoint2775" playOrder="2552">
+        <navPoint id="navPoint2785" playOrder="2560">
           <navLabel>
             <text>penup</text>
           </navLabel>
           <content src="extra/turtle.xhtml#penup" />  
         </navPoint>
-        <navPoint id="navPoint2776" playOrder="2553">
+        <navPoint id="navPoint2786" playOrder="2561">
           <navLabel>
             <text>pendown</text>
           </navLabel>
           <content src="extra/turtle.xhtml#pendown" />  
         </navPoint>
-        <navPoint id="navPoint2777" playOrder="2554">
+        <navPoint id="navPoint2787" playOrder="2562">
           <navLabel>
             <text>getpendown</text>
           </navLabel>
           <content src="extra/turtle.xhtml#getpendown" />  
         </navPoint>
-        <navPoint id="navPoint2778" playOrder="2555">
+        <navPoint id="navPoint2788" playOrder="2563">
           <navLabel>
             <text>setxy</text>
           </navLabel>
           <content src="extra/turtle.xhtml#setxy" />  
         </navPoint>
-        <navPoint id="navPoint2779" playOrder="2556">
+        <navPoint id="navPoint2789" playOrder="2564">
           <navLabel>
             <text>getxy</text>
           </navLabel>
           <content src="extra/turtle.xhtml#getxy" />  
         </navPoint>
-        <navPoint id="navPoint2780" playOrder="2557">
+        <navPoint id="navPoint2790" playOrder="2565">
           <navLabel>
             <text>setheading</text>
           </navLabel>
           <content src="extra/turtle.xhtml#setheading" />  
         </navPoint>
-        <navPoint id="navPoint2781" playOrder="2558">
+        <navPoint id="navPoint2791" playOrder="2566">
           <navLabel>
             <text>hideturtle</text>
           </navLabel>
           <content src="extra/turtle.xhtml#hideturtle" />  
         </navPoint>
-        <navPoint id="navPoint2782" playOrder="2559">
+        <navPoint id="navPoint2792" playOrder="2567">
           <navLabel>
             <text>showturtle</text>
           </navLabel>
           <content src="extra/turtle.xhtml#showturtle" />  
         </navPoint>
-        <navPoint id="navPoint2783" playOrder="2560">
+        <navPoint id="navPoint2793" playOrder="2568">
           <navLabel>
             <text>getshowturtle</text>
           </navLabel>
           <content src="extra/turtle.xhtml#getshowturtle" />  
         </navPoint>
-        <navPoint id="navPoint2784" playOrder="2561">
+        <navPoint id="navPoint2794" playOrder="2569">
           <navLabel>
             <text>updateoff</text>
           </navLabel>
           <content src="extra/turtle.xhtml#updateoff" />  
         </navPoint>
-        <navPoint id="navPoint2785" playOrder="2562">
+        <navPoint id="navPoint2795" playOrder="2570">
           <navLabel>
             <text>updateon</text>
           </navLabel>
           <content src="extra/turtle.xhtml#updateon" />  
         </navPoint>
-        <navPoint id="navPoint2786" playOrder="2563">
+        <navPoint id="navPoint2796" playOrder="2571">
           <navLabel>
             <text>getupdateon</text>
           </navLabel>
           <content src="extra/turtle.xhtml#getupdateon" />  
         </navPoint>
-        <navPoint id="navPoint2787" playOrder="2564">
+        <navPoint id="navPoint2797" playOrder="2572">
           <navLabel>
             <text>clear</text>
           </navLabel>
           <content src="extra/turtle.xhtml#clear" />  
         </navPoint>
-        <navPoint id="navPoint2788" playOrder="2565">
+        <navPoint id="navPoint2798" playOrder="2573">
           <navLabel>
             <text>setpensize</text>
           </navLabel>
           <content src="extra/turtle.xhtml#setpensize" />  
         </navPoint>
-        <navPoint id="navPoint2789" playOrder="2566">
+        <navPoint id="navPoint2799" playOrder="2574">
           <navLabel>
             <text>getpensize</text>
           </navLabel>
           <content src="extra/turtle.xhtml#getpensize" />  
         </navPoint>
-        <navPoint id="navPoint2790" playOrder="2567">
+        <navPoint id="navPoint2800" playOrder="2575">
           <navLabel>
             <text>home</text>
           </navLabel>
@@ -16750,71 +16810,71 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2791" playOrder="2568">
+    <navPoint id="navPoint2801" playOrder="2576">
       <navLabel>
         <text>Neopixels on the RP2040 and RP2350</text>
       </navLabel>
       <content src="extra/neopixel.xhtml" />  
-      <navPoint id="navPoint2792" playOrder="2568">
+      <navPoint id="navPoint2802" playOrder="2576">
         <navLabel>
           <text>Neopixels on the RP2040 and RP2350</text>
         </navLabel>
         <content src="extra/neopixel.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2793" playOrder="2569">
+      <navPoint id="navPoint2803" playOrder="2577">
         <navLabel>
           <text>neopixel</text>
         </navLabel>
         <content src="extra/neopixel.xhtml#neopixel" />  
-        <navPoint id="navPoint2794" playOrder="2569">
+        <navPoint id="navPoint2804" playOrder="2577">
           <navLabel>
             <text>neopixel</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#neopixel" />  
         </navPoint>
-        <navPoint id="navPoint2795" playOrder="2570">
+        <navPoint id="navPoint2805" playOrder="2578">
           <navLabel>
             <text>init-neopixel</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#init-neopixel" />  
         </navPoint>
-        <navPoint id="navPoint2796" playOrder="2571">
+        <navPoint id="navPoint2806" playOrder="2579">
           <navLabel>
             <text>clear-neopixel</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#clear-neopixel" />  
         </navPoint>
-        <navPoint id="navPoint2797" playOrder="2572">
+        <navPoint id="navPoint2807" playOrder="2580">
           <navLabel>
             <text>update-neopixel</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#update-neopixel" />  
         </navPoint>
-        <navPoint id="navPoint2798" playOrder="2573">
+        <navPoint id="navPoint2808" playOrder="2581">
           <navLabel>
             <text>neopixel!</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#id1" />  
         </navPoint>
-        <navPoint id="navPoint2799" playOrder="2574">
+        <navPoint id="navPoint2809" playOrder="2582">
           <navLabel>
             <text>neopixel@</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#id2" />  
         </navPoint>
-        <navPoint id="navPoint2800" playOrder="2575">
+        <navPoint id="navPoint2810" playOrder="2583">
           <navLabel>
             <text>neopixel-size</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#neopixel-size" />  
         </navPoint>
-        <navPoint id="navPoint2801" playOrder="2576">
+        <navPoint id="navPoint2811" playOrder="2584">
           <navLabel>
             <text>x-out-of-range-neopixel</text>
           </navLabel>
           <content src="extra/neopixel.xhtml#x-out-of-range-neopixel" />  
         </navPoint>
-        <navPoint id="navPoint2802" playOrder="2577">
+        <navPoint id="navPoint2812" playOrder="2585">
           <navLabel>
             <text>x-out-of-range-color</text>
           </navLabel>
@@ -16822,59 +16882,59 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2803" playOrder="2578">
+    <navPoint id="navPoint2813" playOrder="2586">
       <navLabel>
         <text>LCD1602 Support</text>
       </navLabel>
       <content src="extra/lcd1602.xhtml" />  
-      <navPoint id="navPoint2804" playOrder="2578">
+      <navPoint id="navPoint2814" playOrder="2586">
         <navLabel>
           <text>LCD1602 Support</text>
         </navLabel>
         <content src="extra/lcd1602.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2805" playOrder="2579">
+      <navPoint id="navPoint2815" playOrder="2587">
         <navLabel>
           <text>lcd1602</text>
         </navLabel>
         <content src="extra/lcd1602.xhtml#lcd1602" />  
-        <navPoint id="navPoint2806" playOrder="2579">
+        <navPoint id="navPoint2816" playOrder="2587">
           <navLabel>
             <text>lcd1602</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#lcd1602" />  
         </navPoint>
-        <navPoint id="navPoint2807" playOrder="2580">
+        <navPoint id="navPoint2817" playOrder="2588">
           <navLabel>
             <text>init-lcd-i2c</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#init-lcd-i2c" />  
         </navPoint>
-        <navPoint id="navPoint2808" playOrder="2581">
+        <navPoint id="navPoint2818" playOrder="2589">
           <navLabel>
             <text>init-lcd</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#init-lcd" />  
         </navPoint>
-        <navPoint id="navPoint2809" playOrder="2582">
+        <navPoint id="navPoint2819" playOrder="2590">
           <navLabel>
             <text>lcd-i2c-device!</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#lcd-i2c-device" />  
         </navPoint>
-        <navPoint id="navPoint2810" playOrder="2583">
+        <navPoint id="navPoint2820" playOrder="2591">
           <navLabel>
             <text>activate-lcd-i2c</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#activate-lcd-i2c" />  
         </navPoint>
-        <navPoint id="navPoint2811" playOrder="2584">
+        <navPoint id="navPoint2821" playOrder="2592">
           <navLabel>
             <text>clear-display</text>
           </navLabel>
           <content src="extra/lcd1602.xhtml#clear-display" />  
         </navPoint>
-        <navPoint id="navPoint2812" playOrder="2585">
+        <navPoint id="navPoint2822" playOrder="2593">
           <navLabel>
             <text>put-text</text>
           </navLabel>
@@ -16882,365 +16942,365 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2813" playOrder="2586">
+    <navPoint id="navPoint2823" playOrder="2594">
       <navLabel>
         <text>zeptoIP Words</text>
       </navLabel>
       <content src="extra/net.xhtml" />  
-      <navPoint id="navPoint2814" playOrder="2586">
+      <navPoint id="navPoint2824" playOrder="2594">
         <navLabel>
           <text>zeptoIP Words</text>
         </navLabel>
         <content src="extra/net.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2815" playOrder="2587">
+      <navPoint id="navPoint2825" playOrder="2595">
         <navLabel>
           <text>net</text>
         </navLabel>
         <content src="extra/net.xhtml#net" />  
-        <navPoint id="navPoint2816" playOrder="2587">
+        <navPoint id="navPoint2826" playOrder="2595">
           <navLabel>
             <text>net</text>
           </navLabel>
           <content src="extra/net.xhtml#net" />  
         </navPoint>
-        <navPoint id="navPoint2817" playOrder="2588">
+        <navPoint id="navPoint2827" playOrder="2596">
           <navLabel>
             <text>x-oversized-frame</text>
           </navLabel>
           <content src="extra/net.xhtml#x-oversized-frame" />  
         </navPoint>
-        <navPoint id="navPoint2818" playOrder="2589">
+        <navPoint id="navPoint2828" playOrder="2597">
           <navLabel>
             <text>x-invalid-dns-name</text>
           </navLabel>
           <content src="extra/net.xhtml#x-invalid-dns-name" />  
         </navPoint>
-        <navPoint id="navPoint2819" playOrder="2590">
+        <navPoint id="navPoint2829" playOrder="2598">
           <navLabel>
             <text>&lt;interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#interface" />  
         </navPoint>
-        <navPoint id="navPoint2820" playOrder="2591">
+        <navPoint id="navPoint2830" playOrder="2599">
           <navLabel>
             <text>&lt;endpoint&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint" />  
         </navPoint>
-        <navPoint id="navPoint2821" playOrder="2592">
+        <navPoint id="navPoint2831" playOrder="2600">
           <navLabel>
             <text>waiting-rx-data?</text>
           </navLabel>
           <content src="extra/net.xhtml#waiting-rx-data" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2822" playOrder="2593">
+      <navPoint id="navPoint2832" playOrder="2601">
         <navLabel>
           <text>net-ipv4</text>
         </navLabel>
         <content src="extra/net.xhtml#net-ipv4" />  
-        <navPoint id="navPoint2823" playOrder="2593">
+        <navPoint id="navPoint2833" playOrder="2601">
           <navLabel>
             <text>net-ipv4</text>
           </navLabel>
           <content src="extra/net.xhtml#net-ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2824" playOrder="2594">
+        <navPoint id="navPoint2834" playOrder="2602">
           <navLabel>
             <text>&lt;ipv4-interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv4-interface" />  
         </navPoint>
-        <navPoint id="navPoint2825" playOrder="2595">
+        <navPoint id="navPoint2835" playOrder="2603">
           <navLabel>
             <text>&lt;ipv4-endpoint&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv4-endpoint" />  
         </navPoint>
-        <navPoint id="navPoint2826" playOrder="2596">
+        <navPoint id="navPoint2836" playOrder="2604">
           <navLabel>
             <text>&lt;ipv4-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv4-handler" />  
         </navPoint>
-        <navPoint id="navPoint2827" playOrder="2597">
+        <navPoint id="navPoint2837" playOrder="2605">
           <navLabel>
             <text>&lt;arp-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#arp-handler" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2828" playOrder="2598">
+      <navPoint id="navPoint2838" playOrder="2606">
         <navLabel>
           <text>net-ipv6</text>
         </navLabel>
         <content src="extra/net.xhtml#net-ipv6" />  
-        <navPoint id="navPoint2829" playOrder="2598">
+        <navPoint id="navPoint2839" playOrder="2606">
           <navLabel>
             <text>net-ipv6</text>
           </navLabel>
           <content src="extra/net.xhtml#net-ipv6" />  
         </navPoint>
-        <navPoint id="navPoint2830" playOrder="2599">
+        <navPoint id="navPoint2840" playOrder="2607">
           <navLabel>
             <text>&lt;ipv6-interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv6-interface" />  
         </navPoint>
-        <navPoint id="navPoint2831" playOrder="2600">
+        <navPoint id="navPoint2841" playOrder="2608">
           <navLabel>
             <text>&lt;ipv6-endpoint&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv6-endpoint" />  
         </navPoint>
-        <navPoint id="navPoint2832" playOrder="2601">
+        <navPoint id="navPoint2842" playOrder="2609">
           <navLabel>
             <text>&lt;ipv6-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv6-handler" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2833" playOrder="2602">
+      <navPoint id="navPoint2843" playOrder="2610">
         <navLabel>
           <text>net-consts</text>
         </navLabel>
         <content src="extra/net.xhtml#net-consts" />  
-        <navPoint id="navPoint2834" playOrder="2602">
+        <navPoint id="navPoint2844" playOrder="2610">
           <navLabel>
             <text>net-consts</text>
           </navLabel>
           <content src="extra/net.xhtml#net-consts" />  
         </navPoint>
-        <navPoint id="navPoint2835" playOrder="2603">
+        <navPoint id="navPoint2845" playOrder="2611">
           <navLabel>
             <text>TCP states</text>
           </navLabel>
           <content src="extra/net.xhtml#tcp-states" />  
         </navPoint>
-        <navPoint id="navPoint2836" playOrder="2604">
+        <navPoint id="navPoint2846" playOrder="2612">
           <navLabel>
             <text>Ports</text>
           </navLabel>
           <content src="extra/net.xhtml#ports" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2837" playOrder="2605">
+      <navPoint id="navPoint2847" playOrder="2613">
         <navLabel>
           <text>endpoint-process</text>
         </navLabel>
         <content src="extra/net.xhtml#endpoint-process" />  
-        <navPoint id="navPoint2838" playOrder="2605">
+        <navPoint id="navPoint2848" playOrder="2613">
           <navLabel>
             <text>endpoint-process</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint-process" />  
         </navPoint>
-        <navPoint id="navPoint2839" playOrder="2606">
+        <navPoint id="navPoint2849" playOrder="2614">
           <navLabel>
             <text>&lt;endpoint-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint-handler" />  
         </navPoint>
-        <navPoint id="navPoint2840" playOrder="2607">
+        <navPoint id="navPoint2850" playOrder="2615">
           <navLabel>
             <text>&lt;endpoint-process&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id24" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2841" playOrder="2608">
+      <navPoint id="navPoint2851" playOrder="2616">
         <navLabel>
           <text>frame-process</text>
         </navLabel>
         <content src="extra/net.xhtml#frame-process" />  
-        <navPoint id="navPoint2842" playOrder="2608">
+        <navPoint id="navPoint2852" playOrder="2616">
           <navLabel>
             <text>frame-process</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-process" />  
         </navPoint>
-        <navPoint id="navPoint2843" playOrder="2609">
+        <navPoint id="navPoint2853" playOrder="2617">
           <navLabel>
             <text>&lt;frame-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-handler" />  
         </navPoint>
-        <navPoint id="navPoint2844" playOrder="2610">
+        <navPoint id="navPoint2854" playOrder="2618">
           <navLabel>
             <text>&lt;frame-process&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id31" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2845" playOrder="2611">
+      <navPoint id="navPoint2855" playOrder="2619">
         <navLabel>
           <text>frame-interface</text>
         </navLabel>
         <content src="extra/net.xhtml#frame-interface" />  
-        <navPoint id="navPoint2846" playOrder="2611">
+        <navPoint id="navPoint2856" playOrder="2619">
           <navLabel>
             <text>frame-interface</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-interface" />  
         </navPoint>
-        <navPoint id="navPoint2847" playOrder="2612">
+        <navPoint id="navPoint2857" playOrder="2620">
           <navLabel>
             <text>&lt;frame-interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id33" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2848" playOrder="2613">
+      <navPoint id="navPoint2858" playOrder="2621">
         <navLabel>
           <text>simple-net-ipv4</text>
         </navLabel>
         <content src="extra/net.xhtml#simple-net-ipv4" />  
-        <navPoint id="navPoint2849" playOrder="2613">
+        <navPoint id="navPoint2859" playOrder="2621">
           <navLabel>
             <text>simple-net-ipv4</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-net-ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2850" playOrder="2614">
+        <navPoint id="navPoint2860" playOrder="2622">
           <navLabel>
             <text>x-endpoint-process-not-started</text>
           </navLabel>
           <content src="extra/net.xhtml#x-endpoint-process-not-started" />  
         </navPoint>
-        <navPoint id="navPoint2851" playOrder="2615">
+        <navPoint id="navPoint2861" playOrder="2623">
           <navLabel>
             <text>&lt;simple-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id35" />  
         </navPoint>
-        <navPoint id="navPoint2852" playOrder="2616">
+        <navPoint id="navPoint2862" playOrder="2624">
           <navLabel>
             <text>&lt;simple-net-ipv6&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-net-ipv6" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2853" playOrder="2617">
+      <navPoint id="navPoint2863" playOrder="2625">
         <navLabel>
           <text>simple-cyw43-net-ipv4</text>
         </navLabel>
         <content src="extra/net.xhtml#simple-cyw43-net-ipv4" />  
-        <navPoint id="navPoint2854" playOrder="2617">
+        <navPoint id="navPoint2864" playOrder="2625">
           <navLabel>
             <text>simple-cyw43-net-ipv4</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-cyw43-net-ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2855" playOrder="2618">
+        <navPoint id="navPoint2865" playOrder="2626">
           <navLabel>
             <text>&lt;simple-cyw43-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id45" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2856" playOrder="2619">
+      <navPoint id="navPoint2866" playOrder="2627">
         <navLabel>
           <text>simple-cyw43-net-ipv6</text>
         </navLabel>
         <content src="extra/net.xhtml#simple-cyw43-net-ipv6" />  
-        <navPoint id="navPoint2857" playOrder="2619">
+        <navPoint id="navPoint2867" playOrder="2627">
           <navLabel>
             <text>simple-cyw43-net-ipv6</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-cyw43-net-ipv6" />  
         </navPoint>
-        <navPoint id="navPoint2858" playOrder="2620">
+        <navPoint id="navPoint2868" playOrder="2628">
           <navLabel>
             <text>&lt;simple-cyw43-net-ipv6&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id50" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2859" playOrder="2621">
+      <navPoint id="navPoint2869" playOrder="2629">
         <navLabel>
           <text>pico-w-cyw43-net-ipv4</text>
         </navLabel>
         <content src="extra/net.xhtml#pico-w-cyw43-net-ipv4" />  
-        <navPoint id="navPoint2860" playOrder="2621">
+        <navPoint id="navPoint2870" playOrder="2629">
           <navLabel>
             <text>pico-w-cyw43-net-ipv4</text>
           </navLabel>
           <content src="extra/net.xhtml#pico-w-cyw43-net-ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2861" playOrder="2622">
+        <navPoint id="navPoint2871" playOrder="2630">
           <navLabel>
             <text>&lt;pico-w-cyw43-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id60" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2862" playOrder="2623">
+      <navPoint id="navPoint2872" playOrder="2631">
         <navLabel>
           <text>pico-w-cyw43-net-ipv6</text>
         </navLabel>
         <content src="extra/net.xhtml#pico-w-cyw43-net-ipv6" />  
-        <navPoint id="navPoint2863" playOrder="2623">
+        <navPoint id="navPoint2873" playOrder="2631">
           <navLabel>
             <text>pico-w-cyw43-net-ipv6</text>
           </navLabel>
           <content src="extra/net.xhtml#pico-w-cyw43-net-ipv6" />  
         </navPoint>
-        <navPoint id="navPoint2864" playOrder="2624">
+        <navPoint id="navPoint2874" playOrder="2632">
           <navLabel>
             <text>&lt;pico-w-cyw43-net-ipv6&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id65" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2865" playOrder="2625">
+      <navPoint id="navPoint2875" playOrder="2633">
         <navLabel>
           <text>simple-enc28j60-net-ipv4</text>
         </navLabel>
         <content src="extra/net.xhtml#simple-enc28j60-net-ipv4" />  
-        <navPoint id="navPoint2866" playOrder="2625">
+        <navPoint id="navPoint2876" playOrder="2633">
           <navLabel>
             <text>simple-enc28j60-net-ipv4</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-enc28j60-net-ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2867" playOrder="2626">
+        <navPoint id="navPoint2877" playOrder="2634">
           <navLabel>
             <text>&lt;simple-enc28j60-net-ipv4&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id72" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2868" playOrder="2627">
+      <navPoint id="navPoint2878" playOrder="2635">
         <navLabel>
           <text>net-misc</text>
         </navLabel>
         <content src="extra/net.xhtml#net-misc" />  
-        <navPoint id="navPoint2869" playOrder="2627">
+        <navPoint id="navPoint2879" playOrder="2635">
           <navLabel>
             <text>net-misc</text>
           </navLabel>
           <content src="extra/net.xhtml#net-misc" />  
         </navPoint>
-        <navPoint id="navPoint2870" playOrder="2628">
+        <navPoint id="navPoint2880" playOrder="2636">
           <navLabel>
             <text>make-ipv4-addr</text>
           </navLabel>
           <content src="extra/net.xhtml#make-ipv4-addr" />  
         </navPoint>
-        <navPoint id="navPoint2871" playOrder="2629">
+        <navPoint id="navPoint2881" playOrder="2637">
           <navLabel>
             <text>make-ipv6-addr</text>
           </navLabel>
           <content src="extra/net.xhtml#make-ipv6-addr" />  
         </navPoint>
-        <navPoint id="navPoint2872" playOrder="2630">
+        <navPoint id="navPoint2882" playOrder="2638">
           <navLabel>
             <text>ipv4.</text>
           </navLabel>
           <content src="extra/net.xhtml#ipv4" />  
         </navPoint>
-        <navPoint id="navPoint2873" playOrder="2631">
+        <navPoint id="navPoint2883" playOrder="2639">
           <navLabel>
             <text>ipv6.</text>
           </navLabel>
@@ -17248,35 +17308,35 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2874" playOrder="2632">
+    <navPoint id="navPoint2884" playOrder="2640">
       <navLabel>
         <text>Simple Network Time Protocol Client</text>
       </navLabel>
       <content src="extra/ntp.xhtml" />  
-      <navPoint id="navPoint2875" playOrder="2632">
+      <navPoint id="navPoint2885" playOrder="2640">
         <navLabel>
           <text>Simple Network Time Protocol Client</text>
         </navLabel>
         <content src="extra/ntp.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2876" playOrder="2633">
+      <navPoint id="navPoint2886" playOrder="2641">
         <navLabel>
           <text>ntp-ipv4 and ntp-ipv6</text>
         </navLabel>
         <content src="extra/ntp.xhtml#ntp-ipv4-and-ntp-ipv6" />  
-        <navPoint id="navPoint2877" playOrder="2633">
+        <navPoint id="navPoint2887" playOrder="2641">
           <navLabel>
             <text>ntp-ipv4 and ntp-ipv6</text>
           </navLabel>
           <content src="extra/ntp.xhtml#ntp-ipv4-and-ntp-ipv6" />  
         </navPoint>
-        <navPoint id="navPoint2878" playOrder="2634">
+        <navPoint id="navPoint2888" playOrder="2642">
           <navLabel>
             <text>ntp-port</text>
           </navLabel>
           <content src="extra/ntp.xhtml#ntp-port" />  
         </navPoint>
-        <navPoint id="navPoint2879" playOrder="2635">
+        <navPoint id="navPoint2889" playOrder="2643">
           <navLabel>
             <text>&lt;ntp-ipv4&gt; and &lt;ntp-ipv6&gt;</text>
           </navLabel>
@@ -17284,35 +17344,35 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2880" playOrder="2636">
+    <navPoint id="navPoint2890" playOrder="2644">
       <navLabel>
         <text>CYW43xxx Words</text>
       </navLabel>
       <content src="extra/cyw43.xhtml" />  
-      <navPoint id="navPoint2881" playOrder="2636">
+      <navPoint id="navPoint2891" playOrder="2644">
         <navLabel>
           <text>CYW43xxx Words</text>
         </navLabel>
         <content src="extra/cyw43.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2882" playOrder="2637">
+      <navPoint id="navPoint2892" playOrder="2645">
         <navLabel>
           <text>cyw43-control</text>
         </navLabel>
         <content src="extra/cyw43.xhtml#cyw43-control" />  
-        <navPoint id="navPoint2883" playOrder="2637">
+        <navPoint id="navPoint2893" playOrder="2645">
           <navLabel>
             <text>cyw43-control</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#cyw43-control" />  
         </navPoint>
-        <navPoint id="navPoint2884" playOrder="2638">
+        <navPoint id="navPoint2894" playOrder="2646">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint2885" playOrder="2639">
+        <navPoint id="navPoint2895" playOrder="2647">
           <navLabel>
             <text>&lt;cyw43-control&gt;</text>
           </navLabel>
@@ -17320,35 +17380,35 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2886" playOrder="2640">
+    <navPoint id="navPoint2896" playOrder="2648">
       <navLabel>
         <text>ENC28J60 Words</text>
       </navLabel>
       <content src="extra/enc28j60.xhtml" />  
-      <navPoint id="navPoint2887" playOrder="2640">
+      <navPoint id="navPoint2897" playOrder="2648">
         <navLabel>
           <text>ENC28J60 Words</text>
         </navLabel>
         <content src="extra/enc28j60.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2888" playOrder="2641">
+      <navPoint id="navPoint2898" playOrder="2649">
         <navLabel>
           <text>enc28j60-runner</text>
         </navLabel>
         <content src="extra/enc28j60.xhtml#enc28j60-runner" />  
-        <navPoint id="navPoint2889" playOrder="2641">
+        <navPoint id="navPoint2899" playOrder="2649">
           <navLabel>
             <text>enc28j60-runner</text>
           </navLabel>
           <content src="extra/enc28j60.xhtml#enc28j60-runner" />  
         </navPoint>
-        <navPoint id="navPoint2890" playOrder="2642">
+        <navPoint id="navPoint2900" playOrder="2650">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/enc28j60.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint2891" playOrder="2643">
+        <navPoint id="navPoint2901" playOrder="2651">
           <navLabel>
             <text>&lt;enc28j60-runner&gt;</text>
           </navLabel>
@@ -17356,65 +17416,65 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2892" playOrder="2644">
+    <navPoint id="navPoint2902" playOrder="2652">
       <navLabel>
         <text>NTC thermistor Support</text>
       </navLabel>
       <content src="extra/ntc.xhtml" />  
-      <navPoint id="navPoint2893" playOrder="2644">
+      <navPoint id="navPoint2903" playOrder="2652">
         <navLabel>
           <text>NTC thermistor Support</text>
         </navLabel>
         <content src="extra/ntc.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2894" playOrder="2645">
+      <navPoint id="navPoint2904" playOrder="2653">
         <navLabel>
           <text>ntc</text>
         </navLabel>
         <content src="extra/ntc.xhtml#ntc" />  
-        <navPoint id="navPoint2895" playOrder="2645">
+        <navPoint id="navPoint2905" playOrder="2653">
           <navLabel>
             <text>ntc</text>
           </navLabel>
           <content src="extra/ntc.xhtml#ntc" />  
         </navPoint>
-        <navPoint id="navPoint2896" playOrder="2646">
+        <navPoint id="navPoint2906" playOrder="2654">
           <navLabel>
             <text>setup-adc</text>
           </navLabel>
           <content src="extra/ntc.xhtml#setup-adc" />  
         </navPoint>
-        <navPoint id="navPoint2897" playOrder="2647">
+        <navPoint id="navPoint2907" playOrder="2655">
           <navLabel>
             <text>setup-abc</text>
           </navLabel>
           <content src="extra/ntc.xhtml#setup-abc" />  
         </navPoint>
-        <navPoint id="navPoint2898" playOrder="2648">
+        <navPoint id="navPoint2908" playOrder="2656">
           <navLabel>
             <text>setup-therm</text>
           </navLabel>
           <content src="extra/ntc.xhtml#setup-therm" />  
         </navPoint>
-        <navPoint id="navPoint2899" playOrder="2649">
+        <navPoint id="navPoint2909" playOrder="2657">
           <navLabel>
             <text>measure-ntc</text>
           </navLabel>
           <content src="extra/ntc.xhtml#measure-ntc" />  
         </navPoint>
-        <navPoint id="navPoint2900" playOrder="2650">
+        <navPoint id="navPoint2910" playOrder="2658">
           <navLabel>
             <text>temp@</text>
           </navLabel>
           <content src="extra/ntc.xhtml#temp" />  
         </navPoint>
-        <navPoint id="navPoint2901" playOrder="2651">
+        <navPoint id="navPoint2911" playOrder="2659">
           <navLabel>
             <text>dump-ntc</text>
           </navLabel>
           <content src="extra/ntc.xhtml#dump-ntc" />  
         </navPoint>
-        <navPoint id="navPoint2902" playOrder="2652">
+        <navPoint id="navPoint2912" playOrder="2660">
           <navLabel>
             <text>ntc-size</text>
           </navLabel>

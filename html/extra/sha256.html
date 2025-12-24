@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SHA-256 &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Turtle graphics" href="turtle.html" />
+    <link rel="prev" title="Pixmap Utilities" href="pixmap8_utils.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sha-256">
+<h1>SHA-256<a class="headerlink" href="#sha-256" title="Link to this heading">¶</a></h1>
+<p>There is currently a software implementation of SHA-256 for zeptoforth. This implementation does not take advantage of hardware SHA-256 accelerators, even though this is planned for future development.</p>
+<p>Note that a basic limitation of SHA-256 is that the total data size must be smaller than 2^64 bits, i.e. 2^56 bytes. For most practical applications this should not be a problem.</p>
+<p>The source code for the software implementation of SHA-256 is in <code class="docutils literal notranslate"><span class="pre">extra/common/sha256.fs</span></code>. This code is based closely off of https://github.com/amonsier/sha-2 which in turn is closely based off https://en.wikipedia.org/wiki/SHA-2 .</p>
+<p>There is a set of SHA-256 tests in <code class="docutils literal notranslate"><span class="pre">test/common/sha256.fs</span></code>.</p>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">sha-256</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sha-256</span></code> module contains the following words:</p>
+<section id="size-of-sha-256-hash">
+<h3><code class="docutils literal notranslate"><span class="pre">size-of-sha-256-hash</span></code><a class="headerlink" href="#size-of-sha-256-hash" title="Link to this heading">¶</a></h3>
+<p>( – bytes )</p>
+<p>Size of an SHA-256 hash in bytes</p>
+</section>
+<section id="sha-256-size">
+<h3><code class="docutils literal notranslate"><span class="pre">sha-256-size</span></code><a class="headerlink" href="#sha-256-size" title="Link to this heading">¶</a></h3>
+<p>( – bytes )</p>
+<p>Size of SHA-256 structure in bytes</p>
+</section>
+<section id="init-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">init-sha-256</span></code><a class="headerlink" href="#init-sha-256" title="Link to this heading">¶</a></h3>
+<p>( hash sha-256 – )</p>
+<p>Initialize an SHA-256 streaming calculation.</p>
+<ul class="simple">
+<li><p>hash: address of hash array, where the result is delivered</p></li>
+<li><p>sha-256: address of an SHA-256 structure</p></li>
+</ul>
+<p>If all the data you are calculating the hash value on is not available in a contiguous buffer in memory, this is where you should start. Instantiate a SHA-256 structure, and invoke this word. Once a SHA-256 hash has been calculated the SHA-256 structure can be initialized again for the next calculation.</p>
+</section>
+<section id="write-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">write-sha-256</span></code><a class="headerlink" href="#write-sha-256" title="Link to this heading">¶</a></h3>
+<p>( data len sha-256 – )</p>
+<p>Stream more input for an on-going SHA-256 calculation.</p>
+<ul class="simple">
+<li><p>data: address of data to be added to the calculation</p></li>
+<li><p>len: length of the data to add, in bytes</p></li>
+<li><p>sha-256: address of a previously initialized SHA-256 structure</p></li>
+</ul>
+<p>This word may be invoked an arbitrary number of times between initialization and closing, but the data length is limited by the SHA-256 algorithm: the total number of bits (i.e. the total number of bytes times eight) must be representable by a 64-bit unsigned integer. While that is not a practical limitation, the result is unpredictable if that limit is exceeded.</p>
+<p>This word may be invoked on empty data (zero length), although that obviously will not add any data.</p>
+</section>
+<section id="close-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">close-sha-256</span></code><a class="headerlink" href="#close-sha-256" title="Link to this heading">¶</a></h3>
+<p>( sha-256 – )</p>
+<p>Conclude an SHA-256 streaming calculation, making the hash value available.</p>
+<ul class="simple">
+<li><p>sha-256: address of a previously initialized SHA-256 structure</p></li>
+</ul>
+<p>After this word has been invoked, the result is available in the hash buffer that initially was provided. The address of the hash value is returned for convenience, but you should feel free to drop it; it is simply the address of the first byte of your initially provided hash array.</p>
+<p>Invoking this word for a calculation with no data (the writing function has never been invoked, or it only has been invoked with empty data) is legal. It will calculate the SHA-256 value of the empty string.</p>
+</section>
+<section id="calc-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">calc-sha-256</span></code><a class="headerlink" href="#calc-sha-256" title="Link to this heading">¶</a></h3>
+<p>( input len hash – )</p>
+<p>The simple SHA-256 calculation word</p>
+<ul class="simple">
+<li><p>input: address of the data the hash will be calculated on</p></li>
+<li><p>len: length of the input data, in bytes</p></li>
+<li><p>hash: address of hash array, where the result is delivered</p></li>
+</ul>
+<p>If all the data you are calculating the hash value on is available in a contiguous buffer in memory, this is the word you should use.</p>
+<p>The length must be correspond to an unsigned 64-bit number of bits (i.e. the length times eight must be less than 2^64).</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/cycles.html">Cycle Counting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/int_overload.html">Interrupt Overloading Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Hardware Random Number Generator words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picocalc.html">PicoCalc words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text.html">Text display words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SHA-256</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ntc.html">NTC thermistor Support</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pixmap8_utils.html" title="previous chapter">Pixmap Utilities</a></li>
+      <li>Next: <a href="turtle.html" title="next chapter">Turtle graphics</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2025, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/extra/sha256.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

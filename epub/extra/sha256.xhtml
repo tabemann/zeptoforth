@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SHA-256</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="sha-256">
+<h1>SHA-256</h1>
+<p>There is currently a software implementation of SHA-256 for zeptoforth. This implementation does not take advantage of hardware SHA-256 accelerators, even though this is planned for future development.</p>
+<p>Note that a basic limitation of SHA-256 is that the total data size must be smaller than 2^64 bits, i.e. 2^56 bytes. For most practical applications this should not be a problem.</p>
+<p>The source code for the software implementation of SHA-256 is in <code class="docutils literal notranslate"><span class="pre">extra/common/sha256.fs</span></code>. This code is based closely off of https://github.com/amonsier/sha-2 which in turn is closely based off https://en.wikipedia.org/wiki/SHA-2 .</p>
+<p>There is a set of SHA-256 tests in <code class="docutils literal notranslate"><span class="pre">test/common/sha256.fs</span></code>.</p>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">sha-256</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sha-256</span></code> module contains the following words:</p>
+<section id="size-of-sha-256-hash">
+<h3><code class="docutils literal notranslate"><span class="pre">size-of-sha-256-hash</span></code></h3>
+<p>( – bytes )</p>
+<p>Size of an SHA-256 hash in bytes</p>
+</section>
+<section id="sha-256-size">
+<h3><code class="docutils literal notranslate"><span class="pre">sha-256-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Size of SHA-256 structure in bytes</p>
+</section>
+<section id="init-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">init-sha-256</span></code></h3>
+<p>( hash sha-256 – )</p>
+<p>Initialize an SHA-256 streaming calculation.</p>
+<ul class="simple">
+<li><p>hash: address of hash array, where the result is delivered</p></li>
+<li><p>sha-256: address of an SHA-256 structure</p></li>
+</ul>
+<p>If all the data you are calculating the hash value on is not available in a contiguous buffer in memory, this is where you should start. Instantiate a SHA-256 structure, and invoke this word. Once a SHA-256 hash has been calculated the SHA-256 structure can be initialized again for the next calculation.</p>
+</section>
+<section id="write-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">write-sha-256</span></code></h3>
+<p>( data len sha-256 – )</p>
+<p>Stream more input for an on-going SHA-256 calculation.</p>
+<ul class="simple">
+<li><p>data: address of data to be added to the calculation</p></li>
+<li><p>len: length of the data to add, in bytes</p></li>
+<li><p>sha-256: address of a previously initialized SHA-256 structure</p></li>
+</ul>
+<p>This word may be invoked an arbitrary number of times between initialization and closing, but the data length is limited by the SHA-256 algorithm: the total number of bits (i.e. the total number of bytes times eight) must be representable by a 64-bit unsigned integer. While that is not a practical limitation, the result is unpredictable if that limit is exceeded.</p>
+<p>This word may be invoked on empty data (zero length), although that obviously will not add any data.</p>
+</section>
+<section id="close-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">close-sha-256</span></code></h3>
+<p>( sha-256 – )</p>
+<p>Conclude an SHA-256 streaming calculation, making the hash value available.</p>
+<ul class="simple">
+<li><p>sha-256: address of a previously initialized SHA-256 structure</p></li>
+</ul>
+<p>After this word has been invoked, the result is available in the hash buffer that initially was provided. The address of the hash value is returned for convenience, but you should feel free to drop it; it is simply the address of the first byte of your initially provided hash array.</p>
+<p>Invoking this word for a calculation with no data (the writing function has never been invoked, or it only has been invoked with empty data) is legal. It will calculate the SHA-256 value of the empty string.</p>
+</section>
+<section id="calc-sha-256">
+<h3><code class="docutils literal notranslate"><span class="pre">calc-sha-256</span></code></h3>
+<p>( input len hash – )</p>
+<p>The simple SHA-256 calculation word</p>
+<ul class="simple">
+<li><p>input: address of the data the hash will be calculated on</p></li>
+<li><p>len: length of the input data, in bytes</p></li>
+<li><p>hash: address of hash array, where the result is delivered</p></li>
+</ul>
+<p>If all the data you are calculating the hash value on is available in a contiguous buffer in memory, this is the word you should use.</p>
+<p>The length must be correspond to an unsigned 64-bit number of bits (i.e. the length times eight must be less than 2^64).</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
