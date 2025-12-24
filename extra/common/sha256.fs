@@ -71,7 +71,9 @@ begin-module sha-256
     \ count: the number of bits to rotate by
     \
     \ Returns the rotated value
-    : right-rot { val count -- } val count rshift val 32 count - lshift or ;
+    : right-rot { val count -- val' }
+      val count rshift val 32 count - lshift or
+    ;
 
     \ First part of consuming a chunk
     : consume-chunk-1 { h p w j i -- p' }
