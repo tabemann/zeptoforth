@@ -89,6 +89,7 @@ Zeptoforth Documentation
    extra/bitmap_utils
    extra/pixmap16_utils
    extra/pixmap8_utils
+   extra/sha256
    extra/turtle
    extra/neopixel
    extra/lcd1602
