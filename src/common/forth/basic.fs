@@ -1901,8 +1901,9 @@ commit-flash
 \ Parse an octal escape
 : escape-octal ( -- )
   octal-len
+  dup 0= if drop exit then
   dup >r base @ >r 8 base !
-  >parse @ input + swap parse-unsigned if
+  >parse @ parse-buffer + swap parse-unsigned if
     r> base !
     dup 256 u< if
       c, r> advance-bytes
@@ -1910,15 +1911,16 @@ commit-flash
       drop rdrop
     then
   else
-    r> base ! rdrop
+    drop r> base ! rdrop
   then
 ;
 
 \ Skip an octal escape
 : skip-escape-octal ( -- )
   octal-len
+  dup 0= if drop exit then
   dup >r base @ >r 8 base !
-  >parse @ input + swap parse-unsigned if
+  >parse @ parse-buffer + swap parse-unsigned if
     r> base !
     256 u< if
       r> advance-bytes
@@ -1926,7 +1928,7 @@ commit-flash
       rdrop
     then
   else
-    r> base ! rdrop
+    drop r> base ! rdrop
   then
 ;
 
@@ -1936,22 +1938,24 @@ commit-flash
 \ Parse a hexadecimal escape
 : escape-hex ( -- )
   2 hex-len
+  dup 0= if drop exit then
   dup >r base @ >r 16 base !
-  >parse @ input + swap parse-unsigned if
+  >parse @ parse-buffer + swap parse-unsigned if
     r> base ! c, r> advance-bytes
   else
-    r> base ! rdrop
+    drop r> base ! rdrop
   then
 ;
 
 \ Skip a hexadecimal escape
 : skip-escape-hex ( -- )
   2 hex-len
+  dup 0= if drop exit then
   dup >r base @ >r 16 base !
-  >parse @ input + swap parse-unsigned if
+  >parse @ parse-buffer + swap parse-unsigned if
     drop r> base ! r> advance-bytes
   else
-    r> base ! rdrop
+    drop r> base ! rdrop
   then
 ;
 
