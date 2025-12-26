@@ -29,7 +29,7 @@ export DUMP=arm-none-eabi-objdump
 export ASFLAGS=-g
 export PREFIX=/usr/local
 export PLATFORM=rp2040_big
-export VERSION=1.15.1-dev
+export VERSION=1.15.2-dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
