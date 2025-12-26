@@ -20,9 +20,9 @@
 
 \ This code is based closely off of https://github.com/amosnier/sha-2
 
-begin-module sha-256-test
+begin-module sha-256-accel-test
 
-  sha-256 import
+  sha-256-accel import
 
   1024 constant buf-size
 
@@ -59,7 +59,7 @@ begin-module sha-256-test
         { data-addr data-bytes hash-addr hash-bytes hash-buf output-buf }
         hash-addr hash-bytes hash-buf parse-hex-string
         space hash-addr hash-bytes type space
-        data-addr data-bytes output-buf calc-sha-256
+        data-addr data-bytes output-buf calc-sha-256-accel
         hash-buf size-of-sha-256-hash output-buf size-of-sha-256-hash
         equal-strings? if
           ." SUCCESS"

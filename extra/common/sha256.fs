@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This code is based closely off of https://github.com/amonsier/sha-2 which in
+\ This code is based closely off of https://github.com/amosnier/sha-2 which in
 \ turn is closely based off https://en.wikipedia.org/wiki/SHA-2
 
 begin-module sha-256
@@ -257,7 +257,7 @@ begin-module sha-256
   \ Invoking this word for a calculation with no data (the writing function has
   \ never been invoked, or it only has been invoked with empty data) is legal.
   \ It will calculate the SHA-256 value of the empty string.
-  : close-sha-256 { sha-256 -- }
+  : close-sha-256 { sha-256 -- hash }
     sha-256 sha-256-chunk-pos @ { pos }
     sha-256 sha-256-space-left @ { space-left }
     sha-256 sha-256-h { h }
