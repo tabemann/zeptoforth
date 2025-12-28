@@ -141,15 +141,24 @@ begin-module dma
       endcase
     ;
     
+    \ Convert PIO's to indices
+    : convert-pio ( pio -- pio-index )
+      case
+        pio::PIO0 of 0 then
+        pio::PIO1 of 1 then
+        pio::PIO2 of 2 then
+        dup
+      endcase
+    ;
   end-module> import
 
   \ System DREQ table
 
   \ PIO TX DREQ
-  : DREQ_PIO_TX ( sm pio -- dreq ) 3 lshift + ;
+  : DREQ_PIO_TX ( sm pio -- dreq ) convert-pio 3 lshift + ;
 
   \ PIO RX DREQ
-  : DREQ_PIO_RX ( sm pio -- dreq ) 3 lshift + 4 + ;
+  : DREQ_PIO_RX ( sm pio -- dreq ) convert-pio 3 lshift + 4 + ;
 
   \ SPI TX DREQ
   : DREQ_SPI_TX ( spi -- dreq ) 1 lshift 24 + ;
