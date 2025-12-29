@@ -138,8 +138,8 @@ begin-module dma
     \ Convert PIO's to indices
     : convert-pio ( pio -- pio-index )
       case
-        pio::PIO0 of 0 then
-        pio::PIO1 of 1 then
+        pio::PIO0 of 0 endof
+        pio::PIO1 of 1 endof
         dup
       endcase
     ;
