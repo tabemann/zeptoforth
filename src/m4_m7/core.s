@@ -1151,6 +1151,7 @@ _comma_lit:
 	bl _asm_undefer_lit
 1:	ldr r2, =deferred_literal
 	str tos, [r2]
+	ldr r1, =literal_deferred_q
 	ldr r0, =-1
 	str r0, [r1]
 	pull_tos
