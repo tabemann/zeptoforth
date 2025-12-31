@@ -277,6 +277,7 @@ _le:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+        end_inlined
 
 	@@ Greater than or equal
 	define_word ">=", visible_flag
