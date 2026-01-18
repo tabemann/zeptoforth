@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2023 Travis Bemann
+@ Copyright (c) 2020-2026 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -192,6 +192,7 @@ _begin:	push {lr}
         movs tos, #syntax_begin
         bl _push_syntax
 	pop {pc}
+        end_inlined
 
 	@@ Start a WHILE block
 	define_word "while", visible_flag | immediate_flag | compiled_flag

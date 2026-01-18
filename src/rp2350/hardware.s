@@ -1,4 +1,4 @@
-@ Copyright (c) 2021-2024 Travis Bemann
+@ Copyright (c) 2021-2026 Travis Bemann
 @ Copyright (c) 2021 Jan Bramkamp
 @ Copyright (c) 2024 Paul Koning
 @
@@ -125,7 +125,9 @@
 
 .equ XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ, 0xAA0
 .equ XOSC_ENABLE_12MHZ, 0xFAB000 | XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ
-.equ XOSC_DELAY       , 47 @ ceil((f_crystal * t_stable) / 256)
+.equ XOSC_HZ, 12000000
+.equ PICO_XOSC_STARTUP_DELAY_MULTIPLIER, 64        
+.equ XOSC_DELAY, ((((XOSC_HZ / 1000) + 128) / 256) * PICO_XOSC_STARTUP_DELAY_MULTIPLIER)
 
 @ -----------------------------------------------------------------------------
 @ PLLs
@@ -344,7 +346,7 @@ XOSC_Init:
         ldr  r0, =XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ
         str  r0, [r1, #XOSC_CTRL]
         
-	movs r0, XOSC_DELAY
+	ldr  r0, =XOSC_DELAY
 	str  r0, [r1, #XOSC_STARTUP]
 
 	ldr  r0, =XOSC_ENABLE_12MHZ
