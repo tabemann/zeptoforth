@@ -36,12 +36,12 @@ Out of range timer dividend or divisor
 ##### `DREQ_PIO_TX`
 ( sm pio -- dreq )
 
-PIO TX DREQ for *pio* block state machine *sm* transmit.
+PIO TX DREQ for *pio* block (either an index or a block base address will be accepted) state machine *sm* transmit.
 
 ##### `DREQ_PIO_RX`
 ( sm pio -- dreq )
 
-PIO RX DREQ for *pio* block state machine *sm* receive.
+PIO RX DREQ for *pio* block (either an index or a block base address will be accepted) state machine *sm* receive.
 
 ##### `DREQ_SPI_TX`
 ( spi -- dreq )

@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2025 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -1471,7 +1471,7 @@ begin-module pio
   : :pio ( -- pio-mark )
     (pbase) @ triggers x-in-pio
     create here (pbase) !
-    cell reserve drop
+    reserve drop
     -1 current-wrap-bottom !
     -1 current-wrap-top !
     -1 current-start !

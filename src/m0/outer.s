@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2025 Travis Bemann
+@ Copyright (c) 2019-2026 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -381,6 +381,7 @@ _hook_needed:
 	string_ln "hook needed"
 	bl _type
 	pop {pc}
+        end_inlined
 	
 	@@ Find a word in a specific dictionary in any wordlist in order of
 	@@ definition
@@ -595,6 +596,8 @@ _quit:	bl _rstack_base
         ldr tos, =_quit_error
         bl _with_error_console
         b _abort
+        bx lr @ Dummy instruction
+        end_inlined
 
         @@ Display an error
 _quit_error:
@@ -650,6 +653,7 @@ _main:	push {lr}
 	bl _refill
         bl _outer
         pop {pc}
+        end_inlined
 
         @@ The main loop of the outer interpreter
         define_word "outer", visible_flag
@@ -668,6 +672,7 @@ _outer: push {lr}
 	b 1b
 2:      pull_tos
         pop {pc}
+        end_inlined
 
         @@ Display the space after enry
         define_word "display-entry-space", visible_flag
@@ -679,6 +684,7 @@ _display_entry_space:
         bgt 1f
         bl _space
 1:      pop {pc}
+        end_inlined
         
         @@ Display the prompt
         define_word "display-prompt", visible_flag
@@ -693,6 +699,7 @@ _display_prompt:
 	ldr tos, [r0]
 	bl _execute_nz
 1:      pop {pc}
+        end_inlined
 
 	@@ Interpret a line of input
 	define_internal_word "interpret-line", visible_flag
@@ -1452,9 +1459,6 @@ _constant_8:
 	define_internal_word "2constant-with-name", visible_flag
 _constant_with_name_8:
 	push {lr}
-	bl _token
-	cmp tos, #0
-	beq 1f
 	bl _asm_start
 	ldr r0, =current_flags
 	movs r1, #visible_flag
@@ -1469,10 +1473,6 @@ _constant_with_name_8:
 	movs tos, #6
 	bl _asm_literal
 	bl _asm_end
-	pop {pc}
-1:	push_tos
-	ldr tos, =_token_expected
-	bl _raise
 	pop {pc}
 	end_inlined
 

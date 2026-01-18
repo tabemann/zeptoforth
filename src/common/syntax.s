@@ -1,4 +1,4 @@
-@ Copyright (c) 2023-2024 Travis Bemann
+@ Copyright (c) 2023-2026 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -84,6 +84,7 @@ _get_syntax:
         ldr r2, =syntax_stack + syntax_stack_size
         cmp r1, r2
         bne 1f
+        push_tos
         ldr tos, =_syntax_underflow
         bl _raise
 1:      push_tos
@@ -128,6 +129,7 @@ _drop_syntax:
         ldr r2, =syntax_stack + syntax_stack_size
         cmp r1, r2
         bne 1f
+        push_tos
         ldr tos, =_syntax_underflow
         bl _raise
 1:      adds r1, #1

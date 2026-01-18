@@ -116,7 +116,9 @@
 .equ XOSC_COUNT  , 0x1c @ A down counter running at the XOSC frequency which counts to zero and stops.
 
 .equ XOSC_ENABLE_12MHZ, 0xfabaa0
-.equ XOSC_DELAY       , 47 @ ceil((f_crystal * t_stable) / 256)
+.equ XOSC_HZ, 12000000
+.equ PICO_XOSC_STARTUP_DELAY_MULTIPLIER, 64        
+.equ XOSC_DELAY, ((((XOSC_HZ / 1000) + 128) / 256) * PICO_XOSC_STARTUP_DELAY_MULTIPLIER)
 
 @ -----------------------------------------------------------------------------
 @ PLLs
@@ -307,7 +309,7 @@ Disable_Resus:
 
 XOSC_Init:
 	ldr  r1, =XOSC_BASE
-	movs r0, XOSC_DELAY
+	ldr  r0, =XOSC_DELAY
 	str  r0, [r1, #XOSC_STARTUP]
 
 	ldr  r0, =XOSC_ENABLE_12MHZ

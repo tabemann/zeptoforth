@@ -14,7 +14,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="PSRAM words" href="psram.html" />
-    <link rel="prev" title="Hardware Timers" href="timer.html" />
+    <link rel="prev" title="Cycle Counting" href="cycles.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -67,12 +67,12 @@
 <section id="dreq-pio-tx">
 <h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_TX</span></code><a class="headerlink" href="#dreq-pio-tx" title="Link to this heading">¶</a></h3>
 <p>( sm pio – dreq )</p>
-<p>PIO TX DREQ for <em>pio</em> block state machine <em>sm</em> transmit.</p>
+<p>PIO TX DREQ for <em>pio</em> block (either an index or a block base address will be accepted) state machine <em>sm</em> transmit.</p>
 </section>
 <section id="dreq-pio-rx">
 <h3><code class="docutils literal notranslate"><span class="pre">DREQ_PIO_RX</span></code><a class="headerlink" href="#dreq-pio-rx" title="Link to this heading">¶</a></h3>
 <p>( sm pio – dreq )</p>
-<p>PIO RX DREQ for <em>pio</em> block state machine <em>sm</em> receive.</p>
+<p>PIO RX DREQ for <em>pio</em> block (either an index or a block base address will be accepted) state machine <em>sm</em> receive.</p>
 </section>
 <section id="dreq-spi-tx">
 <h3><code class="docutils literal notranslate"><span class="pre">DREQ_SPI_TX</span></code><a class="headerlink" href="#dreq-spi-tx" title="Link to this heading">¶</a></h3>
@@ -459,6 +459,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cycles.html">Cycle Counting</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
@@ -467,6 +468,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -493,7 +495,8 @@
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -507,24 +510,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text.html">Text display words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/sha256.html">SHA-256</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntc.html">NTC thermistor Support</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="timer.html" title="previous chapter">Hardware Timers</a></li>
+      <li>Previous: <a href="cycles.html" title="previous chapter">Cycle Counting</a></li>
       <li>Next: <a href="psram.html" title="next chapter">PSRAM words</a></li>
   </ul></li>
 </ul>

@@ -67,7 +67,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * FAT32 filesystem support on top of block storage in on-board Quad SPI flash (on the RP2040, RP2350, and STM32F746 DISCOVERY boards)
 * FAT32 filesystem support on top of PSRAM (on RP2350 boards with PSRAM)
 * Best-effort fault recovery
-* Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the RP2040)
+* Quad SPI flash storage support (on the STM32F746 DISCOVERY board, the RP2040, and the RP2350)
 * A block editor (on the STM32F746 DISCOVERY board, the RP2040, and the RP2350)
 * Hardware random number generator support
 * Pseudorandom number generator support (using the TinyMT32 PRNG)
