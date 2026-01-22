@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 
 \ Display the license message
 : license ( -- )
-  cr ." Copyright (c) 2019-2025 Travis Bemann"
+  cr ." Copyright (c) 2019-2026 Travis Bemann"
   cr ." Copyright (c) 2013, 2021 Matthias Koch"
   cr ." Copyright (c) 2021 Jan Bramkamp"
   cr ." Copyright (c) 2023 Rob Probin"
