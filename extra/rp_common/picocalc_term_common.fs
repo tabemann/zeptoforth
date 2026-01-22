@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -278,12 +278,13 @@ begin-module picocalc-term-common
     variable saved-attention-hook
 
     \ Screenshot flag
-    variable take-screenshot?
+    variable global-screenshot-task
 
     \ The attention handler
     : do-attention ( -- )
       dup [char] s = if
-        drop false attention? ! true take-screenshot? !
+        drop false attention? !
+        global-screenshot-task @ ?dup if 0 swap notify then
       else
         saved-attention-hook @ execute
       then
@@ -291,7 +292,7 @@ begin-module picocalc-term-common
     
     \ Initialize screenshots
     : init-take-screenshots ( -- )
-      false take-screenshot? !
+      0 global-screenshot-task !
       attention-hook @ saved-attention-hook !
       ['] do-attention attention-hook !
     ;
@@ -346,12 +347,18 @@ begin-module picocalc-term-common
 
       \ The saved cursor y coordinate
       cell member saved-cursor-y
-      
-      \ The terminal task
-      cell member term-task
 
-      \ The terminal task mailbox
-      cell member term-task-mailbox
+      \ The terminal input task
+      cell member input-task
+      
+      \ The terminal output task
+      cell member output-task
+
+      \ The terminal screenshot task
+      cell member screenshot-task
+
+      \ The terminal screenshot mailbox
+      cell member screenshot-mailbox
 
       \ Visual bell enabled
       cell member visual-bell-enabled
@@ -374,10 +381,16 @@ begin-module picocalc-term-common
       \ The input receive buffer
       output-recv-buf-size cell align member output-recv-buf
 
-      \ Run the terminal
-      method run-term ( self -- )
+      \ Run the terminal input
+      method run-input ( self -- )
+      
+      \ Run the terminal output
+      method run-output ( self -- )
 
-      \ Start the terminal emulator task
+      \ Run the terminal screenshots
+      method run-screenshot ( self -- )
+
+      \ Start the terminal emulator tasks
       method start-term-task ( self -- )
 
       \ Update the display
@@ -647,8 +660,10 @@ begin-module picocalc-term-common
     \ Constructor
     :noname { self -- }
       self <object>->new
-      0 self term-task !
-      0 self term-task-mailbox !
+      0 self input-task !
+      0 self output-task !
+      0 self screenshot-task !
+      0 self screenshot-mailbox !
       0 self screenshot-hook !
       default-fg-color self fg-color !
       default-bk-color self bk-color !
@@ -679,11 +694,20 @@ begin-module picocalc-term-common
     \ Start the terminal emulator task
     :noname { self -- }
       picocalc-tasks-core self bios-intf init-picocalc-bios
-      self 1 ['] run-term 1536 256 1536 picocalc-tasks-core spawn-on-core
-      self term-task !
-      c" term" self term-task @ task-name!
-      self term-task-mailbox 1 self term-task @ config-notify
-      self term-task @ run
+      self 1 ['] run-input 320 128 768 picocalc-tasks-core spawn-on-core
+      self input-task !
+      c" term-input" self input-task @ task-name!
+      self input-task @ run
+      self 1 ['] run-output 1536 256 1024 picocalc-tasks-core spawn-on-core
+      self output-task !
+      c" term-output" self output-task @ task-name!
+      self output-task @ run
+      self 1 ['] run-screenshot 1536 256 1536 picocalc-tasks-core spawn-on-core
+      self screenshot-task !
+      c" term-screenshot" self screenshot-task @ task-name!
+      self screenshot-mailbox 1 self screenshot-task @ config-notify
+      self screenshot-task @ run
+      self screenshot-task @ global-screenshot-task !
     ; define start-term-task
 
     \ Inject a keycode
@@ -716,13 +740,16 @@ begin-module picocalc-term-common
       bios-intf picocalc-bios::read-kbd-backlight
     ; define do-read-kbd-backlight
 
-    \ Run the PicoCalc terminal
+    \ Run the PicoCalc terminal input
+    :noname { self -- } begin self handle-input pause again ; define run-input
+    
+    \ Run the PicoCalc terminal output
+    :noname { self -- } begin self handle-output pause again ; define run-output
+
+    \ Run the PicoCalc terminal screenshotting
     :noname { self -- }
-      begin
-        take-screenshot? @ if self handle-screenshot then
-        self handle-input self handle-output pause
-      again
-    ; define run-term
+      begin 0 wait-notify drop self handle-screenshot again
+    ; define run-screenshot
 
     \ Take a screenshot
     :noname { self -- }
@@ -734,7 +761,6 @@ begin-module picocalc-term-common
         self do-update-display
       ;] self do-with-term-lock
       self screenshot-hook @ ?execute
-      false take-screenshot? !
     ; define handle-screenshot
     
     \ Handle a normal key
@@ -841,10 +867,10 @@ begin-module picocalc-term-common
         c linefeed = if s\" \r" self input-string exit then
         c backspace = if s\" \x1B\x7F" self input-string exit then
         c KEY_ESC = if s\" \x1B\x1B" self input-string 100 ms exit then
-        c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x35\x50" self input-string exit then
-        c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x35\x51" self input-string exit then
-        c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x35\x52" self input-string exit then
-        c KEY_F4 = if s\" \x1B\x5B\x31\x3B\x35\x53" self input-string exit then
+        c KEY_F1 = if s\" \x1B\x5B\x31\x3B\x33\x50" self input-string exit then
+        c KEY_F2 = if s\" \x1B\x5B\x31\x3B\x33\x51" self input-string exit then
+        c KEY_F3 = if s\" \x1B\x5B\x31\x3B\x33\x52" self input-string exit then
+        c KEY_F4 = if s\" \x1B\x5B\x31\x3B\x33\x53" self input-string exit then
         c KEY_F5 = if
           s\" \x1B\x5B\x31\x35\x3B\x33\x7E" self input-string exit
         then
@@ -953,34 +979,22 @@ begin-module picocalc-term-common
 
     \ Handle input
     :noname { self -- }
-      input-limit { counter }
-      begin self bios-intf picocalc-keys>? counter 0> and while
-        self bios-intf picocalc-keys> { attrs c }
-
-        \ DEBUG
-        \ attrs c [:
-        \   ." <" h.2 ." :" h.2 space flush-console
-        \ ;] console::with-serial-output
-        \ END DEBUG
-
-        attrs 0= if
-          c self handle-normal-key
+      self bios-intf picocalc-keys> { attrs c }
+      attrs 0= if
+        c self handle-normal-key
+      else
+        attrs ATTR_CTRL = if
+          c self handle-ctrl-key
         else
-          attrs ATTR_CTRL = if
-            c self handle-ctrl-key
+          attrs ATTR_ALT = if
+            c self handle-alt-key
           else
-            attrs ATTR_ALT = if
-              c self handle-alt-key
-            else
-              attrs [ ATTR_CTRL ATTR_ALT or ] literal = if
-                c self handle-ctrl-alt-key
-              then
+            attrs [ ATTR_CTRL ATTR_ALT or ] literal = if
+              c self handle-ctrl-alt-key
             then
           then
         then
-
-        -1 +to counter
-      repeat
+      then
     ; define handle-input
 
     \ Handle break
@@ -1000,7 +1014,11 @@ begin-module picocalc-term-common
       begin
         0 { W^ buf }
         countdown 0> if
-          buf 1 self output-stream recv-stream-no-block 0<>
+          output-limit countdown = if
+            buf 1 self output-stream recv-stream 0<>
+          else
+            buf 1 self output-stream recv-stream-no-block 0<>
+          then
         else
           false
         then if
@@ -1009,10 +1027,6 @@ begin-module picocalc-term-common
             self clear-cursor
             true to updated
           then
-
-          \ DEBUG
-\          buf c@ [: ." >" h.2 space flush-console ;] console::with-serial-output
-          \ END DEBUG
           
           buf c@ case
             escape of self handle-escape endof
