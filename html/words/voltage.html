@@ -13,7 +13,7 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Random Number Generator Words" href="rng.html" />
+    <link rel="next" title="Hardware Random Number Generator words" href="rng.html" />
     <link rel="prev" title="Pico clock control words" href="clocks.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cycles.html">Cycle Counting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
@@ -144,7 +145,7 @@
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Voltage words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -166,6 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/sha256.html">SHA-256</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
@@ -173,6 +175,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntc.html">NTC thermistor Support</a></li>
 </ul>
 
 <div class="relations">
@@ -180,7 +183,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="clocks.html" title="previous chapter">Pico clock control words</a></li>
-      <li>Next: <a href="rng.html" title="next chapter">Random Number Generator Words</a></li>
+      <li>Next: <a href="rng.html" title="next chapter">Hardware Random Number Generator words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -207,7 +210,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2025, Travis Bemann.
+      &#169;2020-2026, Travis Bemann.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
