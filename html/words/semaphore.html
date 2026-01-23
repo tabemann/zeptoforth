@@ -119,6 +119,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cycles.html">Cycle Counting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dma.html">DMA support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="psram.html">PSRAM words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="aon_timer.html">Always-On Timer words</a></li>
@@ -127,6 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="int_overload.html">Interrupt Overloading Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="watchdog.html">Watchdog Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
@@ -153,7 +155,8 @@
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clocks.html">Pico clock control words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -167,17 +170,23 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text.html">Text display words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/sha256.html">SHA-256</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntc.html">NTC thermistor Support</a></li>
 </ul>
 
 <div class="relations">
@@ -212,7 +221,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2020-2025, Travis Bemann.
+      &#169;2020-2026, Travis Bemann.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
