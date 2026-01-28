@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PIO/state machine pools</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="pio-state-machine-pools">
+<h1>PIO/state machine pools</h1>
+<p>From release 1.16.0 on there is a PIO/state machine pool mechanism that provides a centralized means of allocating PIO blocks and state machines integrated with PIO memory management.</p>
+<p>Multiple state machines on a single PIO block can be allocated at once with this mechanism. This is useful in cases where one needs multiple state machines to communicate with one another via IRQ’s and thus limitations are imposed on which PIO’s the state machines are on.</p>
+<p>At the same time, this mechanism provides a means of simultaneously allocating PIO memory, ensuring that sufficient memory is available on a given PIO block and atomically allocating it if it is available.</p>
+<p>Freeing state machines is provided for, but if the user wishes to free PIO memory they must do so manually with <code class="docutils literal notranslate"><span class="pre">pio::free-piomem</span></code>.</p>
+<p>Last but not least, for the sake of convenience a means of installing a PIO program into all the allocated state machines at once is provided.</p>
+<section id="pio-pool-module">
+<h2><code class="docutils literal notranslate"><span class="pre">pio-pool</span></code> module</h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pio-pool</span></code> module contains the following words:</p>
+<section id="x-invalid-sm-count">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-sm-count</span></code></h3>
+<p>( – )</p>
+<p>This exception is raised if the user attempts to allocate fewer than 1 or greater than 4 PIO state machines.</p>
+</section>
+<section id="x-unable-allocate-pio-sm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unable-allocate-pio/sm</span></code></h3>
+<p>( – )</p>
+<p>This exception is raised if a PIO/state machine word fails for any reason, e.g. insufficient free state machines on any single PIO block and/or no PIO block with sufficient free state machines has adequate PIO memory available.</p>
+</section>
+<section id="allocate-pio-sms">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-pio-sms</span></code></h3>
+<p>( sm-count – smn … sm0 pio )</p>
+<p>Allocate 1 to 4 state machines on a single PIO block and return the state machine indices and the PIO block.</p>
+</section>
+<section id="allocate-pio-sms-w-piomem">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-pio-sms-w-piomem</span></code></h3>
+<p>( size sm-count – smn … sm0 base pio )</p>
+<p>Allocate 1 to 4 state machines on a single PIO block, atomically allocating the specified PIO program size in that PIO block’s memory (ensuring that the selected PIO block has sufficient space in the process), and returning the state machine indices, the allocated PIO memory base address, and the PIO block.</p>
+</section>
+<section id="allocate-pio-sms-w-prog">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-pio-sms-w-prog</span></code></h3>
+<p>( program sm-count – smn … sm0 base pio )</p>
+<p>Allocate 1 to 4 state machines on a single PIO block, atomically allocating the specified PIO program’s size in that PIO block’s memory (ensuring that the selected PIO block has sufficient space in the process), installing the PIO program into the selected PIO block’s memory, configuring the allocated state machines to execute the PIO program, and returning the state machine indices, the allocated PIO memory base address, and the PIO block.</p>
+</section>
+<section id="free-pio-sm">
+<h3><code class="docutils literal notranslate"><span class="pre">free-pio-sm</span></code></h3>
+<p>( sm pio – )</p>
+<p>Free a single state machine for a specified PIO block.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

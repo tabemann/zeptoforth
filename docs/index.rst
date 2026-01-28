@@ -22,6 +22,7 @@ Zeptoforth Documentation
    words/gpio
    words/exti
    words/pio
+   words/pio_pool
    words/uart
    words/adc
    words/spi

@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2025 Travis Bemann
+\ Copyright (c) 2021-2026 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -127,6 +127,16 @@ begin-module pio
       cfield: pio-program-size
       
     end-structure
+
+    \ PIO locking hook
+    variable pio-lock-hook
+
+    \ Initialize the PIO locking hook to 0
+    : init-pio-lock-hook ( -- ) 0 pio-lock-hook ! ;
+    initializer init-pio-lock-hook
+
+    \ Carry out an operation with the PIO's locked
+    : with-pio-lock ( ? xt -- ? ) pio-lock-hook @ ?dup execute ;
 
   end-module> import
 
@@ -1513,28 +1523,32 @@ begin-module pio
 
   \ Reserve space for a program
   : alloc-piomem ( pio size -- base )
-    dup averts x-invalid-size dup 32 u<= averts x-invalid-size
-    over validate-pio
-    1 swap lshift 1-
-    swap PIO0 = if pio0-freemem else pio1-freemem then
-    32 0 do
-      2dup @ and 0= if
-	bis! i unloop exit
-      then
-      swap dup 0<  triggers x-pio-no-room
-      2* swap
-    loop
-    \ We should not fall through because of earlier checks.
-    1 triggers x-pio-no-room
+    [:
+      dup averts x-invalid-size dup 32 u<= averts x-invalid-size
+      over validate-pio
+      1 swap lshift 1-
+      swap PIO0 = if pio0-freemem else pio1-freemem then
+      32 0 do
+        2dup @ and 0= if
+          bis! i unloop exit
+        then
+        swap dup 0<  triggers x-pio-no-room
+        2* swap
+      loop
+      \ We should not fall through because of earlier checks.
+      1 triggers x-pio-no-room
+    ;] with-pio-lock
   ;
 
   \ Release previously allocated program space
   : free-piomem ( pio base size -- )
-    over 32 u< averts x-invalid-base
-    dup averts x-invalid-size
-    2dup + 32 u<= averts x-invalid-size
-    1 swap lshift 1- .s swap .s lshift
-    swap PIO0 = if pio0-freemem else pio1-freemem then .s bic!
+    [:
+      over 32 u< averts x-invalid-base
+      dup averts x-invalid-size
+      2dup + 32 u<= averts x-invalid-size
+      1 swap lshift 1- .s swap .s lshift
+      swap PIO0 = if pio0-freemem else pio1-freemem then .s bic!
+    ;] with-pio-lock
   ;
   
 end-module

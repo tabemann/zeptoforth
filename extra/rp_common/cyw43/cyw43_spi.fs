@@ -215,8 +215,14 @@ begin-module cyw43-spi
       clk self cyw43-clk !
       cs self cyw43-cs !
 
-      \ Allocate space for the PIO program.
-      pio cyw43-pio-program p-size alloc-piomem self cyw43-pio-addr !
+      \ Set a dummy value for the CYW43439 PIO base address
+      -1 self cyw43-pio-addr !
+
+      \ Set a dummy value for the CYW43439 PIO state machine
+      -1 self cyw43-sm !
+
+      \ Set a dummy value for the CYW43439 PIO block
+      -1 self cyw43-pio !
 
       \ Allocate our DMA channel
       allocate-dma self cyw43-dma-channel !
@@ -226,6 +232,18 @@ begin-module cyw43-spi
     \ Destroy an SPI device
     :noname { self -- }
 
+      \ Free the PIO state machine and code
+      self cyw43-pio @ -1 <>
+      self cyw43-sm @ -1 <> and
+      self cyw43-pio-addr @ -1 <> and if
+        self cyw43-pio @ self cyw43-pio-addr @ cyw43-pio-program p-size
+        free-piomem
+        self cyw43-sm @ self cyw43-pio @ free-pio-sm
+        -1 self cyw43-pio !
+        -1 self cyw43-sm !
+        -1 self cyw43-pio-addr !
+      then
+      
       \ Free our DMA channel
       self cyw43-dma-channel @ free-dma
 
@@ -236,6 +254,12 @@ begin-module cyw43-spi
 
     \ Initialize the CYW43 SPI interface
     :noname { self -- }
+
+      \ Set up to the PIO program
+      cyw43-pio-program 1 allocate-pio-sms-w-prog
+      self cyw43-pio !
+      self cyw43-pio-addr !
+      self cyw43-sm !
 
       \ Get the values we need
       self cyw43-pio @ { pio }
