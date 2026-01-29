@@ -78,7 +78,7 @@ begin-module pio-pool
 
     \ Allocate state machines for a PIO block
     : set-pio-sms { sm-count pio -- smn ... sm0 }
-      pio pio>index 4 * dup 3 + do
+      pio pio>index 4 * dup 4 + swap do
         sm-count 0> if
           i bit pio/sm-bitmap and 0= if
             pio/sm-bitmap i bit or to pio/sm-bitmap
@@ -86,7 +86,8 @@ begin-module pio-pool
             -1 +to sm-count
           then
         then
-      -1 +loop
+      loop
+      sm-count 0 ?do i roll loop
     ;
     
     \ Search for a PIO block to use
