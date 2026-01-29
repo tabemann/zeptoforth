@@ -79,9 +79,12 @@ begin-module pio-pool
     \ Allocate state machines for a PIO block
     : set-pio-sms { sm-count pio -- smn ... sm0 }
       pio pio>index 4 * dup 3 + do
-        i bit pio/sm-bitmap and 0= if
-          pio/sm-bitmap i bit or to pio/sm-bitmap
-          i pio pio>index 4 * -
+        sm-count 0> if
+          i bit pio/sm-bitmap and 0= if
+            pio/sm-bitmap i bit or to pio/sm-bitmap
+            i pio pio>index 4 * -
+            -1 +to sm-count
+          then
         then
       -1 +loop
     ;
@@ -90,7 +93,7 @@ begin-module pio-pool
     : search-pio { sm-count -- pio }
       sm-count PIO0 pio/sm-available? if PIO0 exit then
       sm-count PIO1 pio/sm-available? if PIO1 exit then
-      [ rp2350? ] [if] sm-count PIO2 pio/sm-available? if PIO2 exit then
+      [ rp2350? ] [if] sm-count PIO2 pio/sm-available? if PIO2 exit then [then]
       true triggers x-unable-allocate-pio/sm
     ;
 
