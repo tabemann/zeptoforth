@@ -24,7 +24,7 @@ begin-module pio-pool
   pio-internal import
 
   \ Invalid number of PIO blocks to allocate
-  : x-invalid-sm-count ." invalid PIO state machine count" cr;
+  : x-invalid-sm-count ." invalid PIO state machine count" cr ;
 
   \ Unable to allocate PIO/state machine
   : x-unable-allocate-pio/sm ." unable to allocate PIO/state machines" cr ;
