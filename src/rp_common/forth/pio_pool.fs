@@ -95,23 +95,23 @@ begin-module pio-pool
     \ Search for a PIO block to use, and if found reserve space for a program
     : search-pio-alloc-piomem { size sm-count -- base pio }
       sm-count PIO0 pio/sm-available? if
-        [: PIO0 size alloc-piomem ;] try ?dup if
-          dup ['] x-pio-no-room = if drop 0 then ?raise
+        size [: PIO0 swap alloc-piomem ;] try ?dup if
+          dup ['] x-pio-no-room = if 2drop 0 then ?raise
         else
           PIO0 exit
         then
       then
       sm-count PIO1 pio/sm-available? if
-        [: PIO1 size alloc-piomem ;] try ?dup if
-          dup ['] x-pio-no-room = if drop 0 then ?raise
+        size [: PIO1 swap alloc-piomem ;] try ?dup if
+          dup ['] x-pio-no-room = if 2drop 0 then ?raise
         else
           PIO1 exit
         then
       then
       [ rp2350? ] [if]
         sm-count PIO2 pio/sm-available? if
-          [: PIO2 size alloc-piomem ;] try ?dup if
-            dup ['] x-pio-no-room = if drop 0 then ?raise
+          size [: PIO2 swap alloc-piomem ;] try ?dup if
+            dup ['] x-pio-no-room = if 2drop 0 then ?raise
           else
             PIO2 exit
           then
@@ -173,3 +173,5 @@ begin-module pio-pool
   ;
   
 end-module
+
+reboot
