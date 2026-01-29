@@ -23,6 +23,7 @@ begin-module cyw43-spi
   oo import
   gpio import
   pio import
+  pio-pool import
   pin import
   dma import
   dma-pool import
