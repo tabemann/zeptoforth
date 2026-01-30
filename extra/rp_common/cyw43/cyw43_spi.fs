@@ -237,6 +237,7 @@ begin-module cyw43-spi
       self cyw43-pio @ -1 <>
       self cyw43-sm @ -1 <> and
       self cyw43-pio-addr @ -1 <> and if
+        self cyw43-sm @ bit self cyw43-pio @ sm-disable
         self cyw43-pio @ self cyw43-pio-addr @ cyw43-pio-program p-size
         free-piomem
         self cyw43-sm @ self cyw43-pio @ free-pio-sm
