@@ -210,8 +210,6 @@ begin-module cyw43-spi
       self <object>->new
 
       \ Set up fields
-      pio self cyw43-pio !
-      sm self cyw43-sm !
       dio self cyw43-dio !
       clk self cyw43-clk !
       cs self cyw43-cs !
