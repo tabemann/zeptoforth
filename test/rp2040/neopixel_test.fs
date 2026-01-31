@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -37,10 +37,10 @@ begin-module neopixel-test
   12 constant neopixel-data
   
   \ Neopixel PIO
-  PIO0 constant neopixel-pio
+  -1 constant neopixel-pio
   
   \ Neopixel state machine
-  0 constant neopixel-sm
+  -1 constant neopixel-sm
   
   neopixel-power output-pin
   high neopixel-power pin!
