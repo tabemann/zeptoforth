@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ begin-module st7789v-8
   pixmap8-internal import
   pin import
   pio import
+  pio-pool import
   dma import
   dma-pool import
   armv6m import
@@ -94,6 +95,18 @@ begin-module st7789v-8
       { self }
       { data wr-sck rd-sck dc cs backlight buf round cols rows sm pio }
       dc cs backlight buf round cols rows self <st7789v-8-common>->new
+
+      \ Set up the PIO program
+      pio -1 <> sm -1 <> or if
+        pio pio-internal::validate-pio
+        sm pio-internal::validate-sm
+        sm bit pio sm-disable
+        pio st7789v-8-pio-program p-size alloc-piomem { pio-addr }
+        sm pio st7789v-8-pio-program pio-addr setup-prog
+      else
+        st7789v-8-pio-program 1 allocate-pio-sms-w-prog to pio drop to sm
+      then
+
       sm self st7789v-8-sm !
       wr-sck self st7789v-8-sck-pin !
       data self st7789v-8-data-pins-base !
@@ -124,11 +137,6 @@ begin-module st7789v-8
       data 8 + data ?do out i sm pio sm-pindir! loop
       high wr-sck sm pio sm-pin!
       data 8 + data ?do low i sm pio sm-pin! loop
-
-      \ Set up the PIO program
-      pio st7789v-8-pio-program p-size alloc-piomem { pio-addr }
-      sm pio st7789v-8-pio-program pio-addr setup-prog
-      pio-addr sm pio sm-addr!
 
       \ Enable the PIO state machine
       sm bit pio sm-enable
