@@ -123,6 +123,9 @@ begin-module cyw43-spi
   <object> begin-class <cyw43-spi>
 
     continue-module cyw43-spi-internal
+
+      \ Is PIO managed internally
+      cell member cyw43-pio-managed?
       
       \ SPI PIO block
       cell member cyw43-pio
@@ -214,14 +217,10 @@ begin-module cyw43-spi
       clk self cyw43-clk !
       cs self cyw43-cs !
 
+      pio -1 = sm -1 = and self cyw43-pio-managed? !
+
       \ Set a dummy value for the CYW43439 PIO base address
       -1 self cyw43-pio-addr !
-
-      \ Set a dummy value for the CYW43439 PIO state machine
-      -1 self cyw43-sm !
-
-      \ Set a dummy value for the CYW43439 PIO block
-      -1 self cyw43-pio !
 
       \ Allocate our DMA channel
       allocate-dma self cyw43-dma-channel !
@@ -231,17 +230,20 @@ begin-module cyw43-spi
     \ Destroy an SPI device
     :noname { self -- }
 
-      \ Free the PIO state machine and code
-      self cyw43-pio @ -1 <>
-      self cyw43-sm @ -1 <> and
-      self cyw43-pio-addr @ -1 <> and if
+      \ Shut down the PIO state machine and free its PIO memory
+      self cyw43-sm @ -1 <> self cyw43-pio @ -1 <> and if
         self cyw43-sm @ bit self cyw43-pio @ sm-disable
-        self cyw43-pio @ self cyw43-pio-addr @ cyw43-pio-program p-size
-        free-piomem
+        self cyw43-pio-addr @ 0>= if
+          self cyw43-pio @ self cyw43-pio-addr @ cyw43-pio-program p-size
+          free-piomem
+        then
+      then
+      
+      \ Free the PIO state machine and code
+      self cyw43-pio-managed? @
+      self cyw43-sm @ -1 <> and
+      self cyw43-pio @ -1 <> and if
         self cyw43-sm @ self cyw43-pio @ free-pio-sm
-        -1 self cyw43-pio !
-        -1 self cyw43-sm !
-        -1 self cyw43-pio-addr !
       then
       
       \ Free our DMA channel
@@ -256,10 +258,18 @@ begin-module cyw43-spi
     :noname { self -- }
 
       \ Set up to the PIO program
-      cyw43-pio-program 1 allocate-pio-sms-w-prog
-      self cyw43-pio !
-      self cyw43-pio-addr !
-      self cyw43-sm !
+      self cyw43-pio-managed? @ if
+        cyw43-pio-program 1 allocate-pio-sms-w-prog
+        self cyw43-pio !
+        self cyw43-pio-addr !
+        self cyw43-sm !
+      else
+        self cyw43-sm @ bit self cyw43-pio @ sm-disable
+        self cyw43-pio @ cyw43-pio-program p-size alloc-piomem
+        self cyw43-pio-addr !
+        self cyw43-sm @ self cyw43-pio @ cyw43-pio-program
+        self cyw43-pio-addr @ setup-prog
+      then
 
       \ Get the values we need
       self cyw43-pio @ { pio }
@@ -290,10 +300,6 @@ begin-module cyw43-spi
 
       \ Disable the PIO state machine
       sm bit pio sm-disable
-
-      \ Set up the PIO program
-      sm pio cyw43-pio-program pio-addr setup-prog
-      pio-addr sm pio sm-addr!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 pio pins-pio-alternate
