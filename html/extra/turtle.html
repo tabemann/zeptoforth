@@ -34,8 +34,14 @@
             
   <section id="turtle-graphics">
 <h1>Turtle graphics<a class="headerlink" href="#turtle-graphics" title="Link to this heading">¶</a></h1>
-<p>Optional support for turtle graphics is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/turtle.fs</span></code>. It is designed for compatibility with Thurtle, which is based on WAForth and runs in web browsers, and Forthtoise, which is on top of gforth and uses SDL. It allows changing the color of both the lines drawn and the turtle, but does not currently support changing the line thickness (even though that will likely change in the near future).</p>
-<p>It is currently setup up for use with 16-bit graphics on the 160x80 ST7735S-based display on the Waveshare RP2040-LCD-0.96 but can be readily modified for other ST7735S-based displays, including ones on non-RP2040 based boards. Porting to SSD1306-based displays should be trivial and is an exercise left to the user.</p>
+<p>Optional support for turtle graphics is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle*.fs</span></code>. It is designed for compatibility with Thurtle, which is based on WAForth and runs in web browsers, and Forthtoise, which is on top of gforth and uses SDL. It allows changing the color of both the lines drawn and the turtle, but does not currently support changing the line thickness (even though that will likely change in the near future).</p>
+<p>There are the following versions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle.fs</span></code>: 16-bit graphics on the 160x80 ST7735S-based display on the Waveshare RP2040-LCD-0.96 (this can be readily modified for other ST7735S-based displays)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_st7789v.fs</span></code>: 8-bit graphics on the 320x240 ST7789V-based display on the Tufty 2040 (this can be readily modified for other parallel ST7789V-based displays)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_st7789v_spi.fs</span></code>: 8-bit graphics on SPI 320x240 ST7789V-based displays</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_picocalc.fs</span></code>: 8-bit graphics on PicoCalc’s 320x320 display</p></li>
+</ul>
 <p>The display the turtle is in is such that the (0, 0) lies in the center of the display (all distances are specified in pixels, and <em>x</em> coordinates increase from left to right while <em>y</em> coordinates increase from bottom to top) and a heading of 0 degrees (all angles here are specified in degrees, not radians) is pointing directly up along the Y dimension. The turtle starts (and is reset to by <code class="docutils literal notranslate"><span class="pre">home</span></code>) at (0, 0) with a heading of 0 degrees. Also note that the turtle begins pen down, the turtle starts out with the color (0, 255, 0), i.e. green, and the lined drawn by the turtle starts out with the color (255, 255, 255), i.e white. Note however that not all possibly-specified colors can be distinguished due to the 16-bit color of the display.</p>
 <section id="turtle">
 <h2><code class="docutils literal notranslate"><span class="pre">turtle</span></code><a class="headerlink" href="#turtle" title="Link to this heading">¶</a></h2>
@@ -189,6 +195,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio_pool.html">PIO/state machine pools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
