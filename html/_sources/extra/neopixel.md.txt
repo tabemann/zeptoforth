@@ -6,7 +6,7 @@ Configuring the Neopixel is as simple as alloting a Neopixel data structure for 
 
 Note that in some setups, such as the SeeedStudio XIAO RP2040, a separate GPIO pin may need to be set high to enable a Neopixel (e.g. GPIO pin 11 on the SeeedStudio XIAO RP2040, in addition to the data GPIO pin 12). Use the `pin!` word in the `pin` module for this.
 
-Neopixel support is in `extra/rp2040/neopixel.fs`, which can be compiled either to RAM or to flash as needed.
+Neopixel support is in `extra/rp_common/neopixel.fs`, which can be compiled either to RAM or to flash as needed.
 
 ### `neopixel`
 
