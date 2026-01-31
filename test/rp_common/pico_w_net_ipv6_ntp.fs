@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -79,8 +79,8 @@ begin-module pico-w-net-ntp
   variable my-cyw43-control
   variable my-interface
   
-  0 constant sm-index
-  pio::PIO0 constant pio-instance
+  -1 constant sm-index
+  -1 constant pio-instance
   
   <ntp-ipv6> class-size buffer: my-ntp
 

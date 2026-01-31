@@ -1,4 +1,4 @@
-\ Copyright (c) 2023 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@ begin-module neopixel
   
   pin import
   pio import
+  pio-pool import
   pio-registers import
 
   \ Out of range Neopixel exception
@@ -50,11 +51,15 @@ begin-module neopixel
     end-structure
 
     \ Neopixel program
-    create neopixel-program
-    1 %00000 2 or OUT_X out+,
-    3 %10000 1 or COND_X0= jmp+,
-    0 %10000 4 or COND_ALWAYS jmp+,
-    MOV_SRC_Y %00000 4 or MOV_OP_NONE MOV_DEST_Y mov+,
+    :pio neopixel-program
+      start>
+      wrap<
+      1 %00000 2 or OUT_X out+,
+      3 %10000 1 or COND_X0= jmp+,
+      0 %10000 4 or COND_ALWAYS jmp+,
+      MOV_SRC_Y %00000 4 or MOV_OP_NONE MOV_DEST_Y mov+,
+      <wrap
+    ;pio
 
     \ Send a Neopixel color
     : send-neopixel { grb addr -- }
@@ -108,15 +113,20 @@ begin-module neopixel
   \ Initialize a Neopixel strip
   : init-neopixel { init-sm init-pio init-count init-pin addr -- }
     init-pin pio-internal::validate-pin
-    init-pio pio-internal::validate-pio
-    init-sm pio-internal::validate-sm
+    init-pio -1 <> init-sm -1 <> or if
+      init-pio pio-internal::validate-pio
+      init-sm pio-internal::validate-sm
+      init-sm bit init-pio sm-disable
+      init-pio neopixel-program p-size alloc-piomem { pio-addr }
+      init-sm init-pio neopixel-program pio-addr setup-prog
+    else
+      neopixel-program 1 allocate-pio-sms-w-prog to init-pio drop to init-sm
+    then
     init-pin addr neopixel-pin !
     init-count addr neopixel-count !
     init-pio addr neopixel-pio !
     init-sm addr neopixel-sm !
     addr clear-neopixel
-    init-sm bit init-pio sm-disable
-    init-sm bit init-pio sm-restart
     160 15 init-sm init-pio sm-clkdiv! \ 8000000 Hz
     left init-sm init-pio sm-out-shift-dir
     on init-sm init-pio sm-autopull!
@@ -128,8 +138,6 @@ begin-module neopixel
     off init-sm init-pio sm-sideset-high-enable!
     off init-sm init-pio sm-sideset-pindir!
     0 3 init-sm init-pio sm-wrap!
-    neopixel-program 4 0 init-pio pio-instr-relocate-mem!
-    0 init-sm init-pio sm-addr!
     init-sm bit init-pio sm-enable
   ;
 

@@ -15,7 +15,7 @@ The `neopixel` module contains the following words:
 ##### `init-neopixel`
 ( state-machine pio count pin addr -- )
 
-Initialize a Neopixel structure at *addr* for *count* Neopixels, data GPIO pin *pin*, PIO block *pio* (`PIO0` or `PIO1` from the `pio` module), and state machine *state-machine* (from 0 to 3). This does not take into account any power GPIO pin that may need to be configured. It reprograms the specified PIO block and assumes that it has full control over said block. Note that it is safe to use if one wishes to use multiple state machines that are all controlling Neopixels in one PIO block, because it will only overwrite the PIO program with the very same PIO program.
+Initialize a Neopixel structure at *addr* for *count* Neopixels, data GPIO pin *pin*, PIO block *pio*, and state machine *state-machine*. This does not take into account any power GPIO pin that may need to be configured. It reprograms the specified PIO block and assumes that it has full control over said block. Note that if *sm* and *pio* are both -1, they will be automatically assigned via the PIO pool; otherwise *sm* must be from 0 to 3 and *pio* must be one of `pio::PIO0`, `pio::PIO1`, or, on the RP2350, `pio::PIO2`.
 
 ##### `clear-neopixel`
 ( neopixel -- )
