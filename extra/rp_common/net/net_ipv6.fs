@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -2508,6 +2508,9 @@ begin-module net-ipv6
 
       \ DHCPv6 discovery success flag
       cell member dhcpv6-discover-success?
+
+      \ Multicast DNS enabled flag
+      cell member mdns-enabled?
       
       \ Remove an IPv6 address from the deprecated IPv6 addresses
       method remove-deprecated-ipv6-addr
@@ -2644,6 +2647,14 @@ begin-module net-ipv6
 
       \ Process an IPv6 DNS response packet
       method process-ipv6-dns-packet ( addr bytes self -- )
+
+      \ Process an IPv6 Multicast DNS request packet
+      method process-ipv6-mdns-request
+      ( src-0 src-1 src-2 src-3 addr bytes self -- )
+
+      \ Process an IPv6 Multicast DNS response packet
+      method process-ipv6-mdns-packet
+      ( src-0 src-1 src-2 src-3 addr bytes self -- )
       
       \ Process an ICMPv6 packet
       method process-icmpv6-packet
@@ -2925,6 +2936,7 @@ begin-module net-ipv6
       false self intf-slaac-set? !
       1 0 0 0 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
       systick::systick-counter self intf-dhcpv6-valid-time !
+      false self mdns-enabled? !
       false self intf-dhcpv6-set? !
       0 self deprecated-count !
       max-deprecated-count 0 ?do
@@ -2996,6 +3008,12 @@ begin-module net-ipv6
       <dns-cache> self dns-cache init-object
     ; define new
 
+    \ Set Multicast DNS enabled
+    :noname ( enabled? self -- ) mdns-enabled? ! ; define mdns-enabled!
+
+    \ Get Multicast DNS enabled
+    :noname ( self -- enabled? ) mdns-enabled? @ ; define mdns-enabled@
+    
     \ Get the IPv6 address
     :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
       dup intf-addr-set? @ if
@@ -4038,6 +4056,12 @@ begin-module net-ipv6
           self process-ipv6-dns-packet
           exit
         then
+        addr udp-src-port h@ rev16 mdns-port = if
+          src-0 src-1 src-2 src-3
+          addr udp-header-size + bytes udp-header-size -
+          self process-ipv6-mdns-packet
+          exit
+        then
         addr udp-src-port h@ rev16 dhcpv6-server-port =
         addr udp-dest-port h@ rev16 dhcpv6-client-port = and if
           addr udp-header-size + bytes udp-header-size -
@@ -4103,6 +4127,43 @@ begin-module net-ipv6
       addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
 \      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-dns-packet
+
+    \ Process an IPv6 Multicast DNS response packet
+    :noname ( src-0 src-1 src-2 src-3 ) { addr bytes self -- }
+      \      [: cr ." +++ process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
+      self mdns-enabled? @ not if 2drop 2drop exit then
+      bytes dns-header-size < if 2drop 2drop exit then
+      addr dns-flags hunaligned@ rev16 { flags }
+      DNS_QR_RESPONSE flags and 0= if
+        addr bytes self process-ipv6-mdns-request exit
+      else
+        2drop 2drop
+      then
+      addr bytes { all-addr all-bytes }
+      addr dns-ident hunaligned@ rev16 { ident }
+      DNS_OPCODE_MASK flags and if exit then
+      DNS_TC flags and if exit then
+      DNS_RA flags and 0= if exit then
+      flags DNS_RCODE_MASK and ?dup if
+        ident self dns-cache save-response-by-dns
+        self dns-resolve-sema broadcast
+        self dns-resolve-sema give
+        exit
+      then
+      addr dns-qdcount hunaligned@ rev16 { qdcount }
+      addr dns-ancount hunaligned@ rev16 { ancount }
+      dns-header-size +to addr
+      [ dns-header-size negate ] literal +to bytes
+      begin qdcount 0> bytes 0> and while
+        addr bytes skip-dns-name to bytes to addr
+        bytes dns-qbody-size < if exit then
+        dns-qbody-size +to addr
+        [ dns-qbody-size negate ] literal +to bytes
+        -1 +to qdcount
+      repeat
+      addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
+\      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
+    ; define process-ipv6-mdns-packet
 
     \ Process IPv6 DNS response packet answers
     :noname { addr bytes all-addr all-bytes ancount ident self -- }
@@ -4654,9 +4715,13 @@ begin-module net-ipv6
 
     \ Send a DNS request packet
     :noname { c-addr bytes self -- }
-\      [: cr ." +++ send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
-      c-addr bytes self dns-src-port
-      self dns-server-ipv6-addr ipv6-unaligned@ dns-port
+      \      [: cr ." +++ send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
+      self mdns-enabled? @ c-addr bytes is-local-dns? and if
+        c-addr bytes self mdns-port MDNS_IPV6_MULTICAST mdns-port
+      else
+        c-addr bytes self dns-src-port
+        self dns-server-ipv6-addr ipv6-unaligned@ dns-port
+      then
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
         { c-addr bytes self buf }
         rng::random $FFFF and

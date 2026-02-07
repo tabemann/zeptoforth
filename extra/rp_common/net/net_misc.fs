@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -102,6 +102,15 @@ begin-module net-misc
 
   \ The all-routers link-local multicast address
   : ALL_ROUTERS_LINK_LOCAL_MULTICAST $2 $0 $0 $FF020000 ;
+
+  \ Multicast DNS port
+  5353 constant mdns-port
+
+  \ Multicast DNS multicast IPv4 address
+  224 0 0 251 make-ipv4-addr constant MDNS_IPV4_MULTICAST
+
+  \ Multicast DNS multicast IPv6 ddress
+  : MDNS_IPV6_MULTICAST $FB $0 $0 $FF020000 ;
 
   \ IPv6 version traffic flow
   6 28 lshift constant IPV6_VERSION_TRAFFIC_FLOW_CONST
@@ -325,6 +334,9 @@ begin-module net-misc
     ipv6-addr-size +field icmpv6-recursive-dns-addr
   end-structure
 
+  \ Multicast DNS qclass unicast-response bit
+  $8000 constant MDNS_UNICAST_RESPONSE
+
   \ DNS header structure
   begin-structure dns-header-size
     hfield: dns-ident
@@ -447,7 +459,7 @@ begin-module net-misc
   \ Default requested IP address
   0 0 0 0 make-ipv4-addr constant DEFAULT_IPV4_ADDR
 \  192 168 1 100 make-ipv4-addr constant DEFAULT_IPV4_ADDR
-  
+
   \ DNS flags
   15 bit constant DNS_QR_RESPONSE
   11 constant DNS_OPCODE_LSB
@@ -1154,6 +1166,20 @@ begin-module net-misc
       then
     repeat
     0 0 false
+  ;
+
+  \ Check for a .local DNS name
+  : is-local-dns? { addr bytes -- local? }
+    addr bytes { cur-addr cur-bytes }
+    begin cur-bytes 0> while
+      addr c@ [char] . = if
+        1 +to cur-addr -1 +to cur-bytes
+        cur-addr to addr cur-bytes to bytes
+      else
+        1 +to cur-addr -1 +to cur-bytes
+      then
+    repeat
+    addr bytes s" local" equal-case-strings?
   ;
 
 end-module

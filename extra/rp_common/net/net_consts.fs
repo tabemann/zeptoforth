@@ -46,5 +46,5 @@ begin-module net-consts
   49152 constant MIN_EPHEMERAL_PORT
   65534 constant MAX_EPHEMERAL_PORT
   -1 constant EPHEMERAL_PORT
-
+  
 end-module
