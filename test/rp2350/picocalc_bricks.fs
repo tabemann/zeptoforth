@@ -171,8 +171,8 @@ begin-module bricks
   ;
   
   : init-prng { prng -- }
-    prng tinymt32-init
-    rng::random prng tinymt32-prepare-example
+    rng::random prng tinymt32-init
+    prng tinymt32-prepare-example
   ;
   
   : init-world { world -- }
