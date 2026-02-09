@@ -189,12 +189,13 @@ begin-module bricks
   : draw-rect { erase? color x y width height display -- }
     width 2e0 v/ { width2/ }
     height 2e0 v/ { height2/ }
-    x width2/ v- v>n { x0 }
-    y height2/ v- v>n { y0 }
-    x width2/ v+ v>n { x1 }
-    y height2/ v+ v>n { y1 }
+    x width2/ v- vround-zero v>n { x0 }
+    y height2/ v- vround-zero v>n { y0 }
     erase? if erase-color else color then
-    x0 y0 width v>n height v>n display draw-rect-const
+    x0 y0
+    width 0.5e0 v+ vround-zero v>n
+    height 0.5e0 v+ vround-zero v>n
+    display draw-rect-const
   ;
   
   : draw-block { erase? display block -- }
@@ -460,6 +461,5 @@ begin-module bricks
       again
     ;] with-aligned-allot
   ;
-      
   
 end-module
