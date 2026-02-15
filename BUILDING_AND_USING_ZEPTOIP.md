@@ -11,6 +11,7 @@ For examples of demos involving zeptoIPv4, there are:
 * `test/rp_common/pico_w_net_ipv4_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
 * `test/rp_common/pico_w_net_ipv4_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_ipv4_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
 * `test/rp_common/pico_w_net_ipv4_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
+* `test/rp_common/pico_w_net_ipv4_http_download_url.fs`, an extremely simple web client that connects to an arbitrary URL and echos its reponse
 * `test/rp_common/pico_w_net_ipv4_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
 * `test/rp_common/pico_w_net_ipv4_udp.fs`, a tiny UDP echo server
 * `test/rp_common/pico_w_net_ipv4_uart.fs`, a TCP-UART interface server
@@ -19,6 +20,7 @@ For examples of demos involving zeptoIPv6, there are:
 
 * `test/rp_common/pico_w_net_ipv6_http_led.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_led.fs`
 * `test/rp_common/pico_w_net_ipv6_http_download.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download.fs` (note that there have been issues connecting to its example of `http://www.google.com/` over IPv6)
+* `test/rp_common/pico_w_net_ipv6_http_download_url.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download_url.fs`
 * `test/rp_common/pico_w_net_ipv6_udp.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_udp.fs`
 
 Directions for use of the individual demos are included therein. These examples are all writtey for the CYW43439 driver.
@@ -546,3 +548,23 @@ end-implement
 
 my-port register-tcp-listen-endpoint
 ```
+
+### Enabling Multicast DNS
+
+Multicast DNS can be enabled under both zeptoIPv4 and zeptoIPv6 by executing:
+
+```
+true my-interface mdns-enabled!
+```
+
+This will by itself enable resolving DNS names on the `.local` domain via Multicast DNS.
+
+To go further, and to expose a DNS name on the `.local` domain for your device via Multicast DNS, also execute, say:
+
+```
+s" myhostname.local" my-interface mdns-hostname!
+```
+
+Replace `s" myhostname.local"` with a string containing your choice of hostnames. Note that the hostname is saved internally in a buffer so does not need to remain valid after `mdns-hostname!` returns.
+
+Also note that passing an empty string into `mdns-hostname!` disables exposing aDNS name via Multicast DNS. This is equivalent to the situation on initialization.
