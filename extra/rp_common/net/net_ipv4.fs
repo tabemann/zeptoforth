@@ -3573,7 +3573,7 @@ begin-module net-ipv4
         dns-header-size +to addr
         [ dns-header-size negate ] literal +to bytes
         false { match? }
-        src-addr MDNS_IPV4_MULTICAST <> { unicast-response? }
+        false { unicast-response? }
         begin qdcount 0> bytes 0> and while
           addr bytes all-addr all-bytes self 256 [: { self buf }
             buf parse-dns-name if

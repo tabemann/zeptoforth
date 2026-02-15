@@ -186,14 +186,20 @@ begin-module pico-w-net-http
       sent-header? not endpoint endpoint-tcp-state@ TCP_ESTABLISHED = and if
         cr ." SENDING HEADER" cr
         true to sent-header?
-        s\" GET / HTTP/1.1\r\n" endpoint my-interface @ send-tcp-endpoint
-        s\" Host: www.google.com\r\n" endpoint my-interface @ send-tcp-endpoint
+        s\" GET " endpoint my-interface @ send-tcp-endpoint
+        url-buffer url-len @ url-path
+        endpoint my-interface @ send-tcp-endpoint
+        s\"  HTTP/1.1\r\n" endpoint my-interface @ send-tcp-endpoint
+        s\" Host: " endpoint my-interface @ send-tcp-endpoint
+        url-buffer url-len @ url-domain
+        endpoint my-interface @ send-tcp-endpoint
+        s\" \r\n" endpoint my-interface @ send-tcp-endpoint
         s\" Accept: */*\r\n" endpoint my-interface @ send-tcp-endpoint
         s\" Connection: close\r\n\r\n" endpoint my-interface @ send-tcp-endpoint
       then
       endpoint endpoint-rx-data@ type
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
-        cr ." CLOSING CONNECTION" cr
+\        cr ." CLOSING CONNECTION" cr
         closing? not if
           true to closing?
           500 0 endpoint [:
@@ -202,10 +208,10 @@ begin-module pico-w-net-http
         then
       then
       endpoint endpoint-tcp-state@ TCP_LAST_ACK = if
-        cr ." WAITING FOR LAST ACK" cr
+\        cr ." WAITING FOR LAST ACK" cr
       then
       endpoint endpoint-tcp-state@ TCP_CLOSED = if
-        cr ." CONNECTION CLOSED" cr
+\        cr ." CONNECTION CLOSED" cr
       then
       endpoint my-interface @ endpoint-done
     ; define handle-endpoint

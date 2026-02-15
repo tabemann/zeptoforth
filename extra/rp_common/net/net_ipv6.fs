@@ -4262,7 +4262,7 @@ begin-module net-ipv6
         dns-header-size +to addr
         [ dns-header-size negate ] literal +to bytes
         false { match? }
-        src-0 src-1 src-2 src-3 ipv6-addr-multicast? not { unicast-response? }
+        false { unicast-response? }
         begin qdcount 0> bytes 0> and while
           addr bytes all-addr all-bytes self 256 [: { self buf }
             buf parse-dns-name if
@@ -4329,7 +4329,6 @@ begin-module net-ipv6
       ipv6-addr-size self mdns-hostname@ nip count
       dns-answer-payload-size [:
         { count unicast-response? ident self buf }
-        buf { init-buf }
         unicast-response? if ident rev16 else 0 then buf dns-ident hunaligned!
         [ DNS_QR_RESPONSE DNS_AA or rev16 ] literal buf dns-flags hunaligned!
         0 buf dns-qdcount hunaligned!
@@ -4388,9 +4387,6 @@ begin-module net-ipv6
           self intf-dhcpv6-ipv6-addr@ buf ipv6-unaligned!
         then
         true
-        init-buf dup
-        ipv6-addr-size self mdns-hostname@ nip count
-        dns-answer-payload-size + dump
       ;] self send-ipv6-udp-packet-raw not if 2drop 2drop then
     ; define send-ipv6-mdns-answer
     
