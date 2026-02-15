@@ -14,7 +14,9 @@ Sending data is done differently with regard to TCP and UDP. With TCP sending da
 
 Closing an endpoint is accomplished through `net::close-tcp-endpoint`, for TCP endpoints, and `net::close-udp-endpoint`, for UDP endpoints. Closing UDP endpoints is immediate, while closing TCP endpoints involves waiting for the endpoint to be closed after a four-way handshake.
 
-If the user wishes to listen to multiple connections on the same point they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.
+If the user wishes to listen to multiple connections on the same port they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.
+
+zeptoIP, for both IPv4 and IPv6, optionally supports both resolving names and serving names via Multicast DNS. This defaults to off, and is enabled by passing `true` to `mdns-enabled!`. To enable serving a name via Multicast DNS, a non-empty string must be passed to `mdns-hostname!` (this string need not stay valid after calling `mdns-hostname!` as it is saved in a buffer). Note that passing an empty string to `mdns-hostname!`, the equivalent of the situation on initialization, means that no name will be served via Multicast DNS.
 
 Note that there is a fixed number of available endpoints which is set at compile-time, specified by the constant `net-config::max-endpoints`. This is set to four by default.
 
@@ -87,6 +89,26 @@ Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost
 ( endpoint interface -- )
 
 Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.
+
+##### `mdns-enabled!`
+( enabled? interface -- )
+
+Set whether Multicast DNS is enabled.
+
+##### `mdns-enabled@`
+( interface -- enabled? )
+
+Get whether Multicast DNS is enabled.
+
+##### `mdns-hostname!`
+( c-addr bytes interface -- )
+
+Set a hostname for Multicast DNS. Note that the hostname is saved, so the passed in string need not stay valid after calling this. An empty string indicates that no hostname is assigned.
+
+##### `mdns-hostname@`
+( interface -- c-addr bytes )
+
+Get a hostname for Multicast DNS. An empty string indicates that no hostname is assigned.
 
 #### `<endpoint>`
 

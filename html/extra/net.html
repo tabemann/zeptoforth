@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>zeptoIP Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,7 +41,8 @@
 <p>A more conventional approach to servicing endpoints, albeit one that requires multiple tasks if multiple endpoints are to be serviced, is through calling <code class="docutils literal notranslate"><span class="pre">net::wait-ready-endpoint</span></code>, which blocks until the endpoint is ready, and then promotes the data its receive buffer.</p>
 <p>Sending data is done differently with regard to TCP and UDP. With TCP sending data requires a TCP endpoint, gotten through either receiving an incoming connection on a listening TCP endpoint, started with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-listen-endpoint</span></code>, which will result in the endpoint being readied with the appropriate state change(s), or starting a TCP connection with <code class="docutils literal notranslate"><span class="pre">net-ipv4::allocate-tcp-connect-ipv4-endpoint</span></code> (for IPv4) or <code class="docutils literal notranslate"><span class="pre">net-ipv6::allocate-tcp-connect-ipv6-endpoint</span></code> (for IPv6), at which an TCP endpoint will be provided to the user. Once one has done this, all that one must do is call <code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code>, which will send the provided data unless the connection is closed or reset, where then it will exit prematurely. With UDP sending data simply requires executing <code class="docutils literal notranslate"><span class="pre">net-ipv4::send-ipv4-udp-packet</span></code> (for IPv4) or <code class="docutils literal notranslate"><span class="pre">net-ipv6::send-ipv6-udp-packet</span></code> (for IPv6).</p>
 <p>Closing an endpoint is accomplished through <code class="docutils literal notranslate"><span class="pre">net::close-tcp-endpoint</span></code>, for TCP endpoints, and <code class="docutils literal notranslate"><span class="pre">net::close-udp-endpoint</span></code>, for UDP endpoints. Closing UDP endpoints is immediate, while closing TCP endpoints involves waiting for the endpoint to be closed after a four-way handshake.</p>
-<p>If the user wishes to listen to multiple connections on the same point they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.</p>
+<p>If the user wishes to listen to multiple connections on the same port they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.</p>
+<p>zeptoIP, for both IPv4 and IPv6, optionally supports both resolving names and serving names via Multicast DNS. This defaults to off, and is enabled by passing <code class="docutils literal notranslate"><span class="pre">true</span></code> to <code class="docutils literal notranslate"><span class="pre">mdns-enabled!</span></code>. To enable serving a name via Multicast DNS, a non-empty string must be passed to <code class="docutils literal notranslate"><span class="pre">mdns-hostname!</span></code> (this string need not stay valid after calling <code class="docutils literal notranslate"><span class="pre">mdns-hostname!</span></code> as it is saved in a buffer). Note that passing an empty string to <code class="docutils literal notranslate"><span class="pre">mdns-hostname!</span></code>, the equivalent of the situation on initialization, means that no name will be served via Multicast DNS.</p>
 <p>Note that there is a fixed number of available endpoints which is set at compile-time, specified by the constant <code class="docutils literal notranslate"><span class="pre">net-config::max-endpoints</span></code>. This is set to four by default.</p>
 <section id="net">
 <h2><code class="docutils literal notranslate"><span class="pre">net</span></code><a class="headerlink" href="#net" title="Link to this heading">¶</a></h2>
@@ -110,6 +111,26 @@
 <p>( endpoint interface – )</p>
 <p>Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.</p>
 </section>
+<section id="mdns-enabled">
+<h4><code class="docutils literal notranslate"><span class="pre">mdns-enabled!</span></code><a class="headerlink" href="#mdns-enabled" title="Link to this heading">¶</a></h4>
+<p>( enabled? interface – )</p>
+<p>Set whether Multicast DNS is enabled.</p>
+</section>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">mdns-enabled&#64;</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<p>( interface – enabled? )</p>
+<p>Get whether Multicast DNS is enabled.</p>
+</section>
+<section id="mdns-hostname">
+<h4><code class="docutils literal notranslate"><span class="pre">mdns-hostname!</span></code><a class="headerlink" href="#mdns-hostname" title="Link to this heading">¶</a></h4>
+<p>( c-addr bytes interface – )</p>
+<p>Set a hostname for Multicast DNS. Note that the hostname is saved, so the passed in string need not stay valid after calling this. An empty string indicates that no hostname is assigned.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">mdns-hostname&#64;</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<p>( interface – c-addr bytes )</p>
+<p>Get a hostname for Multicast DNS. An empty string indicates that no hostname is assigned.</p>
+</section>
 </section>
 <section id="endpoint">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code><a class="headerlink" href="#endpoint" title="Link to this heading">¶</a></h3>
@@ -158,8 +179,8 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s IPv4 address.</p>
 </section>
-<section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr!</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr!</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
 <p>( addr interface – )</p>
 <p>Manually set an interface’s IPv4 address.</p>
 </section>
@@ -168,8 +189,8 @@
 <p>( interface – netmask )</p>
 <p>Get an interface’s IPv4 netmask.</p>
 </section>
-<section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask!</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask!</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
 <p>( netmask interface – )</p>
 <p>Manually set an interface’s IPv4 netmask.</p>
 </section>
@@ -178,8 +199,8 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s gateway’s IPv4 address.</p>
 </section>
-<section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr!</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr!</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
 <p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv4 address.</p>
 </section>
@@ -188,8 +209,8 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s DNS server’s IPv4 address.</p>
 </section>
-<section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr!</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr!</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
 <p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv4 address.</p>
 </section>
@@ -203,8 +224,8 @@
 <p>( interface – tll )</p>
 <p>Get an interface’s TTL.</p>
 </section>
-<section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ttl!</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ttl!</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
 <p>( ttl interface – )</p>
 <p>Set an interface’s TTL.</p>
 </section>
@@ -247,8 +268,8 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code><a class="headerlink" href="#ipv4-handler" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class handles receiving IPv4 frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-interface&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following constructor:</p>
-<section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
 <p>( interface handler – )</p>
 <p>Construct an IPv4 frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv4-handler&gt;</span></code> class has the following methods:</p>
@@ -268,19 +289,19 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code><a class="headerlink" href="#arp-handler" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class handles receiving ARP frames from a frame interface and passing them onto an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following constructor:</p>
-<section id="id7">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
 <p>( interface handler – )</p>
 <p>Construct an ARP frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following methods:</p>
 </section>
-<section id="id8">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
 <p>( addr bytes handler – )</p>
 <p>Handle a received frame.</p>
 </section>
-<section id="id9">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
 <p>( handler – )</p>
 <p>Handle periodic housekeeping activities.</p>
 </section>
@@ -292,8 +313,8 @@
 <section id="ipv6-interface">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code><a class="headerlink" href="#ipv6-interface" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> class inherits from <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code> and has the following constructor:</p>
-<section id="id10">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
 <p>( frame-interface interface – )</p>
 <p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code> class has the following methods:</p>
@@ -303,8 +324,8 @@
 <p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
 <p>Get an interface’s primary IPv6 address.</p>
 </section>
-<section id="id11">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-addr!</span></code><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-addr!</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
 <p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
 <p>Manually set an interface’s primary IPv6 address.</p>
 </section>
@@ -313,8 +334,8 @@
 <p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
 <p>Get an interface’s link-local IPv6 address.</p>
 </section>
-<section id="id12">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-link-local-ipv6-addr!</span></code><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-link-local-ipv6-addr!</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
 <p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
 <p>Manually set an interface’s link-local IPv6 address.</p>
 </section>
@@ -323,8 +344,8 @@
 <p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
 <p>Get an interface’s SLAAC IPv6 address.</p>
 </section>
-<section id="id13">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-slaac-ipv6-addr!</span></code><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-slaac-ipv6-addr!</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
 <p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
 <p>Manually set an interface’s SLAAC IPv6 address.</p>
 </section>
@@ -333,8 +354,8 @@
 <p>( interface – addr-0 addr-1 addr-2 addr-3 )</p>
 <p>Get an interface’s DHCPv6 IPv6 address.</p>
 </section>
-<section id="id14">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-dhcpv6-ipv6-addr!</span></code><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-dhcpv6-ipv6-addr!</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
 <p>( addr-0 addr-1 addr-2 addr-3 interface – )</p>
 <p>Manually set an interface’s DHCPv6 IPv6 address.</p>
 </section>
@@ -343,8 +364,8 @@
 <p>( interface – prefix-0 prefix-1 prefix-2 prefix-3 )</p>
 <p>Get an interface’s prefix</p>
 </section>
-<section id="id15">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix!</span></code><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix!</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
 <p>( prefix-0 prefix-1 prefix-2 prefix-3 interface – )</p>
 <p>Manually set an interface’s prefix</p>
 </section>
@@ -353,8 +374,8 @@
 <p>( interface – bits )</p>
 <p>Get the length of an interface’s prefix in bits.</p>
 </section>
-<section id="id16">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix-len!</span></code><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv6-prefix-len!</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
 <p>( bits interface – )</p>
 <p>Manually set the length of an interface’s prefix in bits.</p>
 </section>
@@ -363,8 +384,8 @@
 <p>( interface – autonomous? )</p>
 <p>Get whether an interface is autonomous (note that this does not mean that it does not use DHCPv6).</p>
 </section>
-<section id="id17">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-autonomous!</span></code><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h4>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-autonomous!</span></code><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
 <p>( autonomous? interface – )</p>
 <p>Manually set whether an interface is autonomous.</p>
 </section>
@@ -373,8 +394,8 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s gateway’s IPv6 address.</p>
 </section>
-<section id="id18">
-<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv6-addr!</span></code><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h4>
+<section id="id20">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv6-addr!</span></code><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
 <p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv6 address.</p>
 </section>
@@ -383,8 +404,8 @@
 <p>( interface – addr )</p>
 <p>Get an interface’s DNS server’s IPv6 address.</p>
 </section>
-<section id="id19">
-<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv6-addr!</span></code><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<section id="id21">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv6-addr!</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h4>
 <p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv6 address.</p>
 </section>
@@ -393,8 +414,8 @@
 <p>( interface – hop-limit )</p>
 <p>Get an interface’s hop limit.</p>
 </section>
-<section id="id20">
-<h4><code class="docutils literal notranslate"><span class="pre">intf-hop-limit!</span></code><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-hop-limit!</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
 <p>( hop-limit interface – )</p>
 <p>Manually set an interface’s hop limit.</p>
 </section>
@@ -457,19 +478,19 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code><a class="headerlink" href="#ipv6-handler" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class handles receiving IPv6 frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-interface&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class has the following constructor:</p>
-<section id="id21">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h4>
+<section id="id23">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
 <p>( interface handler – )</p>
 <p>Construct an IPv6 frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ipv6-handler&gt;</span></code> class has the following methods:</p>
 </section>
-<section id="id22">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
+<section id="id24">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
 <p>( addr bytes handler – )</p>
 <p>Handle a received frame.</p>
 </section>
-<section id="id23">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
+<section id="id25">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
 <p>( handler – )</p>
 <p>Handle periodic housekeeping activities.</p>
 </section>
@@ -554,12 +575,12 @@
 <p>Get the current timeout for an endpoint handler in ticks from the present; note that <code class="docutils literal notranslate"><span class="pre">task::no-timeout</span></code> signifies there being no timeout.</p>
 </section>
 </section>
-<section id="id24">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<section id="id26">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class encapsulates a task carrying out the core loop of handling input and state changes on endpoints associated with a interface.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following constructor:</p>
-<section id="id25">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
+<section id="id27">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
 <p>( interface process – )</p>
 <p>This constructor sets the interface for the endpoint processor to <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following methods:</p>
@@ -579,8 +600,8 @@
 <p>( priority self – )</p>
 <p>Set the endpoint processor priority. The default endpoint processor priority is  0. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the priority of the endpoint processor when it is started.</p>
 </section>
-<section id="id26">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-priority&#64;</span></code><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h4>
+<section id="id28">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-priority&#64;</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h4>
 <p>( self – priority )</p>
 <p>Get the endpoint processor priority. The default endpoint processor priority is 0.</p>
 </section>
@@ -589,8 +610,8 @@
 <p>( interval self – )</p>
 <p>Set the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value. This method can be called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> to set the interval of the endpoint processor when it is started with.</p>
 </section>
-<section id="id27">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-interval&#64;</span></code><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
+<section id="id29">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-interval&#64;</span></code><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h4>
 <p>( self – interval )</p>
 <p>Get the endpoint processor interval in ticks, which are normally 100 us increments. A negative interval means that the endpoint processor operates as a normal task, and -1 is the default value.</p>
 </section>
@@ -599,8 +620,8 @@
 <p>( deadline self – )</p>
 <p>Set the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
 </section>
-<section id="id28">
-<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-deadline&#64;</span></code><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h4>
+<section id="id30">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-process-deadline&#64;</span></code><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h4>
 <p>( self – deadline )</p>
 <p>Get the endpoint processor deadline in ticks, which are normally 100 us increments, with the current time in ticks being <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Note that this raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if called before <code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code> has been called.</p>
 </section>
@@ -613,23 +634,23 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code><a class="headerlink" href="#frame-handler" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-frame</span></code> and <code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code> methods.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class contains the following method:</p>
-<section id="id29">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h4>
+<section id="id31">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h4>
 <p>( addr bytes process – )</p>
 <p>Handle a frame of <em>bytes</em> at <em>addr</em>.</p>
 </section>
-<section id="id30">
-<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h4>
+<section id="id32">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code><a class="headerlink" href="#id32" title="Link to this heading">¶</a></h4>
 <p>( process – )</p>
 <p>Carry out periodic housekeeeping activities.</p>
 </section>
 </section>
-<section id="id31">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<section id="id33">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code><a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class encapsulates receiving frames from a frame interface and handling periodic housekeeping activties.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following constructor:</p>
-<section id="id32">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id32" title="Link to this heading">¶</a></h4>
+<section id="id34">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id34" title="Link to this heading">¶</a></h4>
 <p>( frame-interface process – )</p>
 <p>This constructor sets the frame interface for the frame processor to <em>frame-interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following methods:</p>
@@ -650,8 +671,8 @@
 <h2><code class="docutils literal notranslate"><span class="pre">frame-interface</span></code><a class="headerlink" href="#frame-interface" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module encapsulates the interface between a network and zeptoIP, by providing a means of receiving and sending frames.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module contains the following class:</p>
-<section id="id33">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code><a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
+<section id="id35">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code><a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class is meant to be subclassed by implementors of interfaces to external networks.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class contains the following abstract methods:</p>
 <section id="mtu-size">
@@ -664,8 +685,8 @@
 <p>( frame-interface – D: mac-addr )</p>
 <p>Get the MAC address.</p>
 </section>
-<section id="id34">
-<h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code><a class="headerlink" href="#id34" title="Link to this heading">¶</a></h4>
+<section id="id36">
+<h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code><a class="headerlink" href="#id36" title="Link to this heading">¶</a></h4>
 <p>( D: mac-addr frame-interface – )</p>
 <p>Set the MAC address.</p>
 </section>
@@ -720,12 +741,12 @@
 <p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> instance for which the endpoint process has not been started.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4</span></code> module contains the following class:</p>
 </section>
-<section id="id35">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code><a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
+<section id="id37">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code><a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id36">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id36" title="Link to this heading">¶</a></h4>
+<section id="id38">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id38" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv4&gt;</span></code> base class.</p>
 <p>It has the following methods:</p>
@@ -771,44 +792,44 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code><a class="headerlink" href="#simple-net-ipv6" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> class is a base class for encapsulating a network interface driver and a zeptoIPv6 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id37">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id37" title="Link to this heading">¶</a></h4>
+<section id="id39">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id39" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This is a basic constructor that initializes the state of the <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> base class.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id38">
-<h4><code class="docutils literal notranslate"><span class="pre">init-net</span></code><a class="headerlink" href="#id38" title="Link to this heading">¶</a></h4>
+<section id="id40">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net</span></code><a class="headerlink" href="#id40" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> instance.</p>
 </section>
-<section id="id39">
-<h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code><a class="headerlink" href="#id39" title="Link to this heading">¶</a></h4>
+<section id="id41">
+<h4><code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code><a class="headerlink" href="#id41" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-net-ipv6&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
-<section id="id40">
-<h4><code class="docutils literal notranslate"><span class="pre">device-frame-interface&#64;</span></code><a class="headerlink" href="#id40" title="Link to this heading">¶</a></h4>
+<section id="id42">
+<h4><code class="docutils literal notranslate"><span class="pre">device-frame-interface&#64;</span></code><a class="headerlink" href="#id42" title="Link to this heading">¶</a></h4>
 <p>( driver – frame-interface )</p>
 <p>This gets the network interface driver’s frame interface instance.</p>
 </section>
-<section id="id41">
-<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id41" title="Link to this heading">¶</a></h4>
+<section id="id43">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id43" title="Link to this heading">¶</a></h4>
 <p>( driver – interface )</p>
 <p>This gets the zeptoIPv6 interface instance.</p>
 </section>
-<section id="id42">
-<h4><code class="docutils literal notranslate"><span class="pre">net-frame-process&#64;</span></code><a class="headerlink" href="#id42" title="Link to this heading">¶</a></h4>
+<section id="id44">
+<h4><code class="docutils literal notranslate"><span class="pre">net-frame-process&#64;</span></code><a class="headerlink" href="#id44" title="Link to this heading">¶</a></h4>
 <p>( driver – frame-processor )</p>
 <p>This gets the zeptoIP frame processor instance.</p>
 </section>
-<section id="id43">
-<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id43" title="Link to this heading">¶</a></h4>
+<section id="id45">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id45" title="Link to this heading">¶</a></h4>
 <p>( driver – endpoint-processor )</p>
 <p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-net-no-handler</span></code> has been called instead).</p>
 </section>
-<section id="id44">
-<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id44" title="Link to this heading">¶</a></h4>
+<section id="id46">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id46" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This starts the zeptoIP frame and endpoint processors.</p>
 </section>
@@ -817,12 +838,12 @@
 <section id="simple-cyw43-net-ipv4">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code><a class="headerlink" href="#simple-cyw43-net-ipv4" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv4</span></code> module contains the following class:</p>
-<section id="id45">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id45" title="Link to this heading">¶</a></h3>
+<section id="id47">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id47" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id46">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id46" title="Link to this heading">¶</a></h4>
+<section id="id48">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id48" title="Link to this heading">¶</a></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
@@ -852,18 +873,18 @@
 <p>( driver – control )</p>
 <p>This gets the CYW43xxx controller instance.</p>
 </section>
-<section id="id47">
-<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id47" title="Link to this heading">¶</a></h4>
+<section id="id49">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id49" title="Link to this heading">¶</a></h4>
 <p>( driver – interface )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-interface&#64;</span></code>.</p>
 </section>
-<section id="id48">
-<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id48" title="Link to this heading">¶</a></h4>
+<section id="id50">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id50" title="Link to this heading">¶</a></h4>
 <p>( driver – endpoint-processor )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::net-endpoint-process&#64;</span></code>.</p>
 </section>
-<section id="id49">
-<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id49" title="Link to this heading">¶</a></h4>
+<section id="id51">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id51" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv4::run-net-process</span></code>.</p>
 </section>
@@ -872,53 +893,53 @@
 <section id="simple-cyw43-net-ipv6">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv6</span></code><a class="headerlink" href="#simple-cyw43-net-ipv6" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net-ipv6</span></code> module contains the following class:</p>
-<section id="id50">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code><a class="headerlink" href="#id50" title="Link to this heading">¶</a></h3>
+<section id="id52">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code><a class="headerlink" href="#id52" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIPv6 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id51">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id51" title="Link to this heading">¶</a></h4>
+<section id="id53">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id53" title="Link to this heading">¶</a></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id52">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id52" title="Link to this heading">¶</a></h4>
+<section id="id54">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id54" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::init-net</span></code>.</p>
 </section>
-<section id="id53">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id53" title="Link to this heading">¶</a></h4>
+<section id="id55">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id55" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::init-net-no-handler</span></code>.</p>
 </section>
-<section id="id54">
-<h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code><a class="headerlink" href="#id54" title="Link to this heading">¶</a></h4>
+<section id="id56">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code><a class="headerlink" href="#id56" title="Link to this heading">¶</a></h4>
 <p>( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self – )</p>
 <p>Initialize the country abbrevation, code, and revision; these default to <code class="docutils literal notranslate"><span class="pre">XX</span></code>, <code class="docutils literal notranslate"><span class="pre">XX</span></code>, and -1. Note that this must be called before <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code>, if it called at all.</p>
 </section>
-<section id="id55">
-<h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code><a class="headerlink" href="#id55" title="Link to this heading">¶</a></h4>
+<section id="id57">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code><a class="headerlink" href="#id57" title="Link to this heading">¶</a></h4>
 <p>( state gpio driver – )</p>
 <p>This sets a GPIO pin on the CYW43xxx.</p>
 </section>
-<section id="id56">
-<h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code><a class="headerlink" href="#id56" title="Link to this heading">¶</a></h4>
+<section id="id58">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code><a class="headerlink" href="#id58" title="Link to this heading">¶</a></h4>
 <p>( driver – control )</p>
 <p>This gets the CYW43xxx controller instance.</p>
 </section>
-<section id="id57">
-<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id57" title="Link to this heading">¶</a></h4>
+<section id="id59">
+<h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#id59" title="Link to this heading">¶</a></h4>
 <p>( driver – interface )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::net-interface&#64;</span></code>.</p>
 </section>
-<section id="id58">
-<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id58" title="Link to this heading">¶</a></h4>
+<section id="id60">
+<h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#id60" title="Link to this heading">¶</a></h4>
 <p>( driver – endpoint-processor )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::net-endpoint-process&#64;</span></code>.</p>
 </section>
-<section id="id59">
-<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id59" title="Link to this heading">¶</a></h4>
+<section id="id61">
+<h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#id61" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This method is an alias for <code class="docutils literal notranslate"><span class="pre">simple-net-ipv6::run-net-process</span></code>.</p>
 </section>
@@ -927,23 +948,23 @@
 <section id="pico-w-cyw43-net-ipv4">
 <h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code><a class="headerlink" href="#pico-w-cyw43-net-ipv4" title="Link to this heading">¶</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv4</span></code> class has the following class:</p>
-<section id="id60">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id60" title="Link to this heading">¶</a></h3>
+<section id="id62">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code><a class="headerlink" href="#id62" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv4&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
-<section id="id61">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id61" title="Link to this heading">¶</a></h4>
+<section id="id63">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id63" title="Link to this heading">¶</a></h4>
 <p>( sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id62">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id62" title="Link to this heading">¶</a></h4>
+<section id="id64">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id64" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance.</p>
 </section>
-<section id="id63">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id63" title="Link to this heading">¶</a></h4>
+<section id="id65">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id65" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv4&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
@@ -952,8 +973,8 @@
 <p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W to <em>state</em>.</p>
 </section>
-<section id="id64">
-<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id64" title="Link to this heading">¶</a></h4>
+<section id="id66">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id66" title="Link to this heading">¶</a></h4>
 <p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
 </section>
@@ -967,38 +988,38 @@
 <section id="pico-w-cyw43-net-ipv6">
 <h2><code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv6</span></code><a class="headerlink" href="#pico-w-cyw43-net-ipv6" title="Link to this heading">¶</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">pico-w-cyw43-net-ipv6</span></code> class has the following class:</p>
-<section id="id65">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code><a class="headerlink" href="#id65" title="Link to this heading">¶</a></h3>
+<section id="id67">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code><a class="headerlink" href="#id67" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net-ipv6&gt;</span></code> class, providing functionality specific to the Raspberry Pi Pico W.</p>
 <p>It has the following constructor:</p>
-<section id="id66">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id66" title="Link to this heading">¶</a></h4>
+<section id="id68">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id68" title="Link to this heading">¶</a></h4>
 <p>( sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code> or, on the RP2350, <code class="docutils literal notranslate"><span class="pre">pio::PIO2</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
-<section id="id67">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id67" title="Link to this heading">¶</a></h4>
+<section id="id69">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id69" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> instance.</p>
 </section>
-<section id="id68">
-<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id68" title="Link to this heading">¶</a></h4>
+<section id="id70">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id70" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net-ipv6&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
-<section id="id69">
-<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code><a class="headerlink" href="#id69" title="Link to this heading">¶</a></h4>
+<section id="id71">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code><a class="headerlink" href="#id71" title="Link to this heading">¶</a></h4>
 <p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W to <em>state</em>.</p>
 </section>
-<section id="id70">
-<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id70" title="Link to this heading">¶</a></h4>
+<section id="id72">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id72" title="Link to this heading">¶</a></h4>
 <p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
 </section>
-<section id="id71">
-<h4><code class="docutils literal notranslate"><span class="pre">toggle-pico-w-led</span></code><a class="headerlink" href="#id71" title="Link to this heading">¶</a></h4>
+<section id="id73">
+<h4><code class="docutils literal notranslate"><span class="pre">toggle-pico-w-led</span></code><a class="headerlink" href="#id73" title="Link to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This toggles the state of the LED on the Raspberry Pi Pico W or Raspberry Pi Pico 2 W.</p>
 </section>
@@ -1007,12 +1028,12 @@
 <section id="simple-enc28j60-net-ipv4">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-enc28j60-net-ipv4</span></code><a class="headerlink" href="#simple-enc28j60-net-ipv4" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-enc28j60-net-ipv4</span></code> module contains the following class:</p>
-<section id="id72">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code><a class="headerlink" href="#id72" title="Link to this heading">¶</a></h3>
+<section id="id74">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code><a class="headerlink" href="#id74" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code> class encapsulates an ENC28J60 driver and a zeptoIPv4 network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
-<section id="id73">
-<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id73" title="Link to this heading">¶</a></h4>
+<section id="id75">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id75" title="Link to this heading">¶</a></h4>
 <p>( int-pin spi-pin spi-num D: mac-addr duplex – )</p>
 <p>This instantiates an <code class="docutils literal notranslate"><span class="pre">&lt;simple-enc28j60-net-ipv4&gt;</span></code> instance with MAC address <em>mac-addr</em> (or the default address if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> is supplied), using the SPI interface block number <em>spi-num</em> and GPIO number <em>spi-pin</em> and the next three in sequence.  The interrupt signal uses GPIO number <em>int-pin</em> (which does not have to be adjacent to the SPI connections).  Full duplex is used if <em>duplex</em> is true.</p>
 <p>The class will use the GPIO interrupt for processor core 1, and the DMA interrupt.  Note that currently zeptoforth does not have a mechanism for allowing multiple users of the same interrupt, so applications may not use these interrupts while the ENC28J60 is in use.</p>
@@ -1099,6 +1120,7 @@ Set half or full duplex mode.   See the documentation for <code class="docutils 
 <li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio_pool.html">PIO/state machine pools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
@@ -1211,7 +1233,7 @@ Set half or full duplex mode.   See the documentation for <code class="docutils 
       &#169;2020-2026, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
