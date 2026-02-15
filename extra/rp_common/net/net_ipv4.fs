@@ -3641,8 +3641,8 @@ begin-module net-ipv4
         0 buf dns-arcount hunaligned!
         self mdns-hostname@ { name-addr name-bytes }
         dns-header-size +to buf
-        name-addr name-bytes buf encode-full-dns-name
-        name-bytes full-dns-name-size +to buf
+        name-addr name-bytes buf format-dns-name
+        name-bytes dns-name-size +to buf
         [ DNS_QTYPE_A rev16 ] literal buf dns-abody-type hunaligned!
         [ 1 MDNS_CACHE_FLUSH or rev16 ] literal buf dns-abody-class hunaligned!
         self dhcp-discover-state @

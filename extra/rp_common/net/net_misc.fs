@@ -992,38 +992,6 @@ begin-module net-misc
     again
   ;
 
-  \ Get the size of a full DNS name
-  : full-dns-name-size ( bytes -- ) 2 + ;
-
-  \ Encode a full DNS name
-  : encode-full-dns-name { addr bytes buf -- }
-    begin bytes 0> while
-      addr bytes { cur-addr cur-bytes }
-      begin
-        cur-bytes 0> if
-          cur-addr c@ [char] . <> if
-            1 +to cur-addr -1 +to cur-bytes false
-          else
-            true
-          then
-        else
-          true
-        then
-      until
-      cur-addr addr - { part-bytes }
-      part-bytes buf c!
-      1 +to buf
-      part-bytes 0> if
-        addr buf part-bytes move
-        part-bytes +to buf
-        cur-addr 1+ to addr cur-bytes 1- 0 max to bytes
-        bytes 0= if 0 buf c! then
-      else
-        0 to bytes
-      then
-    repeat
-  ;
-
   \ DNS name reference size
   2 constant dns-name-ref-size
 
@@ -1033,7 +1001,7 @@ begin-module net-misc
   \ Calculate the size of an outgoing DNS answer payload
   : dns-answer-payload-size { addr-size name-size count -- bytes }
     dns-header-size
-    count 0> if name-size full-dns-name-size + dns-abody-size + addr-size + then
+    count 0> if name-size dns-name-size + dns-abody-size + addr-size + then
     count 1- 0 max dns-name-ref-size dns-abody-size + addr-size + * +
   ;
   

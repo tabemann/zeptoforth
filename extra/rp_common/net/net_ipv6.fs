@@ -4340,8 +4340,8 @@ begin-module net-ipv6
         true { first? }
         self intf-link-local-set? @ if
           false to first?
-          name-addr name-bytes buf encode-full-dns-name
-          name-bytes full-dns-name-size +to buf
+          name-addr name-bytes buf format-dns-name
+          name-bytes dns-name-size +to buf
           [ DNS_QTYPE_AAAA rev16 ] literal buf dns-abody-type hunaligned!
           [ 1 MDNS_CACHE_FLUSH or rev16 ] literal
           buf dns-abody-class hunaligned!
@@ -4353,8 +4353,8 @@ begin-module net-ipv6
         then
         self intf-slaac-set? @ if
           first? if
-            name-addr name-bytes buf encode-full-dns-name
-            name-bytes full-dns-name-size +to buf
+            name-addr name-bytes buf format-dns-name
+            name-bytes dns-name-size +to buf
             false to first?
           else
             dns-header-size buf encode-dns-name-ref
@@ -4371,8 +4371,8 @@ begin-module net-ipv6
         then
         self intf-dhcpv6-set? @ if
           first? if
-            name-addr name-bytes buf encode-full-dns-name
-            name-bytes full-dns-name-size +to buf
+            name-addr name-bytes buf format-dns-name
+            name-bytes dns-name-size +to buf
           else
             dns-header-size buf encode-dns-name-ref
             dns-name-ref-size +to buf
