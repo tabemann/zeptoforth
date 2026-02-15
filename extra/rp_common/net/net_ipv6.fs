@@ -984,7 +984,7 @@ begin-module net-ipv6
       
       \ Save an IPv6 address by a DNS name
       method save-ipv6-addr-by-dns
-      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self -- )
+      ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 mdns? ident c-addr bytes self -- )
 
       \ Indicate an abnormal response by DNS name
       method save-response-by-dns ( response ident self -- )
@@ -1042,12 +1042,12 @@ begin-module net-ipv6
       ; define lookup-ipv6-addr-by-dns
 
       \ Save an IPv6 address by a DNS name
-      :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self -- )
-        [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 ident c-addr bytes self }
+      :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 mdns? ident c-addr bytes self -- )
+        [: { ipv6-0 ipv6-1 ipv6-2 ipv6-3 mdns? ident c-addr bytes self }
           max-dns-cache 0 ?do
             self cached-dns-names i cells + @ ?dup if
               count c-addr bytes equal-case-strings?
-              self cached-dns-idents i cells + @ ident = and if
+              self cached-dns-idents i cells + @ ident = mdns? or and if
                 ipv6-0 ipv6-1 ipv6-2 ipv6-3
                 self cached-ipv6-addrs i ipv6-addr-size * + ipv6-unaligned!
                 -1 self cached-dns-idents i cells + !
@@ -2344,6 +2344,12 @@ begin-module net-ipv6
       \ The IPv6 autonomous state
       cell member intf-autonomous?
 
+      \ Multicast DNS hostname address
+      256 member mdns-hostname-addr
+
+      \ Multicast DNS hostname lock
+      lock-size member mdns-hostname-lock
+      
       \ The discovered address valid time
       cell member discovered-valid-time
       
@@ -2654,7 +2660,7 @@ begin-module net-ipv6
 
       \ Process an IPv6 Multicast DNS response packet
       method process-ipv6-mdns-packet
-      ( src-0 src-1 src-2 src-3 addr bytes self -- )
+      ( src-0 src-1 src-2 src-3 unicast? addr bytes self -- )
       
       \ Process an ICMPv6 packet
       method process-icmpv6-packet
@@ -2702,16 +2708,20 @@ begin-module net-ipv6
 
       \ Process IPv6 DNS response packet answers
       method process-ipv6-dns-answers
-      ( addr bytes all-addr all-bytes ancount ident self -- )
+      ( mdns? addr bytes all-addr all-bytes ancount ident self -- )
 
       \ Send a DNS request packet
       method send-ipv6-dns-request ( c-addr bytes self -- )
 
+      \ Send an IPv6 Multicast DNS answer packet
+      method send-ipv6-mdns-answer
+      ( src-0 src-1 src-2 src-3 unicast-response? ident self -- )
+      
       \ Send a UDP packet with a specified source IPv6 address and destination
       \ MAC address
       method send-ipv6-udp-packet-raw
       ( ? D: mac-addr src-0 src-1 src-2 src-3 src-addr src-port )
-      ( dest-0 dest-1 dest-2 dest-3 dest-port bytes xt self -- ? success? )
+      ( dest-0 dest-1 desto-2 dest-3 dest-port bytes xt self -- ? success? )
       ( xt: ? buf -- ? sent? )    
       
       \ Wait for a TCP endpoint to close
@@ -2937,6 +2947,8 @@ begin-module net-ipv6
       1 0 0 0 self intf-dhcpv6-ipv6-addr ipv6-unaligned!
       systick::systick-counter self intf-dhcpv6-valid-time !
       false self mdns-enabled? !
+      self mdns-hostname-addr 256 0 fill
+      lock-size self mdns-hostname-lock init-lock
       false self intf-dhcpv6-set? !
       0 self deprecated-count !
       max-deprecated-count 0 ?do
@@ -3009,7 +3021,18 @@ begin-module net-ipv6
     ; define new
 
     \ Set Multicast DNS enabled
-    :noname ( enabled? self -- ) mdns-enabled? ! ; define mdns-enabled!
+    :noname { enabled? self -- }
+      self mdns-enabled? @ not enabled? and if
+        MDNS_IPV6_MULTICAST ipv6-multicast-mac-addr
+        self out-frame-interface @ add-multicast-filter
+      else
+        self mdns-enabled? @ enabled? not and if
+          MDNS_IPV6_MULTICAST ipv6-multicast-mac-addr
+          self out-frame-interface @ remove-multicast-filter
+        then
+      then
+      enabled? self mdns-enabled? !
+    ; define mdns-enabled!
 
     \ Get Multicast DNS enabled
     :noname ( self -- enabled? ) mdns-enabled? @ ; define mdns-enabled@
@@ -3302,49 +3325,67 @@ begin-module net-ipv6
       ttl 255 min 1 max self intf-hop-limit !
     ; define intf-hop-limit!
 
+    \ Set Multicast DNS hostname
+    :noname ( addr bytes self -- )
+      2 pick 2 pick validate-dns-name
+      [: { self }
+        dup self mdns-hostname-addr c!
+        self mdns-hostname-addr 1+ swap move
+      ;] over mdns-hostname-lock with-lock
+    ; define mdns-hostname!
+
+    \ Get Multicast DNS hostname
+    :noname ( self -- addr bytes )
+      [: { self }
+        self mdns-hostname-addr count
+      ;] over mdns-hostname-lock with-lock
+    ; define mdns-hostname@
+    
     \ Are we listening to a mulicast IPv6 address
     :noname { dest-0 dest-1 dest-2 dest-3 self -- listen? }
 
       dest-0 dest-1 dest-2 dest-3
       ALL_NODES_LINK_LOCAL_MULTICAST ipv6= if
-        true
-      else
+        true exit
+      then
+      
+      self intf-addr-set? @
+      dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@
+      solicit-node-link-local-multicast ipv6= and if
+        true exit
+      then
+      
+      self intf-link-local-set? @
+      dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@
+      solicit-node-link-local-multicast ipv6= and if
+        true exit
+      then
+      
+      self intf-slaac-set? @
+      dest-0 dest-1 dest-2 dest-3 self intf-slaac-ipv6-addr@
+      solicit-node-link-local-multicast ipv6= and if
+        true exit
+      then
+      
+      self intf-dhcpv6-set? @
+      dest-0 dest-1 dest-2 dest-3 self intf-dhcpv6-ipv6-addr@
+      solicit-node-link-local-multicast ipv6= and if
+        true exit
+      then
 
-        self intf-addr-set? @
-        dest-0 dest-1 dest-2 dest-3 self intf-ipv6-addr@
-        solicit-node-link-local-multicast ipv6= and if
-          true
-        else
-
-          self intf-link-local-set? @
-          dest-0 dest-1 dest-2 dest-3 self intf-link-local-ipv6-addr@
-          solicit-node-link-local-multicast ipv6= and if
-            true
-          else
-
-            self intf-slaac-set? @
-            dest-0 dest-1 dest-2 dest-3 self intf-slaac-ipv6-addr@
-            solicit-node-link-local-multicast ipv6= and if
-              true
-            else
-
-              self intf-dhcpv6-set? @
-              dest-0 dest-1 dest-2 dest-3 self intf-dhcpv6-ipv6-addr@
-              solicit-node-link-local-multicast ipv6= and if
-                true
-              else
-
-                self deprecated-count @ 0 ?do
-                  i ipv6-addr-size * self deprecated-ipv6-addrs +
-                  ipv6-unaligned@ solicit-node-link-local-multicast
-                  dest-0 dest-1 dest-2 dest-3 ipv6= and if true exit then
-                loop
-                false
-              then
-            then
-          then
+      self mdns-enabled@ if
+        dest-0 dest-1 dest-2 dest-3 MDNS_IPV6_MULTICAST ipv6= if
+          true exit
         then
       then
+      
+      self deprecated-count @ 0 ?do
+        i ipv6-addr-size * self deprecated-ipv6-addrs +
+        ipv6-unaligned@ solicit-node-link-local-multicast
+        dest-0 dest-1 dest-2 dest-3 ipv6= and if true exit then
+      loop
+
+      false
     ; define ipv6-multicast-addr-listen?
 
     \ Are we listening to an IPv6 address
@@ -4057,7 +4098,13 @@ begin-module net-ipv6
           exit
         then
         addr udp-src-port h@ rev16 mdns-port = if
+          src-0 src-1 src-2 src-3 ipv6-addr-multicast? not
+          src-mac-addr mac-addr-multicast? not and if
+            src-mac-addr src-0 src-1 src-2 src-3 systick::systick-counter
+            self address-map save-mac-addr-by-ipv6
+          then
           src-0 src-1 src-2 src-3
+          dest-0 dest-1 dest-2 dest-3 MDNS_IPV6_MULTICAST ipv6= not
           addr udp-header-size + bytes udp-header-size -
           self process-ipv6-mdns-packet
           exit
@@ -4124,32 +4171,32 @@ begin-module net-ipv6
         [ dns-qbody-size negate ] literal +to bytes
         -1 +to qdcount
       repeat
-      addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
+      false addr bytes all-addr all-bytes ancount ident
+      self process-ipv6-dns-answers
 \      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-dns-packet
 
     \ Process an IPv6 Multicast DNS response packet
-    :noname ( src-0 src-1 src-2 src-3 ) { addr bytes self -- }
+    :noname ( src-0 src-1 src-2 src-3 ) { unicast? addr bytes self -- }
       \      [: cr ." +++ process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
       self mdns-enabled? @ not if 2drop 2drop exit then
       bytes dns-header-size < if 2drop 2drop exit then
       addr dns-flags hunaligned@ rev16 { flags }
       DNS_QR_RESPONSE flags and 0= if
         addr bytes self process-ipv6-mdns-request exit
-      else
-        2drop 2drop
+      then
+      { src-0 src-1 src-2 src-3 }
+      unicast? if
+        src-0 src-1 src-2 src-3 ipv6-addr-multicast?
+        src-0 src-1 src-2 src-3 ipv6-addr-link-local? or
+        self intf-ipv6-prefix-len @
+        src-0 src-1 src-2 src-3 self intf-ipv6-prefix ipv6-unaligned@
+        ipv6-addr-matches-prefix? or not if exit then
       then
       addr bytes { all-addr all-bytes }
       addr dns-ident hunaligned@ rev16 { ident }
       DNS_OPCODE_MASK flags and if exit then
-      DNS_TC flags and if exit then
-      DNS_RA flags and 0= if exit then
-      flags DNS_RCODE_MASK and ?dup if
-        ident self dns-cache save-response-by-dns
-        self dns-resolve-sema broadcast
-        self dns-resolve-sema give
-        exit
-      then
+      DNS_RCODE_MASK flags and if exit then
       addr dns-qdcount hunaligned@ rev16 { qdcount }
       addr dns-ancount hunaligned@ rev16 { ancount }
       dns-header-size +to addr
@@ -4161,28 +4208,30 @@ begin-module net-ipv6
         [ dns-qbody-size negate ] literal +to bytes
         -1 +to qdcount
       repeat
-      addr bytes all-addr all-bytes ancount ident self process-ipv6-dns-answers
-\      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
+      true addr bytes all-addr all-bytes ancount ident
+      self process-ipv6-dns-answers
+      \      [: cr ." --- process-ipv6-dns-packet " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-mdns-packet
 
     \ Process IPv6 DNS response packet answers
-    :noname { addr bytes all-addr all-bytes ancount ident self -- }
-\      [: cr ." +++ process-ipv6-dns-answers " depth . ;] debug-hook execute \ DEPTH DEBUG
+    :noname { mdns? addr bytes all-addr all-bytes ancount ident self -- }
+      \      [: cr ." +++ process-ipv6-dns-answers " depth . ;] debug-hook execute \ DEPTH DEBUG
       begin ancount 0> bytes 0> and while
         addr bytes { saved-addr saved-bytes }
         addr bytes skip-dns-name to bytes to addr
         bytes dns-abody-size < if exit then
         addr dns-abody-type hunaligned@ [ DNS_QTYPE_AAAA rev16 ] literal =
-        addr dns-abody-class hunaligned@ [ 1 rev16 ] literal = and
+        addr dns-abody-class hunaligned@
+        [ MDNS_CACHE_FLUSH rev16 ] literal bic [ 1 rev16 ] literal = and
         addr dns-abody-rdlength hunaligned@ [ 16 rev16 ] literal = and if
           dns-abody-size +to addr
           [ dns-abody-size negate ] literal +to bytes
           bytes 16 < if exit then
           addr ipv6-unaligned@
-          saved-addr saved-bytes all-addr all-bytes ident self 256 [:
-            { ident self buf }
-            buf parse-dns-name if
-              ident buf rot self dns-cache save-ipv6-addr-by-dns
+          saved-addr saved-bytes all-addr all-bytes mdns? ident self 256 [:
+            { mdns? ident self buf }
+            buf parse-dns-name if { len }
+              mdns? ident buf len self dns-cache save-ipv6-addr-by-dns
               self dns-resolve-sema broadcast
               self dns-resolve-sema give
             else
@@ -4198,6 +4247,152 @@ begin-module net-ipv6
       repeat
 \      [: cr ." --- process-ipv6-dns-answers " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define process-ipv6-dns-answers
+
+    \ Process IPv6 Multicast DNS requests
+    :noname ( src-0 src-1 src-2 src-3 addr bytes self -- )
+      [: { src-0 src-1 src-2 src-3 addr bytes self }
+        self mdns-hostname@ nip 0= if exit then
+        addr bytes { all-addr all-bytes }
+        addr dns-ident hunaligned@ rev16 { ident }
+        addr dns-flags hunaligned@ rev16 { flags }
+        DNS_OPCODE_MASK flags and if exit then
+        DNS_RCODE_MASK flags and if exit then
+        addr dns-qdcount hunaligned@ rev16 { qdcount }
+        addr dns-ancount hunaligned@ rev16 { ancount }
+        dns-header-size +to addr
+        [ dns-header-size negate ] literal +to bytes
+        false { match? }
+        src-0 src-1 src-2 src-3 ipv6-addr-multicast? not { unicast-response? }
+        begin qdcount 0> bytes 0> and while
+          addr bytes all-addr all-bytes self 256 [: { self buf }
+            buf parse-dns-name if
+              buf swap self mdns-hostname@ equal-case-strings? true
+            else
+              drop false false
+            then
+          ;] with-allot not if exit then { name-found? }
+          addr bytes skip-dns-name to bytes to addr
+          bytes dns-qbody-size < if exit then
+          name-found? if
+            addr dns-qbody-qtype hunaligned@
+            dup [ DNS_QTYPE_AAAA rev16 ] literal =
+            swap [ DNS_QTYPE_ANY rev16 ] literal = or
+            addr dns-qbody-qclass hunaligned@
+            [ MDNS_UNICAST_RESPONSE rev16 ] literal bic
+            dup [ 1 rev16 ] literal =
+            swap [ DNS_QCLASS_ANY rev16 ] literal = or and if
+              true to match?
+              addr dns-qbody-qclass hunaligned@
+              [ MDNS_UNICAST_RESPONSE rev16 ] literal and if
+                true to unicast-response?
+              then
+            then
+          then
+          dns-qbody-size +to addr
+          [ dns-qbody-size negate ] literal +to bytes
+          -1 +to qdcount
+        repeat
+        begin ancount 0> bytes 0> and while
+          addr bytes { saved-addr saved-bytes }
+          addr bytes skip-dns-name to bytes to addr
+          bytes dns-abody-size < if exit then
+          addr dns-abody-rdlength hunaligned@ rev16 { rdlength }
+          dns-abody-size rdlength + dup +to addr negate +to bytes
+          -1 +to ancount
+        repeat
+        match? if
+          src-0 src-1 src-2 src-3 unicast-response? ident
+          self send-ipv6-mdns-answer
+        then
+      ;] over mdns-hostname-lock with-lock
+    ; define process-ipv6-mdns-request
+
+    \ Send an IPv6 Multicast DNS answer
+    :noname { src-0 src-1 src-2 src-3 unicast-response? ident self -- }
+      0
+      self intf-link-local-set? @ if 1+ then
+      self intf-slaac-set? @ if 1+ then
+      self intf-dhcpv6-set? @ if 1+ then { count }
+      count 0= if exit then
+      count unicast-response? ident self
+      unicast-response? if
+        src-0 src-1 src-2 src-3 self address-map lookup-mac-addr-by-ipv6 not if
+          2drop 2drop 2drop exit
+        then
+      else
+        MDNS_IPV6_MULTICAST ipv6-multicast-mac-addr
+      then
+      self intf-link-local-ipv6-addr@
+      mdns-port
+      unicast-response? if src-0 src-1 src-2 src-3 else MDNS_IPV6_MULTICAST then
+      mdns-port
+      ipv6-addr-size self mdns-hostname@ nip count
+      dns-answer-payload-size [:
+        { count unicast-response? ident self buf }
+        buf { init-buf }
+        unicast-response? if ident rev16 else 0 then buf dns-ident hunaligned!
+        [ DNS_QR_RESPONSE DNS_AA or rev16 ] literal buf dns-flags hunaligned!
+        0 buf dns-qdcount hunaligned!
+        count rev16 buf dns-ancount hunaligned!
+        0 buf dns-nscount hunaligned!
+        0 buf dns-arcount hunaligned!
+        self mdns-hostname@ { name-addr name-bytes }
+        dns-header-size +to buf
+        true { first? }
+        self intf-link-local-set? @ if
+          false to first?
+          name-addr name-bytes buf encode-full-dns-name
+          name-bytes full-dns-name-size +to buf
+          [ DNS_QTYPE_AAAA rev16 ] literal buf dns-abody-type hunaligned!
+          [ 1 MDNS_CACHE_FLUSH or rev16 ] literal
+          buf dns-abody-class hunaligned!
+          [ $7FFFFFFF rev ] literal buf dns-abody-ttl unaligned!
+          [ ipv6-addr-size rev16 ] literal buf dns-abody-rdlength hunaligned!
+          dns-abody-size +to buf
+          self intf-link-local-ipv6-addr@ buf ipv6-unaligned!
+          ipv6-addr-size +to buf
+        then
+        self intf-slaac-set? @ if
+          first? if
+            name-addr name-bytes buf encode-full-dns-name
+            name-bytes full-dns-name-size +to buf
+            false to first?
+          else
+            dns-header-size buf encode-dns-name-ref
+            dns-name-ref-size +to buf
+          then
+          [ DNS_QTYPE_AAAA rev16 ] literal buf dns-abody-type hunaligned!
+          [ 1 MDNS_CACHE_FLUSH or rev16 ] literal
+          buf dns-abody-class hunaligned!
+          [ $7FFFFFFF rev ] literal buf dns-abody-ttl unaligned!
+          [ ipv6-addr-size rev16 ] literal buf dns-abody-rdlength hunaligned!
+          dns-abody-size +to buf
+          self intf-slaac-ipv6-addr@ buf ipv6-unaligned!
+          ipv6-addr-size +to buf
+        then
+        self intf-dhcpv6-set? @ if
+          first? if
+            name-addr name-bytes buf encode-full-dns-name
+            name-bytes full-dns-name-size +to buf
+          else
+            dns-header-size buf encode-dns-name-ref
+            dns-name-ref-size +to buf
+          then
+          [ DNS_QTYPE_AAAA rev16 ] literal buf dns-abody-type hunaligned!
+          [ 1 MDNS_CACHE_FLUSH or rev16 ] literal
+          buf dns-abody-class hunaligned!
+          self intf-dhcpv6-valid-time @ systick::systick-counter - 10000 / rev
+          buf dns-abody-ttl unaligned!
+          [ ipv6-addr-size rev16 ] literal buf dns-abody-rdlength hunaligned!
+          dns-abody-size +to buf
+          self intf-dhcpv6-ipv6-addr@ buf ipv6-unaligned!
+        then
+        true
+        init-buf dup
+        ipv6-addr-size self mdns-hostname@ nip count
+        dns-answer-payload-size + dump
+      ;] self send-ipv6-udp-packet-raw not if 2drop 2drop then
+    ; define send-ipv6-mdns-answer
     
     \ Process an ICMPv6 packet
     :noname
@@ -4717,17 +4912,25 @@ begin-module net-ipv6
     :noname { c-addr bytes self -- }
       \      [: cr ." +++ send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
       self mdns-enabled? @ c-addr bytes is-local-dns? and if
-        c-addr bytes self mdns-port MDNS_IPV6_MULTICAST mdns-port
+        true c-addr bytes self
+        MDNS_IPV6_MULTICAST ipv6-multicast-mac-addr
+        self intf-ipv6-addr@ mdns-port
+        MDNS_IPV6_MULTICAST mdns-port
       else
-        c-addr bytes self dns-src-port
+        false c-addr bytes self
+        self dns-server-ipv6-addr ipv6-unaligned@
+        self resolve-ipv6-addr-mac-addr not if
+          2drop 2drop 2drop exit
+        then
+        self intf-ipv6-addr@ dns-src-port
         self dns-server-ipv6-addr ipv6-unaligned@ dns-port
       then
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
-        { c-addr bytes self buf }
-        rng::random $FFFF and
+        { mdns? c-addr bytes self buf }
+        mdns? if 0 else rng::random $FFFF and then
         dup c-addr bytes self dns-cache reserve-dns
         rev16 buf dns-ident hunaligned!
-        [ DNS_RD rev16 ] literal buf dns-flags hunaligned!
+        mdns? if 0 else [ DNS_RD rev16 ] literal then buf dns-flags hunaligned!
         [ 1 rev16 ] literal buf dns-qdcount hunaligned!
         [ 0 rev16 ] literal buf dns-ancount hunaligned!
         [ 0 rev16 ] literal buf dns-nscount hunaligned!
@@ -4738,7 +4941,7 @@ begin-module net-ipv6
         [ DNS_QTYPE_AAAA rev16 ] literal buf dns-qbody-qtype hunaligned!
         [ 1 rev16 ] literal buf dns-qbody-qclass hunaligned!
         true
-      ;] self send-ipv6-udp-packet not if 2drop drop then
+      ;] self send-ipv6-udp-packet-raw not if 2drop 2drop then
 \      [: cr ." --- send-ipv6-dns-request " depth . ;] debug-hook execute \ DEPTH DEBUG
     ; define send-ipv6-dns-request
 

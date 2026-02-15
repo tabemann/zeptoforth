@@ -83,6 +83,12 @@ begin-module net
 
     \ Get Multicast DNS enabled
     method mdns-enabled@ ( self -- enabled? )
+
+    \ Set Multicast DNS hostname
+    method mdns-hostname! ( addr bytes self -- )
+
+    \ Get Multicast DNS hostname
+    method mdns-hostname@ ( seslf -- addr bytes )
     
     \ Send data on a TCP endpoint
     method send-tcp-endpoint ( addr bytes endpoint self -- )

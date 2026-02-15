@@ -31,7 +31,7 @@
 \ 
 \ Then execute from the base directory of zeptoforth:
 \ 
-\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv4_all.fs
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp_common/pico_w_net_ipv6_all.fs
 \ 
 \ Afterwards, if you had not already installed the CYW43439 firmware, driver,
 \ and zeptoIP, make sure to reboot zeptoforth, either by executing:
@@ -60,13 +60,13 @@ begin-module pico-w-net-http
   net-consts import
   net-config import
   net import
-  net-ipv4 import
+  net-ipv6 import
   endpoint-process import
   alarm import
-  simple-cyw43-net-ipv4 import
-  pico-w-cyw43-net-ipv4 import
+  simple-cyw43-net-ipv6 import
+  pico-w-cyw43-net-ipv6 import
 
-  <pico-w-cyw43-net-ipv4> class-size buffer: my-cyw43-net
+  <pico-w-cyw43-net-ipv6> class-size buffer: my-cyw43-net
   variable my-cyw43-control
   variable my-interface
 
@@ -83,6 +83,7 @@ begin-module pico-w-net-http
     
   \ Our MAC address
   default-mac-addr 2constant my-mac-addr
+
   
   \ Our URL buffer size
   512 constant url-size
@@ -185,20 +186,14 @@ begin-module pico-w-net-http
       sent-header? not endpoint endpoint-tcp-state@ TCP_ESTABLISHED = and if
         cr ." SENDING HEADER" cr
         true to sent-header?
-        s\" GET " endpoint my-interface @ send-tcp-endpoint
-        url-buffer url-len @ url-path
-        endpoint my-interface @ send-tcp-endpoint
-        s\"  HTTP/1.1\r\n" endpoint my-interface @ send-tcp-endpoint
-        s\" Host: " endpoint my-interface @ send-tcp-endpoint
-        url-buffer url-len @ url-domain
-        endpoint my-interface @ send-tcp-endpoint
-        s\" \r\n" endpoint my-interface @ send-tcp-endpoint
+        s\" GET / HTTP/1.1\r\n" endpoint my-interface @ send-tcp-endpoint
+        s\" Host: www.google.com\r\n" endpoint my-interface @ send-tcp-endpoint
         s\" Accept: */*\r\n" endpoint my-interface @ send-tcp-endpoint
         s\" Connection: close\r\n\r\n" endpoint my-interface @ send-tcp-endpoint
       then
       endpoint endpoint-rx-data@ type
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
-\        cr ." CLOSING CONNECTION" cr
+        cr ." CLOSING CONNECTION" cr
         closing? not if
           true to closing?
           500 0 endpoint [:
@@ -207,10 +202,10 @@ begin-module pico-w-net-http
         then
       then
       endpoint endpoint-tcp-state@ TCP_LAST_ACK = if
-\        cr ." WAITING FOR LAST ACK" cr
+        cr ." WAITING FOR LAST ACK" cr
       then
       endpoint endpoint-tcp-state@ TCP_CLOSED = if
-\        cr ." CONNECTION CLOSED" cr
+        cr ." CONNECTION CLOSED" cr
       then
       endpoint my-interface @ endpoint-done
     ; define handle-endpoint
@@ -222,7 +217,7 @@ begin-module pico-w-net-http
   \ Initialize the test
   : init-test { D: ssid D: pass -- }
     1024 256 1024 0 init-default-alarm-task
-    sm-index pio-instance <pico-w-cyw43-net-ipv4> my-cyw43-net init-object
+    sm-index pio-instance <pico-w-cyw43-net-ipv6> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
     my-cyw43-net init-cyw43-net
@@ -232,12 +227,33 @@ begin-module pico-w-net-http
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-net run-net-process
-    cr ." Discovering IPv4 address..."
-    my-interface @ discover-ipv4-addr
-    my-interface @ intf-ipv4-addr@ cr ." IPv4 address: " ipv4.
-    my-interface @ intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
-    my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
-    my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
+    cr ." Autoconfiguring link-local IPv6 address... "
+    my-interface @ autoconfigure-link-local-ipv6-addr if
+      ." Success"
+    else
+      ." Failure"
+    then
+    cr ." Discovering IPv6 router..."
+    my-interface @ discover-ipv6-router
+    cr ." Discovering IPv6 address..."
+    my-interface @ discover-ipv6-addr if
+      ." Success"
+    else
+      ." Failure"
+    then
+    my-interface @ intf-ipv6-addr@ cr ." Primary IPv6 address: " ipv6.
+    my-interface @ intf-link-local-ipv6-addr@
+    cr ." Link-local IPv6 address: " ipv6.
+    my-interface @ intf-slaac-ipv6-addr@ cr ." SLAAC IPv6 address: " ipv6.
+    my-interface @ intf-dhcpv6-ipv6-addr@ cr ." DHCPv6 IPv6 address: " ipv6.
+    my-interface @ intf-ipv6-prefix@ cr ." IPv6 prefix: " ipv6.
+    my-interface @ intf-autonomous@ cr ." Autonomous: "
+    if ." yes" else ." no" then
+    my-interface @ intf-ipv6-prefix-len@ cr ." IPv6 prefix length: " .
+    my-interface @ gateway-ipv6-addr@ cr ." Gateway IPv6 address: " ipv6.
+    cr ." Discovering IPv6 DNS server..."
+    my-interface @ discover-dns-ipv6-addr
+    my-interface @ dns-server-ipv6-addr@ cr ." DNS server IPv6 address: " ipv6.
     my-cyw43-net toggle-pico-w-led
     true my-interface @ mdns-enabled!
   ;
@@ -253,17 +269,18 @@ begin-module pico-w-net-http
     false to sent-header?
     false to closing?
     cr ." DNS LOOKUP"
-    domain-addr domain-len my-interface @ resolve-dns-ipv4-addr if { addr }
+    domain-addr domain-len my-interface @ resolve-dns-ipv6-addr if
+      { addr-0 addr-1 addr-2 addr-3 }
       my-cyw43-net toggle-pico-w-led
-      cr ." RESOLVED: " addr ipv4.
-      EPHEMERAL_PORT addr port
-      my-interface @ allocate-tcp-connect-ipv4-endpoint if
+      cr ." RESOLVED: " addr-0 addr-1 addr-2 addr-3 ipv6.
+      EPHEMERAL_PORT addr-0 addr-1 addr-2 addr-3 port
+      my-interface @ allocate-tcp-connect-ipv6-endpoint if
         drop cr ." CONNECTED" cr
       else
         cr ." NOT CONNECTED" drop
       then
     else
-      cr ." NOT RESOLVED" drop
+      cr ." NOT RESOLVED" 2drop 2drop
     then
   ;
 

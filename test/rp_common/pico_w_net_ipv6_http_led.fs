@@ -770,4 +770,10 @@ begin-module pico-w-net-http-server
     init-http-servers
   ;
 
+  \ Set up Multicast DNS
+  : setup-mdns ( c-addr bytes -- )
+    my-cyw43-net net-interface@ mdns-hostname!
+    true my-cyw43-net net-interface@ mdns-enabled!
+  ;
+
 end-module

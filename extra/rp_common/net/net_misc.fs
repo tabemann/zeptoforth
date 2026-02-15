@@ -56,6 +56,11 @@ begin-module net-misc
     $FE800000 \ ipv6-3
   ;
 
+  \ Get whether an IPv6 address is link-local
+  : ipv6-addr-link-local? ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 -- link-local? )
+    nip nip nip $FFC00000 and $FE800000 =
+  ;
+
   \ IPv6 address size
   4 cells constant ipv6-addr-size
 
@@ -106,6 +111,9 @@ begin-module net-misc
   \ Multicast DNS port
   5353 constant mdns-port
 
+  \ Multicast DNS multicast IPv4 MAC address
+  $5E0000FB $0100 2constant MDNS_IPV4_MULTICAST_MAC_ADDR
+  
   \ Multicast DNS multicast IPv4 address
   224 0 0 251 make-ipv4-addr constant MDNS_IPV4_MULTICAST
 
@@ -124,8 +132,17 @@ begin-module net-misc
   \ DNS source port
   65535 constant dns-src-port
 
+  \ The A DNS QTYPE
+  $0001 constant DNS_QTYPE_A
+
   \ The AAAA DNS QTYPE
   $001C constant DNS_QTYPE_AAAA
+
+  \ The ANY DNS QTYPE
+  $00FF constant DNS_QTYPE_ANY
+
+  \ The ANY DNS QCLASS
+  $00FF constant DNS_QCLASS_ANY
   
   \ DHCP client port
   68 constant dhcp-client-port
@@ -337,6 +354,9 @@ begin-module net-misc
   \ Multicast DNS qclass unicast-response bit
   $8000 constant MDNS_UNICAST_RESPONSE
 
+  \ Multicast DNS rrclass cache-flush
+  $8000 constant MDNS_CACHE_FLUSH
+  
   \ DNS header structure
   begin-structure dns-header-size
     hfield: dns-ident
@@ -972,6 +992,51 @@ begin-module net-misc
     again
   ;
 
+  \ Get the size of a full DNS name
+  : full-dns-name-size ( bytes -- ) 2 + ;
+
+  \ Encode a full DNS name
+  : encode-full-dns-name { addr bytes buf -- }
+    begin bytes 0> while
+      addr bytes { cur-addr cur-bytes }
+      begin
+        cur-bytes 0> if
+          cur-addr c@ [char] . <> if
+            1 +to cur-addr -1 +to cur-bytes false
+          else
+            true
+          then
+        else
+          true
+        then
+      until
+      cur-addr addr - { part-bytes }
+      part-bytes buf c!
+      1 +to buf
+      part-bytes 0> if
+        addr buf part-bytes move
+        part-bytes +to buf
+        cur-addr 1+ to addr cur-bytes 1- 0 max to bytes
+        bytes 0= if 0 buf c! then
+      else
+        0 to bytes
+      then
+    repeat
+  ;
+
+  \ DNS name reference size
+  2 constant dns-name-ref-size
+
+  \ Encode a DNS name reference
+  : encode-dns-name-ref ( offset buf -- ) swap $C000 or rev16 swap hunaligned! ;
+
+  \ Calculate the size of an outgoing DNS answer payload
+  : dns-answer-payload-size { addr-size name-size count -- bytes }
+    dns-header-size
+    count 0> if name-size full-dns-name-size + dns-abody-size + addr-size + then
+    count 1- 0 max dns-name-ref-size dns-abody-size + addr-size + * +
+  ;
+  
   \ Get full TCP header size
   : full-tcp-header-size ( addr -- size ) tcp-data-offset c@ 2 rshift ;
 
@@ -1172,7 +1237,7 @@ begin-module net-misc
   : is-local-dns? { addr bytes -- local? }
     addr bytes { cur-addr cur-bytes }
     begin cur-bytes 0> while
-      addr c@ [char] . = if
+      cur-addr c@ [char] . = if
         1 +to cur-addr -1 +to cur-bytes
         cur-addr to addr cur-bytes to bytes
       else
