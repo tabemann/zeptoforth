@@ -152,4 +152,10 @@ begin-module pico-w-net-udp
     my-cyw43-net toggle-pico-w-led
   ;
 
+  \ Set up Multicast DNS
+  : setup-mdns ( c-addr bytes -- )
+    my-cyw43-net net-interface@ mdns-hostname!
+    true my-cyw43-net net-interface@ mdns-enabled!
+  ;
+
 end-module

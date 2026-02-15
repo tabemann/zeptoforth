@@ -424,6 +424,12 @@ begin-module pico-w-net-repl
       drop
     then
   ;
+
+  \ Set up Multicast DNS
+  : setup-mdns ( c-addr bytes -- )
+    my-cyw43-net net-interface@ mdns-hostname!
+    true my-cyw43-net net-interface@ mdns-enabled!
+  ;
   
   \ Flush the telnet console
   : telnet-flush-console ( -- )
