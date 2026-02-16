@@ -290,7 +290,7 @@ begin-module pico-w-net-http
         then
         len discard-http-buf-data
       else
-        drop
+        drop false
       then
     then
   ;
