@@ -289,6 +289,8 @@ begin-module pico-w-net-http
           false
         then
         len discard-http-buf-data
+      else
+        drop
       then
     then
   ;
