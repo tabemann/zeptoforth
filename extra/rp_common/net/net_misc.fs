@@ -23,6 +23,25 @@ begin-module net-misc
   net-consts import
   net-config import
   armv6m import
+  tinymt32 import
+  lock import
+
+  \ TinyMT32 structure
+  tinymt32-size buffer: prng
+
+  \ TinyMT32 lock
+  lock-size buffer: prng-lock
+  
+  \ Initialize the TinyMT32
+  : init-prng ( -- )
+    prng-lock init-lock
+    rng::random prng tinymt32-init
+    prng tinymt32-prepare-example
+  ;
+  initializer init-prng
+
+  \ Get a pseudorandom number
+  : prandom ( -- x ) [: prng tinymt32-generate-uint32 ;] prng-lock with-lock ;
 
   \ Make an IPv4 address
   : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
@@ -1084,7 +1103,7 @@ begin-module net-misc
   \ Initialize ephemeral ports
   : init-ephemeral-ports ( -- )
     ephemeral-port-lock lock::init-lock
-    rng::random [ MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - ] literal umod
+    prandom [ MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - ] literal umod
     MIN_EPHEMERAL_PORT + current-ephemeral-port !
   ;
 

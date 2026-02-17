@@ -3576,7 +3576,7 @@ begin-module net-ipv6
       { addr bytes endpoint self -- }
       2drop 2drop 2drop 2drop
 
-      rng::random endpoint endpoint-init-local-seq!
+      prandom endpoint endpoint-init-local-seq!
       addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
         drop [ max-ipv6-packet-size ipv6-header-size - tcp-header-size - ]
@@ -3607,7 +3607,7 @@ begin-module net-ipv6
       addr tcp-src-port h@ rev16
       dest-0 dest-1 dest-2 dest-3
       addr tcp-dest-port h@ rev16
-      rng::random
+      prandom
       addr tcp-seq-no @ rev
       0
       TCP_RST
@@ -4923,7 +4923,7 @@ begin-module net-ipv6
       then
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
         { mdns? c-addr bytes self buf }
-        mdns? if 0 else rng::random $FFFF and then
+        mdns? if 0 else prandom $FFFF and then
         dup c-addr bytes self dns-cache reserve-dns
         rev16 buf dns-ident hunaligned!
         mdns? if 0 else [ DNS_RD rev16 ] literal then buf dns-flags hunaligned!
@@ -5215,7 +5215,7 @@ begin-module net-ipv6
         self intf-ipv6-addr@ src-port a0 a1 a2 a3 dest-port mac-addr endpoint
         try-ipv6-connect-endpoint if
           endpoint self [: { endpoint self }
-            rng::random endpoint endpoint-init-local-seq!
+            prandom endpoint endpoint-init-local-seq!
             endpoint reset-endpoint-local-port
             endpoint self send-syn
           ;] endpoint with-endpoint
@@ -5656,7 +5656,7 @@ begin-module net-ipv6
       [then]
       self dhcp-server-duid max-duid-size 0 fill
       0 self dhcp-server-duid-len !
-      rng::random $FFFFFF and self current-dhcp-transact-id !
+      prandom $FFFFFF and self current-dhcp-transact-id !
 
       [ debug? ] [if]
         self current-dhcp-transact-id @

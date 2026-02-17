@@ -3009,7 +3009,7 @@ begin-module net-ipv4
 
     \ Send an IPv4 TCP SYN+ACK packet
     :noname { src-addr addr bytes endpoint self -- }
-      rng::random endpoint endpoint-init-local-seq!
+      prandom endpoint endpoint-init-local-seq!
       addr tcp-seq-no @ rev 1+
       addr bytes tcp-mss@ not if
         drop [ mtu-size ipv4-header-size - tcp-header-size - ] literal
@@ -3036,7 +3036,7 @@ begin-module net-ipv4
       over { src-addr }
       dup tcp-src-port h@ rev16 swap
       dup tcp-dest-port h@ rev16 swap
-      rng::random swap
+      prandom swap
       tcp-seq-no @ rev
       0
       TCP_RST
@@ -3951,7 +3951,7 @@ begin-module net-ipv4
       then
       bytes dns-name-size [ dns-header-size dns-qbody-size + ] literal + [:
         { mdns? c-addr bytes self buf }
-        mdns? if 0 else rng::random $FFFF and then
+        mdns? if 0 else prandom $FFFF and then
         dup c-addr bytes self dns-cache reserve-dns
         rev16 buf dns-ident hunaligned!
         mdns? if 0 else [ DNS_RD rev16 ] literal then buf dns-flags hunaligned!
@@ -4222,7 +4222,7 @@ begin-module net-ipv4
         src-port dest-ipv4-addr dest-port mac-addr endpoint
         try-ipv4-connect-endpoint if
           endpoint self [: { endpoint self }
-            rng::random endpoint endpoint-init-local-seq!
+            prandom endpoint endpoint-init-local-seq!
             endpoint reset-endpoint-local-port
             endpoint self send-syn
           ;] endpoint with-endpoint
@@ -4537,7 +4537,7 @@ begin-module net-ipv4
       $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
       $00000000 self dhcp-req-ipv4-addr !
       $FFFFFFFF self dhcp-server-ipv4-addr !
-      rng::random self current-dhcp-xid !
+      prandom self current-dhcp-xid !
       dhcp-wait-offer self dhcp-discover-state !
       systick::systick-counter self dhcp-discover-stage-start !
       self

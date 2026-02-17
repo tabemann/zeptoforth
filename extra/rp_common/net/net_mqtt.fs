@@ -280,7 +280,7 @@ begin-module mqtt
     :noname { D: user-str D: password-str self -- }
       user-str self mqtt-user-size ! self mqtt-user-addr !
       password-str self mqtt-password-size ! self mqtt-password-addr !
-      self rng::random 20 [: { buffer }  
+      self prandom 20 [: { buffer }  
         base @ { my-base } hex 
         buffer swap format-unsigned rot mqtt-client-id string!
         my-base base !
