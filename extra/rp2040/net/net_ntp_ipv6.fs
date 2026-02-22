@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -111,7 +111,7 @@ begin-module ntp-ipv6
 
     \ Get an initial NTP delay
     : init-ntp-delay ( -- delay )
-      rng::random 0 init-ntp-poll-multiplier s>f f* f>s
+      prandom 0 init-ntp-poll-multiplier s>f f* f>s
     ;
     
   end-module> import
@@ -257,13 +257,13 @@ begin-module ntp-ipv6
               data ntp-tx-timestamp 2beunaligned@ self current-time!
             then
             endpoint self ntp-interface @ endpoint-done
-            endpoint self ntp-interface @ close-udp-endpoint
-            0 self ntp-endpoint !
+            \ endpoint self ntp-interface @ close-udp-endpoint
+            \ 0 self ntp-endpoint !
           then
         else
           endpoint self ntp-interface @ endpoint-done
-          endpoint self ntp-interface @ close-udp-endpoint
-          0 self ntp-endpoint !
+          \ endpoint self ntp-interface @ close-udp-endpoint
+          \ 0 self ntp-endpoint !
         then
       then
     ; define handle-endpoint
@@ -391,7 +391,7 @@ begin-module ntp-ipv6
     
     \ Set the NTP lookup alarm
     :noname { self -- }
-      ntp-lookup-delay rng::random 8 umod 10000 * +
+      ntp-lookup-delay prandom 8 umod 10000 * +
       0 self [: drop lookup-ntp-addr ;]
       self ntp-lookup-alarm self ntp-alarm-task set-alarm-delay
     ; define set-ntp-lookup-alarm
