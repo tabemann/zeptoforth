@@ -46,9 +46,9 @@
 \
 \ Afterwards, to download a file via HTTP, execute:
 \
-\ s" <URL>" s" <PATH>" pico-w-net-http::download-file
+\ s" <URL>" s" <PATH>" pico-w-net-http-file::download
 
-begin-module pico-w-net-http
+begin-module pico-w-net-http-file
 
   begin-module pico-w-net-http-file-internal
     
@@ -412,7 +412,7 @@ begin-module pico-w-net-http
     ;
 
     \ Download a file over HTTP
-    : download-file { addr len path-addr path-len -- }
+    : download { addr len path-addr path-len -- }
       [: http-inited? not if init-http then ;] http-init-lock with-lock
       avail-endpoint? not current-endpoint 0<> or if
         cr ." NOT READY" exit
@@ -460,6 +460,6 @@ begin-module pico-w-net-http
   end-module> import
 
   \ Wrapper for downloading files over HTTP
-  : download-file ( url-addr url-bytes path-addr path-bytes ) download-file ;
+  : download ( url-addr url-bytes path-addr path-bytes ) download ;
 
 end-module

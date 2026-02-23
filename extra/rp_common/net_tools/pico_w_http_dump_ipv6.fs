@@ -46,9 +46,9 @@
 \
 \ Afterwards, to download a file via HTTP, execute:
 \
-\ s" <URL>" pico-w-net-http::download-dump
+\ s" <URL>" pico-w-net-http::download
 
-begin-module pico-w-net-http
+begin-module pico-w-net-http-dump
 
   begin-module pico-w-net-http-dump-internal
     
@@ -276,7 +276,7 @@ begin-module pico-w-net-http
       bytes 0 ?do
         i addr + c@ { c }
         c $0A = if last-byte-cr? if $0A emit else cr then else c emit then
-        c $0D to last-byte-cr?
+        c $0D = to last-byte-cr?
       loop
     ;
     
@@ -289,6 +289,7 @@ begin-module pico-w-net-http
       then { bytes }
       http-buf bytes dump-text
       bytes +to total-offset
+      0 to http-buf-bytes
       content-len-found? if content-len total-offset <= else false then
     ;
     
@@ -400,7 +401,7 @@ begin-module pico-w-net-http
     ;
 
     \ Download and dump a file over HTTP
-    : download-dump { addr len -- }
+    : download { addr len -- }
       [: http-inited? not if init-http then ;] http-init-lock with-lock
       avail-endpoint? not if
         cr ." NOT READY" exit
@@ -440,6 +441,6 @@ begin-module pico-w-net-http
   end-module> import
 
   \ Wrapper for downloading and dumping a file over HTTP
-  : download-dump ( url-addr url-bytes ) download-dump ;
+  : download ( url-addr url-bytes ) download ;
 
 end-module
