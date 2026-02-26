@@ -787,10 +787,14 @@ begin-module task
       0 r3 cmp_,#_
       ne bc>
       0 r1 r3 str_,[_,#_]
+      .task-prev r2 r3 str_,[_,#_]
+      .task-next r2 r3 str_,[_,#_]
       pc 1 pop
       >mark
-      0 r2 movs_,#_
-      .task-next r3 r2 str_,[_,#_]
+      0 r0 movs_,#_
+      .task-prev r2 r0 str_,[_,#_]
+      .task-next r2 r0 str_,[_,#_]
+      .task-next r3 r0 str_,[_,#_]
       ]code
     ;
 
@@ -1628,7 +1632,7 @@ begin-module task
     \ argument
     : wake-other-tasks ( -- )
       cpu-count 0 do
-        i cpu-first-task @ begin ?dup while
+        i cpu-first-blocked-task @ begin ?dup while
           dup ['] task-waited-for for-task@ current-task @ = if
             0 over ['] task-waited-for for-task!
             dup task-state h@ blocked-indefinite = if
@@ -1710,8 +1714,8 @@ begin-module task
       task-guard-value over task-start-guard !
       task-guard-value over task-end-guard !
       dup main-task !
-      dup first-task !
-      dup last-task !
+      dup first-active-task !
+      dup last-active-task !
       dup prev-task !
       current-task !
       free-end @ task-size - free-end !
@@ -2010,28 +2014,6 @@ begin-module task
       then
       rdrop
     ;
-
-    \ Body of extra task
-    : do-extra-task ( -- )
-      begin wake-counter @ 1+ current-task @ block-wait again
-    ;
-
-    \ Initialize the extra task
-    : init-extra-task ( -- )
-      extra-task @ if
-        0 ['] do-extra-task extra-task @ cpu-index init-task
-      else
-        0 ['] do-extra-task 320 128 512 spawn extra-task !
-      then
-      claim-same-core-spinlock
-      first-task @ 0= if
-        c" extra" extra-task @ task-name !
-        -1 extra-task @ task-priority h!
-        1 extra-task @ task-active h!
-        extra-task @ insert-task
-      then
-      release-same-core-spinlock
-    ;
     
     \ Adjust a task's deadline
     : adjust-deadline { task -- }
@@ -2050,38 +2032,9 @@ begin-module task
       then
     ;
 
-    \ Prevent deadline wraparound
-    : prevent-deadline-wrap ( -- )
-      systick-counter
-      last-task @
-      code[
-      r0 1 dp ldm
-      mark<
-      0 tos cmp_,#_
-      ne bc>
-      tos 1 dp ldm
-      pc 1 pop
-      >mark
-      .task-interval tos r1 ldr_,[_,#_]
-      .task-deadline tos r2 ldr_,[_,#_]
-      r0 r2 r2 subs_,_,_
-      r1 r2 r2 adds_,_,_
-      r1 r1 mvns_,_
-      1 r1 adds_,#_
-      r2 r1 cmp_,_
-      le bc>
-      r0 r1 r1 adds_,_,_
-      .task-deadline tos r1 ldr_,[_,#_]
-      >mark
-      .task-next tos tos ldr_,[_,#_]
-      b<
-      ]code
-    ;
-
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
-      prevent-deadline-wrap
       reschedule-last? @ if
         claim-same-core-spinlock
         dup task-active@ 0> if
@@ -2142,26 +2095,14 @@ begin-module task
       ]code
     ;
 
-    \ Limit the current task's timeslice
-    : limit-timeslice ( timeslice -- timeslice' )
-      current-task @ { task }
-      task find-next-interval-task-after ?dup if
-        dup task-priority h@ task task-priority h@ = if
-          task-deadline @ task task-deadline @ - 1 max min
-        else
-          drop
-        then
-      then
-    ;
-
     \ Adjust the current task's timeslice
     : adjust-timeslice ( -- )
       current-task @ { task }
       task task-saved-systick-counter @ 0<= if
         task task-saved-systick-counter @ task task-timeslice @ +
-        limit-timeslice task task-min-timeslice @ max
+        task task-min-timeslice @ max
       else
-        task task-saved-systick-counter @ limit-timeslice
+        task task-saved-systick-counter @
       then
       task-systick-counter !
     ;
@@ -2304,11 +2245,17 @@ begin-module task
       
     end-structure
 
+    \ Count tasks in list
+    : count-tasks-in-list ( first-task -- count )
+      0 swap begin ?dup while swap 1+ swap task-prev @ repeat
+    ;
+
     \ Get the task count
     : get-cpu-task-count ( cpu -- count )
-      0 swap cpu-first-task @ begin ?dup while
-        swap 1+ swap task-prev @
-      repeat
+      dup cpu-current-task @ if 1 else 0 then
+      over cpu-first-active-task @ count-tasks-in-list +
+      over cpu-first-delayed-task @ count-tasks-in-list +
+      swap cpu-first-blocked-task @ count-tasks-in-list +
     ;
 
     \ Copy a task name into a task info structure
@@ -2475,7 +2422,21 @@ begin-module task
         dup extra-space + space u< if
           [: { cpu count info }
             info { current-info }
-            cpu cpu-first-task @ begin ?dup while
+            cpu cpu-current-task @ ?dup if
+              current-info swap copy-task-info
+              task-info-size +to current-info
+            then
+            cpu cpu-first-active-task @ begin ?dup while
+              current-info over copy-task-info
+              task-prev @
+              task-info-size +to current-info
+            repeat
+            cpu cpu-first-delayed-task @ begin ?dup while
+              current-info over copy-task-info
+              task-prev @
+              task-info-size +to current-info
+            repeat
+            cpu cpu-first-blocked-task @ begin ?dup while
               current-info over copy-task-info
               task-prev @
               task-info-size +to current-info
@@ -2488,7 +2449,7 @@ begin-module task
                 space info dump-task-state
                 space info dump-task-until
                 cr ."          " info dump-rstack-size
-              space info dump-rstack-used
+                space info dump-rstack-used
                 space info dump-stack-size
                 space info dump-stack-used
                 space info dump-dict-size
@@ -2604,8 +2565,8 @@ begin-module task
           2r@ cpu-current-task !
           2r@ cpu-main-task !
           2r@ cpu-prev-task !
-          2r@ cpu-first-task !
-          2r@ cpu-last-task !
+          2r@ cpu-first-active-task !
+          2r@ cpu-last-active-task !
           2r@ init-aux-task
           ['] init-aux-main-task -rot
           2r> swap >r disable-int launch-aux-core r>
@@ -2670,22 +2631,29 @@ begin-module task
     then
   ;
 
+  \ Signal all other tasks in a list to raise an exception
+  : signal-all-tasks-in-list { xt exclude-task task -- }
+    begin task while
+      task exclude-task <> task i cpu-extra-task @ <> and if
+        xt task task-raise !
+        [: current-task task-raise @ 0 current-task task-raise ! ?raise ;]
+        task force-call
+        task task-next @ { next-task }
+        readied task update-task-state
+        next-task to task
+      then
+    repeat
+
   \ Signal all other tasks to raise exceptions
   : signal-all-other ( xt task -- )
     over 0<> if
       [: { xt exclude-task }
         disable-int
         cpu-count 0 ?do
-          i cpu-last-task @ { task }
-          begin task while
-            task exclude-task <> task i cpu-extra-task @ <> and if
-              xt task task-raise !
-              [: current-task task-raise @ 0 current-task task-raise ! ?raise ;]
-              task force-call
-              readied task update-task-state
-            then
-            task task-next @ to task
-          repeat
+          xt exclude-task i cpu-current-task @ signal-all-tasks-in-list
+          xt exclude-task i cpu-last-active-task @ signal-all-tasks-in-list
+          xt exclude-task i cpu-last-blocked-task @ signal-all-tasks-in-list
+          xt exclude-task i cpu-last-delayed-task @ signal-all-tasks-in-list
         loop
         enable-int
       ;] critical-with-all-core-spinlock
@@ -2758,9 +2726,13 @@ begin-module task
 	0 i cpu-main-task !
 	0 i cpu-current-task !
 	0 i cpu-prev-task !
-	0 i cpu-first-task !
-        0 i cpu-last-task !
+	0 i cpu-first-active-task !
+        0 i cpu-last-active-task !
       then
+      0 i cpu-first-delayed-task !
+      0 i cpu-last-delayed-task !
+      0 i cpu-first-blocked-task !
+      0 i cpu-last-blocked-task !
       0 i cpu-pause-count !
     loop
     ['] execute svcall-vector vector!
