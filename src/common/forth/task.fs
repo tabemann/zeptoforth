@@ -616,7 +616,7 @@ begin-module task
       4 dp r2 ldr_,[_,#_]
       8 dp tos ldr_,[_,#_]
       12 dp adds_,#_
-      .task-core tos r3 ldr_,[_,#_]
+      .task-core r2 r3 ldr_,[_,#_]
       2 r3 r3 lsls_,_,#_
       r3 r0 r0 adds_,_,_
       r3 r1 r1 adds_,_,_
@@ -703,6 +703,7 @@ begin-module task
         insert-task-before-delayed
       else
         insert-task-first-delayed
+        dup task-deadline @ swap task-core @ cpu-next-delayed-tick !
       then
     ;
 
@@ -779,41 +780,57 @@ begin-module task
     : remove-task-core ( task last-task-addr first-task-addr -- )
       code[
       r4 1 push
-      tos r2 movs_,_
-      cortex-m7? cortex-m33? or [if]
-        0 dp r3 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r3 2 dp ldm
-      [then]
-      .task-prev tos r0 ldr_,[_,#_]
-      .task-next tos r1 ldr_,[_,#_]
-      0 r1 cmp_,#_
-      eq bc>
-      .task-prev r1 r0 str_,[_,#_]
+      tos r0 movs_,_
+      0 dp r1 ldr_,[_,#_]
+      4 dp r2 ldr_,[_,#_]
+      8 dp tos ldr_,[_,#_]
+      12 dp adds_,#_
+      .task-core r2 r3 ldr_,[_,#_]
+      2 r3 r3 lsls_,_,#_
+      r3 r0 r0 adds_,_,_
+      r3 r1 r1 adds_,_,_
+      .task-prev r2 r3 ldr_,[_,#_]
+      .task-next r2 r4 ldr_,[_,#_]
+      0 r3 cmp_,#_
+      ne bc>
+      0 r1 r4 str_,[_,#_]
       b>
-      2swap >mark
-      .task-core tos r4 ldr_,[_,#_]
-      2 r4 r4 lsls_,_,#_
-      r4 r2 r0 str_,[_,_]
+      2swap
       >mark
-      0 r0 cmp_,#_
-      eq bc>
-      .task-next r0 r1 str_,[_,#_]
+      .task-next r3 r4 str_,[_,#_]
+      >mark
+      0 r4 cmp_,#_
+      ne bc>
+      0 r0 r3 str_,[_,#_]
       b>
-      2swap >mark
-      .task-core tos r4 ldr_,[_,#_]
-      2 r4 r4 lsls_,_,#_
-      r4 r3 r1 str_,[_,_]
+      2swap
+      >mark
+      .task-prev r4 r3 str_,[_,#_]
       >mark
       0 r0 movs_,#_
-      .task-prev tos r0 str_,[_,#_]
-      .task-next tos r0 str_,[_,#_]
-      tos 1 dp ldm
-      pc r4 2 pop
+      .task-prev r2 r0 str_,[_,#_]
+      .task-next r2 r0 str_,[_,#_]
+      r4 1 pop
       ]code
     ;
+
+    \ : remove-task-core { task last-task-addr first-task-addr -- }
+    \   task task-core @ 2 lshift dup +to last-task-addr +to first-task-addr
+    \   task task-prev @ { prev-task }
+    \   task task-next @ { next-task }
+    \   prev-task 0= if
+    \     next-task last-task-addr !
+    \   else
+    \     next-task prev-task task-next !
+    \   then
+    \   next-task 0= if
+    \     prev-task first-task-addr !
+    \   else
+    \     prev-task next-task task-prev !
+    \   then
+    \   0 task task-prev !
+    \   0 task task-next !
+    \ ;
 
     \ Remove a task from the active list
     : remove-task-active ( task -- )
@@ -2064,22 +2081,20 @@ begin-module task
         then
         release-same-core-spinlock
       else
-        reschedule? @ task-systick-counter @ 0<= or if
-          claim-same-core-spinlock
-          dup task-active@ 0> if
+        claim-same-core-spinlock
+        dup task-active@ 0> if
+          reschedule? @ task-systick-counter @ 0<= or if
             dup adjust-deadline
-            insert-task
-          else
-            dup terminated? if
-              terminated-task !
-            else
-              drop
-            then
           then
-          release-same-core-spinlock
+          insert-task
         else
-          drop
+          dup terminated? if
+            terminated-task !
+          else
+            drop
+          then
         then
+        release-same-core-spinlock
       then
       false reschedule-last? !
       true reschedule? !
@@ -2158,7 +2173,7 @@ begin-module task
                 first-active-task @ ?dup if
                   dup remove-task-first-active
                   dup task-state h@ blocked-wait = if
-                    wake-counter @ over task-wake-after @ > if
+                    wake-counter @ over task-wake-after @ - 0> if
                       readied over task-state h!
                     else
                       insert-task-last-active 0
@@ -2172,7 +2187,7 @@ begin-module task
               first-active-task @ ?dup if
                 dup remove-task-first-active
                 dup task-state h@ blocked-wait = if
-                  wake-counter @ over task-wake-after @ > if
+                  wake-counter @ over task-wake-after @ - 0> if
                     readied over task-state h!
                   else
                     insert-task-last-active 0
