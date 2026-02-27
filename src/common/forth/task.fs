@@ -550,13 +550,21 @@ begin-module task
     \ Find the next task with a higher priority from the active tasks; 0
     \ returned indicates no task exists with a higher priority.
     : find-higher-priority-active ( task -- higher-task )
-      dup task-core @ cpu-last-active-task @ swap find-higher-priority-core
+      dup task-core @ cpu-last-active-task @ ?dup if
+        swap find-higher-priority-core
+      else
+        drop 0
+      then
     ;
 
     \ Find the next task with a higher priority from the delayed task; 0
     \ returned indicates no task exists with a higher priority.
     : find-higher-priority-delayed ( task -- higher-task )
-      dup task-core @ cpu-last-delayed-task @ swap find-higher-priority-core
+      dup task-core @ cpu-last-delayed-task @ ?dup if
+        swap find-higher-priority-core
+      else
+        drop 0
+      then
     ;
 
     \ Core of inserting a task before another task
@@ -600,112 +608,54 @@ begin-module task
       dup task-core @ cpu-last-delayed-task -rot insert-task-before-core
     ;
 
+    \ The core of inserting a task into first position in a list
+    : insert-task-first-core ( task last-task-addr first-task-addr -- )
+      code[
+      tos r0 movs_,_
+      0 dp r1 ldr_,[_,#_]
+      4 dp r2 ldr_,[_,#_]
+      8 dp tos ldr_,[_,#_]
+      12 dp adds_,#_
+      .task-core tos r3 ldr_,[_,#_]
+      2 r3 r3 lsls_,_,#_
+      r3 r0 r0 adds_,_,_
+      r3 r1 r1 adds_,_,_
+      0 r0 r3 ldr_,[_,#_]
+      0 r3 cmp_,#_
+      ne bc>
+      .task-prev r2 r3 str_,[_,#_]
+      .task-next r2 r3 str_,[_,#_]
+      0 r0 r2 str_,[_,#_]
+      0 r1 r2 str_,[_,#_]
+      pc 1 pop
+      >mark
+      .task-next r3 r2 str_,[_,#_]
+      .task-prev r2 r3 str_,[_,#_]
+      0 r0 r2 str_,[_,#_]
+      0 r0 movs_,#_
+      .task-next r2 r0 str_,[_,#_]
+      ]code
+    ;
+    
     \ Insert a task into first position in the active task list
     : insert-task-first-active ( task -- )
-      code[
-      tos 1 push
-      .task-core tos tos ldr_,[_,#_]
-      tos 1 push
-      ]code
-      cpu-first-active-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      0 tos cmp_,#_
-      eq bc>
-      4 r0 ldr_,[sp,#_]
-      .task-next tos r0 str_,[_,#_]
-      .task-prev r0 tos str_,[_,#_]
-      b>
-      2swap >mark
-      0 tos ldr_,[sp,#_]
-      ]code
-      cpu-last-active-task
-      code[
-      4 r0 ldr_,[sp,#_]
-      0 tos r0 str_,[_,#_]
-      >mark
-      tos 1 pop
-      ]code
-      cpu-first-active-task
-      code[
-      r0 1 pop
-      0 tos r0 str_,[_,#_]
-      0 tos movs_,#_
-      .task-next r0 tos str_,[_,#_]
-      tos 1 dp ldm
-      ]code
+      [ 0 cpu-last-active-task ] literal
+      [ 0 cpu-first-active-task ] literal
+      insert-task-first-core
     ;
 
     \ Insert a task into first position in the delayed task list
     : insert-task-first-delayed ( task -- )
-      code[
-      tos 1 push
-      .task-core tos tos ldr_,[_,#_]
-      tos 1 push
-      ]code
-      cpu-first-delayed-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      0 tos cmp_,#_
-      eq bc>
-      4 r0 ldr_,[sp,#_]
-      .task-next tos r0 str_,[_,#_]
-      .task-prev r0 tos str_,[_,#_]
-      b>
-      2swap >mark
-      0 tos ldr_,[sp,#_]
-      ]code
-      cpu-last-delayed-task
-      code[
-      4 r0 ldr_,[sp,#_]
-      0 tos r0 str_,[_,#_]
-      >mark
-      tos 1 pop
-      ]code
-      cpu-first-delayed-task
-      code[
-      r0 1 pop
-      0 tos r0 str_,[_,#_]
-      0 tos movs_,#_
-      .task-next r0 tos str_,[_,#_]
-      tos 1 dp ldm
-      ]code
+      [ 0 cpu-last-delayed-task ] literal
+      [ 0 cpu-first-delayed-task ] literal
+      insert-task-first-core
     ;
 
     \ Insert a task into first position in the blocked task list
     : insert-task-blocked ( task -- )
-      code[
-      tos 1 push
-      .task-core tos tos ldr_,[_,#_]
-      tos 1 push
-      ]code
-      cpu-first-blocked-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      0 tos cmp_,#_
-      eq bc>
-      4 r0 ldr_,[sp,#_]
-      .task-next tos r0 str_,[_,#_]
-      .task-prev r0 tos str_,[_,#_]
-      b>
-      2swap >mark
-      0 tos ldr_,[sp,#_]
-      ]code
-      cpu-last-blocked-task
-      code[
-      4 r0 ldr_,[sp,#_]
-      0 tos r0 str_,[_,#_]
-      >mark
-      tos 1 pop
-      ]code
-      cpu-first-blocked-task
-      code[
-      r0 1 pop
-      0 tos r0 str_,[_,#_]
-      0 tos movs_,#_
-      .task-next r0 tos str_,[_,#_]
-      tos 1 dp ldm
-      ]code
+      [ 0 cpu-last-blocked-task ] literal
+      [ 0 cpu-first-blocked-task ] literal
+      insert-task-first-core
     ;
 
     \ Insert a task in the active task list
@@ -730,11 +680,12 @@ begin-module task
     \ Insert a task
     : insert-task ( task -- )
       dup task-state h@
-      dup readied = if insert-task-active exit then
-      dup delayed = if insert-task-delayed exit then
-      dup blocked-timeout = if insert-task-delayed exit then
-      dup block-timed-out = if insert-task-active exit then
-      drop insert-task-blocked
+      dup readied = if drop insert-task-active exit then
+      dup delayed = if drop insert-task-delayed exit then
+      dup blocked-timeout = if drop insert-task-delayed exit then
+      dup blocked-wait = if drop insert-task-active exit then
+      block-timed-out = if insert-task-active exit then
+      insert-task-blocked
     ;
 
     \ Insert a task last in the active task list
@@ -758,11 +709,12 @@ begin-module task
     \ Insert a task last
     : insert-task-last ( task -- )
       dup task-state h@
-      dup readied = if insert-task-last-active exit then
-      dup delayed = if insert-task-last-delayed exit then
-      dup blocked-timeout = if insert-task-last-delayed exit then
-      dup block-timed-out = if insert-task-last-active exit then
-      drop insert-task-blocked
+      dup readied = if drop insert-task-last-active exit then
+      dup delayed = if drop insert-task-last-delayed exit then
+      dup blocked-timeout = if drop insert-task-last-delayed exit then
+      dup blocked-wait = if drop insert-task-last-active exit then
+      block-timed-out = if insert-task-last-active exit then
+      insert-task-blocked
     ;
 
     \ Adjust next delayed tick
@@ -921,6 +873,7 @@ begin-module task
         dup readied = if remove-task-active exit then
         dup delayed = if remove-task-delayed exit then
         dup blocked-timeout = if remove-task-delayed exit then
+        dup blocked-wait = if remove-task-delayed exit then
         dup block-timed-out = if remove-task-active exit then
         drop remove-task-blocked
       else
@@ -930,13 +883,13 @@ begin-module task
 
     \ Update task state
     : update-task-state ( state task -- )
-      dup remove-task
-      tuck task-state h!
-      dup current-task @ =
-      over task-state h@ dup readied = swap block-timed-out = or and if
-        drop exit
+      dup current-task @ <> if
+        dup remove-task
+        tuck task-state h!
+        insert-task
+      else
+        task-state h!
       then
-      insert-task
     ;
 
     \ Limit task deadlines
@@ -2098,11 +2051,24 @@ begin-module task
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
-      dup task-state h@ dup readied = swap block-timed-out = or if
-        reschedule-last? @ if
+      reschedule-last? @ if
+        claim-same-core-spinlock
+        dup task-active@ 0> if
+          insert-task-last
+        else
+          dup terminated? if
+            terminated-task !
+          else
+            drop
+          then
+        then
+        release-same-core-spinlock
+      else
+        reschedule? @ task-systick-counter @ 0<= or if
           claim-same-core-spinlock
           dup task-active@ 0> if
-            insert-task-last
+            dup adjust-deadline
+            insert-task
           else
             dup terminated? if
               terminated-task !
@@ -2112,25 +2078,8 @@ begin-module task
           then
           release-same-core-spinlock
         else
-          reschedule? @ task-systick-counter @ 0<= or if
-            claim-same-core-spinlock
-            dup task-active@ 0> if
-              dup adjust-deadline
-              insert-task
-            else
-              dup terminated? if
-                terminated-task !
-              else
-                drop
-              then
-            then
-            release-same-core-spinlock
-          else
-            drop
-          then
+          drop
         then
-      else
-        drop
       then
       false reschedule-last? !
       true reschedule? !
@@ -2208,6 +2157,13 @@ begin-module task
               else
                 first-active-task @ ?dup if
                   dup remove-task-first-active
+                  dup task-state h@ blocked-wait = if
+                    wake-counter @ over task-wake-after @ > if
+                      readied over task-state h!
+                    else
+                      insert-task-last-active 0
+                    then
+                  then
                 else
                   0
                 then
@@ -2215,12 +2171,21 @@ begin-module task
             else
               first-active-task @ ?dup if
                 dup remove-task-first-active
+                dup task-state h@ blocked-wait = if
+                  wake-counter @ over task-wake-after @ > if
+                    readied over task-state h!
+                  else
+                    insert-task-last-active 0
+                  then
+                then
               else
                 0
               then
             then
             dup 0= if
-              first-blocked-task @ 0= if
+              first-active-task @ 0=
+              first-delayed-task @ 0= and
+              first-blocked-task @ 0= and if
                 drop init-extra-task
                 first-active-task @ ?dup if
                   dup remove-task-first-active
