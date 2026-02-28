@@ -142,10 +142,10 @@ begin-module task
     cpu-variable cpu-limit-task-deadlines-systick limit-task-deadlines-systick
 
     \ Task deadline limit constant (one hour)
-    10000 60 * 60 * constant task-deadline-limit
+    1000 systick-divisor * 60 * 60 * constant task-deadline-limit
 
     \ Task deadline limit interval (one minute)
-    10000 60 * constant limit-task-deadlines-interval
+    1000 systick-divisor * 60 * constant limit-task-deadlines-interval
     
     \ SVCall vector index
     11 constant svcall-vector
@@ -447,6 +447,11 @@ begin-module task
     disable-int true reschedule-last? ! pause enable-int
   ;
 
+  \ Get task active state
+  : task-active@ ( task -- active )
+    task-active h@ 16 lshift 16 arshift
+  ;
+
   continue-module task-internal
 
     \ Get task dictionary end
@@ -506,6 +511,16 @@ begin-module task
       task-notify-count @ u< averts x-out-of-range-notify
     ;
     
+    \ Adjust next delayed tick
+    : adjust-next-delayed-tick ( core -- )
+      dup cpu-first-delayed-task @ ?dup if
+        dup task-systick-start @ swap task-systick-delay @ +
+        swap cpu-next-delayed-tick !
+      else
+        systick-counter $7FFFFFFF + swap cpu-next-delayed-tick !
+      then
+    ;
+
     \ Core of finding the next task with a higher priority; 0 returned
     \ indicates no task exists with a higher priority.
     : find-higher-priority-core ( last-task task -- higher-task )
@@ -673,7 +688,7 @@ begin-module task
 	insert-task-before-delayed
       else
         dup insert-task-first-delayed
-        dup task-deadline @ swap task-core @ cpu-next-delayed-tick !
+        task-core @ adjust-next-delayed-tick
       then
     ;
 
@@ -702,8 +717,8 @@ begin-module task
       dup task-core @ cpu-last-delayed-task @ ?dup if
         insert-task-before-delayed
       else
-        insert-task-first-delayed
-        dup task-deadline @ swap task-core @ cpu-next-delayed-tick !
+        dup insert-task-first-delayed
+        task-core @ adjust-next-delayed-tick
       then
     ;
 
@@ -716,16 +731,6 @@ begin-module task
       dup blocked-wait = if drop insert-task-last-active exit then
       block-timed-out = if insert-task-last-active exit then
       insert-task-blocked
-    ;
-
-    \ Adjust next delayed tick
-    : adjust-next-delayed-tick ( core -- )
-      dup cpu-first-delayed-task @ ?dup if
-        dup task-systick-start @ swap task-systick-delay @ +
-        swap cpu-next-delayed-tick !
-      else
-        systick-counter $7FFFFFFF + swap cpu-next-delayed-tick !
-      then
     ;
 
     \ Core of removing a task in first position
@@ -860,18 +865,27 @@ begin-module task
       dup task-state h@
       swap task-core @
       over readied = if
+        nip
         0 over cpu-first-active-task !
         0 swap cpu-last-active-task !
         drop exit
       then
       over delayed = if
+        nip
         0 over cpu-first-delayed-task !
         0 swap cpu-last-delayed-task !
         drop exit
       then
       over blocked-timeout = if
+        nip
         0 over cpu-first-delayed-task !
         0 swap cpu-last-delayed-task !
+        drop exit
+      then
+      over blocked-wait = if
+        nip
+        0 over cpu-first-active-task !
+        0 swap cpu-last-active-task !
         drop exit
       then
       swap block-timed-out = if
@@ -900,7 +914,7 @@ begin-module task
 
     \ Update task state
     : update-task-state ( state task -- )
-      dup current-task @ <> if
+      dup dup task-core @ cpu-current-task @ <> over task-active@ 0> and if
         dup remove-task
         tuck task-state h!
         insert-task
@@ -916,7 +930,7 @@ begin-module task
       tos r0 movs_,_
       0 dp r1 ldr_,[_,#_]
       4 dp tos ldr_,[_,#_]
-      8 dp subs_,#_
+      8 dp adds_,#_
       mark<
       0 r1 cmp_,#_
       ne bc>
@@ -934,10 +948,10 @@ begin-module task
 
     \ Limit task deadlines
     : limit-task-deadlines ( -- )
-      limit-task-deadlines-systick systick-counter - 0<= if
-        last-active-task limit-task-deadlines-core
-        last-delayed-task limit-task-deadlines-core
-        last-blocked-task limit-task-deadlines-core
+      limit-task-deadlines-systick @ systick-counter - 0<= if
+        last-active-task @ limit-task-deadlines-core
+        last-delayed-task @ limit-task-deadlines-core
+        last-blocked-task @ limit-task-deadlines-core
         limit-task-deadlines-interval limit-task-deadlines-systick +!
       then
     ;
@@ -1026,11 +1040,6 @@ begin-module task
   \ Validate not timing out
   : validate-timeout ( task -- )
     check-timeout triggers x-timed-out
-  ;
-
-  \ Get task active state
-  : task-active@ ( task -- active )
-    task-active h@ 16 lshift 16 arshift
   ;
 
   \ Get saved task priority
@@ -1170,8 +1179,8 @@ begin-module task
           2 pick task-deadline !
         then
         over task-timeslice @ 2 pick task-core @ cpu-total-timeslice +!
-        over remove-task
-        over insert-task
+        dup 1 > if over remove-task then
+        dup 0 > if over insert-task then
       then
       swap task-active h!
     ;] over task-core @ critical-with-other-core-spinlock
@@ -1203,12 +1212,18 @@ begin-module task
     ;] over task-core @ critical-with-other-core-spinlock
   ;
 
+  \ Adjust deadline for delayed task
+  : adjust-delayed-deadline ( task -- )
+    dup task-systick-start @ over task-systick-delay @ + swap task-deadline !
+  ;
+
   \ Delay a task
   : delay ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
       tuck task-systick-start !
       tuck task-systick-delay !
+      dup adjust-delayed-deadline
       delayed over update-task-state
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
@@ -1221,7 +1236,8 @@ begin-module task
       -1 over task-ready-count +!
       dup task-ready-count @ 0< if
 	tuck task-systick-start !
-	tuck task-systick-delay !
+        tuck task-systick-delay !
+        dup adjust-delayed-deadline
 	blocked-timeout over update-task-state
       else
 	nip nip
@@ -1239,6 +1255,7 @@ begin-module task
       dup current-task @ validate-notify
       swap current-task @ task-systick-start !
       swap current-task @ task-systick-delay !
+      current-task @ adjust-delayed-deadline
       disable-int
       begin dup bit current-task @ task-notified-bitmap bit@ not while
 	dup current-task @ task-current-notify !
@@ -1270,6 +1287,7 @@ begin-module task
       dup current-task @ validate-notify
       swap current-task @ task-systick-start !
       swap current-task @ task-systick-delay !
+      current-task @ adjust-delayed-deadline
       disable-int
       begin dup bit current-task @ task-notified-bitmap bit@ not while
 	dup current-task @ task-current-notify !
@@ -1305,6 +1323,7 @@ begin-module task
       dup current-task @ validate-notify
       swap current-task @ task-systick-start !
       swap current-task @ task-systick-delay !
+      current-task @ adjust-delayed-deadline
       disable-int
       begin dup bit current-task @ task-notified-bitmap bit@ not while
 	dup current-task @ task-current-notify !
@@ -1668,7 +1687,8 @@ begin-module task
 	rot -1 over task-ready-count +!
 	dup task-ready-count @ 0< if
 	  tuck task-systick-start !
-	  tuck task-systick-delay !
+          tuck task-systick-delay !
+          dup adjust-delayed-deadline
 	  blocked-timeout over update-task-state
 	else
 	  nip nip
@@ -1867,6 +1887,7 @@ begin-module task
         dup task-ready-count @ 0< if
           tuck task-systick-start !
           tuck task-systick-delay !
+          dup adjust-delayed-deadline
           blocked-timeout swap update-task-state
         else
           2drop drop
@@ -2050,18 +2071,23 @@ begin-module task
 
     \ Adjust a task's deadline
     : adjust-deadline { task -- }
-      task task-deadline-set? @ not if
-        task task-interval @ dup 0< if
-          drop total-timeslice @ task task-timeslice @ -
-          systick-counter + task task-deadline !
-        else { interval }
-          interval task task-deadline +!
-          task task-deadline @ systick-counter - interval negate < if
-            systick-counter interval - task task-deadline !
+      task task-state h@
+      dup readied =
+      over blocked-wait = or
+      swap block-timed-out = or if
+        task task-deadline-set? @ not if
+          task task-interval @ dup 0< if
+            drop total-timeslice @ task task-timeslice @ -
+            systick-counter + task task-deadline !
+          else { interval }
+            interval task task-deadline +!
+            task task-deadline @ systick-counter - interval negate < if
+              systick-counter interval - task task-deadline !
+            then
           then
+        else
+          false task task-deadline-set? !
         then
-      else
-        false task task-deadline-set? !
       then
     ;
 
@@ -2158,7 +2184,7 @@ begin-module task
           watchdog-hook @ ?execute
           
           1 pause-count +!
-
+          
           current-task @ dup prev-task !
           ?dup if dup save-task-state reschedule-task then
 
@@ -2166,7 +2192,8 @@ begin-module task
             true in-task-change !
             limit-task-deadlines
             claim-same-core-spinlock
-            next-delayed-tick systick-counter - 0<= if
+
+            next-delayed-tick @ systick-counter - 0<= if
               first-delayed-task @ ?dup if
                 dup remove-task-first-delayed
               else
@@ -2197,6 +2224,7 @@ begin-module task
                 0
               then
             then
+
             dup 0= if
               first-active-task @ 0=
               first-delayed-task @ 0= and
