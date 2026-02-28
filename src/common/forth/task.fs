@@ -935,9 +935,9 @@ begin-module task
       blocked-indefinite = { was-blocked? }
       dup task-core @ { core }
       task-state h!
-      was-active? core cpu-filter-active? !
-      was-delayed? core cpu-filter-delayed? !
-      was-blocked? core cpu-filter-blocked? !
+      was-active? core cpu-filter-active? bis!
+      was-delayed? core cpu-filter-delayed? bis!
+      was-blocked? core cpu-filter-blocked? bis!
     ;
 
     \ Limit task deadlines
