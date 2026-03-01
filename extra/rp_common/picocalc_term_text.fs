@@ -1,4 +1,5 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +28,17 @@ begin-module picocalc-term
   font import
   console import
 
-  use-st7789v? not [if]
+  use-st7789v? not use-ili9341? not and [if]
     st7365p-text-common import
     st7365p-text-spi import
-  [else]
+  [then]
+  use-st7789v? [if]
     st7789v-text-common import
     st7789v-text-spi import
+  [then]
+  use-ili9341? [if]
+    ili9341-text-common import
+    ili9341-text-spi import
   [then]
 
   use-5x8-font? [if]
@@ -54,7 +60,9 @@ begin-module picocalc-term
     begin-module picocalc-term-internal
       
       \ The display
-      use-st7789v? not [if] <st7365p-text-spi> [else] <st7789v-text-spi> [then]
+      use-st7789v? not use-ili9341? not and [if] <st7365p-text-spi> [then]
+      use-st7789v? [if] <st7789v-text-spi> [then]
+      use-ili9341? [if] <ili9341-text-spi> [then]
       class-size member display-intf
       
       \ The display buffer
@@ -83,18 +91,26 @@ begin-module picocalc-term
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
       [ use-7x8-font? ] [if] a-simple-font [then] { the-font }
 
-      [ use-st7789v? not ] [if]
+      [ use-st7789v? not use-ili9341? not and ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-rst-pin display-invert
         the-font self display-buf term-width term-height
         display-width display-height
         display-spi-device <st7365p-text-spi> self display-intf init-object
-      [else]
+      [then]
+      [ use-st7789v? ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-bl-pin display-rst-pin
         the-font self display-buf false term-width term-height
         display-width display-height
         display-spi-device <st7789v-text-spi> self display-intf init-object
+      [then]
+      [ use-ili9341? ] [if]
+        display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
+        display-bl-pin display-rst-pin
+        the-font self display-buf term-width term-height
+        display-width display-height
+        display-spi-device <ili9341-text-spi> self display-intf init-object
       [then]
     ; define new
     
