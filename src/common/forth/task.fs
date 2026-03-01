@@ -2380,16 +2380,19 @@ begin-module task
             then
 
             dup 0= if
-              first-active-task @ 0=
-              first-delayed-task @ 0= and
-              first-blocked-task @ 0= and if
-                drop init-extra-task
-                first-active-task @ ?dup if
-                  disable-int
-                  dup remove-task-first-active
-                  enable-int
-                else
-                  0
+              prev-task @ if
+                prev-task @ task-active@ 0<
+                first-active-task @ 0= and
+                first-delayed-task @ 0= and
+                first-blocked-task @ 0= and if
+                  drop init-extra-task
+                  first-active-task @ ?dup if
+                    disable-int
+                    dup remove-task-first-active
+                    enable-int
+                  else
+                    0
+                  then
                 then
               then
             then
@@ -2401,10 +2404,7 @@ begin-module task
                 drop 0
               then
             then
-            disable-int
-            \ dup if dup task-prev @ -1 <> if dup remove-task then then
             dup current-task !
-            enable-int
             release-same-core-spinlock
             false in-task-change !
             dup if
@@ -2988,6 +2988,8 @@ begin-module task
       false i cpu-filter-active? !
       false i cpu-filter-delayed? !
       false i cpu-filter-blocked? !
+      $FFFF8000 i cpu-next-active-priority !
+      $FFFF8000 i cpu-next-delayed-priority !
       systick-counter limit-task-deadlines-interval +
       i cpu-limit-task-deadlines-systick !
       systick-counter i cpu-next-delayed-tick !
