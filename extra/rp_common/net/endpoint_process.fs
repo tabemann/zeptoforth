@@ -227,7 +227,9 @@ begin-module endpoint-process
         begin
           self get-handler-timeout { current-timeout }
           current-timeout no-timeout = if
-            self endpoint-interface @ get-ready-endpoint self process-endpoint
+            self [: { self }
+              self endpoint-interface @ get-ready-endpoint self process-endpoint
+            ;] no-timeout with-timeout
           else
             systick-counter { start-systick }
             current-timeout start-systick self [:
