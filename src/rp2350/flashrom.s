@@ -39,7 +39,6 @@
 
         .equ RESET_TIME_US, 40
         
-	.equ FLASH_BASE, 0x10000000
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
 	.equ IMAGE_SIZE, 0x8000
@@ -291,11 +290,12 @@ _init_flash:
 	movs tos, r0
 
 	@ calculate start of partition offset in flash
+	push { r0 }
 	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 	subs tos, tos, r0
         push_tos
 
@@ -310,6 +310,7 @@ _init_flash:
 
 		ldr tos, =flash_dict_end
 		subs tos, tos, r0
+		pop { r0 }
 		bl _erase_range
 
         cpsie i
@@ -753,7 +754,7 @@ _erase_qspi_sector:
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 
 	subs tos, r0
 	ldr r0, =0xFFFF
@@ -783,7 +784,7 @@ _erase_qspi_4k_sector:
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 	
 	subs tos, r0
 	ldr r0, =0xFFF
@@ -826,7 +827,7 @@ _erase_range:
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 	
 		ldr r2, =flash_dict_main_end
 		subs r2, r2, r0
@@ -885,7 +886,7 @@ _erase_after:
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 
 	subs tos, r0
         push_tos
@@ -910,7 +911,7 @@ _erase_dict_after:
 	ldr r0, [r0]
 	ubfx r0, r0, #0, #12
 	lsls r0, #12
-	rsb r0, r0, #FLASH_BASE
+	rsb r0, r0, #flash_start
 
 	subs tos, r0
         push_tos
@@ -1009,7 +1010,7 @@ _init_flash_write:
 	ldr r1, [r1]
 	ubfx r1, r1, #0, #12
 	lsls r1, #12
-	rsb r1, r1, #FLASH_BASE
+	rsb r1, r1, #flash_start
 
 	subs tos, r1
 	push_tos
@@ -1094,7 +1095,7 @@ _store_mass_qspi:
 	ldr r1, [r1]
 	ubfx r1, r1, #0, #12
 	lsls r1, #12
-	rsb r1, r1, #FLASH_BASE
+	rsb r1, r1, #flash_start
 
 	subs r0, r1
 	movs r1, tos
