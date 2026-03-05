@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2024 Travis Bemann
+\ Copyright (c) 2021-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -118,12 +118,12 @@ begin-module multicore
   \ Serial spinlock index
   29 constant serial-spinlock
 
-  \ Test and set spinlock index
-  28 constant test-set-spinlock
-
   \ RTC spinlock index
-  27 constant rtc-spinlock
+  28 constant rtc-spinlock
   
+  \ Base test and set spinlock index (note that this is a block of 16 spinlocks)
+  0 constant test-set-spinlock-base
+
   continue-module multicore-internal
 
     \ Spinlock lock counts
@@ -416,7 +416,7 @@ begin-module multicore
 
   \ Test and set
   : test-set ( value addr -- set? )
-    [ test-set-spinlock SPINLOCK ] literal
+    dup $3C and [ test-set-spinlock-base SPINLOCK ] literal +
     code[
     cpsid
     r1 r0 2 dp ldm
@@ -445,7 +445,7 @@ begin-module multicore
 
   \ Test and set without touching interrupts
   : test-set-raw ( value addr -- set? )
-    [ test-set-spinlock SPINLOCK ] literal
+    dup $3C and [ test-set-spinlock-base SPINLOCK ] literal +
     code[
     r1 r0 2 dp ldm
     mark<
