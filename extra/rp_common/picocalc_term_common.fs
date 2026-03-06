@@ -26,6 +26,8 @@ begin-module picocalc-term-common
   constant use-st7789v?
   defined? ili9341-8-common defined? ili9341-text-common or use-st7789v? not and
   constant use-ili9341?
+  defined? st7796s-8-common defined? st7796s-text-common or use-st7789v? not and use-ili9341? not and
+  constant use-st7796s?
 
   \ Select fonts automatically based on what fonts are loaded
   defined? simple-font-5x8 constant use-5x8-font?
@@ -109,7 +111,11 @@ begin-module picocalc-term-common
     8 constant char-height
 
     \ Display width
-    320 constant display-width
+    use-st7796s? not [if]
+      320 constant display-width
+    [else]
+      480 constant display-width
+    [then]
     
     \ Display height
     use-st7789v? not use-ili9341? not and [if]
@@ -143,12 +149,12 @@ begin-module picocalc-term-common
     15 constant display-rst-pin
 
     \ Display backlight pin
-    use-st7789v? use-ili9341? or [if]
+    use-st7789v? use-ili9341? or use-st7796s? or [if]
       12 constant display-bl-pin
     [then]
     
     \ Do we invert the display
-    use-st7789v? not use-ili9341? not and [if]
+    use-st7789v? not use-ili9341? not and use-st7796s? not and [if]
       true constant display-invert
     [then]
     

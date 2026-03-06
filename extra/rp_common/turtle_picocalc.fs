@@ -1,4 +1,5 @@
-\ Copyright (c) 2024-2025 Travis Bemann
+\ Copyright (c) 2024-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +30,14 @@ begin-module turtle
   [else]
     defined? st7789v-8-common [if]
       st7789v-8-common import
+    [else]
+      defined? ili9341-8-common [if]
+        ili9341-8-common import
+      [else]
+        defined? st7796s-8-common [if]
+          st7796s-8-common import
+        [then]
+      [then]
     [then]
   [then]
 

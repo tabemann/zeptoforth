@@ -28,7 +28,7 @@ begin-module picocalc-term
   font import
   console import
 
-  use-st7789v? not use-ili9341? not and [if]
+  use-st7789v? not use-ili9341? not and use-st7796s? not and [if]
     st7365p-text-common import
     st7365p-text-spi import
   [then]
@@ -39,6 +39,10 @@ begin-module picocalc-term
   use-ili9341? [if]
     ili9341-text-common import
     ili9341-text-spi import
+  [then]
+  use-st7796s? [if]
+    st7796s-text-common import
+    st7796s-text-spi import
   [then]
 
   use-5x8-font? [if]
@@ -60,9 +64,10 @@ begin-module picocalc-term
     begin-module picocalc-term-internal
       
       \ The display
-      use-st7789v? not use-ili9341? not and [if] <st7365p-text-spi> [then]
+      use-st7789v? not use-ili9341? not and use-st7796s? not and [if] <st7365p-text-spi> [then]
       use-st7789v? [if] <st7789v-text-spi> [then]
       use-ili9341? [if] <ili9341-text-spi> [then]
+      use-st7796s? [if] <st7796s-text-spi> [then]
       class-size member display-intf
       
       \ The display buffer
@@ -91,7 +96,7 @@ begin-module picocalc-term
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
       [ use-7x8-font? ] [if] a-simple-font [then] { the-font }
 
-      [ use-st7789v? not use-ili9341? not and ] [if]
+      [ use-st7789v? not use-ili9341? not and use-st7796s? not and ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-rst-pin display-invert
         the-font self display-buf term-width term-height
@@ -111,6 +116,13 @@ begin-module picocalc-term
         the-font self display-buf term-width term-height
         display-width display-height
         display-spi-device <ili9341-text-spi> self display-intf init-object
+      [then]
+      [ use-st7796s? ] [if]
+        display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
+        display-bl-pin display-rst-pin
+        the-font self display-buf term-width term-height
+        display-width display-height
+        display-spi-device <st7796s-text-spi> self display-intf init-object
       [then]
     ; define new
     
