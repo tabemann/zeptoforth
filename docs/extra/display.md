@@ -1,10 +1,22 @@
 # Bitmaps and Displays
 
-Under `extra/common/bitmap.fs` there is optional code for supporting bitmap operations. Under `extra/common/ssd1306.fs` there is optional code for supporting I2C SSD1306-based displays, and similarly under `extra/common/ch1116.fs` there is optional code for supporting I2C CH1116-based displays. The `<bitmap>` class is defined under the `bitmap` module in `extra/common/bitmap.fs`. The `<ssd1306>` class inherits from the `<bitmap>` class and is defined under the `ssd1306` module in `extra/common/ssd1306.fs`, and similarly the `<ch1116>` class inherits from the `<bitmap>` class and is defined under the `ch1116` module in `extra/common/ch1116.fs`.
+Under `extra/common/bitmap.fs` there is optional code for supporting bitmap operations. The `<bitmap>` class is defined under the `bitmap` module in `extra/common/bitmap.fs`. The `<bitmap-no-clear>` class inherits from `<bitmap>` and is defined in the same module and file, and differs from `<bitmap>` only in that it is not cleared on initialization.
 
-Under `extra/common/pixmap16.fs` there is optional code for supporting 5-bit red, 6-bit green, 5-bit blue 16-bit pixmap operations, and under `extra/common/st7735s.fs` there is optional code for supporting SPI ST7735S-based displays with 16-bit color. The `<pixmap16>` class is defined under the `pixmap16` module in `extra/common/pixmap16.fs`. The `<st7735s>` class inherits from the `<pixmap16>` class and is defined under the `st7735s` module in `extra/common/st7735s.fs`.
+Under `extra/common/ssd1306.fs` there is optional code for supporting I2C SSD1306-based displays. The `<ssd1306>` class inherits from the `<bitmap>` class and is defined under the `ssd1306` module in `extra/common/ssd1306.fs`.
 
-Under `extra/common/pixmap8.fs` there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations. Under `extra/common/st7735s_8.fs` there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers. Under `extra/rp_common/st7789v_parallel_8.fs` there is optional code for supporting parallel ST7789V-based displays using 8-bit backing buffers. Under `extra/common/st7789v_spi_8.fs` there is optional code for supporting SPI ST7789V-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The `<pixmap8>` class is defined under the `pixmap8` module in `extra/common/pixmap8.fs`. The `<st7735s-8>` class is defined under the `st7735s-8` module in `extra/common/st7735s_8.fs`. The `<st7789v-8>` class is defined under the `st7789v-8` module in `extra/common/st7789v_parallel_8.fs`. The `<st7789v-8-spi>` class is defined under the `st7789v-8-spi` module in `extra/common/st7789v_spi_8.fs`. All of these classes inherit from the `<pixmap8>` class.
+Under `extra/common/ch1116.fs` there is optional code for supporting I2C CH1116-based displays. The `<ch1116>` class inherits from the `<bitmap>` class and is defined under the `ch1116` module in `extra/common/ch1116.fs`.
+
+Under `extra/common/pixmap16.fs` there is optional code for supporting 5-bit red, 6-bit green, 5-bit blue 16-bit pixmap operations. The `<pixmap16>` class is defined under the `pixmap16` module in `extra/common/pixmap16.fs`. The `<pixmap16-no-clear>` class inherits from `<pixmap16>` and is defined in the same module and file, and differs from `<pixmap16>` only in that it is not cleared on initialization.
+
+Under `extra/common/st7735s.fs` there is optional code for supporting SPI ST7735S-based displays with 16-bit color. The `<st7735s>` class inherits from the `<pixmap16>` class and is defined under the `st7735s` module in `extra/common/st7735s.fs`.
+
+Under `extra/common/pixmap8.fs` there is optional code for supporting 3-bit red, 3-bit green, 2-bit blue 8-bit pixmap operations. The `<pixmap8>` class is defined under the `pixmap8` module in `extra/common/pixmap8.fs`. The `<pixmap8-no-clear>` class inherits from `<pixmap16>` and is defined in the same module and file, and differs from `<pixmap8>` only in that it is not cleared on initialization.
+
+Under `extra/common/st7735s_8.fs` there is optional code for supporting SPI ST7735S-based displays using 8-bit backing buffers. The `<st7735s-8>` class is defined under the `st7735s-8` module in `extra/common/st7735s_8.fs`.
+
+Under `extra/rp_common/st7789v_parallel_8.fs` there is optional code for supporting parallel ST7789V-based displays using 8-bit backing buffers. Under `extra/common/st7789v_spi_8.fs` there is optional code for supporting SPI ST7789V-based displays using 8-bit backing buffers. The `<st7789v-8>` class is defined under the `st7789v-8` module in `extra/common/st7789v_parallel_8.fs`. The `<st7789v-8-spi>` class is defined under the `st7789v-8-spi` module in `extra/common/st7789v_spi_8.fs`. 
+
+Under `extra/common/st7365p_spi_8.fs` there is optional code for supporting SPI ST7365P-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The `<st7365p-8-spi>` class is defined under the `st7365p-8-spi` module in `extra/common/st7365p_spi_8.fs`. All of these classes inherit from the `<pixmap8>` class.
 
 The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. `<ssd1306>` and `<ch1116>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
 
@@ -22,6 +34,7 @@ The `<st7735s-1>` class implements a 16-bit ST7735S device interface with fixed 
 
 The `<st7789v-8>` and `<st7789v-8-spi>` classes implement 16-bit ST7789V device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` and `<st7789-v-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
+The `<st7365p-8>` and `<st7365p-8-spi>` classes implement 16-bit ST7365P device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` and `<st7789-v-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
 ### `bitmap`
 
@@ -537,3 +550,59 @@ This updates the ST7789V-based display with the current contents of its dirty re
 ( backlight st7789v -- )
 
 Set the on/off state of the ST7789V-based display's backlight.
+
+### `st7365p-8-spi`
+
+The `st7365p-8-spi` module contains the following words:
+
+##### `<st7365p-8-spi>`
+( -- class )
+
+The `<st7365p-8-spi>` class is the class for 16-bit SPI ST7365P-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the `<pixmap8>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<st7365p-8-spi>` class includes the following constructor:
+
+##### `new`
+( din-pin clk-pin dc-pin cs-pin reset-pin invert? buffer-addr columns rows spi-device st7365p -- )
+
+This constructor initializes an SPI ST7365P display at the SPI device *spi-device*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<pixmap16>` instances), *columns* columns, *rows* rows, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the reset pin *reset-pin*, whether the display is *invert?*'ed, and the `<st7365p-8-spi>` instance being initialized, *st7365p*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<st7365p-8-spi>` class includes the following method:
+
+##### `update-display`
+( st7365p -- )
+
+This updates the ST7365P-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight st7365p -- )
+
+Set the on/off state of the ST7365P-based display's backlight. This may be a no-op.
+
+### `ili9341-8-spi`
+
+The `ili9341-8-spi` module contains the following words:
+
+##### `<ili9341-8-spi>`
+( -- class )
+
+The `<ili9341-8-spi>` class is the class for 16-bit SPI ILI9341-based displays with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers. It inherits from the `<pixmap8>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<ili9341-8-spi>` class includes the following constructor:
+
+##### `new`
+( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device ili9341 -- )
+
+This constructor initializes an SPI ILI9341 display at the SPI device *spi-device*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<pixmap16>` instances), *columns* columns, *rows* rows, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the reset pin *reset-pin*, the backlight pin *backlight-pin*, and the `<ili9341-8-spi>` instance being initialized, *ili9341*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<ili9341-8-spi>` class includes the following method:
+
+##### `update-display`
+( ili9341 -- )
+
+This updates the ILI9341-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight ili9341 -- )
+
+Set the on/off state of the ILI9341-based display's backlight.

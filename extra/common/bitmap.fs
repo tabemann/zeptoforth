@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2024 Travis Bemann
+\ Copyright (c) 2022-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -905,6 +905,22 @@ begin-module bitmap
       endcase
     ; define draw-rect
 
+  end-implement
+
+  \ A class for a bitmap that is not cleared on initialization
+  <bitmap> begin-class <bitmap-no-clear>
+  end-class
+  
+  <bitmap-no-clear> begin-implement
+    
+    \ Initialize a bitmap without clearing it
+    :noname { buf cols rows self -- }
+      self <object>->new
+      rows self bitmap-rows !
+      cols self bitmap-cols !
+      buf self bitmap-buf  !
+    ; define new
+    
   end-implement
   
 end-module

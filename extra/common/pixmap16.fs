@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -332,6 +332,22 @@ begin-module pixmap16
       dst-col dup cols + dst-row dup rows + dst dirty-area
     ; define draw-rect-mask
 
+  end-implement
+
+  \ A class for a 16-bit pixmap that is not cleared on initialization
+  <pixmap16> begin-class <pixmap16-no-clear>
+  end-class
+  
+  <pixmap16-no-clear> begin-implement
+    
+    \ Initialize a pixmap
+    :noname { buf cols rows self -- }
+      self <object>->new
+      rows self pixmap-rows !
+      cols self pixmap-cols !
+      buf self pixmap-buf !
+    ; define new
+    
   end-implement
 
 end-module
