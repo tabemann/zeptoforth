@@ -1,4 +1,5 @@
 \ Copyright (c) 2023-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -130,6 +131,11 @@ begin-module ili9341-8-spi
     :noname { self -- }
       self ili9341-8-common::update-display
     ; define update-display
+
+    \ Set the ILI9341 device's backlight
+    :noname { backlight self -- }
+      backlight self ili9341-8-common::backlight!
+    ; define backlight!
 
   end-implement
   

@@ -1,4 +1,5 @@
 \ Copyright (c) 2023-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -128,6 +129,11 @@ begin-module ili9341-text-spi
     :noname { self -- }
       self ili9341-text-common::update-display
     ; define update-display
+
+    \ Set the backlight
+    :noname { backlight self -- }
+      backlight self ili9341-text-common::backlight!
+    ; define backlight!
 
   end-implement
   

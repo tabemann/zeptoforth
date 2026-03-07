@@ -1,4 +1,5 @@
 \ Copyright (c) 2023-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -504,7 +505,7 @@ begin-module ili9341-text-common
       the-font char-cols @ the-font char-rows @
     ; define char-dim@
 
-    \ Set the backlight (this may be a no-op)
+    \ Set the backlight
     :noname { backlight self -- }
       backlight self ili9341-text-backlight-pin @ pin!
     ; define backlight!
