@@ -21,6 +21,7 @@
 #include extra/common/clip.fs
 #include extra/common/bitmap.fs
 #include extra/common/bitmap_utils.fs
+#include extra/common/bitmap_lit.fs
 #include extra/common/font.fs
 #include extra/common/simple_font.fs
 #include extra/common/ssd1306.fs

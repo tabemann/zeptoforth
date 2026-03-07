@@ -22,6 +22,7 @@
 #include extra/common/clip.fs
 #include extra/common/bitmap.fs
 #include extra/common/bitmap_utils.fs
+#include extra/common/bitmap_lit.fs
 #include extra/common/pixmap8.fs
 #include extra/common/pixmap8_utils.fs
 #include extra/common/font.fs

@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2024 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
 #include extra/common/clip.fs
 #include extra/common/bitmap.fs
 #include extra/common/bitmap_utils.fs
+#include extra/common/bitmap_lit.fs
 #include extra/common/font.fs
 #include extra/common/simple_font.fs
 #include extra/common/st7735s_1.fs
