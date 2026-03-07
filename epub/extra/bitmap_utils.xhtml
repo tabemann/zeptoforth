@@ -17,6 +17,7 @@
   <section id="bitmap-utilities">
 <h1>Bitmap Utilities</h1>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap_utils.fs</span></code> there is optional code for supporting additional bitmap operations, particularly line and circle-drawing.</p>
+<p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap_lit.fs</span></code> there is optional code for defining bitmap literals. Bitmap literals specify static blocks of pixels which are used as buffers for instances of <code class="docutils literal notranslate"><span class="pre">bitmap::&lt;bitmap-no-clear&gt;</span></code> with the same width and height. Note that they are constrained by the maximum line length of 255 bytes that zeptoforth supports.</p>
 <section id="bitmap-utils">
 <h2><code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code> module contains the following words:</p>
@@ -54,6 +55,25 @@
 <h3><code class="docutils literal notranslate"><span class="pre">draw-filled-circle</span></code></h3>
 <p>( constant x y radius op dst-bitmap – )</p>
 <p>This draws a filled pixel circle with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>constant</em> value as used by *bitmap::draw-pixel-const`.</p>
+</section>
+</section>
+<section id="bitmap-lit">
+<h2><code class="docutils literal notranslate"><span class="pre">bitmap-lit</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">bitmap-lit</span></code> class contains the following words:</p>
+<section id="begin-bitmap-lit">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-bitmap-lit</span></code></h3>
+<p>( width height “name” – addr width height y line-addr )</p>
+<p>Begin the definition of a bitmap literal.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">!!</span></code></h3>
+<p>( addr width height y line-addr “pixels” – addr width height y line-addr )</p>
+<p>Define a row of a bitmap literal; all characters until the end of the line above $20 are treated as 1 pixels, all characters until the end of the line from $20 and below are treated as 0 pixels, starting after a single character of whitespace after <code class="docutils literal notranslate"><span class="pre">!!</span></code>. Note that if the full width of the line is not defined the remaining pixels are set to 0.</p>
+</section>
+<section id="end-bitmap-lit">
+<h3><code class="docutils literal notranslate"><span class="pre">end-bitmap-lit</span></code></h3>
+<p>( addr width height y line-addr – )</p>
+<p>End the definition of a bitmap literal. Any remaining undefined rows are set to 0.</p>
 </section>
 </section>
 </section>
