@@ -34,7 +34,9 @@ begin-module bitmap-lit
     
   end-module> import
 
-    
+  \ Begin a bitmap literal with the specified width and height in pixels and
+  \ name. Note that a bitmap literal is intended to be used as a buffer for an
+  \ instance of bitmap::<bitmap-no-clear> with the same width and height.
   : begin-bitmap-lit
     ( width height "name" -- addr width height y line-addr )
     create here -rot
@@ -43,7 +45,12 @@ begin-module bitmap-lit
     ram-here 3 pick ram-allot
     dup 4 pick $00 fill
   ;
-    
+
+  \ Define a row of a bitmap literal; all characters until the end of the line
+  \ above $20 are treated as 1 pixels, all characters until the end of the line
+  \ from $20 and below are treated as 0 pixels, starting after a single
+  \ character of whitespace after !! . Note that if the full width of the line
+  \ is not defined the remaining pixels are set to 0.
   : !!
     { addr width height y line-addr -- addr width height y line-addr }
     y height u< if
@@ -60,6 +67,7 @@ begin-module bitmap-lit
     addr width height y 1+ line-addr
   ;
 
+  \ End a bitmap literal. Any remaining undefined rows are set to 0.
   : end-bitmap-lit { addr width height y line-addr -- }
     begin y height < while
       addr width y line-addr >bitmap
