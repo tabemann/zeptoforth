@@ -146,6 +146,21 @@ Update the display.
 
 Clear the display, including pixels that do not have corresponding characters at the edges of the display.
 
+### `st7365p-text-spi`
+
+The `st7365p-text-spi` module contains the following class:
+
+#### `<st7365p-text-spi>`
+
+This class inherits from `st7365p-text-common::<st7365p-text-cmmon>`.
+
+The `<st7365p-text-spi>` class has the following constructor:
+
+##### `new`
+( din-pin sck-pin dc-pin cs-pin reset-pin invert the-font buffer columns rows physical-columns physical-rows display -- )
+
+Construct an `<st7365p-text-spi>` object for a given data-in pin, clock pin, DC pin, CS pin, reset pin, invert boolean, font, `<text8>` buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
+
 ### `st7789v-text-common`
 
 The `st7789v-text-common` module contains the following class:
@@ -182,3 +197,152 @@ Update the display.
 ( display -- )
 
 Clear the display, including pixels that do not have corresponding characters at the edges of the display.
+
+### `st7365p-text-common`
+
+The `st7365p-text-common` module contains the following class:
+
+#### `<st7365p-text-common>`
+
+This class inherits from `text8::<text8>`.
+
+The `<st7365p-text-common>` class has the following methods:
+
+##### `char-dim@`
+( display -- columns rows )
+
+Get the character dimensions.
+
+##### `backlight!`
+( backlight display -- )
+
+Set the backlight (this may be a no-op).
+
+##### `update-display`
+( display -- )
+
+Update the display.
+
+##### `clear-display`
+( display -- )
+
+Clear the display, including pixels that do not have corresponding characters at the edges of the display.
+
+### `st7365p-text-spi`
+
+The `st7365p-text-spi` module contains the following class:
+
+#### `<st7365p-text-spi>`
+
+This class inherits from `st7365p-text-common::<st7365p-text-common>>`.
+
+The `<st7365p-text-spi>` class has the following constructor:
+
+##### `new`
+( dc-pin cs-pin invert the-font buffer columns rows physical-columns physical-rows display -- )
+
+Construct an `<st7365p-text-spi>` object for a given DC pin, CS pin, invert boolean, font, `<text8>` buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
+
+### `st7789v-text-common`
+
+The `st7789v-text-common` module contains the following class:
+
+#### `<st7789v-text-common>`
+
+This class inherits from `text8::<text8>`.
+
+The `<st7789v-text-common>` class has the following constructor:
+
+##### `new`
+( dc-pin cs-pin backlight-pin the-font buffer round columns rows physical-columns physical-rows display -- )
+
+Construct an `<st7789v-text-common>` object for a given DC pin, CS pin, backlight pin, font, `<text8>` buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
+
+The `<st7789v-text-common>` class has the following methods:
+
+##### `char-dim@`
+( display -- columns rows )
+
+Get the character dimensions.
+
+##### `backlight!`
+( backlight display -- )
+
+Set the backlight (this may be a no-op).
+
+##### `update-display`
+( display -- )
+
+Update the display.
+
+##### `clear-display`
+( display -- )
+
+Clear the display, including pixels that do not have corresponding characters at the edges of the display.
+
+### `st7789v-text-spi`
+
+The `st7789v-text-spi` module contains the following class:
+
+#### `<st7789v-text-spi>`
+
+This class inherits from `st7789v::<st7789v-text-common>`.
+
+The `<st7789v-text-spi>` class has the following constructor:
+
+##### `new`
+( din-pin sck-pin dc-pin cs-pin backlight-pin reset-pin the-font buffer round columns rows physical-columns physical-rows display -- )
+
+Construct an `<st7789v-text-spi>` object for a given data-in pin, given clock pin, given DC pin, CS pin, backlight pin, reset pin, font, `<text8>` buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
+
+### `ili9341-text-common`
+
+The `ili9341-text-common` module contains the following class:
+
+#### `<ili9341-text-common>`
+
+This class inherits from `text8::<text8>`.
+
+The `<ili9341-text-common>` class has the following constructor:
+
+##### `new`
+( dc-pin cs-pin backlight-pin the-font buffer columns rows physical-columns physical-rows display -- )
+
+Construct an `<ili9341-text-common>` object for a given DC pin, CS pin, backlight pin, font, `<text8>` buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
+
+The `<ili9341-text-common>` class has the following methods:
+
+##### `char-dim@`
+( display -- columns rows )
+
+Get the character dimensions.
+
+##### `backlight!`
+( backlight display -- )
+
+Set the backlight (this may be a no-op).
+
+##### `update-display`
+( display -- )
+
+Update the display.
+
+##### `clear-display`
+( display -- )
+
+Clear the display, including pixels that do not have corresponding characters at the edges of the display.
+
+### `ili9341-text-spi`
+
+The `ili9341-text-spi` module contains the following class:
+
+#### `<ili9341-text-spi>`
+
+This class inherits from `ili9341::<ili9341-text-common>`.
+
+The `<ili9341-text-spi>` class has the following constructor:
+
+##### `new`
+( din-pin sck-pin dc-pin cs-pin backlight-pin reset-pin the-font buffer columns rows physical-columns physical-rows display -- )
+
+Construct an `<ili9341-text-spi>` object for a given data-in pin, given clock pin, given DC pin, CS pin, backlight pin, reset-pin, font, `<text8>` buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.
