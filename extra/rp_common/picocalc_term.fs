@@ -1,4 +1,5 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +29,17 @@ begin-module picocalc-term
   font import
   console import
 
-  use-st7789v? not [if]
+  use-st7789v? not use-ili9341? not and [if]
     st7365p-8-common import
     st7365p-8-spi import
-  [else]
+  [then]
+  use-st7789v? [if]
     st7789v-8-common import
     st7789v-8-spi import
+  [then]
+  use-ili9341? [if]
+    ili9341-8-common import
+    ili9341-8-spi import
   [then]
 
   use-5x8-font? [if]
@@ -55,7 +61,9 @@ begin-module picocalc-term
     begin-module picocalc-term-internal
       
       \ The display
-      use-st7789v? not [if] <st7365p-8-spi> [else] <st7789v-8-spi> [then]
+      use-st7789v? not use-ili9341? not and [if] <st7365p-8-spi> [then]
+      use-st7789v? [if] <st7789v-8-spi> [then]
+      use-ili9341? [if] <ili9341-8-spi> [then]
       class-size member display-intf
       
       \ The display buffer
@@ -79,16 +87,23 @@ begin-module picocalc-term
     :noname { self -- }
       self <picocalc-term-common>->new
 
-      [ use-st7789v? not ] [if]
+      [ use-st7789v? not use-ili9341? not and ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-rst-pin
         display-invert self display-buf display-width display-height
         display-spi-device <st7365p-8-spi> self display-intf init-object
-      [else]
+      [then]
+      [ use-st7789v? ] [if]
         display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
         display-bl-pin display-rst-pin
         self display-buf false display-width display-height
         display-spi-device <st7789v-8-spi> self display-intf init-object
+      [then]
+      [ use-ili9341? ] [if]
+        display-spi-tx-pin display-spi-sck-pin display-dc-pin display-spi-cs-pin
+        display-bl-pin display-rst-pin
+        self display-buf display-width display-height
+        display-spi-device <ili9341-8-spi> self display-intf init-object
       [then]
     ; define new
 

@@ -1,4 +1,5 @@
 \ Copyright (c) 2025-2026 Travis Bemann
+\ Copyright (c) 2026 Ken Mitton
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +21,11 @@
 
 begin-module picocalc-term-common
 
+  \ Alternate displays
   defined? st7789v-8-common defined? st7789v-text-common or
   constant use-st7789v?
+  defined? ili9341-8-common defined? ili9341-text-common or use-st7789v? not and
+  constant use-ili9341?
 
   \ Select fonts automatically based on what fonts are loaded
   defined? simple-font-5x8 constant use-5x8-font?
@@ -108,7 +112,7 @@ begin-module picocalc-term-common
     320 constant display-width
     
     \ Display height
-    use-st7789v? not [if]
+    use-st7789v? not use-ili9341? not and [if]
       320 constant display-height
     [else]
       240 constant display-height
@@ -139,12 +143,12 @@ begin-module picocalc-term-common
     15 constant display-rst-pin
 
     \ Display backlight pin
-    use-st7789v? [if]
+    use-st7789v? use-ili9341? or [if]
       12 constant display-bl-pin
     [then]
     
     \ Do we invert the display
-    use-st7789v? not [if]
+    use-st7789v? not use-ili9341? not and [if]
       true constant display-invert
     [then]
     
