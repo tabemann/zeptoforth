@@ -157,38 +157,193 @@
 </section>
 </section>
 </section>
+<section id="st7365p-text-spi">
+<h2><code class="docutils literal notranslate"><span class="pre">st7365p-text-spi</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7365p-text-spi</span></code> module contains the following class:</p>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">st7365p-text-common::&lt;st7365p-text-cmmon&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code> class has the following constructor:</p>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( din-pin sck-pin dc-pin cs-pin reset-pin invert the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code> object for a given data-in pin, clock pin, DC pin, CS pin, reset pin, invert boolean, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+</section>
+</section>
+</section>
 <section id="st7789v-text-common">
 <h2><code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code> module contains the following class:</p>
-<section id="id8">
+<section id="id10">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code></h3>
 <p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following constructor:</p>
-<section id="id9">
+<section id="id11">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( dc-pin cs-pin backlight-pin the-font buffer round columns rows physical-columns physical-rows display – )</p>
 <p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> object for a given DC pin, CS pin, backlight pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following methods:</p>
 </section>
-<section id="id10">
+<section id="id12">
 <h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
 <p>( display – columns rows )</p>
 <p>Get the character dimensions.</p>
 </section>
-<section id="id11">
+<section id="id13">
 <h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
 <p>( backlight display – )</p>
 <p>Set the backlight (this may be a no-op).</p>
 </section>
-<section id="id12">
+<section id="id14">
 <h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
 <p>( display – )</p>
 <p>Update the display.</p>
 </section>
-<section id="id13">
+<section id="id15">
 <h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
 <p>( display – )</p>
 <p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="id16">
+<h2><code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7365p-text-common</span></code> module contains the following class:</p>
+<section id="id17">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-common&gt;</span></code> class has the following methods:</p>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="id20">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="id21">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="id22">
+<h2><code class="docutils literal notranslate"><span class="pre">st7365p-text-spi</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7365p-text-spi</span></code> module contains the following class:</p>
+<section id="id23">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">st7365p-text-common::&lt;st7365p-text-common&gt;&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code> class has the following constructor:</p>
+<section id="id24">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( dc-pin cs-pin invert the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7365p-text-spi&gt;</span></code> object for a given DC pin, CS pin, invert boolean, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+</section>
+</section>
+</section>
+<section id="id25">
+<h2><code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-text-common</span></code> module contains the following class:</p>
+<section id="id26">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id27">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( dc-pin cs-pin backlight-pin the-font buffer round columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> object for a given DC pin, CS pin, backlight pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id28">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="id29">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="id30">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="id31">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="st7789v-text-spi">
+<h2><code class="docutils literal notranslate"><span class="pre">st7789v-text-spi</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7789v-text-spi</span></code> module contains the following class:</p>
+<section id="id32">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-spi&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">st7789v::&lt;st7789v-text-common&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-spi&gt;</span></code> class has the following constructor:</p>
+<section id="id33">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( din-pin sck-pin dc-pin cs-pin backlight-pin reset-pin the-font buffer round columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;st7789v-text-spi&gt;</span></code> object for a given data-in pin, given clock pin, given DC pin, CS pin, backlight pin, reset pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, round boolean, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+</section>
+</section>
+</section>
+<section id="ili9341-text-common">
+<h2><code class="docutils literal notranslate"><span class="pre">ili9341-text-common</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ili9341-text-common</span></code> module contains the following class:</p>
+<section id="id34">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-common&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">text8::&lt;text8&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-common&gt;</span></code> class has the following constructor:</p>
+<section id="id35">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( dc-pin cs-pin backlight-pin the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-common&gt;</span></code> object for a given DC pin, CS pin, backlight pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-common&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id36">
+<h4><code class="docutils literal notranslate"><span class="pre">char-dim&#64;</span></code></h4>
+<p>( display – columns rows )</p>
+<p>Get the character dimensions.</p>
+</section>
+<section id="id37">
+<h4><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h4>
+<p>( backlight display – )</p>
+<p>Set the backlight (this may be a no-op).</p>
+</section>
+<section id="id38">
+<h4><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h4>
+<p>( display – )</p>
+<p>Update the display.</p>
+</section>
+<section id="id39">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-display</span></code></h4>
+<p>( display – )</p>
+<p>Clear the display, including pixels that do not have corresponding characters at the edges of the display.</p>
+</section>
+</section>
+</section>
+<section id="ili9341-text-spi">
+<h2><code class="docutils literal notranslate"><span class="pre">ili9341-text-spi</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ili9341-text-spi</span></code> module contains the following class:</p>
+<section id="id40">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-spi&gt;</span></code></h3>
+<p>This class inherits from <code class="docutils literal notranslate"><span class="pre">ili9341::&lt;ili9341-text-common&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-spi&gt;</span></code> class has the following constructor:</p>
+<section id="id41">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( din-pin sck-pin dc-pin cs-pin backlight-pin reset-pin the-font buffer columns rows physical-columns physical-rows display – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;ili9341-text-spi&gt;</span></code> object for a given data-in pin, given clock pin, given DC pin, CS pin, backlight pin, reset-pin, font, <code class="docutils literal notranslate"><span class="pre">&lt;text8&gt;</span></code> buffer, number of character columns, number of character rows, physical number of pixel columns, and physical number of pixel rows.</p>
 </section>
 </section>
 </section>
