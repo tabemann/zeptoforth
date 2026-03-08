@@ -92,6 +92,8 @@ There is also support for loadable extras not included in any builds:
 * CH1116-based displays (in `extra/common/ch1116.fs`)
 * ST7735S-based displays (in `extra/common/st7735s.fs` with 16-bit framebuffers and in `extra/common/st7735s_8.fs` with 8-bit framebuffers)
 * ST7789V-based displays (in `extra/rp_common/st7789v_parallel_8.fs` for parallel displays and `extra/common/st7789v_spi_8.fs` for SPI displays with 8-bit framebuffers)
+* ST7365P-based displays (in `extra/common/st7365p_spi_8.fs`)
+* ILI9341-based displays (in `extra/common/ili9341_spi_8.fs`)
 * Monospace, bitmap fonts (in `extra/common/font.fs`)
 * A simple monospace, bitmap ASCII font (in `extra/common/simple_font.fs`)
 * Turtle graphics for ST7735S displays (in `extra/rp2040/turtle.fs`)
