@@ -70,6 +70,8 @@ There are the following similar programs to load for zeptoIPv6:
 * `extra/rp_common/net_tools/pico_w_udp_echo_ipv6.fs`, a UDP echo server; note that it has no way of verifying that incoming UDP packets are coming from where they say they are coming from, so do not expose it to the open Internet
 * `extra/rp_common/net_tools/pico_w_led_http_ipv6.fs`, a simple HTTP server for controlling the LED on your board
 
+Further directions on their use are contained inside these files.
+
 ## Uploading the CYW43439 firmware
 
 The CYW43439 firmware is not in the zeptoforth Git repository for intellectual property reasons, i.e. to avoid unnecessarily mixing free with non-free code. Hence if one wishes to install the CYW43439 driver (and zeptoIP, most likely) on a Raspberry Pi Pico W, after flashing it with an `rp2040_big` platform `full` (for serial console) or `full_usb` (for USB console) build, or on a Raspberry Pi Pico 2 W, after flashing it with a `rp2350` platform `full` or `full_usb` build, one must manually upload the CYW43439 firmware prior to building the CYW43439 driver and zeptoIP. The recommended approach is to execute the following command:
