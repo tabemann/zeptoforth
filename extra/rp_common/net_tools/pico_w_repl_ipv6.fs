@@ -329,7 +329,8 @@ begin-module pico-w-net-repl
           endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
             false server-active? !
             endpoint pico-w-net::my-interface @ close-tcp-endpoint
-            server-port pico-w-net::my-interface @ allocate-tcp-listen-endpoint if
+            server-port pico-w-net::my-interface @
+            allocate-tcp-listen-endpoint if
               my-endpoint !
             else
               drop
