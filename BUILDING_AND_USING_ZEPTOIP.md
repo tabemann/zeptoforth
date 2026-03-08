@@ -23,7 +23,7 @@ For examples of demos involving zeptoIPv6, there are:
 * `test/rp_common/pico_w_net_ipv6_http_download_url.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download_url.fs`
 * `test/rp_common/pico_w_net_ipv6_udp.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_udp.fs`
 
-Directions for use of the individual demos are included therein. These examples are all writtey for the CYW43439 driver.
+Directions for use of the individual demos are included therein. These examples are all written for the CYW43439 driver.
 
 ## Uploading the CYW43439 firmware
 
