@@ -6,24 +6,69 @@ The CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W requir
 
 Note that zeptoIP, the CYW43439, and the ENC28J60 driver normally live on core 1 of the RP2040 and RP2350, so it is a good idea to leave these cores be and run one's user code on core 0.
 
-For examples of demos involving zeptoIPv4, there are:
+## zeptoIP tools
 
-* `test/rp_common/pico_w_net_ipv4_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
-* `test/rp_common/pico_w_net_ipv4_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp_common/pico_w_net_ipv4_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
-* `test/rp_common/pico_w_net_ipv4_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
-* `test/rp_common/pico_w_net_ipv4_http_download_url.fs`, an extremely simple web client that connects to an arbitrary URL and echos its reponse
-* `test/rp_common/pico_w_net_ipv4_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
-* `test/rp_common/pico_w_net_ipv4_udp.fs`, a tiny UDP echo server
-* `test/rp_common/pico_w_net_ipv4_uart.fs`, a TCP-UART interface server
+There are a number of pre-written tools for use with zeptoIPv4 and zeptoIPv6. These all assume the CYW43439 is being used on a Raspberry Pi Pico W, Raspberry Pi Pico 2W, or Pimoroni Pico Plus 2W.
 
-For examples of demos involving zeptoIPv6, there are:
+To use them one first loads `extra/rp_common/net_tools/pico_w_ipv4_base.fs` or `extra/rp_common/net_tools/pico_w_ipv6_base.fs` depending on whether one wants to use zeptoIPv4 or zeptoIPv6, respectively.
 
-* `test/rp_common/pico_w_net_ipv6_http_led.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_led.fs`
-* `test/rp_common/pico_w_net_ipv6_http_download.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download.fs` (note that there have been issues connecting to its example of `http://www.google.com/` over IPv6)
-* `test/rp_common/pico_w_net_ipv6_http_download_url.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_http_download_url.fs`
-* `test/rp_common/pico_w_net_ipv6_udp.fs`, which is the IPv6 counterpart of `test/rp_common/pico_w_net_ipv4_udp.fs`
+Then one executes the following command:
 
-Directions for use of the individual demos are included therein. These examples are all written for the CYW43439 driver.
+```
+<your WiFi SSID> <your WiFi password> <your Multicast DNS hostname> pico-w-net::init-wifi
+```
+
+\<your WiFi SSID>, \<your WiFi password>, and \<your Multicast DNS hostname> are all Forth address/length pair strings, which are saved so they need not stay valid after executing this line.
+
+Note that Multicast DNS will be enabled, and your Multicast DNS hostname will be set as specified; note that this hostname should end in `.local`. You will be able to connect to your board via this hostname from any system on your local network link that supports Multicast DNS.
+
+After you enter this command, it may take a moment before you get a response indicating relevant IP addresses. If it appears to fail to respond or it takes a long time before it responds you may have weak connectivity with your WiFi router.
+
+Once a WiFi connection is established you should get an output such as the following (with varying values replacing the text in angle brackets) for zeptoIPv4:
+
+```
+Discovering IPv4 address...
+IPv4 address: <your IPv4 address>
+IPv4 netmask: <your IPv4 netmask>
+Gateway IPv4 address: <your gateway IPv4 address>
+DNS server IPv4 address: <your DNS server IPv4 address> ok
+```
+
+For zeptoIPv6 you should instead get an output such as the following:
+
+```
+Autoconfiguring link-local IPv6 address... <Success or Failure>
+Discovering IPv6 router...
+Discovering IPv6 address... <Success or Failure>
+Primary IPv6 address: <your primary IPv6 address>
+Link-local IPv6 address: <your link-local IPv6 address>
+SLAAC IPv6 address: <your SLAAC IPv6 address; note that this may not be valid>
+DHCPv6 IPv6 address: <your DHCPv6 IPv6 address; note that this may not be valid>
+IPv6 prefix: <your IPv6 prefix>
+Autonomous: <yes or no>
+IPv6 prefix length: <your IPv6 prefix length>
+Gateway IPv6 address: <your gateway IPv6 address>
+Discovering IPv6 DNS server...
+DNS server IPv6 address: <your DNS server IPv6 address>
+```
+
+Then one can select one or more of the following programs to load for zeptoIPv4:
+
+* `extra/rp_common/net_tools/pico_w_ntp_ipv4.fs`, an NTP client that makes use of `extra/{rp2040,rp2350}/net/net_ntp_ipv4.fs`, which must be loaded before it; this tool persistently makes use of one endpoint
+* `extra/rp_common/net_tools/pico_w_http_file_ipv4.fs`, an HTTP client which saves a downloaded file to a file in a FAT32 filesystem
+* `extra/rp_common/net_tools/pico_w_http_dump_ipv4.fs`, an HTTP client which dumps a downloaded file and its HTTP headers to the console after converting LF newlines to CRLF newlines
+* `extra/rp_common/net_tools/pico_w_repl_ipv4.fs`, a TCP console server; note that it has no security at all, so do not expose it to the open Internet
+* `extra/rp_common/net_tools/pico_w_udp_echo_ipv4.fs`, a UDP echo server; note that it has no way of verifying that incoming UDP packets are coming from where they say they are coming from, so do not expose it to the open Internet
+* `extra/rp_common/net_tools/pico_w_led_http_ipv4.fs`, a simple HTTP server for controlling the LED on your board
+
+There are the following similar programs to load for zeptoIPv6:
+
+* `extra/rp_common/net_tools/pico_w_ntp_ipv6.fs`, an NTP client that makes use of `extra/{rp2040,rp2350}/net/net_ntp_ipv6.fs`, which must be loaded before it; this tool persistently makes use of one endpoint
+* `extra/rp_common/net_tools/pico_w_http_file_ipv6.fs`, an HTTP client which saves a downloaded file to a file in a FAT32 filesystem
+* `extra/rp_common/net_tools/pico_w_http_dump_ipv6.fs`, an HTTP client which dumps a downloaded file and its HTTP headers to the console after converting LF newlines to CRLF newlines
+* `extra/rp_common/net_tools/pico_w_repl_ipv6.fs`, a TCP console server; note that it has no security at all, so do not expose it to the open Internet
+* `extra/rp_common/net_tools/pico_w_udp_echo_ipv6.fs`, a UDP echo server; note that it has no way of verifying that incoming UDP packets are coming from where they say they are coming from, so do not expose it to the open Internet
+* `extra/rp_common/net_tools/pico_w_led_http_ipv6.fs`, a simple HTTP server for controlling the LED on your board
 
 ## Uploading the CYW43439 firmware
 
