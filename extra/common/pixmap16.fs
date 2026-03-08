@@ -94,11 +94,22 @@ begin-module pixmap16
     ( color start-mask-col start-mask-row start-dst-col start-dst-row cols )
     ( rows mask-bitmap dst-pixmap -- )
 
+    \ Draw a rectangle on a pixmap from a bitmap where 0 bits are given a color
+    method draw-rect-const-neg-mask
+    ( color start-mask-col start-mask-row start-dst-col start-dst-row cols )
+    ( rows mask-bitmap dst-pixmap -- )
+
     \ Draw a rectangle on a pixmap from another pixmap using a bitmap as a mask
     method draw-rect-mask
     ( start-mask-col start-mask-row start-src-col start-src-row start-dst-col )
     ( start-dst-row cols rows mask-bitmap src-pixmap dst-pixmap -- )
     
+    \ Draw a rectangle on a pixmap from another pixmap using a bitmap as a
+    \ negative mask
+    method draw-rect-neg-mask
+    ( start-mask-col start-mask-row start-src-col start-src-row start-dst-col )
+    ( start-dst-row cols rows mask-bitmap src-pixmap dst-pixmap -- )
+
   end-class
 
   <pixmap16> begin-implement
@@ -223,6 +234,40 @@ begin-module pixmap16
         ]code
       ;
 
+      \ Set a strip to a color in a pixmap for all the 0 bits in a bitmap
+      : set-strip-const-neg-mask
+        { color mask-col dst-col mask-row dst-row col-count mask dst -- }
+        mask-row 3 rshift mask
+        bitmap::bitmap-internal::page-addr mask-col + { mask-addr }
+        dst-col dst-row dst pixel-addr { dst-addr }
+        code[
+        r4 r5 2 push
+        8 r0 ldr_,[sp,#_] \ dst-addr
+        12 r1 ldr_,[sp,#_] \ mask-addr
+        24 r2 ldr_,[sp,#_] \ col-count
+        32 r3 ldr_,[sp,#_] \ mask-row
+        7 r4 movs_,#_
+        r4 r3 ands_,_
+        mark<
+        0 r2 cmp_,#_
+        le bc>
+        0 r1 r4 ldrb_,[_,#_]
+        r3 r4 lsrs_,_
+        1 r5 movs_,#_
+        r4 r5 tst_,_
+        ne bc>
+        44 r4 ldr_,[sp,#_] \ color
+        0 r0 r4 strh_,[_,#_]
+        >mark
+        2 r0 adds_,#_
+        1 r1 adds_,#_
+        1 r2 subs_,#_
+        2swap b<
+        >mark
+        r4 r5 2 pop
+        ]code
+      ;
+
       \ Copy a strip from one pixmap to another for all the 1 bits in a bitmap
       : set-strip-mask
         { mask-col src-col dst-col mask-row src-row dst-row col-count mask src dst -- }
@@ -248,6 +293,45 @@ begin-module pixmap16
         1 r6 movs_,#_
         r5 r6 tst_,_
         eq bc>
+        0 r1 r5 ldrh_,[_,#_] \ color
+        0 r0 r5 strh_,[_,#_]
+        >mark
+        2 r0 adds_,#_
+        2 r1 adds_,#_
+        1 r2 adds_,#_
+        1 r3 subs_,#_
+        2swap b<
+        >mark
+        r4 r5 2 pop
+        ]code
+        drop
+      ;          
+      
+      \ Copy a strip from one pixmap to another for all the 1 bits in a bitmap
+      : set-strip-neg-mask
+        { mask-col src-col dst-col mask-row src-row dst-row col-count mask src dst -- }
+        mask-row 3 rshift mask
+        bitmap::bitmap-internal::page-addr mask-col + { mask-addr }
+        src-col src-row src pixel-addr { src-addr }
+        dst-col dst-row dst pixel-addr { dst-addr }
+        dup
+        code[
+        r4 r5 2 push
+        8 r0 ldr_,[sp,#_] \ dst-addr
+        12 r1 ldr_,[sp,#_] \ src-addr
+        16 r2 ldr_,[sp,#_] \ mask-addr
+        32 r3 ldr_,[sp,#_] \ col-count
+        44 r4 ldr_,[sp,#_] \ mask-row
+        7 r5 movs_,#_
+        r5 r4 ands_,_
+        mark<
+        0 r3 cmp_,#_
+        le bc>
+        0 r2 r5 ldrb_,[_,#_]
+        r4 r5 lsrs_,_
+        1 r6 movs_,#_
+        r5 r6 tst_,_
+        ne bc>
         0 r1 r5 ldrh_,[_,#_] \ color
         0 r0 r5 strh_,[_,#_]
         >mark
@@ -316,7 +400,19 @@ begin-module pixmap16
       loop
       dst-col dup cols + dst-row dup rows + dst dirty-area
     ; define draw-rect-const-mask
-    
+
+    \ Draw a rectangle on a pixmap from a bitmap where 0 bits are given a color
+    :noname
+      { mask dst }
+      mask bitmap::dim@ dst dim@ clip::clip-src-dst
+      { color mask-col mask-row dst-col dst-row cols rows }
+      rows 0 ?do
+        color mask-col dst-col mask-row i + dst-row i +
+        cols mask dst set-strip-const-neg-mask
+      loop
+      dst-col dup cols + dst-row dup rows + dst dirty-area
+    ; define draw-rect-const-neg-mask
+
     \ Draw a rectangle on a pixmap from another pixmap using a bitmap as a mask
     :noname
       { mask src dst }
@@ -331,6 +427,22 @@ begin-module pixmap16
       loop
       dst-col dup cols + dst-row dup rows + dst dirty-area
     ; define draw-rect-mask
+
+    \ Draw a rectangle on a pixmap from another pixmap using a bitmap as a
+    \ negative mask
+    :noname
+      { mask src dst }
+      mask bitmap::dim@ clip::clip-mask
+      src dim@ clip::clip-src-w/-mask
+      dst dim@ clip::clip-dst-w/-mask
+      { mask-col mask-row src-col src-row dst-col dst-row cols rows }
+      rows 0 ?do
+        mask-col src-col dst-col
+        mask-row i + src-row i +  dst-row i +
+        cols mask src dst set-strip-neg-mask
+      loop
+      dst-col dup cols + dst-row dup rows + dst dirty-area
+    ; define draw-rect-neg-mask
 
   end-implement
 
