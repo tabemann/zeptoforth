@@ -320,18 +320,22 @@ begin-module pico-w-net-repl
       
       \ Handle a endpoint packet
       :noname { endpoint self -- }
-        endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
-          true server-active? !
-          endpoint endpoint-rx-data@ do-rx-data
-        then
-        endpoint pico-w-net::my-interface @ endpoint-done
-        endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
-          false server-active? !
-          endpoint pico-w-net::my-interface @ close-tcp-endpoint
-          server-port pico-w-net::my-interface @ allocate-tcp-listen-endpoint if
-            my-endpoint !
-          else
-            drop
+        endpoint my-endpoint @ = if
+          endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
+            true server-active? !
+            endpoint endpoint-rx-data@ do-rx-data
+          then
+          endpoint pico-w-net::my-interface @ endpoint-done
+          endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
+            false server-active? !
+            endpoint pico-w-net::my-interface @ close-tcp-endpoint
+            server-port pico-w-net::my-interface @
+            allocate-tcp-listen-endpoint if
+              my-endpoint !
+            else
+              drop
+              0 my-endpoint !
+            then
           then
         then
       ; define handle-endpoint
