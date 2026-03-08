@@ -66,9 +66,6 @@
 begin-module pico-w-net-repl
     
   oo import
-  cyw43-events import
-  cyw43-control import
-  cyw43-structs import
   net-misc import
   net-consts import
   net-config import
@@ -364,9 +361,6 @@ begin-module pico-w-net-repl
       c" repl-tx" server-task @ task::task-name!
       server-task @ task::run
     ;
-
-    \ Event message buffer
-    event-message-size aligned-buffer: my-event
 
   end-module> import
     
