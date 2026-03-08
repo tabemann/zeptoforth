@@ -18,11 +18,11 @@ Under `extra/rp_common/st7789v_parallel_8.fs` there is optional code for support
 
 Under `extra/common/st7365p_spi_8.fs` there is optional code for supporting SPI ST7365P-based displays using 8-bit backing buffers. Note that all of these convert the image data to 16-bit color internally on an as-needed basis. The `<st7365p-8-spi>` class is defined under the `st7365p-8-spi` module in `extra/common/st7365p_spi_8.fs`. All of these classes inherit from the `<pixmap8>` class.
 
-The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. `<ssd1306>` and `<ch1116>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
+The `<bitmap>` class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, e.g. `<ssd1306>` and `<ch1116>` objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.
 
-The `<pixmap16>` class is a general class for 5-bit red, 6-bit green, 5-bit blue 16-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
+The `<pixmap16>` class is a general class for 5-bit red, 6-bit green, 5-bit blue 16-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, e.g. `<st7735s>` objects, drawing operations on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
 
-The `<pixmap8>` class is a general class for 3-bit red, 3-bit green, 2-bit blue 8-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, i.e. <st7735s-8>` objects, drawing operationgs on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
+The `<pixmap8>` class is a general class for 3-bit red, 3-bit green, 2-bit blue 8-bit pixmaps and supports both drawing individual pixels and rectangles to pixmaps and drawing image data from one pixmap onto another pixmap; these operations also support using bitmaps as masks. For pixmaps with dirty state information, e.g. `<st7735s-8>` objects, drawing operations on pixmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the pixmap times hte number of rows multiplied by two bytes per pixel.
 
 The `<ssd1306>` class implements an SSD1306 device interface and the `<ch1116>` class implements a CH1116 device interface; they support all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<ssd1306>` and `<ch1116>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
@@ -32,9 +32,11 @@ The `<st7735s-8>` class implements a 16-bit ST7735S device interface with a 3-bi
 
 The `<st7735s-1>` class implements a 16-bit ST7735S device interface with fixed 16-bit foreground and background colors with a bitmap backing buffer and supports all the drawing operations implemented by the `<bitmap>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-1>` objects do not immediately update the display; rather the display must be manually after drawing to its backing bitmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
-The `<st7789v-8>` and `<st7789v-8-spi>` classes implement 16-bit ST7789V device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` and `<st7789-v-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+The `<st7789v-8>` and `<st7789v-8-spi>` classes implement 16-bit ST7789V device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7789v-8>` and `<st7789v-8-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
-The `<st7365p-8>` and `<st7365p-8-spi>` classes implement 16-bit ST7365P device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7735s-8>` and `<st7789-v-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+The `<st7365p-8-spi>` classes implement 16-bit ST7365P device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<st7365p-8-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
+
+The `<ili9341-8-spi>` classes implement 16-bit ILI9341 device interfaces, parallel and SPI respectively, with 3-bit red, 3-bit green, 2-bit blue 8-bit backing buffers and support all the drawing operations implemented by the `<pixmap8>` superclass along with maintaining dirty rectangles for optimizing updates. Drawing operations upon `<ili9341-8-spi>` objects do not immediately update the display; rather the display must be manually updated after drawing to its backing pixmap. This allows the user to carry out multiple drawing operations in sequence before updating the display at once.
 
 ### `bitmap`
 
@@ -223,10 +225,20 @@ Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one a
 
 Draw a rectangle of *color* where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
 
+##### `draw-rect-const-neg-mask`
+( color mask-column mask-row dst-column dst-row column-count row-count mask-bitmap dst-pixmap -- )
+
+Draw a rectangle of *color* where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to zero to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
 ##### `draw-rect-mask`
 ( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap -- )
 
 Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
+##### `draw-rect-neg-mask`
+( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap -- )
+
+Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to zero to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
 
 ### `pixmap8`
 
@@ -315,10 +327,20 @@ Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one a
 
 Draw a rectangle of *color* where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
 
+##### `draw-rect-const-neg-mask`
+( color mask-column mask-row dst-column dst-row column-count row-count mask-bitmap dst-pixmap -- )
+
+Draw a rectangle of *color* where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to zero to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
 ##### `draw-rect-mask`
 ( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap -- )
 
 Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
+##### `draw-rect-neg-mask`
+( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap -- )
+
+Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to zero to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
 
 ### `ssd1306`
 
