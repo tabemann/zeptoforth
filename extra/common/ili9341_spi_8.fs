@@ -55,13 +55,16 @@ begin-module ili9341-8-spi
       cell member ili9341-8-dma0
       cell member ili9341-8-dma1
       
-      \ Reset the ILI9341-8
+      \ Reset the ILI9341
       method reset-ili9341-8 ( self -- )
       
     end-module
 
-    \ Update the ILI9341-8 device
+    \ Update the ILI9341 device
     method update-display ( self -- )
+
+    \ Set the ILI9341 device's backlight
+    method backlight! ( backlight self -- )
     
   end-class
 

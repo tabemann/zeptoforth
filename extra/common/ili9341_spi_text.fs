@@ -53,13 +53,16 @@ begin-module ili9341-text-spi
       cell member ili9341-text-dma0
       cell member ili9341-text-dma1
 
-      \ Reset the ILI9341-TEXT
+      \ Reset the ILI9341
       method reset-ili9341-text ( self -- )
       
     end-module
 
-    \ Update the ILI9341-TEXT device
+    \ Update the ILI9341 device
     method update-display ( self -- )
+
+    \ Set the ILI9341 device's backlight
+    method backlight! ( backlight self -- )
     
   end-class
 
