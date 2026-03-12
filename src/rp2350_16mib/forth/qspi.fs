@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2025 Travis Bemann
+\ Copyright (c) 2022-2024 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,22 @@ begin-module qspi
   
     \ Quad SPI map base
     $10000000 constant QUADSPI_Map_Base
-    
-    \ Hidden QSPI size
-    $200000 constant QUADSPI_Hidden_Size
 
-    \ Total QSPI size
-    $1000000 constant QUADSPI_Size
+    $200000 constant QUADSPI_Usable_Hidden_Size
+    
+    \ Hidden QSPI size (rounded up to nearest 64k sector size if ATRANS0 mapping is used)
+    $400D0034 @ $FFF and 4096 *   \ ADTRANS0 physical address (partition mapping)
+    $FFFF + $FFFF invert and      \ align up to nearest 64k sector
+    QUADSPI_Usable_Hidden_Size +  
+    $400D0034 @ $FFF and 4096 * - \ and subtract the ATRANS0 mapping so that the qspi area starts at 64k boundary after the hidden area
+     constant QUADSPI_Hidden_Size
+
+    \ Total QSPI size (respecting possible ATRANS0 mapping and aligning to 64k sector size)
+    \ Attention: does not check the partition table if there is another partition after the current one or ATRANS Size Bits
+    $1000000 
+      $400D0034 @ $FFF and 4096 * \ ADTRANS0 physical address (partition mapping)
+      $FFFF + $FFFF invert and    \ align up to nearest 64k sector
+    - constant QUADSPI_Size
 
   end-module> import
     
@@ -55,8 +65,8 @@ begin-module qspi
   \ Get the base usable Quad SPI address
   : qspi-base ( -- addr ) QUADSPI_Map_Base QUADSPI_Hidden_Size + ;
 
-  \ Get the usable Quad SPI flash size
-  : qspi-size ( -- bytes ) QUADSPI_Size QUADSPI_Hidden_Size - ;
+  \ Get the usable Quad SPI flash size reduced by the hidden area and taking ATRANS0 (partition) mapping into account
+  : qspi-size ( -- bytes ) QUADSPI_Size QUADSPI_Usable_Hidden_Size - ;
 
   \ Bulk erase QSPI
   : erase-qspi-bulk ( -- )
