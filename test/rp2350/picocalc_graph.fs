@@ -22,7 +22,6 @@ begin-module graph
 
   picocalc-term import
   pixmap8 import
-  pixmap8-utils
   st7365p-8-common import
   float32 import
   
