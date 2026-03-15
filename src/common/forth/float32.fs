@@ -1327,7 +1327,7 @@ begin-module float32
   \ Get the floor of a single-precision floating-point value
   : vfloor ( f -- f' )
     dup vnfract { int } vfract { fract }
-    int dup v0< if fract v0< if v-1 else 0 then v+ then
+    int dup v0<= if fract v0< if v-1 else 0 then v+ then
   ;
 
   \ Round a single-precision floating-point value to the nearest integer with
