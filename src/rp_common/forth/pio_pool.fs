@@ -163,8 +163,8 @@ begin-module pio-pool
       program p-prog base pio pio-instr-relocate-mem!
       sm-count 0 ?do
         i pick { sm }
-        program p-transfer sm pio sm-addr!
-        program p-wrap sm pio sm-wrap!
+        program p-transfer base + sm pio sm-addr!
+        program p-wrap swap base + swap base + sm pio sm-wrap!
       loop
       base pio
     ;] with-pio-lock
