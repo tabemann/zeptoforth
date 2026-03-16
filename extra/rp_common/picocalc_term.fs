@@ -51,6 +51,9 @@ begin-module picocalc-term
   use-6x8-font? [if]
     simple-font-6x8 import
   [then]
+  use-6x12-font? [if]
+    simple-font-6x12 import
+  [then]
   use-7x8-font? [if]
     simple-font import
   [then]
@@ -151,6 +154,7 @@ begin-module picocalc-term
       [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
       [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
       [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
+      [ use-6x12-font? ] [if] a-simple-font-6x12 [then]
       [ use-7x8-font? ] [if] a-simple-font [then]
       draw-char-to-pixmap8
       
