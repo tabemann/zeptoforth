@@ -7,5 +7,6 @@
 *.uf2
 *.elf
 *.ihex
+*.swp
 utils/zeptoforth_venv
 src/common/kernel_info.s
