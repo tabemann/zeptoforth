@@ -19,7 +19,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is a driver for the LCD1602 I2C module.
+\ This is a driver for the LCD1602 I2C module, with AiP31068L driver.
 
 begin-module lcd1602
 

@@ -17,10 +17,11 @@
   <section id="lcd1602-support">
 <h1>LCD1602 Support</h1>
 <p>There is an optional driver for I2C LCD1602 displays. The LCD1602 is a 2 row by 16 character text LCD display.</p>
-<p>Configuring the LCD1602 is in the form of two steps. The first step is configuring the I2C bus, for which a convenience word <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> is provided; if the user manually configures the I2C bus or previously has used it to access another device, the user must manually call <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to set the I2C bus to use with the LCD1602 and then <code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code>. The second step is initializing the LCD1602 device, which is done through calling <code class="docutils literal notranslate"><span class="pre">init-lcd</span></code>. These steps must be carried out before using the LCD1602 device.</p>
-<p>LCD1602 support is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_demo.fs</span></code>.</p>
+<p>LCD1602 support using an AiP31068L driver is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_demo.fs</span></code>.</p>
+<p>LCD1602 support using a PCF8574 I/O expander is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_pcf8574.fs</span></code>, which can be compiled either to RAM or to flash as needed. There is a demo program which uses it in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/lcd1602_pcf8574_demo.fs</span></code>.</p>
 <section id="lcd1602">
 <h2><code class="docutils literal notranslate"><span class="pre">lcd1602</span></code></h2>
+<p>Configuring the LCD1602 using an AiP31068L driver is in the form of two steps. The first step is configuring the I2C bus, for which a convenience word <code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code> is provided; if the user manually configures the I2C bus or previously has used it to access another device, the user must manually call <code class="docutils literal notranslate"><span class="pre">lcd-i2c-device!</span></code> to set the I2C bus to use with the LCD1602 and then <code class="docutils literal notranslate"><span class="pre">activate-lcd-i2c</span></code>. The second step is initializing the LCD1602 device, which is done through calling <code class="docutils literal notranslate"><span class="pre">init-lcd</span></code>. These steps must be carried out before using the LCD1602 device.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">lcd1602</span></code> module contains the following words:</p>
 <section id="init-lcd-i2c">
 <h3><code class="docutils literal notranslate"><span class="pre">init-lcd-i2c</span></code></h3>
@@ -51,6 +52,98 @@
 <h3><code class="docutils literal notranslate"><span class="pre">put-text</span></code></h3>
 <p>( row col c-addr bytes – )</p>
 <p>Write the specified string to the LCD1602 display at the specified row and column.</p>
+</section>
+</section>
+<section id="lcd1602-pcf8574">
+<h2><code class="docutils literal notranslate"><span class="pre">lcd1602-pcf8574</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">lcd1602-pcf8574</span></code> module contains the following words:</p>
+<section id="lcd1602-pcf8574-i2c-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">LCD1602_PCF8574_I2C_ADDR</span></code></h3>
+<p>( – i2c-addr )</p>
+<p>The default I2C address for LCD1602 PCF8574-based displays, $27.  A common alternate address is $3F.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;lcd1602-pcf8574&gt;</span></code></h3>
+<p>( – class )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;lcd1602-pcf8574&gt;</span></code> class is the class for I2C LCD1602 PCF8574-based displays.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;lcd1602-pcf8574&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="new">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( pin0 pin1 columns rows oled? i2c-addr i2c-device lcd1602-pcf8574 – )</p>
+<p>This constructor initializes an I2C LCD1602 display using a PCF8574 interface with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;lcd1602-pcf8574&gt;</span></code> instance being initialized, <em>lcd1602-pcf8574</em>.</p>
+<p>LCD1602 devices might be LCD or OLED based; pass <code class="docutils literal notranslate"><span class="pre">false</span></code> or <code class="docutils literal notranslate"><span class="pre">true</span></code> as <code class="docutils literal notranslate"><span class="pre">oled?</span></code> to select the correct cursor movements.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;lcd1602-pcf8574&gt;</span></code> class includes the following methoda:</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">put-text</span></code></h3>
+<p>( row col c-addr u lcd1602-pcf8574 – )</p>
+<p>Display the text string at the specified row and column.</p>
+</section>
+<section id="set-cursor">
+<h3><code class="docutils literal notranslate"><span class="pre">set-cursor</span></code></h3>
+<p>( row col lcd1602-pcf8574 – )</p>
+<p>Move the cursor to the specified location.</p>
+</section>
+<section id="set-text">
+<h3><code class="docutils literal notranslate"><span class="pre">set-text</span></code></h3>
+<p>( c-addr u lcd1602-pcf8574 – )</p>
+<p>Display the text string at the current cursor position.</p>
+</section>
+<section id="home">
+<h3><code class="docutils literal notranslate"><span class="pre">home</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Clear display and move the cursor to 0,0.</p>
+</section>
+<section id="clear">
+<h3><code class="docutils literal notranslate"><span class="pre">clear</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Clear display and move the cursor to 0,0.</p>
+</section>
+<section id="display">
+<h3><code class="docutils literal notranslate"><span class="pre">display!</span></code></h3>
+<p>( flag lcd1602-pcf8574 – )</p>
+<p>Enable display if true.</p>
+</section>
+<section id="backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h3>
+<p>( flag lcd1602-pcf8574 – )</p>
+<p>Enable backlight if true.</p>
+</section>
+<section id="blink">
+<h3><code class="docutils literal notranslate"><span class="pre">blink!</span></code></h3>
+<p>( flag lcd1602-pcf8574 – )</p>
+<p>Show blinking block cursor if true.</p>
+</section>
+<section id="cursor">
+<h3><code class="docutils literal notranslate"><span class="pre">cursor!</span></code></h3>
+<p>( flag lcd1602-pcf8574 – )</p>
+<p>Show underline cursor if true.</p>
+</section>
+<section id="autoscroll">
+<h3><code class="docutils literal notranslate"><span class="pre">autoscroll!</span></code></h3>
+<p>( flag lcd1602-pcf8574 – )</p>
+<p>Right-justify text from cursor if true.  Left-justify if false.</p>
+</section>
+<section id="scroll-display-left">
+<h3><code class="docutils literal notranslate"><span class="pre">scroll-display-left</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Move text left 1 position.</p>
+</section>
+<section id="scroll-display-right">
+<h3><code class="docutils literal notranslate"><span class="pre">scroll-display-right</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Move text right 1 position.</p>
+</section>
+<section id="left-to-right">
+<h3><code class="docutils literal notranslate"><span class="pre">left-to-right</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Configure left-to-right script.</p>
+</section>
+<section id="right-to-left">
+<h3><code class="docutils literal notranslate"><span class="pre">right-to-left</span></code></h3>
+<p>( lcd1602-pcf8574 – )</p>
+<p>Configure right-to-left script.</p>
 </section>
 </section>
 </section>
