@@ -310,7 +310,6 @@ begin-module ili9341-text-common
 
     \ Send 8 bits of data to the ILI9341-text
     :noname { W^ data self -- }
-      data c@ HEX . DECIMAL
       high self ili9341-text-dc-pin @ pin!
       low self ili9341-text-cs-pin @ pin!
       data 1 self >ili9341-text
