@@ -312,7 +312,6 @@ begin-module ili9341-8-common
 
     \ Send 8 bits of data to the ILI9341-8
     :noname { W^ data self -- }
-      data c@ HEX . DECIMAL
       high self ili9341-8-dc-pin @ pin!
       low self ili9341-8-cs-pin @ pin!
       data 1 self >ili9341-8
