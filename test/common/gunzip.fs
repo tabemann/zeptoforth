@@ -188,7 +188,7 @@ begin-module gunzip
           2 +to src-addr -2 +to src-bytes
         then
         
-        src-addr src-bytes dest-addr dest-bytes puff dup .
+        src-addr src-bytes dest-addr dest-bytes puff
         0= averts x-invalid-deflate-data { source-len dest-len }
         src-bytes source-len u> averts x-invalid-deflate-data
         source-len +to src-addr source-len negate +to src-bytes
