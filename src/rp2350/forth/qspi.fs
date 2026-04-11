@@ -32,18 +32,21 @@ begin-module qspi
 
     $200000 constant QUADSPI_Usable_Hidden_Size
     
+    \ flash address translation register
+    $400D0034 constant QMI_ATRANS0
+    
     \ Hidden QSPI size (rounded up to nearest 64k sector size if ATRANS0 mapping is used)
-    $400D0034 @ $FFF and 4096 *   \ ADTRANS0 physical address (partition mapping)
-    $FFFF + $FFFF invert and      \ align up to nearest 64k sector
+    QMI_ATRANS0 @ $FFF and 4096 *   \ ATRANS0 physical address (partition mapping)
+    $FFFF + $FFFF invert and        \ align up to nearest 64k sector
     QUADSPI_Usable_Hidden_Size +  
-    $400D0034 @ $FFF and 4096 * - \ and subtract the ATRANS0 mapping so that the qspi area starts at 64k boundary after the hidden area
+    QMI_ATRANS0 @ $FFF and 4096 * - \ and subtract the ATRANS0 mapping so that the qspi area starts at 64k boundary after the hidden area
      constant QUADSPI_Hidden_Size
 
     \ Total QSPI size (respecting possible ATRANS0 mapping and aligning to 64k sector size)
     \ Attention: does not check the partition table if there is another partition after the current one or ATRANS Size Bits
     $400000 
-      $400D0034 @ $FFF and 4096 * \ ADTRANS0 physical address (partition mapping)
-      $FFFF + $FFFF invert and    \ align up to nearest 64k sector
+      QMI_ATRANS0 @ $FFF and 4096 * \ ATRANS0 physical address (partition mapping)
+      $FFFF + $FFFF invert and      \ align up to nearest 64k sector
     - constant QUADSPI_Size
 
   end-module> import
