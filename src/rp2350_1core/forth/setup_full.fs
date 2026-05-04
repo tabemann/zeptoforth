@@ -67,6 +67,7 @@
 #include src/rp2350/forth/rtc.fs
 #include src/rp_common/forth/clocks.fs
 #include src/rp2350/forth/voltage.fs
+#include src/rp_common/forth/busctrl.fs
 #include src/common/forth/full_extra.fs
 #include src/common/forth/blocks_block_dev.fs
 #include src/rp2350/forth/psram_block_dev.fs
