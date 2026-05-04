@@ -439,6 +439,14 @@ begin-module block
   \ Invalid block id exception
   : x-invalid-block-id ( -- ) ." invalid block id" cr ;
 
+  \ Get the number of free blocks
+  : free-block-count@ ( -- count )
+    0
+    sector-count 0 ?do
+      i saved-sector @ <> if i free-count@ + i old-count@ + then
+    loop
+  ;
+
   \ Delete a block
   : delete-block ( id -- )
     dup unwritten <> averts x-invalid-block-id

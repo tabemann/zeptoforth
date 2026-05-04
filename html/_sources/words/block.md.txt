@@ -50,6 +50,11 @@ Exception when `block!` is unable to write a given block, due to no free space b
 
 Exception when attempting to delete, load, or list a nonexistent block.
 
+##### `free-block-count@`
+( -- count )
+
+Get the number of free blocks.
+
 ##### `find-block`
 ( id -- addr | 0 )
 

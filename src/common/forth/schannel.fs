@@ -60,8 +60,8 @@ begin-module schan
 
   \ Get whether a simple channel is full
   : schan-full? ( schan -- flag )
-    dup schan-recv-index @ 1+ over schan-count @ umod
-    swap schan-send-index @ =
+    dup schan-send-index @ 1+ over schan-count @ umod
+    swap schan-recv-index @ =
   ;
   
   \ Get whether a simple channel is empty
