@@ -75,13 +75,13 @@ begin-module busctrl
   ;
 
   \ Set DMA read bus priority
-  : dma-w-bus-priority! ( priority -- )
+  : dma-r-bus-priority! ( priority -- )
     BUSCTRL_BUS_PRIORITY_DMA_R BUSCTRL_BUS_PRIORITY rot if bis! else bic! then
     wait-bus-priority-ack
   ;
 
   \ Get DMA read bus priority
-  : dma-w-bus-priority@ ( -- priority )
+  : dma-r-bus-priority@ ( -- priority )
     BUSCTRL_BUS_PRIORITY_DMA_R BUSCTRL_BUS_PRIORITY bit@
   ;
 
