@@ -67,6 +67,7 @@ Zeptoforth Documentation
    words/systick
    words/clocks
    words/voltage
+   words/busctrl
    words/rng
    words/ansi_term
    words/qspi

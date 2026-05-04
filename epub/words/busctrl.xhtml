@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Bus Control Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="bus-control-words">
+<h1>Bus Control Words</h1>
+<p>The RP2040 and RP2350 support controlling bus priorities of CPU 0, CPU 1, DMA reads, and DMA writes. These bus priorities consist of a binary of either low priority or high priority. The words below enable setting and getting these priorities</p>
+<section id="busctrl">
+<h2><code class="docutils literal notranslate"><span class="pre">busctrl</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">busctrl</span></code> module contains the following words:</p>
+<section id="high">
+<h3><code class="docutils literal notranslate"><span class="pre">high</span></code></h3>
+<p>( – priority )</p>
+<p>High bus priority</p>
+</section>
+<section id="low">
+<h3><code class="docutils literal notranslate"><span class="pre">low</span></code></h3>
+<p>( – priority )</p>
+<p>Low bus priority</p>
+</section>
+<section id="dma-w-bus-priority">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-w-bus-priority!</span></code></h3>
+<p>( priority – )</p>
+<p>Set DMA write bus priority</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-w-bus-priority&#64;</span></code></h3>
+<p>( – priority )</p>
+<p>Get DMA write bus priority</p>
+</section>
+<section id="dma-r-bus-priority">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-r-bus-priority!</span></code></h3>
+<p>( priority – )</p>
+<p>Set DMA read bus priority</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">dma-r-bus-priority&#64;</span></code></h3>
+<p>( – priority )</p>
+<p>Get DMA read bus priority</p>
+</section>
+<section id="proc1-bus-priority">
+<h3><code class="docutils literal notranslate"><span class="pre">proc1-bus-priority!</span></code></h3>
+<p>( priority – )</p>
+<p>Set CPU 1 bus priority</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">proc1-bus-priority&#64;</span></code></h3>
+<p>( – priority )</p>
+<p>Get CPU 1 bus priority</p>
+</section>
+<section id="proc0-bus-priority">
+<h3><code class="docutils literal notranslate"><span class="pre">proc0-bus-priority!</span></code></h3>
+<p>( priority – )</p>
+<p>Set CPU 0 bus priority</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">proc0-bus-priority&#64;</span></code></h3>
+<p>( – priority )</p>
+<p>Get CPU 0 bus priority</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
