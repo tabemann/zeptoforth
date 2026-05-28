@@ -98,6 +98,26 @@ Set the screenshot hook. This defaults to 0, indicating no hook set.
 
 Get the screenshot hook. This defaults to 0, indicating no hook set.
 
+##### `raw-keys-enabled!`
+( enabled -- )
+
+Set raw keys enabled. This defaults to false. If the raw keys enabled setting changes, the key input queue is cleared.
+
+##### `raw-keys-enabled@`
+( -- enabled )
+
+Get raw keys enabled. This defaults to false.
+
+##### `raw-key>?`
+( -- available )
+
+Get whether a raw key is available. This always returns false when raw keys are not enabled.
+
+##### `raw-key>`
+( -- attributes key )
+
+Get a raw key; the attributes and key returned here are in terms of those defined by the firmware installed on the PicoCalc's STM32 firmware. If raw keys are not enabled, this will block until they are enabled.
+
 ### `picocalc-sound`
 
 The `picocalc-sound` module contains the following words:

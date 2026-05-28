@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ begin-module picocalc-bios
   task import
   chan import
   rchan import
+  lock import
   i2c import
   pin import
 
@@ -86,9 +87,6 @@ begin-module picocalc-bios
 
     \ PicoCalc keyboard channel element count
     256 constant picocalc-keys-chan-count
-
-    \ PicoCalc reset delay in milliseconds
-\    100 constant picocalc-rst-delay
 
     \ PicoCalc keyboard count register
     4 constant PICOCALC_COUNT
@@ -172,6 +170,12 @@ begin-module picocalc-bios
       \ Are we emulating the keyboard backlight
       cell member picocalc-emulate-kbd-backlight
 
+      \ Are we capturing raw keypresses
+      cell member picocalc-raw-keys
+
+      \ Lock protecting setting raw keys
+      lock-size member picocalc-raw-keys-lock
+      
       \ The channel of pressed keys
       2 picocalc-keys-chan-count chan-size member picocalc-keys-chan
 
@@ -215,6 +219,15 @@ begin-module picocalc-bios
 
     \ Initialize the PicoCalc BIOS support
     method init-picocalc-bios ( core self -- )
+
+    \ Set collecting raw keys (or not)
+    method picocalc-raw-keys! ( raw-keys? self -- )
+
+    \ Get collecting raw keys (or not)
+    method picocalc-raw-keys@ ( self -- raw-keys? )
+
+    \ Clear the key queue
+    method clear-keys ( self -- )
     
     \ Are there keys to read?
     method picocalc-keys>? ( self -- read? )
@@ -253,6 +266,7 @@ begin-module picocalc-bios
     \ Constructor
     :noname { self -- }
       self <object>->new
+      false self picocalc-raw-keys !
       false self picocalc-keys-ctrl-held !
       false self picocalc-keys-alt-held !
       false self picocalc-error-displayed !
@@ -268,6 +282,7 @@ begin-module picocalc-bios
       false self picocalc-emulate-kbd-backlight !
       2 picocalc-keys-chan-count self picocalc-keys-chan init-chan
       self picocalc-bios-rchan init-rchan
+      self picocalc-raw-keys-lock init-lock
     ; define new
 
     \ Initialize the PicoCalc BIOS support
@@ -281,13 +296,35 @@ begin-module picocalc-bios
       picocalc-bios-i2c-device 7-bit-i2c-addr
       picocalc-bios-i2c-addr picocalc-bios-i2c-device i2c-target-addr!
       picocalc-bios-i2c-device enable-i2c
-\      PICOCALC_RST self send-command8 drop
-\      picocalc-rst-delay ms
       self 1 ['] run-keys 512 128 768 core spawn-on-core { keys-task }
       c" keys" keys-task task-name!
       keys-task run
     ; define init-picocalc-bios
     
+    \ Set collecting raw keys (or not)
+    :noname ( raw-keys? self -- )
+      [: { raw-keys? self }
+        self picocalc-raw-keys @ { old-raw-keys? }
+        raw-keys? self picocalc-raw-keys !
+        raw-keys? old-raw-keys? xor if self clear-keys then
+      ;] over picocalc-raw-keys-lock with-lock
+    ; define picocalc-raw-keys!
+
+    \ Get collecting raw keys (or not)
+    :noname ( self -- raw-keys? 0 )
+      [: picocalc-raw-keys @ ;] over picocalc-raw-keys-lock with-lock
+    ; define picocalc-raw-keys@
+
+    \ Clear the key queue
+    :noname { self -- }
+      begin
+        self [: picocalc-keys-chan skip-chan-no-block ;] try
+        dup 0= if false swap then
+        dup ['] x-would-block = if 2drop true 0 then
+        ?raise
+      until
+    ; define clear-keys
+
     \ Are there keys to read?
     :noname ( self -- read? )
       picocalc-keys-chan chan-empty? not
@@ -536,11 +573,16 @@ begin-module picocalc-bios
         then
       then
       self picocalc-keys-chan chan-full? not if
-        keycode $FF and 1 = if
-          keycode $FF00 and
-          self picocalc-keys-ctrl-held @ ATTR_CTRL and
-          self picocalc-keys-alt-held @ ATTR_ALT and or or { W^ buf }
+        self picocalc-raw-keys @ if
+          keycode { W^ buf }
           buf 2 self picocalc-keys-chan send-chan
+        else
+          keycode $FF and 1 = if
+            keycode $FF00 and
+            self picocalc-keys-ctrl-held @ ATTR_CTRL and
+            self picocalc-keys-alt-held @ ATTR_ALT and or or { W^ buf }
+            buf 2 self picocalc-keys-chan send-chan
+          then
         then
       then
     ; define handle-picocalc-key

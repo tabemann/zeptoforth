@@ -7,7 +7,8 @@
 
     <title>PicoCalc words &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -129,6 +130,26 @@
 <p>( – xt )</p>
 <p>Get the screenshot hook. This defaults to 0, indicating no hook set.</p>
 </section>
+<section id="raw-keys-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">raw-keys-enabled!</span></code><a class="headerlink" href="#raw-keys-enabled" title="Link to this heading">¶</a></h3>
+<p>( enabled – )</p>
+<p>Set raw keys enabled. This defaults to false. If the raw keys enabled setting changes, the key input queue is cleared.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">raw-keys-enabled&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>( – enabled )</p>
+<p>Get raw keys enabled. This defaults to false.</p>
+</section>
+<section id="raw-key">
+<h3><code class="docutils literal notranslate"><span class="pre">raw-key&gt;?</span></code><a class="headerlink" href="#raw-key" title="Link to this heading">¶</a></h3>
+<p>( – available )</p>
+<p>Get whether a raw key is available. This always returns false when raw keys are not enabled.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">raw-key&gt;</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>( – attributes key )</p>
+<p>Get a raw key; the attributes and key returned here are in terms of those defined by the firmware installed on the PicoCalc’s STM32 firmware. If raw keys are not enabled, this will block until they are enabled.</p>
+</section>
 </section>
 <section id="picocalc-sound">
 <h2><code class="docutils literal notranslate"><span class="pre">picocalc-sound</span></code><a class="headerlink" href="#picocalc-sound" title="Link to this heading">¶</a></h2>
@@ -166,8 +187,8 @@
 <p>( fs – )</p>
 <p>Set the FAT32 filesystem object for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This filesystem defaults to the SD card FAT32 filesystem first, if configured, or the PSRAM FAT32 filesystem second, if configured, or the on-board flash storage FAT32 filesystem third, if configured.</p>
 </section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs&#64;</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-fs&#64;</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <p>( – fs )</p>
 <p>Get the FAT32 filesystem object for saving screenshots with the attention key combo.</p>
 </section>
@@ -176,8 +197,8 @@
 <p>( path-addr path-bytes – )</p>
 <p>Set the base path for saving screenshots with Attention (Break (Shift-Escape) on the PicoCalc keyboard, Control-T on the serial and USB CDC consoles) <code class="docutils literal notranslate"><span class="pre">s</span></code>. This path defaults to <code class="docutils literal notranslate"><span class="pre">/SCREEN</span></code>. Note that this directory will be automatically created if it does not exist when taking a screenshot with the console attention key combo, but its parent directorie(s) will not be automatically created.</p>
 </section>
-<section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path&#64;</span></code><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">screenshot-path&#64;</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <p>( – path-addr path-bytes )</p>
 <p>Get the base path for saving screenshots with the attention key combo.</p>
 </section>
@@ -195,8 +216,8 @@
 <p>( – fs )</p>
 <p>This returns the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
-<section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs:</span></code><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">blocks-fs:</span></code><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the on-board flash ‘blocks’ FAT32 filesystem if <code class="docutils literal notranslate"><span class="pre">extra/common/setup_blocks_fat32.fs</span></code> has been compiled before <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
@@ -205,8 +226,8 @@
 <p>( – fs )</p>
 <p>This returns the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
-<section id="id7">
-<h3><code class="docutils literal notranslate"><span class="pre">sd-fs:</span></code><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">sd-fs:</span></code><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in partition 0 of the SDHC or SDXC card inserted in your PicoCalc unless the constant <code class="docutils literal notranslate"><span class="pre">no-sd-fs</span></code> was defined in flash prior to compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
@@ -215,8 +236,8 @@
 <p>( – fs )</p>
 <p>This returns the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
-<section id="id8">
-<h3>`psram-fs:<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id10">
+<h3>`psram-fs:<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This sets the current FAT32 filesystem to the FAT32 filesystem object for the FAT32 filesystem in PSRAM if <code class="docutils literal notranslate"><span class="pre">extra/rp2350/setup_pico_plus_2_psram_fat32.fs</span></code> was compiled before compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code>.</p>
 </section>
@@ -239,7 +260,16 @@
 
 
 
-<h3>Navigation</h3>
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
@@ -304,6 +334,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/busctrl.html">Bus Control Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Hardware Random Number Generator words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
@@ -346,16 +377,6 @@
   </ul></li>
 </ul>
 </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -373,7 +394,7 @@
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
       <a href="../_sources/extra/picocalc.md.txt"

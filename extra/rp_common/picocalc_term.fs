@@ -366,5 +366,17 @@ begin-module picocalc-term
 
   \ Get the screenshot hook
   : screenshot-hook@ ( -- xt ) shared-term do-screenshot-hook@ ;
+
+  \ Set raw keys enabled
+  : raw-keys-enabled! ( enabled -- ) shared-term do-raw-keys-enabled! ;
+
+  \ Get raw keys enabled
+  : raw-keys-enabled@ ( -- enabled ) shared-term do-raw-keys-enabled@ ;
+
+  \ Get whether a raw key is available
+  : raw-key>? ( -- available ) shared-term do-raw-key>? ;
+
+  \ Get a raw key
+  : raw-key> ( -- attributes key ) shared-term do-raw-key> ;
   
 end-module

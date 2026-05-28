@@ -374,6 +374,9 @@ begin-module picocalc-term-common
       \ The terminal input task
       cell member input-task
       
+      \ The terminal input mailbox
+      cell member input-mailbox
+
       \ The terminal output task
       cell member output-task
 
@@ -394,6 +397,9 @@ begin-module picocalc-term-common
 
       \ The terminal lock
       lock-size member term-lock
+
+      \ The raw key lock
+      lock-size member raw-key-lock
 
       \ The input stream
       input-stream-size stream-size member input-stream
@@ -642,6 +648,18 @@ begin-module picocalc-term-common
     \ Carry out getting the screenshot hook
     method do-screenshot-hook@ ( self -- xt )
 
+    \ Carry out setting raw keys enabled
+    method do-raw-keys-enabled! ( enabled self -- )
+
+    \ Carry out getting raw keys enabled
+    method do-raw-keys-enabled@ ( self -- enabled )
+
+    \ Get whether a raw key is available
+    method do-raw-key>? ( self -- available )
+
+    \ Get a raw key
+    method do-raw-key> ( self -- attributes key )
+    
     \ Inject a keycode
     method inject-keycode ( keycode self -- )
 
@@ -684,6 +702,7 @@ begin-module picocalc-term-common
     :noname { self -- }
       self <object>->new
       0 self input-task !
+      0 self input-mailbox !
       0 self output-task !
       0 self screenshot-task !
       0 self screenshot-mailbox !
@@ -704,6 +723,7 @@ begin-module picocalc-term-common
     :noname { self -- }
       <picocalc-bios> self bios-intf init-object
       self term-lock init-lock
+      self raw-key-lock init-lock
       input-stream-size self input-stream init-stream
       output-stream-size self output-stream init-stream
       self chars-buf [ term-width term-height * ] literal $20 fill
@@ -720,6 +740,7 @@ begin-module picocalc-term-common
       self 1 ['] run-input 320 128 768 picocalc-tasks-core spawn-on-core
       self input-task !
       c" term-input" self input-task @ task-name!
+      self input-mailbox 1 self input-task @ config-notify
       self input-task @ run
       self 1 ['] run-output 1536 256 1024 picocalc-tasks-core spawn-on-core
       self output-task !
@@ -1002,6 +1023,7 @@ begin-module picocalc-term-common
 
     \ Handle input
     :noname { self -- }
+      self bios-intf picocalc-raw-keys@ if 0 wait-notify-indefinite drop then
       self bios-intf picocalc-keys> { attrs c }
       attrs 0= if
         c self handle-normal-key
@@ -1624,6 +1646,44 @@ begin-module picocalc-term-common
       screenshot-hook @
     ; define do-screenshot-hook@
 
+    \ Carry out setting raw keys enabled
+    :noname ( enabled self -- )
+      [: { enabled self }
+        enabled self bios-intf picocalc-raw-keys!
+        enabled not if self input-task @ if 0 self input-task @ notify then then
+      ;] over raw-key-lock with-lock
+    ; define do-raw-keys-enabled!
+
+    \ Carry out getting raw keys enabled
+    :noname ( self -- enabled )
+      bios-intf picocalc-raw-keys@
+    ; define do-raw-keys-enabled@
+
+    \ Get whether a raw key is available
+    :noname ( self -- available )
+      [: { self }
+        self bios-intf picocalc-raw-keys@ if
+          self bios-intf picocalc-keys>?
+        else
+          false
+        then
+      ;] over raw-key-lock with-lock
+    ; define do-raw-key>?
+
+    \ Get a raw key
+    :noname { self -- attributes key }
+      begin
+        self [: { self }
+          self bios-intf picocalc-raw-keys@ if
+            self bios-intf picocalc-keys> true
+          else
+            false
+          then
+        ;] self raw-key-lock with-lock
+        dup not if pause-reschedule-last then
+      until
+    ; define do-raw-key>
+    
     \ Draw the cursor
     :noname { self -- }
       true self cursor-x @ self cursor-y @ self draw-char-with-cursor
