@@ -175,6 +175,39 @@ Get the base path for saving screenshots with the attention key combo.
 
 This is the actual word that implements the taking of screenshots. Note that when this word is executed directly the display is _not_ flashed unlike when taking a screenshot with the console attention key combo.
 
+### `picocalc-keys`
+
+Compiling `extra/rp_common/picocalc_keys.fs` adds the `picocalc-keys` module.
+
+This module makes use of raw keys, and ignores keypresses and key releases when raw keys are not enabled.
+
+This module contains the following words:
+
+##### `x-key-out-of-range`
+( -- )
+
+Keycode out of range exception. Note that for this purpose all keycodes in range 0 <= x < 256 are treated as valid even if they do not correspond to actual keys.
+
+##### `clear-keymap`
+( -- )
+
+Clear the keycode map so that all keys are treated as not being pressed.
+
+##### `update-keymap`
+( -- )
+
+Update the keymap by reading any queued raw keys in a non-blocking fashion.
+
+##### `wait-update-keymap`
+( -- )
+
+Update the keymap by waiting for a raw key to be queued and then reading any queued raw keys in a blocking fashion.
+
+##### `keymap@`
+( keycode -- pressed )
+
+Get whether a given key is pressed by keycode up to the last time `update-keymap` or `wait-update-keymap` were called while raw keys were enabled.
+
 ### `fat32-tools`
 
 Compiling `extra/rp_common/picocalc_fat32.fs` adds the following words to the `fat32-tools` module:

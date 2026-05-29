@@ -208,6 +208,37 @@
 <p>This is the actual word that implements the taking of screenshots. Note that when this word is executed directly the display is <em>not</em> flashed unlike when taking a screenshot with the console attention key combo.</p>
 </section>
 </section>
+<section id="picocalc-keys">
+<h2><code class="docutils literal notranslate"><span class="pre">picocalc-keys</span></code><a class="headerlink" href="#picocalc-keys" title="Link to this heading">¶</a></h2>
+<p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_keys.fs</span></code> adds the <code class="docutils literal notranslate"><span class="pre">picocalc-keys</span></code> module.</p>
+<p>This module makes use of raw keys, and ignores keypresses and key releases when raw keys are not enabled.</p>
+<p>This module contains the following words:</p>
+<section id="x-key-out-of-range">
+<h3><code class="docutils literal notranslate"><span class="pre">x-key-out-of-range</span></code><a class="headerlink" href="#x-key-out-of-range" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Keycode out of range exception. Note that for this purpose all keycodes in range 0 &lt;= x &lt; 256 are treated as valid even if they do not correspond to actual keys.</p>
+</section>
+<section id="clear-keymap">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-keymap</span></code><a class="headerlink" href="#clear-keymap" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Clear the keycode map so that all keys are treated as not being pressed.</p>
+</section>
+<section id="update-keymap">
+<h3><code class="docutils literal notranslate"><span class="pre">update-keymap</span></code><a class="headerlink" href="#update-keymap" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Update the keymap by reading any queued raw keys in a non-blocking fashion.</p>
+</section>
+<section id="wait-update-keymap">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-update-keymap</span></code><a class="headerlink" href="#wait-update-keymap" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Update the keymap by waiting for a raw key to be queued and then reading any queued raw keys in a blocking fashion.</p>
+</section>
+<section id="keymap">
+<h3><code class="docutils literal notranslate"><span class="pre">keymap&#64;</span></code><a class="headerlink" href="#keymap" title="Link to this heading">¶</a></h3>
+<p>( keycode – pressed )</p>
+<p>Get whether a given key is pressed by keycode up to the last time <code class="docutils literal notranslate"><span class="pre">update-keymap</span></code> or <code class="docutils literal notranslate"><span class="pre">wait-update-keymap</span></code> were called while raw keys were enabled.</p>
+</section>
+</section>
 <section id="fat32-tools">
 <h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#fat32-tools" title="Link to this heading">¶</a></h2>
 <p>Compiling <code class="docutils literal notranslate"><span class="pre">extra/rp_common/picocalc_fat32.fs</span></code> adds the following words to the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module:</p>
