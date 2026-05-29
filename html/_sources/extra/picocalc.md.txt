@@ -193,6 +193,16 @@ Keycode out of range exception. Note that for this purpose all keycodes in range
 
 Clear the keycode map so that all keys are treated as not being pressed.
 
+##### `reset-keymap`
+( -- )
+
+Reset the pressed and released states of all keys in the keycode map.
+
+##### `reset-key`
+( keycode -- )
+
+Reset the pressed and released state of a single key in the keycode map by keycode.
+
 ##### `update-keymap`
 ( -- )
 
@@ -207,6 +217,16 @@ Update the keymap by waiting for a raw key to be queued and then reading any que
 ( keycode -- pressed )
 
 Get whether a given key is pressed by keycode up to the last time `update-keymap` or `wait-update-keymap` were called while raw keys were enabled.
+
+##### `keymap-pressed@`
+( keycode -- pressed )
+
+Get whether a given key has been pressed since the last time that key was reset by keycode.
+
+##### `keymap-released@`
+( keycode -- released )
+
+Get whether a given key has been released since the last time that key was reset by keycode.
 
 ### `fat32-tools`
 

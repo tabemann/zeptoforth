@@ -25,9 +25,7 @@ begin-module picocalc-keys
   lock import
   
   \ Keycode out of range exception
-  : x-key-out-of-range ( -- )
-    ." key out of range" cr
-  ;
+  : x-key-out-of-range ( -- ) ." key out of range" cr ;
   
   begin-module picocalc-keys-internal
     
@@ -42,11 +40,23 @@ begin-module picocalc-keys
       \ Keycode bitmap
       256 8 / member keymap
       
+      \ Pressed keycode bitmap
+      256 8 / member keymap-pressed
+      
+      \ Released keycode bitmap
+      256 8 / member keymap-released
+      
       \ Keys lock
       lock-size member keys-lock
       
       \ Clear the keymap
       method do-clear-keymap ( self -- )
+      
+      \ Reset the pressed/released state of all keys
+      method do-reset-keymap ( self -- )
+      
+      \ Reset the pressed/released state of one key
+      method do-reset-key ( keycode self -- )
       
       \ Update the keymap in a nonblocking fashion
       method do-update-keymap ( self -- )
@@ -54,9 +64,17 @@ begin-module picocalc-keys
       \ Update the keymap in a blocking fashion
       method do-wait-update-keymap ( self -- )
       
-      \ Test the keymap for whether a key, by
-      \ keycode, is pressed
+      \ Test the keymap for whether a key, by keycode, is
+      \ currently pressed
       method do-keymap@ ( key self -- pressed )
+      
+      \ Test the keymap for whether a key, by keycode, has
+      \ been pressed since the last reset
+      method do-keymap-pressed@ ( key self -- pressed )
+      
+      \ Test the keymap for whether a key, by keycode, has
+      \ been released since the last reset
+      method do-keymap-released@ ( key self -- released )
       
       \ Update the keymap for a single key
       method update-key ( attr keycode self -- )
@@ -71,9 +89,23 @@ begin-module picocalc-keys
         self keys-lock init-lock
       ; define new
       
-      :noname ( self -- )
-        keymap 256 8 / $00 fill
+      :noname { self -- }
+        self keymap 256 8 / $00 fill
+        self do-reset-keymap
       ; define do-clear-keymap
+      
+      :noname { self -- }
+        self keymap-pressed 256 8 / $00 fill
+        self keymap-released 256 8 / $00 fill
+      ; define do-reset-keymap
+      
+      :noname { keycode self -- pressed }
+        keycode 256 u< averts x-key-out-of-range
+        keycode 7 and bit
+        keycode 3 rshift self keymap-pressed + cbic!
+        keycode 7 and bit
+        keycode 3 rshift self keymap-released + cbic!
+      ; define do-reset-key
       
       :noname { self -- }
         raw-key>? if
@@ -98,13 +130,31 @@ begin-module picocalc-keys
         keycode 7 and bit keycode 3 rshift self keymap + cbit@
       ; define do-keymap@
       
+      :noname { keycode self -- pressed }
+        keycode 256 u< averts x-key-out-of-range
+        keycode 7 and bit
+        keycode 3 rshift self keymap-pressed + cbit@
+      ; define do-keymap-pressed@
+      
+      :noname { keycode self -- released }
+        keycode 256 u< averts x-key-out-of-range
+        keycode 7 and bit
+        keycode 3 rshift self keymap-released + cbit@
+      ; define do-keymap-released@
+      
       :noname { attr keycode self -- }
         attr case
           KEY_PRESSED of
-            keycode 7 and bit keycode 3 rshift self keymap + cbis!
+            keycode 7 and bit
+            keycode 3 rshift self keymap + cbis!
+            keycode 7 and bit
+            keycode 3 rshift self keymap-pressed + cbis!
           endof
           KEY_RELEASED of
-            keycode 7 and bit keycode 3 rshift self keymap + cbic!
+            keycode 7 and bit
+            keycode 3 rshift self keymap + cbic!
+            keycode 7 and bit
+            keycode 3 rshift self keymap-released + cbis!
           endof
         endcase
       ; define update-key
@@ -127,6 +177,16 @@ begin-module picocalc-keys
     the-picocalc-keys do-clear-keymap
   ;
   
+  \ Reset the pressed/released state of all keys
+  : reset-keymap ( -- )
+    the-picocalc-keys do-reset-keymap
+  ;
+      
+  \ Reset the pressed/released state of one key
+  : reset-key ( keycode -- )
+    the-picocalc-keys do-reset-key
+  ;
+
   \ Update the keymap in a nonblocking fashion
   : update-keymap ( -- )
     the-picocalc-keys do-update-keymap
@@ -137,10 +197,22 @@ begin-module picocalc-keys
     the-picocalc-keys do-wait-update-keymap
   ;
   
-  \ Test the keymap for whether a key, by keycode,
-  \ is pressed
+  \ Test the keymap for whether a key, by keycode, is
+  \ pressed
   : keymap@ ( key -- pressed )
     the-picocalc-keys do-keymap@
   ;
   
+  \ Test the keymap for whether a key, by keycode, has been
+  \ pressed since the last reset
+  : keymap-pressed@ ( key -- pressed )
+    the-picocalc-keys do-keymap-pressed@
+  ;
+  
+  \ Test the keymap for whether a key, by keycode, has been
+  \ released since the last reset
+  : keymap-released@ ( key -- released )
+    the-picocalc-keys do-keymap-released@
+  ;
+
 end-module

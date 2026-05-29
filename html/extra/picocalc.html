@@ -223,6 +223,16 @@
 <p>( – )</p>
 <p>Clear the keycode map so that all keys are treated as not being pressed.</p>
 </section>
+<section id="reset-keymap">
+<h3><code class="docutils literal notranslate"><span class="pre">reset-keymap</span></code><a class="headerlink" href="#reset-keymap" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Reset the pressed and released states of all keys in the keycode map.</p>
+</section>
+<section id="reset-key">
+<h3><code class="docutils literal notranslate"><span class="pre">reset-key</span></code><a class="headerlink" href="#reset-key" title="Link to this heading">¶</a></h3>
+<p>( keycode – )</p>
+<p>Reset the pressed and released state of a single key in the keycode map by keycode.</p>
+</section>
 <section id="update-keymap">
 <h3><code class="docutils literal notranslate"><span class="pre">update-keymap</span></code><a class="headerlink" href="#update-keymap" title="Link to this heading">¶</a></h3>
 <p>( – )</p>
@@ -237,6 +247,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">keymap&#64;</span></code><a class="headerlink" href="#keymap" title="Link to this heading">¶</a></h3>
 <p>( keycode – pressed )</p>
 <p>Get whether a given key is pressed by keycode up to the last time <code class="docutils literal notranslate"><span class="pre">update-keymap</span></code> or <code class="docutils literal notranslate"><span class="pre">wait-update-keymap</span></code> were called while raw keys were enabled.</p>
+</section>
+<section id="keymap-pressed">
+<h3><code class="docutils literal notranslate"><span class="pre">keymap-pressed&#64;</span></code><a class="headerlink" href="#keymap-pressed" title="Link to this heading">¶</a></h3>
+<p>( keycode – pressed )</p>
+<p>Get whether a given key has been pressed since the last time that key was reset by keycode.</p>
+</section>
+<section id="keymap-released">
+<h3><code class="docutils literal notranslate"><span class="pre">keymap-released&#64;</span></code><a class="headerlink" href="#keymap-released" title="Link to this heading">¶</a></h3>
+<p>( keycode – released )</p>
+<p>Get whether a given key has been released since the last time that key was reset by keycode.</p>
 </section>
 </section>
 <section id="fat32-tools">
