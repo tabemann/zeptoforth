@@ -676,6 +676,7 @@ begin-module rocks
     0 wave !
     init-lives lives !
     begin
+      ansi-term::hide-cursor
       true raw-keys-enabled!
       clear-keymap
       [: dup clear-pixmap update-display ;] with-term-display
@@ -708,6 +709,7 @@ begin-module rocks
           clear-keymap
           1000 ms
           empty-keys
+          ansi-term::show-cursor
           exit
         then
         asteroid-count 0=

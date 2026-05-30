@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -359,6 +359,7 @@ begin-module snake
   
   : play-snake ( -- )
     <world> [: { the-world }
+      ansi-term::hide-cursor
       page
       [: dup clear-pixmap update-display ;] with-term-display
       the-world draw-world
@@ -375,7 +376,9 @@ begin-module snake
         then
       until
       ." *** GAME OVER ***" cr
+      1000 ms
       empty-keys
+      ansi-term::show-cursor
     ;] with-object
   ;
 

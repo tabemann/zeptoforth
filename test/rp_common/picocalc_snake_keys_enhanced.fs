@@ -371,6 +371,7 @@ begin-module snake
   
   : play-snake ( -- )
     <world> [: { the-world }
+      ansi-term::hide-cursor
       true raw-keys-enabled!
       clear-keymap
       page
@@ -393,6 +394,7 @@ begin-module snake
       clear-keymap
       1000 ms
       empty-keys
+      ansi-term::show-cursor
     ;] with-object
   ;
 

@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -675,6 +675,7 @@ begin-module rocks
     0 wave !
     init-lives lives !
     begin
+      ansi-term::hide-cursor
       [: dup clear-pixmap update-display ;] with-term-display
       start-world
       systick::systick-counter { last-systick }
@@ -700,7 +701,9 @@ begin-module rocks
           page
           ." *** GAME OVER ***" cr cr
           ." You survived " wave @ . ." waves" cr
+          1000 ms
           empty-keys
+          ansi-term::show-cursor
           exit
         then
         asteroid-count 0=
