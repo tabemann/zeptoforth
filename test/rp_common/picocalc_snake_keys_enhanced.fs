@@ -18,11 +18,21 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ The controls are:
+\ 
+\ Up: Go up
+\ Down: Go down
+\ Right: Go right
+\ Left: Go left
+\ S: Take a screenshot
+\ Q: Give up in shame
+
 begin-module snake
   
   oo import
   picocalc-term import
   picocalc-keys import
+  picocalc-screenshot import
   pixmap8 import
   st7365p-8-common import
   tinymt32 import
@@ -331,11 +341,23 @@ begin-module snake
   $1B constant escape
   
   : empty-keys ( -- ) begin key? while key drop repeat ;
+
+  : handle-screenshot ( -- )
+    [:
+      screenshot-fs@ { fs }
+      fs if
+        screenshot-path@ fs ['] take-screenshot try-and-display-error 0<> if
+          drop 2drop
+        then
+      then
+    ;] console::with-serial-error-output
+  ;
   
   : handle-key ( -- dir exit? )
     reset-keymap
     update-keymap
     [char] q keymap-pressed@ if none true exit then
+    [char] s keymap-released@ if handle-screenshot then
     none 0
     UP_ARROW keymap-pressed@ if 1+ nip up swap then
     DOWN_ARROW keymap-pressed@ if 1+ nip down swap then

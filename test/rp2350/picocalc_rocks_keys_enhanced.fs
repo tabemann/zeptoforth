@@ -24,6 +24,7 @@
 \ Right: Turn right
 \ Left: Turn left
 \ Space: Fire
+\ S: Take a screenshot
 \ Q: Give up in shame
 
 begin-module rocks
@@ -32,6 +33,7 @@ begin-module rocks
   picocalc-term import
   picocalc-sound import
   picocalc-keys import
+  picocalc-screenshot import
   pixmap8 import
   pixmap8-utils import
   font import
@@ -644,6 +646,17 @@ begin-module rocks
   $1B constant escape
   
   : empty-keys ( -- ) begin key? while key drop repeat ;
+
+  : handle-screenshot ( -- )
+    [:
+      screenshot-fs@ { fs }
+      fs if
+        screenshot-path@ fs ['] take-screenshot try-and-display-error 0<> if
+          drop 2drop
+        then
+      then
+    ;] console::with-serial-error-output
+  ;
   
   : handle-key ( -- exit? )
     reset-keymap
@@ -684,6 +697,7 @@ begin-module rocks
           current-systick exit-key?
         ;] with-term-display
         { exit-key? } to last-systick
+        [char] s keymap-released@ if handle-screenshot then
         exit-key? lives @ 0< or if
           [: dup clear-pixmap update-display ;]
           with-term-display
