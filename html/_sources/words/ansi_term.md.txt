@@ -38,7 +38,7 @@ Show the cursor. Note that multiple `show-cursor` and `hide-cursor` pairs can be
 ##### `hide-cursor`
 ( -- )
 
-Show the cursor. Note that multiple `show-cursor` and `hide-cursor` pairs can be nested.
+Hide the cursor. Note that multiple `show-cursor` and `hide-cursor` pairs can be nested.
 
 ##### `reset-terminal-cursor`
 ( -- )
