@@ -102,6 +102,7 @@ else
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/rp_common/picocalc_term.fs
 fi
 if [ ${PLATFORM} != 'rp2040' ]; then
+    utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/rp_common/picocalc_keys.fs
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/zeptoed_all.fs
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/transfer_all.fs
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/inter_fs_copy.fs

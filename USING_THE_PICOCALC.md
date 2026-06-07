@@ -98,6 +98,7 @@ Then, if you are using a shell prompt you should execute the following commands 
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_sound.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term_common.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_term.fs
+    $ utils/codeload3.sh -B 115200 -p ${TTY} serial extra/rp_common/picocalc_keys.fs
     $ utils/codeload3.sh -B 115200 -p ${TTY} serial suffix.fs
 
 If you are using zeptocom.js, you should do the following:
@@ -110,6 +111,7 @@ If you are using zeptocom.js, you should do the following:
 - Upload `extra/rp_common/picocalc_sound.fs`.
 - Upload `extra/rp_common/picocalc_term_common.fs`
 - Upload `extra/rp_common/picocalc_term.fs`.
+- Upload `extra/rp_common/picocalc_keys.fs`.
 - Issue `initializer picocalc-term::term-console`.
 - Issue 'reboot'.
 
