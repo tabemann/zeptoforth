@@ -1,4 +1,4 @@
-\ Copyright (c) 2025 Travis Bemann
+\ Copyright (c) 2025-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -98,7 +98,6 @@ begin-module picocalc-screenshot
       \ Open the file
       :noname { path-addr path-bytes fs self -- }
         self writer-open @ if self close-writer then
-\        path-addr path-bytes [: type space flush-console ;] console::with-serial-output
         self path-addr path-bytes [: { self file }
           self written-file file clone-file
           true self writer-open !
@@ -192,47 +191,71 @@ begin-module picocalc-screenshot
     \ We are out of available screenshots
     : x-out-of-screenshots ( -- ) ." out of screenshots" cr ;
 
+    \ Path is too long exception
+    : x-path-too-long ( -- ) ." path is too long" cr ;
+
+    \ Maximum path length
+    256 constant max-path-len
+    
+    \ Screenshot opener helper
+    <object> begin-class <screenshot-opener-helper>
+
+      \ FAT32 directory for helper
+      <fat32-dir> class-size member helper-dir
+
+      \ FAT32 directory entry for helper
+      <fat32-entry> class-size member helper-entry
+
+      \ Path buffer for helper
+      max-path-len cell align member helper-path-buf
+
+      \ Number buffer for helper
+      5 cell align member helper-num-buf
+
+    end-class
+
+    <screenshot-opener-helper> begin-implement
+    end-implement
+    
     \ Open a writer for the next screenshot
     : open-next-screenshot ( path-addr path-bytes writer fs -- )
       base @ { saved-base }
       [:
         10 base !
-        <fat32-entry> [:
-          3 pick 13 + cell align [:
-            { path-addr path-bytes writer fs entry new-path-buffer }
-            path-addr path-bytes strip-path to path-bytes
-            path-addr path-bytes fs root-path-exists? not if
-              path-addr path-bytes ['] drop fs with-create-dir-at-root-path
-            then
-            path-addr path-bytes writer fs entry new-path-buffer
-            path-addr path-bytes
-            [:
-              { path-addr path-bytes writer fs entry new-path-buffer dir }
-              -1 { index }
-              begin entry dir read-dir while
-                new-path-buffer 13 entry file-name@ { name-buffer name-bytes }
-                name-bytes 7 > if
-                  name-buffer 3 s" SCR" equal-strings? if
-                    name-buffer 3 + name-bytes 7 - parse-unsigned if
-                      index max to index
-                    else
-                      drop
-                    then
-                  then
+        <screenshot-opener-helper> [:
+          { path-addr path-bytes writer fs helper }
+          path-addr path-bytes strip-path to path-bytes
+          path-bytes 14 - max-path-len <= averts x-path-too-long
+          path-addr path-bytes fs root-path-exists? not if
+            path-addr path-bytes ['] drop fs with-create-dir-at-root-path
+          then
+          helper helper-dir path-addr path-bytes
+          ['] clone-dir fs with-open-dir-at-root-path
+          -1 { index }
+          <fat32-entry> helper helper-entry init-object
+          begin helper helper-entry helper helper-dir read-dir while
+            helper helper-path-buf 13 helper helper-entry file-name@
+            { name-buffer name-bytes }
+            name-bytes 7 > if
+              name-buffer 3 s" SCR" equal-strings? if
+                name-buffer 3 + name-bytes 7 - parse-unsigned if
+                  index max to index
+                else
+                  drop
                 then
-              repeat
-              index 99999 < averts x-out-of-screenshots
-              path-addr new-path-buffer path-bytes move
-              s" /SCR00000.BMP" new-path-buffer path-bytes + swap move
-              new-path-buffer path-bytes index 5 cell align [:
-                { new-path-buffer path-bytes index num-buffer }
-                num-buffer index 1+ format-unsigned { num-addr num-bytes }
-                num-addr new-path-buffer path-bytes 9 + num-bytes - +
-                num-bytes move
-              ;] with-allot
-            ;] fs with-open-dir-at-root-path
-            new-path-buffer path-bytes 13 + fs writer open-writer
-          ;] with-aligned-allot
+              then
+            then
+          repeat
+          helper helper-entry destroy
+          helper helper-dir close-dir
+          helper helper-dir destroy
+          index 99999 < averts x-out-of-screenshots
+          path-addr helper helper-path-buf path-bytes move
+          s" /SCR00000.BMP" helper helper-path-buf path-bytes + swap move
+          helper helper-num-buf index 1+ format-unsigned { num-addr num-bytes }
+          num-addr helper helper-path-buf path-bytes 9 + num-bytes - +
+          num-bytes move
+          helper helper-path-buf path-bytes 13 + fs writer open-writer
         ;] with-object
       ;] try
       saved-base base !
