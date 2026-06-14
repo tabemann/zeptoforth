@@ -1,4 +1,4 @@
-\ Copyright (c) 2024-2025 Travis Bemann
+\ Copyright (c) 2024-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -106,10 +106,8 @@ begin-module turtle
       s>f 180,0 f/ pi f*
     ;
     
-    \ Degree sine
-    : dsin { angle -- D: sin }
-      begin angle 0< while 360 +to angle repeat
-      angle 360 mod 90 + to angle
+    \ Degree sine for generating table
+    : gsin { angle -- D: sin }
       angle 0= if 0,0 exit then
       angle 45 = if
         [ pi 0,25 f* sin swap ] literal literal exit
@@ -127,6 +125,18 @@ begin-module turtle
         [ pi 1,75 f* sin swap ] literal literal exit
       then
       angle convert-angle sin
+    ;
+    
+    \ Generate sine table
+    : gsin-table ( -- ) 360 0 do i gsin 2, loop ;
+    
+    \ Degree sine table
+    create dsin-table gsin-table
+    
+    \ Degree sine
+    : dsin ( angle -- D: sin )
+      90 + 360 mod dup 0< if 360 + then
+      3 lshift dsin-table + 2@
     ;
     
     \ Degree cosine
