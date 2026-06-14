@@ -34,6 +34,8 @@
 begin-module tree
 
   turtle import
+  pixmap8 import
+  font import
   picocalc-term import
   picocalc-keys import
   picocalc-screenshot import
@@ -54,6 +56,44 @@ begin-module tree
   2e0 3e0 v/ value len-fract
   45e0 value angle
   
+  : string> { addr bytes buf-addr -- buf-addr' }
+    addr buf-addr bytes move bytes buf-addr +
+  ;
+  
+  : n> ( n buf-addr -- buf-addr' )
+    base @ { saved-base }
+    [: 10 base ! swap format-integer + ;] try
+    saved-base base ! ?raise
+  ;
+  
+  : v> ( v buf-addr -- buf-addr' )
+    base @ { saved-base }
+    [: 10 base ! swap v>f64 format-fixed 6 min + ;] try
+    saved-base base ! ?raise
+  ;
+  
+  255 255 255 rgb8 constant info-color
+  16 constant info-x
+  16 constant info-y
+
+  : draw-info ( -- )
+    256 [:
+      [: { buf display }
+        buf { buf' }
+        s" Level: " buf' string> to buf'
+        level buf' n> to buf'
+        s"  Len: " buf' string> to buf'
+        len buf' n> to buf'
+        s"  Angle: " buf' string> to buf'
+        angle v>n buf' n> to buf'
+        s"  Len-fract: " buf' string> to buf'
+        len-fract buf' v> to buf'
+        info-color buf buf' buf - info-x info-y display
+        term-font@ draw-string-to-pixmap8
+      ;] with-term-display
+    ;] with-allot
+  ;
+  
   defer draw-tree-branch
   :noname { len level -- }
     angle v>n { angle }
@@ -72,7 +112,7 @@ begin-module tree
   : draw-tree ( -- )
     updateoff
     penup clear 0 -160 setxy 0 setheading pendown
-    len level draw-tree-branch
+    len level draw-tree-branch draw-info
     updateon
   ;
   
