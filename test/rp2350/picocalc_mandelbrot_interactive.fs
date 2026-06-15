@@ -147,7 +147,7 @@ begin-module mandelbrot
             1 +to iteration
           repeat
           iteration iteration>color
-          i height j - display draw-pixel-const
+          i height 1- j - display draw-pixel-const
         loop
       loop
       draw-info
