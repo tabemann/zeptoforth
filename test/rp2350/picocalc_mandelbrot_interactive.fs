@@ -69,7 +69,7 @@ begin-module mandelbrot
     saved-base base ! ?raise
   ;
   
-  255 255 255 rgb8 constant info-color
+  191 191 191 rgb8 constant info-color
   16 constant info-x
   16 constant info-y
 
