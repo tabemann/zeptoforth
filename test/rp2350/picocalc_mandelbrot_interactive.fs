@@ -242,5 +242,3 @@ begin-module mandelbrot
   ;
   
 end-module
-
-    
