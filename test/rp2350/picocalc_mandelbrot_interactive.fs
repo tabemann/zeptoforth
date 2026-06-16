@@ -24,6 +24,7 @@
 \ Down: Pan down
 \ Right: Pan right
 \ Left: Pan left
+\ 1-9: Set multiplier
 \ -: Zoom in
 \ =: Zoom out
 \ {: Zoom X in
@@ -69,7 +70,8 @@ begin-module mandelbrot
     saved-base base ! ?raise
   ;
   
-  191 191 191 rgb8 constant info-color
+  255 255 255 rgb8 constant info-color
+  127 127 127 rgb8 constant info-shadow-color
   16 constant info-x
   16 constant info-y
 
@@ -85,6 +87,8 @@ begin-module mandelbrot
         ya buf' v> to buf'
         s"  yb: " buf' string> to buf'
         yb buf' v> to buf'
+        info-shadow-color buf buf' buf - info-x 1+ info-y 1+
+        display term-font@ draw-string-to-pixmap8
         info-color buf buf' buf - info-x info-y display
         term-font@ draw-string-to-pixmap8
       ;] with-term-display
@@ -132,9 +136,9 @@ begin-module mandelbrot
       yb ya v- { y-mult }
       display dim@ { width height }
       height 0 ?do
+        i u>v height u>v v/ y-mult v* ya v+ { y0 }
         width 0 ?do
           i u>v width u>v v/ x-mult v* xa v+ { x0 }
-          j u>v height u>v v/ y-mult v* ya v+ { y0 }
           0e0 0e0 { x y }
           0 { iteration }
           begin
@@ -168,11 +172,13 @@ begin-module mandelbrot
     ;] console::with-serial-error-output
   ;
   
+  1e0 value multiplier
+  
   0.0625e0 constant pan-factor
   
   : pan { xf yf -- }
-    xb xa v- xf pan-factor v* v* { xr }
-    yb ya v- yf pan-factor v* v* { yr }
+    xb xa v- xf pan-factor multiplier v* v* v* { xr }
+    yb ya v- yf pan-factor multiplier v* v* v* { yr }
     xr xa v+ to xa xr xb v+ to xb
     yr ya v+ to ya yr yb v+ to yb
   ;
@@ -181,8 +187,9 @@ begin-module mandelbrot
   
   : zoom { xf yf -- }
     xa xb v+ 2e0 v/ ya yb v+ 2e0 v/ { x y }
-    xb xa v- 2e0 v/ dup zoom-factor xf v* v* v+ { xd }
-    yb ya v- 2e0 v/ dup zoom-factor yf v* v* v+ { yd }
+    xb xa v- 2e0 v/ dup zoom-factor multiplier v* xf v* v* v+
+    yb ya v- 2e0 v/ dup zoom-factor multiplier v* yf v* v* v+
+    { xd yd }
     x xd v- to xa x xd v+ to xb
     y yd v- to ya y yd v+ to yb
   ;
@@ -231,6 +238,15 @@ begin-module mandelbrot
       [char] [ keymap-pressed@ if
         0e0 -1e0 zoom true to update
       then
+      [char] 9 keymap-pressed@ if 9e0 to multiplier then
+      [char] 8 keymap-pressed@ if 8e0 to multiplier then
+      [char] 7 keymap-pressed@ if 7e0 to multiplier then
+      [char] 6 keymap-pressed@ if 6e0 to multiplier then
+      [char] 5 keymap-pressed@ if 5e0 to multiplier then
+      [char] 4 keymap-pressed@ if 4e0 to multiplier then
+      [char] 3 keymap-pressed@ if 3e0 to multiplier then
+      [char] 2 keymap-pressed@ if 2e0 to multiplier then
+      [char] 1 keymap-pressed@ if 1e0 to multiplier then
       [char] r keymap-pressed@ if reset true to update then
       [char] s keymap-released@ if handle-screenshot then
       [char] q keymap-released@ if true to done then
