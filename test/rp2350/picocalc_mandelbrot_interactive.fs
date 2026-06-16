@@ -135,10 +135,13 @@ begin-module mandelbrot
       xb xa v- { x-mult }
       yb ya v- { y-mult }
       display dim@ { width height }
+      x-mult width u>v v/ { x-unit }
+      y-mult height u>v v/ { y-unit }
+      height 1- { height' }
+      ya { y0 }
       height 0 ?do
-        i u>v height u>v v/ y-mult v* ya v+ { y0 }
+        xa { x0 }
         width 0 ?do
-          i u>v width u>v v/ x-mult v* xa v+ { x0 }
           0e0 0e0 { x y }
           0 { iteration }
           begin
@@ -151,8 +154,10 @@ begin-module mandelbrot
             1 +to iteration
           repeat
           iteration iteration>color
-          i height 1- j - display draw-pixel-const
+          i height' j - display draw-pixel-const
+          x-unit x0 v+ to x0
         loop
+        y-unit y0 v+ to y0
       loop
       draw-info
       display update-display
