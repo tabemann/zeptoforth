@@ -25,18 +25,19 @@
 \ Right: Pan right
 \ Left: Pan left
 \ 1-9: Set multiplier
-\ -: Zoom in
-\ =: Zoom out
-\ {: Zoom X in
-\ }: Zoom X out
-\ [: Zoom Y in
-\ ]: Zoom Y out
+\ + or =: Zoom in
+\ - or _: Zoom out
+\ }: Zoom X in
+\ {: Zoom X out
+\ ]: Zoom Y in
+\ [: Zoom Y out
 \ R: Reset pan and zoom
 \ S: Take a screenshot
 \ Q: Give up in shame
 
 begin-module mandelbrot
   
+  oo import  
   picocalc-term import
   picocalc-keys import
   picocalc-screenshot import
@@ -54,6 +55,7 @@ begin-module mandelbrot
   0.47e0 constant init-xb
   -1.12e0 constant init-ya
   1.12e0 constant init-yb
+  1e0 value multiplier
   
   init-xa value xa
   init-xb value xb
@@ -64,6 +66,12 @@ begin-module mandelbrot
     addr buf-addr bytes move bytes buf-addr +
   ;
   
+  : n> ( n buf-addr -- buf-addr' )
+    base @ { saved-base }
+    [: 10 base ! swap format-integer + ;] try
+    saved-base base ! ?raise
+  ;
+
   : v> ( v buf-addr -- buf-addr' )
     base @ { saved-base }
     [: 10 base ! swap v>f64 format-fixed 8 min + ;] try
@@ -74,7 +82,33 @@ begin-module mandelbrot
   127 127 127 rgb8 constant info-shadow-color
   16 constant info-x
   16 constant info-y
-
+  term-pixels-dim@ drop info-x - constant save-width
+  term-font@ char-rows @ 1+ constant save-height
+  
+  save-width save-height pixmap8-buf-size buffer: save-buf
+  <pixmap8> class-size buffer: save-pixmap
+  
+  : init-save ( -- )
+    save-buf save-width save-height <pixmap8> save-pixmap
+    init-object
+  ;
+  
+  initializer init-save
+  
+  : save ( -- )
+    [: { display }
+      info-x info-y 0 0 save-width save-height
+      display save-pixmap draw-rect
+    ;] with-term-display
+  ;
+  
+  : restore ( -- )
+    [: { display }
+      0 0 info-x info-y save-width save-height
+      save-pixmap display draw-rect
+    ;] with-term-display
+  ;
+  
   : draw-info ( -- )
     256 [:
       [: { buf display }
@@ -87,6 +121,8 @@ begin-module mandelbrot
         ya buf' v> to buf'
         s"  yb: " buf' string> to buf'
         yb buf' v> to buf'
+        s"  mult: " buf' string> to buf'
+        multiplier v>n buf' n> to buf'
         info-shadow-color buf buf' buf - info-x 1+ info-y 1+
         display term-font@ draw-string-to-pixmap8
         info-color buf buf' buf - info-x info-y display
@@ -159,6 +195,7 @@ begin-module mandelbrot
         loop
         y-unit y0 v+ to y0
       loop
+      save
       draw-info
       display update-display
     ;] with-term-display
@@ -176,9 +213,7 @@ begin-module mandelbrot
       then
     ;] console::with-serial-error-output
   ;
-  
-  1e0 value multiplier
-  
+    
   0.0625e0 constant pan-factor
   
   : pan { xf yf -- }
@@ -213,6 +248,35 @@ begin-module mandelbrot
       false { done }
       update if xa xb ya yb draw false to update then
       update-keymap
+      false { update-info }
+      [char] s keymap-released@ if handle-screenshot then
+      [char] 9 keymap-pressed@ if
+        9e0 to multiplier true to update-info
+      then
+      [char] 8 keymap-pressed@ if
+        8e0 to multiplier true to update-info
+      then
+      [char] 7 keymap-pressed@ if
+        7e0 to multiplier true to update-info
+      then
+      [char] 6 keymap-pressed@ if
+        6e0 to multiplier true to update-info
+      then
+      [char] 5 keymap-pressed@ if
+        5e0 to multiplier true to update-info
+      then
+      [char] 4 keymap-pressed@ if
+        4e0 to multiplier true to update-info
+      then
+      [char] 3 keymap-pressed@ if
+        3e0 to multiplier true to update-info
+      then
+      [char] 2 keymap-pressed@ if
+        2e0 to multiplier true to update-info
+      then
+      [char] 1 keymap-pressed@ if
+        1e0 to multiplier true to update-info
+      then
       RIGHT_ARROW keymap-pressed@ if
         1e0 0e0 pan true to update
       then
@@ -225,37 +289,31 @@ begin-module mandelbrot
       DOWN_ARROW keymap-pressed@ if
         0e0 -1e0 pan true to update
       then
-      [char] = keymap-pressed@ [char] + keymap-pressed@ or if
+      [char] - keymap-pressed@ [char] _ keymap-pressed@ or if
         1e0 1e0 zoom true to update
       then
-      [char] - keymap-pressed@ [char] _ keymap-pressed@ or if
+      [char] = keymap-pressed@ [char] + keymap-pressed@ or if
         -1e0 -1e0 zoom true to update
       then
-      [char] } keymap-pressed@ if
+      [char] { keymap-pressed@ if
         1e0 0e0 zoom true to update
       then
-      [char] { keymap-pressed@ if
+      [char] } keymap-pressed@ if
         -1e0 0e0 zoom true to update
       then
-      [char] ] keymap-pressed@ if
+      [char] [ keymap-pressed@ if
         0e0 1e0 zoom true to update
       then
-      [char] [ keymap-pressed@ if
+      [char] ] keymap-pressed@ if
         0e0 -1e0 zoom true to update
       then
-      [char] 9 keymap-pressed@ if 9e0 to multiplier then
-      [char] 8 keymap-pressed@ if 8e0 to multiplier then
-      [char] 7 keymap-pressed@ if 7e0 to multiplier then
-      [char] 6 keymap-pressed@ if 6e0 to multiplier then
-      [char] 5 keymap-pressed@ if 5e0 to multiplier then
-      [char] 4 keymap-pressed@ if 4e0 to multiplier then
-      [char] 3 keymap-pressed@ if 3e0 to multiplier then
-      [char] 2 keymap-pressed@ if 2e0 to multiplier then
-      [char] 1 keymap-pressed@ if 1e0 to multiplier then
       [char] r keymap-pressed@ if reset true to update then
-      [char] s keymap-released@ if handle-screenshot then
       [char] q keymap-released@ if true to done then
       reset-keymap
+      update-info update not and if
+        [: restore draw-info update-display ;]
+        with-term-display
+      then
     done until
     false raw-keys-enabled!
     1000 ms
