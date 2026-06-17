@@ -117,6 +117,7 @@ begin-module block-game
   : random-color ( -- color ) colors random 1+ ;
   
   : init-game ( -- )
+    0 to score
     game-blocks game-width game-height * 0 fill
     game-height game-init-height ?do
       game-width 0 ?do
