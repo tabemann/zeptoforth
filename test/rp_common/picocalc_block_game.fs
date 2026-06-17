@@ -91,8 +91,8 @@ begin-module block-game
   0 value game-falling-block
   0 value game-falling-block-x
   0,0 2value game-falling-block-y
-  1560 constant block-fall-delay
-  1,5 game-height s>f f* 2constant block-fall-speed
+  3125 constant block-fall-delay
+  1,25 game-height s>f f* 2constant block-fall-speed
   0 value last-block-fall-tick
   1250 constant select-move-delay
   0 value last-select-move-tick
