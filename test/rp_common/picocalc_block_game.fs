@@ -20,10 +20,10 @@
 
 \ The controls are:
 \ 
-\ Up: Pan up
-\ Down: Pan down
-\ Right: Pan right
-\ Left: Pan left
+\ Up: Move up
+\ Down: Move down
+\ Right: Move right
+\ Left: Move left
 \ Space: Select
 \ S: Take a screenshot
 \ Q: Give up in shame
