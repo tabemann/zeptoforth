@@ -127,7 +127,11 @@ begin-module neopixel
     init-pio addr neopixel-pio !
     init-sm addr neopixel-sm !
     addr clear-neopixel
-    160 15 init-sm init-pio sm-clkdiv! \ 8000000 Hz
+    [ rp2040? ] [if]
+      160 15 init-sm init-pio sm-clkdiv! \ 8000000 Hz with a 125 MHz sysclk
+    [else]
+      192 18 init-sm init-pio sm-clkdiv! \ 8000000 Hz with a 150 MHz sysclk
+    [then]
     left init-sm init-pio sm-out-shift-dir
     on init-sm init-pio sm-autopull!
     24 init-sm init-pio sm-pull-threshold!
