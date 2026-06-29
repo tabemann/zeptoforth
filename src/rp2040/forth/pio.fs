@@ -1183,6 +1183,18 @@ begin-module pio
     2dup 2>r SM_CLKDIV_INT! 2r> SM_CLKDIV_FRAC!
   ;
 
+  \ Set the clock to the nearest possible clock based on SYSCLK
+  : sm-clock! { clock sm pio -- }
+    sm pio validate-sm-pio
+    clock sysclk @ u<= averts x-clkdiv-out-of-range
+    sysclk @ clock / $10000 u<= averts x-clkdiv-out-of-range
+    sysclk @ s>f clock s>f f/ { D: div-clock }
+    div-clock drop 0 256,0 f* round-zero
+    div-clock round-zero
+    over 0<> over 65536 = and triggers x-clkdiv-out-of-range
+    sm pio sm-clkdiv!
+  ;
+
   \ Set the address for a state machine
   : sm-addr! ( address state-machine pio -- )
     2dup validate-sm-pio

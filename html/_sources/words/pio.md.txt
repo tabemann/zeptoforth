@@ -189,6 +189,11 @@ Restart state machines.
 
 Set the clock divisor for a state machine.
 
+##### `sm-clock!`
+( hz state-machine pio -- )
+
+Set the clock divisor for a state machine to give a particular frequency in Hz.
+
 ##### `sm-addr!`
 ( address state-machine pio -- )
 

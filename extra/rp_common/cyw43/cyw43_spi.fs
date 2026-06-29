@@ -321,13 +321,13 @@ begin-module cyw43-spi
 
       \ Set the clock divisor, i.e. 62.5 MHz
       [ rp2040? ] [if]
-        0 2 sm pio sm-clkdiv!
+        62500000 sysclk @ min sm pio sm-clock!
       [else]
         \ This is a hack to get this to work on the RP2350; this should read:
-        \ 103 2 sm pio sm-clk-div!
+        \ 103 2 sm pio sm-clkdiv!
         \ but for some reason that does not work but this slower setting does.
         
-        0 3 sm pio sm-clkdiv!
+        50000000 sysclk @ min sm pio sm-clock!
       [then]
 
       \ Initialize the CLK and DIO pins' initial direction (to output) and value
