@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2020 Travis Bemann
+# Copyright (c) 2020-2026 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@ rm -rf obj
 rm -rf upload.fs
 make html
 make epub
+rm -rf html/.buildinfo.bak
+rm -rf epub/.buildinfo.bak
 rm -rf docs
 mv html docs
 rm -rf utils/zeptoforth_venv
