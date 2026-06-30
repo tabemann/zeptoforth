@@ -157,7 +157,7 @@ flash_rp() {
     udisksctl mount -b ${BLOCK_DEVICE}
     sleep 1
     cp ${IMAGE} ${FILESYSTEM}
-    sleep 8
+    sleep 10
 }
 
 issue_bootsel() {
