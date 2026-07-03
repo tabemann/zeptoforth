@@ -71,7 +71,7 @@ begin-module net-http-demo
         ." <head><title>Index</title></head>"
         ." <body>"
         ." <h1>Index</h1>"
-        ." <ul>
+        ." <ul>"
         .\" <li><a href=\"/hello.txt\">hello.txt</a></li>"
         .\" <li><a href=\"/hello.html\">hello.html</a></li>"
         .\" <li><a href=\"/dump-headers.txt\">dump-headers.txt</a></li>"
