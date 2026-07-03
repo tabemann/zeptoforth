@@ -76,6 +76,7 @@ begin-module net-http-demo
         .\" <li><a href=\"/hello.html\">hello.html</a></li>"
         .\" <li><a href=\"/dump-headers.txt\">dump-headers.txt</a></li>"
         .\" <li><a href=\"/echo-uri/\">echo-uri/</a></li>"
+        .\" <li><a href=\"/dump-tasks.txt\">dump-tasks.txt</a></li>"
         ." </ul>"
         ." </body>"
         ." </html>"
@@ -109,7 +110,7 @@ begin-module net-http-demo
     then
   ;
 
-  : dump-headers ( -- )
+  : dump-headers-txt ( -- )
     0 0 { cr-count nl-count }
     s" text/text" http-ok.
     begin http-closing? not cr-count 2 <> nl-count 2 <> and and while
@@ -132,13 +133,25 @@ begin-module net-http-demo
     then
   ;
   
+  : dump-tasks-txt ( -- )
+    http-method@ dup method-get = over method-head = or swap method-post = or if
+      s" text/text " http-ok.
+      http-method@ dup method-get = swap method-post = or if
+        task::dump-tasks
+      then
+    else
+      http-method-not-allowed.
+    then
+  ;
+
   : init-demo ( -- )
     ['] index-html s" /" register-fixed-uri
     ['] index-html s" /index.html" register-fixed-uri
     ['] hello-txt s" /hello.txt" register-fixed-uri
     ['] hello-html s" /hello.html" register-fixed-uri
-    ['] dump-headers s" /dump-headers.txt" register-fixed-uri
+    ['] dump-headers-txt s" /dump-headers.txt" register-fixed-uri
     ['] echo-uri s" /echo-uri/" register-prefix-uri
+    ['] dump-tasks-txt s" /dump-tasks.txt" register-fixed-uri
   ;
   
 end-module
