@@ -889,6 +889,12 @@ begin-module net-http
     http-server uri-buffer http-server uri-len @
   ;
 
+  \ Get the current endpoint
+  : http-endpoint@ ( -- endpoint ) current-http-server dyn@ http-endpoint @ ;
+
+  \ Get the current interface
+  : http-interface@ ( -- interface ) current-http-server dyn@ http-interface @ ;
+
   \ Serve protocol
   : http-protocol. ( -- ) current-http-server dyn@ serve-protocol ;
 
