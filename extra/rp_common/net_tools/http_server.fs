@@ -202,7 +202,7 @@ begin-module net-http
         not if addr bytes + 0 0 false false exit then
         addr 3 + bytes 3 - rot true true
       else
-        addr 1+ bytes 1- addr c@ false true
+        addr 1+ bytes 1- addr c@ dup [char] + = if drop bl then false true
       then
     ;
 
@@ -471,7 +471,12 @@ begin-module net-http
       ; define do-http-key
 
       \ Carry out KEY?
-      :noname ( self -- flag ) http-buffer-offset @ 0> ; define do-http-key?
+      :noname { self -- flag }
+        self http-buffer-offset @ 0>
+        self http-endpoint @ endpoint-rx-data@ nip
+        self endpoint-rx-offset @ 0 max - 0> or
+        self http-endpoint @ waiting-rx-data? or
+      ; define do-http-key?
       
       \ Find HTTP header newline
       :noname { self -- offset | -1 }
@@ -816,7 +821,7 @@ begin-module net-http
           bytes 0> if false self new-http? ! false self http-start-set? ! then
           bytes self endpoint-rx-offset @ -
           http-buffer-size self http-buffer-offset @ - min { accept-bytes }
-          addr accept-bytes self add-http-buffer
+          addr self endpoint-rx-offset @ + accept-bytes self add-http-buffer
           accept-bytes self endpoint-rx-offset +!
           self endpoint-rx-offset @ bytes = if
             endpoint self http-interface @ endpoint-done
