@@ -240,7 +240,7 @@ begin-module net-http-console-out
           key? if
             key { c }
             -1 +to len
-            c [char] % <> c [char] & <> and c [char] + <> and if
+            c [char] % <> c [char] & <> and c [char] + <> and c bl > and if
               s? if c saved-emit-hook execute then
             then
             c [char] + = if
