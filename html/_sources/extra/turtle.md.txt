@@ -60,10 +60,20 @@ Pen down, i.e. start drawing lines with turtle movement.
 
 Get whether the pen is down.
 
+##### `fsetxy`
+( D: x D: y -- )
+
+Set the position of the turtle to *x* and *y* as S31.32 fixed-point values, where (0, 0) is in the center of the display. The *x* coordinate increases from left to right, and the *y* coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.
+
 ##### `setxy`
 ( x y -- )
 
 Set the position of the turtle to *x* and *y*, where (0, 0) is in the center of the display. The *x* coordinate increases from left to right, and the *y* coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.
+
+##### `fgetxy`
+( -- D: x D: y )
+
+Get the position of the turtle as S31.32 fixed-point values, where (0, 0) is in the center of the display. The *x* coordinate increases from left to right, and the *y* coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.
 
 ##### `getxy`
 ( -- x y )

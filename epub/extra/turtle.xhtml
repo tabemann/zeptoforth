@@ -73,10 +73,20 @@
 <p>( – pen-down? )</p>
 <p>Get whether the pen is down.</p>
 </section>
+<section id="fsetxy">
+<h3><code class="docutils literal notranslate"><span class="pre">fsetxy</span></code></h3>
+<p>( D: x D: y – )</p>
+<p>Set the position of the turtle to <em>x</em> and <em>y</em> as S31.32 fixed-point values, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
+</section>
 <section id="setxy">
 <h3><code class="docutils literal notranslate"><span class="pre">setxy</span></code></h3>
 <p>( x y – )</p>
 <p>Set the position of the turtle to <em>x</em> and <em>y</em>, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
+</section>
+<section id="fgetxy">
+<h3><code class="docutils literal notranslate"><span class="pre">fgetxy</span></code></h3>
+<p>( – D: x D: y )</p>
+<p>Get the position of the turtle as S31.32 fixed-point values, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.</p>
 </section>
 <section id="getxy">
 <h3><code class="docutils literal notranslate"><span class="pre">getxy</span></code></h3>

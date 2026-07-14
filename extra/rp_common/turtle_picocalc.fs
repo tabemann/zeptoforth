@@ -235,6 +235,21 @@ begin-module turtle
   \ Get whether the pen is down
   : getpendown ( -- pendown? ) pen-down? ;
   
+  \ Set the x/y coordinate of the turtle as S31.32 fixed-point values
+  : fsetxy ( D: x D: y -- )
+    [: { D: x D: y display }
+      display erase-turtle
+      pen-down? if
+        pen-size pen-color turtle-x f>s turtle-y f>s x f>s y f>s display
+        draw-line
+      then
+      x to turtle-x
+      y to turtle-y
+      display draw-turtle
+      update-display? if display update-display then
+    ;] with-term-display
+  ;
+
   \ Set the x/y coordinate of the turtle
   : setxy ( x y -- )
     [: { x y display }
@@ -249,13 +264,18 @@ begin-module turtle
     ;] with-term-display
   ;
 
+  \ Get the x/y coordinate of the turtle as S31.32 fixed-point values
+  : fgetxy ( -- D: x D: y )
+    turtle-x turtle-y
+  ;
+  
   \ Get the x/y coordinate of the turtle - note that this is only accurate to
   \ the pixel, so calling GETXY and then using the same values for SETXY may
   \ lose precision.
   : getxy ( -- x y )
     turtle-x f>s turtle-y f>s
   ;
-  
+
   \ Set the angle, from pointing up, of the turtle
   : setheading ( angle -- )
     [: { angle display }
