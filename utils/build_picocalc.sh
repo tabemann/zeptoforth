@@ -22,7 +22,7 @@ set -e
 # SOFTWARE.
 
 usage() {
-    echo "Usage: $0 <platform> <port> (5x8 | 5x8_v2 | 6x8 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1]"
+    echo "Usage: $0 <platform> <port> (5x8 | 5x8_v2 | 6x8 | 6x12 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1]"
 }
 
 if [ "$#" -lt 3 ]; then
