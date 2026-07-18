@@ -194,7 +194,7 @@ begin-module frame-process
           then
           ?raise
         again
-      ;] 1024 256 1024 1 spawn-on-core
+      ;] 1024 256 1536 1 spawn-on-core
       c" frame-process" over task-name!
       run
     ; define run-frame-process
