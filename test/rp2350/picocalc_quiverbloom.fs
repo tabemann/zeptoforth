@@ -18,6 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ This is based off code at:
+\ https://github.com/oonap0oo/QB64-projects/blob/main/quiverbloom2.bas
+
 begin-module quiverbloom
 
   float32 import
