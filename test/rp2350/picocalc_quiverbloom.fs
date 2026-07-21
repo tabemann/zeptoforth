@@ -74,7 +74,16 @@ begin-module quiverbloom
     y [ 160e0 200e0 v/ ] literal v* 160e0 v+ v>n
   ;
   
-  : hypot { x y -- hypot } x x v* y y v* v+ vsqrt ;
+  : vapproxisqrt { x -- isqrt }
+    x 0.5e0 v* { x2 }
+    $5F3759DF x 1 arshift - { y } \ yes, this is correct
+    y 1.5e0 x2 y v* y v* v- v* to y \ 1st iteration of Newton-Raphson
+    y 1.5e0 x2 y v* y v* v- v* \ 2nd iteration of Newton-Raphson
+  ;
+
+  : vapproxsqrt ( x -- sqrt ) dup vapproxisqrt v* ;
+
+  : hypot { x y -- hypot } x x v* y y v* v+ vapproxsqrt ;
   
   : drop-keys ( -- ) begin key? while key drop repeat ;
   
