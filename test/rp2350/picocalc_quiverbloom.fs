@@ -83,32 +83,35 @@ begin-module quiverbloom
     [:
       page
       [: dup clear-pixmap update-display ;] with-term-display
-      0e0 { t }
-      begin t [ 2e0 vpi v* ] literal v<= while
-        t [: { t display }
-          display clear-pixmap
-          0e0 { x }
-          begin x 12000e0 v<= while
-            x 235e0 v/ { y }
-            4e0 x 11e0 v/ 8e0 t v* v+ vsin v+ x 14e0 v/ vcos v* { k }
-            y 9e0 v/ 19e0 v- { e }
-            k e hypot y 9e0 v/ 3e0 t v* v+ vsin v+ { d }
-            2e0 2e0 k v* vsin v*
-            y 17e0 v/ vsin k v* 9e0 2e0 y 3e0 d v* v- vsin v* v+ v* v+ { q }
-            d d v* 50e0 v/ { c }
-            q 50e0 c vcos v* v- 85e0 v- { xp }
-            d 39e0 v* q c vsin v* v- 620e0 v- { yp }
-            xp t vcos v* yp t vsin v* v- { xr }
-            xp t vsin v* yp t vcos v* v+ { yr }
-            100e0 3e0 k v* vsin v* v>n { col }
-            255 col 155 + 255 col - rgb8 xr yr rescale display draw-pixel-const
-            0.5e0 x v+ to x
-          repeat
-          display update-display
-        ;] with-term-display
-        key? if exit then
-        [ vpi 400e0 v/ ] literal t v+ to t
-      repeat
+      begin
+        0e0 { t }
+        begin t [ 2e0 vpi v* ] literal v<= while
+          t [: { t display }
+            display clear-pixmap
+            0e0 { x }
+            begin x 12000e0 v<= while
+              x 235e0 v/ { y }
+              4e0 x 11e0 v/ 8e0 t v* v+ vsin v+ x 14e0 v/ vcos v* { k }
+              y 9e0 v/ 19e0 v- { e }
+              k e hypot y 9e0 v/ 3e0 t v* v+ vsin v+ { d }
+              2e0 2e0 k v* vsin v*
+              y 17e0 v/ vsin k v* 9e0 2e0 y 3e0 d v* v- vsin v* v+ v* v+ { q }
+              d d v* 50e0 v/ { c }
+              q 50e0 c vcos v* v- 85e0 v- { xp }
+              d 39e0 v* q c vsin v* v- 620e0 v- { yp }
+              xp t vcos v* yp t vsin v* v- { xr }
+              xp t vsin v* yp t vcos v* v+ { yr }
+              100e0 3e0 k v* vsin v* v>n { col }
+              255 col 155 + 255 col - rgb8 xr yr rescale display
+              draw-pixel-const
+              0.5e0 x v+ to x
+            repeat
+            display update-display
+          ;] with-term-display
+          key? if exit then
+          [ vpi 400e0 v/ ] literal t v+ to t
+        repeat
+      again
     ;] try
     show-cursor
     ?raise
