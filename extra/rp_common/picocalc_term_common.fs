@@ -810,7 +810,7 @@ begin-module picocalc-term-common
     \ Handle a normal key
     :noname { c self -- }
       attention? @ if
-        c KEY_ESC = if $1B to key then
+        c KEY_ESC = if $1B to c then
         c $80 < if c [: attention-hook @ ?execute ;] try drop then
       else
         c linefeed = if s\" \r" self input-string exit then
@@ -844,7 +844,7 @@ begin-module picocalc-term-common
     \ Handle a control key
     :noname { c self -- }
       attention? @ if
-        c KEY_ESC = if $1B to key then
+        c KEY_ESC = if $1B to c then
         c $80 < if
           c convert-control [: attention-hook @ ?execute ;] try drop
         then

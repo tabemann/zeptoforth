@@ -54,12 +54,20 @@ continue-module internal
   5 constant do-limit-local
   6 constant do-leave-local
   
+  \ Not a local or VALUE exception
+  : x-not-local-or-value ( -- ) ." not a local or value" cr ;
+
   \ Out of local space exception
   : x-out-of-locals ( -- ) ." out of local space" cr ;
 
   \ Loop variable not found
   : x-loop-var-not-found ( -- ) ." loop variable not found" cr ;
 
+  \ Validate that a word is a VALUE
+  : validate-value ( word -- )
+    word-flags h@ init-value-flag and averts x-not-local-or-value
+  ;
+  
   \ Find a loop variable
   : find-loop-var ( i type addr -- i' addr' )
     begin dup local-buf-bottom @ < while
@@ -636,7 +644,7 @@ end-module> import
   then
   start-compile-no-push
   visible
-  compiling-to-flash? if init-value then
+  init-value
   hreserve
   6 push,
   [ armv6m-instr import ]
@@ -666,7 +674,7 @@ end-module> import
   then
   start-compile-no-push
   visible
-  compiling-to-flash? if init-value then
+  init-value
   hreserve
   [ armv6m-instr import ]
   8 dp subs_,#_
@@ -696,12 +704,12 @@ end-module> import
   token dup 0<> averts x-token-expected
   state @ if
     2dup parse-set-local not if
-      find dup 0<> averts x-unknown-word >xt compile-to-value
+      find dup 0<> averts x-unknown-word dup validate-value >xt compile-to-value
     else
       2drop
     then
   else
-    find dup 0<> averts x-unknown-word >xt
+    find dup 0<> averts x-unknown-word dup validate-value >xt
     dup 2value? if value-addr@ 2! else value-addr@ ! then
   then
 ;
@@ -712,12 +720,13 @@ end-module> import
   token dup 0<> averts x-token-expected
   state @ if
     2dup parse-add-local not if
-      find dup 0<> averts x-unknown-word >xt compile-+to-value
+      find dup 0<> averts x-unknown-word dup validate-value
+      >xt compile-+to-value
     else
       2drop
     then
   else
-    find dup 0<> averts x-unknown-word >xt
+    find dup 0<> averts x-unknown-word dup validate-value >xt
     dup 2value? if value-addr@ 2+! else value-addr@ +! then
   then
 ;
