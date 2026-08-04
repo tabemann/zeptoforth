@@ -30,15 +30,18 @@ begin-module picocalc-term-common
   constant use-st7796s?
 
   \ Select fonts automatically based on what fonts are loaded
-  defined? simple-font-5x8 constant use-5x8-font?
-  defined? simple-font-5x8-v2 use-5x8-font? not and constant use-5x8-v2-font?
-  defined? simple-font-6x8 use-5x8-font? not and use-5x8-v2-font? not and
+  defined? simple-font-4x8 constant use-4x8-font?
+  defined? simple-font-5x8 use-4x8-font? not and constant use-5x8-font?
+  defined? simple-font-5x8-v2 use-4x8-font? not and use-5x8-font? not and
+  constant use-5x8-v2-font?
+  defined? simple-font-6x8 use-4x8-font? not and use-5x8-font? not and
+  use-5x8-v2-font? not and
   constant use-6x8-font?
-  defined? simple-font-6x12 use-5x8-font? not and use-5x8-v2-font? not and
-  use-6x8-font? not and
+  defined? simple-font-6x12 use-4x8-font? not and use-5x8-font? not and
+  use-5x8-v2-font? not and use-6x8-font? not and
   constant use-6x12-font?
-  defined? simple-font use-5x8-font? not and use-5x8-v2-font? not and
-  use-6x8-font? not and use-6x12-font? not and
+  defined? simple-font use-4x8-font? not and use-5x8-font? not and
+  use-5x8-v2-font? not and use-6x8-font? not and use-6x12-font? not and
   constant use-7x8-font?
 
   \ Select a core to use for the PicoCalc tasks
@@ -50,7 +53,8 @@ begin-module picocalc-term-common
 
   \ Ensure that at least one font is available
   : font-test ( -- )
-    use-5x8-font? use-5x8-v2-font? or use-6x8-font? or use-6x12-font? or use-7x8-font? or not if
+    use-4x8-font? use-5x8-font? or use-5x8-v2-font? or use-6x8-font? or
+    use-6x12-font? or use-7x8-font? or not if
       [: ." no font is available" cr ;] ?raise
     then
   ;
@@ -64,6 +68,9 @@ begin-module picocalc-term-common
   stream import
   console import
 
+  use-4x8-font? [if]
+    simple-font-4x8 import
+  [then]
   use-5x8-font? [if]
     simple-font-5x8 import
   [then]
@@ -89,6 +96,9 @@ begin-module picocalc-term-common
   begin-module picocalc-term-common-internal
 
     \ Initialize the font
+    use-4x8-font? [if]
+      initializer init-simple-font-4x8
+    [then]
     use-5x8-font? [if]
       initializer init-simple-font-5x8
     [then]
@@ -106,6 +116,9 @@ begin-module picocalc-term-common
     [then]
 
     \ Font character with
+    use-4x8-font? [if]
+      4 constant char-width
+    [then]
     use-5x8-font? use-5x8-v2-font? or [if]
       5 constant char-width
     [then]
@@ -1750,6 +1763,7 @@ begin-module picocalc-term-common
 
   \ Get the terminal font
   : term-font@ ( -- font )
+    [ use-4x8-font? ] [if] a-simple-font-4x8 [then]
     [ use-5x8-font? ] [if] a-simple-font-5x8 [then]
     [ use-5x8-v2-font? ] [if] a-simple-font-5x8-v2 [then]
     [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
