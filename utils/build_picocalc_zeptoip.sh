@@ -124,6 +124,7 @@ if [ ${PLATFORM} != 'rp2040' ]; then
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/zeptoed_all.fs
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/transfer_all.fs
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/inter_fs_copy.fs
+    utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/glob.fs
 fi
 echo 'reboot' > /tmp/picocalc/suffix.fs
 utils/codeload3.sh -B ${BAUD} -p ${PORT} serial /tmp/picocalc/suffix.fs

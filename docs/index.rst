@@ -81,6 +81,7 @@ Zeptoforth Documentation
    extra/fixed32
    extra/complex_float32
    extra/inter_fs_copy
+   extra/glob
    extra/profile
    extra/zeptoed
    extra/picocalc

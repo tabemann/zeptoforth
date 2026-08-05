@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Glob</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="glob">
+<h1>Glob</h1>
+<p>Globs enable matching over multiple files and directories, in nested directories, using wildcards. The matched file and directory paths are passed to a given execution token.</p>
+<p>There are two wildcards, <code class="docutils literal notranslate"><span class="pre">?</span></code>, which matches any single character, and <code class="docutils literal notranslate"><span class="pre">*</span></code>, which matches any number of characters in a path element. Also, if the last character of a glob is <code class="docutils literal notranslate"><span class="pre">/</span></code>, only directories will be matched (the <code class="docutils literal notranslate"><span class="pre">/</span></code> will be included in the paths passed to the execution token).</p>
+<p>By default <code class="docutils literal notranslate"><span class="pre">*</span></code> will match all files and all directories in a given directory; if one only wants to match files one must specify a glob containing <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">.</span></code> and <code class="docutils literal notranslate"><span class="pre">..</span></code> are never matched with wildcards, even though they can exist in glob patterns.</p>
+<p>There is a limit of 256 bytes in any given matched path; paths longer than this will be ignored.</p>
+<p>This functionality is included in <code class="docutils literal notranslate"><span class="pre">extra/common/glob.fs</span></code>.</p>
+<section id="fat32-tools">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code></h2>
+<p>The following word is in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module:</p>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">glob</span></code></h3>
+<p>( addr bytes xt – )</p>
+<p>Match any number of file or directory pathes with a glob defined by the string <em>addr</em> <em>bytes</em> and pass each path to the execution token <em>xt</em>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

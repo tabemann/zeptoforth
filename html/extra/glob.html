@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Turtle graphics &#8212; zeptoforth  documentation</title>
+    <title>Glob &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
@@ -14,8 +14,8 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Neopixels on the RP2040 and RP2350" href="neopixel.html" />
-    <link rel="prev" title="SHA-256" href="sha256.html" />
+    <link rel="next" title="Profiler Words" href="profile.html" />
+    <link rel="prev" title="Copying Files Between Filesystems" href="inter_fs_copy.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -33,139 +33,21 @@
 
           <div class="body" role="main">
             
-  <section id="turtle-graphics">
-<h1>Turtle graphics<a class="headerlink" href="#turtle-graphics" title="Link to this heading">¶</a></h1>
-<p>Optional support for turtle graphics is in <code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle*.fs</span></code>. It is designed for compatibility with Thurtle, which is based on WAForth and runs in web browsers, and Forthtoise, which is on top of gforth and uses SDL. It allows changing the color of both the lines drawn and the turtle, but does not currently support changing the line thickness (even though that will likely change in the near future).</p>
-<p>There are the following versions:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle.fs</span></code>: 16-bit graphics on the 160x80 ST7735S-based display on the Waveshare RP2040-LCD-0.96 (this can be readily modified for other ST7735S-based displays)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_st7789v.fs</span></code>: 8-bit graphics on the 320x240 ST7789V-based display on the Tufty 2040 (this can be readily modified for other parallel ST7789V-based displays)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_st7789v_spi.fs</span></code>: 8-bit graphics on SPI 320x240 ST7789V-based displays</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">extra/rp_common/turtle_picocalc.fs</span></code>: 8-bit graphics on PicoCalc’s 320x320 display</p></li>
-</ul>
-<p>The display the turtle is in is such that the (0, 0) lies in the center of the display (all distances are specified in pixels, and <em>x</em> coordinates increase from left to right while <em>y</em> coordinates increase from bottom to top) and a heading of 0 degrees (all angles here are specified in degrees, not radians) is pointing directly up along the Y dimension. The turtle starts (and is reset to by <code class="docutils literal notranslate"><span class="pre">home</span></code>) at (0, 0) with a heading of 0 degrees. Also note that the turtle begins pen down, the turtle starts out with the color (0, 255, 0), i.e. green, and the lined drawn by the turtle starts out with the color (255, 255, 255), i.e white. Note however that not all possibly-specified colors can be distinguished due to the 16-bit color of the display.</p>
-<section id="turtle">
-<h2><code class="docutils literal notranslate"><span class="pre">turtle</span></code><a class="headerlink" href="#turtle" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">turtle</span></code> module contains the following words:</p>
-<section id="setpencolor">
-<h3><code class="docutils literal notranslate"><span class="pre">setpencolor</span></code><a class="headerlink" href="#setpencolor" title="Link to this heading">¶</a></h3>
-<p>( r g b – )</p>
-<p>Set the current pen color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 to 255 (but note that 16-bit displays do not permit all possible colors in this color space to be distinguished from one another).</p>
-</section>
-<section id="setturtlecolor">
-<h3><code class="docutils literal notranslate"><span class="pre">setturtlecolor</span></code><a class="headerlink" href="#setturtlecolor" title="Link to this heading">¶</a></h3>
-<p>( r g b – )</p>
-<p>Set the current turtle color, where <em>r</em>, <em>g</em>, and <em>b</em> are values between 0 and 255 (likewise not all colors so specified may be distinguished in 16-bit color).</p>
-</section>
-<section id="forward">
-<h3><code class="docutils literal notranslate"><span class="pre">forward</span></code><a class="headerlink" href="#forward" title="Link to this heading">¶</a></h3>
-<p>( pixels – )</p>
-<p>Move the turtle forward a given number of <em>pixels</em>.</p>
-</section>
-<section id="backward">
-<h3><code class="docutils literal notranslate"><span class="pre">backward</span></code><a class="headerlink" href="#backward" title="Link to this heading">¶</a></h3>
-<p>( pixel – )</p>
-<p>Move the turtle backward a given number of <em>pixels</em>.</p>
-</section>
-<section id="left">
-<h3><code class="docutils literal notranslate"><span class="pre">left</span></code><a class="headerlink" href="#left" title="Link to this heading">¶</a></h3>
-<p>( angle – )</p>
-<p>Turn the turtle left <em>angle</em> degrees (not radians).</p>
-</section>
-<section id="right">
-<h3><code class="docutils literal notranslate"><span class="pre">right</span></code><a class="headerlink" href="#right" title="Link to this heading">¶</a></h3>
-<p>( right – )</p>
-<p>Turn the turtle right <em>angle</em> degrees (not radians).</p>
-</section>
-<section id="penup">
-<h3><code class="docutils literal notranslate"><span class="pre">penup</span></code><a class="headerlink" href="#penup" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Pen up, i.e. stop drawing lines with turtle movement.</p>
-</section>
-<section id="pendown">
-<h3><code class="docutils literal notranslate"><span class="pre">pendown</span></code><a class="headerlink" href="#pendown" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Pen down, i.e. start drawing lines with turtle movement.</p>
-</section>
-<section id="getpendown">
-<h3><code class="docutils literal notranslate"><span class="pre">getpendown</span></code><a class="headerlink" href="#getpendown" title="Link to this heading">¶</a></h3>
-<p>( – pen-down? )</p>
-<p>Get whether the pen is down.</p>
-</section>
-<section id="fsetxy">
-<h3><code class="docutils literal notranslate"><span class="pre">fsetxy</span></code><a class="headerlink" href="#fsetxy" title="Link to this heading">¶</a></h3>
-<p>( D: x D: y – )</p>
-<p>Set the position of the turtle to <em>x</em> and <em>y</em> as S31.32 fixed-point values, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
-</section>
-<section id="setxy">
-<h3><code class="docutils literal notranslate"><span class="pre">setxy</span></code><a class="headerlink" href="#setxy" title="Link to this heading">¶</a></h3>
-<p>( x y – )</p>
-<p>Set the position of the turtle to <em>x</em> and <em>y</em>, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that if the pen is down a line will be drawn.</p>
-</section>
-<section id="fgetxy">
-<h3><code class="docutils literal notranslate"><span class="pre">fgetxy</span></code><a class="headerlink" href="#fgetxy" title="Link to this heading">¶</a></h3>
-<p>( – D: x D: y )</p>
-<p>Get the position of the turtle as S31.32 fixed-point values, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.</p>
-</section>
-<section id="getxy">
-<h3><code class="docutils literal notranslate"><span class="pre">getxy</span></code><a class="headerlink" href="#getxy" title="Link to this heading">¶</a></h3>
-<p>( – x y )</p>
-<p>Get the position of the turtle, where (0, 0) is in the center of the display. The <em>x</em> coordinate increases from left to right, and the <em>y</em> coordinate increases from bottom to top. Note that the reported coordinate is in pixels, so precision may be lost.</p>
-</section>
-<section id="setheading">
-<h3><code class="docutils literal notranslate"><span class="pre">setheading</span></code><a class="headerlink" href="#setheading" title="Link to this heading">¶</a></h3>
-<p>( angle – )</p>
-<p>Set the heading of the turtnle to <em>angle</em> degrees, where 0 is pointing up along the Y dimension and 90 is pointing left along the X dimension.</p>
-</section>
-<section id="hideturtle">
-<h3><code class="docutils literal notranslate"><span class="pre">hideturtle</span></code><a class="headerlink" href="#hideturtle" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Hide the turtle.</p>
-</section>
-<section id="showturtle">
-<h3><code class="docutils literal notranslate"><span class="pre">showturtle</span></code><a class="headerlink" href="#showturtle" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Show the turtle.</p>
-</section>
-<section id="getshowturtle">
-<h3><code class="docutils literal notranslate"><span class="pre">getshowturtle</span></code><a class="headerlink" href="#getshowturtle" title="Link to this heading">¶</a></h3>
-<p>( – show-turtle? )</p>
-<p>Get whether the turtle is shown.</p>
-</section>
-<section id="updateoff">
-<h3><code class="docutils literal notranslate"><span class="pre">updateoff</span></code><a class="headerlink" href="#updateoff" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Disable updating the display.</p>
-</section>
-<section id="updateon">
-<h3><code class="docutils literal notranslate"><span class="pre">updateon</span></code><a class="headerlink" href="#updateon" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Enable updating the display, and update it.</p>
-</section>
-<section id="getupdateon">
-<h3><code class="docutils literal notranslate"><span class="pre">getupdateon</span></code><a class="headerlink" href="#getupdateon" title="Link to this heading">¶</a></h3>
-<p>( – update-on? )</p>
-<p>Get whether updating the display is on.</p>
-</section>
-<section id="clear">
-<h3><code class="docutils literal notranslate"><span class="pre">clear</span></code><a class="headerlink" href="#clear" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Clear the display but leave the turtle in the same position and heading (and it will remain visible unless the turtle is hidden).</p>
-</section>
-<section id="setpensize">
-<h3><code class="docutils literal notranslate"><span class="pre">setpensize</span></code><a class="headerlink" href="#setpensize" title="Link to this heading">¶</a></h3>
-<p>( pixels – )</p>
-<p>Set the pen size in pixels.</p>
-</section>
-<section id="getpensize">
-<h3><code class="docutils literal notranslate"><span class="pre">getpensize</span></code><a class="headerlink" href="#getpensize" title="Link to this heading">¶</a></h3>
-<p>( – pixels )</p>
-<p>Get the pen size in pixels.</p>
-</section>
-<section id="home">
-<h3><code class="docutils literal notranslate"><span class="pre">home</span></code><a class="headerlink" href="#home" title="Link to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Move the turtle to the center of the display, pointing up. No lines are drawn by this.</p>
+  <section id="glob">
+<h1>Glob<a class="headerlink" href="#glob" title="Link to this heading">¶</a></h1>
+<p>Globs enable matching over multiple files and directories, in nested directories, using wildcards. The matched file and directory paths are passed to a given execution token.</p>
+<p>There are two wildcards, <code class="docutils literal notranslate"><span class="pre">?</span></code>, which matches any single character, and <code class="docutils literal notranslate"><span class="pre">*</span></code>, which matches any number of characters in a path element. Also, if the last character of a glob is <code class="docutils literal notranslate"><span class="pre">/</span></code>, only directories will be matched (the <code class="docutils literal notranslate"><span class="pre">/</span></code> will be included in the paths passed to the execution token).</p>
+<p>By default <code class="docutils literal notranslate"><span class="pre">*</span></code> will match all files and all directories in a given directory; if one only wants to match files one must specify a glob containing <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">.</span></code> and <code class="docutils literal notranslate"><span class="pre">..</span></code> are never matched with wildcards, even though they can exist in glob patterns.</p>
+<p>There is a limit of 256 bytes in any given matched path; paths longer than this will be ignored.</p>
+<p>This functionality is included in <code class="docutils literal notranslate"><span class="pre">extra/common/glob.fs</span></code>.</p>
+<section id="fat32-tools">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code><a class="headerlink" href="#fat32-tools" title="Link to this heading">¶</a></h2>
+<p>The following word is in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module:</p>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">glob</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>( addr bytes xt – )</p>
+<p>Match any number of file or directory pathes with a glob defined by the string <em>addr</em> <em>bytes</em> and pass each path to the execution token <em>xt</em>.</p>
 </section>
 </section>
 </section>
@@ -273,7 +155,7 @@
 <li class="toctree-l1"><a class="reference internal" href="fixed32.html">S15.16 Fixed Point Numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="inter_fs_copy.html">Copying Files Between Filesystems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glob.html">Glob</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Glob</a></li>
 <li class="toctree-l1"><a class="reference internal" href="profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picocalc.html">PicoCalc words</a></li>
@@ -285,7 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pixmap8_utils.html">Pixmap Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sha256.html">SHA-256</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="turtle.html">Turtle graphics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lcd1602.html">LCD1602 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
@@ -299,8 +181,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="sha256.html" title="previous chapter">SHA-256</a></li>
-      <li>Next: <a href="neopixel.html" title="next chapter">Neopixels on the RP2040 and RP2350</a></li>
+      <li>Previous: <a href="inter_fs_copy.html" title="previous chapter">Copying Files Between Filesystems</a></li>
+      <li>Next: <a href="profile.html" title="next chapter">Profiler Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -324,7 +206,7 @@
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
-      <a href="../_sources/extra/turtle.md.txt"
+      <a href="../_sources/extra/glob.md.txt"
           rel="nofollow">Page source</a>
     </div>
 
