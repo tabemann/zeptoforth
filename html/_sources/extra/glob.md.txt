@@ -10,6 +10,8 @@ Note that `.` and `..` are never matched with wildcards, even though they can ex
 
 There is a limit of 256 bytes in any given matched path; paths longer than this will be ignored.
 
+`glob` uses the current task's RAM dictionary for scratchpad space, so it cannot be used with words such as `included` which add additional data to the current task's RAM dictionary. It can be used with words that only temporarily use the current task's RAM dictionary and which restore `ram-here` to its original value upon completion or which only modify existing `variable`s, `value`s, `buffer:`s, and like already compiled into the RAM dictionary.
+
 This functionality is included in `extra/common/glob.fs`.
 
 ### `fat32-tools`
