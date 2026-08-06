@@ -105,6 +105,12 @@ continue-module fat32-tools
       
       \ The previous frame
       cell member glob-prev
+
+      \ Entry
+      <fat32-entry> class-size member glob-entry
+      
+      \ Name buffer
+      12 cell align member glob-name-buf
       
     end-class
 
@@ -120,10 +126,12 @@ continue-module fat32-tools
         off self glob-off !
         xt self glob-xt !
         prev self glob-prev !
+        <fat32-entry> self glob-entry init-object
       ; define new
 
       \ Destructor
       :noname { self -- }
+        self glob-entry destroy
         self glob-dir close-dir
         self glob-dir destroy
         self <object>->destroy
@@ -135,10 +143,12 @@ continue-module fat32-tools
   
   \ Execute an xt for each file or directory matching a glob path
   : glob ( addr bytes xt -- )
-    ram-here { saved-here }
-    [:
-      256 [:
-        <fat32-dir> class-size [: { addr bytes xt buf base-dir }
+    256 [: { addr bytes xt buf }
+      ram-here { frame }
+      <glob-frame> class-size cell align ram-allot
+      addr bytes xt buf frame [: dup { frame }
+        <fat32-dir> class-size [:
+          { addr bytes xt buf frame base-dir }
           0 { off }
           begin-critical
           bytes 0> if
@@ -149,119 +159,115 @@ continue-module fat32-tools
               base-dir current-fs@ current-dir@
             then
           then
-          ram-here { frame }
-          <glob-frame> class-size cell align ram-allot
           0 xt off buf off + 256 off -
           addr bytes base-dir <glob-frame> frame init-object
-          frame [: { frame }
-            end-critical
-            begin frame while
-              frame [: { frame }
-                frame <fat32-entry> [: { frame entry }
-                  entry frame glob-dir read-dir if
-                    frame entry [ 12 cell align ] literal [:
-                      { frame entry name-buf }
-                      frame glob-pattern 2@ split-elem
-                      { elem-addr elem-bytes rest-addr rest-bytes }
-                      name-buf 12 entry file-name@ { name-addr name-bytes }
-                      name-addr name-bytes elem-addr elem-bytes match-glob? if
-                        name-bytes frame glob-buf 2@ nip <= if
-                          name-addr frame glob-buf 2@ drop name-bytes move
-                          rest-bytes 0> if
-                            rest-addr rest-bytes s" /" equal-strings? if
-                              name-bytes frame glob-buf 2@ nip < if
-                                [char] / frame glob-buf 2@ drop name-bytes + c!
-                                entry entry-dir? if
-                                  frame glob-buf 2@ drop
-                                  frame glob-off @ -
-                                  frame glob-off @ name-bytes 1+ +
-                                  frame glob-xt @ execute
-                                then
-                              then
-                              false
-                            else
-                              name-bytes frame glob-buf 2@ nip < if
-                                entry entry-dir? if
-                                  [char] / frame
-                                  glob-buf 2@ drop name-bytes + c!
-                                  name-bytes 1+ true
-                                else
-                                  false
-                                then
-                              else
-                                false
-                              then
-                            then
-                          else
-                            entry entry-file? entry entry-dir? or if
-                              frame glob-buf 2@ drop
-                              frame glob-off @ -
-                              frame glob-off @ name-bytes +
-                              frame glob-xt @ execute
-                            then
-                            false
-                          then
-                        else
-                          false
-                        then
+          base-dir close-dir
+          base-dir destroy
+          addr bytes
+        ;] with-aligned-allot
+      ;] try
+      ?dup if frame ram-here! end-critical ?raise then
+      to bytes to addr
+      end-critical
+      begin frame while
+        frame [: { frame }
+          frame glob-entry frame glob-dir read-dir if
+            frame glob-pattern 2@ split-elem
+            { elem-addr elem-bytes rest-addr rest-bytes }
+            frame glob-name-buf 12 frame glob-entry file-name@ nip
+            { name-bytes }
+            frame glob-name-buf name-bytes
+            elem-addr elem-bytes match-glob? if
+              name-bytes frame glob-buf 2@ nip <= if
+                frame glob-name-buf frame glob-buf 2@ drop name-bytes move
+                rest-bytes 0> if
+                  rest-addr rest-bytes s" /" equal-strings? if
+                    name-bytes frame glob-buf 2@ nip < if
+                      [char] / frame glob-buf 2@ drop name-bytes + c!
+                      frame glob-entry entry-dir? if
+                        frame glob-buf 2@ drop
+                        frame glob-off @ -
+                        frame glob-off @ name-bytes 1+ +
+                        frame glob-xt @ execute
+                      then
+                    then
+                    false
+                  else
+                    name-bytes frame glob-buf 2@ nip < if
+                      frame glob-entry entry-dir? if
+                        [char] / frame
+                        glob-buf 2@ drop name-bytes + c!
+                        name-bytes 1+ true
                       else
                         false
                       then
-                    ;] with-allot
-                    if { name-bytes }
-                      ram-here { new-frame }
-                      <glob-frame> class-size cell align ram-allot
-                      name-bytes frame new-frame <fat32-dir> class-size [:
-                        [:
-                          { name-bytes frame new-frame dir }
-                          frame glob-buf 2@ drop name-bytes 1-
-                          dir frame glob-dir open-dir
-                          name-bytes frame new-frame dir [:
-                            { name-bytes frame new-frame dir }
-                            frame frame glob-xt @ frame glob-off @ name-bytes +
-                            frame glob-buf 2@
-                            name-bytes - swap name-bytes + swap
-                            frame glob-pattern 2@ split-elem 2nip
-                            dir <glob-frame> new-frame init-object
-                          ;] try
-                          dir close-dir
-                          dir destroy
-                          ?raise
-                        ;] with-aligned-allot
-                      ;] critical
-                      new-frame
                     else
-                      frame
+                        false
                     then
-                  else
-                    frame glob-prev @ { prev-frame }
-                    frame destroy
-                    prev-frame
                   then
-                ;] with-object
-              ;] try
-              dup if
-                begin frame while
-                  frame glob-prev @ { prev-frame }
-                  frame destroy
-                  prev-frame to frame
-                  frame <glob-frame> class-size + ram-here!
-                repeat
+                else
+                  frame glob-entry entry-file?
+                  frame glob-entry entry-dir? or if
+                    frame glob-buf 2@ drop
+                    frame glob-off @ -
+                    frame glob-off @ name-bytes +
+                    frame glob-xt @ execute
+                  then
+                  false
+                then
               else
-                swap to frame
-                frame <glob-frame> class-size + ram-here!
+                false
               then
-              ?raise
-            repeat
-          ;] try
-          base-dir close-dir
-          base-dir destroy
-          ?raise
-        ;] with-aligned-allot
-      ;] with-allot
-    ;] try
-    saved-here ram-here!
-    ?raise
+            else
+              false
+            then
+            if { name-bytes }
+              ram-here { new-frame }
+              <glob-frame> class-size cell align ram-allot
+              name-bytes frame new-frame <fat32-dir> class-size [:
+                [:
+                  { name-bytes frame new-frame dir }
+                  frame glob-buf 2@ drop name-bytes 1-
+                  dir frame glob-dir open-dir
+                  name-bytes frame new-frame dir [:
+                    { name-bytes frame new-frame dir }
+                    frame frame glob-xt @ frame glob-off @ name-bytes +
+                    frame glob-buf 2@
+                    name-bytes - swap name-bytes + swap
+                    frame glob-pattern 2@ split-elem 2nip
+                    dir <glob-frame> new-frame init-object
+                  ;] try
+                  dir close-dir
+                  dir destroy
+                  ?raise
+                ;] with-aligned-allot
+              ;] critical
+              new-frame
+            else
+              frame
+            then
+          else
+            frame glob-prev @ { prev-frame }
+            frame destroy
+            frame ram-here!
+            prev-frame
+          then
+        ;] try
+        dup if
+          begin frame while
+            frame glob-prev @ { prev-frame }
+            frame destroy
+            frame ram-here!
+            prev-frame to frame
+            frame if frame <glob-frame> class-size + ram-here! then
+          repeat
+        else
+          swap to frame
+          frame if frame <glob-frame> class-size + ram-here! then
+        then
+        ?raise
+      repeat
+    ;] with-allot
   ;
   
 end-module
