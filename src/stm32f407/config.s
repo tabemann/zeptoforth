@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2024 Travis Bemann
+@ Copyright (c) 2019-2026 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
         .equ cortex_m33, 0
 	.equ ram_start, 0x20000000
 	.equ ram_end, 0x20020000
-	.equ rstack_size, 0x0400
+	.equ rstack_size, 0x0800
 	.equ rstack_top, ram_end
 	.equ stack_size, 0x0200
 	.equ vector_count, 112
