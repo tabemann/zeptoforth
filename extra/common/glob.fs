@@ -146,7 +146,7 @@ continue-module fat32-tools
     256 [: { addr bytes xt buf }
       ram-here { frame }
       <glob-frame> class-size cell align ram-allot
-      addr bytes xt buf frame [: dup { frame }
+      addr bytes xt buf frame [:
         <fat32-dir> class-size [:
           { addr bytes xt buf frame base-dir }
           0 { off }
