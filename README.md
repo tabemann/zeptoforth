@@ -249,7 +249,7 @@ to use the default version or:
 
     $ make VERSION=<version>
 
-This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the `rp2040` platform, a `zeptoforth.rp2040_big.uf2` file will be built for the `rp2040_big` platform, a `zeptoforth.rp2350.uf2` file will be built for the `rp2350` platform, and a `zeptoforth.rp2350_16mib.uf2` file will be built for the `rp2350_16mib` platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
+This build a `obj/zeptoforth.<platform>.bin`, a `obj/zeptoforth.<platform>.ihex`, and a `obj/zeptoforth.<platform>.elf` file for each supported platform. Additionally a `obj/zeptoforth.rp2040.uf2` file will be built for the `rp2040` platform, a `obj/zeptoforth.rp2040_big.uf2` file will be built for the `rp2040_big` platform, a `obj/zeptoforth.rp2350.uf2` file will be built for the `rp2350` platform, and a `obj/zeptoforth.rp2350_16mib.uf2` file will be built for the `rp2350_16mib` platform. The `obj/zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
 ## Console Access
 
