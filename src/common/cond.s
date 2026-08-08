@@ -67,11 +67,6 @@ _if:	push {lr}
 	push_tos
 	movs tos, #6
 	bl _asm_pull
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	bl _asm_cmp_imm
 	bl _asm_reserve_branch
         bl _begin_block
         push_tos
@@ -216,11 +211,6 @@ _while:	push {lr}
 	push_tos
 	movs tos, #6
 	bl _asm_pull
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	bl _asm_cmp_imm
 	bl _asm_reserve_branch
         bl _begin_block
 	pop {pc}
@@ -267,11 +257,6 @@ _until:	push {lr}
 	push_tos
 	movs tos, #6
 	bl _asm_pull
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	bl _asm_cmp_imm
 	bl _asm_branch_zero
 	pop {pc}
 	end_inlined
