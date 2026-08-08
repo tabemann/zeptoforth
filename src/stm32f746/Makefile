@@ -23,11 +23,11 @@ BASEDIR=../..
 ODIR=$(BASEDIR)/obj
 IDIR=$(BASEDIR)/bin/$(VERSION)/$(PLATFORM)
 OBJ=$(ODIR)/zeptoforth.$(PLATFORM).o
-ELF=$(BASEDIR)/zeptoforth.$(PLATFORM).elf
-BIN=$(BASEDIR)/zeptoforth.$(PLATFORM).bin
-IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
-LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
-MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
+ELF=$(ODIR)/zeptoforth.$(PLATFORM).elf
+BIN=$(ODIR)/zeptoforth.$(PLATFORM).bin
+IHEX=$(ODIR)/zeptoforth.$(PLATFORM).ihex
+LIST=$(ODIR)/zeptoforth.$(PLATFORM).list
+MAP=$(ODIR)/zeptoforth.$(PLATFORM).map
 
 all: kernel_info $(BIN)
 

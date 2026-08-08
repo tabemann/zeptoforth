@@ -22,11 +22,11 @@ PLATFORM=rp2350
 BASEDIR=../../..
 ODIR=$(BASEDIR)/obj
 OBJ=$(ODIR)/boot.$(PLATFORM).o
-ELF=$(BASEDIR)/boot.$(PLATFORM).elf
-BIN=$(BASEDIR)/boot.$(PLATFORM).bin
-IHEX=$(BASEDIR)/boot.$(PLATFORM).ihex
-LIST=$(BASEDIR)/boot.$(PLATFORM).list
-MAP=$(BASEDIR)/boot.$(PLATFORM).map
+ELF=$(ODIR)/boot.$(PLATFORM).elf
+BIN=$(ODIR)/boot.$(PLATFORM).bin
+IHEX=$(ODIR)/boot.$(PLATFORM).ihex
+LIST=$(ODIR)/boot.$(PLATFORM).list
+MAP=$(ODIR)/boot.$(PLATFORM).map
 BOOT_WITH_CHECKSUM=./boot_with_checksum.py
 
 all: $(BIN)
