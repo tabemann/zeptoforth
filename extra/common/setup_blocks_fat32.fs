@@ -38,7 +38,19 @@ begin-module prepare-blocks-fat32
           true dev write-blk-block-zero!
           true dev write-through!
           4 dev init-fat32-tool::init-partition-and-fat32
-        then
+        else
+          dev fat32::fat32-internal::sector-size [: { dev scratchpad }
+            \ Fix broken VBR's
+            true dev write-through!
+            scratchpad fat32::fat32-internal::sector-size 1 dev block@
+            scratchpad $1FE + c@ $55 <>
+            scratchpad $1FF + c@ $AA <> or if
+              $55 scratchpad $1FE + c! \ magic 55
+              $AA scratchpad $1FF + c! \ magic AA
+              scratchpad fat32::fat32-internal::sector-size 1 dev block!
+            then
+          ;] with-aligned-allot
+        then         
       ;] with-object
     ;] with-object
   ;

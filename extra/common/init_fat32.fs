@@ -85,6 +85,8 @@ defined? init-fat32-tool not [if]
         2 scratchpad $02C + ! \ Root directory cluster
         1 scratchpad $030 + h! \ Info sector
         $28 scratchpad $042 + c! \ Extended boot signature
+        $55 scratchpad $1FE + c! \ magic 55
+        $AA scratchpad $1FF + c! \ magic AA
         scratchpad sector-size 1 media block!
       ;
 
