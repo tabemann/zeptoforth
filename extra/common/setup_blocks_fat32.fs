@@ -43,8 +43,11 @@ begin-module prepare-blocks-fat32
             \ Fix broken VBR's
             true dev write-through!
             scratchpad fat32::fat32-internal::sector-size 1 dev block@
-            scratchpad $1FE + c@ $55 <>
+            s\" \xEB\x58\x90MSWIN4.1" scratchpad $000 + over equal-strings? not
+            scratchpad $1FE + c@ $55 <> or
             scratchpad $1FF + c@ $AA <> or if
+              \ Magic for Windows
+              s\" \xEB\x58\x90MSWIN4.1" scratchpad $000 + swap move
               $55 scratchpad $1FE + c! \ magic 55
               $AA scratchpad $1FF + c! \ magic AA
               scratchpad fat32::fat32-internal::sector-size 1 dev block!

@@ -74,6 +74,7 @@ defined? init-fat32-tool not [if]
       \ Populate a FAT32 filesystem's VBR
       : init-vbr { cluster-sectors scratchpad media -- }
         scratchpad sector-size 0 fill
+        s\" \xEB\x58\x90MSWIN4.1" scratchpad $000 + swap move \ Magic for Windows
         512 scratchpad $00B + unaligned-h! \ Sector size
         cluster-sectors scratchpad $00D + c! \ Cluster sector count
         2 scratchpad $00E + h! \ Reserved sector count
