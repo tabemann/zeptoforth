@@ -50,6 +50,13 @@ begin-module sd
   
   begin-module sd-internal
 
+    \ Dummy bytes
+    create dummy-bytes-buf
+    -1 , -1 , -1 , -1 ,
+    -1 , -1 , -1 , -1 ,
+    -1 , -1 , -1 , -1 ,
+    -1 , -1 , -1 , -1 ,
+    
     \ Reverse byte order
     : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
 
@@ -462,7 +469,7 @@ begin-module sd
     ; define dummy-byte
     
     :noname { sd-card -- }
-      64 begin ?dup while sd-card dummy-byte 1- repeat
+      dummy-bytes-buf 64 sd-card spi-device @ buffer>spi
     ; define dummy-bytes
     
     :noname { argument command sd-card -- response }
