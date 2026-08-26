@@ -1346,7 +1346,8 @@ begin-module fat32
     
     :noname ( fs -- cluster )
       [:
-        >r r@ find-free-cluster
+        >r r@ read-info-sector
+        r@ find-free-cluster
         end-cluster-mark over r@ all-fat!
         dup r@ recent-allocated-cluster !
         -1 r@ free-cluster-count +!
@@ -1363,7 +1364,8 @@ begin-module fat32
     
     :noname ( cluster fs -- )
       [:
-        >r free-cluster-mark swap r@ all-fat!
+        >r r@ read-info-sector
+        free-cluster-mark swap r@ all-fat!
         1 r@ free-cluster-count +!
         r> write-info-sector
       ;] over with-fat32-lock
