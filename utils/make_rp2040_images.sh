@@ -57,6 +57,10 @@ flash_rp ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040 ${PORT} full_usb
 issue_bootsel ${PORT}
 
+flash_rp ${RP2040_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+${DIR}/make_uf2_image.sh ${VERSION} rp2040 ${PORT} full_msc_only
+issue_bootsel ${PORT}
+
 flash_rp ${RP2040_BIG_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2040_big ${PORT} full
 issue_bootsel ${PORT}

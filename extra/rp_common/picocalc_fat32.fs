@@ -92,6 +92,7 @@ continue-module fat32-tools
       : init-sd-fs ( -- )
         sd-sck-pin sd-tx-pin sd-rx-pin sd-cs-pin sd-spi-device
         <simple-fat32-fs> sd-fs@ init-object
+        sd-fs@ simple-fat32::simple-fat32-internal::simple-fat32-sd usb::set-usb-blocks
         true sd-fs@ write-through!
       ;
       initializer init-sd-fs

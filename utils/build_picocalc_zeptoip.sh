@@ -95,7 +95,7 @@ else
 fi
 BAUD=115200
 
-utils/codeload3.sh -B ${BAUD} -p ${PORT} serial src/${PLATFORM}/forth/setup_full.fs
+utils/codeload3.sh -B ${BAUD} -p ${PORT} serial src/${PLATFORM}/forth/setup_full_msc_only.fs
 utils/load_cyw43_fw.sh ${PORT} ${FW} ${FW_CLM}
 if [ ${ZEPTOIP} = 'ipv4' ]; then
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/rp_common/pico_w_net_ipv4_all.fs

@@ -51,3 +51,5 @@ issue_bootsel ${PORT}
 flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
 ${DIR}/make_uf2_image.sh ${VERSION} rp2350_16mib ${PORT} full_usb
 
+flash_rp ${RP2350_KERNEL} ${BLOCK_DEVICE} ${FILESYSTEM}
+${DIR}/make_uf2_image.sh ${VERSION} rp2350_16mib ${PORT} full_msc_only
