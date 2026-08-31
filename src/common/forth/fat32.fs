@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2025 Travis Bemann
+\ Copyright (c) 2022-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -236,6 +236,9 @@ begin-module fat32
 
     \ Get the actual filesystem
     method real-fs@ ( fs -- fs' )
+
+    \ Get whether any files or directories are open
+    method fs-open? ( fs -- open? )
     
   end-class
   
@@ -245,6 +248,7 @@ begin-module fat32
     ' abstract-method define with-root-path
     ' abstract-method define root-path-exists?
     ' abstract-method define flush
+    ' abstract-method define fs-open?
   end-implement
   
   \ FAT32 filesystem class
@@ -1601,6 +1605,16 @@ begin-module fat32
         count
       ;] over with-fat32-lock
     ; define dir-open-count
+
+    \ Get whether any files or directories are open
+    :noname ( fs -- open? )
+      [: { fs }
+        fs first-open-file @ 0<>
+        fs last-open-file @ 0<> or
+        fs first-open-dir @ 0<> or
+        fs last-open-dir @ 0<> or
+      ;] over with-fat32-lock
+    ; define fs-open?
     
   end-implement
   

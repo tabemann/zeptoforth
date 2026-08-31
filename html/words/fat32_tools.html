@@ -237,6 +237,11 @@
 <p>( path-addr path-u – dir? )</p>
 <p>Get whether the entry at a specified path is a directory.</p>
 </section>
+<section id="ensure-safe-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">ensure-safe-fs</span></code><a class="headerlink" href="#ensure-safe-fs" title="Link to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Ensure safe external access to the current filesystem by ensuring that all files and directories are closed. This will block until all are closed. This will also reset the current directory to the current filesystem’s root directory.</p>
+</section>
 </section>
 </section>
 
@@ -343,6 +348,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/glob.html">Glob</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>

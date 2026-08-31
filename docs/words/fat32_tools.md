@@ -206,3 +206,8 @@ Get whether the entry at a specified path is a file.
 ( path-addr path-u -- dir? )
 
 Get whether the entry at a specified path is a directory.
+
+##### `ensure-safe-fs`
+( -- )
+
+Ensure safe external access to the current filesystem by ensuring that all files and directories are closed. This will block until all are closed. This will also reset the current directory to the current filesystem's root directory.

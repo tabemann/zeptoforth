@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2024 Travis Bemann
+\ Copyright (c) 2022-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -107,6 +107,8 @@ begin-module simple-fat32
     ; define write-through@
     
     :noname ( fs -- ) simple-fat32-fs flush ; define flush
+
+    :noname ( fs -- open? ) simple-fat32-fs fs-open? ; define fs-open?
 
     :noname ( fs -- fs' ) simple-fat32-fs ; define real-fs@
     

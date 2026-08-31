@@ -1,4 +1,4 @@
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -110,6 +110,8 @@ defined? simple-psram-fat32 not [if]
       
       :noname ( fs -- ) simple-psram-fat32-fs flush ; define flush
 
+      :noname ( fs -- open? ) simple-psram-fat32-fs fs-open? ; define fs-open?
+      
       :noname ( fs -- fs' ) simple-psram-fat32-fs ; define real-fs@
       
     end-implement

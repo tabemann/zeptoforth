@@ -218,6 +218,11 @@
 <p>( path-addr path-u – dir? )</p>
 <p>Get whether the entry at a specified path is a directory.</p>
 </section>
+<section id="ensure-safe-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">ensure-safe-fs</span></code></h3>
+<p>( – )</p>
+<p>Ensure safe external access to the current filesystem by ensuring that all files and directories are closed. This will block until all are closed. This will also reset the current directory to the current filesystem’s root directory.</p>
+</section>
 </section>
 </section>
 

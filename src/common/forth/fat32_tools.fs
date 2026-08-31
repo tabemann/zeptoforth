@@ -1,4 +1,4 @@
-\ Copyright (c) 2022-2024 Travis Bemann
+\ Copyright (c) 2022-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -250,18 +250,20 @@ begin-module fat32-tools
   
   \ Set the current filesystem
   : current-fs! ( fs -- )
-    current-dir-inited? @ if
-      current-dir dir-fs@ over <> if
-        current-dir close-dir
-        current-dir destroy
-        current-dir swap root-dir@
+    [:
+      current-dir-inited? @ if
+        current-dir dir-fs@ over <> if
+          current-dir close-dir
+          current-dir destroy
+          current-dir swap root-dir@
+        else
+          drop
+        then
       else
-        drop
+        current-dir swap root-dir@
+        true current-dir-inited? !
       then
-    else
-      current-dir swap root-dir@
-      true current-dir-inited? !
-    then
+    ;] fs-lock with-lock
   ;
   
   \ Get the current filesystem
@@ -804,6 +806,28 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
+  \ Ensure safe external access to the current filesystem by ensuring that all
+  \ files and directories are closed. This will block until all are closed.
+  \ This will also reset the current directory to the current filesystem's root
+  \ directory.
+  : ensure-safe-fs ( -- )
+    current-fs@ dup { fs } averts x-fs-not-set
+    begin
+      [:
+        [:
+          current-fs@ { fs }
+          current-dir-inited? @ if
+            current-dir close-dir
+            current-dir destroy
+            false current-dir-inited? !
+          then
+          fs if fs fs-open? not else true then
+        ;] current-fs@ fat32-internal::fat32-lock with-lock
+      ;] fs-lock with-lock
+    until
+    fs current-fs!
+  ;
+  
 end-module> import
 
 : init ( -- )

@@ -224,6 +224,11 @@ Parse a path starting at the root directory of a FAT32 filesystem, and attempt t
 
 Flush any dirty blocks cached by the underlying block device.
 
+##### `fs-open?`
+( fs -- open? )
+
+Get whether any files or directories are open in a filesystem.
+
 ##### `<fat32-fs>`
 ( -- class )
 
