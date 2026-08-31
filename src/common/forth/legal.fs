@@ -29,6 +29,7 @@
   cr ." Copyright (c) 2024-2025 Serialcomms (GitHub)"
   cr ." Copyright (c) 2025 tmsgthb (GitHub)"
   cr ." Copyright (c) 2026 Ken Mitton"
+  cr ." Copyright (c) 2026 Yaroslav Salnikov"
   cr
   cr ." Permission is hereby granted, free of charge, to any person obtaining a copy"
   cr .\" of this software and associated documentation files (the \"Software\"), to deal"
