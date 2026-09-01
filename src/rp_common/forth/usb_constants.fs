@@ -1,6 +1,7 @@
 \ Copyright (c) 2023-2025 Travis Bemann
 \ Copyright (c) 2024-2025 Serialcomms (GitHub)
 \ Copyright (c) 2025 Paul Koning
+\ Copyright (c) 2026 Yaroslav Salnikov
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +20,6 @@
 \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
-
-compile-to-flash
 
 begin-module usb-constants
 
@@ -182,10 +181,18 @@ $3 constant USB_BUFFER_STATUS_EP0 \ in or out
 6 bit constant USB_BUFFER_STATUS_EP3_TO_HOST
 \ Spare endpoint
 \ 7 bit constant USB_BUFFER_STATUS_EP3_TO_PICO
+\ Mass Storage Endpoints
+\ endpoint 4 in 
+8 bit constant USB_BUFFER_STATUS_EP4_TO_HOST
+\ endpoint 4 out
+9 bit constant USB_BUFFER_STATUS_EP4_TO_PICO
+
 
 \ Request types
 0  constant USB_REQUEST_TYPE_STANDARD
 32 constant USB_REQUEST_TYPE_CLASS
+$A1 constant USB_REQUEST_TYPE_CLASSINTERFACE_TO_HOST
+31 constant USB_REQUEST_TYPE_CLASSINTERFACE_TO_PICO
 
 \ Requests
 0 constant USB_REQUEST_GET_STATUS
@@ -253,7 +260,16 @@ USB_DPRAM_Base $68  + constant EP0_STALL_ARM
 \ USB endpoint 0 DPRAM Address (shared in/out)
 USB_DPRAM_Base $100 + constant EP0_DPRAM_SHARED
 
+$12 constant SCSI-CMD-INQUIRY
+$00 constant SCSI-CMD-TEST-UNIT-READY
+$25 constant SCSI-CMD-READ-CAPACITY-10
+$28 constant SCSI-CMD-READ-10
+$1A constant SCSI-CMD-MODE-SENSE
+$1B constant SCSI-CMD-START-STOP-UNIT
+$1E constant SCSI-CMD-PREVENT-ALLOW-REMOVAL
+$2A constant SCSI-CMD-WRITE-10
+$23 constant SCSI-CMD-READ-FORMAT-CAPACITY
+$03 constant SCSI-CMD-REQUEST-SENSE
+$35 constant SCSI-CMD-SYNCHRONIZE-CACHE-10
+
 end-module
-
-compile-to-ram
-

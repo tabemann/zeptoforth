@@ -85,7 +85,7 @@ else
 fi
 BAUD=115200
 
-utils/codeload3.sh -B ${BAUD} -p ${PORT} serial src/${PLATFORM}/forth/setup_full.fs
+utils/codeload3.sh -B ${BAUD} -p ${PORT} serial src/${PLATFORM}/forth/setup_full_msc_only.fs
 mkdir -p /tmp/picocalc
 echo 'compile-to-flash' > /tmp/picocalc/prefix.fs
 echo "${CORE} constant select-picocalc-tasks-core" >> /tmp/picocalc/prefix.fs

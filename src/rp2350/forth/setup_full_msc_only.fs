@@ -33,8 +33,7 @@
 #include src/common/forth/value.fs
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
-#include src/common/forth/multicore.fs
-#include src/rp2350_1core/forth/core1.fs
+#include src/rp2350/forth/multicore.fs
 #include src/rp_common/forth/erase.fs
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
@@ -74,7 +73,7 @@
 #include src/rp2350/forth/psram_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs
 compile-to-flash
-true constant usb-console?
+false constant usb-console?
 #include src/rp_common/forth/usb_constants.fs
 #include src/rp_common/forth/usb_cdc_buffers.fs
 #include src/rp_common/forth/usb_core_and_cdc.fs

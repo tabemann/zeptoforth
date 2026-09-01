@@ -33,7 +33,7 @@ export VERSION=1.16.6-dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
-all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big rp2040_1core rp2040_1core_big rp2350 rp2350_16mib rp2350_1core rp2350_1core_16mib
+all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040 rp2040_big rp2040_big_16mib rp2040_1core rp2040_1core_big rp2040_1core_big_16mib rp2350 rp2350_16mib rp2350_1core rp2350_1core_16mib
 
 install:
 	$(MAKE) -C src/stm32f407 install
@@ -42,8 +42,10 @@ install:
 	$(MAKE) -C src/stm32f746 install
 	$(MAKE) -C src/rp2040 install
 	$(MAKE) -C src/rp2040_big install
+	$(MAKE) -C src/rp2040_big_16mib install
 	$(MAKE) -C src/rp2040_1core install
 	$(MAKE) -C src/rp2040_1core_big install
+	$(MAKE) -C src/rp2040_1core_big_16mib install
 	$(MAKE) -C src/rp2350 install
 	$(MAKE) -C src/rp2350_16mib install
 	$(MAKE) -C src/rp2350_1core install
@@ -67,11 +69,17 @@ rp2040:
 rp2040_big:
 	$(MAKE) -C src/rp2040_big
 
+rp2040_big_16mib:
+	$(MAKE) -C src/rp2040_big_16mib
+
 rp2040_1core:
 	$(MAKE) -C src/rp2040_1core
 
 rp2040_1core_big:
 	$(MAKE) -C src/rp2040_1core_big
+
+rp2040_1core_big_16mib:
+	$(MAKE) -C src/rp2040_1core_big_16mib
 
 rp2350:
 	$(MAKE) -C src/rp2350
@@ -85,7 +93,7 @@ rp2350_1core:
 rp2350_1core_16mib:
 	$(MAKE) -C src/rp2350_1core_16mib
 
-.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big rp2040_1core rp2040_1core_big rp2350 rp2350_16mib rp2350_1core rp2350_1core_16mib clean html epub
+.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 rp2040 rp2040_big rp2040_big_16mib rp2040_1core rp2040_1core_big rp2040_1core_big_16mib rp2350 rp2350_16mib rp2350_1core rp2350_1core_16mib clean html epub
 
 html:
 	cd docs ; sphinx-build -b html . ../html
@@ -100,8 +108,10 @@ clean:
 	$(MAKE) -C src/stm32f746 clean
 	$(MAKE) -C src/rp2040 clean
 	$(MAKE) -C src/rp2040_big clean
+	$(MAKE) -C src/rp2040_big_16mib clean
 	$(MAKE) -C src/rp2040_1core clean
 	$(MAKE) -C src/rp2040_1core_big clean
+	$(MAKE) -C src/rp2040_1core_big_16mib clean
 	$(MAKE) -C src/rp2350 clean
 	$(MAKE) -C src/rp2350_16mib clean
 	$(MAKE) -C src/rp2350_1core clean

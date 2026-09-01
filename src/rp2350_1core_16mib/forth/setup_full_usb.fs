@@ -1,5 +1,6 @@
 \ Copyright (c) 2021-2026 Travis Bemann
 \ Copyright (c) 2024 Paul Koning
+\ Copyright (c) 2026 Yaroslav Salnikov
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +73,8 @@
 #include src/common/forth/blocks_block_dev.fs
 #include src/rp2350/forth/psram_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs
+compile-to-flash
+true constant usb-console?
 #include src/rp_common/forth/usb_constants.fs
 #include src/rp_common/forth/usb_cdc_buffers.fs
 #include src/rp_common/forth/usb_core_and_cdc.fs

@@ -54,7 +54,7 @@
 #include src/rp2350/forth/timer1.fs
 #include src/common/forth/cycles.fs
 #include src/rp2350/forth/rng.fs
-#include src/rp2350/forth/qspi.fs
+#include src/rp2350_16mib/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
 #include src/rp2350/forth/dma.fs
@@ -74,7 +74,7 @@
 #include src/rp2350/forth/psram_block_dev.fs
 #include src/common/forth/simple_blocks_fat32.fs
 compile-to-flash
-true constant usb-console?
+false constant usb-console?
 #include src/rp_common/forth/usb_constants.fs
 #include src/rp_common/forth/usb_cdc_buffers.fs
 #include src/rp_common/forth/usb_core_and_cdc.fs

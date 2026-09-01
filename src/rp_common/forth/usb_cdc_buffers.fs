@@ -31,7 +31,6 @@
 \ tx and rx buffer sizes can be different if required
 \ adjust values locally for required usage scenarios.
 
-compile-to-flash
 
 begin-module usb-cdc-buffers
 
@@ -182,5 +181,3 @@ rx-buffer-size buffer: rx-buffer
 ;
 
 end-module
-
-compile-to-ram
