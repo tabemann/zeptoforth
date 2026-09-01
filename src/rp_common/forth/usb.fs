@@ -176,18 +176,18 @@ continue-module usb
       usb-console? if switch-to-usb-console then
     ;
 
-\    initializer init-usb-console
-
-  : init-usb
-    [ defined? usb-msc-blocks  [if] usb-msc-blocks [else] 0 [then] ] literal 
-    to blks
-    init-usb-console
-  ;
-
-  : set-usb-blocks ( blocks-object -- )
+    \ Start the process of initializing USB
+    : init-usb
+      [ defined? usb-msc-blocks  [if] usb-msc-blocks [else] 0 [then] ] literal 
       to blks
-  ;
+      init-usb-console
+    ;
+    
+    initializer init-usb
 
+    \ Set the block device to be used by the USB Mass Storage Device
+    : set-usb-blocks ( blocks-object -- ) to blks ;
+    
   end-module> import
 
   \ Select the USB serial console
@@ -208,8 +208,7 @@ continue-module usb
     ['] usb-emit ['] usb-emit? rot ['] usb-flush-console swap with-error-output
   ;
 
-
-  ' init-usb export init-usb
+  \ Export SET-USB-BLOCKS to enable it to be called later from outside
   ' set-usb-blocks export set-usb-blocks
 
   initializer init-usb
