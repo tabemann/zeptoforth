@@ -56,6 +56,10 @@ if [ ${PLATFORM} = 'rp2040_big' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2040_1core_big' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2040_big_16mib' ]; then
+    ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+elif [ ${PLATFORM} = 'rp2040_1core_big_16mib' ]; then
+    ${DIR}/../src/rp2040/make_uf2.sh --big ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2040' ]; then
     ${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
 elif [ ${PLATFORM} = 'rp2040_1core' ]; then
