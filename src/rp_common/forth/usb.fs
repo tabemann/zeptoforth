@@ -211,7 +211,4 @@ continue-module usb
   \ Export SET-USB-BLOCKS to enable it to be called later from outside
   ' set-usb-blocks export set-usb-blocks
 
-  initializer init-usb
-  
-
 end-module
