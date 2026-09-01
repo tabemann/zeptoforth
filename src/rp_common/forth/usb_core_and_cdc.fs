@@ -1128,8 +1128,6 @@ begin-module usb-core
   ;
 
   : SCSI-command { adr len -- }
-    
-
     adr c@ case
       SCSI_CMD_INQUIRY of                  \ INQUIRY
         SCSI-inquiry-response-data EP4-to-Host dpram-address @ 36 move
@@ -1210,13 +1208,9 @@ begin-module usb-core
         SCSI-response 
       endof
 
-
-      s" SCSI Cmd: " type
-      16 base !
-      len 0 do adr i + c@ . loop ." not implemented" cr   \ debug missing commands
-      decimal
+      ." SCSI Cmd: "
+      len 0 do adr i + c@ h.2 loop ." not implemented" cr
     endcase
-    
   ;
 
   : CBW-parse { CBW -- }
