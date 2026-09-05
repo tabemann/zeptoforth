@@ -200,6 +200,57 @@ However, there is a convenient means of configuring a board to use FAT32 filesys
 
 Note that the general unsuitability of FAT32 for in-on board flash is tempered by the fact that block storage provided by zeptoforth has built-in wear leveling.
 
+## Exposing Filesystems with USB Mass Storage Device Class
+
+If you have installed a `full_msc_only` or `full_usb` build, you can (except if you used a PicoCalc installer script, where the SD card is always selected as the block device to expose) select a block device to expose via the USB Mass Storage Device class. Unless you are using a PicoCalc, you must follow one of the sets of steps below before the USB Mass Storage Device class will become available.
+
+The simplest approach is to expose the block device that is already configured for be the default filesystem on boot. This can be done by compiling:
+
+    compile-to-flash
+    fat32-tools import
+    fat32::fat32-internal import
+    : init-usb-blocks current-fs@ fat32-device @ usb::set-usb-blocks ;
+    initializer init-usb-blocks
+    reboot
+
+If the default filesystem is something other than the FAT32 filesystem in blocks storage and you want to expose the blocks storage block device instead compile:
+
+    compile-to-flash
+    setup-blocks-fat32 import
+    simple-blocks-fat32::simple-blocks-fat32-internal import
+    : init-usb-blocks my-fs simple-blocks-fat32-dev usb::set-usb-blocks ;
+    initializer init-usb-blocks
+    reboot
+ 
+If the default filesystem is something other than the SD card FAT32 filesystem and you want to expose the SD card instead compile:
+
+    compile-to-flash
+    : init-usb-blocks <your block device> usb::set-usb-blocks ;
+    initializer init-usb-blocks
+    reboot
+
+Note that here \<your block device> is dependent on your particular setup.
+
+If the default filesystem is something other than the PSRAM disk FAT32 filesystem and you want to expose the PSRAM disk instead compile:
+
+    compile-to-flash
+    psram-fat32 import
+    simple-psram-fat32::simple-psram-fat32-internal import
+    : init-usb-blocks psram-fs@ simple-psram-fat32-dev usb::set-usb-blocks ;
+    initializer init-usb-blocks
+    reboot
+
+## Limitations of the USB Mass Storage Device Class
+
+There are a number of important limitations of the USB Mass Storage Device Class. These are:
+
+* Changes made from the USB host side may not become available on the zeptoforth side until one executes `sync` or equivalent on the USB host side or unmounts the USB Mass Storage Device.
+* One must not delete files or directories that are open on either the zeptoforth side or the USB host side from the other side. Doing so willl likely result in filesystem corruption.
+* Changes made from the zeptoforth side may not be available on the USB host side without unmounted and remounting in between. Failing to do so may result in inconsistency in what one reads from the USB host side.
+* Changes made from the USB host side after changes have been made from the zeptoforth side without unmounting and remounting in between may result in filesystem corruption.
+
+In order to provide a modicum of protection against modifying files or directories open from the zeptoforth side from the USB side, the tool `fat32-tools::ensure-safe-fs` is provided. This will block until all files and directories on the current filesystem are closed, and it will close the current directory and reopen the root directory as the current directory (as the root directory is guaranteed to never be deleted).
+
 ## Initializing PSRAM on RP2350 Boards
 
 Some RP2350 boards such as the Pimoroni Pico Plus 2 come with PSRAM that is connected to the RP2350 microcontroller via Quad SPI. On these boards PSRAM can be initialized by executing `init-psram` ( psram-cs-pin -- ), where *psram-cs-pin* is the index of the GPIO to which the chip select pin of the PSRAM is tied. On the Pimoroni Pico Plus 2, for instance, this is GPIO 47. Once initialized, the size of PSRAM can be queried with `psram-size` ( -- bytes ). Also, the base address of PSRAM can be gotten with `psram-base` ( -- address ).
