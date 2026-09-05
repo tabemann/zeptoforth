@@ -12,7 +12,7 @@ Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2
 
 ## Features
 
-The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_usb`, and `full_swdcom` builds, includes the following:
+The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_msc_only`, `full_usb`, and `full_swdcom` builds, includes the following:
 
 * A priority-scheduled preemptive multitasker with deadline scheduling
 * Semaphores
@@ -112,7 +112,7 @@ To load the zeptoforth image (whether just the kernel or an image including prec
 
 Note the address referred to above. This will also reboot the board. In the case of the STM32F411 "Black Pill" board, if it was wedged prior to this, it may be necessary to remove power, apply power while holding down the BOOT0 button, keep the button held down while executing `st-flash erase` and `st-flash write`, and then instead of executing `st-flash reset` release the BOOT0 button and press the NRST button.
 
-To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring LED support), after loading the `full` or `full_usb` RP2040 zeptoforth UF2 file execute the following:
+To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring LED support), after loading the `full`, `full_msc_only, or `full_usb` RP2040 zeptoforth UF2 file execute the following:
 
     compile-to-flash
     true constant platform-xiao
@@ -120,7 +120,7 @@ To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring
 
 Afterwards the `led` module will function properly for the SeeedStudio XIAO RP2040 (e.g. the red, green, and blue LED's will be off on boot).
 
-To activate SeeedStudio WIO RP2040-specified features (e.g. properly configuring LED support), after loading the `full` or `full_usb` RP2040 zeptoforth UF2 file execute the following:
+To activate SeeedStudio WIO RP2040-specified features (e.g. properly configuring LED support), after loading the `full`, `full_msc_only`, or `full_usb` RP2040 zeptoforth UF2 file execute the following:
 
     compile-to-flash
     true constant platform-wio
@@ -149,7 +149,8 @@ Prebuilt binaries are in `bin/<version>/<platform>/` in release tarballs. They a
 where \<type> is one of:
 
 * `full` (full functionality compiled in except for USB and swdcom support with a cornerstone* to enable resetting functionality back to "factory" settings)
-* `full_usb` (full functionality compiled in including USB, and without swdcom, support with a cornerstone to enable resetting functionality back to "factory" settings)
+* `full_msc_only` (full functionality compiled in including USB Mass Storage Device class support but using the serial console rather than USB CDC console, and without swdcom support, with a cornerstone to enable resetting functionality back to "factory" settings)
+* `full_usb` (full functionality compiled in including both the USB CDC console and USB Mass Storage Device class support, and without swdcom support, with a cornerstone to enable resetting functionality back to "factory" settings)
 * `full_swdcom` (full functionality compiled in including swdcom support with a cornerstone* to enable resetting functionality back to "factory" settings)
 * `mini` (i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
 * `mini_swdcom` (i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
@@ -167,7 +168,9 @@ and where \<platform> is one of
 
 Note that for the `rp2040`, `rp2040_big`, `rp2350`, or `rp2350_16mib` platforms, to load code with the bootloader onto an RP2040-based or RP2350-based board one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
 
-The `rp2040` and `rp2040_big` platforms only differ, aside from there are no `mini` builds for `rp2040_big`, in that `rp2040` builds devote 960 KB of space to the flash dictionary, 48 KB of space to the flash dictionary index, and 1 MB of space to block storage (but some of that space is not usable due to being used for metadata) while `rp2040_big` builds devote 1472 KB of space to the flash dictionary, 60 KB of space to the flash dictionary index, and 512 MB of space (with overhead) to block storage. `rp2040_big` is intended in particular for zeptoIP, due to the space taken up by the CYW43439 driver and zeptoIP. From this point on, all mentions of `rp2040` shall also encompass `rp2040_big`.
+The `rp2040` and `rp2040_big` platforms only differ, aside from there are no `mini` builds for `rp2040_big`, in that `rp2040` builds devote 960 KiB of space to the flash dictionary, 48 KiB of space to the flash dictionary index, and 1 MiB of space to block storage (but some of that space is not usable due to being used for metadata) while `rp2040_big` builds devote 1472 KiB of space to the flash dictionary, 60 KB of space to the flash dictionary index, and 512 KiB of space (with overhead) to block storage. `rp2040_big` is intended in particular for zeptoIP, due to the space taken up by the CYW43439 driver and zeptoIP. From this point on, all mentions of `rp2040` shall also encompass `rp2040_big`.
+
+The `rp2040_big_16mib` platform is the same as the `rp2040_big` platform except that block storage fills out a full 16 MiB flash chip, and thus is 14848 KiB in size. Note that this is not contained, excluding the kernel, in release tarballs for lack of hardware to build it with. However, if you have an RP2040 board with 16 MiB of flash you can build this platform if you so choose.
 
 The `rp2350` and `rp2350_16mib` platforms only differ in that the full 16 MiB of Quad SPI flash is used by `rp2350_16mib` builds, with the lower 2 MiB being used for the zeptoforth kernel and flash dictionary and the upper 14 MiB being used for block/FAT32 storage, whereas for `rp2350` builds only 2 MiB are available for block/FAT32 storage. Note that there are no `mini` builds available for the `rp2350_16mib` platform, as `mini` builds do not support block/FAT32 storage.
 
@@ -179,6 +182,7 @@ There exist single-core platforms of zeptoforth for the RP2040 and RP2350, speci
 
 * `rp2040_1core`
 * `rp2040_1core_big`
+* `rp2040_1core_big_16mib`
 * `rp2350_1core`
 * `rp2350_1core_16mib`
 
