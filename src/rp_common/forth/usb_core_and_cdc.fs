@@ -37,7 +37,8 @@ begin-module usb-core
 
   oo import
   block-dev import
-  task import 
+  task import
+  systick import
 
   0 value blks
 
@@ -88,9 +89,9 @@ begin-module usb-core
   \ Mass Storage variables
 
   variable LUNS
-  variable CBW-PHASE
-  variable RESPONSE-CMD
-  variable PREVENT-REMOVAL
+  variable CBW-phase
+  variable response-cmd
+  variable prevent-removal
 
   variable EP4-mailbox
   variable EP4-task
@@ -807,8 +808,8 @@ begin-module usb-core
       $fe of
         0 EP4-to-Pico-event !         \ reinitialize state variables
         0 EP4-to-Host-event !         \ in case of disconnect
-        -1 RESPONSE-CMD !
-        0 CBW-PHASE !
+        -1 response-cmd !
+        0 CBW-phase !
         1 LUNS  usb-start-control-transfer-to-host
       endof
     endcase
@@ -1018,26 +1019,6 @@ begin-module usb-core
     \ N.B. no corresponding EP3-to-Pico endpoint required
   ;
 
-  : flush-task  
-    0 { st }
-    begin
-      st if                           \ if PREVENT-REMOVAL not active longer than 2 seconds
-        PREVENT-REMOVAL @ 0= if       \ assuming filesystem unmounted on host PC
-          2000 ms
-          PREVENT-REMOVAL @ 0= if
-            blks flush-blocks
-            false to st
-          then
-        then
-      else
-        PREVENT-REMOVAL @ if
-          true to st
-        then
-      then
-      1000 ms
-    again
-  ;
-  
   : u@  ( adr -- x ) \ unaligned read for RP2040
     [ rp2350? ] [if] [inlined] @ [else]
       dup c@ swap dup 1+ c@ 8 lshift swap dup 2 + c@ 16 lshift swap 3 + c@ 24 lshift 
@@ -1064,12 +1045,12 @@ begin-module usb-core
   ;
 
   : SCSI-response ( -- )
-    RESPONSE-CMD @ 0 >= if
+    response-cmd @ 0 >= if
       CBW-COPY CBW-dCBWTag CSW CBW-dCBWTag 4 move
       0 CSW CSW-dCSWDataResidue !
       0 { r-val }
       blks 0= if 1 to r-val else 0 to r-val then
-      RESPONSE-CMD @ case
+      response-cmd @ case
         SCSI_CMD_TEST_UNIT_READY of
           r-val CSW CSW-bCSWStatus c!
         endof
@@ -1089,7 +1070,7 @@ begin-module usb-core
         0 CSW CSW-bCSWStatus c!
       endcase
       CSW EP4-to-Host dpram-address @ 13 move
-      -1 RESPONSE-CMD !
+      -1 response-cmd !
       EP4-to-Host 13 usb-send-data-packet
     then  
   ;
@@ -1105,7 +1086,7 @@ begin-module usb-core
       lba-buf     EP4-to-Host dpram-address @   EP4-to-Host max-packet-size @     move 
       EP4-to-Host EP4-to-Host max-packet-size @ usb-send-data-packet
     else
-      0 CBW-PHASE !
+      0 CBW-phase !
       SCSI-response
     then
   ;
@@ -1122,7 +1103,7 @@ begin-module usb-core
     then
     
     LBA-COUNT @ 0 = if
-      0 CBW-PHASE !
+      0 CBW-phase !
       SCSI-response
     then
   ;
@@ -1131,12 +1112,12 @@ begin-module usb-core
     adr c@ case
       SCSI_CMD_INQUIRY of                  \ INQUIRY
         SCSI-inquiry-response-data EP4-to-Host dpram-address @ 36 move
-        SCSI_CMD_INQUIRY RESPONSE-CMD !
+        SCSI_CMD_INQUIRY response-cmd !
         EP4-to-Host 36 usb-send-data-packet
       endof
 
       SCSI_CMD_TEST_UNIT_READY of                  \ Test unit ready
-        SCSI_CMD_TEST_UNIT_READY RESPONSE-CMD !
+        SCSI_CMD_TEST_UNIT_READY response-cmd !
         SCSI-response
       endof
 
@@ -1144,7 +1125,7 @@ begin-module usb-core
         blks block-count 1 - reverse-byte-order SCSI-capacity-data !
         blks block-size  reverse-byte-order SCSI-capacity-data 4 + !
         SCSI-capacity-data EP4-to-Host dpram-address @ 8 move
-        SCSI_CMD_READ_CAPACITY_10 RESPONSE-CMD !
+        SCSI_CMD_READ_CAPACITY_10 response-cmd !
         EP4-to-Host 8 usb-send-data-packet
       endof
       
@@ -1152,8 +1133,8 @@ begin-module usb-core
         CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order                  \ Unaligned memory read !!! 
         CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
         ( lba num -- )
-        SCSI_CMD_READ_10 RESPONSE-CMD !
-        1 CBW-PHASE !
+        SCSI_CMD_READ_10 response-cmd !
+        1 CBW-phase !
         LBA-COUNT !
         LBA-CURRENT !
         ['] read-next-lba EP4-to-Host callback-handler !
@@ -1162,18 +1143,18 @@ begin-module usb-core
 
       SCSI_CMD_MODE_SENSE of                  \ mode sense
         SCSI-mode-sense-response-data EP4-to-Host dpram-address @ 4 move
-        SCSI_CMD_MODE_SENSE RESPONSE-CMD !
+        SCSI_CMD_MODE_SENSE response-cmd !
         EP4-to-Host 4 usb-send-data-packet
       endof
 
       SCSI_CMD_START_STOP_UNIT of                  \ handle STOP START UNIT
-        SCSI_CMD_START_STOP_UNIT RESPONSE-CMD !
+        SCSI_CMD_START_STOP_UNIT response-cmd !
         SCSI-response
       endof
 
       SCSI_CMD_PREVENT_ALLOW_REMOVAL of                  \ prevent/allow media removal
-        CBW-COPY CBW-dCBWCB 4 + c@ PREVENT-REMOVAL !
-        SCSI_CMD_PREVENT_ALLOW_REMOVAL RESPONSE-CMD !
+        CBW-COPY CBW-dCBWCB 4 + c@ prevent-removal !
+        SCSI_CMD_PREVENT_ALLOW_REMOVAL response-cmd !
         SCSI-response
       endof
 
@@ -1181,8 +1162,8 @@ begin-module usb-core
         CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order 
         CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
         ( lba num -- )
-        SCSI_CMD_WRITE_10 RESPONSE-CMD !
-        2 CBW-PHASE !
+        SCSI_CMD_WRITE_10 response-cmd !
+        2 CBW-phase !
         LBA-COUNT !
         LBA-CURRENT !
         ['] write-next-lba EP4-to-Pico callback-handler !
@@ -1192,19 +1173,19 @@ begin-module usb-core
       SCSI_CMD_READ_FORMAT_CAPACITY of                \ read format capacity
         SCSI-prepare-format-capacity-data
         SCSI-format-capacity-data EP4-to-Host dpram-address @ 12 move
-        SCSI_CMD_READ_FORMAT_CAPACITY RESPONSE-CMD !
+        SCSI_CMD_READ_FORMAT_CAPACITY response-cmd !
         EP4-to-Host 12 usb-send-data-packet
       endof
 
       SCSI_CMD_REQUEST_SENSE of                \ request sense
         SCSI-request-sense-data EP4-to-Host dpram-address @ 18 move
-        SCSI_CMD_REQUEST_SENSE RESPONSE-CMD !
+        SCSI_CMD_REQUEST_SENSE response-cmd !
         EP4-to-Host 18 usb-send-data-packet
       endof
 
       SCSI_CMD_SYNCHRONIZE_CACHE_10 of                \ SYNCHRONIZE CACHE
         blks flush-blocks
-        SCSI_CMD_SYNCHRONIZE_CACHE_10 RESPONSE-CMD !
+        SCSI_CMD_SYNCHRONIZE_CACHE_10 response-cmd !
         SCSI-response 
       endof
 
@@ -1224,7 +1205,7 @@ begin-module usb-core
     EP4-to-Host usb-update-transfer-bytes
     EP4-to-Host usb-toggle-data-pid
     false EP4-to-Host endpoint-busy? !
-    CBW-PHASE @ case
+    CBW-phase @ case
       0 of
         SCSI-response
       endof
@@ -1243,7 +1224,7 @@ begin-module usb-core
   : ep4-handler-to-pico ( -- )
     EP4-to-Pico usb-update-transfer-bytes
     EP4-to-Pico usb-toggle-data-pid
-    CBW-PHASE @ case
+    CBW-phase @ case
       0 of EP4-to-Pico dpram-address @ CBW-parse endof
       2 of
         EP4-to-Pico dpram-address @ EP4-to-Pico source-address @ EP4-to-Pico transfer-bytes @ move
@@ -1257,10 +1238,50 @@ begin-module usb-core
     EP4-to-Pico 64 usb-receive-data-packet
   ;
   
+  \ Default EP4-handler timeout
+  10000 constant default-timeout
 
+  \ Unmount test EP4-handler timeout
+  20000 constant unmounted-timeout
+
+  \ Mounted state
+  0 constant unmounted
+  1 constant mounted-0
+  2 constant mounted-1
+  
   : EP4-handler
+    unmounted { mounted-state }
+    systick-counter { begin-tick }
+    default-timeout { current-timeout }
     begin
-      0 wait-notify drop
+      systick-counter begin-tick - current-timeout > if
+        mounted-state case
+          unmounted of
+            prevent-removal @ if
+              mounted-0 to mounted-state
+            then
+            default-timeout to current-timeout
+          endof
+          mounted-0 of
+            prevent-removal @ 0= if
+              mounted-1 to mounted-state
+              unmounted-timeout to current-timeout
+            else
+              default-timeout to current-timeout
+            then
+          endof
+          mounted-1 of
+            prevent-removal @ 0= if
+              blks flush-blocks
+              unmounted to mounted-state
+            then
+            default-timeout to current-timeout
+          endof
+        endcase
+        systick-counter to begin-tick
+      then
+      current-timeout begin-tick 0 ['] wait-notify-timeout try
+      dup ['] x-timed-out = if 2drop drop 0 then ?raise drop
       begin
         EP4-to-Host-event @ if    \ EP4-to-Host interrupt
           0 EP4-to-Host-event !
@@ -1399,12 +1420,10 @@ begin-module usb-core
     false line-notification-complete? !
     false usb-readied? !
     0 LUNS !
-    0 CBW-PHASE !
-    0 RESPONSE-CMD !
+    0 CBW-phase !
+    0 response-cmd !
     s" USBS" CSW CSW-dCSWSignature swap move
-    0 PREVENT-REMOVAL !
-    c" Flush-task"
-    0 ['] flush-task 128 128 512 spawn dup run task-name!
+    0 prevent-removal !
     EP4-task-init
 
     ['] usb-irq-handler usbctrl-vector vector!
