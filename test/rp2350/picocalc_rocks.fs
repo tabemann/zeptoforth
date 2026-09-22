@@ -888,7 +888,7 @@ begin-module rocks
   <entity> begin-class <alien>
   
     method do-spawn-alien ( alien -- )
-    method check-collide-alien ( ship-x ship-y alien -- )
+    method do-check-collide-alien ( ship-x ship-y alien -- )
     method render-alien ( color display alien -- )
     
   end-class
@@ -902,6 +902,8 @@ begin-module rocks
   ;
   
   : deactivate-alien ( -- ) alien deactivate-entity ;
+
+  : check-collide-alien ( x y -- hit? ) alien do-check-collide-alien ;
   
   : update-alien ( interval -- ) alien update-entity ;
   
@@ -1000,7 +1002,8 @@ begin-module rocks
       then
       true self entity-coord@ try-collide-bonuses
       true self entity-coord@ check-collide-asteroids
-      self entity-coord@ check-alien-shots-collide or if
+      self entity-coord@ check-alien-shots-collide or
+      self entity-coord@ check-collide-alien or if
         wave-start @ not shield-active @ v0= and if
           beep
           init-shield shield !
@@ -1093,6 +1096,18 @@ begin-module rocks
       then
     ; define do-update-entity
     
+    :noname { ship-x ship-y self -- hit? }
+      self entity-active? if
+        self entity-coord@ { x y }
+        ship-x x v- dup v* ship-y y v- dup v* v+
+        alien-radius ship-collide-radius v+ dup v* v<= dup if
+          shield-active @ v0> if self deactivate-entity then
+        then
+      else
+        false
+      then
+    ; define do-check-collide-alien
+
     :noname { color display self -- }
       self entity-coord@ { x y }
       color x y convert-coord alien-radius v>n
