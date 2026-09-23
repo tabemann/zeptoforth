@@ -32,6 +32,7 @@
         .equ XIP_CTRL_EN_SECURE, 0x00000001
         
 	.equ XIP_QMI_BASE, 0x400D0000
+	.equ XIP_QMI_ATRANS0_OFFSET, 0x34
 
         .equ TIMER_BASE, 0x400B0000
         .equ TIMERAWL, TIMER_BASE + 0x28
@@ -287,6 +288,15 @@ _init_flash:
 
         push_tos
 	movs tos, r0
+
+	@ calculate start of partition offset in flash
+	push { r0 }
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+	subs tos, tos, r0
         push_tos
 
 @        push_tos
@@ -298,8 +308,10 @@ _init_flash:
 @        push_tos
 @        bl _h_8
 
-        ldr tos, =flash_dict_end - flash_start
-	bl _erase_range
+		ldr tos, =flash_dict_end
+		subs tos, tos, r0
+		pop { r0 }
+		bl _erase_range
 
         cpsie i
         bl _release_core
@@ -736,7 +748,14 @@ _erase_qspi_sector:
 	dsb
 	isb
 	bl _exit_xip
-	ldr r0, =flash_start
+
+	@ calculate start of partition offset in flash
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+
 	subs tos, r0
 	ldr r0, =0xFFFF
 	bics tos, r0
@@ -759,7 +778,14 @@ _erase_qspi_4k_sector:
 	dsb
 	isb
 	bl _exit_xip
-	ldr r0, =flash_start
+
+	@ calculate start of partition offset in flash
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+	
 	subs tos, r0
 	ldr r0, =0xFFF
 	bics tos, r0
@@ -794,7 +820,19 @@ _erase_range:
 	ldr r2, =0xFFFF
 	tst r1, r2
 	bne 3f
-        ldr r2, =flash_dict_main_end - flash_start
+
+	@ calculate start of partition offset in flash
+	push { r0 }
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+	
+		ldr r2, =flash_dict_main_end
+		subs r2, r2, r0
+		pop { r0 }
+
         cmp r1, r2
         bhs 3f
 	push_tos
@@ -843,10 +881,17 @@ _erase_range:
 	define_internal_word "erase-after", visible_flag
 _erase_after:
 	push {lr}
-	ldr r0, =flash_start
+	@ calculate start of partition offset in flash
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+
 	subs tos, r0
         push_tos
-        ldr tos, =flash_main_end - flash_start
+        ldr tos, =flash_main_end
+		subs tos, tos, r0
 	bl _erase_range
         ldr r0, =reboot_hook
         ldr r1, =_do_nothing
@@ -860,10 +905,18 @@ _erase_after:
 	define_internal_word "erase-dict-after", visible_flag
 _erase_dict_after:
 	push {lr}
-	ldr r0, =flash_start
+
+	@ calculate start of partition offset in flash
+	ldr r0, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r0, [r0]
+	ubfx r0, r0, #0, #12
+	lsls r0, #12
+	rsb r0, r0, #flash_start
+
 	subs tos, r0
         push_tos
-        ldr tos, =flash_main_end - flash_start
+        ldr tos, =flash_main_end
+		subs tos, tos, r0
 	bl _erase_range
         ldr r0, =reboot_hook
         ldr r1, =_do_nothing
@@ -951,7 +1004,14 @@ _init_flash_write:
 	bl _exit_xip
 	bl _enable_flash_cmd
 	bl _enable_flash_write
-	ldr r1, =flash_start
+	
+	@ calculate start of partition offset in flash
+	ldr r1, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r1, [r1]
+	ubfx r1, r1, #0, #12
+	lsls r1, #12
+	rsb r1, r1, #flash_start
+
 	subs tos, r1
 	push_tos
 	ldr tos, =CMD_PAGE_PROGRAM
@@ -1029,7 +1089,14 @@ _store_mass_qspi:
 	bl _enable_flash_cmd
 	movs r0, tos
 	pull_tos
-	ldr r1, =flash_start
+
+	@ calculate start of partition offset in flash
+	ldr r1, =(XIP_QMI_BASE + XIP_QMI_ATRANS0_OFFSET)
+	ldr r1, [r1]
+	ubfx r1, r1, #0, #12
+	lsls r1, #12
+	rsb r1, r1, #flash_start
+
 	subs r0, r1
 	movs r1, tos
 	pull_tos
