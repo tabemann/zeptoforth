@@ -64,6 +64,7 @@ begin-module zeptoed-help
   %% Page Down        Move down a significant portion of a screen
   %% Home             Move to the top of the document
   %% End              Move to the end of the document
+  %% Insert           Toggle insert mode
   %% Control-Space    Start a selection, or clear the current selection
   %% Control-A        Move to the start of line (note that one may have to enter
   %%                  this twice with some terminal emulators)
@@ -133,8 +134,9 @@ begin-module zeptoed-internal
 
   \ Character entry mode
   0 constant insert-mode
-  1 constant search-forward-mode
-  2 constant search-backward-mode
+  1 constant replace-mode
+  2 constant search-forward-mode
+  3 constant search-backward-mode
   
   \ Normal video
   : normal-video ( -- ) csi ." 0m" ;
@@ -321,6 +323,9 @@ begin-module zeptoed-internal
     
     \ Character entry mode
     cell member buffer-char-entry-mode
+
+    \ Saved character entry mode
+    cell member buffer-saved-char-entry-mode
 
     \ Search string
     2 cells member buffer-search-text
@@ -827,6 +832,9 @@ begin-module zeptoed-internal
 
     \ Uncomment text
     method handle-uncomment ( buffer -- )
+
+    \ Handle insert/replace
+    method handle-insert-replace ( buffer -- )
     
   end-class
 
@@ -1123,6 +1131,9 @@ begin-module zeptoed-internal
     \ Handle editor close
     method handle-editor-close ( editor -- )
 
+    \ Handle editor insert/replace
+    method handle-editor-insert-replace ( editor -- )
+    
     \ Handle help
     method handle-help ( editor -- )
     
@@ -1162,6 +1173,7 @@ begin-module zeptoed-internal
       false buffer buffer-dirty !
       true buffer buffer-autoindent !
       insert-mode buffer buffer-char-entry-mode !
+      insert-mode buffer buffer-saved-char-entry-mode !
       0 0 buffer buffer-search-text 2!
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
@@ -1201,9 +1213,14 @@ begin-module zeptoed-internal
 
     \ Leave search
     :noname { buffer -- }
-      insert-mode buffer buffer-char-entry-mode !
-      buffer buffer-search-text 2@ drop ?dup if buffer buffer-heap @ free then
-      0 0 buffer buffer-search-text 2!
+      buffer searching? if
+        buffer buffer-saved-char-entry-mode @
+        buffer buffer-char-entry-mode !
+        buffer buffer-search-text 2@ drop ?dup if buffer buffer-heap @ free then
+        0 0 buffer buffer-search-text 2!
+        buffer output-title
+        buffer buffer-editor @ update-coord
+      then
     ; define leave-search
 
     \ Get whether a buffer is being searched
@@ -1995,18 +2012,27 @@ begin-module zeptoed-internal
     \ Output buffer title
     :noname { buffer -- }
       0 0 go-to-coord
-      buffer buffer-dirty @ if -2 else 0 then { dirty-offset }
-      buffer buffer-name 2@ dup buffer buffer-width@ dirty-offset + < if
-        type buffer buffer-dirty @ if ."  *" then erase-end-of-line
-      else
-        dup buffer buffer-width@ dirty-offset + = if
-          type buffer buffer-dirty @ if ."  *" then
-        else
-          + buffer buffer-width@ dirty-offset + -
-          buffer buffer-width@ dirty-offset +
-          buffer buffer-dirty @ if ."  *" then
-        then
+      buffer buffer-dirty @ if -2 else 0 then { end-offset }
+      s"  Ovwrt" { ovwrt-addr ovwrt-bytes }
+      s"  Search-fwd" { search-fwd-addr search-fwd-bytes }
+      s"  Search-back" { search-back-addr search-back-bytes }
+      buffer buffer-char-entry-mode @ case
+        replace-mode of ovwrt-bytes +to end-offset endof
+        search-forward-mode of search-fwd-bytes +to end-offset endof
+        search-backward-mode of search-back-bytes +to end-offset endof
+      endcase
+      buffer buffer-width@ end-offset - { name-width }
+      buffer buffer-name 2@ dup name-width > if
+        drop name-width
       then
+      type
+      buffer buffer-dirty @ if ."  *" then
+      buffer buffer-char-entry-mode @ case
+        replace-mode of ovwrt-addr ovwrt-bytes type endof
+        search-forward-mode of search-fwd-addr search-fwd-bytes type endof
+        search-backward-mode of search-back-addr search-back-bytes type endof
+      endcase
+      buffer buffer-name 2@ nip name-width < if erase-end-of-line then
     ; define output-title
     
     \ Refresh the current line
@@ -3350,7 +3376,8 @@ begin-module zeptoed-internal
         c buffer do-search-backward exit
       then
       buffer update-prev-cursor
-      buffer edit-cursor-at-end? if
+      buffer edit-cursor-at-end? { at-end? }
+      at-end? if
         c tab <> if
           at-end
         else
@@ -3359,6 +3386,9 @@ begin-module zeptoed-internal
       else
         in-middle
       then { position }
+      buffer buffer-char-entry-mode @ replace-mode = at-end? not and if
+        buffer do-delete-forward
+      then
       c buffer do-insert
       buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if
         full-width to position
@@ -3628,6 +3658,9 @@ begin-module zeptoed-internal
     \ Start finding forward
     :noname { buffer -- }
       buffer searching? { buffer-searching? }
+      buffer-searching? not if
+        buffer buffer-char-entry-mode @ buffer buffer-saved-char-entry-mode !
+      then
       search-forward-mode buffer buffer-char-entry-mode @ <> if
         search-forward-mode buffer buffer-char-entry-mode !
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
@@ -3647,6 +3680,9 @@ begin-module zeptoed-internal
     \ Start finding backward
     :noname { buffer -- }
       buffer searching? { buffer-searching? }
+      buffer-searching? not if
+        buffer buffer-char-entry-mode @ buffer buffer-saved-char-entry-mode !
+      then
       search-backward-mode buffer buffer-char-entry-mode @ <> if
         search-backward-mode buffer buffer-char-entry-mode !
         buffer-searching? buffer buffer-search-text 2@ nip 0> and if
@@ -3885,6 +3921,22 @@ begin-module zeptoed-internal
         buffer clear-undos
       then
     ; define handle-revert
+
+    \ Handle insert/replace
+    :noname { buffer -- }
+      buffer searching? not if
+        buffer buffer-char-entry-mode @ case
+          insert-mode of replace-mode endof
+          replace-mode of insert-mode endof
+          [: ." should not be reached!" cr ;] ?raise
+        endcase
+        buffer buffer-char-entry-mode !
+        buffer output-title
+        buffer buffer-editor @ update-coord
+      else
+        buffer leave-search
+      then
+    ; define handle-insert-replace
     
   end-implement
 
@@ -3959,6 +4011,9 @@ begin-module zeptoed-internal
     \ Handle revert
     :noname ( buffer -- ) drop ; define handle-revert
 
+    \ Handle insert/replace
+    :noname ( buffer -- ) drop ; define handle-insert-replace
+    
   end-implement
   
   \ Implement the minibuffer
@@ -4841,6 +4896,11 @@ begin-module zeptoed-internal
         then
       then
     ; define handle-editor-close
+
+    \ Handle editor insert/replace
+    :noname { editor -- }
+      editor editor-current @ handle-insert-replace
+    ; define handle-editor-insert-replace
     
     \ Handle a prompted close
     :noname { editor -- }
@@ -4919,6 +4979,12 @@ begin-module zeptoed-internal
         [char] F of editor handle-editor-doc-end endof
         [char] H of editor handle-editor-doc-home endof
         [char] Z of editor handle-editor-unindent endof
+        [char] 2 of
+          get-key case
+            [char] ~ of editor handle-editor-insert-replace endof
+            clear-keys
+          endcase
+        endof
         [char] 3 of
           get-key case
             [char] ~ of editor handle-editor-delete-forward endof
