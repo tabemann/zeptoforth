@@ -1832,7 +1832,7 @@ begin-module zeptoed-internal
 
     \ Inner workings of searching backward
     :noname { addr count cursor buffer -- found? }
-      cursor offset@ 0= if false exit then
+      cursor offset@ buffer buffer-left-bound @ <= if false exit then
       cursor offset@ buffer buffer-dyn-buffer dyn-buffer-len@ = if
         -1 cursor adjust-offset
       then
@@ -1846,7 +1846,7 @@ begin-module zeptoed-internal
             equal-case-strings?
           then
           if
-            cursor addr count dup [: { cursor addr count data }
+            cursor buffer addr count dup [: { cursor buffer addr count data }
               data count cursor read-data-w/o-move count = if
                 addr count data count
                 addr count contains-upper? if
@@ -1857,7 +1857,7 @@ begin-module zeptoed-internal
                 if
                   true true
                 else
-                  cursor offset@ 0= if
+                  cursor offset@ buffer buffer-left-bound @ <= if
                     false true
                   else
                     -1 cursor adjust-offset false
@@ -1868,7 +1868,7 @@ begin-module zeptoed-internal
               then
             ;] with-allot
           else
-            cursor offset@ 0= if
+            cursor offset@ buffer buffer-left-bound @ <= if
               false true
             else
               -1 cursor adjust-offset false
@@ -3275,7 +3275,7 @@ begin-module zeptoed-internal
     :noname { buffer -- }
       buffer leave-search
       buffer update-prev-cursor
-      buffer edit-cursor-offset@ 0> if
+      buffer edit-cursor-offset@ buffer buffer-left-bound @ > if
         buffer edit-cursor-left-space { cols rows }
         buffer edit-cursor-before-spaces { spaces }
         buffer do-backward
