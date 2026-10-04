@@ -35,7 +35,7 @@ This will erase the entire flash dictionary of your board except for the kernel.
 To build zeptoforth for the PicoCalc without zeptoIP, at a shell prompt at the root of the zeptoforth directory tree execute:
 
 ```
-$ utils/build_picocalc.sh <platform> <port> <font> [<graphical?> [<pico-plus?> [<core>]]]
+$ utils/build_picocalc.sh <platform> <port> <font> [<graphical?> [<pico-plus?> [<core> [<blocks-fat32?>]]]]
 ```
 
 where:
@@ -46,13 +46,14 @@ where:
 - `<graphical?>` is an optional argument that may have values of `graphical` or `text`, to select the graphical PicoCalc terminal emulator or the text-only PicoCalc terminal emulator, respectively; this defaults to `graphical`. The main purpose of this argument is if you wish to save RAM you may want to select the text-only PicoCalc terminal emulator as the graphical PicoCalc terminal emulator uses large quantities of RAM space for its framebuffer; this is particularly a concern on the RP2040 as the graphical PicoCalc terminal emulator leaves little RAM space for user applications on it.
 - `<pico-plus?>` is an optional argument that may have values of `not_pico_plus`, if the target board is not a Pimoroni Pico Plus 2 or Pico Plus 2 W, or `pico_plus`, if the target board is a Pimoroni Pico Plus 2 or Pico Plus 2 W; this defaults to `not_pico_plus`. The effect of selecting `pico_plus` is to enable a FAT32 filesystem in PSRAM with the PSRAM Chip Select pin tied to GPIO 47.
 - `<core>` is an optional argument that may have values of `core_0`, for the zeptoforth PicoCalc tasks executing on core 0 of the RP2040 or RP2350, or `core_1`, for the zeptoforth PicoCalc tasks executing on core 1 of the RP2040 or RP2350; this defaults to `core_1`. The main purpose of this argument is to enable the zeptoforth PicoCalc tasks to execute on a different core than the zeptoIP frame handler and CYW43xxx driver tasks, if you wish to install zeptoIP on your board.
+- `<blocks-fat32?>` is an optional argument that may have values of `no_blocks_fat32`, if the user desires for blocks storage to not be used for a FAT32 filesystem, or `no_blocks_fat32`, if the user desires for a FAT32 filesystem to be used in blocks storage; this defaults to `no_blocks_fat32`. Note that if `blocks_fat32` is selected a FAT32 filesystem will be created in blocks storage, overwriting existing data, if one is not found, and the default filesystem will be the FAT32 filesystem in blocks storage; otherwise blocks storage is left as-is and the default filesystem will be the SDHC card FAT32 filesystem.
 
 Once you have done this the following will be installed on your PicoCalc:
 
 - a `full` build for the selected platform
 - a graphical or text-only PicoCalc terminal emulator, as selected
 - zeptoed, tools for transferring files with your PC, and tools for transferring files between filesystems, unless the platform is `rp2040` where these are omitted to save limited flash dictionary space
-- FAT32 filesystem support for the FAT32 filesystems in on-board flash (a.k.a. 'blocks'), on the SDHC card, and if a Pimoroni Pico Plus 2 or Pico Plus 2 W has been selected, in PSRAM
+- FAT32 filesystem support for the FAT32 filesystems in on-board flash (a.k.a. 'blocks'), if selected with `blocks_fat32`, on the SDHC card, and if a Pimoroni Pico Plus 2 or Pico Plus 2 W has been selected, in PSRAM
 - a screenshot tool as appropriate for the graphical or text-only PicoCalc terminal emulator
 
 When complete, your PicoCalc will reboot and be ready for use!
@@ -61,7 +62,7 @@ To build zeptoforth for the PicoCalc _with_ zeptoIP, instead execute:
 
 
 ```
-$ utils/build_picocalc_zeptoip.sh <platform> <port> <ipv> <fw> <fw-clm> <font> [<graphical?> [<pico-plus?> [<core>]]]
+$ utils/build_picocalc_zeptoip.sh <platform> <port> <ipv> <fw> <fw-clm> <font> [<graphical?> [<pico-plus?> [<core> [<blocks-fat32?>]]]]
 ```
 
 The parameters are the same as for `utils/build_picocalc.sh` except:

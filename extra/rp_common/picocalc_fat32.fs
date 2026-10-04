@@ -94,6 +94,7 @@ continue-module fat32-tools
         <simple-fat32-fs> sd-fs@ init-object
         sd-fs@ simple-fat32::simple-fat32-internal::simple-fat32-sd usb::set-usb-blocks
         true sd-fs@ write-through!
+        [ defined? setup-blocks-fat32 not ] [if] sd-fs: [then]
       ;
       initializer init-sd-fs
 

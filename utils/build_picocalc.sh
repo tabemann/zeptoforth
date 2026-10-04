@@ -23,7 +23,7 @@ set -e
 # SOFTWARE.
 
 usage() {
-    echo "Usage: $0 <platform> <port> (4x8 | 5x8 | 5x8_v2 | 6x8 | 6x12 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1]"
+    echo "Usage: $0 <platform> <port> (4x8 | 5x8 | 5x8_v2 | 6x8 | 6x12 | 7x8) [graphical | text] [not_pico_plus | pico_plus] [core_0 | core_1] [no_blocks_fat32 | blocks_fat32]"
 }
 
 if [ "$#" -lt 3 ]; then
@@ -84,6 +84,18 @@ if [ "$#" -eq 6 ]; then
 else
     CORE=1
 fi
+if [ "$#" -eq 7 ]; then
+    if [ "$7" = 'no_blocks_fat32' ]; then
+        BLOCKS_FAT32='no_blocks_fat32'
+    elif [ "$7" = 'blocks_fat32' ]; then
+        BLOCKS_FAT32='blocks_fat32'
+    else
+        usage
+        exit 1
+    fi
+else
+    BLOCKS_FAT32='no_blocks_fat32'
+fi
 BAUD=115200
 
 utils/codeload3.sh -B ${BAUD} -p ${PORT} serial src/${PLATFORM}/forth/setup_full_msc_only.fs
@@ -113,7 +125,9 @@ if [ ${PLATFORM} != 'rp2040' ]; then
 fi
 echo 'reboot' > /tmp/picocalc/suffix.fs
 utils/codeload3.sh -B ${BAUD} -p ${PORT} serial /tmp/picocalc/suffix.fs
-utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/setup_blocks_fat32.fs
+if [ ${BLOCKS_FAT32} = 'blocks_fat32' ]; then
+    utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/common/setup_blocks_fat32.fs
+fi
 if [ ${PICO_PLUS} = 'pico_plus' ]; then
     utils/codeload3.sh -B ${BAUD} -p ${PORT} serial extra/rp2350/setup_pico_plus_2_psram_fat32.fs
 fi
