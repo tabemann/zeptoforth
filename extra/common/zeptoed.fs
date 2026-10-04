@@ -4982,6 +4982,17 @@ begin-module zeptoed-internal
         [char] 2 of
           get-key case
             [char] ~ of editor handle-editor-insert-replace endof
+            [char] ; of
+              get-key case
+                [char] 3 of
+                  get-key case
+                    [char] ~ of editor handle-editor-insert-replace endof
+                    clear-keys
+                  endcase
+                endof
+                clear-keys
+              endcase
+            endof
             clear-keys
           endcase
         endof
