@@ -3387,7 +3387,9 @@ begin-module zeptoed-internal
         in-middle
       then { position }
       buffer buffer-char-entry-mode @ replace-mode = at-end? not and if
-        buffer do-delete-forward
+        c $80 < c unicode-start? or if
+          buffer do-delete-forward
+        then
       then
       c buffer do-insert
       buffer buffer-edit-cursor buffer cursor-line-last-row-len 0= if

@@ -54,6 +54,7 @@ begin-module edit-internal
     field: edit-current
     field: edit-unicode-entered
     field: edit-displaying-help
+    field: edit-replacing
     field: edit-dirty \ one bit per dirty flag, starting from bit 0
     buffer-count cells +field edit-ids
     buffer-count block-size * +field edit-buffers
@@ -201,8 +202,8 @@ begin-module edit-internal
       4 of s" ^N Go to the next buffer        ^P Go to the previous buffer" endof
       5 of s" ^W Write the current block      ^X Revert the current block" endof
       6 of s" ^U Insert a row above           ^K Delete the current row" endof
-      7 of s" ^V Exit                         ^L Redraw the display" endof
-      8 of s" ^? Display help" endof
+      7 of s" Insert Toggle overwrite mode    ^L Redraw the display" endof
+      8 of s" ^V Exit                         ^? Display help" endof
       9 of s" " endof
       10 of s" Press any key to exit help." endof
       >r s" " r>
@@ -261,6 +262,9 @@ begin-module edit-internal
         edit-state @ edit-current @ id@ 0 <# #s #> dup >r type
         edit-state @ edit-current @ dirty? if
           space [char] * emit r> 2 + >r
+        then
+        edit-state @ edit-replacing @ if
+          s"  Ovwrt" dup r> + >r type
         then
       else
         s" HELP" dup >r type
@@ -429,27 +433,19 @@ begin-module edit-internal
 
   \ Get the number of bytes of the character to the right of the cursor
   : right-bytes ( -- count )
-    current-column-bytes buffer-width < if
-      current-row current-column-bytes + c@
-      dup $80 u< if
-	drop 1
+    current-column-bytes dup { index } buffer-width < if
+      current-row dup { addr } index + dup { start } c@ unicode? not if
+        1
       else
-	1 current-column-bytes 1+ begin
-	  dup buffer-width u< if
-	    dup current-row + c@
-	    dup unicode-start? if
-	      drop drop true
-	    else
-	      unicode? if
-		1+ swap 1+ swap false
-	      else
-		drop true
-	      then
-	    then
-	  else
-	    drop true
-	  then
-	until
+        1 { count }
+        addr buffer-width + start 1+ ?do
+          i c@ dup unicode? if
+            unicode-start? if leave else 1 +to count then
+          else
+            drop leave
+          then
+        loop
+        count
       then
     else
       0
@@ -516,14 +512,33 @@ begin-module edit-internal
       drop
     then
   ;
+
+  \ Delete forward for replace mode
+  : handle-replace-delete ( b -- )
+    edit-state @ edit-replacing @ if
+      dup $80 < swap unicode-start? or if
+        current-column-bytes { column-bytes }
+        column-bytes buffer-width < if
+          right-bytes { bytes-right }
+          current-row { addr }
+          buffer-width bytes-right - { end-bytes }
+          addr column-bytes + dup bytes-right + swap end-bytes move
+          addr end-bytes + bytes-right $20 fill
+        then
+      then
+    else
+      drop
+    then
+  ;
   
   \ Handle insertion
   : handle-insert ( b -- )
-    current-row-index@ row-len buffer-width u< if
-      current-row current-column-bytes +
-      current-row current-column-bytes 1+ +
-      buffer-width current-column-bytes - 1- move
-      dup current-row current-column-bytes + c!
+    current-column-bytes
+    buffer-width edit-state @ edit-replacing @ if right-bytes + then u< if
+      dup handle-replace-delete
+      current-row dup { addr } current-column-bytes dup { bytes } + dup 1+
+      buffer-width bytes  - 1- move
+      dup addr bytes + c!
       dup $20 >= over $80 < and if
 	drop
 	1 edit-state @ edit-cursor-column +!
@@ -747,6 +762,7 @@ begin-module edit-internal
   \ Configure the block editor
   : config-edit ( id -- )
     false edit-state @ edit-displaying-help !
+    false edit-state @ edit-replacing !
     false edit-state @ edit-unicode-entered !
     cr redraw-terminal
     0 edit-state @ edit-current !
@@ -768,6 +784,11 @@ begin-module edit-internal
     then
   ;
 
+  \ Handle toggling insert/replace
+  : handle-insert-replace ( -- )
+    true edit-state @ edit-replacing xor! update-header
+  ;
+
   \ Handle a special key
   : handle-special ( -- )
     get-key case
@@ -775,6 +796,23 @@ begin-module edit-internal
       [char] B of handle-down endof
       [char] C of handle-forward endof
       [char] D of handle-backward endof
+      [char] 2 of
+        get-key case
+          [char] ~ of handle-insert-replace endof
+          [char] ; of
+            get-key case
+              [char] 3 of
+                get-key case
+                  [char] ~ of handle-insert-replace endof
+                  clear-keys
+                endcase
+              endof
+              clear-keys
+            endcase
+          endof
+          clear-keys
+        endcase
+      endof
       [char] 3 of
 	get-key case
 	  [char] ~ of handle-delete-forward endof
