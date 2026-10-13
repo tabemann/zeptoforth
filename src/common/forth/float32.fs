@@ -631,8 +631,8 @@ begin-module float32
     
     \ Enable floating point
     : enable-float ( -- )
+      FPCCR_ASPEN_LSPEN_BITS FPCCR bic! \ if the FPU is already enabled, this will not cause a fault
       CPACR_FPU_BITS CPACR bit@ not if
-        FPCCR_ASPEN_LSPEN_BITS FPCCR bic!
         CPACR_FPU_BITS CPACR bis!
       then
     ;
