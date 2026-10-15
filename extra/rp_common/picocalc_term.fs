@@ -254,7 +254,7 @@ begin-module picocalc-term
       drop
       self display-intf set-dirty
     ; define invert-display
-    
+
   end-implement
   
   \ The PicoCalc terminal
@@ -337,6 +337,82 @@ begin-module picocalc-term
 
   \ Get the terminal font
   : term-font@ ( -- font ) picocalc-term-common::term-font@ ;
+
+  \ Refresh the terminal
+  : refresh-term ( -- ) shared-term do-refresh-term ;
+  
+  \ Reset the terminal default foreground color
+  : reset-term-default-fg-color ( -- )
+    [:
+      picocalc-term-common::reset-term-default-fg-color
+      shared-term update-default-fg-color
+    ;] with-term-lock
+  ;
+
+  \ Reset the terminal default background color
+  : reset-term-default-bk-color ( -- )
+    [:
+      picocalc-term-common::reset-term-default-bk-color
+      shared-term update-default-bk-color
+    ;] with-term-lock
+  ;
+
+  \ Reset the terminal default foreground and background colors
+  : reset-term-default-colors ( -- )
+    [:
+      picocalc-term-common::reset-term-default-colors
+      shared-term update-default-fg-color
+      shared-term update-default-bk-color
+    ;] with-term-lock
+  ;
+
+  \ Reset the terminal colors' RGB8 mappings
+  : reset-term-colors-rgb8 ( -- ) picocalc-term-common::reset-term-colors-rgb8 ;
+
+  \ Reset the terminal colors
+  : reset-term-colors ( -- )
+    [:
+      picocalc-term-common::reset-term-colors
+      shared-term update-default-fg-color
+      shared-term update-default-bk-color
+    ;] with-term-lock
+  ;
+
+  \ Get the terminal default foreground color
+  : term-default-fg-color@ ( -- color-const )
+    picocalc-term-common::term-default-fg-color@
+  ;
+
+  \ Set the terminal default foreground color
+  : term-default-fg-color! ( color-const -- )
+    [:
+      picocalc-term-common::term-default-fg-color!
+      shared-term update-default-fg-color
+    ;] with-term-lock
+  ;
+
+  \ Get the terminal default background color
+  : term-default-bk-color@ ( -- color-const )
+    picocalc-term-common::term-default-bk-color@
+  ;
+
+  \ Set the terminal default background color
+  : term-default-bk-color! ( color-const -- )
+    [:
+      picocalc-term-common::term-default-bk-color!
+      shared-term update-default-bk-color
+    ;] with-term-lock
+  ;
+  
+  \ Get a terminal color as RGB8
+  : term-color-rgb8@ ( color-const -- color )
+    picocalc-term-common::term-color-rgb8@
+  ;
+
+  \ Set a terminal color as RGB8
+  : term-color-rgb8! ( color color-const -- )
+    picocalc-term-common::term-color-rgb8!
+  ;
   
   \ Read the battery
   : read-battery ( -- val ) shared-term do-read-battery ;

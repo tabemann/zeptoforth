@@ -92,6 +92,9 @@ begin-module picocalc-term-common
   [else]
     text8 import
   [then]
+
+  \ Color is not 8-bit
+  : x-color-not-8-bit ( -- ) ." color is not 8-bit" cr ;
   
   begin-module picocalc-term-common-internal
 
@@ -206,10 +209,10 @@ begin-module picocalc-term-common
     3 bit constant attr-reverse
 
     \ The default foreground color
-    ansi-term::b-green constant default-fg-color
+    ansi-term::b-green value default-fg-color
 
     \ The default background color
-    ansi-term::black constant default-bk-color
+    ansi-term::black value default-bk-color
     
     \ The terminal colors
     create term-colors
@@ -229,6 +232,16 @@ begin-module picocalc-term-common
     255 0 255 rgb8 c, \ b-magenta
     0 255 255 rgb8 c, \ b-cyan
     255 255 255 rgb8 c, \ b-white
+
+    \ The current terminal colors
+    16 buffer: current-term-colors
+
+    \ Validate a color
+    : validate-color { color -- }
+      color ansi-term::black >= color ansi-term::white <= and
+      color ansi-term::b-black >= color ansi-term::b-white <= and or
+      averts ansi-term::x-not-color
+    ;
 
     \ Modify the foreground color based on attributes
     : modify-color { color-const attr -- color-const' }
@@ -270,7 +283,7 @@ begin-module picocalc-term-common
 
     \ Get the color
     : get-color ( color-const -- color )
-      color-index term-colors + c@
+      color-index current-term-colors + c@
     ;
 
     \ Convert a control character
@@ -333,13 +346,29 @@ begin-module picocalc-term-common
       ['] do-attention attention-hook !
     ;
     initializer init-take-screenshots
-    
+
   end-module> import
 
-  : *depth* ( c -- )
-    [: space emit space depth . flush-console ;] console::with-serial-output
+  \ Reset the terminal default foreground color
+  : reset-term-default-fg-color ( -- ) ansi-term::b-green to default-fg-color ;
+
+  \ Reset the terminal default background color
+  : reset-term-default-bk-color ( -- ) ansi-term::black to default-bk-color ;
+
+  \ Reset the terminal default foreground and background colors
+  : reset-term-default-colors ( -- )
+    reset-term-default-fg-color reset-term-default-bk-color
   ;
   
+  \ Reset the terminal colors' RGB8 mappings
+  : reset-term-colors-rgb8 ( -- ) term-colors current-term-colors 16 move ;
+
+  \ Reset the terminal colors
+  : reset-term-colors ( -- ) reset-term-default-colors reset-term-colors-rgb8 ;
+  
+  \ Initialize the terminal colors
+  initializer reset-term-colors-rgb8
+
   \ The common PicoCalc terminal class
   <object> begin-class <picocalc-term-common>
 
@@ -365,6 +394,12 @@ begin-module picocalc-term-common
       
       \ The background color
       cell member bk-color
+
+      \ The foreground color is the default color
+      cell member fg-color-default
+
+      \ The background color is the default color
+      cell member bk-color-default
 
       \ The attributes
       cell member attrs
@@ -705,6 +740,15 @@ begin-module picocalc-term-common
 
     \ Flush the output stream
     method flush-term ( self -- )
+
+    \ Refresh the terminal
+    method do-refresh-term ( self -- )
+
+    \ Update the default foreground color
+    method update-default-fg-color ( self -- )
+
+    \ Update the default background color
+    method update-default-bk-color ( self -- )
     
   end-class
 
@@ -722,6 +766,8 @@ begin-module picocalc-term-common
       0 self screenshot-hook !
       default-fg-color self fg-color !
       default-bk-color self bk-color !
+      true self fg-color-default !
+      true self bk-color-default !
       false self visual-bell-enabled !
       false self audible-bell-enabled !
       0 self attrs !
@@ -1488,11 +1534,13 @@ begin-module picocalc-term-common
     
     \ Handle setting the foreground color
     :noname { color self -- }
+      false self fg-color-default !
       color self fg-color !
     ; define handle-fg-color
 
     \ Handle setting the background color
     :noname { color self -- }
+      false self bk-color-default !
       color ansi-term::ansi-term-internal::background-offset - self bk-color !
     ; define handle-bk-color
 
@@ -1541,11 +1589,13 @@ begin-module picocalc-term-common
     \ Handle setting the default foreground color
     :noname { self -- }
       default-fg-color self fg-color !
+      true self fg-color-default !
     ; define handle-default-fg-color
 
     \ Handle setting the default background color
     :noname { self -- }
       default-bk-color self bk-color !
+      true self bk-color-default !
     ; define handle-default-bk-color
 
     \ Handle a carriage return
@@ -1750,6 +1800,26 @@ begin-module picocalc-term-common
       repeat
     ; define flush-term
 
+    \ Refresh the terminal
+    :noname ( self -- )
+      [: { self }
+        term-height 0 ?do
+          term-width 0 ?do true i j self draw-char-with-cursor loop
+        loop
+        self do-update-display
+      ;] over do-with-term-lock
+    ; define do-refresh-term
+
+    \ Update the default foreground color
+    :noname { self -- }
+      self fg-color-default @ if default-fg-color self fg-color ! then
+    ; define update-default-fg-color
+
+    \ Update the default background color
+    :noname { self -- }
+      self bk-color-default @ if default-bk-color self bk-color ! then
+    ; define update-default-bk-color
+
   end-implement
 
   \ Get the terminal pixel dimensions
@@ -1769,6 +1839,33 @@ begin-module picocalc-term-common
     [ use-6x8-font? ] [if] a-simple-font-6x8 [then]
     [ use-6x12-font? ] [if] a-simple-font-6x12 [then]
     [ use-7x8-font? ] [if] a-simple-font [then]
+  ;
+
+  \ Get the terminal default foreground color
+  : term-default-fg-color@ ( -- color-const ) default-fg-color ;
+
+  \ Set the terminal default foreground color
+  : term-default-fg-color! ( color-const -- )
+    dup validate-color to default-fg-color
+  ;
+
+  \ Get the terminal default background color
+  : term-default-bk-color@ ( -- color-const ) default-bk-color ;
+
+  \ Set the terminal default background color
+  : term-default-bk-color! ( color-const -- )
+    dup validate-color to default-bk-color
+  ;
+
+  \ Get a terminal color as RGB8
+  : term-color-rgb8@ ( color-const -- color )
+    dup validate-color get-color
+  ;
+
+  \ Set a terminal color as RGB8
+  : term-color-rgb8! ( color color-const -- )
+    dup validate-color over $100 u< averts x-color-not-8-bit
+    color-index current-term-colors + c!
   ;
   
 end-module
