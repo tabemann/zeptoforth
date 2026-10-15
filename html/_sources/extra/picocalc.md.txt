@@ -43,6 +43,66 @@ Get the terminal character dimensions in pixels.
 
 Get the terminal font.
 
+##### `refresh-term`
+( -- )
+
+Refresh the terminal, redrawing all the characters on it.
+
+##### `reset-term-default-fg-color`
+( -- )
+
+Reset the terminal default foreground color.
+
+##### `reset-term-default-bk-color`
+( -- )
+
+Reset the terminal default background color.
+
+##### `reset-term-default-colors`
+( -- )
+
+Reset the terminal default foreground and background colors.
+
+##### `reset-term-colors-rgb8`
+( -- )
+
+Reset the terminal colors' RGB8 mappings.
+
+##### `reset-term-colors`
+( -- )
+
+Reset the terminal colors, including default foreground and background colors and color RGB8 mappings.
+
+##### `term-default-fg-color@`
+( -- color-const )
+
+Get the terminal default foreground color. This is one of 16 basic color constants from `ansi-term`.
+
+##### `term-default-fg-color!`
+( color-const -- )
+
+Set the terminal default foreground color. This is one of 16 basic color constants from `ansi-term`. This does not modify any pixels already drawn to the display.
+
+##### `term-default-bk-color@`
+( -- color-const )
+
+Get the terminal default background color. This is one of 16 basic color constants from `ansi-term`.
+
+##### `term-default-bk-color!`
+( color-const -- )
+
+Set the terminal default background color. This is one of 16 basic color constants from `ansi-term`. This does not modify any pixels already drawn to the display.
+
+##### `term-color-rgb8@`
+( color-const -- color )
+
+Get the mapping of a terminal color as RGB8.
+
+##### `term-color-rgb8!`
+( color color-const -- )
+
+Set the mapping of a terminal color as RGB8. This does not modify any pixels already drawn to the display.
+
 ##### `read-battery`
 ( -- battery-level )
 
