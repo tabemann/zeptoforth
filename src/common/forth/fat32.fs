@@ -1828,13 +1828,13 @@ begin-module fat32
       >r r@ file-size@ min 0 max dup r@ file-offset ! ( offset )
       0 r@ file-current-cluster-index ! ( offset )
       r@ file-start-cluster @ begin ( offset cluster )
-        over sector-size < if ( offset cluster )
+        over sector-size r@ file-fs @ cluster-sectors @ * < if ( offset cluster )
           r> file-current-cluster ! drop true ( flag )
         else
           dup 0 r@ file-fs @ fat@ dup link-cluster? if ( offset cluster link )
             1 r@ file-current-cluster-index +! ( offset cluster link )
             nip cluster-link ( offset cluster' )
-            swap sector-size - swap false ( offset' cluster' flag )
+            swap sector-size r@ file-fs @ cluster-sectors @ * - swap false ( offset' cluster' flag )
           else
             drop r> file-current-cluster ! drop true ( flag )
           then
