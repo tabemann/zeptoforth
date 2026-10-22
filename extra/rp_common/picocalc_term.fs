@@ -181,69 +181,250 @@ begin-module picocalc-term
 
     \ Scroll up by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
+      self max-margins? if
+        lines term-height min to lines
+        lines term-width * { chars }
+        
+        self chars-buf chars + self chars-buf
+        [ term-width term-height * ] literal chars - move
+        self chars-buf [ term-width term-height * ] literal chars - + chars
+        $20 fill
+        
+        self attrs-buf chars + self attrs-buf
+        [ term-width term-height * ] literal chars - move
+        self attrs-buf [ term-width term-height * ] literal chars - + chars
+        0 fill
+        
+        self fg-colors-buf chars + self fg-colors-buf
+        [ term-width term-height * ] literal chars - move
+        self fg-colors-buf [ term-width term-height * ] literal chars - + chars
+        self fg-color @ fill
+        
+        self bk-colors-buf chars + self bk-colors-buf
+        [ term-width term-height * ] literal chars - move
+        self bk-colors-buf [ term-width term-height * ] literal chars - + chars
+        self bk-color @ fill
+        
+        lines [ char-height display-width * ] literal * { pixels }
+        self display-buf pixels + self display-buf
+        [ display-width display-height * ] literal pixels - move
+        [ term-height char-height * ] literal lines char-height * - { fill-y }
+        self bk-color @ get-color
+        0 fill-y display-width display-height fill-y - self display-intf
+        draw-rect-const
+        self display-intf set-dirty
+      else
+        self bottom-margin @ 1+ self top-margin @ - { total-lines }
+        lines total-lines min to lines
+        lines term-width * { chars }
+        self top-margin @ term-width * { top-offset }
 
-      self chars-buf chars + self chars-buf
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - + chars
-      $20 fill
+        self max-left-right-margins? if
+          
+          self chars-buf top-offset + chars + self chars-buf top-offset +
+          term-width total-lines * chars - move
+          self chars-buf top-offset + term-width total-lines * chars - + chars
+          $20 fill
+          
+          self attrs-buf top-offset + chars + self attrs-buf top-offset +
+          term-width total-lines * chars - move
+          self attrs-buf top-offset + term-width total-lines * chars - + chars
+          0 fill
+          
+          self fg-colors-buf top-offset + chars +
+          self fg-colors-buf top-offset +
+          term-width total-lines * chars - move
+          self fg-colors-buf top-offset + term-width total-lines * chars - +
+          chars self fg-color @ fill
+          
+          self bk-colors-buf top-offset + chars +
+          self bk-colors-buf top-offset +
+          term-width total-lines * chars - move
+          self bk-colors-buf top-offset + term-width total-lines * chars - +
+          chars self bk-color @ fill
 
-      self attrs-buf chars + self attrs-buf
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - + chars 0 fill
+          self bottom-margin @ 1+ char-height * { total-height }
+          lines [ char-height display-width * ] literal * { pixels }
+          self top-margin @ [ char-height display-width * ] literal *
+          { top-pixel-offset }
+          self display-buf top-pixel-offset + pixels +
+          self display-buf top-pixel-offset +
+          display-width total-height * top-pixel-offset - pixels - move
 
-      self fg-colors-buf chars + self fg-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars - + chars
-      self fg-color @ fill
+          total-height lines char-height * - { fill-y }
+          self bk-color @ get-color
+          0 fill-y display-width total-height fill-y - self display-intf
+          draw-rect-const
+          self display-intf set-dirty
+        else
+          self right-margin @ 1+ self left-margin @ - { line-chars }
+          self left-margin @ self top-margin @ lines + term-width * + { src }
+          self left-margin @ self top-margin @ term-width * + { dest }
 
-      self bk-colors-buf chars + self bk-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars - + chars
-      self bk-color @ fill
+          self bottom-margin @ 1+ self top-margin @ lines + ?do
+            self chars-buf src + self chars-buf dest + line-chars move
+            self attrs-buf src + self attrs-buf dest + line-chars move
+            self fg-colors-buf src + self fg-colors-buf dest + line-chars move
+            self bk-colors-buf src + self bk-colors-buf dest + line-chars move
+            term-width +to src
+            term-width +to dest
+          loop
 
-      lines [ char-height display-width * ] literal * { pixels }
-      self display-buf pixels + self display-buf
-      [ display-width display-height * ] literal pixels - move
-      [ term-height char-height * ] literal lines char-height * - { fill-y }
-      self bk-color @ get-color
-      0 fill-y display-width display-height fill-y - self display-intf
-      draw-rect-const
-      self display-intf set-dirty
+          self left-margin @ self bottom-margin @ 1+ lines - term-width * +
+          to dest
+          self fg-color @ { fg }
+          self bk-color @ { bk }
+
+          self bottom-margin @ 1+ dup lines - ?do
+            self chars-buf dest + line-chars $20 fill
+            self attrs-buf dest + line-chars 0 fill
+            self fg-colors-buf dest + line-chars fg fill
+            self bk-colors-buf dest + line-chars bk fill
+            term-width +to dest
+          loop
+
+          self display-buf self left-margin @ char-width *
+          self top-margin @ lines +
+          [ char-height display-width * ] literal * + + to src
+          self display-buf self left-margin @ char-width *
+          self top-margin @
+          [ char-height display-width * ] literal * + + to dest
+          line-chars char-width * { line-pixels }
+
+          self bottom-margin @ 1+ char-height *
+          self top-margin @ lines + char-height * ?do
+            src dest line-pixels move
+            display-width +to src
+            display-width +to dest
+          loop
+
+          bk get-color
+          self left-margin @ char-width *
+          self bottom-margin @ 1+ lines - char-height *
+          line-chars char-width * lines char-height *
+          self display-intf draw-rect-const
+          self display-intf set-dirty
+        then
+      then
     ; define scroll-up
 
     \ Scroll down by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
+      self max-margins? if
+        lines term-height min to lines
+        lines term-width * { chars }
 
-      self chars-buf self chars-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - $20 fill
+        self chars-buf self chars-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self chars-buf [ term-width term-height * ] literal chars - $20 fill
 
-      self attrs-buf self attrs-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - 0 fill
+        self attrs-buf self attrs-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self attrs-buf [ term-width term-height * ] literal chars - 0 fill
 
-      self fg-colors-buf self fg-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars -
-      self fg-color @ fill
+        self fg-colors-buf self fg-colors-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self fg-colors-buf [ term-width term-height * ] literal chars -
+        self fg-color @ fill
 
-      self bk-colors-buf self bk-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars -
-      self bk-color @ fill
+        self bk-colors-buf self bk-colors-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self bk-colors-buf [ term-width term-height * ] literal chars -
+        self bk-color @ fill
 
-      lines [ char-height display-width * ] literal * { pixels }
-      self display-buf self display-buf pixels +
-      [ display-width display-height * ] literal pixels - move
-      display-height term-height lines - char-height * - { fill-y }
-      self bk-color @ get-color
-      0 0 display-width fill-y self display-intf
-      draw-rect-const
-      self display-intf set-dirty
+        lines [ char-height display-width * ] literal * { pixels }
+        self display-buf self display-buf pixels +
+        [ display-width display-height * ] literal pixels - move
+        display-height term-height lines - char-height * - { fill-y }
+        self bk-color @ get-color
+        0 0 display-width fill-y self display-intf
+        draw-rect-const
+        self display-intf set-dirty
+      else
+        self bottom-margin @ 1+ self top-margin @ - { total-lines }
+        lines total-lines min to lines
+        lines term-width * { chars }
+        self top-margin @ term-width * { top-offset }
+
+        self max-left-right-margins? if
+
+          self chars-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self chars-buf top-offset + term-width total-lines * chars - $20 fill
+
+          self attrs-buf self attrs-buf chars +
+          term-width total-lines * chars - move
+          self attrs-buf top-offset + term-width total-lines * chars - 0 fill
+
+          self fg-colors-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self fg-colors-buf top-offset + term-width total-lines * chars -
+          self fg-color @ fill
+
+          self bk-colors-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self bk-colors-buf top-offset + term-width total-lines * chars -
+          self bk-color @ fill
+
+          self bottom-margin @ 1+ char-height * { total-height }
+          lines [ char-height display-width * ] literal * { pixels }
+          self top-margin @ [ char-height display-width * ] literal *
+          { top-pixel-offset }
+          self display-buf top-pixel-offset + dup pixels +
+          total-height display-width * top-pixel-offset - pixels - move
+          total-lines lines - char-height * { fill-y }
+          self bk-color @ get-color
+          0 self top-margin @ char-height * display-width fill-y
+          self display-intf draw-rect-const
+          self display-intf set-dirty
+        else
+          self right-margin @ 1+ self left-margin @ - { line-chars }
+          self left-margin @ self bottom-margin @ lines - term-width * + { src }
+          self left-margin @ self bottom-margin @ term-width * + { dest }
+          
+          self top-margin @ lines + self bottom-margin @ ?do
+            self chars-buf src + self chars-buf dest + line-chars move
+            self attrs-buf src + self attrs-buf dest + line-chars move
+            self fg-colors-buf src + self fg-colors-buf dest + line-chars move
+            self bk-colors-buf src + self bk-colors-buf dest + line-chars move
+            [ term-width negate ] literal +to src
+            [ term-width negate ] literal +to dest
+          -1 +loop
+
+          self left-margin @ self top-margin @ term-width * + to dest
+          self fg-color @ { fg }
+          self bk-color @ { bk }
+          
+          self top-margin @ lines + self top-margin @ ?do
+            self chars-buf dest + line-chars $20 fill
+            self attrs-buf dest + line-chars 0 fill
+            self fg-colors-buf dest + line-chars fg fill
+            self bk-colors-buf dest + line-chars bk fill
+            term-width +to dest
+          loop
+
+          self display-buf self left-margin @ char-width *
+          self bottom-margin @ 1+ lines -
+          [ char-height display-width * ] literal * + display-width - + to src
+          self display-buf self left-margin @ char-width *
+          self bottom-margin @ 1+
+          [ char-height display-width * ] literal * + display-width - + to dest
+          line-chars char-width * { line-pixels }
+
+          self top-margin @ lines + char-height *
+          self bottom-margin @ 1+ char-height * 1- do
+            src dest line-pixels move
+            [ display-width negate ] literal +to src
+            [ display-width negate ] literal +to dest
+          -1 +loop
+
+          bk get-color
+          self left-margin @ char-width * self top-margin @ char-height *
+          line-chars char-width * lines char-height *
+          self display-intf draw-rect-const
+          self display-intf set-dirty
+        then
+      then
     ; define scroll-down
 
     \ Invert the display

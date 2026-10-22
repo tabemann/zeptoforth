@@ -176,63 +176,203 @@ begin-module picocalc-term
 
     \ Scroll up by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
+      self fg-color @ { fg }
+      self bk-color @ { bk }
+      fg get-color { fg' }
+      bk get-color { bk' }
 
-      lines self display-intf text8::scroll-up
+      self max-margins? if
+        lines term-height min to lines
+        lines term-width * { chars }
+        
+        lines self display-intf text8::scroll-up
+        
+        self chars-buf chars + self chars-buf
+        [ term-width term-height * ] literal chars - move
+        self chars-buf [ term-width term-height * ] literal chars - + chars
+        $20 fill
+        
+        self attrs-buf chars + self attrs-buf
+        [ term-width term-height * ] literal chars - move
+        self attrs-buf [ term-width term-height * ] literal chars - + chars
+        0 fill
+        
+        self fg-colors-buf chars + self fg-colors-buf
+        [ term-width term-height * ] literal chars - move
+        self fg-colors-buf [ term-width term-height * ] literal chars - + chars
+        fg fill
+        
+        self bk-colors-buf chars + self bk-colors-buf
+        [ term-width term-height * ] literal chars - move
+        self bk-colors-buf [ term-width term-height * ] literal chars - + chars
+        bk fill
+        
+        term-height dup lines - ?do        
+          term-width 0 ?do
+            $20 fg' bk' false i j self display-intf whole-char!
+          loop
+        loop
+      else
+        self bottom-margin @ 1+ self top-margin @ - { total-lines }
+        lines total-lines min to lines
+        lines term-width * { chars }
+        self top-margin @ term-width * { top-offset }
 
-      self chars-buf chars + self chars-buf
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - + chars
-      $20 fill
+        self top-margin @ self bottom-margin @
+        self left-margin @ self right-margin @
+        lines self display-intf text8::scroll-up-with-margins
 
-      self attrs-buf chars + self attrs-buf
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - + chars 0 fill
+        self max-left-right-margins? if  
+          self chars-buf top-offset + chars + self chars-buf top-offset +
+          term-width total-lines * chars - move
+          self chars-buf top-offset + term-width total-lines * chars - + chars
+          $20 fill
+          
+          self attrs-buf top-offset + chars + self attrs-buf top-offset +
+          term-width total-lines * chars - move
+          self attrs-buf top-offset + term-width total-lines * chars - + chars
+          0 fill
+          
+          self fg-colors-buf top-offset + chars +
+          self fg-colors-buf top-offset +
+          term-width total-lines * chars - move
+          self fg-colors-buf top-offset + term-width total-lines * chars - +
+          chars fg fill
+          
+          self bk-colors-buf top-offset + chars +
+          self bk-colors-buf top-offset +
+          term-width total-lines * chars - move
+          self bk-colors-buf top-offset + term-width total-lines * chars - +
+          chars bk fill
+        else
+          self right-margin @ 1+ self left-margin @ - { line-chars }
+          self left-margin @ self top-margin @ lines + term-width * + { src }
+          self left-margin @ self top-margin @ term-width * + { dest }
+          
+          self bottom-margin @ 1+ self top-margin @ lines + ?do
+            self chars-buf src + self chars-buf dest + line-chars move
+            self attrs-buf src + self attrs-buf dest + line-chars move
+            self fg-colors-buf src + self fg-colors-buf dest + line-chars move
+            self bk-colors-buf src + self bk-colors-buf dest + line-chars move
+            term-width +to src
+            term-width +to dest
+          loop
 
-      self fg-colors-buf chars + self fg-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars - + chars
-      self fg-color @ fill
+          self left-margin @ self bottom-margin @ 1+ lines - term-width * +
+          to dest
 
-      self bk-colors-buf chars + self bk-colors-buf
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars - + chars
-      self bk-color @ fill
-      
-      term-height dup lines - ?do        
-        term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
-      loop
+          self bottom-margin @ 1+ dup lines - ?do
+            self chars-buf dest + line-chars $20 fill
+            self attrs-buf dest + line-chars 0 fill
+            self fg-colors-buf dest + line-chars fg fill
+            self bk-colors-buf dest + line-chars bk fill
+            term-width +to dest
+          loop
+        then
+
+        self bottom-margin @ 1+ dup lines - ?do        
+          self right-margin @ 1+ self left-margin @ ?do
+            $20 fg' bk' false i j self display-intf whole-char!
+          loop
+        loop
+      then
     ; define scroll-up
 
     \ Scroll down by a number of lines
     :noname { lines self -- }
-      lines term-height min to lines
-      lines term-width * { chars }
+      self fg-color @ { fg }
+      self bk-color @ { bk }
+      fg get-color { fg' }
+      bk get-color { bk' }
+          
+      self max-margins? if
+        lines term-height min to lines
+        lines term-width * { chars }
+        
+        lines self display-intf text8::scroll-down
+        
+        self chars-buf self chars-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self chars-buf [ term-width term-height * ] literal chars - $20 fill
+        
+        self attrs-buf self attrs-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self attrs-buf [ term-width term-height * ] literal chars - 0 fill
+        
+        self fg-colors-buf self fg-colors-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self fg-colors-buf [ term-width term-height * ] literal chars -
+        self fg-color @ fill
+        
+        self bk-colors-buf self bk-colors-buf chars +
+        [ term-width term-height * ] literal chars - move
+        self bk-colors-buf [ term-width term-height * ] literal chars -
+        self bk-color @ fill
+        
+        lines 0 ?do
+          term-width 0 ?do
+            $20 fg' bk' false i j self display-intf whole-char!
+          loop
+        loop
+      else
+        self bottom-margin @ 1+ self top-margin @ - { total-lines }
+        lines total-lines min to lines
+        lines term-width * { chars }
+        self top-margin @ term-width * { top-offset }
 
-      lines self display-intf text8::scroll-down
+        self top-margin @ self bottom-margin @
+        self left-margin @ self right-margin @
+        lines self display-intf text8::scroll-down-with-margins
 
-      self chars-buf self chars-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self chars-buf [ term-width term-height * ] literal chars - $20 fill
+        self max-left-right-margins? if
+          self chars-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self chars-buf top-offset + term-width total-lines * chars - $20 fill
 
-      self attrs-buf self attrs-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self attrs-buf [ term-width term-height * ] literal chars - 0 fill
+          self attrs-buf self attrs-buf chars +
+          term-width total-lines * chars - move
+          self attrs-buf top-offset + term-width total-lines * chars - 0 fill
 
-      self fg-colors-buf self fg-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self fg-colors-buf [ term-width term-height * ] literal chars -
-      self fg-color @ fill
+          self fg-colors-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self fg-colors-buf top-offset + term-width total-lines * chars -
+          self fg-color @ fill
 
-      self bk-colors-buf self bk-colors-buf chars +
-      [ term-width term-height * ] literal chars - move
-      self bk-colors-buf [ term-width term-height * ] literal chars -
-      self bk-color @ fill
-      
-      lines 0 ?do
-        term-width 0 ?do $20 0 0 false i j self display-intf whole-char! loop
-      loop
+          self bk-colors-buf top-offset + dup chars +
+          term-width total-lines * chars - move
+          self bk-colors-buf top-offset + term-width total-lines * chars -
+          self bk-color @ fill
+        else
+          self right-margin @ 1+ self left-margin @ - { line-chars }
+          self left-margin @ self bottom-margin @ lines - term-width * + { src }
+          self left-margin @ self bottom-margin @ term-width * + { dest }
+          
+          self top-margin @ self bottom-margin @ lines - ?do
+            self chars-buf src + self chars-buf dest + line-chars move
+            self attrs-buf src + self attrs-buf dest + line-chars move
+            self fg-colors-buf src + self fg-colors-buf dest + line-chars move
+            self bk-colors-buf src + self bk-colors-buf dest + line-chars move
+            [ term-width negate ] literal +to src
+            [ term-width negate ] literal +to dest
+          -1 +loop
+
+          self left-margin @ self top-margin @ term-width * + to dest
+
+          self top-margin @ lines + self top-margin @ ?do
+            self chars-buf dest + line-chars $20 fill
+            self attrs-buf dest + line-chars 0 fill
+            self fg-colors-buf dest + line-chars fg fill
+            self bk-colors-buf dest + line-chars bk fill
+            term-width +to dest
+          loop
+        then
+
+        lines self top-margin @ + self top-margin @ ?do
+          self right-margin @ 1+ self left-margin @ ?do
+            $20 fg' bk' false i j self display-intf whole-char!
+          loop
+        loop
+      then
     ; define scroll-down
 
     \ Invert the display
@@ -242,7 +382,7 @@ begin-module picocalc-term
     :noname ( self -- )
       [: { self }
         self display-intf text8-internal::set-dirty
-        self <picocalc-term>->do-refresh-term
+        self <picocalc-term-common>->do-refresh-term
       ;] over do-with-term-lock
     ; define do-refresh-term
     

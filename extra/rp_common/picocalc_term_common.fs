@@ -419,6 +419,21 @@ begin-module picocalc-term-common
       \ The saved cursor y coordinate
       cell member saved-cursor-y
 
+      \ The top margin
+      cell member top-margin
+
+      \ The bottom margin
+      cell member bottom-margin
+
+      \ Is setting left-right margins enabled
+      cell member left-right-margins-enabled
+
+      \ The left margin
+      cell member left-margin
+
+      \ The right margin
+      cell member right-margin
+
       \ The terminal input task
       cell member input-task
       
@@ -475,6 +490,12 @@ begin-module picocalc-term-common
 
       \ Take a screenshot
       method handle-screenshot ( self -- )
+
+      \ Check whether the margins are maximal
+      method max-margins? ( self -- max? )
+
+      \ Check whether the left-right margins are maximal
+      method max-left-right-margins? ( self -- max? )
       
       \ Draw the cursor
       method draw-cursor ( self -- )
@@ -536,6 +557,12 @@ begin-module picocalc-term-common
       \ Handle hiding the cursor
       method handle-hide-cursor ( self -- )
 
+      \ Handle enabling setting left-right margins
+      method handle-enable-set-left-right-margins ( self -- )
+
+      \ Handle disabling setting left-right margins
+      method handle-disable-set-left-right-margins ( self -- )
+      
       \ Handle saving the cursor
       method handle-save-cursor ( self -- )
 
@@ -605,6 +632,12 @@ begin-module picocalc-term-common
       \ Parse the text color and style
       method parse-color-style ( addr bytes self -- )
       
+      \ Handle setting top and bottom margins
+      method handle-set-top-bottom-margins ( addr bytes self -- )
+
+      \ Handle setting left and right margins
+      method handle-set-left-right-margins ( addr bytes self -- )
+      
       \ Handle setting the text color and style
       method handle-color-style ( style self -- )
 
@@ -643,7 +676,7 @@ begin-module picocalc-term-common
 
       \ Handle setting the default background color
       method handle-default-bk-color ( self -- )
-      
+
       \ Handle a carriage return
       method handle-return ( self -- )
 
@@ -776,6 +809,11 @@ begin-module picocalc-term-common
       true self cursor-visible !
       0 self saved-cursor-x !
       0 self saved-cursor-y !
+      0 self top-margin !
+      term-height 1- self bottom-margin !
+      false self left-right-margins-enabled !
+      0 self left-margin !
+      term-width 1- self right-margin !
     ; define new
 
     \ Initialize the PicoCalc terminal
@@ -1203,6 +1241,12 @@ begin-module picocalc-term-common
       
       addr bytes s" [?25h" equal-strings? if self handle-show-cursor exit then
       addr bytes s" [?25l" equal-strings? if self handle-hide-cursor exit then
+      addr bytes s" [?69h" equal-strings? if
+        self handle-enable-set-left-right-margins exit
+      then
+      addr bytes s" [?69l" equal-strings? if
+        self handle-disable-set-left-right-margins exit
+      then
       addr bytes s" [s" equal-strings? if self handle-save-cursor exit then
       addr bytes s" [u" equal-strings? if self handle-restore-cursor exit then
       addr bytes s" [6n" equal-strings? if
@@ -1223,6 +1267,12 @@ begin-module picocalc-term-common
       last-char [char] S = if addr bytes self handle-scroll-up exit then
       last-char [char] T = if addr bytes self handle-scroll-down exit then
       last-char [char] f = if addr bytes self handle-cursor-pos exit then
+      last-char [char] r = if
+        addr bytes self handle-set-top-bottom-margins exit
+      then
+      last-char [char] s = if
+        addr bytes self handle-set-left-right-margins exit
+      then
       last-char [char] m = if addr bytes self parse-color-style exit then
     ; define parse-escape
 
@@ -1252,7 +1302,19 @@ begin-module picocalc-term-common
     :noname { self -- }
       false self cursor-visible !
     ; define handle-hide-cursor
-    
+
+    \ Handle enabling setting left-right margins
+    :noname { self -- }
+      true self left-right-margins-enabled !
+    ; define handle-enable-set-left-right-margins
+
+    \ Handle disabling setting left-right margins
+    :noname { self -- }
+      false self left-right-margins-enabled !
+      0 self left-margin !
+      [ term-width 1- ] literal self right-margin !
+    ; define handle-disable-set-left-right-margins
+
     \ Handle saving the cursor
     :noname { self -- }
       self cursor-x @ self saved-cursor-x !
@@ -1365,7 +1427,39 @@ begin-module picocalc-term-common
         then
       then
     ; define handle-cursor-pos
-    
+
+    \ Handle setting top and bottom margins
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec { top top-bytes }
+      addr 1+ top-bytes + c@ [char] ; = if
+        1 addr 2 + top-bytes + bytes 2 - top-bytes - self parse-dec
+        { bottom bottom-bytes }
+        bytes 2 - top-bytes - bottom-bytes - 1 = if
+          bottom 1- 0 max [ term-height 1- ] literal min to bottom
+          top 1- 0 max [ term-height 1- ] literal min self top-margin !
+          self top-margin @ bottom max self bottom-margin !
+          0 self cursor-x !
+          0 self cursor-y !
+        then
+      then
+    ; define handle-set-top-bottom-margins
+
+    \ Handle setting left and right margins
+    :noname { addr bytes self -- }
+      1 addr 1+ bytes 1- self parse-dec { left left-bytes }
+      addr 1+ left-bytes + c@ [char] ; = if
+        1 addr 2 + left-bytes + bytes 2 - left-bytes - self parse-dec
+        { right right-bytes }
+        bytes 2 - left-bytes - right-bytes - 1 = if
+          right 1- 0 max [ term-width 1- ] literal min to right
+          left 1- 0 max [ term-width 1- ] literal min self left-margin !
+          self left-margin @ right max self right-margin !
+          0 self cursor-x !
+          0 self cursor-y !
+        then
+      then
+    ; define handle-set-left-right-margins
+
     \ Handle erasing in the display
     :noname { addr bytes self -- }
       0 addr 1+ bytes 1- self parse-dec bytes 2 - = if
@@ -1600,15 +1694,21 @@ begin-module picocalc-term-common
 
     \ Handle a carriage return
     :noname { self -- }
-      0 self cursor-x !
+      self left-margin @ self cursor-x !
     ; define handle-return
     
     \ Handle a linefeed
     :noname { self -- }
-      self cursor-y @ term-height 1- < if
+      self cursor-y @ self bottom-margin @ < if
         1 self cursor-y +!
       else
-        1 self scroll-up
+        self cursor-y @ self bottom-margin @ = if
+          1 self scroll-up
+        else
+          self cursor-y @ [ term-height 1- ] literal < if
+            1 self cursor-y +!
+          then
+        then
       then
     ; define handle-linefeed
     
@@ -1632,9 +1732,12 @@ begin-module picocalc-term-common
     :noname { c self -- }
       c $20 < c $7E > or if exit then
       self cursor-x @ self cursor-y @ { x y }
-      x term-width = if
-        0 to x
-        y term-height 1- >= if 1 self scroll-up else y 1+ to y then
+      x self right-margin @ = if
+        self left-margin @ to x
+        y self bottom-margin @ = if 1 self scroll-up else y 1+ to y then
+        y self term-height = if [ term-height 1- ] literal to y then
+      else
+        x [ term-width 1- ] literal = if self left-margin @ 1- to x then
       then
       y self cursor-y !
       x 1+ self cursor-x !
@@ -1746,6 +1849,18 @@ begin-module picocalc-term-common
         dup not if pause-reschedule-last then
       until
     ; define do-raw-key>
+
+    \ Check whether the margins are maximal
+    :noname { self -- max? }
+      self top-margin @ 0=
+      self bottom-margin @ [ term-height 1- ] literal = and
+      self max-left-right-margins? and
+    ; define max-margins?
+
+    \ Check whether the left-right margins are maximal
+    :noname { self -- max? }
+      self left-margin @ 0= self right-margin @ [ term-width 1- ] literal = and
+    ; define max-left-right-margins?
     
     \ Draw the cursor
     :noname { self -- }

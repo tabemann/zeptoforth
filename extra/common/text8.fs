@@ -124,9 +124,19 @@ begin-module text8
     \ lines)
     method scroll-up ( lines text -- )
 
+    \ Scroll up a number of lines (note that this will *not* fill in the new
+    \ lines) with margins
+    method scroll-up-with-margins
+    ( top-margin bottom-margin left-margin right-margin lines text -- )
+ 
     \ Scroll down a number of lines (note that this will *not* fill in the new
     \ lines)
     method scroll-down ( lines text -- )
+
+    \ Scroll down a number of lines (note that this will *not* fill in the new
+    \ lines) with margins
+    method scroll-down-with-margins
+    ( top-margin bottom-margin left-margin right-margin lines self -- )
 
     \ Invert the text
     method invert-text ( text -- )
@@ -334,6 +344,53 @@ begin-module text8
       then
     ; define scroll-up
 
+    \ Scroll up a number of lines (note that this will *not* fill in the new
+    \ lines) with margins
+    :noname { top-margin bottom-margin left-margin right-margin lines self -- }
+      self text-rows @ { rows }
+      self text-cols @ { cols }
+      cols 8 align 3 rshift { underline-row-size }
+      
+      lines 0> lines rows < and
+      top-margin 0>= top-margin rows < and and
+      bottom-margin 0>= bottom-margin rows < and and
+      top-margin bottom-margin <= and
+      left-margin 0>= left-margin cols < and and
+      right-margin 0>= right-margin cols < and and
+      left-margin right-margin <= and if
+        bottom-margin 1+ top-margin - { total-lines }
+        lines total-lines min to lines
+        right-margin 1+ left-margin - { line-chars }
+        left-margin top-margin lines + cols * + { src }
+        left-margin top-margin cols * + { dest }
+        lines underline-row-size * negate { underline-off }
+
+        bottom-margin 1+ top-margin lines + ?do
+          self text-char-buf @ src + self text-char-buf @ dest +
+          line-chars move
+          self text-fg-color-buf @ src + self text-fg-color-buf @ dest +
+          line-chars move
+          self text-bk-color-buf @ src + self text-bk-color-buf @ dest +
+          line-chars move
+
+          right-margin 1+ left-margin ?do
+            i 7 and dup { bit }
+            self text-underline-buf @ j underline-row-size * + i 3 rshift +
+            dup { addr } cbit@ if
+              bit addr underline-off + cbis!
+            else
+              bit addr underline-off + cbic!
+            then
+          loop
+          cols +to src
+          cols +to dest
+        loop
+
+        left-margin right-margin 1+ top-margin bottom-margin 1+ lines -
+        self dirty-area
+      then
+    ; define scroll-up-with-margins
+
     \ Scroll down a number of lines (note that this will *not* fill in the new
     \ lines)
     :noname { lines self -- }
@@ -350,6 +407,53 @@ begin-module text8
       then
     ; define scroll-down
 
+    \ Scroll down a number of lines (note that this will *not* fill in the new
+    \ lines) with margins
+    :noname { top-margin bottom-margin left-margin right-margin lines self -- }
+      self text-rows @ { rows }
+      self text-cols @ { cols }
+      cols 8 align 3 rshift { underline-row-size }
+      
+      lines 0> lines rows < and
+      top-margin 0>= top-margin rows < and and
+      bottom-margin 0>= bottom-margin rows < and and
+      top-margin bottom-margin <= and
+      left-margin 0>= left-margin cols < and and
+      right-margin 0>= right-margin cols < and and
+      left-margin right-margin <= and if
+        bottom-margin 1+ top-margin - { total-lines }
+        lines total-lines min to lines
+        right-margin 1+ left-margin - { line-chars }
+        left-margin bottom-margin lines - cols * + { src }
+        left-margin bottom-margin cols * + { dest }
+        lines underline-row-size * { underline-off }
+
+        top-margin bottom-margin lines - ?do
+          self text-char-buf @ src + self text-char-buf @ dest +
+          line-chars move
+          self text-fg-color-buf @ src + self text-fg-color-buf @ dest +
+          line-chars move
+          self text-bk-color-buf @ src + self text-bk-color-buf @ dest +
+          line-chars move
+
+          right-margin 1+ left-margin ?do
+            i 7 and dup { bit }
+            self text-underline-buf @ j underline-row-size * + i 3 rshift +
+            dup { addr } cbit@ if
+              bit addr underline-off + cbis!
+            else
+              bit addr underline-off + cbic!
+            then
+          loop
+          cols negate +to src
+          cols negate +to dest
+        -1 +loop
+
+        left-margin right-margin 1+ top-margin lines + bottom-margin 1+
+        self dirty-area
+      then
+    ; define scroll-down-with-margins
+    
     \ Invert the text
     :noname { self -- }
       self text-rows @ self text-cols @ * { chars }
