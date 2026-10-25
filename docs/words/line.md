@@ -12,6 +12,8 @@ The line editor provides a simple interface for allowing the user to edit input 
 * Control-E: move the cursor to the end of the input
 * Control-L: reset the terminal
 * Control-K: delete/cut to the end of the line from the cursor
+* Control-R: search backwards in the history
+* Control-Meta-R: search forwards in the history
 * Control-U: delete/cut to the start of the line from the cursor
 * Control-W: delete/cut to the start of the preceding word delimited by whitespace from the cursor
 * Control-Y: paste the current clipboard at the cursor

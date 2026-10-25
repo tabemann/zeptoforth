@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2025 Travis Bemann
+\ Copyright (c) 2021-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,6 @@ begin-module line-internal
   \ Line structure for current task
   user line
 
-  compress-flash
-  
   \ History block count
   128 constant history-block-count
 
@@ -40,6 +38,15 @@ begin-module line-internal
   \ Line editor is in upload mode
   0 bit constant line-upload-mode
 
+  \ Line editor is searching forward
+  1 bit constant search-forward-mode
+
+  \ Line editor is searching backward
+  2 bit constant search-backward-mode
+
+  \ Line editor search has failed
+  3 bit constant search-failed
+  
   \ Clipboard size
   128 constant clipboard-size
 
@@ -51,8 +58,9 @@ begin-module line-internal
 
   \ Right clipboard end
   2 constant right-clipboard-end
-  
-  commit-flash
+
+  \ Search buffer length
+  256 constant search-size
   
   \ Line structure
   begin-structure line-size
@@ -72,6 +80,9 @@ begin-module line-internal
     field: line-edit-deferred
     hfield: line-clipboard-count
     hfield: line-clipboard-end
+    hfield: line-search-len
+    hfield: line-search-off
+    search-size +field line-search-buf
     clipboard-size +field line-clipboard
     history-block-size history-block-count heap-size +field line-history-heap
   end-structure
@@ -88,6 +99,7 @@ begin-module line-internal
   $06 constant ctrl-f
   $0B constant ctrl-k
   $0C constant ctrl-l
+  $12 constant ctrl-r
   $15 constant ctrl-u
   $17 constant ctrl-w
   $19 constant ctrl-y
@@ -95,12 +107,17 @@ begin-module line-internal
   \ The saved REFILL hook
   variable saved-refill-hook
 
-  commit-flash
-  
   \ The saved ACCEPT hook
   variable saved-accept-hook
-  
-  commit-flash
+
+  \ Clear search
+  : clear-search ( -- )
+    search-forward-mode line @ line-flags bic!
+    search-backward-mode line @ line-flags bic!
+    search-failed line @ line-flags bic!
+    0 line @ line-search-off h!
+    0 line @ line-search-len h!
+  ;
   
   \ Get next history item
   : history-next ( history -- next-history ) @ ;
@@ -111,8 +128,6 @@ begin-module line-internal
   \ Get first history item
   : history-first ( -- first-history ) line @ line-history-first @ ;
 
-  commit-flash
-  
   \ Get previous history item
   : history-prev ( history -- prev-history )
     history-first 2dup <> if
@@ -127,8 +142,6 @@ begin-module line-internal
     history-first begin dup history-next while history-next repeat
   ;
 
-  commit-flash
-
   \ Evict history
   : history-evict ( -- )
     history-last
@@ -138,8 +151,6 @@ begin-module line-internal
       dup history-prev 0 swap ! line @ line-history-heap free
     then
   ;
-
-  commit-flash
 
   \ Allocate a string in the history
   : history-allocate ( length -- )
@@ -177,8 +188,6 @@ begin-module line-internal
       true
     then
   ;
-
-  commit-flash
 
   \ Add a string in the history
   : history-add ( c-addr bytes -- )
@@ -231,6 +240,56 @@ begin-module line-internal
     then
   ;
 
+  \ Get header
+  : header ( -- addr bytes )
+    search-failed line @ line-flags bit@ not if
+      search-forward-mode line @ line-flags bit@ if
+        s" search-forward" exit
+      then
+      search-backward-mode line @ line-flags bit@ if
+        s" search-backward" exit
+      then
+    else
+      search-forward-mode line @ line-flags bit@ if
+        s" failed search-forward" exit
+      then
+      search-backward-mode line @ line-flags bit@ if
+        s" failed search-backward" exit
+      then
+    then
+    s" "
+  ;
+
+  \ Are we searching?
+  : searching? ( -- )
+    search-forward-mode line @ line-flags bit@
+    search-backward-mode line @ line-flags bit@ or
+  ;
+
+  \ Get header length
+  : header-len ( -- bytes )
+    searching? if
+      header nip 5 +
+      0 line @ line-search-len h@ 0 ?do
+        line @ line-search-buf i + c@
+        dup tab = if
+          drop 7 bic 8 +
+        else
+          dup unicode-start? if
+            drop 1+
+          else
+            dup $20 >= swap $7F < and if
+              1+
+            then
+          then
+        then
+      loop
+      +
+    else
+      0
+    then
+  ;
+  
   \ Get the start position
   : start-position ( -- row column )
     line @ line-start-row h@ line @ line-start-column h@
@@ -238,7 +297,7 @@ begin-module line-internal
 
   \ Get the position at a character offset
   : offset-position ( offset -- row column )
-    line @ line-start-column h@ +
+    line @ line-start-column h@ + header-len +
     dup line @ line-terminal-columns h@ / line @ line-start-row h@ +
     swap line @ line-terminal-columns h@ mod
   ;
@@ -251,7 +310,7 @@ begin-module line-internal
 
   \ Calculate number of lines text will take up
   : total-lines ( -- lines )
-    line @ line-count h@ line @ line-start-column h@ +
+    line @ line-count h@ line @ line-start-column h@ + header-len +
     line @ line-terminal-columns h@ / 1+
   ;
 
@@ -266,13 +325,58 @@ begin-module line-internal
     then
   ;
 
-  commit-flash
+  \ Handle search highlighting
+  : search-highlight { c index search-match-len -- search-match-len' }
+    searching? index line @ line-search-off h@ >= and if
+      index line @ line-search-off h@ - { search-i }
+      search-i search-match-len < if
+        c to-upper-char line @ line-search-buf search-i + c@ to-upper-char <> if
+          search-i to search-match-len
+        then
+      then
+      search-match-len 0> if
+        index line @ line-search-off h@ = if
+          reverse-color color-effect!
+        else
+          index line @ line-search-off h@ search-match-len + = if
+            reverse-color-off color-effect!
+          then
+        then
+      then
+    then
+    search-match-len
+  ;
+
+  \ Type search string
+  : type-search ( -- )
+    0 line @ line-search-len h@ 0 ?do
+      line @ line-search-buf i + c@
+      dup tab = if
+        drop dup 7 bic 8 + tuck swap - spaces
+      else
+        dup emit
+        dup unicode-start? if
+          drop 1+
+        else
+          dup $20 >= swap $7F < and if
+            1+
+          then
+        then
+      then
+    loop
+    drop
+  ;
   
   \ Type line
   : type-line ( -- )
-    0 line @ line-buffer-ptr @ line @ line-count-ptr @ @ +
-    line @ line-buffer-ptr @ ?do
-      i c@
+    header type
+    searching? if
+      ."  `" type-search ." ': "
+    then
+    line @ line-search-len h@ { search-match-len }
+    0 line @ line-count-ptr @ @ 0 ?do
+      line @ line-buffer-ptr @ i + c@
+      dup i search-match-len search-highlight to search-match-len
       dup tab <> if
 	dup emit
 	dup unicode-start? swap $80 u< or if
@@ -283,9 +387,12 @@ begin-module line-internal
       then
     loop
     drop
+    searching? if
+      search-match-len line @ line-count-ptr @ @ = if
+        reverse-color-off color-effect!
+      then
+    then
   ;
-
-  commit-flash
 
   \ Actually update the line editor
   : update-line ( -- )
@@ -310,6 +417,12 @@ begin-module line-internal
   \ Handle resetting the terminal
   : handle-reset ( -- )
     reset-terminal-color reset-terminal-cursor
+    page reset-ansi-term update-start-position update-terminal-size update-line
+  ;
+
+  \ Reset the terminal for searches
+  : reset-term-search ( -- )
+    reset-terminal-color reset-terminal-cursor hide-cursor
     page reset-ansi-term update-start-position update-terminal-size update-line
   ;
 
@@ -373,8 +486,6 @@ begin-module line-internal
     then
   ;
 
-  commit-flash
-
   \ Insert a byte on the left-hand side of the clipboard
   : insert-clipboard-left { c -- }
     line @ line-clipboard-end h@ left-clipboard-end = if
@@ -405,8 +516,6 @@ begin-module line-internal
     1 line @ line-clipboard-count h+!
   ;
 
-  commit-flash
-  
   \ Delete a byte at an index
   : delete-byte ( -- )
     line @ line-index-ptr @ @ 0> if
@@ -529,10 +638,9 @@ begin-module line-internal
     bytes
   ;
 
-  commit-flash
-  
   \ Handle delete
   : handle-delete ( -- )
+    clear-search
     line @ line-offset h@ 0> if
       left-bytes
       line @ line-index-ptr @ @ over - get-spaces-to-index
@@ -545,6 +653,7 @@ begin-module line-internal
 
   \ Handle delete forward
   : handle-delete-forward ( -- )
+    clear-search
     line @ line-offset h@ line @ line-count h@ < if
       right-bytes 0 ?do delete-byte-forward loop
       line @ line-count-ptr @ @ get-spaces-to-index line @ line-count h!
@@ -554,6 +663,7 @@ begin-module line-internal
 
   \ Handle delete word
   : handle-delete-word ( -- )
+    clear-search
     line @ line-offset h@ 0> if
       line @ line-index-ptr @ @ get-spaces-to-index { start-count }
       [: dup bl = swap tab = or ;] delete-bytes
@@ -566,6 +676,7 @@ begin-module line-internal
 
   \ Handle deleting to the start of the line
   : handle-delete-start ( -- )
+    clear-search
     delete-start
     line @ line-offset h@ negate line @ line-count h+!
     0 line @ line-offset h!
@@ -574,6 +685,7 @@ begin-module line-internal
 
   \ Handle deleting to the end of the line
   : handle-delete-end ( -- )
+    clear-search
     delete-end
     line @ line-offset h@ line @ line-count h!
     update-line
@@ -581,6 +693,7 @@ begin-module line-internal
   
   \ Handle insert
   : handle-insert ( b -- )
+    clear-search
     line @ line-index-ptr @ @ line @ line-count-ptr @ @ < if
       line @ line-index-ptr @ @ get-spaces-to-index swap
       insert-byte if
@@ -645,6 +758,7 @@ begin-module line-internal
   
   \ Handle paste
   : handle-paste ( -- )
+    clear-search
     line @ line-index-ptr @ @ get-spaces-to-index { start-count }
     get-paste-count { paste-count }
     false { pasted? }
@@ -660,6 +774,7 @@ begin-module line-internal
 
   \ Handle going forward
   : handle-forward ( -- )
+    clear-search
     line @ line-index-ptr @ @ line @ line-count-ptr @ @ < if
       line @ line-index-ptr @ @ get-spaces-to-index
       right-bytes line @ line-index-ptr @ +!
@@ -671,6 +786,7 @@ begin-module line-internal
 
   \ Handle going backward
   : handle-backward ( -- )
+    clear-search
     line @ line-index-ptr @ @ 0> if
       line @ line-index-ptr @ @ get-spaces-to-index
       left-bytes negate line @ line-index-ptr @ +!
@@ -682,6 +798,7 @@ begin-module line-internal
 
   \ Handle going to the start
   : handle-start ( -- )
+    clear-search
     0 line @ line-index-ptr @ !
     0 line @ line-offset h!
     update-line
@@ -689,6 +806,7 @@ begin-module line-internal
 
   \ Handle going to the end
   : handle-end ( -- )
+    clear-search
     line @ line-count-ptr @ @ line @ line-index-ptr @ !
     line @ line-count h@ line @ line-offset h!
     update-line
@@ -696,9 +814,14 @@ begin-module line-internal
 
   \ Write history to the buffer
   : set-buffer-for-history ( history -- )
-    cell+ dup c@ dup line @ line-index-ptr @ ! dup line @ line-count-ptr @ !
-    dup get-spaces-to-index dup line @ line-offset h! line @ line-count h!
-    swap 1+ line @ line-buffer-ptr @ rot move
+    ?dup if
+      cell+ dup c@ dup line @ line-index-ptr @ ! dup line @ line-count-ptr @ !
+      dup get-spaces-to-index dup line @ line-offset h! line @ line-count h!
+      swap 1+ line @ line-buffer-ptr @ rot move
+    else
+      0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
+      0 line @ line-offset h! 0 line @ line-count h!
+    then
     update-line
   ;
 
@@ -711,6 +834,7 @@ begin-module line-internal
 
   \ Handle going to the next history item
   : handle-history-next ( -- )
+    clear-search
     history-current if
       history-current history-next ?dup if
 	dup line @ line-history-current ! set-buffer-for-history
@@ -722,8 +846,9 @@ begin-module line-internal
     then
   ;
 
-  \ Handle going to the next history item
+  \ Handle going to the previous history item
   : handle-history-prev ( -- )
+    clear-search
     history-current if
       history-current history-first <> if
 	history-current history-prev dup line @ line-history-current !
@@ -732,6 +857,53 @@ begin-module line-internal
 	0 line @ line-history-current ! clear-buffer
       then
     then
+  ;
+
+  \ Match a search against history
+  : match-search ( history -- match? )
+    history-string count { addr bytes }
+    0 { off }
+    begin bytes off line @ line-search-len h@ + >= while
+      addr off + bytes off - line @ line-search-len h@ min
+      line @ line-search-buf line @ line-search-len h@
+      equal-case-strings? if
+        off line @ line-search-off h! true exit
+      then
+      1 +to off
+    repeat
+    false
+  ;
+  
+  \ Search history backward
+  : do-search-backward ( -- )
+    history-current 0= if
+      history-first if
+        history-first dup line @ line-history-current ! set-buffer-for-history
+      then
+    then
+    history-current begin ?dup while
+      dup match-search if
+        search-failed line @ line-flags bic!
+        dup line @ line-history-current ! set-buffer-for-history exit
+      then
+      history-next
+    repeat
+    search-failed line @ line-flags bis!
+    update-line
+  ;
+
+  \ Search history forward
+  : do-search-forward ( -- )
+    history-current 0= if exit then
+    history-current begin ?dup while
+      dup match-search if
+        search-failed line @ line-flags bic!
+        dup line @ line-history-current ! set-buffer-for-history exit
+      then
+      history-prev
+    repeat
+    search-failed line @ line-flags bis!
+    update-line
   ;
 
   \ Check whether to leave upload mode
@@ -751,6 +923,7 @@ begin-module line-internal
 
   \ Handle uploading a byte
   : handle-upload-byte ( c -- )
+    clear-search
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
       dup emit
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
@@ -763,6 +936,7 @@ begin-module line-internal
 
   \ Handle deleting a byte in upload mode
   : handle-upload-delete-byte ( -- )
+    clear-search
     line @ line-index-ptr @ @ 0> if
       -1 line @ line-index-ptr @ +!
       -1 line @ line-count-ptr @ +!
@@ -775,10 +949,9 @@ begin-module line-internal
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
   ;
 
-  commit-flash
-
   \ Handle upload mode
   : handle-upload ( -- )
+    clear-search
     reset-upload xon ack
     continue-upload? if
       begin
@@ -808,10 +981,9 @@ begin-module line-internal
     then
   ;
     
-  commit-flash
-
   \ Set upload mode
   : handle-set-upload ( -- )
+    clear-search
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     0 line @ line-offset h! 0 line @ line-count h!
     update-line
@@ -821,7 +993,151 @@ begin-module line-internal
     line-upload-mode line @ line-flags bis!
   ;
   
-  commit-flash
+  \ Character delay
+  100 constant char-delay
+
+  \ Test for search failure
+  : test-search-failure ( -- )
+    history-current if
+      history-current history-string count
+      line @ line-search-off h@ - 0 max line @ line-search-len h@ min
+      swap line @ line-search-off h@ + swap
+      line @ line-search-buf line @ line-search-len h@
+      equal-case-strings? if
+        search-failed line @ line-flags bic!
+      else
+        search-failed line @ line-flags bis!
+      then
+    else
+      search-failed line @ line-flags bis!
+    then
+    update-line
+  ;
+
+  \ Handle search delete
+  : handle-search-delete ( -- )
+    line @ line-search-len h@ 1- 0> if
+      line @ line-search-len h@ 1- line @ line-search-buf + c@ unicode? if
+        begin
+          -1 line @ line-search-len h+!
+          line @ line-search-len h@ 0> if
+            line @ line-search-len h@ line @ line-search-buf + c@ unicode-start?
+          else
+            true
+          then
+        until
+      else
+        -1 line @ line-search-len h+!
+      then
+    else
+      0 line @ line-search-len h!
+      0 line @ line-search-off h!
+      search-failed line @ line-flags bic!
+    then
+    test-search-failure
+  ;
+  
+  \ Handle searching backward
+  : handle-search-backward ( -- )
+    [:
+      search-backward-mode line @ line-flags bis!
+      search-failed line @ line-flags bic!
+      history-current ?dup if
+        history-next ?dup if
+          dup line @ line-history-current ! set-buffer-for-history
+        then
+      then
+      do-search-backward
+      systick::systick-counter false { unicode-time unicode-time-set? }
+      begin
+        unicode-time-set? if
+          get-key? if get-key else -1 then
+        else
+          get-key
+        then { c }
+        c delete = if
+          handle-search-delete false
+        else
+          c $20 >= c tab = or c -1 = or if
+            c -1 <> if
+              c unicode-start? if
+                systick::systick-counter to unicode-time
+                true to unicode-time-set?
+              then
+              line @ line-search-len h@ [ search-size 1- ] literal < if
+                c line @ line-search-buf line @ line-search-len h@ + c!
+                1 line @ line-search-len h+!
+                do-search-backward
+              then
+            then
+            unicode-time-set? if
+              systick::systick-counter unicode-time - 0>
+            else true then if
+              false to unicode-time-set?
+              test-search-failure
+            then
+            false
+          else
+            c ctrl-l = if reset-term-search false else c set-key true then
+          then
+        then
+      until
+    ;] execute-hide-cursor
+    search-backward-mode line @ line-flags bic!
+    search-failed line @ line-flags bic!
+    update-line
+  ;
+
+  \ Handle searching forward
+  : handle-search-forward ( -- )
+    [:
+      search-forward-mode line @ line-flags bis!
+      search-failed line @ line-flags bic!
+      history-current ?dup if
+        history-prev ?dup if
+          dup line @ line-history-current ! set-buffer-for-history
+        then
+      then
+      do-search-forward
+      systick::systick-counter false { unicode-time unicode-time-set? }
+      begin
+        unicode-time-set? if
+          get-key? if get-key else -1 then
+        else
+          get-key
+        then { c }
+        c delete = if
+          handle-search-delete false
+        else
+          c $20 >= c tab = or c -1 = or if
+            c -1 <> if
+              c unicode-start? if
+                systick::systick-counter to unicode-time
+                true to unicode-time-set?
+              then
+              line @ line-search-len h@ [ search-size 1- ] literal < if
+                c line @ line-search-buf line @ line-search-len h@ + c!
+                1 line @ line-search-len h+!
+                do-search-forward
+              then
+            then
+            unicode-time-set? if
+              systick::systick-counter unicode-time - 0>
+            else true then if
+              false to unicode-time-set?
+              test-search-failure
+            then
+            false
+          else
+            c ctrl-l = if reset-term-search false else c set-key true then
+          then
+        then
+      until
+    ;] execute-hide-cursor
+    search-forward-mode line @ line-flags bic!
+    search-failed line @ line-flags bic!
+    update-line
+  ;
 
   \ Handle the escape key
   : handle-escape ( -- exit-line-editor )
@@ -847,11 +1163,35 @@ begin-module line-internal
 	  dup set-key swap false swap
 	endcase
       endof
+      ctrl-r of handle-search-forward false endof
       dup set-key swap false swap
     endcase
   ;
 
-  commit-flash
+  \ Handle a key
+  : handle-key ( c -- done? )
+    dup $20 u< if 
+      case
+        return of true endof
+        newline of true endof
+        tab of tab handle-insert false endof
+        ctrl-a of handle-start false endof
+        ctrl-e of handle-end false endof
+        ctrl-f of handle-forward false endof
+        ctrl-b of handle-backward false endof
+        ctrl-w of handle-delete-word false endof
+        ctrl-u of handle-delete-start false endof
+        ctrl-k of handle-delete-end false endof
+        ctrl-y of handle-paste false endof
+        ctrl-l of handle-reset false endof
+        ctrl-r of handle-search-backward false endof
+        escape of handle-escape endof
+        swap false swap
+      endcase 
+    else
+      dup delete = if drop handle-delete else handle-insert then false
+    then
+  ;
   
   \ The line editor
   : line-edit ( index-ptr count-ptr buffer-ptr buffer-size -- )
@@ -860,34 +1200,7 @@ begin-module line-internal
     line @ line-count-ptr !
     line @ line-index-ptr !
     xon ack reset-line
-    begin
-      get-key
-      dup $20 u< if 
-	case
-	  return of true endof
-	  newline of true endof
-	  tab of tab handle-insert false endof
-	  ctrl-a of handle-start false endof
-	  ctrl-e of handle-end false endof
-	  ctrl-f of handle-forward false endof
-          ctrl-b of handle-backward false endof
-          ctrl-w of handle-delete-word false endof
-          ctrl-u of handle-delete-start false endof
-          ctrl-k of handle-delete-end false endof
-          ctrl-y of handle-paste false endof
-          ctrl-l of handle-reset false endof
-	  escape of handle-escape endof
-	  swap false swap
-	endcase 
-      else
-	dup delete = if
-	  drop handle-delete
-	else
-	  handle-insert
-	then
-	false
-      then
-    until
+    begin get-key handle-key until
     line @ line-flags @ line-upload-mode and 0= if
       history-changed? if
 	line @ line-count-ptr @ @ if
@@ -926,6 +1239,8 @@ begin-module line-internal
     0 over line-flags !
     0 over line-clipboard-count h!
     0 over line-clipboard-end h!
+    0 over line-search-off h!
+    0 over line-search-len h!
     ['] refill-edit over line-edit-deferred !
     history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
@@ -955,8 +1270,6 @@ internal import
   init-line-refill
 ;
 
-commit-flash
-
 \ Enable line editor
 : enable-line ( -- )
   refill-hook @ saved-refill-hook !
@@ -973,8 +1286,6 @@ commit-flash
 
 \ Get whether the line editor is enabled
 : line-enabled? ( -- ) refill-hook @ ['] refill-edit = ;
-
-end-compress-flash
 
 \ Reboot
 reboot
