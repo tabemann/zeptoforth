@@ -1732,12 +1732,15 @@ begin-module picocalc-term-common
     :noname { c self -- }
       c $20 < c $7E > or if exit then
       self cursor-x @ self cursor-y @ { x y }
-      x self right-margin @ = if
+      x self right-margin @ 1+ = x term-width = or if
         self left-margin @ to x
-        y self bottom-margin @ = if 1 self scroll-up else y 1+ to y then
-        y self term-height = if [ term-height 1- ] literal to y then
-      else
-        x [ term-width 1- ] literal = if self left-margin @ 1- to x then
+        y self bottom-margin @ = if
+          1 self scroll-up
+        else
+          y term-height 1- < if
+            y 1+ to y
+          then
+        then
       then
       y self cursor-y !
       x 1+ self cursor-x !
