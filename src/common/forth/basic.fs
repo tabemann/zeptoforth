@@ -2774,6 +2774,12 @@ commit-flash
   abort
 ;
 
+\ Get whether a byte is the start of a unicode code point greater than 127
+: utf-8-start? ( b -- flag ) $C0 and $C0 = ;
+
+\ Get whether a byte is part of a unicode code point greater than 127
+: utf-8? ( b -- flag ) $80 and 0<> ;
+
 #include src/common/forth/welcome.fs
 #include src/common/forth/legal.fs
 

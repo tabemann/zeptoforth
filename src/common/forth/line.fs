@@ -198,12 +198,6 @@ begin-module line-internal
     5 + swap move
   ;
 
-  \ Get whether a byte is the start of a unicode code point greater than 127
-  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
-
-  \ Get whether a byte is part of a unicode code point greater than 127
-  : unicode? ( b -- flag ) $80 and 0<> ;
-
   \ Update the start position
   : update-start-position ( -- )
     get-cursor-position line @ line-start-column h! line @ line-start-row h!
@@ -275,7 +269,7 @@ begin-module line-internal
         dup tab = if
           drop 7 bic 8 +
         else
-          dup unicode-start? if
+          dup utf-8-start? if
             drop 1+
           else
             dup $20 >= swap $7F < and if
@@ -355,7 +349,7 @@ begin-module line-internal
         drop dup 7 bic 8 + tuck swap - spaces
       else
         dup emit
-        dup unicode-start? if
+        dup utf-8-start? if
           drop 1+
         else
           dup $20 >= swap $7F < and if
@@ -379,7 +373,7 @@ begin-module line-internal
       dup i search-match-len search-highlight to search-match-len
       dup tab <> if
 	dup emit
-	dup unicode-start? swap $80 u< or if
+	dup utf-8-start? swap $80 u< or if
 	  1+
 	then
       else
@@ -433,7 +427,7 @@ begin-module line-internal
       line @ line-buffer-ptr @ i + c@ dup tab = if
 	drop 7 bic 8 +
       else
-	dup unicode-start? if
+	dup utf-8-start? if
 	  drop 1+
 	else
 	  dup $20 >= swap $7F < and if
@@ -451,10 +445,10 @@ begin-module line-internal
       begin
         bytes line @ line-clipboard-count h@ < if
           line @ line-clipboard bytes + c@ { c }
-          c unicode-start? if
+          c utf-8-start? if
             count 0= if 1 +to bytes false else true then
           else
-            c unicode? if 1 +to bytes false else true then
+            c utf-8? if 1 +to bytes false else true then
           then
         else
           true
@@ -473,7 +467,7 @@ begin-module line-internal
       begin
         bytes line @ line-clipboard-count h@ < if
           line @ line-clipboard bytes - c@ { c }
-          c unicode? c unicode-start? not and if
+          c utf-8? c utf-8-start? not and if
             1 +to bytes false
           else
             true
@@ -603,10 +597,10 @@ begin-module line-internal
     0 { bytes }
     begin line @ line-index-ptr @ @ bytes - 0> while
       line @ line-index-ptr @ @ bytes 1+ - line @ line-buffer-ptr @ + c@ { c }
-      c unicode-start? if
+      c utf-8-start? if
         bytes 1+ exit
       else
-        c unicode? if
+        c utf-8? if
           1 +to bytes
         else
           bytes 0= if 1 else bytes then exit
@@ -621,14 +615,14 @@ begin-module line-internal
     0 { bytes }
     begin line @ line-index-ptr @ @ bytes + line @ line-count-ptr @ @ < while
       line @ line-index-ptr @ @ bytes + line @ line-buffer-ptr @ + c@ { c }
-      c unicode-start? if
+      c utf-8-start? if
         bytes 0= if
           1 +to bytes
         else
           bytes exit
         then
       else
-        c unicode? if
+        c utf-8? if
           1 +to bytes
         else
           bytes 0= if 1 else bytes then exit
@@ -732,14 +726,14 @@ begin-module line-internal
       paste-count 0> and
     while
       line @ line-clipboard paste-count + 1- c@ { c }
-      c unicode? if
+      c utf-8? if
         begin
           paste-count 0> if
             line @ line-clipboard paste-count + 1- c@ { c }
-            c unicode-start? if
+            c utf-8-start? if
               -1 +to paste-count true
             else
-              c unicode? if
+              c utf-8? if
                 -1 +to paste-count false
               else
                 true
@@ -1017,11 +1011,11 @@ begin-module line-internal
   \ Handle search delete
   : handle-search-delete ( -- )
     line @ line-search-len h@ 1- 0> if
-      line @ line-search-len h@ 1- line @ line-search-buf + c@ unicode? if
+      line @ line-search-len h@ 1- line @ line-search-buf + c@ utf-8? if
         begin
           -1 line @ line-search-len h+!
           line @ line-search-len h@ 0> if
-            line @ line-search-len h@ line @ line-search-buf + c@ unicode-start?
+            line @ line-search-len h@ line @ line-search-buf + c@ utf-8-start?
           else
             true
           then
@@ -1060,7 +1054,7 @@ begin-module line-internal
         else
           c $20 >= c tab = or c -1 = or if
             c -1 <> if
-              c unicode-start? if
+              c utf-8-start? if
                 systick::systick-counter to unicode-time
                 true to unicode-time-set?
               then
@@ -1111,7 +1105,7 @@ begin-module line-internal
         else
           c $20 >= c tab = or c -1 = or if
             c -1 <> if
-              c unicode-start? if
+              c utf-8-start? if
                 systick::systick-counter to unicode-time
                 true to unicode-time-set?
               then

@@ -1,4 +1,4 @@
-\ Copyright (c) 2023-2025 Travis Bemann
+\ Copyright (c) 2023-2026 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -144,12 +144,6 @@ begin-module zeptoed-internal
   \ Inverse video
   : inverse-video ( -- ) csi ." 7m" ;
   
-  \ Get whether a byte is the start of a unicode code point greater than 127
-  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
-
-  \ Get whether a byte is part of a unicode code point greater than 127
-  : unicode? ( b -- flag ) $80 and 0<> ;
-
   \ Get whether a string contains any uppercase characters
   : contains-upper? ( c-addr u -- flag )
     over + swap ?do
@@ -268,7 +262,7 @@ begin-module zeptoed-internal
       byte tab = if
         zeptoed-tab-size chars zeptoed-tab-size umod - +to chars
       else
-        byte bl >= byte delete < and byte unicode-start? or if 1 +to chars then
+        byte bl >= byte delete < and byte utf-8-start? or if 1 +to chars then
       then
     loop
     chars
@@ -1702,7 +1696,7 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         [:
-          dup tab = over unicode? or over bl < or over delete = or
+          dup tab = over utf-8? or over bl < or over delete = or
           swap newline = or
         ;] cursor find-prev
         cursor offset@ { check-offset }
@@ -1711,7 +1705,7 @@ begin-module zeptoed-internal
         cursor offset@ check-offset <> { checked-before }
         orig-cursor cursor copy-cursor
         [:
-          dup tab = over unicode? or over bl < or over delete = or
+          dup tab = over utf-8? or over bl < or over delete = or
           swap newline = or
         ;] cursor find-next
         cursor offset@ to check-offset
@@ -2061,7 +2055,7 @@ begin-module zeptoed-internal
               else
                 byte emit
                 byte bl >= byte delete < and
-                byte unicode-start? or if
+                byte utf-8-start? or if
                   1 +to chars
                 then
               then
@@ -2155,7 +2149,7 @@ begin-module zeptoed-internal
                       else
                         byte emit
                         byte bl >= byte delete < and
-                        byte unicode-start? or if
+                        byte utf-8-start? or if
                           -1 +to cols-remaining
                           cols-remaining 0 <= if
                             rows-remaining 0 > if
@@ -2451,12 +2445,12 @@ begin-module zeptoed-internal
     \ Go to the start of a Unicode character
     :noname { buffer -- }
       buffer edit-cursor-at { byte }
-      byte unicode? byte unicode-start? not and if
+      byte utf-8? byte utf-8-start? not and if
         begin
           -1 buffer buffer-edit-cursor adjust-offset
           buffer buffer-edit-cursor offset@ 0> if
             buffer edit-cursor-at to byte
-            byte unicode? not byte unicode-start? or
+            byte utf-8? not byte utf-8-start? or
           else
             true
           then
@@ -2467,12 +2461,12 @@ begin-module zeptoed-internal
     \ Go to the end of a Unicode character
     :noname { buffer -- }
       buffer edit-cursor-at { byte }
-      byte unicode? byte unicode-start? not and if
+      byte utf-8? byte utf-8-start? not and if
         begin
           1 buffer buffer-edit-cursor adjust-offset
           buffer buffer-edit-cursor offset@ buffer buffer-len@ < if
             buffer edit-cursor-at to byte
-            byte unicode? not byte unicode-start? or
+            byte utf-8? not byte utf-8-start? or
           else
             true
           then
@@ -2528,7 +2522,7 @@ begin-module zeptoed-internal
                 dist buffer buffer-width@ umod to cols'
               else
                 -1 buffer buffer-edit-cursor adjust-offset
-                dup bl >= over delete < and swap unicode-start? or if
+                dup bl >= over delete < and swap utf-8-start? or if
                   -1 +to cols'
                 then
               then
@@ -2555,7 +2549,7 @@ begin-module zeptoed-internal
                 after before - +to cols'
               else
                 -1 buffer buffer-edit-cursor adjust-offset
-                dup bl >= over delete < and swap unicode-start? or if
+                dup bl >= over delete < and swap utf-8-start? or if
                   -1 +to cols'
                 then
               then
@@ -2590,7 +2584,7 @@ begin-module zeptoed-internal
                   drop
                   zeptoed-tab-size cols' zeptoed-tab-size umod - +to cols'
                 else
-                  dup bl >= over delete < and swap unicode-start? or if
+                  dup bl >= over delete < and swap utf-8-start? or if
                     1 +to cols'
                   then
                 then
@@ -2617,7 +2611,7 @@ begin-module zeptoed-internal
                   drop
                   zeptoed-tab-size cols' zeptoed-tab-size umod - +to cols'
                 else
-                  dup bl >= over delete < and swap unicode-start? or if
+                  dup bl >= over delete < and swap utf-8-start? or if
                     1 +to cols'
                   then
                 then
@@ -2671,7 +2665,7 @@ begin-module zeptoed-internal
           cursor offset@ 0> if
             cursor buffer cursor-before { byte }
             -1 cursor adjust-offset
-            byte unicode? not byte unicode-start? or
+            byte utf-8? not byte utf-8-start? or
           else
             true
           then
@@ -2685,12 +2679,12 @@ begin-module zeptoed-internal
       dup buffer-dyn-buffer <cursor> [: { buffer cursor }
         buffer buffer-edit-cursor cursor copy-cursor
         cursor buffer cursor-at { byte }
-        byte unicode? byte unicode-start? not and if
+        byte utf-8? byte utf-8-start? not and if
           begin
             -1 cursor adjust-offset
             cursor offset@ 0> if
               cursor buffer cursor-at to byte
-              byte unicode? not byte unicode-start? or
+              byte utf-8? not byte utf-8-start? or
             else
               true
             then
@@ -2703,7 +2697,7 @@ begin-module zeptoed-internal
             1 cursor adjust-offset
             1 +to count
             cursor buffer cursor-at to byte
-            byte unicode? not byte unicode-start? or
+            byte utf-8? not byte utf-8-start? or
           else
             true
           then
@@ -2726,7 +2720,7 @@ begin-module zeptoed-internal
           1 buffer buffer-edit-cursor delete-data
           buffer dirty-buffer
           select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
-          byte unicode? not byte unicode-start? or
+          byte utf-8? not byte utf-8-start? or
         else
           true
         then
@@ -2746,7 +2740,7 @@ begin-module zeptoed-internal
           buffer dirty-buffer
           select-diff 0> if -1 buffer buffer-select-cursor adjust-offset then
           buffer edit-cursor-at { byte }
-          byte unicode? not byte unicode-start? or
+          byte utf-8? not byte utf-8-start? or
         else
           true
         then
@@ -3387,7 +3381,7 @@ begin-module zeptoed-internal
         in-middle
       then { position }
       buffer buffer-char-entry-mode @ replace-mode = at-end? not and if
-        c $80 < c unicode-start? or if
+        c $80 < c utf-8-start? or if
           buffer do-delete-forward
         then
       then

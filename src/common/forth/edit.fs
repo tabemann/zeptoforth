@@ -164,10 +164,10 @@ begin-module edit-internal
   ;
 
   \ Get whether a byte is the start of a unicode code point greater than 127
-  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
+  : utf-8-start? ( b -- flag ) $C0 and $C0 = ;
 
   \ Get whether a byte is part of a unicode code point greater than 127
-  : unicode? ( b -- flag ) $80 and 0<> ;
+  : utf-8? ( b -- flag ) $80 and 0<> ;
 
   \ Get whether to display borders on the sides and line numbers
   : big-term? ( -- flag )
@@ -226,12 +226,12 @@ begin-module edit-internal
         get-row dup buffer-width + swap
       then
       ?do
-	i c@ dup $20 >= over $7F <> and over unicode? not and if
+	i c@ dup $20 >= over $7F <> and over utf-8? not and if
 	  emit 1+
 	else
-	  dup unicode? if
+	  dup utf-8? if
 	    dup emit
-	    unicode-start? if 1+ then
+	    utf-8-start? if 1+ then
 	  else
 	    drop leave
 	  then
@@ -386,12 +386,12 @@ begin-module edit-internal
 	dup $20 >= over $80 < and if
 	  drop 1-
 	else
-	  dup unicode? swap unicode-start? and if
+	  dup utf-8? swap utf-8-start? and if
 	    1-
 	    begin
 	      over buffer-width < if
 		over current-row + c@
-		dup unicode? swap unicode-start? not and if
+		dup utf-8? swap utf-8-start? not and if
 		  swap 1+ swap false
 		else
 		  true
@@ -419,10 +419,10 @@ begin-module edit-internal
     0 current-column-bytes begin
       dup 0> if
 	swap 1+ swap 1- dup current-row + c@
-	dup unicode-start? if
+	dup utf-8-start? if
 	  drop true
 	else
-	  unicode? not
+	  utf-8? not
 	then
       else
 	true
@@ -434,13 +434,13 @@ begin-module edit-internal
   \ Get the number of bytes of the character to the right of the cursor
   : right-bytes ( -- count )
     current-column-bytes dup { index } buffer-width < if
-      current-row dup { addr } index + dup { start } c@ unicode? not if
+      current-row dup { addr } index + dup { start } c@ utf-8? not if
         1
       else
         1 { count }
         addr buffer-width + start 1+ ?do
-          i c@ dup unicode? if
-            unicode-start? if leave else 1 +to count then
+          i c@ dup utf-8? if
+            utf-8-start? if leave else 1 +to count then
           else
             drop leave
           then
@@ -489,7 +489,7 @@ begin-module edit-internal
 	  key? not if
 	    pause
 	  else
-	    get-key dup unicode? over unicode-start? not and if
+	    get-key dup utf-8? over utf-8-start? not and if
 	      current-row-index@ row-len buffer-width u< if
 		current-row current-column-bytes +
 		current-row current-column-bytes 1+ +
@@ -516,7 +516,7 @@ begin-module edit-internal
   \ Delete forward for replace mode
   : handle-replace-delete ( b -- )
     edit-state @ edit-replacing @ if
-      dup $80 < swap unicode-start? or if
+      dup $80 < swap utf-8-start? or if
         current-column-bytes { column-bytes }
         column-bytes buffer-width < if
           right-bytes { bytes-right }
@@ -547,7 +547,7 @@ begin-module edit-internal
 	go-to-current-coord
 	dirty
       else
-	unicode-start? if
+	utf-8-start? if
 	  1 edit-state @ edit-cursor-column +!
 	  true edit-state @ edit-unicode-entered !
 	then

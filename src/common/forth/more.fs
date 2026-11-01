@@ -1,4 +1,4 @@
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -61,12 +61,6 @@ begin-module more-internal
   $0D constant carriage-return
   $08 constant backspace
   $1B constant escape
-
-  \ Get whether a byte is the start of a unicode code point greater than 127
-  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
-
-  \ Get whether a byte is part of a unicode code point greater than 127
-  : unicode? ( b -- flag ) $80 and 0<> ;
 
   \ Pager exit message
   : x-pager-exit ( -- ) ;
@@ -232,7 +226,7 @@ begin-module more-internal
       normal-mode to char-mode
     else
       3byte-mode char-mode = if
-        c unicode? if
+        c utf-8? if
           2byte-mode to char-mode
         else
           do-advance-char
@@ -240,7 +234,7 @@ begin-module more-internal
         then
       else
         4byte-mode char-mode = if
-          c unicode? if
+          c utf-8? if
             3byte-mode to char-mode
           else
             do-advance-char
@@ -255,7 +249,7 @@ begin-module more-internal
     
   \ Handle Unicode
   : do-unicode { c -- }
-    c unicode-start? if
+    c utf-8-start? if
       c do-unicode-start
     else
       c do-unicode-tail

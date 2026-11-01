@@ -100,7 +100,7 @@ begin-module literal-internal
   ;
 
   \ Parse a 2-byte Unicode character
-  : parse-unicode?-2 { addr bytes -- c success? }
+  : parse-unicode-2 { addr bytes -- c success? }
     bytes 2 = if
       addr c@ $E0 bic 6 lshift
       addr 1+ c@ dup $C0 and $80 = if
@@ -114,7 +114,7 @@ begin-module literal-internal
   ;
 
   \ Parse a 3-byte Unicode character
-  : parse-unicode?-3 { addr bytes -- c success? }
+  : parse-unicode-3 { addr bytes -- c success? }
     bytes 3 = if
       addr c@ $F0 bic 12 lshift
       addr 1+ c@ dup $C0 and $80 = if
@@ -133,7 +133,7 @@ begin-module literal-internal
   ;
 
   \ Parse a 4-byte Unicode character
-  : parse-unicode?-4 { addr bytes -- c success? }
+  : parse-unicode-4 { addr bytes -- c success? }
     bytes 4 = if
       addr c@ $F0 bic 18 lshift
       addr 1+ c@ dup $C0 and $80 = if
@@ -157,11 +157,11 @@ begin-module literal-internal
   ;
   
   \ Parse a Unicode character
-  : parse-unicode? { addr bytes -- c success? }
-    addr c@ unicode-start? if
-      addr c@ $E0 and $C0 = if addr bytes parse-unicode?-2 exit then
-      addr c@ $F0 and $E0 = if addr bytes parse-unicode?-3 exit then
-      addr c@ $F0 and $F0 = if addr bytes parse-unicode?-4 exit then
+  : parse-unicode { addr bytes -- c success? }
+    addr c@ utf-8-start? if
+      addr c@ $E0 and $C0 = if addr bytes parse-unicode-2 exit then
+      addr c@ $F0 and $E0 = if addr bytes parse-unicode-3 exit then
+      addr c@ $F0 and $F0 = if addr bytes parse-unicode-4 exit then
       0 false
     else
       0 false
@@ -173,8 +173,8 @@ begin-module literal-internal
     addr bytes 1- + c@ [char] ' = if -1 +to bytes then
     1 +to addr -1 +to bytes
     bytes 0> if
-      addr c@ unicode? if
-        addr bytes parse-unicode? if lit,? true else drop false then
+      addr c@ utf-8? if
+        addr bytes parse-unicode if lit,? true else drop false then
       else
         bytes 1 = if addr c@ lit,? true else false then
       then
@@ -213,8 +213,8 @@ end-module> import
 : char ( "char" -- c )
   token dup averts x-token-expected { addr bytes }
   bytes 0> averts x-invalid-char-literal
-  addr c@ unicode? if
-    addr bytes parse-unicode? averts x-invalid-char-literal
+  addr c@ utf-8? if
+    addr bytes parse-unicode averts x-invalid-char-literal
   else
     bytes 1 = averts x-invalid-char-literal
     addr c@
