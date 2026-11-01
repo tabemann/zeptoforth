@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2020-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -36,4 +36,7 @@
 #include src/stm32f407/forth/serial.fs
 #include src/stm32f407/forth/gpio.fs
 #include src/common/forth/task.fs
+#include src/common/forth/temp.fs
+#include src/common/forth/temp_str.fs
+#include src/common/forth/literal.fs
 
