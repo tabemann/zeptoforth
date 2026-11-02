@@ -25,6 +25,7 @@ compile-to-flash
 begin-module ansi-term
 
   systick import
+  task import
 
   begin-module ansi-term-internal
 
@@ -282,6 +283,31 @@ begin-module ansi-term
   : reset-ansi-term ( -- )
     0 show-cursor-count ! 0 preserve-cursor-count ! 0 saved-key !
   ;
+
+  continue-module ansi-term-internal
+
+    \ Saved task-init-hook
+    variable saved-task-init-hook
+
+    commit-flash
+    
+    \ Initialize terminal state on thread initialization
+    : init-reset-ansi-term ( -- )
+      reset-ansi-term
+      task-init-hook @ saved-task-init-hook !
+      [:
+        saved-task-init-hook @ ?dup if over swap execute then
+        0 over ['] show-cursor-count for-task!
+        0 over ['] preserve-cursor-count for-task!
+        0 swap ['] saved-key for-task!
+      ;] task-init-hook !
+    ;
+
+    commit-flash
+    
+    initializer init-reset-ansi-term
+
+  end-module
   
   \ Clear window in ticks
   100 constant clear-ticks
