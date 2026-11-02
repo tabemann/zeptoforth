@@ -105,6 +105,21 @@ If there is a saved input byte, return it, clearing it in the process, otherwise
 
 Save an input byte, overwriting any which has already been saved.
 
+##### `replacement-char`
+( -- u )
+
+The Replacement Character code point, U+FFFD.
+
+##### `get-unicode-from-utf-8`
+( -- u )
+
+Read a Unicode code point as UTF-8 from the console input, using a saved input byte if available. If invalid UTF-8 (including overlong encodings) is read, `replacement-char` is returned, and if the last byte read is a valid start to another Unicode code point as UTF-8 it is saved.
+
+##### `emit-unicode-as-utf-8`
+( u -- )
+
+Emit a Unicode code point as UTF-8 to the console output. If an invalid Unicode code point (e.g. one greater than U+10FFFF) is passed in, U+FFFD is output as UTF-8.
+
 ##### `wait-number`
 ( -- n matches )
 

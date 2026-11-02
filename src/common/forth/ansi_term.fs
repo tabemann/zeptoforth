@@ -350,6 +350,7 @@ begin-module ansi-term
       c utf-8? if
         c utf-8-continue? if
           b $E0 bic 6 lshift c $C0 bic or
+          dup $80 u< if drop replacement-char then
         else
           c put-back-utf-8-start replacement-char
         then
@@ -368,6 +369,7 @@ begin-module ansi-term
           c utf-8? if
             c utf-8-continue? if
               b 6 lshift c $C0 bic or
+              dup $0800 u< if drop replacement-char then
             else
               c put-back-utf-8-start replacement-char
             then
@@ -396,6 +398,7 @@ begin-module ansi-term
               c utf-8? if
                 c utf-8-continue? if
                   b 6 lshift c $C0 bic or
+                  dup $010000 u< if drop replacement-char then
                   dup $10FFFF u> if drop replacement-char then
                 else
                   c put-back-utf-8-start replacement-char

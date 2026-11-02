@@ -104,7 +104,7 @@ begin-module literal-internal
     bytes 2 = if
       addr c@ $E0 bic 6 lshift
       addr 1+ c@ dup utf-8-continue? if
-        $C0 bic or true
+        $C0 bic or dup $80 u< if drop 0 false else true then
       else
         2drop 0 false
       then
@@ -120,7 +120,7 @@ begin-module literal-internal
       addr 1+ c@ dup utf-8-continue? if
         $C0 bic 6 lshift or
         addr 2 + c@ dup utf-8-continue? if
-          $C0 bic or true
+          $C0 bic or dup $0800 u< if drop 0 false else true then
         else
           2drop 0 false
         then
@@ -141,7 +141,9 @@ begin-module literal-internal
         addr 2 + c@ dup utf-8-continue? if
           $C0 bic 6 lshift or
           addr 3 + c@ dup utf-8-continue? if
-            $C0 bic or dup $10FFFF u<=
+            $C0 bic or
+            dup $010000 u< if drop 0 false exit then
+            dup $10FFFF u> if drop 0 false else true then
           else
             2drop 0 false
           then

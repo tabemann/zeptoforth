@@ -2081,3 +2081,18 @@ The console color enabled variable. This defaults to `true`.
 ( -- addr )
 
 The XON/XOFF flow control enabled variable. This defaults to `false`.
+
+##### `utf-8?`
+( b -- flag )
+
+Get whether a byte is part of a Unicode code point greater than 127 as represented in UTF-8.
+
+##### `utf-8-start?`
+( b -- flag )
+
+Get whether a byte is an initial byte as part of a Unicode code point greater than 127 as represented in UTF-8.
+
+##### `utf-8-continue?`
+( b -- flag )
+
+Get whether a byte is a continuation byte as part of a Unicode code point greater than 127 as represented in UTF-8.

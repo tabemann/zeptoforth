@@ -2106,6 +2106,21 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The XON/XOFF flow control enabled variable. This defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
 </section>
+<section id="utf-8">
+<h3><code class="docutils literal notranslate"><span class="pre">utf-8?</span></code></h3>
+<p>( b – flag )</p>
+<p>Get whether a byte is part of a Unicode code point greater than 127 as represented in UTF-8.</p>
+</section>
+<section id="utf-8-start">
+<h3><code class="docutils literal notranslate"><span class="pre">utf-8-start?</span></code></h3>
+<p>( b – flag )</p>
+<p>Get whether a byte is an initial byte as part of a Unicode code point greater than 127 as represented in UTF-8.</p>
+</section>
+<section id="utf-8-continue">
+<h3><code class="docutils literal notranslate"><span class="pre">utf-8-continue?</span></code></h3>
+<p>( b – flag )</p>
+<p>Get whether a byte is a continuation byte as part of a Unicode code point greater than 127 as represented in UTF-8.</p>
+</section>
 </section>
 </section>
 

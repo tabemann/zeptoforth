@@ -138,6 +138,21 @@
 <p>( b – )</p>
 <p>Save an input byte, overwriting any which has already been saved.</p>
 </section>
+<section id="replacement-char">
+<h3><code class="docutils literal notranslate"><span class="pre">replacement-char</span></code><a class="headerlink" href="#replacement-char" title="Link to this heading">¶</a></h3>
+<p>( – u )</p>
+<p>The Replacement Character code point, U+FFFD.</p>
+</section>
+<section id="get-unicode-from-utf-8">
+<h3><code class="docutils literal notranslate"><span class="pre">get-unicode-from-utf-8</span></code><a class="headerlink" href="#get-unicode-from-utf-8" title="Link to this heading">¶</a></h3>
+<p>( – u )</p>
+<p>Read a Unicode code point as UTF-8 from the console input, using a saved input byte if available. If invalid UTF-8 (including overlong encodings) is read, <code class="docutils literal notranslate"><span class="pre">replacement-char</span></code> is returned, and if the last byte read is a valid start to another Unicode code point as UTF-8 it is saved.</p>
+</section>
+<section id="emit-unicode-as-utf-8">
+<h3><code class="docutils literal notranslate"><span class="pre">emit-unicode-as-utf-8</span></code><a class="headerlink" href="#emit-unicode-as-utf-8" title="Link to this heading">¶</a></h3>
+<p>( u – )</p>
+<p>Emit a Unicode code point as UTF-8 to the console output. If an invalid Unicode code point (e.g. one greater than U+10FFFF) is passed in, U+FFFD is output as UTF-8.</p>
+</section>
 <section id="wait-number">
 <h3><code class="docutils literal notranslate"><span class="pre">wait-number</span></code><a class="headerlink" href="#wait-number" title="Link to this heading">¶</a></h3>
 <p>( – n matches )</p>
