@@ -307,7 +307,119 @@ begin-module ansi-term
  
   \ Set font effect or color
   : color-effect! ( color-effect -- ) csi (dec.) end-color-effect ;
- 
+
+  \ The replacement character
+  $FFFD constant replacement-char
+
+  continue-module ansi-term-internal
+    
+    \ Put back a byte from the console if the start of a UTF-8 sequence
+    : put-back-utf-8-start { c -- }
+      c $80 u< c utf-8-start? or if c set-key then
+    ;
+    
+    \ Get a Unicode code point as a 2-byte UTF-8 sequence from the console
+    : get-unicode-from-utf-8-2 { b -- u }
+      get-key { c }
+      c utf-8? if
+        c utf-8-continue? if
+          b $E0 bic 6 lshift c $C0 bic or
+        else
+          c put-back-utf-8-start replacement-char
+        then
+      else
+        c set-key replacement-char
+      then
+    ;
+    
+    \ Get a Unicode code pooint as a 3-byte UTF-8 sequence from the console
+    : get-unicode-from-utf-8-3 { b -- u }
+      get-key { c }
+      c utf-8? if
+        c utf-8-continue? if
+          b $F0 bic 6 lshift c $C0 bic or to b
+          get-key to c
+          c utf-8? if
+            c utf-8-continue? if
+              b 6 lshift c $C0 bic or
+            else
+              c put-back-utf-8-start replacement-char
+            then
+          else
+            c put-back-utf-8-start replacement-char
+          then
+        else
+          c put-back-utf-8-start replacement-char
+        then
+      else
+        c set-key replacement-char
+      then
+    ;
+    
+    \ Get a Unicode code pooint as a 4-byte UTF-8 sequence from the console
+    : get-unicode-from-utf-8-4 { b -- u }
+      get-key { c }
+      c utf-8? if
+        c utf-8-continue? if
+          b $F0 bic 6 lshift c $C0 bic or to b
+          get-key to c
+          c utf-8? if
+            c utf-8-continue? if
+              b 6 lshift c $C0 bic or to b
+              get-key to c
+              c utf-8? if
+                c utf-8-continue? if
+                  b 6 lshift c $C0 bic or
+                  dup $10FFFF u> if drop replacement-char then
+                else
+                  c put-back-utf-8-start replacement-char
+                then
+              else
+                c put-back-utf-8-start replacement-char
+              then
+            else
+              c put-back-utf-8-start replacement-char
+            then
+          else
+            c put-back-utf-8-start replacement-char
+          then
+        else
+          c put-back-utf-8-start replacement-char
+        then
+      else
+        c set-key replacement-char
+      then
+    ;
+
+  end-module
+    
+  \ Get a Unicode code point as UTF-8 from the console
+  : get-unicode-from-utf-8 ( -- u )
+    get-key
+    dup utf-8? if
+      dup utf-8-start? if
+        dup $E0 and $C0 = if get-unicode-from-utf-8-2 exit then
+        dup $F0 and $E0 = if get-unicode-from-utf-8-3 exit then
+        dup $F0 and $F0 = if get-unicode-from-utf-8-4 exit then
+      then
+      drop replacement-char
+    then
+  ;
+
+  \ Emit a Unicode code point as UTF-8 to the console
+  : emit-unicode-as-utf-8 { u -- }
+    u $80 u< if u emit exit then
+    u $800 u< if $C0 u 6 rshift or emit $80 u $3F and or emit exit then
+    u $10000 u< if
+      $E0 u 12 rshift or emit $80 u 6 rshift $3F and or emit $80 u $3F and or emit exit
+    then
+    u $110000 u< if
+      $F0 u 18 rshift or emit $80 u 12 rshift $3F and or emit
+      $80 u 6 rshift $3F and or emit $80 u $3F and or emit exit
+    then
+    replacement-char recurse
+  ;
+  
 end-module
 
 commit-flash

@@ -99,11 +99,11 @@ begin-module literal-internal
     then
   ;
 
-  \ Parse a 2-byte Unicode character
-  : parse-unicode-2 { addr bytes -- c success? }
+  \ Parse a 2-byte UTF-8 Unicode character
+  : parse-utf-8-2 { addr bytes -- c success? }
     bytes 2 = if
       addr c@ $E0 bic 6 lshift
-      addr 1+ c@ dup $C0 and $80 = if
+      addr 1+ c@ dup utf-8-continue? if
         $C0 bic or true
       else
         2drop 0 false
@@ -113,13 +113,13 @@ begin-module literal-internal
     then
   ;
 
-  \ Parse a 3-byte Unicode character
-  : parse-unicode-3 { addr bytes -- c success? }
+  \ Parse a 3-byte UTF-8 Unicode character
+  : parse-utf-8-3 { addr bytes -- c success? }
     bytes 3 = if
       addr c@ $F0 bic 12 lshift
-      addr 1+ c@ dup $C0 and $80 = if
+      addr 1+ c@ dup utf-8-continue? if
         $C0 bic 6 lshift or
-        addr 2 + c@ dup $C0 and $80 = if
+        addr 2 + c@ dup utf-8-continue? if
           $C0 bic or true
         else
           2drop 0 false
@@ -132,15 +132,15 @@ begin-module literal-internal
     then
   ;
 
-  \ Parse a 4-byte Unicode character
-  : parse-unicode-4 { addr bytes -- c success? }
+  \ Parse a 4-byte UTF-8 Unicode character
+  : parse-utf-8-4 { addr bytes -- c success? }
     bytes 4 = if
       addr c@ $F0 bic 18 lshift
-      addr 1+ c@ dup $C0 and $80 = if
+      addr 1+ c@ dup utf-8-continue? if
         $C0 bic 12 lshift or
-        addr 2 + c@ dup $C0 and $80 = if
+        addr 2 + c@ dup utf-8-continue? if
           $C0 bic 6 lshift or
-          addr 3 + c@ dup $C0 and $80 = if
+          addr 3 + c@ dup utf-8-continue? if
             $C0 bic or dup $10FFFF u<=
           else
             2drop 0 false
@@ -156,12 +156,12 @@ begin-module literal-internal
     then
   ;
   
-  \ Parse a Unicode character
-  : parse-unicode { addr bytes -- c success? }
+  \ Parse a UTF-8 Unicode character
+  : parse-utf-8 { addr bytes -- c success? }
     addr c@ utf-8-start? if
-      addr c@ $E0 and $C0 = if addr bytes parse-unicode-2 exit then
-      addr c@ $F0 and $E0 = if addr bytes parse-unicode-3 exit then
-      addr c@ $F0 and $F0 = if addr bytes parse-unicode-4 exit then
+      addr c@ $E0 and $C0 = if addr bytes parse-utf-8-2 exit then
+      addr c@ $F0 and $E0 = if addr bytes parse-utf-8-3 exit then
+      addr c@ $F0 and $F0 = if addr bytes parse-utf-8-4 exit then
       0 false
     else
       0 false
@@ -174,7 +174,7 @@ begin-module literal-internal
     1 +to addr -1 +to bytes
     bytes 0> if
       addr c@ utf-8? if
-        addr bytes parse-unicode if lit,? true else drop false then
+        addr bytes parse-utf-8 if lit,? true else drop false then
       else
         bytes 1 = if addr c@ lit,? true else false then
       then
@@ -214,7 +214,7 @@ end-module> import
   token dup averts x-token-expected { addr bytes }
   bytes 0> averts x-invalid-char-literal
   addr c@ utf-8? if
-    addr bytes parse-unicode averts x-invalid-char-literal
+    addr bytes parse-utf-8 averts x-invalid-char-literal
   else
     bytes 1 = averts x-invalid-char-literal
     addr c@
