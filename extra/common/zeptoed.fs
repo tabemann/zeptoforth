@@ -2327,12 +2327,12 @@ begin-module zeptoed-internal
     \ Display a single character
     :noname { c buffer -- }
       c emit
-      1 buffer buffer-edit-col +!
+      c utf-8? not c utf-8-start? or if 1 buffer buffer-edit-col +! then
       buffer buffer-edit-col @ buffer buffer-width@ = if
         0 buffer buffer-edit-col !
         1 buffer buffer-edit-row +!
+        buffer buffer-editor @ update-coord
       then
-      buffer buffer-editor @ update-coord
     ; define output-char
 
     \ Backspace a single char
