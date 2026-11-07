@@ -109,26 +109,37 @@ _asm_link:
 
 	.if cortex_m7
 
+	@@ The Cortex-M7's registers for its caches
+	.equ SCB_CCR, 0xE000ED14
+	.equ SCB_CCSIDR, 0xE000ED80
+	.equ SCB_CSSELR, 0xE000ED84
+	.equ SCB_ICIALLU, 0xE000EF50
+	.equ SCB_DCCSW, 0xE000EF6C
+
+	@@ SCB_CCR's bits: the data cache and the instruction cache are on
+	.equ SCB_CCR_DC, 0x10000
+	.equ SCB_CCR_IC, 0x20000
+
 	@@ Make what has just been compiled fit to run on a Cortex-M7 with its caches
 	@@ on: the data cache cleaned, so that the code is in the memory the instruction
 	@@ side fetches from, and the instruction cache emptied, as it may hold what was
 	@@ at those addresses before. With a cache off there is nothing to do for it
 	define_internal_word "sync-caches", visible_flag
 _sync_caches:
-	ldr r0, =0xE000ED14	@@ SCB_CCR
+	ldr r0, =SCB_CCR
 	ldr r1, [r0]
-	tst r1, #0x10000	@@ DC, the data cache
+	tst r1, #SCB_CCR_DC
 	beq 3f
 	push {r4, r5}
-	ldr r0, =0xE000ED84	@@ SCB_CSSELR: the level 1 data cache
+	ldr r0, =SCB_CSSELR	@@ the level 1 data cache
 	movs r2, #0
 	str r2, [r0]
 	dsb
-	ldr r0, =0xE000ED80	@@ SCB_CCSIDR
+	ldr r0, =SCB_CCSIDR
 	ldr r2, [r0]
 	ubfx r3, r2, #13, #15	@@ the last set
 	ubfx r2, r2, #3, #10	@@ the last way
-	ldr r0, =0xE000EF6C	@@ SCB_DCCSW, by set and way: a Cortex-M7's has four ways
+	ldr r0, =SCB_DCCSW	@@ by set and way: a Cortex-M7's has four ways
 1:	mov r4, r2
 2:	lsl r5, r4, #30
 	orr r5, r5, r3, lsl #5
@@ -139,9 +150,9 @@ _sync_caches:
 	bpl 1b
 	pop {r4, r5}
 	dsb
-3:	tst r1, #0x20000	@@ IC, the instruction cache
+3:	tst r1, #SCB_CCR_IC
 	beq 4f
-	ldr r0, =0xE000EF50	@@ SCB_ICIALLU
+	ldr r0, =SCB_ICIALLU
 	movs r2, #0
 	str r2, [r0]
 4:	dsb
