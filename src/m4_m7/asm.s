@@ -107,6 +107,52 @@ _asm_link:
 	pop {pc}
 	end_inlined
 
+	.if cortex_m7
+
+	@@ Make what has just been compiled fit to run on a Cortex-M7 with its caches
+	@@ on: the data cache cleaned, so that the code is in the memory the instruction
+	@@ side fetches from, and the instruction cache emptied, as it may hold what was
+	@@ at those addresses before. With a cache off there is nothing to do for it
+	define_internal_word "sync-caches", visible_flag
+_sync_caches:
+	ldr r0, =0xE000ED14	@@ SCB_CCR
+	ldr r1, [r0]
+	tst r1, #0x10000	@@ DC, the data cache
+	beq 3f
+	push {r4, r5}
+	ldr r0, =0xE000ED84	@@ SCB_CSSELR: the level 1 data cache
+	movs r2, #0
+	str r2, [r0]
+	dsb
+	ldr r0, =0xE000ED80	@@ SCB_CCSIDR
+	ldr r2, [r0]
+	ubfx r3, r2, #13, #15	@@ the last set
+	ubfx r2, r2, #3, #10	@@ the last way
+	ldr r0, =0xE000EF6C	@@ SCB_DCCSW, by set and way: a Cortex-M7's has four ways
+1:	mov r4, r2
+2:	lsl r5, r4, #30
+	orr r5, r5, r3, lsl #5
+	str r5, [r0]
+	subs r4, #1
+	bpl 2b
+	subs r3, #1
+	bpl 1b
+	pop {r4, r5}
+	dsb
+3:	tst r1, #0x20000	@@ IC, the instruction cache
+	beq 4f
+	ldr r0, =0xE000EF50	@@ SCB_ICIALLU
+	movs r2, #0
+	str r2, [r0]
+4:	dsb
+	isb
+	bx lr
+	end_inlined
+
+	.ltorg
+
+	.endif
+
 	@@ Finalize the compilation of a word
 	define_internal_word "finalize,", visible_flag
 _asm_finalize:
@@ -163,6 +209,9 @@ _asm_finalize:
         ldr r0, =current_unit_start
         movs r1, #0
         str r1, [r0]
+	.if cortex_m7
+	bl _sync_caches
+	.endif
 	pop {pc}
 	end_inlined
 	
@@ -221,6 +270,9 @@ _asm_finalize_no_align:
         ldr r0, =current_unit_start
         movs r1, #0
         str r1, [r0]
+	.if cortex_m7
+	bl _sync_caches
+	.endif
 	pop {pc}
 	end_inlined
 
