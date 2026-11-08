@@ -206,10 +206,12 @@ begin-module fixed32
       then
     until
   ;
-  
-  \ Exponentiate an S15.16 fixed-point number by an integer
-  : f32i** ( f32 exponent -- f32' )
-    dup 0> if
+
+  continue-module fixed32-internal
+    
+    \ Core of exponentiation of an S15.16 fixed-point number by an unsigned
+    \ integer
+    : f32i**' ( f32 u -- f32' )
       [ 1 s>f32 ] literal begin
         over 1 and if
           2 pick f32*
@@ -220,27 +222,37 @@ begin-module fixed32
           rot dup f32* swap rot false
         then
       until
+    ;
+  
+  \ Exponentiate an S15.16 fixed-point number by an integer
+  : f32i** ( f32 exponent -- f32' )
+    dup 0> if f32i**'
     else
-      0= if
-        drop [ 1 s>f32 ] literal
+      dup 0= if
+        2drop [ 1 s>f32 ] literal
       else
-        drop 0
+        [ 1 s>f32 ] literal -rot negate f32i**' f32/
       then
     then
   ;
 
   continue-module fixed32-internal
 
+    $0002_B7E2 constant exp(1)
     $0001_7154 constant log2(e)
   
   end-module
 
   \ Implement S15.16 exp
   : f32exp { f -- f' }
-    f log2(e) f32* { g }
-    g f32round-half-even { k } g k s>f32 - { r }
-    [ 1 s>f32 ] literal k dup 0>= if lshift else negate rshift then { 2**k }
-    2**k r f32>f64 internal::2** f64>f32 f32*
+    f $FFFF and 0<> f f32>s abs 10 > or if
+      f log2(e) f32* { g }
+      g f32round-half-even { k } g k s>f32 - { r }
+      [ 1 s>f32 ] literal k dup 0>= if lshift else negate rshift then { 2**k }
+      2**k r f32>f64 internal::2** f64>f32 f32*
+    else
+      exp(1) f f32>s f32i**
+    then
   ;
 
   \ Implement exp 1-

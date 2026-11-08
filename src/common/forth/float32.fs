@@ -1415,9 +1415,11 @@ begin-module float32
   \ Pi as a single-precision floating-point value
   pi f64>v constant vpi
 
-  \ Exponentiate a single-precision floating-point value by an integer
-  : vi** ( f exponent -- f' )
-    dup 0> if
+  continue-module float32-internal
+
+    \ Core of exponentiating a single-precision floating-poinst value by an
+    \ unsigned integer
+    : vi**' ( f u -- f' ) 
       v1 begin
         over 1 and if
           2 pick v*
@@ -1428,17 +1430,25 @@ begin-module float32
           rot dup v* swap rot false
         then
       until
+    ;
+    
+  end-module
+  
+  \ Exponentiate a single-precision floating-point value by an integer
+  : vi** ( f exponent -- f' )
+    dup 0> if vi**'
     else
-      0= if
-        drop v1
+      dup 0= if
+        2drop v1
       else
-        drop 0
+        v1 -rot negate vi**' v/
       then
     then
   ;
 
   continue-module float32-internal
 
+    $402DF854 constant vexp(1)
     $3FB8AA3B constant log2(e)
     $3F317217 constant ln(2)
     $3E75FDEF constant ln(2)**2/2
@@ -1465,14 +1475,18 @@ begin-module float32
     f +infinity = if +infinity exit then
     f -infinity = if 0 exit then
     f nan = if nan exit then
-    f log2(e) v* { g }
-    g vround-half-even { k } g k v- { r }
-    k v>n exponent-bias + dup [ max-exponent exponent-bias + 1- ] literal > if
-      drop +infinity exit
+    f vfract v0<> f vnfract v>n abs 88 > or if
+      f log2(e) v* { g }
+      g vround-half-even { k } g k v- { r }
+      k v>n exponent-bias + dup [ max-exponent exponent-bias + 1- ] literal > if
+        drop +infinity exit
+      then
+      dup 0<= if drop 0 exit exit then
+      physical-significand-size lshift { 2**k }
+      2**k r 2** v*
+    else
+      vexp(1) f v>n vi**
     then
-    dup 0<= if drop 0 exit exit then
-    physical-significand-size lshift { 2**k }
-    2**k r 2** v*
   ;
 
   \ Implement exp 1-

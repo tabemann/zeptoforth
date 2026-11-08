@@ -120,9 +120,10 @@ commit-flash
   [immediate] postpone r> postpone r> postpone 2dup postpone >r postpone >r
 ;
 
-\ Exponentiation of a fixed point number by an unsigned integer
-: fi** ( f1 u -- f2 )
-  dup 0> if
+continue-module internal
+
+  \ Core of exponentiation of a fixed point number by an unsigned integer
+  : fi**' ( f1 u -- f2 )
     0 1 begin
       2 pick 1 and if
 	4 pick 4 pick f*
@@ -133,11 +134,19 @@ commit-flash
 	4 roll 4 roll 2dup f* rot 4 roll 4 roll false
       then
     until
+  ;
+  
+end-module
+
+
+\ Exponentiation of a fixed point number by an unsigned integer
+: fi** ( f1 u -- f2 )
+  dup 0> if fi**'
   else
-    0= if
-      2drop 0 1
+    dup 0= if
+      drop 2drop 0 1
     else
-      2drop 0 0
+      >r 2>r 0 1 2r> r> negate fi**' f/
     then
   then
 ;
@@ -183,6 +192,7 @@ end-module
 
 continue-module internal
 
+  $B7E15160 2 2constant exp(1)
   $7154764E 1 2constant log2(e)
   $B17217F5 0 2constant ln(2)
   $3D7F7BFA 0 2constant ln(2)**2/2
@@ -206,10 +216,15 @@ end-module
 
 \ Implement S31.32 exp
 : exp { D: f -- D: f' }
-  f log2(e) f* { D: g }
-  g round-half-even { k } g k s>f d- { D: r }
-  0 1 k dup 0>= if 2lshift else negate 2rshift then { D: 2**k }
-  2**k r 2** f*
+  f swap 0<> over abs 21 > or if
+    drop
+    f log2(e) f* { D: g }
+    g round-half-even { k } g k s>f d- { D: r }
+    0 1 k dup 0>= if 2lshift else negate 2rshift then { D: 2**k }
+    2**k r 2** f*
+  else
+    exp(1) rot fi**
+  then
 ;
 
 \ Implement exp 1-
