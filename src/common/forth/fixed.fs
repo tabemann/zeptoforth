@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2024 Travis Bemann
+\ Copyright (c) 2020-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -181,20 +181,40 @@ end-module
 \ Calculate a factorial
 : factorial ( u -- ud ) 1 0 rot 1 + 1 ?do i 0 ud* loop ;
 
-\ Calculate (e^x)-1
-: expm1 ( f1 -- f2 )
-  >r >r 0 0 0 1 1 0 begin
-    2swap 2r@ f* 2over d/ 2dup dabs 2 0 d< >r 2rot 2over d+
-    2swap 2rot 1 0 d+ r>
-  until
-  rdrop rdrop 2drop 2drop
+continue-module internal
+
+  $7154764E 1 2constant log2(e)
+  $B17217F5 0 2constant ln(2)
+  $3D7F7BFA 0 2constant ln(2)**2/2
+  $0E358468 0 2constant ln(2)**3/6
+  $0276556D 0 2constant ln(2)**4/24
+  $005761FC 0 2constant ln(2)**5/120
+
+  \ Calculate 2**r for small r
+  : 2** { D: r -- }
+    0 1 ln(2) r f* d+
+    r r f* { D: r' }
+    ln(2)**2/2 r' f* d+
+    r' r f* to r'
+    ln(2)**3/6 r' f* d+
+    r' r f* to r'
+    ln(2)**4/24 r' f* d+
+    ln(2)**5/120 r' r f* f* d+
+  ;
+  
+end-module
+
+\ Implement S31.32 exp
+: exp { D: f -- D: f' }
+  f log2(e) f* { D: g }
+  g round-half-even { k } g k s>f d- { D: r }
+  0 1 k dup 0>= if 2lshift else negate 2rshift then { D: 2**k }
+  2**k r 2** f*
 ;
 
-commit-flash
-
-\ Execute e^x
-: exp ( f1 -- f2 ) expm1 0 1 d+ ;
-
+\ Implement exp 1-
+: expm1 ( D: f -- D: f' ) exp 0 1 d- ;
+  
 \ Calculate ln(x + 1)
 : lnp1 ( f1 -- f2 )
   0 1 d+ 64 >r >r >r 0 0 begin

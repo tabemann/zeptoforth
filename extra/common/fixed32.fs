@@ -1,4 +1,4 @@
-\ Copyright (c) 2024 Travis Bemann
+\ Copyright (c) 2024-2026 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -229,17 +229,39 @@ begin-module fixed32
     then
   ;
 
-  \ Get the (e^x)-1 of an S15.16 fixed-point number
-  : f32expm1 ( f32 -- f32' )
-    >r 0 [ 1 s>f32 ] literal 1 begin
-      swap r@ f32* over / dup abs 2 < >r rot over +
-      swap rot 1 + r>
-    until
-    rdrop 2drop
-  ;
+  continue-module fixed32-internal
+
+    $0001_7154 constant log2(e)
+    $0000_B172 constant ln(2)
+    $0000_3D7F constant ln(2)**2/2
+    $0000_0E35 constant ln(2)**3/6
+    $0000_0276 constant ln(2)**4/24
+    $0000_0057 constant ln(2)**5/120
+
+    \ Calculate 2**r for small r
+    : f32-2** { r -- }
+      [ 1 s>f32 ] literal ln(2) r f32* +
+      r r f32* { r' }
+      ln(2)**2/2 r' f32* +
+      r' r f32* to r'
+      ln(2)**3/6 r' f32* +
+      r' r f32* to r'
+      ln(2)**4/24 r' f32* +
+      ln(2)**5/120 r' r f32* f32* +
+    ;
   
-  \ Get the e^x of an S15.16 fixed-point number
-  : f32exp ( f32 -- f32' ) f32expm1 [ 1 s>f32 ] literal + ;
+  end-module
+
+  \ Implement S15.16 exp
+  : f32exp { f -- f' }
+    f log2(e) f32* { g }
+    g f32round-half-even { k } g k s>f32 - { r }
+    [ 1 s>f32 ] literal k dup 0>= if lshift else negate rshift then { 2**k }
+    2**k r f32-2** f32*
+  ;
+
+  \ Implement exp 1-
+  : f32expm1 ( f -- f' ) f32exp [ 1 s>f32 ] literal - ;
   
   \ Get the ln(x+1) of an S15.16 fixed-point number
   : f32lnp1 ( f32 -- f32' )
