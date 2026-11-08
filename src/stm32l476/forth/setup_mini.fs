@@ -32,6 +32,7 @@
 #include src/common/forth/exception.fs
 #include src/common/forth/multicore.fs
 #include src/stm32l476/forth/erase.fs
+#include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
 #include src/stm32l476/forth/serial.fs
 #include src/stm32l476/forth/gpio.fs

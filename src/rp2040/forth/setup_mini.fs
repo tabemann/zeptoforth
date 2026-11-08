@@ -33,6 +33,7 @@
 #include src/common/forth/exception.fs
 #include src/rp2040/forth/multicore.fs
 #include src/rp_common/forth/erase.fs
+#include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
 #include src/rp_common/forth/serial.fs
 #include src/rp2040/forth/gpio.fs
