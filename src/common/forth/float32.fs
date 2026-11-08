@@ -1439,26 +1439,44 @@ begin-module float32
 
   continue-module float32-internal
 
-    \ Get the (e^x)-1 of a single-precision floating-point value
-    \
-    \ Note that this algorithm is wrapped to handle instability in the face of
-    \ negative arguments.
-    : vexpm1' ( f -- f' )
-      >r 0 v1 v1 begin
-        swap r@ v* over v/ dup vabs 0= >r rot over v+ swap rot v1 v+ r>
-      until
-      rdrop 2drop
+    $3FB8AA3B constant log2(e)
+    $3F317217 constant ln(2)
+    $3E75FDEF constant ln(2)**2/2
+    $3D635846 constant ln(2)**3/6
+    $3C1D955B constant ln(2)**4/24
+    $3AAEC3FF constant ln(2)**5/120
+
+    \ Calculate 2**r for small r
+    : 2** { r -- }
+      v1 ln(2) r v* v+
+      r r v* { r' }
+      ln(2)**2/2 r' v* v+
+      r' r v* to r'
+      ln(2)**3/6 r' v* v+
+      r' r v* to r'
+      ln(2)**4/24 r' v* v+
+      ln(2)**5/120 r' r v* v* v+
     ;
-
+    
   end-module
-
-  \ Get the (e^x)-1 of a single-precision floating-point value
-  : vexpm1 ( f -- f' )
-    dup v0>= if vexpm1' else v1 swap vnegate vexpm1' v1 v+ v/ v1 v- then
+  
+  \ Implement single-precision floating-point exp
+  : vexp { f -- f' }
+    f +infinity = if +infinity exit then
+    f -infinity = if 0 exit then
+    f nan = if nan exit then
+    f log2(e) v* { g }
+    g vround-half-even { k } g k v- { r }
+    k v>n exponent-bias + dup [ max-exponent exponent-bias + 1- ] literal > if
+      drop +infinity exit
+    then
+    dup 0<= if drop 0 exit exit then
+    physical-significand-size lshift { 2**k }
+    2**k r 2** v*
   ;
 
-  \ Get the e^x of a single-precision floating-point value
-  : vexp ( f -- f' ) vexpm1 v1 v+ ;
+  \ Implement exp 1-
+  : vexpm1 ( f -- f' ) vexp v1 v- ;
   
   \ Domain error exception
   : x-domain-error ( -- ) ." domain error" cr ;
