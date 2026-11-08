@@ -232,23 +232,6 @@ begin-module fixed32
   continue-module fixed32-internal
 
     $0001_7154 constant log2(e)
-    $0000_B172 constant ln(2)
-    $0000_3D7F constant ln(2)**2/2
-    $0000_0E35 constant ln(2)**3/6
-    $0000_0276 constant ln(2)**4/24
-    $0000_0057 constant ln(2)**5/120
-
-    \ Calculate 2**r for small r
-    : f32-2** { r -- }
-      [ 1 s>f32 ] literal ln(2) r f32* +
-      r r f32* { r' }
-      ln(2)**2/2 r' f32* +
-      r' r f32* to r'
-      ln(2)**3/6 r' f32* +
-      r' r f32* to r'
-      ln(2)**4/24 r' f32* +
-      ln(2)**5/120 r' r f32* f32* +
-    ;
   
   end-module
 
@@ -257,7 +240,7 @@ begin-module fixed32
     f log2(e) f32* { g }
     g f32round-half-even { k } g k s>f32 - { r }
     [ 1 s>f32 ] literal k dup 0>= if lshift else negate rshift then { 2**k }
-    2**k r f32-2** f32*
+    2**k r f32>f64 internal::2** f64>f32 f32*
   ;
 
   \ Implement exp 1-
