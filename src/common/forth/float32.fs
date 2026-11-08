@@ -1145,7 +1145,7 @@ begin-module float32
     then
     hidden-bit significand or s>d
     exponent -9 < if
-      9 exponent - 2rshift
+      exponent 9 + negate 2rshift
     else
       exponent 9 + 2lshift
     then
