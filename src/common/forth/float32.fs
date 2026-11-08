@@ -72,7 +72,7 @@ begin-module float32
     : v>significand ( f -- significand )
       dup v>denormal? not if hidden-bit else 0 then swap significand-mask and +
       [ 31 physical-significand-size - ] literal lshift
-    ;
+    ; 
 
   end-module> import
 
@@ -1437,12 +1437,24 @@ begin-module float32
     then
   ;
 
+  continue-module float32-internal
+
+    \ Get the (e^x)-1 of a single-precision floating-point value
+    \
+    \ Note that this algorithm is wrapped to handle instability in the face of
+    \ negative arguments.
+    : vexpm1' ( f -- f' )
+      >r 0 v1 v1 begin
+        swap r@ v* over v/ dup vabs 0= >r rot over v+ swap rot v1 v+ r>
+      until
+      rdrop 2drop
+    ;
+
+  end-module
+
   \ Get the (e^x)-1 of a single-precision floating-point value
   : vexpm1 ( f -- f' )
-    >r 0 v1 v1 begin
-      swap r@ v* over v/ dup vabs 0= >r rot over v+ swap rot v1 v+ r>
-    until
-    rdrop 2drop
+    dup v0>= if vexpm1' else v1 swap vnegate vexpm1' v1 v+ v/ v1 v- then
   ;
 
   \ Get the e^x of a single-precision floating-point value
