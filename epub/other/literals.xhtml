@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Literals</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="literals">
+<h1>Literals</h1>
+<p>Traditionally, Forth has only numeric literals, very often with support for base prefixes on integral values. zeptoforth has these, with the following base prefixes supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$</span></code> for base 16</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span></code> for base 10</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code> for base 8</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">%</span></code> for base 2</p></li>
+<li><p>And a non-standard <code class="docutils literal notranslate"><span class="pre">0x</span></code> for base 16</p></li>
+</ul>
+<p>Of the various kinds of numeric literals it supports, it supports:</p>
+<ul class="simple">
+<li><p>Single-cell integral literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integer&gt;</span></code></p></li>
+<li><p>Double-cell integral literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integer&gt;.</span></code> with support for <code class="docutils literal notranslate"><span class="pre">.</span></code> to be elsewhere in the literal after the prefix (but this is not recommended as it may be confusing)</p></li>
+<li><p>S31.32 fixed-point literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integral&gt;,&lt;fractional&gt;</span></code>; do note that the decimal point is a comma, not a period/full stop</p></li>
+<li><p>If the module <code class="docutils literal notranslate"><span class="pre">fixed32</span></code> is loaded, S15.16 fixed-point literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integral&gt;;&lt;fractional&gt;</span></code>; do note that the decimal point is a semicolon</p></li>
+<li><p>On platforms/builds with hardware single-precision floating-point support (i.e. currently all non-mini, non-RP2040 platforms/builds), single-precision floating point literals, of the form <code class="docutils literal notranslate"><span class="pre">&lt;integral&gt;[.&lt;fractional&gt;]e&lt;exponent&gt;</span></code></p></li>
+<li><p>On platforms/builds with hardware double-precision floating-point support (currently only zeptoforth for the Colour MaxiMite 2 (CMM2)), double-precision floating point literals, of the form <code class="docutils literal notranslate"><span class="pre">&lt;integral&gt;[.&lt;fractional&gt;]de&lt;exponent&gt;</span></code></p></li>
+</ul>
+<p>In other cases, Forths have traditionally used words such as <code class="docutils literal notranslate"><span class="pre">s&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">c&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">.&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">[']</span></code>, <code class="docutils literal notranslate"><span class="pre">char</span></code>, and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> to prefix values in the place of literals.</p>
+<p>However, additionally, as of release 1.17.2, zeptoforth has a number of other kinds of literals that cover these cases, including:</p>
+<ul class="simple">
+<li><p>String literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code> except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">&quot;&lt;string&gt;&quot;</span></code>; these are specifically <em>addr</em> <em>bytes</em> string literals, and there is no equivalent literals for counted strings</p></li>
+<li><p>Execution token literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">'</span></code> in interpretation state and <code class="docutils literal notranslate"><span class="pre">[']</span></code> in compilation state except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">`&lt;name&gt;</span></code></p></li>
+<li><p>Name token literals, of the form <code class="docutils literal notranslate"><span class="pre">``&lt;name&gt;</span></code>; these push or compile literals, depending on state, for the headers of the named words</p></li>
+<li><p>Character literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">char</span></code> in interpretation state and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> in compilation state except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">'&lt;character&gt;[']</span></code>; note that these do support UTF-8, which is evaluated to a Unicode code point</p></li>
+</ul>
+<p>Also note that, as of release 1.17.2, <code class="docutils literal notranslate"><span class="pre">char</span></code> and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> have been extended to support UTF-8, which is evaluated to a Unicode code point.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

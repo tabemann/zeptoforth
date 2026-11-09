@@ -14,7 +14,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Module Words" href="module.html" />
+    <link rel="next" title="Literals" href="../other/literals.html" />
     <link rel="prev" title="Zeptoforth Documentation" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -1928,12 +1928,12 @@ otherwise passing the specified argument through.</p>
 <section id="char">
 <h3><code class="docutils literal notranslate"><span class="pre">char</span></code><a class="headerlink" href="#char" title="Link to this heading">¶</a></h3>
 <p>( “char” – c )</p>
-<p>Parse a character and put it on the stack</p>
+<p>Parse a character and put it on the stack; as of release 1.17.2 this supports UTF-8, which is evaluated to a Unicode code point</p>
 </section>
 <section id="id111">
 <h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id111" title="Link to this heading">¶</a></h3>
 <p>( “char” – ) ( compiled: – c )</p>
-<p>Parse a character and compile it</p>
+<p>Parse a character and compile it; as of release 1.17.2 this supports UTF-8, which is evaluated to a Unicode code point</p>
 </section>
 <section id="id112">
 <h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id112" title="Link to this heading">¶</a></h3>
@@ -2172,6 +2172,7 @@ otherwise passing the specified argument through.</p>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/literals.html">Literals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dynamic.html">Dynamically-Scoped Variable Words</a></li>
@@ -2273,7 +2274,7 @@ otherwise passing the specified argument through.</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../index.html" title="previous chapter">Zeptoforth Documentation</a></li>
-      <li>Next: <a href="module.html" title="next chapter">Module Words</a></li>
+      <li>Next: <a href="../other/literals.html" title="next chapter">Literals</a></li>
   </ul></li>
 </ul>
 </div>
@@ -2293,7 +2294,7 @@ otherwise passing the specified argument through.</p>
       &#169;2020-2026, Travis Bemann.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

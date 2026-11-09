@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Literals &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module Words" href="../words/module.html" />
+    <link rel="prev" title="Basic Words" href="../words/basic.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="literals">
+<h1>Literals<a class="headerlink" href="#literals" title="Link to this heading">¶</a></h1>
+<p>Traditionally, Forth has only numeric literals, very often with support for base prefixes on integral values. zeptoforth has these, with the following base prefixes supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$</span></code> for base 16</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span></code> for base 10</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code> for base 8</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">%</span></code> for base 2</p></li>
+<li><p>And a non-standard <code class="docutils literal notranslate"><span class="pre">0x</span></code> for base 16</p></li>
+</ul>
+<p>Of the various kinds of numeric literals it supports, it supports:</p>
+<ul class="simple">
+<li><p>Single-cell integral literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integer&gt;</span></code></p></li>
+<li><p>Double-cell integral literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integer&gt;.</span></code> with support for <code class="docutils literal notranslate"><span class="pre">.</span></code> to be elsewhere in the literal after the prefix (but this is not recommended as it may be confusing)</p></li>
+<li><p>S31.32 fixed-point literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integral&gt;,&lt;fractional&gt;</span></code>; do note that the decimal point is a comma, not a period/full stop</p></li>
+<li><p>If the module <code class="docutils literal notranslate"><span class="pre">fixed32</span></code> is loaded, S15.16 fixed-point literals, of the form <code class="docutils literal notranslate"><span class="pre">[&lt;prefix&gt;]&lt;integral&gt;;&lt;fractional&gt;</span></code>; do note that the decimal point is a semicolon</p></li>
+<li><p>On platforms/builds with hardware single-precision floating-point support (i.e. currently all non-mini, non-RP2040 platforms/builds), single-precision floating point literals, of the form <code class="docutils literal notranslate"><span class="pre">&lt;integral&gt;[.&lt;fractional&gt;]e&lt;exponent&gt;</span></code></p></li>
+<li><p>On platforms/builds with hardware double-precision floating-point support (currently only zeptoforth for the Colour MaxiMite 2 (CMM2)), double-precision floating point literals, of the form <code class="docutils literal notranslate"><span class="pre">&lt;integral&gt;[.&lt;fractional&gt;]de&lt;exponent&gt;</span></code></p></li>
+</ul>
+<p>In other cases, Forths have traditionally used words such as <code class="docutils literal notranslate"><span class="pre">s&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">c&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">.&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">[']</span></code>, <code class="docutils literal notranslate"><span class="pre">char</span></code>, and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> to prefix values in the place of literals.</p>
+<p>However, additionally, as of release 1.17.2, zeptoforth has a number of other kinds of literals that cover these cases, including:</p>
+<ul class="simple">
+<li><p>String literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code> except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">&quot;&lt;string&gt;&quot;</span></code>; these are specifically <em>addr</em> <em>bytes</em> string literals, and there is no equivalent literals for counted strings</p></li>
+<li><p>Execution token literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">'</span></code> in interpretation state and <code class="docutils literal notranslate"><span class="pre">[']</span></code> in compilation state except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">`&lt;name&gt;</span></code></p></li>
+<li><p>Name token literals, of the form <code class="docutils literal notranslate"><span class="pre">``&lt;name&gt;</span></code>; these push or compile literals, depending on state, for the headers of the named words</p></li>
+<li><p>Character literals, equivalent to the use of <code class="docutils literal notranslate"><span class="pre">char</span></code> in interpretation state and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> in compilation state except without an extra separating whitespace, of the form <code class="docutils literal notranslate"><span class="pre">'&lt;character&gt;[']</span></code>; note that these do support UTF-8, which is evaluated to a Unicode code point</p></li>
+</ul>
+<p>Also note that, as of release 1.17.2, <code class="docutils literal notranslate"><span class="pre">char</span></code> and <code class="docutils literal notranslate"><span class="pre">[char]</span></code> have been extended to support UTF-8, which is evaluated to a Unicode code point.</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Literals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dynamic.html">Dynamically-Scoped Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/float32.html">Single-Precision Floating-Point Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio_pool.html">PIO/state machine pools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/cycles.html">Cycle Counting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dma.html">DMA support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/psram.html">PSRAM words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/aon_timer.html">Always-On Timer words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block_dev.html">SDHC/SDXC Card and Blocks Block Device Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/int_overload.html">Interrupt Overloading Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/watchdog.html">Watchdog Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/clocks.html">Pico clock control words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/voltage.html">Voltage words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/busctrl.html">Bus Control Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Hardware Random Number Generator words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/fixed32.html">S15.16 Fixed Point Numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/complex_float32.html">Complex Numbers Based on Single-Precision Floating-Point Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/inter_fs_copy.html">Copying Files Between Filesystems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/glob.html">Glob</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/profile.html">Profiler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/zeptoed.html">zeptoed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/picocalc.html">PicoCalc words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text.html">Text display words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/text_display.html">Text Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/pixmap8_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/sha256.html">SHA-256</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/turtle.html">Turtle graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040 and RP2350</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/lcd1602.html">LCD1602 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntp.html">Simple Network Time Protocol Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/enc28j60.html">ENC28J60 Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/ntc.html">NTC thermistor Support</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../words/basic.html" title="previous chapter">Basic Words</a></li>
+      <li>Next: <a href="../words/module.html" title="next chapter">Module Words</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2020-2026, Travis Bemann.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.2.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/other/literals.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

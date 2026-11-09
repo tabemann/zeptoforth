@@ -1885,12 +1885,12 @@ Compile a counted-string
 ##### `char`
 ( "char" -- c )
 
-Parse a character and put it on the stack
+Parse a character and put it on the stack; as of release 1.17.2 this supports UTF-8, which is evaluated to a Unicode code point
 
 ##### `[char]`
 ( "char" -- ) ( compiled: -- c )
 
-Parse a character and compile it
+Parse a character and compile it; as of release 1.17.2 this supports UTF-8, which is evaluated to a Unicode code point
 
 ##### `(.)`
 ( n -- )

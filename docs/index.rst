@@ -6,6 +6,7 @@ Zeptoforth Documentation
    :caption: Contents:
 
    words/basic
+   other/literals
    words/module
    words/lambda
    words/dynamic
