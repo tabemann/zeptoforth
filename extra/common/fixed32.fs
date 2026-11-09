@@ -462,32 +462,50 @@ begin-module fixed32
     : do-handle-number { addr bytes -- flag }
       addr bytes saved-handle-number-hook @ execute not if
         addr bytes
-        parse-base >r
         dup 0<> if
-          over c@ [char] - = if
-            1- swap 1+ swap
-            dup 0<> if
-              r> handle-f32
-            else
-              rdrop 2drop false
-            then
-            dup if
-              state @ if
-                swap negate lit,
+          over c@ [char] 0 = if
+            dup 2 > if
+              over 1+ c@ [char] x = if
+                2 - swap 2 + swap 16 false
               else
-                swap negate swap
+                true
+              then
+            else
+              true
+            then
+          else
+            true
+          then if
+            parse-base
+          then >r
+          dup 0<> if
+            over c@ [char] - = if
+              1- swap 1+ swap
+              dup 0<> if
+                r> handle-f32
+              else
+                rdrop 2drop false
+              then
+              dup if
+                state @ if
+                  swap negate lit,
+                else
+                  swap negate swap
+                then
+              then
+            else
+              r> handle-f32
+              dup if
+                state @ if
+                  swap lit,
+                then
               then
             then
           else
-            r> handle-f32
-            dup if
-              state @ if
-                swap lit,
-              then
-            then
+            rdrop 2drop false
           then
         else
-          rdrop 2drop false
+          2drop false
         then
       else
         true
