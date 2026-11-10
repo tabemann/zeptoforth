@@ -1169,7 +1169,20 @@ _parse_base:
 	bne 4f
 	movs r1, #2
 	b 6f
-4:	push_tos
+4:	cmp r0, #1
+        beq 8f
+        cmp r1, #0x30
+        bne 8f
+        ldrb r1, [tos, #1]
+        cmp r1, #0x78
+        beq 7f
+        cmp r1, #0x58
+        bne 8f
+7:      movs r1, #16
+        adds tos, #1
+        subs r0, #1
+        b 6f
+8:      push_tos
 	movs tos, r0
 5:	bl _base
 	ldr tos, [tos]

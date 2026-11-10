@@ -28,63 +28,6 @@ begin-module literal-internal
   \ Conditionally compile a literal
   : lit,? ( x -- x | ) state @ if lit, then ;
 
-  \ Does an integer literal contain an extra base prefix
-  : has-base-prefix? { addr bytes -- }
-    bytes 0> if
-      addr c@ dup [char] $ = if drop true exit then
-      dup [char] # = if drop true exit then
-      dup [char] / = if drop true exit then
-      [char] % = if drop true exit then
-      false
-    else
-      false
-    then
-  ;
-  
-  \ Is an integer literal double-cell
-  : is-double? { addr bytes -- }
-    0 { dot-count }
-    addr bytes + addr ?do i c@ [char] . = if 1 +to dot-count then loop
-    dot-count 1 = if bytes 1 > else false then
-  ;
-
-  \ Is an integer literal S31.32 fixed-point
-  : is-s31.32? { addr bytes -- }
-    0 { comma-count }
-    addr bytes + addr ?do i c@ [char] , = if 1 +to comma-count then loop
-    comma-count 1 = if bytes 1 > else false then
-  ;
-
-  \ Parse an 0x-hex literal
-  : parse-0x-literal { addr bytes -- success? }
-    2 +to addr -2 +to bytes
-    addr bytes has-base-prefix? if false exit then
-    addr bytes is-double? if
-      base @ { saved-base }
-      addr bytes [:
-        hex parse-double if state @ if swap lit, lit, then true else 2drop false then
-      ;] try
-      saved-base base !
-      ?raise
-    else
-      addr bytes is-s31.32? if
-        base @ { saved-base }
-        addr bytes [:
-          hex parse-fixed if state @ if swap lit, lit, then true else 2drop false then
-        ;] try
-        saved-base base !
-        ?raise
-      else
-        base @ { saved-base }
-        addr bytes [:
-          hex parse-integer if lit,? true else drop false then
-        ;] try
-        saved-base base !
-        ?raise
-      then
-    then
-  ;
-
   \ Parse a string literal
   : parse-string-literal { addr bytes -- success? }
     addr 1+ source drop - >parse ! postpone s\" true
@@ -189,9 +132,6 @@ begin-module literal-internal
   : parse-literal { addr bytes -- }
     addr bytes saved-handle-number-hook @ execute if true exit then
     bytes 1 > if
-      addr c@ [char] 0 = addr 1+ c@ [char] x = and if
-        addr bytes parse-0x-literal exit
-      then
       addr c@ [char] " = if addr bytes parse-string-literal exit then
       addr c@ [char] ` = if addr bytes parse-tick-literal exit then
       addr c@ [char] ' = if addr bytes parse-char-literal exit then

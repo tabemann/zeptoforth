@@ -463,21 +463,7 @@ begin-module fixed32
       addr bytes saved-handle-number-hook @ execute not if
         addr bytes
         dup 0<> if
-          over c@ [char] 0 = if
-            dup 2 > if
-              over 1+ c@ [char] x = if
-                2 - swap 2 + swap 16 false
-              else
-                true
-              then
-            else
-              true
-            then
-          else
-            true
-          then if
-            parse-base
-          then >r
+          parse-base >r
           dup 0<> if
             over c@ [char] - = if
               1- swap 1+ swap
