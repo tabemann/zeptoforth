@@ -5115,7 +5115,7 @@ end-implement
       ;] try
       editor destroy
       editor my-heap free
-      display-height @ 0 go-to-coord cr
+      display-height @ 1- 0 go-to-coord cr
       ?raise
     ;] with-aligned-allot
   ;
