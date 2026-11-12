@@ -72,6 +72,7 @@
 <h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code></h3>
 <p>( file – )</p>
 <p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.</p>
+<p>(Just to clarify, this accepts a <code class="docutils literal notranslate"><span class="pre">fat32::&lt;fat32-file&gt;</span></code> object address as an argument, <em>not</em> a file path, providing which would probably result in a hard fault. If you want to load code from a file by its path, use <code class="docutils literal notranslate"><span class="pre">included</span></code>.)</p>
 </section>
 <section id="included">
 <h3><code class="docutils literal notranslate"><span class="pre">included</span></code></h3>

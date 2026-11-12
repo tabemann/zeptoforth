@@ -62,6 +62,8 @@ Disable echoing while loading code from a file. Note that a given number of disa
 
 Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process. The contents of the file will be echoed to the console as it is evaluated if echoing is enabled.
 
+(Just to clarify, this accepts a `fat32::<fat32-file>` object address as an argument, *not* a file path, providing which would probably result in a hard fault. If you want to load code from a file by its path, use `included`.)
+
 ##### `included`
 ( path-addr path-u -- )
 
