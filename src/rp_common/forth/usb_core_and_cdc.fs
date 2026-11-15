@@ -233,6 +233,18 @@ begin-module usb-core
   create SCSI-request-sense-data
   $70 c,        \ error
   $00 c,
+  $00 c,        \ no error
+  0 c, 0 c, 0 c, 0 c,
+  $0a c,        \ 10 additional bytes
+  0 c, 0 c, 0 c, 0 c,
+  $00 c, $00 c,       \ no error
+  0 c, 
+  0 c, 0 c, 0 c, 
+  \ 18 bytes total
+
+  create SCSI-request-sense-data-no-medium
+  $70 c,        \ error
+  $00 c,
   $02 c,        \ not ready
   0 c, 0 c, 0 c, 0 c,
   $0a c,        \ 10 additional bytes
@@ -241,6 +253,21 @@ begin-module usb-core
   0 c, 
   0 c, 0 c, 0 c, 
   \ 18 bytes total
+
+  create SCSI-request-sense-data-unsupported
+  $70 c,        \ error
+  $00 c,
+  $05 c,        \ illegal request
+  0 c, 0 c, 0 c, 0 c,
+  $0a c,        \ 10 additional bytes
+  0 c, 0 c, 0 c, 0 c,
+  $20 c, $00 c,       \ invalid/supported command
+  0 c, 
+  0 c, 0 c, 0 c, 
+  \ 18 bytes total
+
+  \ Flag to signal unsupported command
+  variable SCSI-unsupported?
 
   \ Read Format Capacity Response data
   12 buffer: SCSI-format-capacity-data 
@@ -1039,9 +1066,11 @@ begin-module usb-core
   : SCSI-prepare-format-capacity-data
     SCSI-format-capacity-data 12 0 fill
     8 SCSI-format-capacity-data 3 + c!                  \ list_length
-    blks block-count reverse-byte-order SCSI-format-capacity-data 4 + ! \ block_num    should be aligned
+    blks if blks block-count else $FFFF_FFFF then
+    reverse-byte-order SCSI-format-capacity-data 4 + ! \ block_num    should be aligned
     2 SCSI-format-capacity-data 8 + c!                  \ 2 - formated media
-    blks block-size dup $ff and 8 lshift swap $ff00 and 8 rshift or SCSI-format-capacity-data 10 + uh!
+    blks if blks block-size else 512 then
+    dup $ff and 8 lshift swap $ff00 and 8 rshift or SCSI-format-capacity-data 10 + uh!
   ;
 
   : SCSI-response ( -- )
@@ -1063,16 +1092,25 @@ begin-module usb-core
         SCSI_CMD_WRITE_10 of
           r-val CSW CSW-bCSWStatus c!
         endof
-        SCSI_CMD_READ_FORMAT_CAPACITY of
-          r-val CSW CSW-bCSWStatus c!
-        endof
-
         0 CSW CSW-bCSWStatus c!
       endcase
       CSW EP4-to-Host dpram-address @ 13 move
       -1 response-cmd !
+      false SCSI-unsupported? !
       EP4-to-Host 13 usb-send-data-packet
     then  
+  ;
+
+  : SCSI-check-condition-response { unsupported? -- }
+    response-cmd @ 0 >= if
+      CBW-COPY CBW-dCBWTag CSW CBW-dCBWTag 4 move
+      0 CSW CSW-dCSWDataResidue !
+      1 CSW CSW-bCSWStatus c!
+      CSW EP4-to-Host dpram-address @ 13 move
+      -1 response-cmd !
+      unsupported? SCSI-unsupported? !
+      EP4-to-Host 13 usb-send-data-packet
+    then
   ;
 
   : read-next-lba
@@ -1122,23 +1160,31 @@ begin-module usb-core
       endof
 
       SCSI_CMD_READ_CAPACITY_10 of                  \ Read Capacity
-        blks block-count 1 - reverse-byte-order SCSI-capacity-data !
-        blks block-size  reverse-byte-order SCSI-capacity-data 4 + !
-        SCSI-capacity-data EP4-to-Host dpram-address @ 8 move
         SCSI_CMD_READ_CAPACITY_10 response-cmd !
-        EP4-to-Host 8 usb-send-data-packet
+        blks if
+          blks block-count 1 - reverse-byte-order SCSI-capacity-data !
+          blks block-size  reverse-byte-order SCSI-capacity-data 4 + !
+          SCSI-capacity-data EP4-to-Host dpram-address @ 8 move
+          EP4-to-Host 8 usb-send-data-packet
+        else
+          SCSI-response
+        then
       endof
       
       SCSI_CMD_READ_10 of                  \ Read(10)
-        CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order                  \ Unaligned memory read !!! 
-        CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
-        ( lba num -- )
         SCSI_CMD_READ_10 response-cmd !
-        1 CBW-phase !
-        LBA-COUNT !
-        LBA-CURRENT !
-        ['] read-next-lba EP4-to-Host callback-handler !
-        read-next-lba
+        blks if
+          CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order                  \ Unaligned memory read !!! 
+          CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
+          ( lba num -- )
+          1 CBW-phase !
+          LBA-COUNT !
+          LBA-CURRENT !
+          ['] read-next-lba EP4-to-Host callback-handler !
+          read-next-lba
+        else
+          SCSI-response
+        then
       endof
 
       SCSI_CMD_MODE_SENSE of                  \ mode sense
@@ -1159,38 +1205,53 @@ begin-module usb-core
       endof
 
       SCSI_CMD_WRITE_10 of                  \ write(10)
-        CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order 
-        CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
-        ( lba num -- )
         SCSI_CMD_WRITE_10 response-cmd !
-        2 CBW-phase !
-        LBA-COUNT !
-        LBA-CURRENT !
-        ['] write-next-lba EP4-to-Pico callback-handler !
-        true write-next-lba
+        blks if
+          CBW-COPY CBW-dCBWCB  2 + u@ reverse-byte-order 
+          CBW-COPY CBW-dCBWCB  7 + dup c@ swap 1+ c@ swap 8 lshift or 
+          ( lba num -- )
+          2 CBW-phase !
+          LBA-COUNT !
+          LBA-CURRENT !
+          ['] write-next-lba EP4-to-Pico callback-handler !
+          true write-next-lba
+        else
+          SCSI-response
+        then
       endof
 
-      SCSI_CMD_READ_FORMAT_CAPACITY of                \ read format capacity
+      SCSI_CMD_READ_FORMAT_CAPACITIES of                \ read format capacities
+        SCSI_CMD_READ_FORMAT_CAPACITIES response-cmd !
         SCSI-prepare-format-capacity-data
         SCSI-format-capacity-data EP4-to-Host dpram-address @ 12 move
-        SCSI_CMD_READ_FORMAT_CAPACITY response-cmd !
         EP4-to-Host 12 usb-send-data-packet
       endof
 
       SCSI_CMD_REQUEST_SENSE of                \ request sense
-        SCSI-request-sense-data EP4-to-Host dpram-address @ 18 move
+        SCSI-unsupported? @ if
+          SCSI-request-sense-data-unsupported
+        else
+          blks 0= if
+            SCSI-request-sense-data-no-medium
+          else
+            SCSI-request-sense-data
+          then
+        then
+        EP4-to-Host dpram-address @ 18 move
         SCSI_CMD_REQUEST_SENSE response-cmd !
         EP4-to-Host 18 usb-send-data-packet
       endof
 
       SCSI_CMD_SYNCHRONIZE_CACHE_10 of                \ SYNCHRONIZE CACHE
-        blks flush-blocks
         SCSI_CMD_SYNCHRONIZE_CACHE_10 response-cmd !
-        SCSI-response 
+        blks if blks flush-blocks then
+        SCSI-response
       endof
 
-      ." SCSI Cmd: "
-      len 0 do adr i + c@ h.2 loop ." not implemented" cr
+      dup response-cmd !
+      true SCSI-check-condition-response
+\      ." SCSI Cmd: "
+\      len 0 do adr i + c@ h.2 loop ." not implemented" cr
     endcase
   ;
 
@@ -1272,7 +1333,7 @@ begin-module usb-core
           endof
           mounted-1 of
             prevent-removal @ 0= if
-              blks flush-blocks
+              blks if blks flush-blocks then
               unmounted to mounted-state
             then
             default-timeout to current-timeout
@@ -1424,6 +1485,7 @@ begin-module usb-core
     0 response-cmd !
     s" USBS" CSW CSW-dCSWSignature swap move
     0 prevent-removal !
+    false SCSI-unsupported? !
     EP4-task-init
 
     ['] usb-irq-handler usbctrl-vector vector!
