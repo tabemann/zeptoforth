@@ -110,7 +110,7 @@ begin-module bezier
           -1 +to depth
           frame> { D: t0 D: x0 D: y0 D: t1 D: x1 D: y1 }
           t1 t0 d- epsilon d> if
-            t1 t0 d- 2,0 f/ t0 d+ { D: t }
+            t1 t0 d- 1 2arshift t0 d+ { D: t }
             t addr count de-casteljau { D: x D: y }
             x x0 d- 2dup f* y y0 d- 2dup f* d+ 4,0 d> if
               t0 x0 y0 t x y >frame 1 +to depth
