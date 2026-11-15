@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Bezier Curves</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="bezier-curves">
+<h1>Bezier Curves</h1>
+<p>There is an implementation of Bézier curves using De Casteljau’s algorithm in <code class="docutils literal notranslate"><span class="pre">extra/common/bezier.fs</span></code></p>
+<p>It contains the following module:</p>
+<section id="bezier">
+<h2><code class="docutils literal notranslate"><span class="pre">bezier</span></code></h2>
+<p>This module contains the following word:</p>
+<section id="draw-bezier">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-bezier</span></code></h3>
+<p>( coef-addr coef-count max-depth xt – )</p>
+<p>where:</p>
+<ul class="simple">
+<li><p><em>coef-addr</em> is an array of x,y pairs of S31.32 fixed point values corresponding to Bézier control points.</p></li>
+<li><p><em>coef-count</em> is the number of control points.</p></li>
+<li><p><em>max-depth</em> is the maximum depth to evaluate the Bézier curve to, based on successively subdividing <em>t</em> from an initial interval of [0, 1] by 2 until either the interval is smaller than 2^-<em>max-depth</em> or the distance of the segment formed in x,y space is smaller than 2.</p></li>
+<li><p><em>xt</em> is an execution token to execute to draw each individual line segment from x0,y0 to x1,y1 with the signature ( D: x0 D: y0 D: x1 D: y1 – ) where each value is a S31.32 fixed-point value.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
