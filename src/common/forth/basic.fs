@@ -446,7 +446,7 @@ commit-flash
 \ Set a deferred word
 : defer! ( xt deferred-xt -- )
   compiling-to-flash? >r
-  dup $20000000 < over $2FFFFFFF > or if
+  dup ram-base < over ram-end >= or if
     compile-to-flash
   else
     compile-to-ram
