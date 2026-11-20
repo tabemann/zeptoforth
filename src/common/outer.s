@@ -1154,6 +1154,9 @@ _parse_unsigned:
 	define_word "parse-base", visible_flag
 _parse_base:
 	push {lr}
+        bl _base
+	ldr r2, [tos]
+        pull_tos
 	cmp tos, #0
 	beq 5f
 	movs r0, tos
@@ -1180,18 +1183,44 @@ _parse_base:
         cmp r1, #0x30
         bne 8f
         ldrb r1, [tos, #1]
+        cmp r2, #34
+        bhs 8f
         cmp r1, #0x78
         beq 7f
         cmp r1, #0x58
-        bne 8f
+        bne 1f
 7:      movs r1, #16
-        adds tos, #1
+        b 9f
+1:      cmp r2, #25
+        bhs 8f
+        cmp r1, #0x6F
+        beq 7f
+        cmp r1, #0x4F
+        bne 1f
+7:      movs r1, #8
+        b 9f
+1:      cmp r2, #14
+        bhs 8f
+        cmp r1, #0x64
+        beq 7f
+        cmp r1, #0x44
+        bne 1f
+7:      movs r1, #10
+        b 9f
+1:      cmp r2, #12
+        bhs 8f
+        cmp r1, #0x62
+        beq 7f
+        cmp r1, #0x42
+        bne 8f
+7:      movs r1, #2
+9:      adds tos, #1
         subs r0, #1
         b 6f
 8:      push_tos
 	movs tos, r0
-5:	bl _base
-	ldr tos, [tos]
+5:	push_tos
+        movs tos, r2
 	pop {pc}
 6:	adds tos, #1
 	push_tos
