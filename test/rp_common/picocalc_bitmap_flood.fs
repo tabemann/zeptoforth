@@ -50,7 +50,8 @@ begin-module bitmap-flood-test
       ;] with-object
     ;] with-aligned-allot
   ;
-   : draw-hole-triangle { color x0 y0 x1 y1 x2 y2 -- }
+  
+  : draw-hole-triangle { color x0 y0 x1 y1 x2 y2 -- }
     x0 x1 min x2 min { x-min }
     y0 y1 min y2 min { y-min }
     x0 x1 max x2 max x-min - y0 y1 max y2 max y-min - { cols rows }
