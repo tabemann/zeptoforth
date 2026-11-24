@@ -31,7 +31,6 @@ begin-module bezier-flood-test
   watchdog import
 
   12 cells buffer: coefs
-  closure-size buffer: line-xt
   <bitmap> class-size buffer: bits
   
   : my-line ( D: x0 D: y0 D: x1 D: y1 -- )
