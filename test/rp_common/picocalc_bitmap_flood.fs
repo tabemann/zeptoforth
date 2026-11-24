@@ -35,12 +35,12 @@ begin-module bitmap-flood-test
     cols rows bitmap-buf-size [: { cols rows buf }
       cols rows buf cols rows <bitmap> [:
         { color x0 y0 x1 y1 x2 y2 x-min y-min cols rows bits }
-        $FF x0 x-min - y0 y-min - x1 x-min - y1 y-min -
-        op-or bits draw-pixel-line
-        $FF x1 x-min - y1 y-min - x2 x-min - y2 y-min -
-        op-or bits draw-pixel-line
-        $FF x2 x-min - y2 y-min - x0 x-min - y0 y-min -
-        op-or bits draw-pixel-line
+        x-min negate +to x0 y-min negate +to y0
+        x-min negate +to x1 y-min negate +to y1
+        x-min negate +to x2 y-min negate +to y2
+        $FF x0 y0 x1 y1 op-or bits draw-pixel-line
+        $FF x1 y1 x2 y2 op-or bits draw-pixel-line
+        $FF x2 y2 x0 y0 op-or bits draw-pixel-line
         true x0 x1 + x2 + 3 / y0 y1 + y2 + 3 / cols rows max 2*
         bits draw-bitmap-flood
         color 0 0 x-min y-min cols rows bits [: { display }
@@ -59,13 +59,13 @@ begin-module bitmap-flood-test
     cols rows bitmap-buf-size [: { cols rows buf }
       cols rows buf cols rows <bitmap> [:
         { color x0 y0 x1 y1 x2 y2 x-min y-min cols rows bits }
+        x-min negate +to x0 y-min negate +to y0
+        x-min negate +to x1 y-min negate +to y1
+        x-min negate +to x2 y-min negate +to y2
         $FF 0 0 cols rows op-or bits draw-rect-const
-        $FF x0 x-min - y0 y-min - x1 x-min - y1 y-min -
-        op-bic bits draw-pixel-line
-        $FF x1 x-min - y1 y-min - x2 x-min - y2 y-min -
-        op-bic bits draw-pixel-line
-        $FF x2 x-min - y2 y-min - x0 x-min - y0 y-min -
-        op-bic bits draw-pixel-line
+        $FF x0 y0 x1 y1 op-bic bits draw-pixel-line
+        $FF x1 y1 x2 y2 op-bic bits draw-pixel-line
+        $FF x2 y2 x0 y0 op-bic bits draw-pixel-line
         false x0 x1 + x2 + 3 / y0 y1 + y2 + 3 / cols rows max 2*
         bits draw-bitmap-flood
         color 0 0 x-min y-min cols rows bits [: { display }

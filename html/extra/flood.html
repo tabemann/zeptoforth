@@ -43,11 +43,13 @@
 <h3><code class="docutils literal notranslate"><span class="pre">draw-flood</span></code><a class="headerlink" href="#draw-flood" title="Link to this heading">¶</a></h3>
 <p>( x-min y-min cols rows x-seed y-seed max-depth inside-xt set-xt – )</p>
 <p>This is the core of flood filling.</p>
-<p><em>x-min</em>, <em>y-min</em>, <em>cols</em>, and <em>rows</em> define the geometry of the maximal space that flood filling will attempt to fill, with (<em>x-min</em>, <em>y-min</em>) being the upper lefthand pixel of the space and (<em>x-min</em> + <em>cols</em> - 1, <em>y-min</em> + <em>rows</em> - 1) being the lower righthand pixel of the space. Undefined behavior may result if this space extends beyond the boundaries of the graphics backend.</p>
-<p><em>x-seed</em> and <em>y-seed</em> define the coordinates of the seed pixel to start filling from.</p>
-<p><em>max-depth</em> is the maximum nesting depth for the stack used by flood filling. This stack takes up 8 bytes per frame and is temporarily alloted in the current tasks’s RAM dictionary. If <em>max-depth</em> is reached flood filling may not properly function; this is primarily meant as a safety to prevent crashes caused by overrunning the end of the current task’s RAM dictionary.</p>
-<p><em>inside-xt</em> is an execution token with the signature ( x y – inside? ) that defines an operation to test a pixel for whether it is inside the area to be filled.</p>
-<p><em>set-xt</em> is an execution token with the signature ( x y – ) that defines an operation to set a pixel as filled.</p>
+<ul class="simple">
+<li><p><em>x-min</em>, <em>y-min</em>, <em>cols</em>, and <em>rows</em> define the geometry of the maximal space that flood filling will attempt to fill, with (<em>x-min</em>, <em>y-min</em>) being the upper lefthand pixel of the space and (<em>x-min</em> + <em>cols</em> - 1, <em>y-min</em> + <em>rows</em> - 1) being the lower righthand pixel of the space. Undefined behavior may result if this space extends beyond the boundaries of the graphics backend.</p></li>
+<li><p><em>x-seed</em> and <em>y-seed</em> define the coordinates of the seed pixel to start filling from.</p></li>
+<li><p><em>max-depth</em> is the maximum nesting depth for the stack used by flood filling. This stack takes up 8 bytes per frame and is temporarily alloted in the current tasks’s RAM dictionary. If <em>max-depth</em> is reached flood filling may not properly function; this is primarily meant as a safety to prevent crashes caused by overrunning the end of the current task’s RAM dictionary.</p></li>
+<li><p><em>inside-xt</em> is an execution token with the signature ( x y – inside? ) that defines an operation to test a pixel for whether it is inside the area to be filled.</p></li>
+<li><p><em>set-xt</em> is an execution token with the signature ( x y – ) that defines an operation to set a pixel as filled.</p></li>
+</ul>
 <p>Note that any pixel’s coordinates for which <em>set-xt</em> is called <em>must</em> afterwards return <code class="docutils literal notranslate"><span class="pre">false</span></code> when those coordinates are passed to <em>inside-xt</em> or otherwise flood filling will not function properly.</p>
 <p>Each coordinate component is limited to the range [-32768, 32767], as 16-bit signed values are used to store coordinate components in the stack in the RAM dictionary. Coordinate components provided outside this range will be clamped to this range.</p>
 </section>
@@ -55,52 +57,62 @@
 <h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-flood</span></code><a class="headerlink" href="#draw-bitmap-flood" title="Link to this heading">¶</a></h3>
 <p>( set? x y max-depth dest – )</p>
 <p>This is a convenience word for doing flood fills for bitmaps.</p>
-<p><em>set?</em> is whether to set unset pixels, if <code class="docutils literal notranslate"><span class="pre">true</span></code>, or to unset set pixels, if <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
-<p><em>x</em> and <em>y</em> are the seed coordinates.</p>
-<p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p>
-<p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> graphics backend</p>
+<ul class="simple">
+<li><p><em>set?</em> is whether to set unset pixels, if <code class="docutils literal notranslate"><span class="pre">true</span></code>, or to unset set pixels, if <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><em>x</em> and <em>y</em> are the seed coordinates.</p></li>
+<li><p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p></li>
+<li><p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> graphics backend</p></li>
+</ul>
 <p>Note that this word is only available if the <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module is available.</p>
 </section>
 <section id="draw-pixmap8-flood">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap8-flood</span></code><a class="headerlink" href="#draw-pixmap8-flood" title="Link to this heading">¶</a></h3>
 <p>( color x y max-depth dest – )</p>
 <p>This is a convenience word for doing flood fills bounded by the same color as that being set for 8-bit pixmaps.</p>
-<p><em>color</em> is the RGB332 color value to set and to bound the flood fill by.</p>
-<p><em>x</em> and <em>y</em> are the seed coordinates.</p>
-<p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p>
-<p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> graphics backend</p>
+<ul class="simple">
+<li><p><em>color</em> is the RGB332 color value to set and to bound the flood fill by.</p></li>
+<li><p><em>x</em> and <em>y</em> are the seed coordinates.</p></li>
+<li><p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p></li>
+<li><p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> graphics backend</p></li>
+</ul>
 <p>Note that this word is only available if the <code class="docutils literal notranslate"><span class="pre">pixmap8</span></code> module is available.</p>
 </section>
 <section id="draw-pixmap8-flood-inside">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap8-flood-inside</span></code><a class="headerlink" href="#draw-pixmap8-flood-inside" title="Link to this heading">¶</a></h3>
 <p>( inside-color set-color x y max-depth dest – )</p>
 <p>This is a convenience word for doing flood fills for an area specified as that of a particular color for 8-bit pixmaps.</p>
-<p><em>inside-color</em> is the RGB332 color value to test for.</p>
-<p><em>set-color</em> is the RGB332 color value to set.</p>
-<p><em>x</em> and <em>y</em> are the seed coordinates.</p>
-<p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p>
-<p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> graphics backend</p>
+<ul class="simple">
+<li><p><em>inside-color</em> is the RGB332 color value to test for.</p></li>
+<li><p><em>set-color</em> is the RGB332 color value to set.</p></li>
+<li><p><em>x</em> and <em>y</em> are the seed coordinates.</p></li>
+<li><p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p></li>
+<li><p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap8&gt;</span></code> graphics backend</p></li>
+</ul>
 <p>Note that this word is only available if the <code class="docutils literal notranslate"><span class="pre">pixmap8</span></code> module is available.</p>
 </section>
 <section id="draw-pixmap16-flood">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap16-flood</span></code><a class="headerlink" href="#draw-pixmap16-flood" title="Link to this heading">¶</a></h3>
 <p>( color x y max-depth dest – )</p>
 <p>This is a convenience word for doing flood fills bounded by the same color as that being set for 16-bit pixmaps.</p>
-<p><em>color</em> is the RGB565 color value to set and to bound the flood fill by.</p>
-<p><em>x</em> and <em>y</em> are the seed coordinates.</p>
-<p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p>
-<p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> graphics backend</p>
+<ul class="simple">
+<li><p><em>color</em> is the RGB565 color value to set and to bound the flood fill by.</p></li>
+<li><p><em>x</em> and <em>y</em> are the seed coordinates.</p></li>
+<li><p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p></li>
+<li><p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> graphics backend</p></li>
+</ul>
 <p>Note that this word is only available if the <code class="docutils literal notranslate"><span class="pre">pixmap16</span></code> module is available.</p>
 </section>
 <section id="draw-pixmap16-flood-inside">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap16-flood-inside</span></code><a class="headerlink" href="#draw-pixmap16-flood-inside" title="Link to this heading">¶</a></h3>
 <p>( inside-color set-color x y max-depth dest – )</p>
 <p>This is a convenience word for doing flood fills for an area specified as that of a particular color for 16-bit pixmaps.</p>
-<p><em>inside-color</em> is the RGB565 color value to test for.</p>
-<p><em>set-color</em> is the RGB565 color value to set.</p>
-<p><em>x</em> and <em>y</em> are the seed coordinates.</p>
-<p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p>
-<p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> graphics backend</p>
+<ul class="simple">
+<li><p><em>inside-color</em> is the RGB565 color value to test for.</p></li>
+<li><p><em>set-color</em> is the RGB565 color value to set.</p></li>
+<li><p><em>x</em> and <em>y</em> are the seed coordinates.</p></li>
+<li><p><em>max-depth</em> is the maximal stack depth, like in <code class="docutils literal notranslate"><span class="pre">draw-flood</span></code>.</p></li>
+<li><p><em>dest</em> is the destination <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> graphics backend</p></li>
+</ul>
 <p>Note that this word is only available if the <code class="docutils literal notranslate"><span class="pre">pixmap16</span></code> module is available.</p>
 </section>
 </section>
