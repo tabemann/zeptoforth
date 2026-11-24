@@ -48,12 +48,6 @@ begin-module flood
 
     \ Clamp a value to the range [-32768, 32767]
     : sh-clamp ( n -- nh ) -32768 max 32767 min ;
-
-    \ Force two values to be in lower-higher order
-    : lo-hi { n1 n2 -- n-lo n-hi } n1 n2 < if n1 n2 else n2 n1 then ;
-
-    \ Debug test
-    : =debug= type ." : " depth . ;
     
   end-module> import
   

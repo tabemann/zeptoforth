@@ -45,7 +45,7 @@ begin-module bitmap-flood-test
         bits draw-bitmap-flood
         color 0 0 x-min y-min cols rows bits [: { display }
           display pixmap8::draw-rect-const-mask
-          display st7365p-8-common::update-display
+          display update-display
         ;] with-term-display
       ;] with-object
     ;] with-aligned-allot
@@ -70,7 +70,7 @@ begin-module bitmap-flood-test
         bits draw-bitmap-flood
         color 0 0 x-min y-min cols rows bits [: { display }
           display pixmap8::draw-rect-const-mask
-          display st7365p-8-common::update-display
+          display update-display
         ;] with-term-display
       ;] with-object
     ;] with-aligned-allot
