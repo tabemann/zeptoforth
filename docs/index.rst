@@ -94,6 +94,7 @@ Zeptoforth Documentation
    extra/pixmap16_utils
    extra/pixmap8_utils
    extra/bezier
+   extra/flood
    extra/sha256
    extra/turtle
    extra/neopixel
