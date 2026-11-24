@@ -28,7 +28,6 @@ begin-module bezier-flood-test
   bitmap import
   bitmap-utils import
   st7365p-8-common import
-  watchdog import
 
   12 cells buffer: coefs
   <bitmap> class-size buffer: bits
