@@ -133,7 +133,7 @@ begin-module bitmap
     :noname { self -- }
       self set-dirty
       self bitmap-buf @
-      self bitmap-rows @ self bitmap-cols @ bitmap-buf-size $00 fill
+      self bitmap-cols @ self bitmap-rows @ bitmap-buf-size $00 fill
     ; define clear-bitmap
 
     \ Get the address of a page

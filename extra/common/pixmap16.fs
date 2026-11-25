@@ -141,7 +141,7 @@ begin-module pixmap16
     :noname { self -- }
       self set-dirty
       self pixmap-buf @
-      self pixmap-rows @ self pixmap-cols @ pixmap16-buf-size $00 fill
+      self pixmap-cols @ self pixmap-rows @ pixmap16-buf-size $00 fill
     ; define clear-pixmap
 
     \ Get the address of a pixel
