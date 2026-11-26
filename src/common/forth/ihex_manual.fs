@@ -48,7 +48,7 @@
  : ea04generate ( -- print 04 Extended Address Type record )
    ." :02000004"              \ Write 04 Extended Address Type record preamble
    dup h.4                    \ quotient = LBA
-   $06 + not $FF and 1+      \ calculate checksum. $06 is record preamble value.
+   $06 over 8 rshift $FF and + swap $FF and + not $FF and 1+      \ calculate checksum. $06 is record preamble value.
    h.2  cr                    \ print checksum
  ;
 
@@ -67,7 +67,7 @@
 
  : clone ( flash-size -- )
    cr      \ Dumps a bootable Flash Image (core + all words)
-   0 do   
+   flash-base + flash-base ?do   
      i erased?
      if
        i insert.04ea?  
